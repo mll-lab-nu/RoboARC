@@ -1,0 +1,298 @@
+{
+ "task": "interlocked_claws",
+ "topogym_task": "interlocked_claws",
+ "variation_id": "interlocked_claws_rd_easier",
+ "seed": 0,
+ "eval_index": null,
+ "text": "Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side.\n\n## Success requirements\n\n- Put every part of the entire brown claw piece inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.\n- Keep the target above the tabletop (contact tolerance 1 mm below the surface) and within the goal volume's height. It need not touch the table. The goal volume extends 352.936 mm above the tabletop.\n- Keep the other claw piece, and every other remaining puzzle component, entirely on the system side of the fixed separator. Moving the whole puzzle into the goal is not completion.\n- Keep each target rigid part's linear speed at most 1 mm/s and angular speed at most 0.02 rad/s. Holding the target with the gripper is allowed; release is not required.\n- Keep all final conditions satisfied together for at least 0.5 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.\n\n## Task failure conditions\n\n- A task piece falling more than 100 mm below the tabletop ends the episode in failure. Contact penetration never ends the episode by itself: a success with a task contact deeper than 3 mm, or deeper than 2 mm for at least 0.25 s, is held for review instead of credited automatically (a finger contact with a held movable piece: 4 mm, or 2 mm for 0.25 s; holding requires both fingers of the same hand to contact the same piece, or an active assisted grasp by that hand). A task contact deeper than 10 mm ends the episode as a simulator breakdown.",
+ "simulator": {
+  "task_id": "interlocked_claws",
+  "robot_id": "aloha",
+  "variation_id": "interlocked_claws_rd_easier",
+  "task_parameters": {},
+  "compute_backend": "cpu",
+  "precision": "64",
+  "physics_dt_s": 0.0025,
+  "solver_substeps": 4,
+  "terminal_contract_version": 1,
+  "control_decimation": 10,
+  "max_physics_steps": null,
+  "history_storage": "segment",
+  "reset_physics_steps": 0,
+  "rigid_options": {},
+  "ipc_options": {},
+  "ipc_settled_state": null,
+  "enable_rgb": true,
+  "enable_depth": true,
+  "observation_mode": "JOINT",
+  "control_mode": "JOINT_ABS",
+  "enable_privileged": true,
+  "seed": 0,
+  "render_backend": "nyx",
+  "asset_root": null,
+  "work_dir": null,
+  "grasp_assist": {
+   "model": "contact_weld_v1",
+   "targets": [
+    {
+     "entity": "piece_0",
+     "link": "b_grip",
+     "center_m": [
+      0.15354862077636683,
+      -0.0012220421947595783,
+      -0.0008006483649466415
+     ],
+     "radius_m": 0.03
+    },
+    {
+     "entity": "piece_0",
+     "link": "b_head",
+     "center_m": [
+      -0.12645137922363317,
+      -0.0012220421947595783,
+      -0.0008006483649466415
+     ],
+     "radius_m": 0.03
+    },
+    {
+     "entity": "piece_1",
+     "link": "a_grip",
+     "center_m": [
+      -0.09142300125610861,
+      0.10079481584297066,
+      0.09499297201435151
+     ],
+     "radius_m": 0.03
+    }
+   ],
+   "stable_time_s": 0.02,
+   "max_tcp_distance_m": 0.06,
+   "max_penetration_m": 0.002,
+   "max_translation_error_m": 0.01,
+   "max_rotation_error_rad": 0.15,
+   "max_finger_opening_fraction": 0.15,
+   "intent_deadband": 0.002,
+   "initial_intent": "close"
+  },
+  "physics_engine": "mujoco",
+  "mujoco_scene": "instance_assets/mujoco",
+  "mujoco_birth": null
+ },
+ "state_sha": "b8ee36f64f29dfc7",
+ "action_dim": 14,
+ "action_layout": [
+  "left/waist",
+  "left/shoulder",
+  "left/elbow",
+  "left/forearm_roll",
+  "left/wrist_angle",
+  "left/wrist_rotate",
+  "left_native_gripper",
+  "right/waist",
+  "right/shoulder",
+  "right/elbow",
+  "right/forearm_roll",
+  "right/wrist_angle",
+  "right/wrist_rotate",
+  "right_native_gripper"
+ ],
+ "gripper_space": "native",
+ "control_hz": 40.0,
+ "backend": "cuda",
+ "reset_joint_targets": [
+  0.02201,
+  -1.815081,
+  1.261977,
+  0.0,
+  0.727638,
+  -0.0,
+  0.0222,
+  0.475086,
+  0.361825,
+  0.47894,
+  1.047028,
+  -1.149925,
+  -0.61565,
+  0.0222
+ ],
+ "objects": {
+  "goal_region": {
+   "position": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "orientation_wxyz": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bounds": [
+    [
+     -0.31815,
+     0.104,
+     0.91984
+    ],
+    [
+     0.04679,
+     0.46894,
+     0.92004
+    ]
+   ],
+   "size": [
+    0.36494,
+    0.36494,
+    0.0002
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": true
+  },
+  "piece_0": {
+   "position": [
+    -0.30823,
+    -0.03415,
+    1.08044
+   ],
+   "orientation_wxyz": [
+    0.976296,
+    0.0,
+    0.0,
+    -0.21644
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    -0.43633
+   ],
+   "bounds": [
+    [
+     -0.44056,
+     -0.11918,
+     1.06564
+    ],
+    [
+     -0.15007,
+     0.03685,
+     1.11164
+    ]
+   ],
+   "size": [
+    0.29049,
+    0.15603,
+    0.046
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": false
+  },
+  "piece_1": {
+   "position": [
+    -0.3333,
+    -0.0685,
+    1.05688
+   ],
+   "orientation_wxyz": [
+    0.976296,
+    0.0,
+    0.0,
+    0.21644
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    0.43633
+   ],
+   "bounds": [
+    [
+     -0.47591,
+     -0.20133,
+     0.91964
+    ],
+    [
+     -0.2087,
+     0.05536,
+     1.1663
+    ]
+   ],
+   "size": [
+    0.26722,
+    0.25669,
+    0.24666
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": false
+  }
+ },
+ "instance_contract_version": 2,
+ "soft_state": {},
+ "asset_identity": {
+  "family/a_grip.obj": "4352c16bcdeeadbfdea0d6adbe0566eb9da27e803c547d569de6c660ed54bed4",
+  "family/b_grip.obj": "7298413902e6cd20bcd2bc63aafc36ae2bc91d3d5fd92214baf1111b957e3e7e",
+  "family/b_head.obj": "55b536ae164168087eb63b5d31bafb6357679f86cd26fcbce5ebac9a832082eb",
+  "family/piece_0.obj": "3198c89c4c4d03373f3b789b6b4c7e7d392fada2de3a132bd5d5d2d8c9eedbf6",
+  "family/piece_0.urdf": "c3ebac7433254638564f0ed61c5ba036e7fb3e4108ec909272b8e5a235c897c3",
+  "family/piece_1.obj": "4e97d376c30f00e69ac4dbd30a246eaf8b5627be2e02c6c192a100d73d7c5db7",
+  "family/piece_1.urdf": "094cb3f3e0e6a2f7245b805b1b4dfadab2b0a889083c089d30fa7676355719d6",
+  "geometry_report.json": "712f8a9547502d21756b95bee68a18538672d4fcfa26e90e33318114f0336cf8",
+  "goal_region.obj": "120241aaa88aec32b8fdb1c348837b6d1e9deb5e0bfd4aa65e1311dd154ae7f8"
+ },
+ "physics_engine": "mujoco",
+ "mujoco_version": "3.14.0",
+ "topogym_source": {
+  "sha256": "1d53ef50579f8104110f533655afa9b9d091ecb2596d670a30ce227883a80f57",
+  "files": 716
+ },
+ "resolved_variation_id": "interlocked_claws_rd_easier",
+ "scene_variation": null,
+ "effective_task_parameters": {
+  "center_xy_m": [
+   -0.1356786,
+   0.05
+  ],
+  "initial_floor_clearance_m": 0.001,
+  "stable_duration_s": 0.5,
+  "minimum_separation_m": 0.01,
+  "sdf_cell_size_m": 0.001,
+  "sdf_max_res": 128,
+  "initial_finger_position_m": null,
+  "target_shade": 1.0,
+  "other_rgb": null
+ },
+ "public_goal": {
+  "schema_version": 1,
+  "task_id": "interlocked_claws",
+  "variation_id": "interlocked_claws_rd_easier",
+  "seed": 0,
+  "terminal_revision": "placement_region_v3_grasp_contact_2mm",
+  "summary": "Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side.",
+  "stable_duration_s": 0.5,
+  "success_conditions": [
+   "Put every part of the entire brown claw piece inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.",
+   "Keep the target above the tabletop (contact tolerance 1 mm below the surface) and within the goal volume's height. It need not touch the table. The goal volume extends 352.936 mm above the tabletop.",
+   "Keep the other claw piece, and every other remaining puzzle component, entirely on the system side of the fixed separator. Moving the whole puzzle into the goal is not completion.",
+   "Keep each target rigid part's linear speed at most 1 mm/s and angular speed at most 0.02 rad/s. Holding the target with the gripper is allowed; release is not required."
+  ],
+  "failure_conditions": [
+   "A task piece falling more than 100 mm below the tabletop ends the episode in failure. Finger contact with a held movable piece may penetrate at most 2 mm; holding requires both fingers of the same hand to contact the same piece, or an active assisted grasp by that hand. All other task contacts, including piece-piece, table, arm and gripper-housing contacts, may penetrate at most 1 mm. Exceeding either limit ends the episode in failure."
+  ]
+ },
+ "evaluable_for_task_success": true,
+ "success_rule": "task-native success (goal_complete True; frozen parameters; terminal revision placement_region_v3_grasp_contact_2mm)"
+}

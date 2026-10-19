@@ -1,0 +1,99 @@
+{
+ "cycles": [
+  {
+   "screw": "130915_1_1",
+   "op": "s1-screw-1-1",
+   "place_arm": "left",
+   "grab": 9500,
+   "rel": 14900,
+   "twirl_end": 36000,
+   "key_arm": "right",
+   "key_pick": 39700,
+   "demo_weld": 95500,
+   "s1": 95720,
+   "yaw1": 156.0,
+   "key_dist_mm": 88.1
+  },
+  {
+   "screw": "130915_1_2",
+   "op": "s1-screw-1-2",
+   "place_arm": "right",
+   "grab": 102400,
+   "rel": 105900,
+   "twirl_end": 134800,
+   "key_arm": "right",
+   "key_pick": 95600,
+   "demo_weld": 214200,
+   "s1": 214260,
+   "yaw1": -178.4,
+   "key_dist_mm": 87.9
+  },
+  {
+   "screw": "130915_2_1",
+   "op": "s1-screw-2-1",
+   "place_arm": "right",
+   "grab": 228800,
+   "rel": 229000,
+   "twirl_end": 235100,
+   "key_arm": "left",
+   "key_pick": 269400,
+   "demo_weld": 336200,
+   "s1": 336260,
+   "yaw1": 7.2,
+   "key_dist_mm": 88.1
+  },
+  {
+   "screw": "130915_2_2",
+   "op": "s1-screw-2-2",
+   "place_arm": "right",
+   "grab": 343400,
+   "rel": 345800,
+   "twirl_end": 352500,
+   "key_arm": "left",
+   "key_pick": 336300,
+   "demo_weld": 437500,
+   "s1": 437560,
+   "yaw1": -114.0,
+   "key_dist_mm": 88.1
+  },
+  {
+   "screw": "130915_3_1",
+   "op": "s1-screw-3-1",
+   "place_arm": "right",
+   "grab": 452200,
+   "rel": 454800,
+   "twirl_end": 489700,
+   "key_arm": "left",
+   "key_pick": 493800,
+   "demo_weld": 537900,
+   "s1": 537960,
+   "yaw1": 65.0,
+   "key_dist_mm": 88.2
+  },
+  {
+   "screw": "130915_3_2",
+   "op": "s1-screw-3-2",
+   "place_arm": "right",
+   "grab": 544900,
+   "rel": 547300,
+   "twirl_end": 596500,
+   "key_arm": "right",
+   "key_pick": 600100,
+   "demo_weld": 655000,
+   "s1": 655060,
+   "yaw1": 59.2,
+   "key_dist_mm": 89.1
+  }
+ ],
+ "welds": {
+  "s1-leg-1": 5800,
+  "s1-screw-1-1": 95500,
+  "s1-screw-1-2": 214200,
+  "s1-leg-2": 225100,
+  "s1-screw-2-1": 336200,
+  "s1-screw-2-2": 437500,
+  "s1-leg-3": 448400,
+  "s1-screw-3-1": 537900,
+  "s1-screw-3-2": 655000
+ }
+}

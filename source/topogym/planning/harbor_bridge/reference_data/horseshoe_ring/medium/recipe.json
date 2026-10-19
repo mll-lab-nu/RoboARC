@@ -1,0 +1,160 @@
+{
+  "variant": "medium",
+  "seed": 0,
+  "instance_id": "14b0649275c6fa4cede62daf7016722d9d97ff5930856997b50daf55a321a87e",
+  "model_revision": "ring_clearance_grasp_candidate_v5",
+  "terminal_revision": "placement_region_v3_grasp_contact_2mm",
+  "resource_sha256": {
+    "variations/horseshoe_ring/u_mild.json": "4e4d5bfe15e830af54041f0428c226e261722a589d717158f336810f46ce6f82",
+    "variations/horseshoe_ring/u_mild_settled_poses.json": "76261b9bfba74b71dcdaa3ae5c47cef48c5ebf6dc721d7c62304acdebfc0ab29"
+  },
+  "config": {
+    "task_id": "horseshoe_ring",
+    "robot_id": "aloha",
+    "variation_id": "medium",
+    "task_parameters": {},
+    "compute_backend": "cpu",
+    "precision": "64",
+    "physics_dt_s": 0.025,
+    "solver_substeps": 40,
+    "terminal_contract_version": 1,
+    "control_decimation": 1,
+    "max_physics_steps": 80000,
+    "history_storage": "segment",
+    "reset_physics_steps": 0,
+    "rigid_options": {
+      "use_contact_island": false
+    },
+    "ipc_options": {},
+    "ipc_settled_state": null,
+    "enable_rgb": false,
+    "enable_depth": false,
+    "observation_mode": "JOINT",
+    "control_mode": "JOINT_ABS",
+    "enable_privileged": true,
+    "seed": null,
+    "render_backend": "nyx",
+    "asset_root": null,
+    "work_dir": "<topogym checkout>/runs/oracle_dev/horseshoe_20261003/medium_phase0_open16_5_prefix/scene",
+    "grasp_assist": {
+      "model": "contact_weld_v1",
+      "targets": [
+        {
+          "entity": "horseshoe_left",
+          "link": "horseshoe_left",
+          "center_m": [
+            0.013658686977917174,
+            -1.3877787807814457e-17,
+            0.0
+          ],
+          "radius_m": 0.09055211523025057
+        },
+        {
+          "entity": "horseshoe_right",
+          "link": "horseshoe_right",
+          "center_m": [
+            -0.013658686977917146,
+            1.3877787807814457e-17,
+            0.0
+          ],
+          "radius_m": 0.09055211523025057
+        },
+        {
+          "entity": "target_ring",
+          "link": "target_ring",
+          "center_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "radius_m": 0.08166170200612914
+        }
+      ],
+      "stable_time_s": 0.02,
+      "max_tcp_distance_m": 0.12055211523025057,
+      "max_penetration_m": 0.002,
+      "max_translation_error_m": 0.01,
+      "max_rotation_error_rad": 0.15,
+      "max_finger_opening_fraction": 0.15,
+      "intent_deadband": 0.002,
+      "initial_intent": "open"
+    }
+  },
+  "selection": [
+    {
+      "step": "prefix",
+      "parameters": {
+        "grasps": {
+          "path": "evidence/runs/medium_from_home_08/oracle_inputs/grasps.json",
+          "sha256": "c95a2c471b5a56b4185f17b0263944d8fd00c5c910ab404dd228526033d7f9a1"
+        },
+        "reference": {
+          "path": "evidence/runs/medium_from_home_08/oracle_inputs/reference.json",
+          "sha256": "3ab3d9af280804dad9a4ae17f3314abce609b8a0b779d7c00fa83364e257d2df"
+        },
+        "fold": {
+          "path": "evidence/runs/medium_from_home_08/oracle_inputs/fold.json",
+          "sha256": "b90c7c72188e67a2747455ab959dbde862ce53c4ae9cd9ece4d711b64743c4ca"
+        },
+        "support": {
+          "path": "evidence/runs/medium_from_home_08/oracle_inputs/support.json",
+          "sha256": "095964339285a930bd6c6deb76133510aeeda8ec715d512b2600622e7f776550"
+        },
+        "approach": {
+          "path": "evidence/runs/medium_from_home_08/oracle_inputs/approach.json",
+          "sha256": "76edeaf6ea60615cd3de22fe7d210088bc4f60423a1b142b72c94d321c364cc6"
+        },
+        "flip_s": 30
+      }
+    },
+    {
+      "step": "orient_for_handoff",
+      "parameters": {
+        "angle_deg": 90.0,
+        "yaw_deg": 0.0,
+        "translation_m": [
+          0.0,
+          0.1,
+          -0.04
+        ],
+        "hold_s": 8.0,
+        "sample_duration_s": 0.1,
+        "restore": false,
+        "position_bias_limit_m": 0.05
+      }
+    },
+    {
+      "step": "support_release",
+      "parameters": {
+        "suspended_upper": true
+      }
+    },
+    {
+      "step": "clear_remainder_for_table_pickup",
+      "parameters": {}
+    },
+    {
+      "step": "grasp_ring",
+      "parameters": {
+        "choice": {
+          "tcp_backoff_m": 0.01531
+        }
+      }
+    },
+    {
+      "step": "place_ring",
+      "parameters": {}
+    },
+    {
+      "step": "verify_goal",
+      "parameters": {}
+    }
+  ],
+  "qualification": {
+    "accepted_proof": true,
+    "instance_id": "14b0649275c6fa4cede62daf7016722d9d97ff5930856997b50daf55a321a87e",
+    "audit": "evidence/runs/medium_from_home_08/independent_audit.json",
+    "audit_sha256": "8d7ea231fbe7df220d45f6208d3afd1a46aae52c279ca77af138cb3292a778f1"
+  },
+  "mujoco_changes": "2026-10-10, MuJoCo port (exact constraint diagonal): grasps.json and approach.json re-made on the MuJoCo birth (scripts/robotangle/references/horseshoe_ring/regrasp_inputs.py). The right hand's grasp moved from the band's outer bend (180 deg, flip 1, 16.5 mm opening) to 200 deg (flip 1, same opening): at 180 deg the static check now finds the ring within the right fingers' clearance, and in physics the right finger landed on the band 4 mm above its target (TCP tracking failed in descend_to_band). Every other input and step is the released one. 2026-10-11, on the soft contact class at a constant impedance: the flip takes 30 s instead of 20 s (prefix flip_s). With 20 s the free ring tumbled to the other side of the folding pair during the flip and was pinched between the closing shoes (73 N, the right shoe 6-11 mm behind; the fold stopped at reference index 2820-2890, also when the fold was backed off and repeated four times); with 30 s it stays clear and the released handoff and table pickup follow."
+}

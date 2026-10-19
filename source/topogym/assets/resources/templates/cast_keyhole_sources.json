@@ -1,0 +1,33 @@
+{
+  "reference_puzzle": "Hanayama Huzzle Cast Keyhole HZ 4-11 / 515061",
+  "designer": "Vesa Timonen",
+  "difficulty": "4 / 6",
+  "checked_on": "2026-09-17",
+  "sources": [
+    {
+      "url": "https://hanayama-toys.com/product/cast-keyhole/",
+      "publisher": "Hanayama",
+      "use": "Identity, two-piece 3D groove maze, designer and level; no measured geometry"
+    },
+    {
+      "url": "https://hanayama-toys.com/wp-content/uploads/2018/06/Keyhole-2-800x800.jpg",
+      "publisher": "Hanayama",
+      "use": "Separated front silhouettes: open gold fork, closed silver stepped aperture with external foot recess; proportions only"
+    },
+    {
+      "url": "https://hanayama-toys.com/wp-content/uploads/2018/06/Keyhole-800x800.jpg",
+      "publisher": "Hanayama",
+      "use": "Reference interlocked assembly; reconstruction pose is authored, not a measured factory pose"
+    }
+  ],
+  "authored_assumptions": [
+    "26 x 69 mm envelope, 3 mm uniform thickness, 6600 kg/m3 nominal zinc-alloy density",
+    "Outline coordinates inferred from the manufacturer front photo; not dimensional metrology or CAD",
+    "Circular upper returns, sharp slot corners, no edge bevels or cast draft",
+    "Perpendicular lower-bore initial pose and uniform scene scale are engineering choices; not the factory starting pose"
+  ],
+  "qualification_gates": [
+    "Obtain measured thickness, groove widths, bevels and exact turn clearances",
+    "Check blocked pulls, allowed slides, timestep sensitivity and robot grasps"
+  ]
+}

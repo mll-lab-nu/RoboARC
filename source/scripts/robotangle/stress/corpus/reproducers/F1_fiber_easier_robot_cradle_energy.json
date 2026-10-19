@@ -1,0 +1,12 @@
+{
+ "name": "F1_fiber_easier_robot_cradle_energy",
+ "base": "fiber-bundling-easier-i00",
+ "family": "fiber_bundling",
+ "mechanism": "Robotiq into the cable cradle: local energy created",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 41,
+ "core_rows": 1,
+ "sha256": "a026e3c82dd50459f945e7cd2f83792dd5ce399fbc4ca8a7a171a5f9b5801c92",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

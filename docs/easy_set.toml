@@ -1,0 +1,201 @@
+# The easy set (docs/PROTOCOL.md §4, docs/RUNNING.md "Results"): task bases KEPT in the repository and run like any
+# other task, but reported apart from the main table and left OUT of the headline statistics.
+#
+# One entry per task base (the task name without its mode suffix); it covers every mode the base ships. Fields:
+#   base       e.g. "behavior-chop-an-onion-i00"
+#   benchmark  the base's label (scripts/task_conventions.py BENCHMARKS)
+#   reason     "shortcut": a success came through a goal looser than the task's text, or a grader shortcut (`note`: the
+#              observed pattern); "owner": the benchmark owner judges the task too easy or not discriminative;
+#              "solved": the screening runs solved it in every mode it ships (`note`: which runs; their core-set numbers
+#              are then filtered against them, so report those runs on all tasks alongside)
+#   note       optional
+# Append entries in the benchmark's block (one PR per benchmark touches only its own lines).
+# Read by scripts/task_conventions.py (`set_of`: "easy" / "core", recorded with each result as `set`, never part of
+# `config_key`) and checked by `python3 scripts/task_conventions.py easy-set --check` (ci_checks/run_all.sh). Marking a
+# task here changes none of its files: its DIGEST and the results recorded against it stay valid. A task leaves the
+# set by deleting its entry (e.g. after a grader fix and a re-grade).
+#
+# 2026-10-16: the first 84 bases (BEHAVIOR-1K 16, ManiGuard 8, RoboARC 31, RoboLab 19, RoboPaint 8, RoboWits 2), the
+# benchmark owner's (Qineng Wang) selection after the GPT-6 Astra review (#265). Several shortcut patterns are closed
+# by grader fixes (#243, #244, #248, #254), so some tasks may move back to the core set after a re-grade; RoboWits is
+# small because its reference solver had a hack, and its affected tasks may be re-run once the solver is fixed.
+# 2026-10-16: DexJoCo 4 (#278, group meeting: a task the screening runs solved in both modes; docs/benchmarks/dexjoco.md
+# "Easy set").
+# 2026-10-17: AM-Bench 8 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/ambench.md "Easy set").
+# 2026-10-17: RoboCasa 9 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/robocasa.md "Easy set").
+# 2026-10-17: RoboCasa365 19 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/robocasa365.md "Easy set").
+# 2026-10-17: RoboCasa-GR1 9 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/robocasa-gr1.md "Easy set").
+# 2026-10-17: MetaWorld+ 29 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/metaworldplus.md "Easy set").
+# 2026-10-17: VLABench 15 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/vlabench.md "Easy set").
+# 2026-10-17: LIBERO-MAX 29 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/libero-max.md "Easy set").
+# 2026-10-17: RoboDojo 33 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/robodojo.md "Easy set").
+# 2026-10-17: Panda Dynamic Scenes 1 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/pandadyn.md "Easy set").
+# 2026-10-17: YAMLab 5 (the owner's screening: every mode the base ships solved by a screening run;
+# docs/benchmarks/yamlab.md "Easy set").
+
+[[task]]
+base = "roboarc-blanket-flatten-01-i01"
+benchmark = "RoboARC"
+reason = "shortcut"
+note = "Luna P: passed_only_in_replay_hold_tolerance"
+
+[[task]]
+base = "roboarc-blanket-flatten-05-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-blanket-flatten-06-i01"
+benchmark = "RoboARC"
+reason = "shortcut"
+note = "Luna P: passed_only_in_replay_hold_tolerance"
+
+[[task]]
+base = "roboarc-blanket-fold-02-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-buzz-wire-3d-03-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-buzz-wire-3d-05-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-buzz-wire-3d-08-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-coil-01-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-coil-02-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-coil-03-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-coil-05-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-keyhole-01-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-keyhole-02-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-cast-keyhole-06-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-fiber-bundling-01-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-fiber-bundling-02-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-fiber-bundling-03-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-fiber-bundling-05-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-fiber-bundling-08-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-hedgehog-in-cage-03-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-hedgehog-in-cage-04-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-hedgehog-in-cage-08-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-horseshoe-ring-04-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-interlocked-claws-04-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-interlocked-claws-08-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-interlocked-claws-10-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-knot-untying-04-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-lock-picking-02-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-lock-picking-03-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-rope-threading-01-i01"
+benchmark = "RoboARC"
+reason = "owner"
+
+[[task]]
+base = "roboarc-rope-threading-02-i01"
+benchmark = "RoboARC"
+reason = "owner"
+

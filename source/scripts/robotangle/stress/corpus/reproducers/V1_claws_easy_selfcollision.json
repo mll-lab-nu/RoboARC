@@ -1,0 +1,14 @@
+{
+ "name": "V1_claws_easy_selfcollision",
+ "base": "interlocked-claws-easy-i00",
+ "family": "interlocked_claws",
+ "mechanism": "robot self-collision with the ALOHA joint-speed clamp off: energy created",
+ "found_on_commit": "49dad3774",
+ "configuration": {
+  "aloha_joint_speed_clamp": "off (validator probe; on a clamped build it is CLEAN)"
+ },
+ "rows": 129,
+ "core_rows": 89,
+ "sha256": "a265998383407b0221835517408f43d598ba226661085bf3f929adc633db71ac",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

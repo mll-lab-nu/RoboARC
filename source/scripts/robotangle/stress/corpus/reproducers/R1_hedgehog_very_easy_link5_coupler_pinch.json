@@ -1,0 +1,12 @@
+{
+ "name": "R1_hedgehog_very_easy_link5_coupler_pinch",
+ "base": "hedgehog-in-cage-very-easy-i01",
+ "family": "hedgehog_in_cage",
+ "mechanism": "random arm targets fold the Panda's wrist (joint5 2.75, joint6 0.11, joint7 2.6 rad) with the gripper commanded 76 % closed and empty; with the Robotiq's spring links at springref 2.62 the finger's four-bar takes a shape in which link5 enters the corner between the right coupler and the right driver and is pinched by both: the coupler's normal force equals the two driver contacts' sum and climbs to 166 kN in 9 ticks at 2 mm depth, 250 J of energy created (the stress self-check of hedgehog very_easy on 2f576d681, random_e6, shrunk from 376 controls). Robot-robot contacts were on the task class (solref .00125 / 2). BREAKDOWN on 2f576d681 .. cfd907281 (final 65f4a24cd5958fb6, two fresh processes); VIOLENT with the springs at 0 (final 92faa50a6704e7f0). On hedgehog_v4 (robot.self_contact = SOFT_CONTACT, 3297f29cb): VIOLENT, link5 x coupler 2.6 kN / 1.16 mm, final f44a2d751fd56240.",
+ "found_on_commit": "2f576d681 (hedgehog_v3, springref 2.62)",
+ "configuration": null,
+ "rows": 100,
+ "core_rows": 60,
+ "sha256": "d14da99ecfe64f5d67d5d5db3b2003a94a2b30c8eb96c3ae0640487ea17de3d0",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

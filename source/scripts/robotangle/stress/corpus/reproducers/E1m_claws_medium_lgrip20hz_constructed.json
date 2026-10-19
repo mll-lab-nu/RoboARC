@@ -1,0 +1,12 @@
+{
+ "name": "E1m_claws_medium_lgrip20hz_constructed",
+ "base": "interlocked-claws-medium-i00",
+ "family": "interlocked_claws",
+ "mechanism": "E1 on medium: E1p's input rebuilt on medium's birth targets (the left gripper alone as a 20 Hz square wave 0.0290 / 0.0185 for 476 controls, then 40 hold), constructed, not found by search; global X 0.105 J at tick 4754, energy created 0.159 J, no contact pair above 0 J net. The same input on very_easy, easy and hard creates 0.17, 0.16 and 0.01 J and peaks at X 0.034, 0.033 and 0 J",
+ "found_on_commit": "0cc192ac2",
+ "configuration": null,
+ "rows": 516,
+ "core_rows": null,
+ "sha256": "bc9c7b566e99fae8f794039bfb7ab432b1330d41fc91e73c4e15f63906c18a9d",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

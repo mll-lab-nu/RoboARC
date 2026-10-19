@@ -1,0 +1,13 @@
+{
+ "name": "G46_buzz_very_easy_top046",
+ "base": "buzz-wire-3d-very-easy-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "gpusearch bz1 top046_b1_e1132 (shrunk): energy_created(local) X rose 0.66J in 0.1 s, X+S 0.65J, contact ('r85_right_driver', 'wire::wire') gave 0.97J @tick 536; triggers force 17560",
+ "found_on_commit": "19bee571e",
+ "configuration": null,
+ "rows": 75,
+ "core_rows": 35,
+ "sha256": "c9665af863ae516f498a60b70d6134a69a72bd76cce0a66101a18dc982c57c0b",
+ "source": "/workspace/mj/gpusearch/repro/bz1/buzz-wire-3d-very-easy-i00__top046_b1_e1132.npz",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

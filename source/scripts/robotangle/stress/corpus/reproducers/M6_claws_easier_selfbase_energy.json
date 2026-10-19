@@ -1,0 +1,16 @@
+{
+ "name": "M6_claws_easier_selfbase_energy",
+ "base": "interlocked-claws-easier-i00",
+ "family": "interlocked_claws",
+ "mechanism": "ALOHA gripper base into its own base link and shoulder link (robot self-contact): energy created",
+ "found_on_commit": "593ae66ac",
+ "configuration": null,
+ "rows": 89,
+ "core_rows": 49,
+ "sha256": "cad10f963eeac65c8e5fd79597a78644bd256c558c8f5119f4cbb9957d30f2f9",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN",
+ "trace": {
+  "base_link": "ticks 742-758: depth 0.07 -> 0.83 mm, force 6 -> 32 kN, the gripper accelerating 0.48 -> 3.22 m/s while in contact",
+  "shoulder_link": "tick 742 -> 743: 69 N at 1.29 mm -> 14.7 kN at 1.66 mm; then 4.05 mm and 120 kN at tick 757"
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "name": "M3c_claws_hard_gripperbase_claw_clamped",
+ "base": "interlocked-claws-hard-i00",
+ "family": "interlocked_claws",
+ "mechanism": "gripper base into a piece: a sliver-hull bogus depth, deep contact and energy",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 52,
+ "core_rows": 12,
+ "sha256": "d1cd780ac39ec06477ce74d5f0cbae070501ae87da323d234bd3c6b93dc85758",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

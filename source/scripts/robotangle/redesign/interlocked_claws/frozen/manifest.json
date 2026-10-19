@@ -1,0 +1,59 @@
+{
+ "family": "interlocked_claws",
+ "note": "Frozen instances of the step-3/4 redesign tiers (made in the family's sandbox by freeze.py) and their references. The tiers are registered in-process, not in the registry: load an instance in a fresh process after putting scripts/robotangle/redesign/interlocked_claws/overlay first on PYTHONPATH. References: the post-COM-fix references (a cloud host out/refs2/claws-rd-<tier>), recorded on the bound tree rt3.",
+ "tiers": {
+  "very_easy": {
+   "instance": "very_easy/instance.json",
+   "variation": "interlocked_claws_rd_very_easy",
+   "birth_sha": "90bed6fbea180192",
+   "reference": "very_easy/reference/privileged.npz",
+   "rows": 1801,
+   "final_sha": "9a36adc68cb9ff91",
+   "head_final_sha": "0e9a8ec0a36febe0",
+   "head_note": "success kept at row 1801; the final state moved with ccd4ba7fa (the soft contact class at a constant impedance, migrated into frozen scenes at load), as that commit recorded; re-record on the head",
+   "head_built": "no robot-touchable cylinder: same birth, same replay as the frozen instance"
+  },
+  "easier": {
+   "instance": "easier/instance.json",
+   "variation": "interlocked_claws_rd_easier",
+   "birth_sha": "b8ee36f64f29dfc7",
+   "reference": "easier/reference/privileged.npz",
+   "rows": 3304,
+   "final_sha": "504c972da5c13d2a",
+   "head_final_sha": "504c972da5c13d2a",
+   "head_built": "no robot-touchable cylinder: same birth, same replay as the frozen instance"
+  },
+  "easy": {
+   "instance": "easy/instance.json",
+   "variation": "interlocked_claws_rd_easy",
+   "birth_sha": "1fc784208b95adfc",
+   "reference": "easy/reference/privileged.npz",
+   "rows": 4277,
+   "final_sha": "64196635f343edbf",
+   "head_final_sha": "64196635f343edbf",
+   "head_built": "no robot-touchable cylinder: same birth, same replay as the frozen instance"
+  },
+  "medium": {
+   "instance": "medium/instance.json",
+   "variation": "interlocked_claws_rd_medium",
+   "birth_sha": "2a58a514f9b6b76a",
+   "reference": "medium/reference/privileged.npz",
+   "rows": 4780,
+   "final_sha": "3a54532aa3162cf5",
+   "head_final_sha": "3a54532aa3162cf5",
+   "head_built": "no robot-touchable cylinder: same birth, same replay as the frozen instance"
+  },
+  "hard": {
+   "instance": "hard/instance.json",
+   "variation": "interlocked_claws_rd_hard",
+   "birth_sha": "ff4b68725467157f",
+   "reference": "hard/reference/privileged.npz",
+   "rows": 6221,
+   "final_sha": "2fb8e555a4e4f8d3",
+   "head_final_sha": "994ea8174c04abf3",
+   "head_note": "success kept at row 6214; the final state moved with ccd4ba7fa (the soft contact class at a constant impedance, migrated into frozen scenes at load), as that commit recorded; re-record on the head",
+   "head_built": "no robot-touchable cylinder: same birth, same replay as the frozen instance"
+  }
+ },
+ "checked_on_head": "6bb17729df + this branch, Quest 2026-10-12 (rigid_integrate_20261012, jobs 9616197 / 9616936 / 9617135): head_final = the reference's final state replayed open loop on this frozen instance in a fresh process; head_built = the same tier made again on the head (make-instance) and the reference replayed on it"
+}

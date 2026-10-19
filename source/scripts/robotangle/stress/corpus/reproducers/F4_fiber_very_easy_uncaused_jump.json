@@ -1,0 +1,12 @@
+{
+ "name": "F4_fiber_very_easy_uncaused_jump",
+ "base": "fiber-bundling-very-easy-i00",
+ "family": "fiber_bundling",
+ "mechanism": "uncaused fiber-link jumps",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 186,
+ "core_rows": 146,
+ "sha256": "5176812fda53d8cf88c3d6cb2d7fc9b163a19ff1cb73f74df6b9de11d8df294a",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

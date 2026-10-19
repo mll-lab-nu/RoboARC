@@ -1,0 +1,83 @@
+{
+ "schema_version": 1,
+ "geometry": "variations/cast_coil/official_two_axis.json",
+ "geometry_sha256": "eaad1e727b597e5fd66d620cd587d7dad2146624d2fbb5a993823188e52df39e",
+ "description": "The official 8-step solution of variations/cast_coil/official_two_axis.json (two rotation axes): the disassembly of silver relative to gold, in gold's frame and cell units; assembly is the route played backwards.",
+ "route": [
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    1.5,
+    0.0,
+    2.5
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "x",
+   "through": [
+    0.0,
+    -0.5,
+    2.5
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    1.5,
+    0.0,
+    3.5
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "turn",
+   "axis": "x",
+   "through": [
+    0.0,
+    -2.5,
+    4.5
+   ],
+   "degrees": -90.0
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    1.5,
+    0.0,
+    3.5
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    6.0,
+    0.0,
+    0.0
+   ]
+  }
+ ],
+ "official_steps": "disassembly step k of the route = official step k; assembly step k = official step 9-k reversed"
+}

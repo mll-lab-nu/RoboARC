@@ -1,0 +1,12 @@
+{
+ "name": "K1_knot_medium_rod_zigzag_e1",
+ "base": "knot-untying-medium-i00",
+ "family": "knot_untying",
+ "mechanism": "an explicit rod zig-zag mid-rope sliding at 0.6 m/s on the table (32 -> 2226 rad/s in 17 MuJoCo steps), a blow-up: fault, mjWARN_BADQACC, rope links at 430 m/s (rope agent's self-check, knot medium prefix e1). BREAKDOWN on knot_chain_v2; v4 replays it CLEAN",
+ "found_on_commit": "93b176b09 (knot_chain_v2)",
+ "configuration": null,
+ "rows": 1430,
+ "core_rows": 1430,
+ "sha256": "870621f62391f7b89fcf0ce72971054b3f6fdc235a743d94a44c1fc5f4939634",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

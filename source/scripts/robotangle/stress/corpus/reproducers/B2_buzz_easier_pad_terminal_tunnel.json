@@ -1,0 +1,12 @@
+{
+ "name": "B2_buzz_easier_pad_terminal_tunnel",
+ "base": "buzz-wire-3d-easier-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "the Robotiq pad strikes the wire terminal post at 3.3 m/s (1.8-2.6 m/s normal): first contact already 1.49 mm deep within one substep (the 1.47 mm wire tunnelled above 2.35 m/s normal), 202 kN, the constraint absorbs 18.5 J then returns ~27 J in ~10 ms: X +8.75 J (found by cem in round B_1k, seed 95005 e46)",
+ "found_on_commit": "19bee571e",
+ "configuration": null,
+ "rows": 56,
+ "core_rows": 16,
+ "sha256": "cb7ef6f1a35f3ca1a35f45eae0253c7ab94888bbaec6b23f991a249219323220",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

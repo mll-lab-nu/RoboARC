@@ -1,0 +1,325 @@
+<mujoco model="robotangle">
+  <compiler angle="radian" autolimits="true" balanceinertia="false" inertiafromgeom="auto" boundmass="0" boundinertia="0" />
+  <option timestep="0.00062500000000000001" gravity="0 0 -9.8100000000000005" integrator="implicitfast" solver="Newton" iterations="100" ls_iterations="50" tolerance="1e-08" cone="elliptic" impratio="10" ccd_iterations="500" ccd_tolerance="1e-10" />
+  <size memory="256M" />
+  <default>
+    <default class="vx300s">
+      <joint axis="0 1 0" actuatorfrcrange="-35 35" />
+      <site group="4" />
+      <default class="waist">
+        <joint axis="0 0 1" range="-3.14158 3.14158" damping="5.76" />
+        <position ctrlrange="-3.14158 3.14158" kp="43" />
+      </default>
+      <default class="shoulder">
+        <joint range="-1.85005 1.25664" armature="0.395" frictionloss="2.0" damping="20.0" actuatorfrcrange="-144 144" />
+        <position ctrlrange="-1.85005 1.25664" kp="265" />
+      </default>
+      <default class="elbow">
+        <joint range="-1.76278 1.6057" armature="0.383" frictionloss="1.15" damping="18.49" actuatorfrcrange="-59 59" />
+        <position ctrlrange="-1.76278 1.6057" kp="227" />
+      </default>
+      <default class="forearm_roll">
+        <joint axis="1 0 0" range="-3.14158 3.14158" armature="0.14" damping="6.78" actuatorfrcrange="-22 22" />
+        <position ctrlrange="-3.14158 3.14158" kp="78" />
+      </default>
+      <default class="wrist_angle">
+        <joint range="-1.8675 2.23402" armature="0.008" damping="6.28" />
+        <position ctrlrange="-1.8675 2.23402" kp="37" />
+      </default>
+      <default class="wrist_rotate">
+        <joint axis="1 0 0" range="-3.14158 3.14158" damping="1.2" />
+        <position ctrlrange="-3.14158 3.14158" kp="10.4" />
+      </default>
+      <default class="finger">
+        <joint type="slide" armature="0.243" damping="40" />
+        <position ctrlrange="0.002 0.037" kp="2000" kv="124" />
+        <default class="left_finger">
+          <joint range="0 0.041" axis="0 0 -1" />
+        </default>
+        <default class="right_finger">
+          <joint range="0 0.041" axis="0 0 -1" />
+        </default>
+      </default>
+      <default class="visual">
+        <geom type="mesh" mass="0" group="2" material="black" contype="0" conaffinity="0" />
+      </default>
+      <default class="collision">
+        <geom group="3" type="mesh" condim="6" friction="1 5e-3 5e-4" solref=".01 1" />
+        <default class="sphere_collision">
+          <geom type="sphere" size="0.0006" rgba="1 0 0 1" />
+        </default>
+      </default>
+    </default>
+  </default>
+  <asset>
+    <material name="black" rgba="0.15 0.15 0.15 1" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_1_base.stl" scale="0.001 0.001 0.001" name="vx300s_1_base" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_2_shoulder.stl" scale="0.001 0.001 0.001" name="vx300s_2_shoulder" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_3_upper_arm.stl" scale="0.001 0.001 0.001" name="vx300s_3_upper_arm" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_4_upper_forearm.stl" scale="0.001 0.001 0.001" name="vx300s_4_upper_forearm" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_5_lower_forearm.stl" scale="0.001 0.001 0.001" name="vx300s_5_lower_forearm" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_6_wrist.stl" scale="0.001 0.001 0.001" name="vx300s_6_wrist" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_7_gripper_prop.stl" name="vx300s_7_gripper_prop" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_7_gripper_bar.stl" name="vx300s_7_gripper_bar" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_7_gripper_wrist_mount.stl" name="vx300s_7_gripper_wrist_mount" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_8_custom_finger_left.stl" name="vx300s_8_custom_finger_left" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_8_custom_finger_right.stl" name="vx300s_8_custom_finger_right" maxhullvert="64" />
+    <mesh file="@robot-assets@/robots/aloha/assets/d405_solid.stl" name="d405_solid" maxhullvert="64" />
+    <mesh name="goal_region_0bff94a01edc6d35" file="meshes/goal_region_0bff94a01edc6d35.obj" />
+  </asset>
+  <worldbody>
+    <body name="ground">
+      <geom name="ground" type="plane" size="0 0 1" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" friction="1 0.0050000000000000001 0.0001" condim="3" solmix="0" />
+    </body>
+    <body name="table" pos="-0.13567860000000001 0 0.45982145000000002">
+      <geom name="table" type="box" size="0.75 0.69999999999999996 0.45982145000000002" rgba="0.78000000000000003 0.80000000000000004 0.81999999999999995 1" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" friction="1 0.0050000000000000001 0.0001" condim="3" solmix="0" />
+    </body>
+    <body name="robot" pos="-0.13567860000000001 0 0.91964290000000004" quat="1 0 0 0">
+      <body name="left/base_link" childclass="vx300s" pos="-0.469 -0.019 0.0" gravcomp="1">
+        <inertial pos="-0.0534774 -0.000562575 0.0205961" quat="-0.00292324 0.712517 0.00480387 0.701633" mass="0.969034" diaginertia="0.0071633 0.00602451 0.00169819" />
+        <geom quat="1 0 0 1" class="visual" mesh="vx300s_1_base" />
+        <geom quat="1 0 0 1" mesh="vx300s_1_base" class="collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+        <body name="left/shoulder_link" pos="0 0 0.079" gravcomp="1">
+          <inertial pos="0.000259233 -3.3552e-06 0.0116129" quat="-0.476119 0.476083 0.52279 0.522826" mass="0.798614" diaginertia="0.00120156 0.00113744 0.0009388" />
+          <joint name="left/waist" class="waist" armature="0.10000000000000001" actuatorfrclimited="false" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" class="visual" mesh="vx300s_2_shoulder" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" mesh="vx300s_2_shoulder" class="collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+          <body name="left/upper_arm_link" pos="0 0 0.04805" gravcomp="1">
+            <inertial pos="0.0206949 4e-10 0.226459" quat="0 0.0728458 0 0.997343" mass="0.792592" diaginertia="0.00911338 0.008925 0.000759317" />
+            <joint name="left/shoulder" class="shoulder" armature="0.10000000000000001" actuatorfrclimited="false" />
+            <geom quat="1 0 0 1" class="visual" mesh="vx300s_3_upper_arm" />
+            <geom quat="1 0 0 1" class="collision" mesh="vx300s_3_upper_arm" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+            <body name="left/upper_forearm_link" pos="0.05955 0 0.3" gravcomp="1">
+              <inertial pos="0.105723 0 0" quat="-0.000621631 0.704724 0.0105292 0.709403" mass="0.322228" diaginertia="0.00144107 0.00134228 0.000152047" />
+              <joint name="left/elbow" class="elbow" armature="0.10000000000000001" actuatorfrclimited="false" />
+              <geom class="visual" mesh="vx300s_4_upper_forearm" />
+              <geom class="collision" mesh="vx300s_4_upper_forearm" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+              <body name="left/lower_forearm_link" pos="0.2 0 0" gravcomp="1">
+                <inertial pos="0.0513477 0.00680462 0" quat="-0.702604 -0.0796724 -0.702604 0.0796724" mass="0.414823" diaginertia="0.0005911 0.000546493 0.000155707" />
+                <joint name="left/forearm_roll" class="forearm_roll" armature="0.10000000000000001" actuatorfrclimited="false" />
+                <geom quat="0 1 0 0" class="visual" mesh="vx300s_5_lower_forearm" />
+                <geom quat="0 1 0 0" class="collision" mesh="vx300s_5_lower_forearm" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                <body name="left/wrist_link" pos="0.1 0 0" gravcomp="1">
+                  <inertial pos="0.046743 -7.6652e-06 0.010565" quat="-0.00100191 0.544586 0.0026583 0.8387" mass="0.115395" diaginertia="5.45707e-05 4.63101e-05 4.32692e-05" />
+                  <joint name="left/wrist_angle" class="wrist_angle" armature="0.10000000000000001" actuatorfrclimited="false" />
+                  <geom quat="1 0 0 1" class="visual" mesh="vx300s_6_wrist" />
+                  <geom quat="1 0 0 1" class="collision" mesh="vx300s_6_wrist" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                  <body name="left/gripper_link" pos="0.069744 0 0" gravcomp="1">
+                    <inertial pos="0.0395662 -2.56311e-07 0.00400649" quat="0.62033 0.619916 -0.339682 0.339869" mass="0.251652" diaginertia="0.000689546 0.000650316 0.000468142" />
+                    <joint name="left/wrist_rotate" class="wrist_rotate" armature="0.10000000000000001" actuatorfrclimited="false" />
+                    <site name="left/gripper" pos="0.13 0 -.003" group="5" />
+                    <body name="left/gripper_base" euler="0 1.57 -1.57" pos="0.035 0 0" gravcomp="1">
+                      <inertial pos="0.000182154 -0.0341589 -0.0106026" quat="0.435286 0.557074 -0.551539 0.442718" mass="0.42158" diaginertia="0.00110438 0.000790537 0.000469727" />
+                      <geom class="visual" mesh="vx300s_7_gripper_prop" />
+                      <geom class="collision" mesh="vx300s_7_gripper_prop" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <geom class="visual" mesh="vx300s_7_gripper_bar" />
+                      <geom class="collision" mesh="vx300s_7_gripper_bar" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <geom class="visual" pos="0 -0.03525 -0.0227" quat="0 -1 0 -1" type="mesh" mesh="vx300s_7_gripper_wrist_mount" />
+                      <geom class="collision" pos="0 -0.03525 -0.0227" quat="0 -1 0 -1" type="mesh" mesh="vx300s_7_gripper_wrist_mount" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <geom class="visual" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" />
+                      <geom class="collision" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <camera name="wrist_cam_left" pos="0 -0.0824748 -0.0095955" mode="fixed" euler="2.70525955359 0 0" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
+                      <body name="left/left_finger_link" pos="0.0191 -0.0141637 0.0211727" quat="1 -1 -1 1" gravcomp="1">
+                        <inertial pos="0.0143478 -0.0284791 0.0122897" quat="0.535486 0.458766 -0.450407 0.547651" mass="0.0862937" diaginertia="5.86848e-05 4.46887e-05 1.8397e-05" />
+                        <joint name="left/left_finger" class="left_finger" armature="0.10000000000000001" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="visual" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="collision" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="left/left_g0" pos="0.013 -0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="left/left_g1" pos="0.0222 -0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="left/left_g2" pos="0.0182 -0.0845 0.0266" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <site name="left/left_finger" pos="0.015 -0.06 0.02" />
+                      </body>
+                      <body name="left/right_finger_link" pos="-0.0191 -0.0141637 0.0211727" quat="1 1 1 1" gravcomp="1">
+                        <inertial pos="0.0143711 0.0284792 0.0121421" quat="0.461317 0.537615 -0.545478 0.447894" mass="0.0862932" diaginertia="5.86828e-05 4.46887e-05 1.83949e-05" />
+                        <joint name="left/right_finger" class="right_finger" armature="0.10000000000000001" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="visual" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="collision" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="left/right_g0" pos="0.013 0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="left/right_g1" pos="0.0222 0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="left/right_g2" pos="0.0182 0.0845 0.0266" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <site name="left/right_finger" pos="0.015 0.06 0.02" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="right/base_link" childclass="vx300s" pos="0.469 -0.019 0.0" quat="0 0 0 1" gravcomp="1">
+        <inertial pos="-0.0534774 -0.000562575 0.0205961" quat="-0.00292324 0.712517 0.00480387 0.701633" mass="0.969034" diaginertia="0.0071633 0.00602451 0.00169819" />
+        <geom quat="1 0 0 1" class="visual" mesh="vx300s_1_base" />
+        <geom quat="1 0 0 1" mesh="vx300s_1_base" class="collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+        <body name="right/shoulder_link" pos="0 0 0.079" gravcomp="1">
+          <inertial pos="0.000259233 -3.3552e-06 0.0116129" quat="-0.476119 0.476083 0.52279 0.522826" mass="0.798614" diaginertia="0.00120156 0.00113744 0.0009388" />
+          <joint name="right/waist" class="waist" armature="0.10000000000000001" actuatorfrclimited="false" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" class="visual" mesh="vx300s_2_shoulder" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" mesh="vx300s_2_shoulder" class="collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+          <body name="right/upper_arm_link" pos="0 0 0.04805" gravcomp="1">
+            <inertial pos="0.0206949 4e-10 0.226459" quat="0 0.0728458 0 0.997343" mass="0.792592" diaginertia="0.00911338 0.008925 0.000759317" />
+            <joint name="right/shoulder" class="shoulder" armature="0.10000000000000001" actuatorfrclimited="false" />
+            <geom quat="1 0 0 1" class="visual" mesh="vx300s_3_upper_arm" />
+            <geom quat="1 0 0 1" class="collision" mesh="vx300s_3_upper_arm" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+            <body name="right/upper_forearm_link" pos="0.05955 0 0.3" gravcomp="1">
+              <inertial pos="0.105723 0 0" quat="-0.000621631 0.704724 0.0105292 0.709403" mass="0.322228" diaginertia="0.00144107 0.00134228 0.000152047" />
+              <joint name="right/elbow" class="elbow" armature="0.10000000000000001" actuatorfrclimited="false" />
+              <geom class="visual" mesh="vx300s_4_upper_forearm" />
+              <geom class="collision" mesh="vx300s_4_upper_forearm" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+              <body name="right/lower_forearm_link" pos="0.2 0 0" gravcomp="1">
+                <inertial pos="0.0513477 0.00680462 0" quat="-0.702604 -0.0796724 -0.702604 0.0796724" mass="0.414823" diaginertia="0.0005911 0.000546493 0.000155707" />
+                <joint name="right/forearm_roll" class="forearm_roll" armature="0.10000000000000001" actuatorfrclimited="false" />
+                <geom quat="0 1 0 0" class="visual" mesh="vx300s_5_lower_forearm" />
+                <geom quat="0 1 0 0" class="collision" mesh="vx300s_5_lower_forearm" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                <body name="right/wrist_link" pos="0.1 0 0" gravcomp="1">
+                  <inertial pos="0.046743 -7.6652e-06 0.010565" quat="-0.00100191 0.544586 0.0026583 0.8387" mass="0.115395" diaginertia="5.45707e-05 4.63101e-05 4.32692e-05" />
+                  <joint name="right/wrist_angle" class="wrist_angle" armature="0.10000000000000001" actuatorfrclimited="false" />
+                  <geom quat="1 0 0 1" class="visual" mesh="vx300s_6_wrist" />
+                  <geom quat="1 0 0 1" class="collision" mesh="vx300s_6_wrist" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                  <body name="right/gripper_link" pos="0.069744 0 0" gravcomp="1">
+                    <inertial pos="0.0395662 -2.56311e-07 0.00400649" quat="0.62033 0.619916 -0.339682 0.339869" mass="0.251652" diaginertia="0.000689546 0.000650316 0.000468142" />
+                    <joint name="right/wrist_rotate" class="wrist_rotate" armature="0.10000000000000001" actuatorfrclimited="false" />
+                    <site name="right/gripper" pos="0.13 0 -.003" group="5" />
+                    <body name="right/gripper_base" euler="0 1.57 -1.57" pos="0.035 0 0" gravcomp="1">
+                      <inertial pos="0.000182154 -0.0341589 -0.0106026" quat="0.435286 0.557074 -0.551539 0.442718" mass="0.42158" diaginertia="0.00110438 0.000790537 0.000469727" />
+                      <geom class="visual" mesh="vx300s_7_gripper_prop" />
+                      <geom class="collision" mesh="vx300s_7_gripper_prop" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <geom class="visual" mesh="vx300s_7_gripper_bar" />
+                      <geom class="collision" mesh="vx300s_7_gripper_bar" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <geom class="visual" pos="0 -0.03525 -0.0227" quat="0 -0.707107 0 -0.707107" type="mesh" mesh="vx300s_7_gripper_wrist_mount" />
+                      <geom class="collision" pos="0 -0.03525 -0.0227" quat="0 -0.707107 0 -0.707107" type="mesh" mesh="vx300s_7_gripper_wrist_mount" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <geom class="visual" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" />
+                      <geom class="collision" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                      <camera name="wrist_cam_right" pos="0 -0.0824748 -0.0095955" mode="fixed" euler="2.70525955359 0 0" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
+                      <body name="right/left_finger_link" pos="0.0191 -0.0141637 0.0211727" quat="1 -1 -1 1" gravcomp="1">
+                        <inertial pos="0.0143478 -0.0284791 0.0122897" quat="0.535486 0.458766 -0.450407 0.547651" mass="0.0862937" diaginertia="5.86848e-05 4.46887e-05 1.8397e-05" />
+                        <joint name="right/left_finger" class="left_finger" armature="0.10000000000000001" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="visual" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="collision" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="right/left_g0" pos="0.013 -0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="right/left_g1" pos="0.0222 -0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="right/left_g2" pos="0.0182 -0.0845 0.0266" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <site name="right/left_finger" pos="0.015 -0.06 0.02" />
+                      </body>
+                      <body name="right/right_finger_link" pos="-0.0191 -0.0141637 0.0211727" quat="1 1 1 1" gravcomp="1">
+                        <inertial pos="0.0143711 0.0284792 0.0121421" quat="0.461317 0.537615 -0.545478 0.447894" mass="0.0862932" diaginertia="5.86828e-05 4.46887e-05 1.83949e-05" />
+                        <joint name="right/right_finger" class="right_finger" armature="0.10000000000000001" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="visual" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="collision" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="right/right_g0" pos="0.013 0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="right/right_g1" pos="0.0222 0.0892 0.0268" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <geom name="right/right_g2" pos="0.0182 0.0845 0.0266" class="sphere_collision" solref="0.0050000000000000001 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" solmix="0" />
+                        <site name="right/right_finger" pos="0.015 0.06 0.02" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="piece_0::piece_0" pos="-0.26801440978476321 0.0057657066569464302 1.1004451613831661" quat="0.97629600711993325 -6.7939590583994084e-18 3.5175657377186681e-17 -0.21643961393810288">
+      <freejoint name="piece_0::root" />
+      <inertial pos="-0.012914544730609911 0.00088438553494349815 0.0005853790546581682" mass="0.03075840124465223" fullinertia="5.7377856135630962e-06 0.00019111335199064564 0.00019441030788834709 4.4796744107666578e-06 2.9349592822617693e-06 -1.147367706201378e-06" />
+      <geom type="box" size="0.0060000000000000001 0.035000000000000003 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.081678589891320694 -0.0012335916236640666 -0.00080226138316595228" quat="1 0 0 0" />
+      <geom type="box" size="0.019 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.081678589891320694 0.027766408376335937 0.012197738616834047" quat="4.329780281177467e-17 0.70710678118654768 -4.3297802811774664e-17 0.70710678118654746" />
+      <geom type="box" size="0.11600000000000001 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.028321410108679307 -0.0012335916236640666 -0.00080226138316595228" quat="1 0 0 0" />
+      <geom type="box" size="0.026000000000000002 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.1016785898913207 -0.0012335916236640666 -0.00080226138316595228" quat="6.123233995736766e-17 0 0 1" />
+      <body name="piece_0::b_grip" pos="0 0 0" quat="1 0 0 0">
+        <inertial pos="0.1533214151859284 -0.0012335912324488165 -0.00080226128920912753" mass="0.012096000087439999" fullinertia="1.3708799711573113e-06 1.487808047885235e-06 1.697472080583146e-06 -4.4667753077863494e-21 -4.963083675318166e-22 1.5509636485369269e-23" />
+        <geom type="box" size="0.014999999999999999 0.014 0.012" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.15332141010867928 -0.0012335916236640666 -0.00080226138316595228" quat="6.123233995736766e-17 0 0 1" />
+      </body>
+      <body name="piece_0::b_head" pos="0 0 0" quat="1 0 0 0">
+        <inertial pos="-0.12667858973145482 -0.0012335916981101023 -0.00080226128920912688" mass="0.012095997399888255" fullinertia="1.6391402616437952e-06 1.4292108267937989e-06 1.4878074357558057e-06 1.25092055460084e-07 0 -2.5203159288725062e-23" />
+        <geom type="box" size="0.014999999999999999 0.014 0.012" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.12667858989132069 -0.0012335916236640666 -0.00080226138316595228" quat="0.59636781052901811 0.59636781052901799 -0.37992819659091515 -0.37992819659091526" />
+      </body>
+    </body>
+    <body name="piece_1::piece_1" pos="-0.28515274265133461 -0.042079572695601211 1.1129539668867023" quat="0.97629600711993336 0 0 0.21643961393810288">
+      <freejoint name="piece_1::root" />
+      <inertial pos="-0.001965573545397949 -1.230692808580577e-05 -0.0039264949942987076" mass="0.37509255994546115" fullinertia="0.0024658508701395818 0.0025254607768612565 0.0025769243750413816 -1.0551719141097344e-05 0.00010225222092626845 2.1496314654570539e-05" />
+      <geom type="box" size="0.0040000000000000001 0.021800000000000003 0.070550000000000002" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 -0.057600152734767249 -0.012811066886702237" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.070550000000000002 0.021800000000000003" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 -0.0088501527347672453 -0.061561066886702237" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.025550000000000003 0.028550000000000002" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 -0.053850152734767252 -0.054811066886702245" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.025550000000000003 0.029300000000000003" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 -0.053850152734767252 0.02843893311329776" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.070550000000000002 0.022550000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 -0.0088501527347672453 0.035188933113297766" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.0263 0.028550000000000002" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 0.035399847265232751 -0.054811066886702245" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.0263 0.029300000000000003" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 0.035399847265232751 0.02843893311329776" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.022550000000000001 0.070550000000000002" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.072296187115191993 0.039149847265232754 -0.012811066886702237" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.060049999999999999 0.019550000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.0015895500496726639 0.07491473600832034 -0.05381106688670223" quat="0.90630778703664994 0 0 -0.42261826174069944" />
+      <geom type="box" size="0.0040000000000000001 0.038300000000000001 0.019550000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.015071916588165105 0.060934105497638114 0.027188933113297772" quat="0.90630778703664994 0 0 -0.42261826174069944" />
+      <geom type="box" size="0.0040000000000000001 0.060049999999999999 0.01055" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.0015895500496726639 0.07491473600832034 0.036188933113297767" quat="0.90630778703664994 0 0 -0.42261826174069944" />
+      <geom type="box" size="0.0040000000000000001 0.017300000000000003 0.023300000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.03433794999300898 0.1023939063224199 -0.050061066886702234" quat="0.90630778703664994 0 0 -0.42261826174069944" />
+      <geom type="box" size="0.0040000000000000001 0.0090500000000000008 0.060049999999999999" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.040657816648740547 0.10769690410233385 -0.013311066886702238" quat="0.90630778703664994 0 0 -0.42261826174069944" />
+      <geom type="box" size="0.0040000000000000001 0.015800000000000002 0.070550000000000002" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.063438671809435146 -0.063600152734767268 0.05053482626792101" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.024800000000000003 0.043550000000000005" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.074849364876434052 -0.05460015273476726 0.026064516017931458" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.070550000000000002 0.0143" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.039666394586520812 -0.0088501527347672453 0.10151463928873257" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.070550000000000002 0.0143" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.087210949032349508 -0.0088501527347672453 -0.00044498675289056551" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.028550000000000002 0.022550000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.083724348372988741 -0.050850152734767264 0.0070320524901617953" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.029300000000000003 0.022550000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.083724348372988741 0.032399847265232755 0.0070320524901617953" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.029300000000000003 0.022550000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.043152995245881579 0.032399847265232755 0.094037600045680209" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.024800000000000003 0.070550000000000002" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.063438671809435146 0.036899847265232759 0.05053482626792101" quat="0.97629600711993336 0 0.21643961393810285 0" />
+      <geom type="box" size="0.0040000000000000001 0.070550000000000002 0.024800000000000003" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.067703812884807993 -0.0088501527347672453 -0.058561066886702234" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.029300000000000003 0.04505" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.067703812884807993 -0.050100152734767256 -0.038311066886702237" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.03005 0.03005" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.067703812884807993 -0.049350152734767255 -0.053311066886702237" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.03005 0.0053" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.067703812884807993 -0.049350152734767255 0.0014389331132977686" quat="1 0 0 0" />
+      <geom type="box" size="0.0040000000000000001 0.01205 0.04505" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.067703812884807993 0.049649847265232749 -0.038311066886702237" quat="1 0 0 0" />
+      <geom type="box" size="0.085929590579712486 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.016259668618219925 -0.016572973824760015 -0.072311066886702233" quat="0.38552521357578717 0.028871360733190871 -0.012070095178908752 0.92216650721500926" />
+      <geom type="box" size="0.037556086111602265 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.057626068546644732 0.082137557098313108 -0.072311066886702233" quat="0.51274719695161186 0.068155398796228089 -0.040880106948528311 0.85485318651161901" />
+      <geom type="box" size="0.037556086111602265 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.057626068546644732 0.082137557098313108 0.045688933113297761" quat="0.51274719695161186 -0.068155398796228159 0.040880106948528359 0.85485318651161901" />
+      <geom type="box" size="0.094574540972585899 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.009200681288259141 -0.073350152734767249 -0.042616546441322581" quat="5.9996657849159881e-17 0.1998829638986615 -1.2239301597129088e-17 0.97981977972639767" />
+      <geom type="box" size="0.067549281033929098 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.017846887463145625 -0.073350152734767249 0.079387151929023028" quat="-2.7498631276751874e-16 0.24016079635435386 6.8032016671785351e-17 0.97073312083931829" />
+      <geom type="box" size="0.067549281033929098 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.017846887463145625 0.054649847265232754 0.079387151929023028" quat="5.9440260463109596e-17 0.24016079635435386 -1.4705607526801939e-17 0.97073312083931829" />
+      <geom type="box" size="0.075999999999999998 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.0022961871151919999 -0.073350152734767249 -0.077311066886702237" quat="6.123233995736766e-17 0 0 1" />
+      <geom type="box" size="0.075999999999999998 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.0022961871151919999 0.054649847265232754 -0.077311066886702237" quat="6.123233995736766e-17 0 0 1" />
+      <geom type="box" size="0.080330343736592522 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.0022961871151919999 -0.073350152734767249 0.025688933113297764" quat="6.0333929377661265e-17 -0.17067232992662082 1.0450666127382861e-17 0.98532784178537181" />
+      <geom type="box" size="0.070000000000000007 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.0027038128848080045 -0.0093501527347672458 -0.077311066886702237" quat="0.70710678118654768 0 0 0.70710678118654746" />
+      <geom type="box" size="0.050499999999999982 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.040523113210179026 0.087041637892890183 0.04841627701947615" quat="0.13919840293856225 0.086300712254457346 -0.01217828223803785 0.98642165483400546" />
+      <geom type="box" size="0.045500000000000006 0.0060000000000000001 0.0060000000000000001" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.1091750113380722 -0.085725734730314418 0.057548036131141511" quat="0.98316998928688693 -0.014047489060911952 -0.086016228381506646 -0.16056353468869178" />
+      <body name="piece_1::a_grip" pos="0 0 0" quat="1 0 0 0">
+        <inertial pos="-0.097777407556997029 0.1035287739011575 0.058921992848003334" mass="0.0120960008633322" fullinertia="1.3889275305247425e-06 1.4796087821276098e-06 1.687624168395994e-06 2.8473916958762794e-08 5.3669665195695401e-08 -1.5454872420680912e-08" />
+        <geom type="box" size="0.014999999999999999 0.014 0.012" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="-0.097777408203909996 0.10352877416292336 0.058921991768325424" quat="0.98642165483400546 0.012178282238037855 0.086300712254457457 -0.13919840293856214" />
+      </body>
+      <body name="piece_1::a_grip2" pos="0 0 0" quat="1 0 0 0">
+        <inertial pos="0.16099209293945974 -0.1031142110870288 0.067185507823212129" mass="0.012095997829455417" fullinertia="1.3915653936898711e-06 1.4769697242340499e-06 1.6876236392309643e-06 3.2296785628731992e-08 -5.2948740591201617e-08 1.776815409189964e-08" />
+        <geom type="box" size="0.014999999999999999 0.014 0.012" solref="0.00125 2" solimp="0.90000000000000002 0.98999999999999999 0.001 0.5 2" friction="0.29999999999999999 0.0050000000000000001 0.0001" condim="3" mass="0" pos="0.16099209347401783 -0.10311421069874144 0.067185509991656137" quat="0.16056353468869178 -0.086016228381506757 0.014047489060911982 0.98316998928688681" />
+      </body>
+    </body>
+    <body name="goal_region" pos="0 0 0" quat="1 0 0 0">
+      <geom type="mesh" mesh="goal_region_0bff94a01edc6d35" contype="0" conaffinity="0" group="2" />
+    </body>
+  </worldbody>
+  <contact>
+    <exclude body1="left/base_link" body2="left/shoulder_link" />
+    <exclude body1="right/base_link" body2="right/shoulder_link" />
+  </contact>
+  <equality>
+    <joint joint1="left/left_finger" joint2="left/right_finger" polycoef="0 1 0 0 0" solref="0.00125 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <joint joint1="right/left_finger" joint2="right/right_finger" polycoef="0 1 0 0 0" solref="0.00125 2" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/left/piece_0/b_grip" body1="left/gripper_link" body2="piece_0::b_grip" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/left/piece_0/b_head" body1="left/gripper_link" body2="piece_0::b_head" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/left/piece_1/a_grip" body1="left/gripper_link" body2="piece_1::a_grip" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/left/piece_1/a_grip2" body1="left/gripper_link" body2="piece_1::a_grip2" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/right/piece_0/b_grip" body1="right/gripper_link" body2="piece_0::b_grip" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/right/piece_0/b_head" body1="right/gripper_link" body2="piece_0::b_head" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/right/piece_1/a_grip" body1="right/gripper_link" body2="piece_1::a_grip" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+    <weld name="grasp/right/piece_1/a_grip2" body1="right/gripper_link" body2="piece_1::a_grip2" active="false" solref="0.0025000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" />
+  </equality>
+  <actuator>
+    <general name="left/drive/waist" joint="left/waist" gaintype="fixed" gainprm="43" biastype="affine" biasprm="0 -43 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="left/drive/shoulder" joint="left/shoulder" gaintype="fixed" gainprm="265" biastype="affine" biasprm="0 -265 -0" ctrllimited="true" ctrlrange="-1.85005 1.25664" forcelimited="true" forcerange="-144 144" />
+    <general name="left/drive/elbow" joint="left/elbow" gaintype="fixed" gainprm="227" biastype="affine" biasprm="0 -227 -0" ctrllimited="true" ctrlrange="-1.76278 1.6056999999999999" forcelimited="true" forcerange="-59 59" />
+    <general name="left/drive/forearm_roll" joint="left/forearm_roll" gaintype="fixed" gainprm="78" biastype="affine" biasprm="0 -78 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-22 22" />
+    <general name="left/drive/wrist_angle" joint="left/wrist_angle" gaintype="fixed" gainprm="37" biastype="affine" biasprm="0 -37 -0" ctrllimited="true" ctrlrange="-1.8674999999999999 2.2340200000000001" forcelimited="true" forcerange="-35 35" />
+    <general name="left/drive/wrist_rotate" joint="left/wrist_rotate" gaintype="fixed" gainprm="10.4" biastype="affine" biasprm="0 -10.4 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="left/drive/left_finger" joint="left/left_finger" gaintype="fixed" gainprm="2000" biastype="affine" biasprm="0 -2000 -124" ctrllimited="true" ctrlrange="0.002 0.036999999999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/waist" joint="right/waist" gaintype="fixed" gainprm="43" biastype="affine" biasprm="0 -43 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/shoulder" joint="right/shoulder" gaintype="fixed" gainprm="265" biastype="affine" biasprm="0 -265 -0" ctrllimited="true" ctrlrange="-1.85005 1.25664" forcelimited="true" forcerange="-144 144" />
+    <general name="right/drive/elbow" joint="right/elbow" gaintype="fixed" gainprm="227" biastype="affine" biasprm="0 -227 -0" ctrllimited="true" ctrlrange="-1.76278 1.6056999999999999" forcelimited="true" forcerange="-59 59" />
+    <general name="right/drive/forearm_roll" joint="right/forearm_roll" gaintype="fixed" gainprm="78" biastype="affine" biasprm="0 -78 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-22 22" />
+    <general name="right/drive/wrist_angle" joint="right/wrist_angle" gaintype="fixed" gainprm="37" biastype="affine" biasprm="0 -37 -0" ctrllimited="true" ctrlrange="-1.8674999999999999 2.2340200000000001" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/wrist_rotate" joint="right/wrist_rotate" gaintype="fixed" gainprm="10.4" biastype="affine" biasprm="0 -10.4 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/left_finger" joint="right/left_finger" gaintype="fixed" gainprm="2000" biastype="affine" biasprm="0 -2000 -124" ctrllimited="true" ctrlrange="0.002 0.036999999999999998" forcelimited="true" forcerange="-35 35" />
+  </actuator>
+</mujoco>

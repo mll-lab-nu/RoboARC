@@ -1,0 +1,12 @@
+{
+ "name": "M3c_claws_easier_gripperbase_piece_clamped",
+ "base": "interlocked-claws-easier-i00",
+ "family": "interlocked_claws",
+ "mechanism": "gripper base into a piece: a sliver-hull bogus depth, deep contact and energy",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 144,
+ "core_rows": 104,
+ "sha256": "12d6491958d9a371e49da33781f030ba68603b224e8e9df5e4861d0e7566212c",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

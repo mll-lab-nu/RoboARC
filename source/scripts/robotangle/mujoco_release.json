@@ -1,0 +1,250 @@
+{
+ "note": "The MuJoCo bases of the RoboTangle release and how their instances are made: input of scripts/robotangle/release_rebuild.py (the final release rebuild, docs/rcb/MUJOCO_MIGRATION.md). A family's base <family>-<tier><from> (the released Genesis base) becomes <family>-<NN><to>, NN its number in the family's numbers (a tier without one keeps <family>-<tier><to>; PROTOCOL §2.8: changed physics makes a new task). Task names carry no difficulty: release.json keeps the tier, task.toml states difficulty. Its instance is made inside the release image: rcb_topogym.py make-instance --task <family> --variation <variation> --scene-seed <scene_seed> --gripper-space <gripper_space> [--simulator-overrides <file>], with the MuJoCo tasks' numpy / OpenBLAS SIMD masking. variation: <family>_<tier> unless the family's variations map names it. The overrides: released_simulator_keys copies those keys of the released instance's simulator configuration (the base image's /opt/robotangle/instances/<released base>/instance.json); simulator_overrides adds fixed values, in which \"@released_instance\" stands for that instance.json's path and \"@render_host/<path>\" for a file of the render host. A family's make_instance overrides the defaults (gripper_space). The ports of released IPC ropes (rope agent's port_instance.py): render_host copies the released instance and its task's runtime_binding.json into instance_assets/render_host/ (the render host and the birth source; the instance records mujoco_birth relative to itself, and ported_from); frozen_assets copies the released frozen generated assets and installs them before the Session, so declare() uses the released tet volume, not this CPU's tetgen; released_task_parameters passes the released simulator.task_parameters; grasp_weld_links makes the assisted grasp contact_weld_v1 on every link of the entity (link_m long, the released tolerances). Each base needs its MuJoCo reference, oracles/<new base>/privileged.npz in the tree or release_rebuild.py --references <dir>; its birth must be the one the reference recorded (instance_sha). A family's package_text (a directory of the tree) holds task texts laid over the released ones, file by file: <package_text>/<released base>-<mode>/ for its tiers (a design changed under the released variation id), <package_text>/<new base>-<mode>/ for its new bases; its design (one line, what changed) goes into the README's change log. new_bases {<new base>: {template, variation, tier, task, scene_seed, gripper_space, package_text, design, simulator_overrides}} are tasks of a new design under new names (template and variation required; tier defaults to the variation without <family>_, task to the family, the rest to the family's): a new base takes its template's released texts (a released base, which stays as it is) under the new name with its own texts over them, its instance is made like a tier's but without the released-instance overrides (its own simulator_overrides, fixed values, apply), its reference is oracles/<new base>/privileged.npz, and release.json records it with its template instead of replaces. tiers may be empty.",
+ "gpu_profiles": ["blanket_vbd_gpu"],
+ "gpu_profiles_note": "MuJoCo profiles whose physics needs a GPU (the blanket's CUDA cloth step): a base whose simulator_overrides name one is made with a GPU (release_rebuild.py --gpu), its release.json record says gpu_physics, its tasks keep the one-GPU reservation for physics as well as Nyx, and its Harbor checks keep the GPU with rendering off.",
+ "suffix": {"from": "-i00", "to": "-i01"},
+ "make_instance": {"scene_seed": 0, "gripper_space": "native"},
+ "families": {
+  "interlocked_claws": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "note": "core, claws_v6: no overrides",
+   "new_bases": {
+    "interlocked-claws-06-i01": {"template": "interlocked-claws-very-easy-i00", "variation": "interlocked_claws_rd_very_easy", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)", "note": "rd very_easy; acceptance FZ1b_clawsrd_very_easy (v2.12, 0 confirmed BREAKDOWN); registration eabc587992; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "interlocked-claws-07-i01": {"template": "interlocked-claws-easier-i00", "variation": "interlocked_claws_rd_easier", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)", "note": "rd easier; acceptance FZ1b_clawsrd_easier (v2.12, 0 confirmed BREAKDOWN); registration eabc587992; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "interlocked-claws-08-i01": {"template": "interlocked-claws-easy-i00", "variation": "interlocked_claws_rd_easy", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)", "note": "rd easy; acceptance FZ1b_clawsrd_easy (v2.12, 0 confirmed BREAKDOWN); registration eabc587992; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "interlocked-claws-09-i01": {"template": "interlocked-claws-medium-i00", "variation": "interlocked_claws_rd_medium", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)", "note": "rd medium; acceptance FZ1b_clawsrd_medium (v2.12, 0 confirmed BREAKDOWN); registration eabc587992; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "interlocked-claws-10-i01": {"template": "interlocked-claws-hard-i00", "variation": "interlocked_claws_rd_hard", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)", "note": "rd hard; acceptance FZ1b_clawsrd_hard (v2.12, 0 confirmed BREAKDOWN); registration eabc587992; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "interlocked-claws-11-i01": {"template": "interlocked-claws-easy-i00", "variation": "interlocked_claws_cast_abc", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "Hanayama's Cast ABC: an AB plate and a C ring, both held from the start", "note": "experimental variation, no tier; reference oracles/interlocked-claws-11-i01 (5979 rows, final state 4701f99e7860e8c9); acceptance round on 6d7ee21e4 PASS (1,000 episodes, criteria v2.10); Harbor under this base PASS (2026-10-12, test commit 21b3e083d); listed on the user's go (2026-10-13)"},
+    "interlocked-claws-12-i01": {"template": "interlocked-claws-easy-i00", "variation": "interlocked_claws_rotor", "tier": "very_hard", "package_text": "scripts/robotangle/package_text/interlocked_claws", "design": "Hanayama's Cast Rotor: two identical interlocked rotor pieces (100 mm outer radius, 0.5 mm clearance), both held from the start", "note": "tier very_hard, the variation record's difficulty; reference oracles/interlocked-claws-12-i01 (21116 rows, final state 87c1e785d178acfc); acceptance round claws_rotor_r1 on d27c622d7 PASS (1,000 episodes, criteria v2.10); Harbor under this base PASS (2026-10-12, test commit d2abf8f9d); listed on the user's go (2026-10-13)"}
+   }
+  },
+  "fiber_bundling": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "package_text": "scripts/robotangle/package_text/fiber_bundling",
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "released_simulator_keys": ["grasp_assist"],
+   "note": "fiber_v4: the released grasp assistance (contact_weld_v1 on trunk_04) frozen with the instance; hard ships without a reference solution (oracle none, user 2026-10-13: no reference ever existed): made on ad7a855bf3 with the released grasp_assist, birth f308c4c1a19865c4 in two builds, nop CLEAN, smoke search 225 episodes with 0 BREAKDOWN under v2.13b",
+   "new_bases": {
+    "fiber-bundling-06-i01": {"template": "fiber-bundling-very-easy-i00", "variation": "fiber_bundling_rd_very_easy", "package_text": "scripts/robotangle/package_text/fiber_bundling", "design": "formboard: 16 strands, a tighter ring turned and moved, pegs on the board and a target roll of the red fiber", "note": "rd very_easy; acceptance FZ1b_fiberrd_very_easy; registration 115f44fb89 (grasp from recommended_grasp_assist); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "fiber-bundling-07-i01": {"template": "fiber-bundling-easier-i00", "variation": "fiber_bundling_rd_easier", "package_text": "scripts/robotangle/package_text/fiber_bundling", "design": "formboard: 16 strands, a tighter ring turned and moved, pegs on the board and a target roll of the red fiber", "note": "rd easier; acceptance FZ1b_fiberrd_easier; registration 115f44fb89 (grasp from recommended_grasp_assist); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "fiber-bundling-08-i01": {"template": "fiber-bundling-easy-i00", "variation": "fiber_bundling_rd_easy", "package_text": "scripts/robotangle/package_text/fiber_bundling", "design": "formboard: 16 strands, a tighter ring turned and moved, pegs on the board and a target roll of the red fiber", "note": "rd easy; acceptance FZ1b_fiberrd_easy; registration 115f44fb89 (grasp from recommended_grasp_assist); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "fiber-bundling-09-i01": {"template": "fiber-bundling-medium-i00", "variation": "fiber_bundling_rd_medium", "package_text": "scripts/robotangle/package_text/fiber_bundling", "design": "formboard: 16 strands, a tighter ring turned and moved, pegs on the board and a target roll of the red fiber", "note": "rd medium; acceptance FZ1b_fiberrd_medium; registration 115f44fb89 (grasp from recommended_grasp_assist); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "fiber-bundling-10-i01": {"template": "fiber-bundling-hard-i00", "variation": "fiber_bundling_rd_hard", "package_text": "scripts/robotangle/package_text/fiber_bundling", "design": "formboard: 16 strands, a tighter ring turned and moved, pegs on the board and a target roll of the red fiber", "note": "rd hard; acceptance FZ1b_fiberrd_hard; registration 115f44fb89 (grasp from recommended_grasp_assist); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"}
+   }
+  },
+  "buzz_wire_3d": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "note": "the spring links and drivers frictionless (Robotiq); easy, medium and hard ship without a reference solution (oracle none, user 2026-10-13: the released routes fail on springref 2.62, the family's stress evidence stands for them; the rd tiers are their solved redesign): instances made on ad7a855bf3 with births eaa04a6aeb93e41c / b0ec89f9696bec11 / e74b5106b74f29bf, two builds each identical, nop CLEAN, smoke search 279 episodes per tier with 0 BREAKDOWN under v2.13b",
+   "new_bases": {
+    "buzz-wire-3d-06-i01": {"template": "buzz-wire-3d-very-easy-i00", "variation": "buzz_wire_3d_rd_very_easy", "package_text": "scripts/robotangle/package_text/buzz_wire_3d", "design": "a redesigned wire, with insulated rest sleeves and an insulated finish post", "note": "rd very_easy; acceptance FZ1b_buzzrd_very_easy; registration e5dd0fc7fa; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "buzz-wire-3d-07-i01": {"template": "buzz-wire-3d-easier-i00", "variation": "buzz_wire_3d_rd_easier", "package_text": "scripts/robotangle/package_text/buzz_wire_3d", "design": "a redesigned wire, with insulated rest sleeves and an insulated finish post", "note": "rd easier; acceptance FZ1b_buzzrd_easier; registration e5dd0fc7fa; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "buzz-wire-3d-08-i01": {"template": "buzz-wire-3d-easier-i00", "variation": "buzz_wire_3d_rd_easy", "package_text": "scripts/robotangle/package_text/buzz_wire_3d", "design": "a redesigned wire, with insulated rest sleeves and an insulated finish post", "note": "rd easy; acceptance FZ1b_buzzrd_easy; registration e5dd0fc7fa; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "buzz-wire-3d-09-i01": {"template": "buzz-wire-3d-easier-i00", "variation": "buzz_wire_3d_rd_medium", "package_text": "scripts/robotangle/package_text/buzz_wire_3d", "design": "a redesigned wire, with insulated rest sleeves and an insulated finish post", "note": "rd medium; acceptance FZ1b_buzzrd_medium; registration e5dd0fc7fa; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "buzz-wire-3d-10-i01": {"template": "buzz-wire-3d-easier-i00", "variation": "buzz_wire_3d_rd_hard", "package_text": "scripts/robotangle/package_text/buzz_wire_3d", "design": "a redesigned wire, with insulated rest sleeves and an insulated finish post", "note": "rd hard; acceptance FZ1b_buzzrd_hard; registration e5dd0fc7fa; redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"}
+   }
+  },
+  "blanket_flatten": {
+   "tiers": ["very_easy", "easy", "medium", "hard"],
+   "package_text": "scripts/robotangle/package_text/blanket_flatten",
+   "numbers": {"very_easy": "01", "easy": "07", "medium": "08", "hard": "09"},
+   "variations": {"very_easy": "very_easy"},
+   "released_simulator_keys": ["grasp_assist"],
+   "simulator_overrides": {"mujoco_birth": "@released_instance", "mujoco_profile": "blanket_vbd_gpu",
+                           "mujoco_birth_settle": {"quiet_m_s": 0.05, "quiet_s": 0.1, "max_s": 60.0}},
+   "note": "blanket_vbd_gpu (the deterministic GPU VBD cloth, user 2026-10-12; a GPU make, release_rebuild.py --gpu): the cloth born from the released PBD particles, settled at rest inside make-instance on the GPU step (the robot holding home, every cloth vertex under 5 cm/s and every bending rest angle within 1e-3 rad per control for 0.1 s, at most 60 s: the gathered easy / medium births were still creasing at 10 s; the task parameters are the released instance's own); the released grasp assistance (pbd_local_patch_v1); very_easy keeps its released variation id and ships its staged instance (PREMADE: settled on blanket_vbd, then re-pointed to blanket_vbd_gpu); easy (blanket-flatten-07-i01, wave 2 after RoboARC 0.1.0): PREMADE, its frozen instance made with this recipe through the release make path (release_rebuild.make_instances in eai-roboarc:0.1.0-noinst, host A RTX 4090; birth 12fe5f2d5f7374a7) ships through the freeze manifest's instance key, reference oracles/blanket-flatten-07-i01 (EASY with the near-edge pull, end a6f78e4255ff5adf); its texts (package_text blanket-flatten-easy-i00-*: the released texts, the evaluate_state excerpt regenerated) are pending user review; medium (blanket-flatten-08-i01, wave 2, user 2026-10-15): PREMADE the same way (birth 49ee5e7e16239616, made with easy on 10-14), reference oracles/blanket-flatten-08-i01 (MEDIUM with the hang-and-lay stage, end d539d4d85d80ab0e); its texts (package_text blanket-flatten-medium-i00-*) are pending user review; hard (blanket-flatten-09-i01, V3 2026-10-18): PREMADE the same way (birth c7e8fe0051099141, made with easy / medium on 10-14), reference oracles/blanket-flatten-09-i01 (route hard5, topogym/planning/blanket_flatten/hard_port.py: the page turns, the hang-and-lay with the measured re-centring, the measured slide that rolls the tucked far strip out; 2813 rows, end 6a9c4796da46cf47); its texts (package_text blanket-flatten-hard-i00-*) are pending user review",
+   "new_bases": {
+    "blanket-flatten-02-i01": {"template": "blanket-flatten-very-easy-i00", "variation": "very_easy", "tier": "rd_very_easy", "package_text": "scripts/robotangle/package_text/blanket_flatten", "design": "redesigned start states of the blanket, coverage 0.95", "note": "rd very_easy (very_easy4); PREMADE: the redesign keeps the released variation id the port uses, so its staged frozen instance ships through the manifest's instance key; GPU base (blanket_vbd_gpu); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "blanket-flatten-03-i01": {"template": "blanket-flatten-very-easy-i00", "variation": "easier", "tier": "rd_easier", "package_text": "scripts/robotangle/package_text/blanket_flatten", "design": "redesigned start states of the blanket, coverage 0.95", "note": "rd easier (easier4); PREMADE: the redesign keeps the released variation id the port uses, so its staged frozen instance ships through the manifest's instance key; GPU base (blanket_vbd_gpu); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "blanket-flatten-04-i01": {"template": "blanket-flatten-very-easy-i00", "variation": "easy", "tier": "rd_easy", "package_text": "scripts/robotangle/package_text/blanket_flatten", "design": "redesigned start states of the blanket, coverage 0.95", "note": "rd easy (easy4); PREMADE: the redesign keeps the released variation id the port uses, so its staged frozen instance ships through the manifest's instance key; GPU base (blanket_vbd_gpu); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "blanket-flatten-05-i01": {"template": "blanket-flatten-very-easy-i00", "variation": "medium", "tier": "rd_medium", "package_text": "scripts/robotangle/package_text/blanket_flatten", "design": "redesigned start states of the blanket, coverage 0.95", "note": "rd medium (medium4); PREMADE: the redesign keeps the released variation id the port uses, so its staged frozen instance ships through the manifest's instance key; GPU base (blanket_vbd_gpu); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "blanket-flatten-06-i01": {"template": "blanket-flatten-very-easy-i00", "variation": "hard", "tier": "rd_hard", "package_text": "scripts/robotangle/package_text/blanket_flatten", "design": "redesigned start states of the blanket, coverage 0.95", "note": "rd hard (hard4, route hard4b_hem: the rc prefix + a far-hem tail, 11719 rows; its full replay measured 64.6 min on a shared host C RTX 4090, 3877 s); PREMADE: the redesign keeps the released variation id the port uses, so its staged frozen instance ships through the manifest's instance key; GPU base (blanket_vbd_gpu); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"}
+   }
+  },
+  "knot_untying": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "variations": {"very_easy": "very_easy", "easier": "easier"},
+   "make_instance": {"gripper_space": "width"},
+   "render_host": true,
+   "frozen_assets": true,
+   "simulator_overrides": {"mujoco_birth": "@render_host/instance_assets/ipc_state/manifest.json"},
+   "note": "knot_chain_v4: the rope a rigid capsule chain born from the released instance's IPC settled state, with the released tet volume; the released gripper space width",
+   "new_bases": {
+    "knot-untying-06-i01": {"template": "knot-untying-very-easy-i00", "variation": "knot_untying_rd_very_easy", "package_text": "scripts/robotangle/package_text/knot_untying", "design": "a loose figure-eight in one rope, its standing end clamped under a staple, a long free tail", "note": "rd very_easy; acceptance: the knot stress round on inst10 clean, nop / -i01 / 5 breakers fail; PREMADE: the rope chain needs its frozen birth archive, so the frozen instance ships through the manifest's instance key (HARBOR_FREEZE_RUNBOOK): made in the release image eai-roboarc:0.1.0-noinst (1f2153746214; tooling b842da320) with make-instance from the exact inputs of the source instance inst10/very_easy (knot_inst10 build, state b0c35b5a83a3f30c, instance.json sha256 ef5ad4cf1e4a25ac): its task parameters (sha256 fbae385ac285bfc6), its rope birth archive (rope_birth/manifest.json sha256 32d721990213e3db, arrays.npz sha256 934c58d568028323) and its grasp (contact_weld_v1 on every link); two makes, byte-identical, both state b0c35b5a83a3f30c; checks in that image: birth exact (instance_exact, assets_exact), nop 2400 rows clean, the reference's fresh replay success at its last row (4809) with end e235713d44851ce5, no forcing, every row within the standard service's joint step limit (every arm joint at most 0.039 rad per row, the limit 0.04); reference fv81az (4809 rows, sha256 dc88f5ff8f4c81f7, end e235713d44851ce5): a decision-level route search (beam over the oracle's checkpointed decisions with --turbo variants: n0__v01 -> c034_v04 -> c050_v04 -> c081_v06, untied at row 5264), finished with --flatten and the hold (fv81a: 5293 rows, fresh replay = live 7d4f46a7b8b81493, no forcing), then its pure-hold runs thinned to half (thin_rows.py) and cut at the thinned rows' replay success: an open-loop route, valid by its own fresh replays (a cloud host and this image); trial-host time by paired timing (host C, Ryzen 9 7950X, an msf3 control on a second physical core, normalised to msf3's quiet run of 70.8 min): 30.7 min = 17.1 % of the 3 h budget (raw 56.0 min at host load 26-117; unpaired 41.4 min at load 13-25; knot: user-approved 30 % bar, 2026-10-14); backups: fv65z (4982 rows, sha256 0d8083720a90dd51, end a68b96dcd2a96a06, the same checks in this image, 44.2 min = 24.6 % at load 16-22), b45fast (7701 rows, sha256 de1e8e40ba9d1130, end 1d9ec17cd237dadf, 57.1 min = 31.7 %); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted with scripts/robotangle/package_text_tool.py, texts pending user review"},
+    "knot-untying-09-i01": {"template": "knot-untying-medium-i00", "variation": "knot_untying_rd_medium", "package_text": "scripts/robotangle/package_text/knot_untying", "design": "a loose figure-eight round an eye post, its standing end clamped under a staple, a second post and a curb beside it, the rope laid in a front strip", "note": "rd medium; PREMADE as knot-untying-06-i01 (HARBOR_FREEZE_RUNBOOK): made in the release image eai-roboarc:0.1.0-noinst (1f2153746214; tooling b842da320) with make-instance from the exact inputs of the source instance inst10/medium_loose (knot_inst10 build, state 343aa690921a6a1d, instance.json sha256 73c3e7b421ad631c): its task parameters (sha256 6aecba65dd8d9d79), its rope birth archive (rope_birth/manifest.json sha256 2aac2d8e43cf1555, arrays.npz sha256 be6ebd6f1a9b967c) and its grasp; two makes, byte-identical, both state 343aa690921a6a1d; checks in that image: birth exact (instance_exact, assets_exact), nop 2400 rows clean, the reference's fresh replay success at its last row (10559) with end 120b884db510d9a5, no forcing, every row within the standard service's joint step limit (every arm joint at most 0.039 rad per row, the limit 0.04); reference qp7 (10559 rows, sha256 db8061d2c59a954c (c7e6d878de08ce63 before its meta lost two host paths, 2026-10-17; the arrays are the same), end 120b884db510d9a5): the untie chain ml_g1_exit05 (8017 rows; a beam over the oracle's checkpointed decisions: n0__v11 -> c038_v12 -> c092_v02 -> ml_f3_lift_d01_fast -> ml_g1_exit05), then the serpentine + lay1f placement with --turbo 4.5 and 20 cm/s carries (2502 rows; Quest kr_md14b); trial-host time by paired timing (Ryzen 9 7950X, an msf3 control on a second physical core, normalised per block to msf3's quiet run of 70.8 min): 49.4 min = 27.4 % of the 3 h budget (host A, raw 88.7 min at host load 23-217); the same method gave mt6 54.2 min (30.1 %) and qp2 54.3 min (30.2 %) on host B; the untie alone about 43 min (knot: user-approved 30 % bar, 2026-10-14); backups, each passing the same checks in this image: qp2 (10677 rows, sha256 1348a4bbb6c8bb92, end 81ae8d5c2b0c1279), qp8 (10563 rows, sha256 80af9274368d6b68, end 7b2c546008f80111), mt6 (11197 rows, sha256 45b03f7fecea6ca5, end b094a1ca71ba8c07), msf3 (14834 rows, sha256 34987789483b1de5, end 14a2c93ae2ce8916, 70.8 min = 39.3 %); texts drafted with scripts/robotangle/package_text_tool.py from describes in that image and the task class's public_instruction() (the region in words, no world coordinates), then the frame and chain words as the generator renders them; region images in environment/goal/ (scripts/robotangle/redesign/knot_untying/region_images.py: the start scene from cam_high / cam_low with the region's dashed line drawn in; the scene does not draw it); texts pending user review"},
+    "knot-untying-07-i01": {"template": "knot-untying-easier-i00", "variation": "knot_untying_rd_easier", "package_text": "scripts/robotangle/package_text/knot_untying", "design": "a loose figure-eight, its standing end clamped under a staple, two posts beside it and a curb, the rope laid in a back strip", "note": "rd easier; PREMADE as knot-untying-06-i01 (HARBOR_FREEZE_RUNBOOK): made in eai-roboarc:0.2.0-noinst (9d0bd3a6996a; the V2 shared tooling) with redesign/knot_untying/premade/make_premade.py from the source inst10/easier_v8_r2 (knot_inst10 build, state 5280c58d22ba19ac) with its goal region set to the user's 2026-10-13 back strip (_r3, option A: x -0.45..0.42; premade/region_source.py: task_parameters.redesign.regions from births/easier_v8_r3, nothing else changed); two makes, byte-identical, both state a3c58ab73130b9b3; checks in that image: birth exact (instance_exact, assets_exact), nop 2400 rows clean; reference g333 (7419 rows, end 8ae062ea4c733dbc): the 2026-10-14 route et1 (14172 rows, ~39 %; the beam untie e9 + the serpentine / lay1f placement at turbo 3) re-timed whole (redesign/knot_untying/robot/retime_search.py global: waits x3, moves while the rope was quiet x3, other moves x1.75, gripper changes as recorded, every arm joint step <= 0.0385 rad), then the final targets held to the success; one success of 72 such re-timings (the route is chaotic under re-timing; the others fail), valid by its own fresh replays: strict double fresh replay success, deterministic, same end on host A, host B and Quest (Zen 4, Xeon 8592+); trial-host time (host B, Ryzen 9 7950X, one physical core per sim with --cpus 1, the trials' env, rendering off, a qp7 control on a second core at its quiet 3353 s against 3338 s): 3037 s = 28.1 % of the 3 h budget (0.409 s per step; knot: user-approved 30 % bar, the 25 % aim not reached; the et1 route it re-times: 14172 rows, ~48 % on host A); the same replay at host load 50-74 paired with qp7 (6953 s): 6360 s, normalised 3053 s; strict double replay on host A (load ~14): 3232 s per replay; texts drafted from knot-untying-09-i01's package_text with this scene's facts (scripts in the V3 notes), region images by region_images.py; texts pending user review"}
+   }
+  },
+  "rope_threading": {
+   "tiers": ["easy", "medium", "hard"],
+   "numbers": {"easy": "01", "medium": "02", "hard": "03"},
+   "render_host": true,
+   "frozen_assets": true,
+   "released_task_parameters": true,
+   "grasp_weld_links": {"entity": "rope", "link_m": 0.0055, "radius_m": 0.008},
+   "simulator_overrides": {"mujoco_birth": "@render_host/instance_assets/ipc_state/manifest.json"},
+   "note": "as knot_untying (gripper space native), plus the released task parameters and the assisted grasp contact_weld_v1 on every 5.5 mm link; medium listed 2026-10-13 (validate): its reference oracles/rope-threading-02-i01 (sha256 7a736bb517f4c9ba..., end 740d4048045ab81d) passed acceptance round FZ1_rope_medium (b32 6bb17729df, criteria v2.12, 300 episodes, 0 confirmed BREAKDOWN), as easy (FZ1_rope_easy) and hard (FZ1_rope_hard)",
+   "new_bases": {
+    "rope-threading-04-i01": {"template": "rope-threading-easy-i00", "variation": "rope_threading_rd_very_easy", "package_text": "scripts/robotangle/package_text/rope_threading", "design": "bulkhead lacing: a wall between the arms with grommets, and low rings or a ring on a post", "note": "rd very_easy; acceptance FZ1_roperd_very_easy; PREMADE: the rope chain needs its frozen birth archive, so the frozen instance ships through the manifest's instance key (HARBOR_FREEZE_RUNBOOK); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "rope-threading-05-i01": {"template": "rope-threading-easy-i00", "variation": "rope_threading_rd_easier", "package_text": "scripts/robotangle/package_text/rope_threading", "design": "bulkhead lacing: a wall between the arms with grommets, and low rings or a ring on a post", "note": "rd easier; acceptance FZ1_roperd_easierb; PREMADE: the rope chain needs its frozen birth archive, so the frozen instance ships through the manifest's instance key (HARBOR_FREEZE_RUNBOOK); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "rope-threading-06-i01": {"template": "rope-threading-easy-i00", "variation": "rope_threading_rd_easy", "package_text": "scripts/robotangle/package_text/rope_threading", "design": "bulkhead lacing: a wall between the arms with grommets, and low rings or a ring on a post", "note": "rd easy; acceptance FZ1_roperd_easy; PREMADE: the rope chain needs its frozen birth archive, so the frozen instance ships through the manifest's instance key (HARBOR_FREEZE_RUNBOOK); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "rope-threading-07-i01": {"template": "rope-threading-medium-i00", "variation": "rope_threading_rd_medium", "package_text": "scripts/robotangle/package_text/rope_threading", "design": "bulkhead lacing: a wall between the arms with grommets, and low rings or a ring on a post", "note": "rd medium; acceptance FZ1_roperd_medium; PREMADE: the rope chain needs its frozen birth archive, so the frozen instance ships through the manifest's instance key (HARBOR_FREEZE_RUNBOOK); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"},
+    "rope-threading-08-i01": {"template": "rope-threading-hard-i00", "variation": "rope_threading_rd_hard", "package_text": "scripts/robotangle/package_text/rope_threading", "design": "bulkhead lacing: a wall between the arms with grommets, and low rings or a ring on a post", "note": "rd hard; acceptance FZ1_roperd_hard; PREMADE: the rope chain needs its frozen birth archive, so the frozen instance ships through the manifest's instance key (HARBOR_FREEZE_RUNBOOK); redesigned tier set (rd-): the user ships the ported and the rd tiers (2026-10-12); texts drafted by validate with scripts/robotangle/package_text_tool.py, reviewed by the user (the work notes)"}
+   }
+  },
+  "hedgehog_in_cage": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "variations": {"very_easy": "very_easy", "easier": "easier"},
+   "note": "hedgehog_v4 (medium hedgehog_v3_waisted; robot-robot contacts on the soft class, the fix for the Robotiq coupler pinch), on the Robotiq spring references (springref 2.62): very_easy and easier the released rows re-recorded on the exact diagonal; medium and hard the family's oracle re-run closed loop; easy the oracle's first grasp to its release (row 7300), then it keeps the grasp and rolls the ball out of the slot (docs/rcb/families/hedgehog_in_cage.md); very_easy and easier keep their released variation ids. Acceptance: round hedgehog_v4 on 3297f29cb, 1,000 episodes per tier, criteria v2.10, PASS on all five. The experimental settings are new designs, listed as new_bases: window_change (round hedgehog_v4, PASS) and cast_cage (its round on d1b764ddc, PASS) in the width gripper space their references were recorded in, owl (round bird_owl_r1 on d27c622d7, PASS) in the native one; Harbor oracle 1 / nop 0 in both modes under their own names (release_rebuild with Harbor on the test-only commit 3d8436413, 2026-10-12)",
+   "new_bases": {
+    "hedgehog-in-cage-08-i01": {"template": "hedgehog-in-cage-very-easy-i00", "variation": "hedgehog_in_cage_window_change", "gripper_space": "width", "package_text": "scripts/robotangle/package_text/hedgehog_in_cage", "design": "the very_easy cage with a narrower start window"},
+    "hedgehog-in-cage-06-i01": {"template": "hedgehog-in-cage-hard-i00", "variation": "hedgehog_in_cage_cast_cage", "gripper_space": "width", "package_text": "scripts/robotangle/package_text/hedgehog_in_cage", "design": "Cast Cage: Hanayama's Cast Cage at four times its real size, a six-spiked star in a closed barrel with four side windows, and a rod lying on the table"},
+    "hedgehog-in-cage-07-i01": {"template": "hedgehog-in-cage-very-easy-i00", "variation": "hedgehog_in_cage_owl", "package_text": "scripts/robotangle/package_text/hedgehog_in_cage", "design": "Bird in Cage: a wooden owl in a cage, and a rod lying on the table"}
+   }
+  },
+  "cast_keyhole": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "note": "keyhole_v3 with the re-cut (docs/rcb/families/cast_keyhole.md): made in the native gripper space, no overrides; the released goals, rules and geometry. acceptance (validate, 2026-10-12/13): round FZJ_<family>-<tier> per base on build b38j (f9db156d16; b39j acbb4ca88e for the new designs) with this reference, criteria v2.12, 300 episodes (search protocol 3), 0 confirmed BREAKDOWN, reference within the 120 min limit: PASS on all five and on the double maze. The double maze is a new design (docs/rcb/families/cast_keyhole_double_maze.md, profile keyhole_double_maze_v2, birth c15ba78d2bfda87e) with easy as its template and its own texts. Listed 2026-10-13 by validate on main's instruction (the release owner aggregates; to be merged with Jianwen)",
+   "new_bases": {
+    "cast-keyhole-06-i01": {"template": "cast-keyhole-easy-i00", "variation": "cast_keyhole_double_maze", "package_text": "scripts/robotangle/package_text/cast_keyhole", "design": "Double maze: two plates, gold and silver, each with a slot grid, threaded through each other at right angles (design dm4b)"}
+   }
+  },
+  "cast_coil": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "note": "the redesigned Cast Coil (variations cast_coil_v2_*) ships as instance -i02 of very_easy / easier / easy: no version in a task name (PROTOCOL 2.2), versions are instances; the five ported tiers stay -i01; coil_legacy_v2 (docs/rcb/families/cast_coil.md): the five released tiers, made in the native gripper space, no overrides. acceptance (validate, 2026-10-12/13): round FZJ_<family>-<tier> per base on build b38j (f9db156d16; b39j acbb4ca88e for the new designs) with this reference, criteria v2.12, 300 episodes (search protocol 3), 0 confirmed BREAKDOWN, reference within the 120 min limit: PASS on all five. The v2 redesign is listed as three new bases (below), re-recorded on the prism rule. Listed 2026-10-13 by validate on main's instruction. Jianwen's 1,000-episode round (criteria v2.10) on 88f0d3773: PASS on all five",
+   "new_bases": {
+    "cast-coil-06-i01": {"template": "cast-coil-very-easy-i00", "variation": "cast_coil_v2_very_easy", "package_text": "scripts/robotangle/package_text/cast_coil", "design": "after the official Cast Coil puzzle", "note": "birth 22e9a1e035809358, 8,688 rows, end be32137b76dbae53; reference recorded on the 32-facet prism instance (b270379ac); on 126cf1b6c: two fresh replays on the same end state, observer CLEAN, nop CLEAN; acceptance round m126_coilv2_round (1,000 episodes, criteria through v2.12) PASS, 0 confirmed BREAKDOWN; Harbor under this base PASS, both modes (2026-10-13, test commit fba08165c); listed on the user's go (2026-10-13)"},
+    "cast-coil-07-i01": {"template": "cast-coil-easier-i00", "variation": "cast_coil_v2_easier", "package_text": "scripts/robotangle/package_text/cast_coil", "design": "the lattice design s43: two interlocked lattice pieces", "note": "birth 6432913b260aaf8c, 28,037 rows, end 60441db184274e4a; reference recorded on the 32-facet prism instance (b270379ac); on 126cf1b6c: two fresh replays on the same end state, observer CLEAN, nop CLEAN; acceptance round m126_coilv2_round (1,000 episodes, criteria through v2.12) PASS, 0 confirmed BREAKDOWN; Harbor under this base PASS, both modes (2026-10-13, test commit fba08165c); listed on the user's go (2026-10-13)"},
+    "cast-coil-08-i01": {"template": "cast-coil-easy-i00", "variation": "cast_coil_v2_easy", "package_text": "scripts/robotangle/package_text/cast_coil", "design": "the lattice design s121: two interlocked lattice pieces", "note": "birth faad5b880e67eb06, 32,967 rows, end 625e699dc0e01560; reference recorded on the 32-facet prism instance (b270379ac); on 126cf1b6c: two fresh replays on the same end state, observer CLEAN, nop CLEAN; acceptance round m126_coilv2_round (1,000 episodes, criteria through v2.12) PASS, 0 confirmed BREAKDOWN; Harbor under this base PASS, both modes (2026-10-13, test commit fba08165c); listed on the user's go (2026-10-13)"}
+   }
+  },
+  "horseshoe_ring": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "note": "docs/rcb/families/horseshoe_ring.md: the five released tiers, made in the native gripper space, no overrides; hard's hand-off is a hand swap (the released release in the air does not work on MuJoCo). acceptance (validate, 2026-10-12/13): round FZJ_<family>-<tier> per base on build b38j (f9db156d16; b39j acbb4ca88e for the new designs) with this reference, criteria v2.12, 300 episodes (search protocol 3), 0 confirmed BREAKDOWN, reference within the 120 min limit: PASS on all five. Listed 2026-10-13 by validate on main's instruction"
+  },
+  "lock_picking": {
+   "tiers": ["very_easy", "easier", "easy", "medium", "hard"],
+   "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
+   "package_text": "scripts/robotangle/package_text/lock_picking",
+   "note": "lock_chain_v2: the chain lock under the released variation ids (user decision 2026-10-10), native gripper space, its own task texts (package_text/lock_picking/README.md). acceptance (validate, 2026-10-12/13): round FZJ_<family>-<tier> per base on build b38j (f9db156d16; b39j acbb4ca88e for the new designs) with this reference, criteria v2.12, 300 episodes (search protocol 3), 0 confirmed BREAKDOWN, reference within the 120 min limit: PASS on very_easy, easier, easy and medium; hard's round (FZJ_lock-hard) was still running when this entry was written. Listed 2026-10-13 by validate on main's instruction"
+  },
+  "slotted_post_ring": {
+   "tiers": [],
+   "note": "slotted_post_ring on MuJoCo (chains2 / Jianwen): no released base of its own; texts start from horseshoe_ring's released package (the frame) with the slotted scene's own goal, rules and grader lines; very_easy / easier (FZ1, PASS) and the #108 chain tiers (FZ2_slotted_*_chain); profile slotted_chain108_v3",
+   "new_bases": {
+    "slotted-post-ring-01-i01": {
+     "template": "horseshoe-ring-very-easy-i00",
+     "variation": "slotted_post_ring_very_easy",
+     "tier": "very_easy",
+     "package_text": "scripts/robotangle/package_text/slotted_post_ring",
+     "design": "a ring on a slotted post (below easy)"
+    },
+    "slotted-post-ring-02-i01": {
+     "template": "horseshoe-ring-easier-i00",
+     "variation": "slotted_post_ring_easier",
+     "tier": "easier",
+     "package_text": "scripts/robotangle/package_text/slotted_post_ring",
+     "design": "a ring on a post, with a cord (below easy)"
+    },
+    "slotted-post-ring-03-i01": {
+     "template": "horseshoe-ring-easy-i00",
+     "variation": "slotted_post_ring_easy_chain",
+     "tier": "easy_chain",
+     "package_text": "scripts/robotangle/package_text/slotted_post_ring",
+     "design": "slotted #108 on a rigid capsule chain (easy)"
+    },
+    "slotted-post-ring-04-i01": {
+     "template": "horseshoe-ring-medium-i00",
+     "variation": "slotted_post_ring_medium_chain",
+     "tier": "medium_chain",
+     "package_text": "scripts/robotangle/package_text/slotted_post_ring",
+     "design": "slotted #108 on a rigid capsule chain (medium)"
+    },
+    "slotted-post-ring-05-i01": {
+     "template": "horseshoe-ring-hard-i00",
+     "variation": "slotted_post_ring_hard_chain",
+     "tier": "hard_chain",
+     "package_text": "scripts/robotangle/package_text/slotted_post_ring",
+     "design": "slotted #108 on a rigid capsule chain (hard)"
+    }
+   }
+  },
+  "orbits": {
+   "tiers": [],
+   "make_instance": {
+    "gripper_space": "width"
+   },
+   "note": "orbits on MuJoCo (chains2 / Jianwen): no released base of its own; texts from horseshoe_ring's released package as the frame; very_easy (FZ2 on the 3 m/s / 120 rad/s clamp, PASS); easier as orbits-02-i01 (V3, 2026-10-17) on a 0.3125 ms MuJoCo step (solver_substeps 8, frozen with its instance): its round FZ3 on the 0.625 ms step FAILED (prefix12_e2: the step's own energy residual at a handle landing, docs/rcb/families/orbits.md); width gripper space (the references')",
+   "new_bases": {
+    "orbits-01-i01": {
+     "template": "horseshoe-ring-very-easy-i00",
+     "variation": "orbits_very_easy",
+     "tier": "very_easy",
+     "package_text": "scripts/robotangle/package_text/orbits",
+     "design": "a cord loop with a handle, posts with stopper balls"
+    },
+    "orbits-02-i01": {
+     "template": "horseshoe-ring-easier-i00",
+     "variation": "orbits_easier",
+     "tier": "easier",
+     "package_text": "scripts/robotangle/package_text/orbits",
+     "simulator_overrides": {
+      "solver_substeps": 8
+     },
+     "design": "a cord loop with a handle, threaded through a ring between two posts with stopper balls; MuJoCo step 0.3125 ms"
+    }
+   }
+  },
+  "blanket_fold": {
+   "tiers": [],
+   "note": "blanket_fold (the user's new family, 2026-10-10): blanket_flatten's cloth on blanket_vbd_gpu, folded into a frozen target shape; texts from blanket-flatten-very-easy-i00 with the fold goal words (BlanketFoldTask, eb2764316f); PREMADE (the frozen target archive comes with the staged instance); GPU base",
+   "new_bases": {
+    "blanket-fold-01-i01": {
+     "template": "blanket-flatten-very-easy-i00",
+     "variation": "blanket_fold_very_easy",
+     "tier": "very_easy",
+     "package_text": "scripts/robotangle/package_text/blanket_fold",
+     "design": "from flat; the target: the half fold, the far half over the near one"
+    },
+    "blanket-fold-02-i01": {
+     "template": "blanket-flatten-very-easy-i00",
+     "variation": "blanket_fold_easier",
+     "tier": "easier",
+     "package_text": "scripts/robotangle/package_text/blanket_fold",
+     "design": "from flat; the target: the half fold with the top layer's corner dog-eared",
+     "note": "PREMADE (blanket_vbd_gpu instance, Quest inputs/blanket_gpuinst, made on ce7f515db1); texts drafted with package_text_tool.py from describes on the head (a cloud host, 2026-10-13 evening), target images in environment/goal/; shipped tonight on its reference: Harbor oracle trial not run; reference 2795 rows, end e108b023283b1577, replay-verified across GPUs"
+    },
+    "blanket-fold-03-i01": {
+     "template": "blanket-flatten-very-easy-i00",
+     "variation": "blanket_fold_easy",
+     "tier": "easy",
+     "package_text": "scripts/robotangle/package_text/blanket_fold",
+     "design": "from a folded-over start; the target: the half fold",
+     "note": "PREMADE (blanket_vbd_gpu instance, Quest inputs/blanket_gpuinst, made on ce7f515db1); texts drafted with package_text_tool.py from describes on the head (a cloud host, 2026-10-13 evening), target images in environment/goal/; shipped tonight on its reference: Harbor oracle trial not run; reference 9568 rows, end fe554386da0a864b, replay-verified"
+    },
+    "blanket-fold-04-i01": {
+     "template": "blanket-flatten-very-easy-i00",
+     "variation": "blanket_fold_medium",
+     "tier": "medium",
+     "package_text": "scripts/robotangle/package_text/blanket_fold",
+     "design": "from a folded-over start; the target: the half fold with the top layer's corner dog-eared",
+     "note": "PREMADE (blanket_vbd_gpu instance, Quest inputs/blanket_gpuinst, made on ce7f515db1); texts drafted with package_text_tool.py from describes on the head (a cloud host, 2026-10-13 evening), target images in environment/goal/; shipped tonight on its reference: Harbor oracle trial not run; reference 7654 rows, end e023725c2d8ab680, replay-verified"
+    },
+    "blanket-fold-05-i01": {
+     "template": "blanket-flatten-very-easy-i00",
+     "variation": "blanket_fold_hard",
+     "tier": "hard",
+     "package_text": "scripts/robotangle/package_text/blanket_fold",
+     "design": "as medium, with the fence standing beyond the blanket's far side",
+     "note": "PREMADE (blanket_vbd_gpu instance, Quest inputs/blanket_gpuinst, made on ce7f515db1); texts drafted with package_text_tool.py from describes on the head (a cloud host, 2026-10-13 evening), target images in environment/goal/; shipped tonight on its reference: Harbor oracle trial not run; reference 15265 rows, end 34e1b8bf47080e58: single-card success, cross-GPU replays running at delivery"
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "name": "F5x_fiber_easier_whip_depth_ccd500",
+ "base": "fiber-bundling-easier-i00",
+ "family": "fiber_bundling",
+ "mechanism": "the F5 whip at ccd_iterations 500: 12.7 mm deep and 16 J given back at the cradle",
+ "found_on_commit": "f9f42391d",
+ "configuration": {
+  "experiment_opt": "ccd_iterations=500,ccd_tolerance=1e-10"
+ },
+ "rows": 71,
+ "core_rows": 31,
+ "sha256": "307e054ac02997d39a32f4e80aa3e54f02d37d2247ab0a1cce2bb8b7ac511240",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

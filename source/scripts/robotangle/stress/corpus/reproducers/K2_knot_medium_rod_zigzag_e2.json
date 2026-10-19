@@ -1,0 +1,12 @@
+{
+ "name": "K2_knot_medium_rod_zigzag_e2",
+ "base": "knot-untying-medium-i00",
+ "family": "knot_untying",
+ "mechanism": "an explicit rod zig-zag with the rope pulled taut between the hands (tail in the left fingers, links 54-61 in the right's, link speeds ~6 m/s), a blow-up at row 728 (fault, mjWARN_BADQACC). BREAKDOWN on knot_chain_v3 (also on b1ec43997 with v3); v4 replays it without BREAKDOWN (VIOLENT, causal whips at 6.1 m/s)",
+ "found_on_commit": "78e0c03a9 (knot_chain_v3)",
+ "configuration": null,
+ "rows": 728,
+ "core_rows": 728,
+ "sha256": "8990226b6ed5f56cf0af9ac1776adc901e5a584ad01258ffca770cf4a4907493",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

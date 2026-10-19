@@ -1,0 +1,12 @@
+{
+ "name": "F3_fiber_easy_depth130mm",
+ "base": "fiber-bundling-easy-i00",
+ "family": "fiber_bundling",
+ "mechanism": "deep cable contacts (tens of mm) and uncaused link jumps",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 41,
+ "core_rows": 1,
+ "sha256": "1f93386eeed6268f2077cbda407c072d3a6d9cc2c82f7bf867b60987123c62f5",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

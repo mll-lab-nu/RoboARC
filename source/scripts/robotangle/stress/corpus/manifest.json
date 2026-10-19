@@ -1,0 +1,1511 @@
+{
+ "about": "RoboTangle MuJoCo stress corpus: the L1 / L8 / 10-08 incident / L12 streams per instance (search.py mutates them; round.py replays them). Inputs are action streams (npz 'actions', rows x action_dim), relative to this file.",
+ "families": {
+  "interlocked_claws": {
+   "directed_modes": [
+    "pull",
+    "twist",
+    "shake",
+    "ram",
+    "slam",
+    "throw",
+    "regrasp"
+   ]
+  },
+  "fiber_bundling": {
+   "directed_modes": [
+    "pull",
+    "twist",
+    "shake",
+    "spin",
+    "sweep",
+    "ram",
+    "slam",
+    "regrasp"
+   ]
+  }
+ },
+ "cases": [
+  {
+   "key": "fiber-bundling-easier-i00:21deea585fe137c6c8c61b3e4ab132d9d0b28944d43c38500a036bd339b50991",
+   "id": "L1_17f5187be41a8589e779ad7e",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/21deea585fe137c6c8c61b3e4ab132d9d0b28944d43c38500a036bd339b50991.npz",
+   "actions_sha256": "21deea585fe137c6c8c61b3e4ab132d9d0b28944d43c38500a036bd339b50991",
+   "file_sha256": "3fec4affcbb873c6b2d8bf01ad563b0a44e63a106afb92a95fb8c716c8b43aa2",
+   "rows": 226,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "17f5187be41a8589e779ad7e",
+     "label": "fiber-bundling-easier-i00-q000000-a001-s01",
+     "mechanisms": [
+      "contact_impulse",
+      "native_solver_fault",
+      "nonfinite_solver_state"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easier-i00:cf6e8077f19e02e84985d277ab954b47087333acd8139b8186ce198733d613b6",
+   "id": "L1_6243a1c3e10560ab1400abfe",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/cf6e8077f19e02e84985d277ab954b47087333acd8139b8186ce198733d613b6.npz",
+   "actions_sha256": "cf6e8077f19e02e84985d277ab954b47087333acd8139b8186ce198733d613b6",
+   "file_sha256": "1997daf6f6d500f79e6fcda76aeafcebe94d97ba5b4a03c8095d1b72e69a6a24",
+   "rows": 26,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "6243a1c3e10560ab1400abfe",
+     "label": "fiber-bundling-easier-i00-q000000-a000-s00",
+     "mechanisms": [
+      "native_solver_fault",
+      "nonfinite_solver_state"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easier-i00:6fedde6e0df14b07b8345d8edc25d78083f934242e6bdfb6699390fb160a875c",
+   "id": "L8_fiber_easier_birth_joint_limits_nan",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/6fedde6e0df14b07b8345d8edc25d78083f934242e6bdfb6699390fb160a875c.npz",
+   "actions_sha256": "6fedde6e0df14b07b8345d8edc25d78083f934242e6bdfb6699390fb160a875c",
+   "file_sha256": "53bd67b86ce276f3d7042fd1a33491248ac9628c8dd12f3ec8b35042df14cfd5",
+   "rows": 96,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "fccb72aa350c5a4fb7aebe44",
+     "label": "fiber-easier-native-nonfinite",
+     "mechanisms": [
+      "native_solver_fault",
+      "nonfinite_solver_state"
+     ]
+    },
+    {
+     "origin": "L8",
+     "id": "fiber_easier_birth_joint_limits_nan",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    },
+    {
+     "origin": "L8",
+     "id": "stress_34e1dcc5a9d086fa",
+     "mechanisms": [
+      "nonfinite_contact_or_state"
+     ],
+     "historical": {
+      "fault": true,
+      "max_contact_force_n": 1656.599013031652,
+      "max_penetration_m": 0.0019269692056874468,
+      "max_rigid_angular_rad_s": 47.575549545769576,
+      "max_rigid_linear_m_s": 2.210224672780802,
+      "nonfinite": true
+     },
+     "historical_end": null
+    },
+    {
+     "origin": "L8",
+     "id": "stress_c96183d378e6ae5e",
+     "mechanisms": [
+      "nonfinite_contact_or_state"
+     ],
+     "historical": {
+      "fault": true,
+      "max_contact_force_n": 1656.599013031652,
+      "max_penetration_m": 0.0019269692056874468,
+      "max_rigid_angular_rad_s": 47.575549545769576,
+      "max_rigid_linear_m_s": 2.210224672780802,
+      "nonfinite": true
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easier-i00:3aba80a0e73674bec9263e30136696d7f14fffb4ceff4f1c0c11bde6f672e6ca",
+   "id": "L8_fiber_easier_push_natural_nan",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/3aba80a0e73674bec9263e30136696d7f14fffb4ceff4f1c0c11bde6f672e6ca.npz",
+   "actions_sha256": "3aba80a0e73674bec9263e30136696d7f14fffb4ceff4f1c0c11bde6f672e6ca",
+   "file_sha256": "5bbee7c4c8fc04fde96bd8dffedf67467c3b98ba63c9246b4b66aa9d329cbb4e",
+   "rows": 5043,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "fiber_easier_push_natural_nan",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easier-i00:587e06a9fab314b3ca5b25107bca05acccd1b6c38fd5ac4cb52720ce5f98bfa8",
+   "id": "L8_fiber_easier_rotate_natural_nan",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/587e06a9fab314b3ca5b25107bca05acccd1b6c38fd5ac4cb52720ce5f98bfa8.npz",
+   "actions_sha256": "587e06a9fab314b3ca5b25107bca05acccd1b6c38fd5ac4cb52720ce5f98bfa8",
+   "file_sha256": "0800bfb74425d909b5c3b35a45ecfa92feeb393de1ee3d6dade840b25363a01b",
+   "rows": 5045,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "fiber_easier_rotate_natural_nan",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easier-i00:4aa288cdbb5a41a82d16c941b20a159855a269ed0c28f8b181f291d91743262c",
+   "id": "L8_stress_36a9de230dc799c8",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/4aa288cdbb5a41a82d16c941b20a159855a269ed0c28f8b181f291d91743262c.npz",
+   "actions_sha256": "4aa288cdbb5a41a82d16c941b20a159855a269ed0c28f8b181f291d91743262c",
+   "file_sha256": "b3ccc81cf96341f76123673ffad64786e23ff9dd5b19fb9dd1b94a02ea8dfc82",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_36a9de230dc799c8",
+     "mechanisms": [
+      "rigid_contact_force_amplification"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 4779.23993954317,
+      "max_penetration_m": 0.0037917543162097264,
+      "max_rigid_angular_rad_s": 0.0,
+      "max_rigid_linear_m_s": 0.0,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easier-i00:edddd6d1d51a4c2868ea7c2a1a37837e3305089b680d702f29dfd34d82999b82",
+   "id": "L8_stress_d8e470adf6a86e13",
+   "base": "fiber-bundling-easier-i00",
+   "input": "inputs/edddd6d1d51a4c2868ea7c2a1a37837e3305089b680d702f29dfd34d82999b82.npz",
+   "actions_sha256": "edddd6d1d51a4c2868ea7c2a1a37837e3305089b680d702f29dfd34d82999b82",
+   "file_sha256": "8195a8f4aa1f3c2a1fb85ae90149acf88a1956c37d8e235c84ca023bf1dc03a6",
+   "rows": 15,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_d8e470adf6a86e13",
+     "mechanisms": [
+      "rigid_linear_speed",
+      "task_rule_contact"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 318.2184641605719,
+      "max_penetration_m": 0.003682708761116463,
+      "max_rigid_angular_rad_s": 43.72034406551577,
+      "max_rigid_linear_m_s": 3.460941773051024,
+      "nonfinite": false
+     },
+     "historical_end": "fiber_gripper_contact"
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easy-i00:f0a51b9cbb7ff61c234d6c588a9bc85a451b08864b2bf36e6878fdd843ffd061",
+   "id": "L1_213b8b17003164414986bc4d",
+   "base": "fiber-bundling-easy-i00",
+   "input": "inputs/f0a51b9cbb7ff61c234d6c588a9bc85a451b08864b2bf36e6878fdd843ffd061.npz",
+   "actions_sha256": "f0a51b9cbb7ff61c234d6c588a9bc85a451b08864b2bf36e6878fdd843ffd061",
+   "file_sha256": "a52bbd848259e3665c19f0d719dbe64336a483519a274ee7e54502af067504bd",
+   "rows": 185,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "213b8b17003164414986bc4d",
+     "label": "fiber-bundling-easy-i00-q000000-a000-s01",
+     "mechanisms": [
+      "contact_impulse",
+      "native_solver_fault",
+      "nonfinite_solver_state"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easy-i00:cb0a85711b74ea0bfc71321e76b882ab3569a9dff4a5342754d863386b07e238",
+   "id": "L8_stress_b686506d477a7443",
+   "base": "fiber-bundling-easy-i00",
+   "input": "inputs/cb0a85711b74ea0bfc71321e76b882ab3569a9dff4a5342754d863386b07e238.npz",
+   "actions_sha256": "cb0a85711b74ea0bfc71321e76b882ab3569a9dff4a5342754d863386b07e238",
+   "file_sha256": "37d1ab79790fc820b1bf20412497458909fd5def763ed964d99d2988440e3729",
+   "rows": 607,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_b686506d477a7443",
+     "mechanisms": [
+      "rigid_contact_force_amplification"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 3225.8423959995894,
+      "max_penetration_m": 0.0030131245562994386,
+      "max_rigid_angular_rad_s": 0.0,
+      "max_rigid_linear_m_s": 0.0,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-easy-i00:88f585e4d139f4535fc30362111d83192628ac88e5f6606c08c446ea0b40a887",
+   "id": "L8_stress_c9833685f2d556b1",
+   "base": "fiber-bundling-easy-i00",
+   "input": "inputs/88f585e4d139f4535fc30362111d83192628ac88e5f6606c08c446ea0b40a887.npz",
+   "actions_sha256": "88f585e4d139f4535fc30362111d83192628ac88e5f6606c08c446ea0b40a887",
+   "file_sha256": "506ff640ae4e49088de2d1c97841e924d88fefc5d79b5edd001504e72f0d5d06",
+   "rows": 737,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_c9833685f2d556b1",
+     "mechanisms": [
+      "rigid_contact_force_amplification"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 5691.172716086928,
+      "max_penetration_m": 0.004749928737697995,
+      "max_rigid_angular_rad_s": 9.642987852417582,
+      "max_rigid_linear_m_s": 0.41416936521479597,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-medium-i00:60bfb94a3d85d9dcc34acb18f3faf16d2ebcc61c8f8c7d0d69ba326df796de3e",
+   "id": "L1_a52ccd413dd6c4e4964382fb",
+   "base": "fiber-bundling-medium-i00",
+   "input": "inputs/60bfb94a3d85d9dcc34acb18f3faf16d2ebcc61c8f8c7d0d69ba326df796de3e.npz",
+   "actions_sha256": "60bfb94a3d85d9dcc34acb18f3faf16d2ebcc61c8f8c7d0d69ba326df796de3e",
+   "file_sha256": "8ecafd0db4cd952e5aa431bf80903f8f9d508713fad0911b427d65f91aed5c66",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "a52ccd413dd6c4e4964382fb",
+     "label": "fiber-bundling-medium-i00-q000000-a000-s03",
+     "mechanisms": [
+      "contact_impulse"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-medium-i00:95ed76c709b6ed94ee54c12b086479cc3a25ed64a1a08fc8dcc68a6a895a2b2d",
+   "id": "L1_c7140ce84a6b34ee979372ea",
+   "base": "fiber-bundling-medium-i00",
+   "input": "inputs/95ed76c709b6ed94ee54c12b086479cc3a25ed64a1a08fc8dcc68a6a895a2b2d.npz",
+   "actions_sha256": "95ed76c709b6ed94ee54c12b086479cc3a25ed64a1a08fc8dcc68a6a895a2b2d",
+   "file_sha256": "10f28d077204667b0c94594a3b47e36137141cd21c4947b56cbb997a58d332e2",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "c7140ce84a6b34ee979372ea",
+     "label": "fiber-bundling-medium-i00-q000000-a000-s04",
+     "mechanisms": [
+      "contact_impulse"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:cc14b51d28c956fda4840713a941af2333ae9ce2aeaa61c65acac7f49cd0c168",
+   "id": "L1_0671e168fd3058884c96022a",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/cc14b51d28c956fda4840713a941af2333ae9ce2aeaa61c65acac7f49cd0c168.npz",
+   "actions_sha256": "cc14b51d28c956fda4840713a941af2333ae9ce2aeaa61c65acac7f49cd0c168",
+   "file_sha256": "545d4b718bf779429c3ff232ac336b004e75c51a81a90dc4582c46b053d6b8bc",
+   "rows": 11,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "0671e168fd3058884c96022a",
+     "label": "fiber-very-easy-v5-native-nonfinite-contact",
+     "mechanisms": [
+      "native_solver_fault",
+      "nonfinite_solver_state",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:fc24a2ebeba7419f31211beddd8d4a8142540d2101ce3d281f39a6bddffce802",
+   "id": "L1_27a7b095feb5fab76fc4c03e",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/fc24a2ebeba7419f31211beddd8d4a8142540d2101ce3d281f39a6bddffce802.npz",
+   "actions_sha256": "fc24a2ebeba7419f31211beddd8d4a8142540d2101ce3d281f39a6bddffce802",
+   "file_sha256": "b9639a532bffcd1254bf92f972c8e197b38680335c611c02f5c929cb986443d0",
+   "rows": 3205,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "27a7b095feb5fab76fc4c03e",
+     "label": "fiber-bundling-very-easy-i00-q000002-a000-s00",
+     "mechanisms": [
+      "native_solver_fault",
+      "nonfinite_solver_state",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:cfd46191f8ed0bfea41f27f6c6fa4f13c75f4ae0f5a495f1f97fc593fd18232c",
+   "id": "L1_82f012b2d0ed0eb27bae3390",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/cfd46191f8ed0bfea41f27f6c6fa4f13c75f4ae0f5a495f1f97fc593fd18232c.npz",
+   "actions_sha256": "cfd46191f8ed0bfea41f27f6c6fa4f13c75f4ae0f5a495f1f97fc593fd18232c",
+   "file_sha256": "c7cdea952bd0158debf9959131bc6c0df078ba4af00197214d695354b0b17df6",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "82f012b2d0ed0eb27bae3390",
+     "label": "fiber-bundling-very-easy-i00-q000000-a000-s00",
+     "mechanisms": [
+      "contact_impulse"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:ab76b9dda1930aa652b91ac38567de84d03a7e4cb308b18177a1ade7bd6ff48f",
+   "id": "L1_864676dd82a7f425fe1794d1",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/ab76b9dda1930aa652b91ac38567de84d03a7e4cb308b18177a1ade7bd6ff48f.npz",
+   "actions_sha256": "ab76b9dda1930aa652b91ac38567de84d03a7e4cb308b18177a1ade7bd6ff48f",
+   "file_sha256": "ffc62e10a6be37a6de22c2e898bab03a9bdc378157f8489462d4d5351c49041b",
+   "rows": 1076,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "864676dd82a7f425fe1794d1",
+     "label": "fiber-bundling-very-easy-i00-q000004-a001-s01",
+     "mechanisms": [
+      "native_solver_fault",
+      "nonfinite_solver_state",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:994ae2ee989c90b12a970b6021228c88b1f34a60fd0a9f5aa0b7a45c60235e4e",
+   "id": "L8_fiber_late_z_support_overflow",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/994ae2ee989c90b12a970b6021228c88b1f34a60fd0a9f5aa0b7a45c60235e4e.npz",
+   "actions_sha256": "994ae2ee989c90b12a970b6021228c88b1f34a60fd0a9f5aa0b7a45c60235e4e",
+   "file_sha256": "8452e0d499b39107162d936807a8542e9aca5d184d7cd7bb0d455f72ac7718c7",
+   "rows": 3759,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "fiber_late_z_support_overflow",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:75d99d59feedd5f3fcad455e6f47b6cc7550aa126f0e5c1160afc4b6f0fb6f7f",
+   "id": "L8_fiber_quickdraw_support_overflow",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/75d99d59feedd5f3fcad455e6f47b6cc7550aa126f0e5c1160afc4b6f0fb6f7f.npz",
+   "actions_sha256": "75d99d59feedd5f3fcad455e6f47b6cc7550aa126f0e5c1160afc4b6f0fb6f7f",
+   "file_sha256": "465cbe5049928c127065daaef97f715ece75064056400d026a8b9ab88434e082",
+   "rows": 365,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "fiber_quickdraw_support_overflow",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:6300376a3e70e1dd4fbe454fee12c3705180c51cac0a68751ae3c9c48c3818f1",
+   "id": "L8_stress_3e4194ff4ace78b7",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/6300376a3e70e1dd4fbe454fee12c3705180c51cac0a68751ae3c9c48c3818f1.npz",
+   "actions_sha256": "6300376a3e70e1dd4fbe454fee12c3705180c51cac0a68751ae3c9c48c3818f1",
+   "file_sha256": "70f9801c1a36d6731f901d6e4bcb690ebb901dca03290ee0da0d7db547146a78",
+   "rows": 78,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_3e4194ff4ace78b7",
+     "mechanisms": [
+      "task_rule_contact"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 0.009545584155053227,
+      "max_penetration_m": 0.0003011274117781272,
+      "max_rigid_angular_rad_s": 7.450764175098856,
+      "max_rigid_linear_m_s": 0.08345492197263847,
+      "nonfinite": false
+     },
+     "historical_end": "fiber_gripper_contact"
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:fd2ba149ed22b3eb52ab6f68ca0a43d0fe763d691d88bc2216359efbffd11c26",
+   "id": "L8_stress_bfef82666ac032bd",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/fd2ba149ed22b3eb52ab6f68ca0a43d0fe763d691d88bc2216359efbffd11c26.npz",
+   "actions_sha256": "fd2ba149ed22b3eb52ab6f68ca0a43d0fe763d691d88bc2216359efbffd11c26",
+   "file_sha256": "10cfeabc4d93b4be330c4287c0a009d3d4b445fd674ff41553975ea263d8c0b0",
+   "rows": 79,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_bfef82666ac032bd",
+     "mechanisms": [
+      "task_rule_contact"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 35.813793441680595,
+      "max_penetration_m": 0.0010685154542588405,
+      "max_rigid_angular_rad_s": 34.42264735824787,
+      "max_rigid_linear_m_s": 2.251647780385012,
+      "nonfinite": false
+     },
+     "historical_end": "fiber_gripper_contact"
+    }
+   ]
+  },
+  {
+   "key": "fiber-bundling-very-easy-i00:d197b29407253dddc9fb7140a4253b18079e0608c0ed33d3a160c13e05230b4d",
+   "id": "L8_stress_ef02d1f34fc5fafb",
+   "base": "fiber-bundling-very-easy-i00",
+   "input": "inputs/d197b29407253dddc9fb7140a4253b18079e0608c0ed33d3a160c13e05230b4d.npz",
+   "actions_sha256": "d197b29407253dddc9fb7140a4253b18079e0608c0ed33d3a160c13e05230b4d",
+   "file_sha256": "0cf4c87ab28e4663fa819c6910913704979198149132e1d7733d1a6b8f7033ca",
+   "rows": 385,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_ef02d1f34fc5fafb",
+     "mechanisms": [
+      "rigid_contact_force_amplification"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 2702.4816727418847,
+      "max_penetration_m": 0.0007276187633129538,
+      "max_rigid_angular_rad_s": 0.0,
+      "max_rigid_linear_m_s": 0.0,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:3160354d46dccf6dbd7ddd8f74242fff1f3dfa7be1cb62aee212cee4e6bc03cf",
+   "id": "L1_7d12236f8f1c43be31024342",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/3160354d46dccf6dbd7ddd8f74242fff1f3dfa7be1cb62aee212cee4e6bc03cf.npz",
+   "actions_sha256": "3160354d46dccf6dbd7ddd8f74242fff1f3dfa7be1cb62aee212cee4e6bc03cf",
+   "file_sha256": "2713eec12b1d60ede82a4b4ea18d44f19b890715c0e3c35ebe17eb5222e1d151",
+   "rows": 87,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "7d12236f8f1c43be31024342",
+     "label": "claws-easier-native-joint-limits",
+     "mechanisms": [
+      "rigid_explosion"
+     ]
+    },
+    {
+     "origin": "L8",
+     "id": "stress_dc2b09bedfcbc9fd",
+     "mechanisms": [
+      "body_left_workspace",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 754.0036545890122,
+      "max_penetration_m": 0.0008891271775133464,
+      "max_rigid_angular_rad_s": 42.01620736281955,
+      "max_rigid_linear_m_s": 6.558730314660091,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    },
+    {
+     "origin": "L8",
+     "id": "stress_9a86f6bbe101744c",
+     "mechanisms": [
+      "body_left_workspace",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 754.0036545890122,
+      "max_penetration_m": 0.0008891271775133464,
+      "max_rigid_angular_rad_s": 42.01620736281955,
+      "max_rigid_linear_m_s": 6.558730314660091,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:c4ae2c1524958ab430899563b716e1e77bb31b3fb645bdd898ed5717a9c4c25d",
+   "id": "L1_8aac2019c666fd0fb458a17e",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/c4ae2c1524958ab430899563b716e1e77bb31b3fb645bdd898ed5717a9c4c25d.npz",
+   "actions_sha256": "c4ae2c1524958ab430899563b716e1e77bb31b3fb645bdd898ed5717a9c4c25d",
+   "file_sha256": "555a1fa98aef98ebf86a1c84365dbc62443133144a3df5ccd4280fa32d0c5c4b",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "8aac2019c666fd0fb458a17e",
+     "label": "interlocked-claws-easier-i00-q000000-a000-s03",
+     "mechanisms": [
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:415eaa060f3efbb5b0b920ffd445c197faf6544324d20c040b3f987c73f9e0dd",
+   "id": "L8_short_claws_7d12236f8f1c43be31024342",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/415eaa060f3efbb5b0b920ffd445c197faf6544324d20c040b3f987c73f9e0dd.npz",
+   "actions_sha256": "415eaa060f3efbb5b0b920ffd445c197faf6544324d20c040b3f987c73f9e0dd",
+   "file_sha256": "c3601c822f541d46ac3af45f1388f4497ca91c6708c119f921e01a4f9764192a",
+   "rows": 5,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_f7b048d0eaf6ef93",
+     "mechanisms": [
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 410.3394841100535,
+      "max_penetration_m": 0.0038142459426847566,
+      "max_rigid_angular_rad_s": 27.677649197232842,
+      "max_rigid_linear_m_s": 3.1423843998739045,
+      "nonfinite": false
+     },
+     "historical_end": null
+    },
+    {
+     "origin": "L8",
+     "id": "short_claws_7d12236f8f1c43be31024342",
+     "mechanisms": [
+      "rigid_linear_speed_spike"
+     ],
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:220af4cca3c15811d8a389993a261dfe7c73df2be528f4bd2dfbeb51b6b9a1e9",
+   "id": "L8_stress_02751dbeb21b4d74",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/220af4cca3c15811d8a389993a261dfe7c73df2be528f4bd2dfbeb51b6b9a1e9.npz",
+   "actions_sha256": "220af4cca3c15811d8a389993a261dfe7c73df2be528f4bd2dfbeb51b6b9a1e9",
+   "file_sha256": "75a533e867b7cedc83f31bb0d035e780c6b85d78d20821fc712c0ce248f21438",
+   "rows": 6,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_02751dbeb21b4d74",
+     "mechanisms": [
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 406.5985774435239,
+      "max_penetration_m": 0.003853512513175963,
+      "max_rigid_angular_rad_s": 28.51322998598895,
+      "max_rigid_linear_m_s": 3.7676941973524953,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:bc2f61eebf3f44d0ec6f70a92c39262b07b7589933c3375d01beee44c9535f16",
+   "id": "L8_stress_14678629741d912e",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/bc2f61eebf3f44d0ec6f70a92c39262b07b7589933c3375d01beee44c9535f16.npz",
+   "actions_sha256": "bc2f61eebf3f44d0ec6f70a92c39262b07b7589933c3375d01beee44c9535f16",
+   "file_sha256": "fae106acb6e9190f900a672106de23efb1e39f5745f159739dd7815d5ba9d478",
+   "rows": 11,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_14678629741d912e",
+     "mechanisms": [
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 631.5512371489824,
+      "max_penetration_m": 0.004459891090887601,
+      "max_rigid_angular_rad_s": 27.82991798903534,
+      "max_rigid_linear_m_s": 7.043838794462763,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:7988e800ddc155f07df2255bb66123e1d64138fc1ced92b5136565a60dc72439",
+   "id": "L8_stress_3054cbd421b750df",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/7988e800ddc155f07df2255bb66123e1d64138fc1ced92b5136565a60dc72439.npz",
+   "actions_sha256": "7988e800ddc155f07df2255bb66123e1d64138fc1ced92b5136565a60dc72439",
+   "file_sha256": "5a55c1895bf670d41cc46ed6127227610a59376af1942cf4e300767dbb5099af",
+   "rows": 22,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_3054cbd421b750df",
+     "mechanisms": [
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 392.9362228730529,
+      "max_penetration_m": 0.004332010861573542,
+      "max_rigid_angular_rad_s": 31.681324378769705,
+      "max_rigid_linear_m_s": 6.436954436774999,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easier-i00:17d4ea905cb3385fd27a2bb2c4c35e08809c71f4e0e7708904132f15102ccc26",
+   "id": "L8_stress_e82eca5dfc01dc8e",
+   "base": "interlocked-claws-easier-i00",
+   "input": "inputs/17d4ea905cb3385fd27a2bb2c4c35e08809c71f4e0e7708904132f15102ccc26.npz",
+   "actions_sha256": "17d4ea905cb3385fd27a2bb2c4c35e08809c71f4e0e7708904132f15102ccc26",
+   "file_sha256": "66de84d39490d0f34e3a76538840489a853a9ee500b776462593bca463531193",
+   "rows": 30,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_e82eca5dfc01dc8e",
+     "mechanisms": [
+      "body_left_workspace",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 299.17189545193486,
+      "max_penetration_m": 0.0038878917380632642,
+      "max_rigid_angular_rad_s": 26.882284257522322,
+      "max_rigid_linear_m_s": 4.917989361429114,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-easy-i00:a7ea825a4faf8ab6aeb5cf18f1da65ecb74070fbedad7ee8395a2aaac6166a3a",
+   "id": "L1_75fb934f83e5833b019713c3",
+   "base": "interlocked-claws-easy-i00",
+   "input": "inputs/a7ea825a4faf8ab6aeb5cf18f1da65ecb74070fbedad7ee8395a2aaac6166a3a.npz",
+   "actions_sha256": "a7ea825a4faf8ab6aeb5cf18f1da65ecb74070fbedad7ee8395a2aaac6166a3a",
+   "file_sha256": "5a448378f997f175668d57c6b95b466fb7c4fdd43b746087d1b0ea55f41448b6",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "75fb934f83e5833b019713c3",
+     "label": "interlocked-claws-easy-i00-q000000-a000-s00",
+     "mechanisms": [
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:d900e73dedf8e4c6f60aef79f8a0a338aeb9c2ec16a1fc31d51fa636a35aa561",
+   "id": "L12_matched_s2026100912",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/d900e73dedf8e4c6f60aef79f8a0a338aeb9c2ec16a1fc31d51fa636a35aa561.npz",
+   "actions_sha256": "d900e73dedf8e4c6f60aef79f8a0a338aeb9c2ec16a1fc31d51fa636a35aa561",
+   "file_sha256": "e0e77c001b1b4da63717a55fb78af877ddfd891a62963ccf049968692800ab47",
+   "rows": 120,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L12",
+     "id": "matched_s2026100912",
+     "label": "L12 matched claws failure search (20 setup + 100 random controls)"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:f718f20e667bfc5c59dc1c5cda03f1ec70bc347be16078782f5bc832f994ecb4",
+   "id": "L12_matched_s2026100913",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/f718f20e667bfc5c59dc1c5cda03f1ec70bc347be16078782f5bc832f994ecb4.npz",
+   "actions_sha256": "f718f20e667bfc5c59dc1c5cda03f1ec70bc347be16078782f5bc832f994ecb4",
+   "file_sha256": "2b045bde27234cccd206ccf8ac0d703d5881302720ac0da6c403ec503f96f2ab",
+   "rows": 120,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L12",
+     "id": "matched_s2026100913",
+     "label": "L12 matched claws failure search (20 setup + 100 random controls)"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:2f610e43dd9e1ecccadd1027c92e23875a2bb2e8cc113f3fc57f6e971f0cf8ee",
+   "id": "L1_0ea92fcdcdb24a881860788a",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/2f610e43dd9e1ecccadd1027c92e23875a2bb2e8cc113f3fc57f6e971f0cf8ee.npz",
+   "actions_sha256": "2f610e43dd9e1ecccadd1027c92e23875a2bb2e8cc113f3fc57f6e971f0cf8ee",
+   "file_sha256": "3954ad1b5eda51abdeacfc02c66f730beccb3ce99c6ea8ac34b502eeee265dac",
+   "rows": 11,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "0ea92fcdcdb24a881860788a",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s02",
+     "mechanisms": [
+      "contact_impulse",
+      "deep_penetration",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:f729002061a60e32d1f5a00fd0a07d79730dba13a05151978c444f3eea8f51ff",
+   "id": "L1_1d714647ecdc35fe69b7929f",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/f729002061a60e32d1f5a00fd0a07d79730dba13a05151978c444f3eea8f51ff.npz",
+   "actions_sha256": "f729002061a60e32d1f5a00fd0a07d79730dba13a05151978c444f3eea8f51ff",
+   "file_sha256": "cf998a8024e970237bbaf9e8a6212b1e8818bf33b61e210b514f3397e2df78e7",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "1d714647ecdc35fe69b7929f",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s01",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:16da5be530f409577a87492b22173a8a2bee9c0e19a3b3cc6dee047af235ef27",
+   "id": "L1_2d7333a7add86a47c177d786",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/16da5be530f409577a87492b22173a8a2bee9c0e19a3b3cc6dee047af235ef27.npz",
+   "actions_sha256": "16da5be530f409577a87492b22173a8a2bee9c0e19a3b3cc6dee047af235ef27",
+   "file_sha256": "517bcfd9a4a389c7fafe3c7e4ffe5d4890c1c5394af084b0f68d15045ef2d0e0",
+   "rows": 42,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "2d7333a7add86a47c177d786",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s04",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:bc6ab2598068e273890468973440ed41e57cabf59ae3543feb75fb64b9e7e94a",
+   "id": "L1_533abf7cb2122fba0ed3ce65",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/bc6ab2598068e273890468973440ed41e57cabf59ae3543feb75fb64b9e7e94a.npz",
+   "actions_sha256": "bc6ab2598068e273890468973440ed41e57cabf59ae3543feb75fb64b9e7e94a",
+   "file_sha256": "5cf306c5800b591231281b26d3a65255d21dd8d92186964a29fd06203d9e841e",
+   "rows": 9,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "533abf7cb2122fba0ed3ce65",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s03",
+     "mechanisms": [
+      "contact_impulse",
+      "deep_penetration",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:9e700db6b8511522292a2fd06179bf4d83fe72472e946183420beb170abbcda5",
+   "id": "L1_5b07f1bbe97162eb8cc0d458",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/9e700db6b8511522292a2fd06179bf4d83fe72472e946183420beb170abbcda5.npz",
+   "actions_sha256": "9e700db6b8511522292a2fd06179bf4d83fe72472e946183420beb170abbcda5",
+   "file_sha256": "8ed7945c02177524d94c80ab6e3f00bec3bd8ef9a74690a254625714afb71e74",
+   "rows": 567,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "5b07f1bbe97162eb8cc0d458",
+     "label": "interlocked-claws-hard-i00-q000000-a001-s00",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:1d5f3b660ad7674b59b9612ba99e702d5ccddaf33c4e5f90089c19ba55dc0cc8",
+   "id": "L1_63f75cdea3ed92fd327ada4b",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/1d5f3b660ad7674b59b9612ba99e702d5ccddaf33c4e5f90089c19ba55dc0cc8.npz",
+   "actions_sha256": "1d5f3b660ad7674b59b9612ba99e702d5ccddaf33c4e5f90089c19ba55dc0cc8",
+   "file_sha256": "064fe9936a4237e8ebe4b973c1a1cb78617ed5073a147e1d396c96671751fd9f",
+   "rows": 225,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "63f75cdea3ed92fd327ada4b",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s01",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:f03a44a449bd84675ad9b12c2e590e9c05dd5913cdfb4d91b4d6018a30ce488c",
+   "id": "L1_828710b904666694669fd5f6",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/f03a44a449bd84675ad9b12c2e590e9c05dd5913cdfb4d91b4d6018a30ce488c.npz",
+   "actions_sha256": "f03a44a449bd84675ad9b12c2e590e9c05dd5913cdfb4d91b4d6018a30ce488c",
+   "file_sha256": "11fe33cb21ea919f6a6a99344e7cd48609439123082a1005b106bee143542401",
+   "rows": 1750,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "828710b904666694669fd5f6",
+     "label": "interlocked-claws-hard-i00-q000002-a000-s01",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:6419c6cd42ee3d8b0fb20241c53db6da335bd92f37d769f920832cb78e0a340a",
+   "id": "L1_9e041c7890136fb268ef5506",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/6419c6cd42ee3d8b0fb20241c53db6da335bd92f37d769f920832cb78e0a340a.npz",
+   "actions_sha256": "6419c6cd42ee3d8b0fb20241c53db6da335bd92f37d769f920832cb78e0a340a",
+   "file_sha256": "51e503c116fc76920944bea123f031451ffb70227f7f88480f9135fbea89803e",
+   "rows": 8,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "9e041c7890136fb268ef5506",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s04",
+     "mechanisms": [
+      "deep_penetration",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:1d04be8da111cc157f5dba37718d0c2cf9ceb81d488d734628aa64efdcd5a717",
+   "id": "L1_b892059146ce6f3aaeefc8ba",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/1d04be8da111cc157f5dba37718d0c2cf9ceb81d488d734628aa64efdcd5a717.npz",
+   "actions_sha256": "1d04be8da111cc157f5dba37718d0c2cf9ceb81d488d734628aa64efdcd5a717",
+   "file_sha256": "83ff50bd6bc5333ba255e711e5cd3d90c3bba8204cd90a27be4512340fef4f3d",
+   "rows": 10,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "b892059146ce6f3aaeefc8ba",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s03",
+     "mechanisms": [
+      "contact_impulse",
+      "deep_penetration",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:d8bf755aa54f36655ad0cc7d3d0be9088a3a845274d27f3da6c2536542f1c77c",
+   "id": "L1_d7de6fdc1fce37cf75428b67",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/d8bf755aa54f36655ad0cc7d3d0be9088a3a845274d27f3da6c2536542f1c77c.npz",
+   "actions_sha256": "d8bf755aa54f36655ad0cc7d3d0be9088a3a845274d27f3da6c2536542f1c77c",
+   "file_sha256": "6e7ef738516c17dba4c52cb89832b8ff59de8beb103c97327ae729fb5a56dfdd",
+   "rows": 53,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "d7de6fdc1fce37cf75428b67",
+     "label": "interlocked-claws-hard-i00-q000000-a001-s01",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:a145accc3c94f10abd56d889dfb2930d215959dd8b2516d1cd095440cebe8c6e",
+   "id": "L1_f30dd0627fdff60901b26154",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/a145accc3c94f10abd56d889dfb2930d215959dd8b2516d1cd095440cebe8c6e.npz",
+   "actions_sha256": "a145accc3c94f10abd56d889dfb2930d215959dd8b2516d1cd095440cebe8c6e",
+   "file_sha256": "4048700a0949b7c9b089a5bc61071ef836804f6238220bdab6c470e88b880419",
+   "rows": 31,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "f30dd0627fdff60901b26154",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s00",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:d5996f2bae1c862b54b0216ded30f37872498f6fc7b0d48876ca27203185b3bc",
+   "id": "L1_f30e30cb4b0af56ac21dde24",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/d5996f2bae1c862b54b0216ded30f37872498f6fc7b0d48876ca27203185b3bc.npz",
+   "actions_sha256": "d5996f2bae1c862b54b0216ded30f37872498f6fc7b0d48876ca27203185b3bc",
+   "file_sha256": "2b98b86575ee3ac648aed2271f30d5d9c5ff484bade473048457f92a1d3ed7a8",
+   "rows": 8,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "f30e30cb4b0af56ac21dde24",
+     "label": "interlocked-claws-hard-i00-q000000-a000-s00",
+     "mechanisms": [
+      "contact_impulse",
+      "deep_penetration",
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:bf6cb254492c7880b27db5ecdea3e8ed2687e449c853175288eec06c92286574",
+   "id": "L8_claws_l1_executed60",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/bf6cb254492c7880b27db5ecdea3e8ed2687e449c853175288eec06c92286574.npz",
+   "actions_sha256": "bf6cb254492c7880b27db5ecdea3e8ed2687e449c853175288eec06c92286574",
+   "file_sha256": "dfdb95c09d0c95098c540b6bc3bd7a97ab5679de7aa71934ae994988be1983fa",
+   "rows": 60,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "d806af5ddc07df2f745eb119",
+     "label": "claws-hard-native-pull",
+     "mechanisms": [
+      "contact_impulse",
+      "rigid_explosion"
+     ]
+    },
+    {
+     "origin": "L8",
+     "id": "claws_l1_executed60",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    },
+    {
+     "origin": "L8",
+     "id": "stress_02333f1e685471f6",
+     "mechanisms": [
+      "body_left_workspace",
+      "rigid_angular_speed",
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 10762.236611520142,
+      "max_penetration_m": 0.004815031838661818,
+      "max_rigid_angular_rad_s": 68.45780967368188,
+      "max_rigid_linear_m_s": 7.721753446687145,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    },
+    {
+     "origin": "L8",
+     "id": "stress_b8f39ff4b56ee3d9",
+     "mechanisms": [
+      "body_left_workspace",
+      "rigid_angular_speed",
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 10762.236611520142,
+      "max_penetration_m": 0.004815031838661818,
+      "max_rigid_angular_rad_s": 68.45780967368188,
+      "max_rigid_linear_m_s": 7.721753446687145,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:98f9e584993db74aa262a4a7313f2a052183d83789532c846cfc22f3b09927f2",
+   "id": "L8_claws_native_full80",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/98f9e584993db74aa262a4a7313f2a052183d83789532c846cfc22f3b09927f2.npz",
+   "actions_sha256": "98f9e584993db74aa262a4a7313f2a052183d83789532c846cfc22f3b09927f2",
+   "file_sha256": "efe3aa009d82e84de07ab2b829bbfdd136eee2893a1c8b51dd58a37403b85c87",
+   "rows": 80,
+   "incident": true,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "claws_native_full80",
+     "mechanisms": null,
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:0172190ac8840185f7bc87cb6ce5d93febc838b3d5ac55a9be1faa84d9e4fb56",
+   "id": "L8_short_claws_d806af5ddc07df2f745eb119",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/0172190ac8840185f7bc87cb6ce5d93febc838b3d5ac55a9be1faa84d9e4fb56.npz",
+   "actions_sha256": "0172190ac8840185f7bc87cb6ce5d93febc838b3d5ac55a9be1faa84d9e4fb56",
+   "file_sha256": "8d162bbfbde9c94eed39c333e1f6c1db9caa8d726367618dfe6c2ccb3c00197d",
+   "rows": 3,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_61e45682b03f1050",
+     "mechanisms": [
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 29641.689399580337,
+      "max_penetration_m": 0.004705620971417269,
+      "max_rigid_angular_rad_s": 18.914339062246604,
+      "max_rigid_linear_m_s": 3.420635371704757,
+      "nonfinite": false
+     },
+     "historical_end": null
+    },
+    {
+     "origin": "L8",
+     "id": "short_claws_d806af5ddc07df2f745eb119",
+     "mechanisms": [
+      "rigid_linear_speed_spike",
+      "rigid_force_spike"
+     ],
+     "historical": null,
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:d72ecec5566030a2447f756d2ce6371cd12ae46177519665389f9af0ba7418e8",
+   "id": "L8_stress_6fe8a12747c858ab",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/d72ecec5566030a2447f756d2ce6371cd12ae46177519665389f9af0ba7418e8.npz",
+   "actions_sha256": "d72ecec5566030a2447f756d2ce6371cd12ae46177519665389f9af0ba7418e8",
+   "file_sha256": "48fe4c615ce551353a5d142bee2f0d4acb472b65c1d09767087945394db820dc",
+   "rows": 4,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_6fe8a12747c858ab",
+     "mechanisms": [
+      "deep_penetration",
+      "infra_ends_episode",
+      "rigid_angular_speed",
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 15200.849023109788,
+      "max_penetration_m": 0.010677813850220895,
+      "max_rigid_angular_rad_s": 95.4607146635084,
+      "max_rigid_linear_m_s": 10.310275091365437,
+      "nonfinite": false
+     },
+     "historical_end": "simulator_instability"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:aff5c55c31c74f8b874d059d85c378110bfc5df0be76f20b1eab5a8fde7b16c3",
+   "id": "L8_stress_c5bf9fdab9f06b39",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/aff5c55c31c74f8b874d059d85c378110bfc5df0be76f20b1eab5a8fde7b16c3.npz",
+   "actions_sha256": "aff5c55c31c74f8b874d059d85c378110bfc5df0be76f20b1eab5a8fde7b16c3",
+   "file_sha256": "3d1cee63ed98bcb884105ae67077898286f7ab71e29307d10dc644f13dc06a22",
+   "rows": 8,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_c5bf9fdab9f06b39",
+     "mechanisms": [
+      "rigid_angular_speed",
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 4291.729834189744,
+      "max_penetration_m": 0.005034413204368799,
+      "max_rigid_angular_rad_s": 106.50548487493487,
+      "max_rigid_linear_m_s": 11.553824070025382,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:a27386bb3e491349b200ca735224da15d55a45cf21c0457c98e161269fc2437f",
+   "id": "L8_stress_d27e2ad0fb9b1ff7",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/a27386bb3e491349b200ca735224da15d55a45cf21c0457c98e161269fc2437f.npz",
+   "actions_sha256": "a27386bb3e491349b200ca735224da15d55a45cf21c0457c98e161269fc2437f",
+   "file_sha256": "cefb33fdb3b49eeb7ab657fa735982eb4c2e45e45105e07e9c211999a0607177",
+   "rows": 4,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_d27e2ad0fb9b1ff7",
+     "mechanisms": [
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 29641.689399580337,
+      "max_penetration_m": 0.004705620971417269,
+      "max_rigid_angular_rad_s": 26.949068829575296,
+      "max_rigid_linear_m_s": 4.809329095256895,
+      "nonfinite": false
+     },
+     "historical_end": null
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-hard-i00:d0d4afb8cb53b0cc8bb9acae1caa3d3a8c4d9aae9f26f5cd3912e499da5c2807",
+   "id": "L8_stress_f201a903b1c8c98a",
+   "base": "interlocked-claws-hard-i00",
+   "input": "inputs/d0d4afb8cb53b0cc8bb9acae1caa3d3a8c4d9aae9f26f5cd3912e499da5c2807.npz",
+   "actions_sha256": "d0d4afb8cb53b0cc8bb9acae1caa3d3a8c4d9aae9f26f5cd3912e499da5c2807",
+   "file_sha256": "b5fc08638dee6ad2303061a40800f35d7f5eacc03d68ac42a854ca915e5ede7d",
+   "rows": 25,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_f201a903b1c8c98a",
+     "mechanisms": [
+      "body_left_workspace",
+      "rigid_contact_force_amplification",
+      "rigid_linear_speed"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 17434.51815842221,
+      "max_penetration_m": 0.004726620405964383,
+      "max_rigid_angular_rad_s": 50.76494948715186,
+      "max_rigid_linear_m_s": 7.875083647698595,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-medium-i00:9577bfa196005cc557eb9de5dfe0bb10c71f7d6b3bb1ea953592abaf2e2ebdf4",
+   "id": "L1_c4ef506d156afd6452b3df41",
+   "base": "interlocked-claws-medium-i00",
+   "input": "inputs/9577bfa196005cc557eb9de5dfe0bb10c71f7d6b3bb1ea953592abaf2e2ebdf4.npz",
+   "actions_sha256": "9577bfa196005cc557eb9de5dfe0bb10c71f7d6b3bb1ea953592abaf2e2ebdf4",
+   "file_sha256": "694bfd305e775673eda6e5525488dc024665918f1f0c5141e0ba73a98f8ca01a",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "c4ef506d156afd6452b3df41",
+     "label": "interlocked-claws-medium-i00-q000000-a000-s00",
+     "mechanisms": [
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-medium-i00:99f95af707371e0f1a4ab604b483e44204a542ff703b312dc9291ceabed3f7d9",
+   "id": "L8_stress_7510a1832ff72f76",
+   "base": "interlocked-claws-medium-i00",
+   "input": "inputs/99f95af707371e0f1a4ab604b483e44204a542ff703b312dc9291ceabed3f7d9.npz",
+   "actions_sha256": "99f95af707371e0f1a4ab604b483e44204a542ff703b312dc9291ceabed3f7d9",
+   "file_sha256": "c7ee8d019fa902fc79c92697d1dc40562bdf2353bdfcf27f109b0fba2d8d31de",
+   "rows": 682,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_7510a1832ff72f76",
+     "mechanisms": [
+      "body_left_workspace"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 113.19262635859822,
+      "max_penetration_m": 0.0012286308044985273,
+      "max_rigid_angular_rad_s": 15.122173281899606,
+      "max_rigid_linear_m_s": 2.134992328998295,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-medium-i00:ea54852b08d6f93cf8c1d3ba665098a1bb262d544930c76f8338382a5c8d3c0b",
+   "id": "L8_stress_971581e13285952a",
+   "base": "interlocked-claws-medium-i00",
+   "input": "inputs/ea54852b08d6f93cf8c1d3ba665098a1bb262d544930c76f8338382a5c8d3c0b.npz",
+   "actions_sha256": "ea54852b08d6f93cf8c1d3ba665098a1bb262d544930c76f8338382a5c8d3c0b",
+   "file_sha256": "4ac50842fbbf47d6c0ca9ad8100ad670cb4337e3f36f7332a82f272ee166ea36",
+   "rows": 644,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_971581e13285952a",
+     "mechanisms": [
+      "body_left_workspace"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 167.42449036915562,
+      "max_penetration_m": 0.001033484557861721,
+      "max_rigid_angular_rad_s": 21.998146592460117,
+      "max_rigid_linear_m_s": 2.1073900102096403,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-very-easy-i00:fb6d317d726c65835a3bc8f35c1fb37f035c10071838a057396e9a3e80ae9564",
+   "id": "L1_8029d9c40faa7cf3c401b6cb",
+   "base": "interlocked-claws-very-easy-i00",
+   "input": "inputs/fb6d317d726c65835a3bc8f35c1fb37f035c10071838a057396e9a3e80ae9564.npz",
+   "actions_sha256": "fb6d317d726c65835a3bc8f35c1fb37f035c10071838a057396e9a3e80ae9564",
+   "file_sha256": "13e076ab495a29c4830586176149220d9d3ba74bc55ad89b14bc0ee4733f0f42",
+   "rows": 800,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L1",
+     "id": "8029d9c40faa7cf3c401b6cb",
+     "label": "interlocked-claws-very-easy-i00-q000000-a000-s01",
+     "mechanisms": [
+      "rigid_explosion"
+     ]
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-very-easy-i00:6743bf79ce55dc65d957460bb8031273e5619e8cd0d82f154a1229556d2b469b",
+   "id": "L8_stress_47d96b861916fd73",
+   "base": "interlocked-claws-very-easy-i00",
+   "input": "inputs/6743bf79ce55dc65d957460bb8031273e5619e8cd0d82f154a1229556d2b469b.npz",
+   "actions_sha256": "6743bf79ce55dc65d957460bb8031273e5619e8cd0d82f154a1229556d2b469b",
+   "file_sha256": "a557475ef3e8f49db96ed678cd51e0dd8bd8b420d42a9e537c5e6d5472e576eb",
+   "rows": 418,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_47d96b861916fd73",
+     "mechanisms": [
+      "body_left_workspace"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 121.64130112787831,
+      "max_penetration_m": 0.0018699493706600644,
+      "max_rigid_angular_rad_s": 27.70422124405846,
+      "max_rigid_linear_m_s": 0.9289687329672952,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  },
+  {
+   "key": "interlocked-claws-very-easy-i00:76d4c03d16080bba36218d4d11205d3b8b26ba0618cfd1518a05663a4b4f7e30",
+   "id": "L8_stress_59bcf535abb847fd",
+   "base": "interlocked-claws-very-easy-i00",
+   "input": "inputs/76d4c03d16080bba36218d4d11205d3b8b26ba0618cfd1518a05663a4b4f7e30.npz",
+   "actions_sha256": "76d4c03d16080bba36218d4d11205d3b8b26ba0618cfd1518a05663a4b4f7e30",
+   "file_sha256": "d967223616c7bafb8f4f2e0d89f5675d5e312c174981f74d338eafca5d43ce68",
+   "rows": 324,
+   "incident": false,
+   "sources": [
+    {
+     "origin": "L8",
+     "id": "stress_59bcf535abb847fd",
+     "mechanisms": [
+      "body_left_workspace"
+     ],
+     "historical": {
+      "fault": false,
+      "max_contact_force_n": 118.98367866530452,
+      "max_penetration_m": 0.006820751284092968,
+      "max_rigid_angular_rad_s": 19.075646101966633,
+      "max_rigid_linear_m_s": 1.791554386701886,
+      "nonfinite": false
+     },
+     "historical_end": "A task body fell below the table"
+    }
+   ]
+  }
+ ],
+ "skipped": [
+  {
+   "id": "0227b9055af6cb3e45b485d8",
+   "origin": "L1",
+   "base": "fiber-bundling-hard-i00",
+   "reason": "instance out of scope"
+  },
+  {
+   "id": "a2b4fc2fbf0fc46ff0367bdb",
+   "origin": "L1",
+   "base": "fiber-bundling-hard-i00",
+   "reason": "instance out of scope"
+  },
+  {
+   "id": "fiber_pad_backing_collision_geometry",
+   "origin": "L8",
+   "base": "fiber-bundling-very-easy-i00",
+   "reason": "No explicit saved action locator; procedural adapter inventory only"
+  },
+  {
+   "id": "stress_bb46f7b07e30f105",
+   "origin": "L8",
+   "base": "fiber-bundling-hard-i00",
+   "reason": "instance out of scope"
+  }
+ ]
+}

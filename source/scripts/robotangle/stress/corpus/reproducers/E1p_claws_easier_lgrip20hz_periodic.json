@@ -1,0 +1,12 @@
+{
+ "name": "E1p_claws_easier_lgrip20hz_periodic",
+ "base": "interlocked-claws-easier-i00",
+ "family": "interlocked_claws",
+ "mechanism": "E1 found on CPU by the periodic strategy (search protocol 3, seed 97002, episode 18): the left gripper alone as a 20 Hz square wave between 0.0185 and 0.0290 for 11.9 s, every other target at birth; the finger-coupling joint equality pumps the global books to 0.102 J at tick 4754 (energy created 0.165 J, no contact pair above 0 J net)",
+ "found_on_commit": "0cc192ac2",
+ "configuration": null,
+ "rows": 516,
+ "core_rows": null,
+ "sha256": "216ad638ed543ddf4ede50a6c329a341aac60bfcba188fad357be9f4280ff411",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

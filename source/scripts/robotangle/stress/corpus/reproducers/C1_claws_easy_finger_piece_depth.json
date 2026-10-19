@@ -1,0 +1,12 @@
+{
+ "name": "C1_claws_easy_finger_piece_depth",
+ "base": "interlocked-claws-easy-i00",
+ "family": "interlocked_claws",
+ "mechanism": "an ALOHA finger driven through a claw piece (round CL6 on b1ec43997, claws v6, easy, periodic e38; the 86-control stream as found): left/right_finger_link presses 11.3 mm into piece_0 at tick 850 (the observer's peak force 701 N), the normal force alternating ~6-10 N / ~100 N per substep while the depth grows 8.1 -> 11.3 mm in 5 ms; the Session ends with simulator_instability. Energy clean (X 0.000 J, pair +0.043 J). BREAKDOWN on b1ec43997 (final state 1371e6dedbf31c4d, two fresh processes + the round's confirmation). Contact: solref (0.00125, 2), solimp (0.9, 0.99, 0.001, 0.5, 2)",
+ "found_on_commit": "b1ec43997",
+ "configuration": null,
+ "rows": 86,
+ "core_rows": 86,
+ "sha256": "fd0c4689dbb0945ee32e4f4d24a6cd5acd1ba36a2cbfb98cae487d3c753c0c81",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

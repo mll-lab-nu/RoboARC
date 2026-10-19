@@ -1,0 +1,12 @@
+{
+ "name": "G11_buzz_hard_springlink_wire",
+ "base": "buzz-wire-3d-hard-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "a frictionless Robotiq spring link on the wire (GPU search bz5g1 on a0b4dddef, hard, top000_b2_e307: hard_s1's cut 5 then search rows; shrunk to 1038 rows + 40 hold): the r85_left_spring_link-wire pair gives +1.54 J (F5-local: X rose 0.68 J in 0.1 s, X+S 0.97 J; force 6.0 kN); global X 0.004 J. BREAKDOWN on a0b4dddef and 0f8654a49 (final state 469f1ae672dbf2d7 in two fresh processes each); VIOLENT on b1ec43997 (the exact constraint diagonal, DIAGEXACT; f36d96a8bcc16eff, pair +0.23 J)",
+ "found_on_commit": "a0b4dddef",
+ "configuration": null,
+ "rows": 1078,
+ "core_rows": 1038,
+ "sha256": "79aafe4308d82b88d97e1eec5478a86a98f9d4d69f256e2198d5d354cec8bd3e",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

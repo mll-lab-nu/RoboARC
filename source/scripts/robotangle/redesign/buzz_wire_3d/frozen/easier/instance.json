@@ -1,0 +1,302 @@
+{
+ "task": "buzz_wire_3d",
+ "topogym_task": "buzz_wire_3d",
+ "variation_id": "buzz_wire_3d_rd_easier",
+ "seed": 0,
+ "eval_index": null,
+ "text": "Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them, so you can hang the wand there and take a new grip. The final bend and the post at the finish are insulated as well; the wand may slide down the post to the deck before you set its final pose.\n\n## Success requirements\n\n- Start within 10 mm along the wire from its starting end and traverse continuously until within 10 mm of its finishing end. Keep one unambiguous wire crossing inside the loop. Skipping branches or taking the loop off the route before completing traversal does not count; restart from the beginning if tracking is lost.\n- After completing traversal, lower the tool onto the finish support. The completed traversal remains valid when the loop leaves the wire to rest on the support.\n- Match the finish resting pose within 5 mm and 10 degrees. A half-turn about the handle axis is an equivalent orientation. The tool must actually contact the finish support.\n- Keep all metal parts of the tool clear of the metal wire throughout the episode. Wooden-handle contact is not a metal-wire failure. Remove all robot contact before final confirmation.\n- Release all target parts and disengage any assisted grasp. Withdraw the robot until there is at least 5 mm of verified clearance from every target part; opening the fingers while still touching or surrounding the target is insufficient.\n- During confirmation, every target point or rigid body's linear speed must be at most 1 mm/s and its displacement from the start of confirmation at most 1 mm. Each target rigid body's angular speed must be at most 0.02 rad/s and angular drift at most 0.02 rad.\n- Keep all final conditions satisfied together for at least 1 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.\n\n## Task failure conditions\n\n- Any metal-tool touch of the metal wire ends the episode in failure, including brief or zero-force touches.\n- The tool falling more than 100 mm below the tabletop ends the episode in failure.",
+ "simulator": {
+  "task_id": "buzz_wire_3d",
+  "robot_id": "panda_robotiq",
+  "variation_id": "buzz_wire_3d_rd_easier",
+  "task_parameters": {},
+  "compute_backend": "cpu",
+  "precision": "64",
+  "physics_dt_s": 0.0025,
+  "solver_substeps": 4,
+  "terminal_contract_version": 1,
+  "control_decimation": 10,
+  "max_physics_steps": null,
+  "history_storage": "segment",
+  "reset_physics_steps": 0,
+  "rigid_options": {},
+  "ipc_options": {},
+  "ipc_settled_state": null,
+  "enable_rgb": true,
+  "enable_depth": true,
+  "observation_mode": "JOINT",
+  "control_mode": "JOINT_ABS",
+  "enable_privileged": true,
+  "seed": 0,
+  "render_backend": "nyx",
+  "asset_root": null,
+  "work_dir": null,
+  "grasp_assist": {
+   "model": "contact_weld_v1",
+   "targets": [
+    {
+     "entity": "wand",
+     "link": "wand",
+     "center_m": [
+      0.04374599999999999,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.025
+    }
+   ],
+   "stable_time_s": 0.02,
+   "max_tcp_distance_m": 0.06,
+   "max_penetration_m": 0.002,
+   "max_translation_error_m": 0.01,
+   "max_rotation_error_rad": 0.15,
+   "max_finger_opening_fraction": 0.15,
+   "intent_deadband": 0.002,
+   "initial_intent": "open"
+  },
+  "physics_engine": "mujoco",
+  "mujoco_scene": "instance_assets/mujoco",
+  "mujoco_birth": null,
+  "mujoco_settled_state": null,
+  "mujoco_profile": null
+ },
+ "state_sha": "0c44ba0acfa39229",
+ "action_dim": 8,
+ "action_layout": [
+  "joint1",
+  "joint2",
+  "joint3",
+  "joint4",
+  "joint5",
+  "joint6",
+  "joint7",
+  "arm_native_gripper"
+ ],
+ "gripper_space": "native",
+ "control_hz": 40.0,
+ "backend": "cuda",
+ "reset_joint_targets": [
+  0.0,
+  0.392699,
+  0.0,
+  -1.963495,
+  0.0,
+  2.356194,
+  -0.785398,
+  0.0
+ ],
+ "objects": {
+  "wand": {
+   "position": [
+    -0.11986,
+    -0.50968,
+    1.0641
+   ],
+   "orientation_wxyz": [
+    0.739378,
+    0.01981,
+    -0.021775,
+    0.672647
+   ],
+   "euler_xyz": [
+    0.0,
+    -0.05888,
+    1.47635
+   ],
+   "bounds": [
+    [
+     -0.13225,
+     -0.52211,
+     1.06211
+    ],
+    [
+     -0.10748,
+     -0.45189,
+     1.07098
+    ]
+   ],
+   "size": [
+    0.02477,
+    0.07022,
+    0.00886
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": false
+  },
+  "wire": {
+   "position": [
+    -0.1,
+    -0.3,
+    0.91964
+   ],
+   "orientation_wxyz": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bounds": [
+    [
+     -0.32415,
+     -0.51368,
+     1.06214
+    ],
+    [
+     -0.11586,
+     -0.09408,
+     1.28683
+    ]
+   ],
+   "size": [
+    0.20829,
+    0.4196,
+    0.22469
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": true
+  },
+  "wire_base": {
+   "position": [
+    -0.1,
+    -0.3,
+    0.92839
+   ],
+   "orientation_wxyz": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bounds": [
+    [
+     -0.41,
+     -0.525,
+     0.91964
+    ],
+    [
+     0.21,
+     -0.075,
+     1.30126
+    ]
+   ],
+   "size": [
+    0.62,
+    0.45,
+    0.38161
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": true
+  }
+ },
+ "instance_contract_version": 2,
+ "soft_state": {},
+ "asset_identity": {
+  "base.urdf": "a1589fa4466a5878b367eb072a3c3db118c9a7071d1c2da555d45887bfb4bc7d",
+  "base_collision_0.obj": "e914d060f29fc0289892c27ac0c52820ec78df0843123b170cb8b5d3baf8faba",
+  "base_collision_1.obj": "e688d18e2dfd34bb0b5c6bf20f3777a663291f6c337c8901356c8be03a953b20",
+  "base_collision_2.obj": "fc42c07ca4bfcd749c3009beb7bc474e88f6d2f3282195c2d2f727ed927a2ef2",
+  "base_collision_3.obj": "b17d3737468fc26e17435beb4611b94f54ceff400fe13b4bef9bfaf663991052",
+  "base_collision_4.obj": "7fd01497e992d6696dc7a90a9e2317c0f67ba91a4b833cf68e2ad45660f8ccf4",
+  "base_collision_5.obj": "e4a5c8a4406158171d87e108a1dfbdfbbf85ca1e4dd66d655dd642cec1074aff",
+  "base_visual.glb": "d0d869c03537ea593cdb5db4161eefd96b5409645badfef42eb9b9ff6856bb99",
+  "base_wood.glb": "ccc47bf788f6ed0f0464618491de4fa0f340239b3ceb047d60c495398c65d5fa",
+  "geometry_report.json": "44fdb78a59fb09adaf11b9baaf09aed9cccdc1933a873827ebc2b94a27597526",
+  "handle_wood.glb": "044a66b7de91f2d2f9bb72846fd0a20539b7133386e65e5786f6493af992f023",
+  "obstacles_wood.glb": "ef2b74fd2a82ef1a8edc0c126bd9256d58fbe73699b8d44dc02f90cfd3ab7a1c",
+  "posts_wood.glb": "84542bc82e61579d2632cfe5a11b3eecbcb627d138d4ce2e4173e6bdd473ecaf",
+  "rail_metal.glb": "37baadb4cb3cabfd458e24f34c7880568f5f1366fd1f8715847aa4aaa3e184c9",
+  "reference_path.npz": "9431a982521ad3c3793137e110bb2deade91a2a0c05018079074e14d16ca787e",
+  "rest_sleeves.glb": "ed00d6e8b376d065a59dbd3ee8d56ca19b436da6c9f0e0b53af3f28305502933",
+  "ring_steel.glb": "e7132f2cfccb8542ffadc84d0c9f9c4a72b2161ca9dff43229831e89edaaac48",
+  "scene_preset.json": "a92ec3cd33bd43a53b600c1ccb6200e8fcc472763956a028ff7f4676cc558faf",
+  "sha256.json": "115092122941007450b74146e28b7a3d6512a8896ac65aaf26d1e7be3a563df3",
+  "wand.urdf": "d06ff28c62ddb4e234ce5a6acd184c74363db41d583ac976ffde271be54208c9",
+  "wand_visual.glb": "d53fcbc981b402eeca75a34f2e88da75453453a8d8d34436ce3e363a1afc3013",
+  "wire.urdf": "771e318ab4cf151e678106b569be9d1b962d7bdd51c95269919286e1ada28bd9",
+  "wire_visual.glb": "65fe55b1bda79f2d85a9f2dca03fccb2a083df36e4700acfb126cffd8d530f87"
+ },
+ "physics_engine": "mujoco",
+ "mujoco_version": "3.14.0",
+ "topogym_source": {},
+ "resolved_variation_id": "buzz_wire_3d_rd_easier",
+ "scene_variation": null,
+ "effective_task_parameters": {
+  "geometry": {
+   "horizontal_scale": 0.7,
+   "depth_scale": 0.7,
+   "height_scale": 0.7,
+   "base_size_m": [
+    0.826,
+    0.574,
+    0.045
+   ]
+  },
+  "center_xy_m": [
+   -0.1,
+   -0.3
+  ],
+  "stable_duration_s": 1.0,
+  "terminal": {
+   "finish_position_tolerance_m": 0.005,
+   "finish_angle_tolerance_deg": 10.0,
+   "maximum_speed_m_s": 0.001,
+   "maximum_angular_speed_rad_s": 0.02,
+   "start_route_tolerance_m": 0.01,
+   "route_progress_tolerance_m": 0.003
+  },
+  "wood_tint": 1.0,
+  "rail_rgb": [
+   0.72,
+   0.33,
+   0.16
+  ],
+  "linear_scale": 1.0,
+  "base_elevation_m": 0.125,
+  "scene_preset_id": "lab_tasks_v1"
+ },
+ "public_goal": {
+  "schema_version": 1,
+  "task_id": "buzz_wire_3d",
+  "variation_id": "buzz_wire_3d_rd_easier",
+  "seed": 0,
+  "terminal_revision": "terminal_v4_traversal_then_deck_release",
+  "summary": "Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support.",
+  "stable_duration_s": 1.0,
+  "success_conditions": [
+   "Start within 10 mm along the wire from its starting end and traverse continuously until within 10 mm of its finishing end. Keep one unambiguous wire crossing inside the loop. Skipping branches or taking the loop off the route before completing traversal does not count; restart from the beginning if tracking is lost.",
+   "After completing traversal, lower the tool onto the finish support. The completed traversal remains valid when the loop leaves the wire to rest on the support.",
+   "Match the finish resting pose within 5 mm and 10 degrees. A half-turn about the handle axis is an equivalent orientation. The tool must actually contact the finish support.",
+   "Keep all metal parts of the tool clear of the metal wire throughout the episode. Wooden-handle contact is not a metal-wire failure. Remove all robot contact before final confirmation.",
+   "Release all target parts and disengage any assisted grasp. Withdraw the robot until there is at least 5 mm of verified clearance from every target part; opening the fingers while still touching or surrounding the target is insufficient.",
+   "During confirmation, every target point or rigid body's linear speed must be at most 1 mm/s and its displacement from the start of confirmation at most 1 mm. Each target rigid body's angular speed must be at most 0.02 rad/s and angular drift at most 0.02 rad."
+  ],
+  "failure_conditions": [
+   "Any metal-tool touch of the metal wire ends the episode in failure, including brief or zero-force touches.",
+   "The tool falling more than 100 mm below the tabletop ends the episode in failure."
+  ]
+ },
+ "evaluable_for_task_success": true,
+ "success_rule": "task-native success (goal_complete True; frozen parameters; terminal revision terminal_v4_traversal_then_deck_release)"
+}

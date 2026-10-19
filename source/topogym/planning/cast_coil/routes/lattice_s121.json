@@ -1,0 +1,124 @@
+{
+ "schema_version": 1,
+ "geometry": "variations/cast_coil/lattice_s121.json",
+ "geometry_sha256": "48fb72d4a472ae22c1dcbdd5b26c01891a3b99a767ac14a06ee1172b1ead213a",
+ "description": "The shortest assembly of variations/cast_coil/lattice_s121.json (13 constrained actions, turns about x, y and z; the last slide's final 2 cells are free), as a disassembly of silver relative to gold in gold's frame and cell units; assembly is the route played backwards. anchor, carry and pregrasp_rise_m set how the oracle executes it: both arms place the pair, a joint-space carry, a 6 cm descent before the grasp.",
+ "route": [
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    3.5,
+    0.0,
+    2.5
+   ],
+   "degrees": -90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    2.5,
+    0.0,
+    2.5
+   ],
+   "degrees": -90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "z",
+   "through": [
+    3.0,
+    2.0,
+    0.0
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "x",
+   "through": [
+    0.0,
+    3.5,
+    1.5
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    -5.0
+   ]
+  }
+ ],
+ "anchor": "arms",
+ "carry": "joint",
+ "pregrasp_rise_m": 0.06,
+ "source": "design search ik_search2 (seed 121, rank 1; rank 0's carry passed the pieces through each other); MuJoCo physics success in runs/test_results/cast_coil_v2_design_candidates_20261010/s121_r1 (32967 control steps, observer CLEAN)"
+}

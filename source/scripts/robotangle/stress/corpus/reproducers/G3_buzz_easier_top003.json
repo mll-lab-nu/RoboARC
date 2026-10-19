@@ -1,0 +1,13 @@
+{
+ "name": "G3_buzz_easier_top003",
+ "base": "buzz-wire-3d-easier-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "gpusearch bz1 top003_b1_e1606 (shrunk): energy_created(local) X rose 0.79J in 0.1 s, X+S 298.58J, contact ('right_finger', 'wire::wire') gave 32.71J @tick 372; triggers force 211529",
+ "found_on_commit": "19bee571e",
+ "configuration": null,
+ "rows": 72,
+ "core_rows": 32,
+ "sha256": "c8b6cdbe41408a4e73bcd139f96d3d8bfbf10e42b74cb683f88fa40d10b0add6",
+ "source": "/workspace/mj/gpusearch/repro/bz1/buzz-wire-3d-easier-i00__top003_b1_e1606.npz",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

@@ -1,0 +1,12 @@
+{
+ "name": "M1c_claws_medium_selfcollision_clamped",
+ "base": "interlocked-claws-medium-i00",
+ "family": "interlocked_claws",
+ "mechanism": "robot self-collision (forearm or upper arm into the gripper base): energy created",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 113,
+ "core_rows": 73,
+ "sha256": "42b0355f6bc3ab63af6d12b9d53b3a67a3502fe4474a8c99a19f200aef4c9196",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

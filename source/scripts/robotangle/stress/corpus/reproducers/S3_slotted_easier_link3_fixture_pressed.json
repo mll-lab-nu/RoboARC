@@ -1,0 +1,12 @@
+{
+ "name": "S3_slotted_easier_link3_fixture_pressed",
+ "base": "slotted-post-ring-easier-i00",
+ "family": "slotted_post_ring",
+ "mechanism": "a prefix branch of the easier -i01 reference (search prefix, seed 9103, episode 0 on the armature-1e-6 instance abb49f48c87259c0, build 315526e0be): the hand drives the chain's link_003 into the fixture (slotted_chain::world) 12.3 mm deep; the contact creates 3.99 J (X rose 1.50 J in 0.1 s) at tick 5972, the chain at 7.6 m/s and 367 rad/s. BREAKDOWN on armature 1e-6 in two fresh processes (final state b48c268cebb8b3c4); VIOLENT (3.1 m/s, 1.5 mm, no creation) on armature 1e-5 (5406216a1a, birth 88c14ec362546ea4) in two fresh processes (final state 94f2d2b0422e6125). Same class as Jianwen's prefix4_e20 (slotted easier, 88f0d3773).",
+ "found_on_commit": "315526e0be (slotted_chain108_v2, armature 1e-6)",
+ "configuration": null,
+ "rows": 754,
+ "core_rows": 754,
+ "sha256": "8d9db913e4fadf233db06d2eda229e5f285a456472baa9e8491b8740a4376c7c",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

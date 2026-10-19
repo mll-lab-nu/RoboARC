@@ -1,0 +1,203 @@
+{
+ "note": "RoboARC V2: the Harbor records of the references this release ships new or changed in a base it already released (release_rebuild.py writes each as that base's release.json evidence, without `provenance`). A new or changed reference without a record here is `not_run`: no score is claimed. The four new bases (knot-untying-06/09-i01, blanket-flatten-07/08-i01) get theirs from their Harbor runs on the 0.2.0 image. RoboARC V3 (0.2.1): blanket-fold-05-i01's new reference (both modes) from its Harbor run on 0.2.0; the three new bases (orbits-02-i01, knot-untying-07-i01, blanket-flatten-09-i01) are not_run here, their Harbor runs on 0.2.1 are the release's evidence.",
+ "bases": {
+  "buzz-wire-3d-09-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0 (9c5f3a616846), reward 1, live end = replay end; its record in dev/speedrule-refs-main 31f7a28beb scripts/roboarc/release.json"
+   }
+  },
+  "fiber-bundling-07-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0 (9c5f3a616846), reward 1, live end = replay end; its record in dev/speedrule-refs-main 31f7a28beb scripts/roboarc/release.json"
+   }
+  },
+  "fiber-bundling-08-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0 (9c5f3a616846), reward 1, live end = replay end; its record in dev/speedrule-refs-main 31f7a28beb scripts/roboarc/release.json"
+   }
+  },
+  "fiber-bundling-09-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0 (9c5f3a616846), reward 1, live end = replay end; its record in dev/speedrule-refs-main 31f7a28beb scripts/roboarc/release.json"
+   }
+  },
+  "fiber-bundling-10-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0 (9c5f3a616846), reward 1, live end = replay end; its record in dev/speedrule-refs-main 31f7a28beb scripts/roboarc/release.json"
+   }
+  },
+  "interlocked-claws-12-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0 (9c5f3a616846), reward 1, live end = replay end; its record in dev/speedrule-refs-main 31f7a28beb scripts/roboarc/release.json"
+   }
+  },
+  "rope-threading-04-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0, reward 1, live_success = replay_success = deterministic = 1, live sha = replay sha = the end state (rope agent, 2026-10-14, job rope04-pbc6)"
+   }
+  },
+  "rope-threading-05-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0, reward 1, live_success = replay_success = deterministic = 1, live sha = replay sha = the end state (rope agent, 2026-10-14, job rope05-pbm)"
+   }
+  },
+  "rope-threading-06-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0, reward 1, live_success = replay_success = deterministic = 1, live sha = replay sha = the end state (rope agent, 2026-10-14, job rope06-pbc6)"
+   }
+  },
+  "rope-threading-07-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0, reward 1, live_success = replay_success = deterministic = 1, live sha = replay sha = the end state (rope agent, 2026-10-14, job rope07-fast2)"
+   }
+  },
+  "rope-threading-08-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor standard oracle on eai-roboarc:0.1.0, reward 1, live_success = replay_success = deterministic = 1, live sha = replay sha = the end state (rope agent, 2026-10-14, job rope08-f2c4)"
+   }
+  },
+  "buzz-wire-3d-03-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.1.0 (9c5f3a616846), all_success / deterministic / instance_exact 1 (missing-refs agent, 2026-10-14, run easy1; task dirs of missing-refs-render)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.1.0 (9c5f3a616846), all_success / deterministic / instance_exact 1 (missing-refs agent, 2026-10-14, run easy1; task dirs of missing-refs-render)"
+   }
+  },
+  "buzz-wire-3d-04-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.1.0 (9c5f3a616846), all_success / deterministic / instance_exact 1 (missing-refs agent, 2026-10-14, run medium1; task dirs of missing-refs-render)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.1.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.0 adds speed cuts in the simulator's host code only; its physics is bit-identical)",
+    "source": "37aa7ac0",
+    "tooling": "d8692e15",
+    "date": "2026-10-14",
+    "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.1.0 (9c5f3a616846), all_success / deterministic / instance_exact 1 (missing-refs agent, 2026-10-14, run medium1; task dirs of missing-refs-render)"
+   }
+  },
+  "blanket-fold-05-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.2.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.1 differs only by the EPA-patched libmujoco.so; every reference reaches its recorded end state on it)",
+    "source": "c9171f79",
+    "tooling": "d8692e15",
+    "date": "2026-10-18",
+    "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.2.0 (b971ca472d33), end 4f1b6724fc0a6512 live = replay, all_success / deterministic / instance_exact 1 (V3 fold-05 agent, 2026-10-18, host B harbor/h1, tree cd1d1351b9)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image eai-roboarc 0.2.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.1 differs only by the EPA-patched libmujoco.so; every reference reaches its recorded end state on it)",
+    "source": "c9171f79",
+    "tooling": "d8692e15",
+    "date": "2026-10-18",
+    "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.2.0 (b971ca472d33), end 4f1b6724fc0a6512 live = replay, all_success / deterministic / instance_exact 1 (V3 fold-05 agent, 2026-10-18, host B harbor/h1, tree cd1d1351b9)"
+   }
+  }
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "name": "S4_slotted_easier_link4_fixture_energy",
+ "base": "slotted-post-ring-easier-i00",
+ "family": "slotted_post_ring",
+ "mechanism": "a prefix branch of the easier -i01 reference (search prefix, seed 9101, episode 10 on the armature-1e-6 instance abb49f48c87259c0, build 315526e0be): the chain's link_004 pressed against the fixture (slotted_chain::world), 6.3 mm deep; the contact creates 0.27 J (X rose 0.30 J in 0.1 s) at tick 4060, the chain at 4.5 m/s. BREAKDOWN on armature 1e-6 in two fresh processes (final state b7b86024f2af39e2); CLEAN (0.93 m/s, 0.65 mm) on armature 1e-5 (5406216a1a, birth 88c14ec362546ea4) in two fresh processes (final state b4d8ac4f078d2e33).",
+ "found_on_commit": "315526e0be (slotted_chain108_v2, armature 1e-6)",
+ "configuration": null,
+ "rows": 441,
+ "core_rows": 441,
+ "sha256": "475919e93a68f3f38fe7f2d08c56f81af04868836acde091b96e2217a6db023f",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

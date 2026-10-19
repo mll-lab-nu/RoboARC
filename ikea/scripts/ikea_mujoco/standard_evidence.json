@@ -1,0 +1,519 @@
+{
+ "note": "Standard-mode evidence of the IKEA MuJoCo tasks under the standard rules (the agent's wall clock, robot frame, the robots' real joint-speed limits, live verdict = the grader's settled verdict (final_check)). Written from Harbor runs on the lab's RTX 4090 workstations (job names relative to the run directories). budget_pct_live = live service time / the wall clock of the run; the verifier's replays run after the agent's time.",
+ "lack": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305)",
+  "rows": 67697,
+  "sim_time_s": 169.24,
+  "service_time_s": 1277.0,
+  "live_sha": "684fe3c488e01d1ae35df2b976df470e71259d53b5e076df2079e2eff340fc6e",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 11.8,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_oracle/ikea-lack-i00-standard__TQJo9bt",
+    "note": "the hand-slew reference: live settled success at control step 67697 (17 calls), live end hash 684fe3c488e0 = the reference's, video 1; live service time 1277 s on the loaded host"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_nop/ikea-lack-i00-standard__B3pngp4",
+    "note": "video 1"
+   }
+  ],
+  "reference": {
+   "rows_in": 63697,
+   "rows_out": 67697,
+   "method": "clamp",
+   "steps_added": 0,
+   "rows_clamped": 0,
+   "max_abs_dev_rad": 0.0,
+   "despiked_rows": 0,
+   "speed": "robot",
+   "grip": "wait",
+   "gripper_wait_steps": 4000,
+   "gripper_slewed_steps": 0,
+   "max_step_rad": 0.006525000000003445,
+   "steps_over_limit": 0,
+   "gripper_steps_over_limit": 0,
+   "max_step_in_limits": 1.0
+  },
+  "live_checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-19_ikea_032/harbor/jobs/D_ls_oracle/ikea-lack-i00-standard__qnAQED4",
+    "note": "spot check of the 0.3.2 / 0.4.2 rebind (2026-10-19): live settled success at control step 67697, live end hash 684fe3c488e0 = the reference's, service time 733 s, video 1"
+   }
+  ]
+ },
+ "svallet": {
+  "date": "2026-10-16",
+  "host": "host A (RTX 4090; shared, loaded) (oracle), host B (nop), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB; built per host from one context: host B a466a594c463, host C 53d8800bfa22, host A 3f9218fb9864); the live, replay and settled hashes equal the 0.3.0 (EGL) run's",
+  "rows": 68000,
+  "sim_time_s": 170.0,
+  "service_time_s": 396.6,
+  "replay_wall_s": 352.6,
+  "live_sha": "0ff8067d19b81524b9a9e8e3f0770e7457355a561c9a880ac87b188bd5940e3a",
+  "replay_sha": [
+   "0ff8067d19b81524b9a9e8e3f0770e7457355a561c9a880ac87b188bd5940e3a",
+   "0ff8067d19b81524b9a9e8e3f0770e7457355a561c9a880ac87b188bd5940e3a"
+  ],
+  "settled_sha": [
+   "2322c6014de2e614d9eef972c9989d1f07be9ec253e3b8dcd5af7bbbcd82ba73",
+   "2322c6014de2e614d9eef972c9989d1f07be9ec253e3b8dcd5af7bbbcd82ba73"
+  ],
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 3.7,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host A n4/jobs/n4_short_oracle_b/ikea-svallet-i00-standard__3bmZ2fa",
+    "note": "sim 0.4.0 (Nyx): live settled success at control step 68000 (17 calls), both replays pass final_check() and end in the live state (live_matches_replay 1, deterministic 1), live end hash = the 0.3.0 run's; live service time 397 s, verifier replays 353 s"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B n4/jobs/n4_std_nop/ikea-svallet-i00-standard__Usq85e6"
+   }
+  ],
+  "reference": {
+   "rows_in": 65529,
+   "rows_out": 69414,
+   "method": "track",
+   "lag_rad": 0.1,
+   "steps_added": 3885,
+   "despiked_rows": 344,
+   "speed": "robot",
+   "max_step_rad": 0.00785397500000018,
+   "max_step_in_limits": 1.0,
+   "steps_over_limit": 0
+  }
+ },
+ "gladom": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode (#305)",
+  "rows": 184000,
+  "sim_time_s": 460.0,
+  "service_time_s": 4780.4,
+  "live_sha": "f45afdd206b444313eb6d176c2504fc77676c5197a00fea6842c8b4ac06fa0f9",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 44.3,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B harbor/jobs/A_std_oracle/ikea-gladom-i00-standard__dbVxvFF",
+    "note": "the hand-slew reference: live settled success at control step 184000 (46 calls), startup binding 700c53dd (instance_exact), video 1; live service time 4780 s on the loaded host"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B harbor/jobs/A_std_nop/ikea-gladom-i00-standard__VcDZqzW",
+    "note": "video 1"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/gladom/gladom.npz (build.py)",
+   "rows_out": 186611,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  }
+ },
+ "variera": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463)",
+  "rows": 243159,
+  "sim_time_s": 607.9,
+  "service_time_s": 4273.5,
+  "live_sha": "95134e1fbd5cf0f9d445c414d93f394a0ee1d6520421efca6d652f98513fd8ac",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 39.6,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B harbor/jobs/A_std_oracle/ikea-variera-i00-standard__QZAYZgq",
+    "note": "graded live (#305): live settled success at control step 243159 (61 calls, n_clipped 0 on every call), live end hash 95134e1fbd5c = the privileged replays'; live service time 4274 s on loaded host B; video 1"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B harbor/jobs/A_std_nop/ikea-variera-i00-standard__L9qLkE6",
+    "note": "video 1"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/variera/variera_ref.npz (build.py)",
+   "rows_out": 243159,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  }
+ },
+ "eket": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305)",
+  "rows": 83181,
+  "sim_time_s": 207.95,
+  "service_time_s": 1048.7,
+  "live_sha": "25be8deaa1fe0ad71371f1236c67e06837059508e50e146c806b6bb667180825",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 9.7,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_oracle/ikea-eket-i00-standard__MGJVfx3",
+    "note": "the hand-slew reference: live settled success at control step 83181 (21 calls), live end hash 25be8deaa1fe = the reference's, video 1; live service time 1049 s on the loaded host"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_nop/ikea-eket-i00-standard__ggc4r89",
+    "note": "video 1"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/eket/eket_ref.npz (build_ref.py, grip_wait)",
+   "rows_out": 83181,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  }
+ },
+ "ikea365": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305)",
+  "rows": 96000,
+  "sim_time_s": 240.0,
+  "service_time_s": 1285.0,
+  "live_sha": "3250d0d9de3183c01c173a59922d7a01151f59223272373ab7f3b15a35d0c548",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 11.9,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_oracle/ikea-ikea365-i00-standard__s9YWweP",
+    "note": "the hand-slew reference: live settled success at control step 96000 (24 calls), live end hash 3250d0d9de31 (a chunk end before the reference's last row), video 1; live service time 1285 s on the loaded host"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_nop/ikea-ikea365-i00-standard__4uCqfEn",
+    "note": "video 1"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/ikea365/ikea365_ref.npz (build_ref.py, grip_wait)",
+   "rows_out": 96747,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  }
+ },
+ "vesken": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 a466a594c463 (Nyx RGB)",
+  "rows": 388000,
+  "sim_time_s": 970.0,
+  "service_time_s": 1889.1,
+  "live_sha": "4b5b978b0d08969f1ac37117ebd32584abe84b9929703ecc34a5a33219896783",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 17.5,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-17_ikea_hs_vesken/harbor/jobs/hs_S_oracle/ikea-vesken-i00-standard__ANNyiJS",
+    "note": "graded by the live episode (#305): live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on loaded host B"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-17_ikea_hs_vesken/harbor/jobs/hs_S_nop/ikea-vesken-i00-standard__fUo7Wqi"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py",
+   "rows_out": 389504,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  }
+ },
+ "stegesund": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463)",
+  "rows": 376000,
+  "sim_time_s": 940.0,
+  "service_time_s": 1938.2,
+  "live_sha": "802cd7d68dcae4d66dd13dd0f721607667ef8258294687c62a43d0a72adcee47",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 17.9,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-17_ikea_hs_stegesund/harbor/jobs/A_std_oracle/ikea-stegesund-i00-standard__wJXgFBE",
+    "note": "graded live (#305): live settled success at control step 376000 (94 calls), live end hash 802cd7d68dca, video 1; live service time 1938 s"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-17_ikea_hs_stegesund/harbor/jobs/A_std_nop/ikea-stegesund-i00-standard__bcXcdCC",
+    "note": "video 1"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/stegesund/stegesund.npz (build.py)",
+   "rows_out": 379529,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  }
+ },
+ "stenerik": {
+  "date": "2026-10-17",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared) (oracle, nop) and host A (the same class; a second oracle), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, host B a466a594c463, host A 3f9218fb9864)",
+  "rows": 222600,
+  "sim_time_s": 556.5,
+  "service_time_s": 3671.8,
+  "live_sha": "a690aa1b973b3f102222e25e833f4f7cf18eab777619b680db92ff233797846b",
+  "settled_sha": [
+   "20a59284ab83ebe8b8ab7d28329073b89a7eb02bf653daecfd46a93ffe31d03f"
+  ],
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 34.0,
+  "checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B harbor/jobs/D_std_oracle/ikea-stenerik-i00-standard__nv9rW2f",
+    "note": "the final dir (with the Nyx start-up retry): live settled success at control step 215782 (54 calls), live end hash a02c9a18abca = both replays', live_matches_replay 1, deterministic 1, video 1; live service time 2958 s, verifier replays 2813 s"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B harbor/jobs/D_std_nop/ikea-stenerik-i00-standard__L6SZaSV",
+    "note": "the final dir; video 1"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B harbor/jobs/C_std_oracle/ikea-stenerik-i00-standard__EmRKr4T",
+    "note": "before the Nyx start-up retry: sim 0.4.0 (Nyx): live settled success at control step 215782 (54 calls), both replays pass final_check() and end in the live state (live_matches_replay 1, deterministic 1), video 1; live service time 3104 s, verifier replays 2880 s"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host A harbor/jobs/C_std_oracle_ws/ikea-stenerik-i00-standard__tHMuTUA",
+    "note": "before the Nyx start-up retry: a second host (host A, loaded): live settled success at control step 215782, live service time 3906 s, verifier replays 3603 s, live_matches_replay 1, deterministic 1, video 1"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B harbor/jobs/C_std_nop/ikea-stenerik-i00-standard__x7VbsNV",
+    "note": "before the Nyx start-up retry"
+   }
+  ],
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/stenerik/stenerik.npz (build.py + pads.py, under the Franka Hand slew)",
+   "rows_out": 222600,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  },
+  "live_checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B <host work dir>",
+    "note": "the hand-slew reference 7a1e6e502d63 (2026-10-18, dev/qineng-ikea-hand-slew; image 0.3.0 / -sim 0.4.0 Nyx), PR #305 grading (live episode, no grading replay): live settled success at control step 222600 (56 calls), live end hash a690aa1b973b = the reference's in every fresh replay, settled hash 20a59284ab83, settle_failed 0, 1 sim start-up, no resume, video 1 (live.mp4, 5566 frames); live service time 3672 s (34 % of the 3 h budget) on host B (load ~15)"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B <host work dir>",
+    "note": "PR #305 grading (live episode): no call, reward 0, video 1"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B <host work dir>",
+    "note": "the first reference (215,782 rows, before the Franka Hand rule): PR #305 grading (live episode, no grading replay; dev/robotangle_mujoco ec3114219c ported onto main 765fc3ce16, monitor and caps on): live settled success at control step 215782 (54 calls), live end hash a02c9a18abca = the reference's (the earlier runs' live and replay hash), settle_failed 0, no resume, video 1; live service time 6169 s (57 % of the 3 h budget) on host B under heavy load (load average about 81 on 32 threads; 2958-3104 s on the earlier, quieter runs)"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B <host work dir>",
+    "note": "the first reference (215,782 rows, before the Franka Hand rule): PR #305 grading (live episode): no call, reason timeout, reward 0, video 1"
+   }
+  ],
+  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); the first two are the hand-slew reference's (222,600 rows, 7a1e6e502d63), the rest the first reference's. Kept apart from `checks` (the replay-graded history of the first reference, 215,782 rows, e0097d6689ea, end a02c9a18abca, before the Franka Hand rule; the standard README renders `checks` only). rows, sim_time_s, service_time_s, live_sha, settled_sha and reference are the hand-slew reference's."
+ },
+ "burvik": {
+  "date": "2026-10-18",
+  "host": "host A (Ryzen 9 7950X, RTX 4090; shared, load ~15), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, host A 3f9218fb9864)",
+  "rows": 162534,
+  "sim_time_s": 406.34,
+  "service_time_s": 1823.7,
+  "live_sha": "ebe8cde264156516b8bcd83273228fb32ea8181dc7433f8eb8fbf730a690d370",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 16.9,
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/burvik/burvik.npz (build2.py, the Franka Hand slew)",
+   "rows_out": 162534,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  },
+  "live_checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host A harbor/jobs/S2_std_oracle/ikea-burvik-i00-standard__cMaK4eU",
+    "note": "Franka Hand slew reference, PR #305 grading (live episode), the final dir: live settled success at control step 160001 of the reference's 162534 (40 calls; during the hands' retreat), live end hash ebe8cde26415 (= the first run's), settle_failed 0, no resume, video 1; live service time 1824 s (16.9 % of the 3 h budget)"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host A harbor/jobs/S2_std_nop/ikea-burvik-i00-standard__b8F3cE4",
+    "note": "the final dir: no call, reward 0, video 1"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host A harbor/jobs/S1_std_oracle/ikea-burvik-i00-standard__o9oYLB5",
+    "note": "first run: live settled success at control step 160001, live end hash ebe8cde26415, service time 1986 s, video 1"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host A harbor/jobs/S1_std_nop/ikea-burvik-i00-standard__auKMDh8",
+    "note": "first run"
+   }
+  ],
+  "checks": [],
+  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py is main's file and renders `checks` only."
+ },
+ "uppsta": {
+  "date": "2026-10-18",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, load ~15-30), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75)",
+  "rows": 430225,
+  "sim_time_s": 537.78,
+  "service_time_s": 4290.8,
+  "live_sha": "a748a42dc36d7d2a04db385924a895105719f738d47fae8fe1d230b3787abc83",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 39.7,
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/uppsta/uppsta.npz (search.py)",
+   "rows_out": 430225,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  },
+  "live_checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_oracle/ikea-uppsta-i00-standard__7piAxgZ",
+    "note": "the merged head (the Franka Hand slew in the shared rule, 2026-10-18), image 0.3.1 / -sim 0.4.1: live settled success at control step 430225 (54 calls), live end hash a748a42dc36d = the reference's (unchanged: its rows were built within the slew), settle_failed 0, video 1; live service time 6963 s on host B at load 40-90 (the earlier 4291-4685 s at load 15-30)"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_std_nop/ikea-uppsta-i00-standard__9xFFAkf",
+    "note": "the merged head: no call, reward 0, video 1"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B harbor/jobs/C_std_oracle/ikea-uppsta-i00-standard__kfe5CeL",
+    "note": "PR #305 grading (live episode), the final dir: live settled success at control step 430225 (54 calls), live end hash a748a42dc36d = the reference's, settle_failed 0, no resume, video 1; live service time 4685 s (43.4 % of the 3 h budget; host B load 25-30 with the privileged verifier's two replays alongside)"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B harbor/jobs/C_std_nop/ikea-uppsta-i00-standard__nSLedxa",
+    "note": "PR #305 grading (live episode), the final dir: no call, reward 0, video 1"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B harbor/jobs/B_std_oracle/ikea-uppsta-i00-standard__nKjQL4H",
+    "note": "first run (the same twin before the privileged row cap was rendered): live settled success at control step 430225, live end hash a748a42dc36d, live service time 4291 s (39.7 %), video 1"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B harbor/jobs/B_std_nop/ikea-uppsta-i00-standard__Co59rKT",
+    "note": "first run"
+   }
+  ],
+  "checks": [],
+  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py is main's file and renders `checks` only."
+ },
+ "kyrre": {
+  "date": "2026-10-19",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared), Harbor 0.23.0, image 0.3.2 sha256:5d5090ea1910 / -sim 0.4.2 (Nyx RGB, host B 050cd45d70f6); the first run on the candidate's local 0.3.1-kyrre-cyl / 0.4.1-kyrre-cyl",
+  "rows": 733558,
+  "sim_time_s": 1833.89,
+  "service_time_s": 3073.3,
+  "live_sha": "0a9f1a9e6d7767b5fad11fff71cbfe8e01851ed9f4c674dd6b389e2a14fcc162",
+  "live_reason": "success",
+  "settle_failed": 0,
+  "budget_pct_live": 28.5,
+  "reference": {
+   "method": "closed-loop",
+   "source": "scripts/ikea_mujoco/oracles/kyrre/kyrre_ref.npz (rebuild.sh)",
+   "rows_out": 733558,
+   "steps_over_limit": 0,
+   "speed": "robot"
+  },
+  "live_checks": [
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-19_ikea_032/harbor/jobs/D_ks_oracle/ikea-kyrre-i00-standard__CkBrbjU",
+    "note": "final dir on image 0.3.2 / -sim 0.4.2: live settled success at control step 733558 (184 calls), live end hash 0a9f1a9e6d77 = the reference's, settle_failed 0, no resume, video 1; live service time 4931 s on host B at load 30-65 (the first run's 3073 s at load ~10)"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-19_ikea_032/harbor/jobs/D_ks_nop/ikea-kyrre-i00-standard__jCCQyMn",
+    "note": "final dir on 0.3.2 / 0.4.2: no call, reward 0, video 1"
+   },
+   {
+    "agent": "oracle",
+    "reward": 1,
+    "job": "host B 2026-10-17_ikea_v3_kyrre/cyl/harbor/jobs/C_std_oracle/ikea-kyrre-i00-standard__oBS9GX2",
+    "note": "first run (the candidate branch): live settled success at control step 733558 (184 calls), live end hash 0a9f1a9e6d77 = the reference's, settle_failed 0, no resume, video 1; live service time 3073 s (28.5 % of the 3 h budget) with the privileged verifier's replays alongside"
+   },
+   {
+    "agent": "nop",
+    "reward": 0,
+    "job": "host B 2026-10-17_ikea_v3_kyrre/cyl/harbor/jobs/C_std_nop/ikea-kyrre-i00-standard__uVMn4jj",
+    "note": "first run: no call, reward 0, video 1"
+   }
+  ],
+  "checks": [],
+  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py is main's file and renders `checks` only."
+ }
+}

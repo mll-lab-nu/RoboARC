@@ -1,0 +1,12 @@
+{
+ "name": "O1_orbits_very_easy_handle_landing_whip",
+ "base": "orbits-very-easy-i01",
+ "family": "orbits",
+ "mechanism": "the i01 very_easy reference's rows 0-2653, then 200 perturbation rows (the stress session's prefix_e1) that fling the cord at up to 8.0 m/s: the handle lands on the ground at tick 27340 (90 N) and is spun up to 120 rad/s, twelve links (link_11 .. link_22) gain 0.9-1.7 m/s within that tick, and rule 6's energy balance of the cord for the tick misses by 0.046 J (25 uncaused jumps; no energy created over the run). BREAKDOWN on orbits_chain_v1 (8fa6c8edc, final state 28054e21e425068b; two fresh processes at the stress session, two here); VIOLENT with the cord's speed clamp (orbits_chain_v3): final state e552d86f4533c6d9 on 8fa473f1c, d8f8bbf38fd2bc97 on 9b5c7c28b's rebuilt instance (ccd4ba7fa's kept pieces at solmix 2^60)",
+ "found_on_commit": "8fa6c8edc (orbits_chain_v1)",
+ "configuration": null,
+ "rows": 2854,
+ "core_rows": 2854,
+ "sha256": "9178eeaf36d25f49ff2ba54bab7032274aa8f077d4aba3f8afdf9927ccfbc43d",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

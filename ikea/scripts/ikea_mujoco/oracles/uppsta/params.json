@@ -1,0 +1,88 @@
+{
+ "comment": "per-segment parameters of the reference (2026-10-18): every segment rebuilt from the birth by search.py under the welded-group contact switch-off, the tempo profile ref/tempo.npz (every 4th demo row away from the grasps and releases) and the Franka Hand slew; tempo_max caps the profile in that segment (2: every 2nd row, 1: the demo's pace); segment 8 also needs --spin-max-seg 8:25 (screw b lands 21.5 deg off the guide's spin modulo 60, and the key still meets the socket in segment 10); segment k = demo rows [bounds[k-1], bounds[k]) of uppsta_oracle.Runner",
+ "segs": [
+  {
+   "tempo_max": 1
+  },
+  {
+   "tempo_max": 1
+  },
+  {},
+  {
+   "tempo_max": 2
+  },
+  {
+   "press": 0.003
+  },
+  {},
+  {},
+  {
+   "tempo_max": 2
+  },
+  {
+   "rot": false,
+   "ff_rot": false,
+   "tempo_max": 1
+  },
+  {},
+  {},
+  {},
+  {},
+  {
+   "tempo_max": 1
+  },
+  {
+   "g": 0.01,
+   "gr": 0.005,
+   "tempo_max": 2
+  },
+  {
+   "press": 0.005
+  },
+  {
+   "press": 0.01,
+   "tempo_max": 2
+  },
+  {},
+  {},
+  {},
+  {
+   "press": 0.003
+  },
+  {
+   "tempo_max": 2
+  },
+  {
+   "g": 0.0025,
+   "gr": 0.00125,
+   "tempo_max": 1
+  },
+  {
+   "tempo_max": 2
+  },
+  {
+   "tempo_max": 2
+  },
+  {
+   "g": 0.0025,
+   "gr": 0.00125,
+   "tempo_max": 1
+  },
+  {
+   "press": 0.003,
+   "g": 0.01,
+   "gr": 0.005,
+   "tempo_max": 2
+  },
+  {
+   "tempo_max": 2
+  },
+  {
+   "tempo_max": 1
+  },
+  {
+   "tempo_max": 2
+  },
+  {}
+ ]
+}

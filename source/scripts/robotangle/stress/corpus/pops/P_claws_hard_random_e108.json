@@ -1,0 +1,21 @@
+{
+ "name": "P_claws_hard_random_e108",
+ "base": "interlocked-claws-hard-i00",
+ "found_on_commit": "76516b188",
+ "pops": [
+  {
+   "tick": 579,
+   "body": "claw_0::claw_0",
+   "before": 0.2487,
+   "after": 0.8378,
+   "partner": "left/left_finger_link",
+   "partner_speed": 0.2182,
+   "bound": 0.7931,
+   "ke_gain_j": 0.02847,
+   "stored_before_j": 0.23957,
+   "stored_drop_j": 0.12841
+  }
+ ],
+ "sha256": "3508c2fe5b1f6ecd80a73566e84961ab120793877c0d9e95c75017df712547a6",
+ "expected": "legitimate dynamics (criteria v2+): a stored-energy pop at or below 3 m/s, never a BREAKDOWN"
+}

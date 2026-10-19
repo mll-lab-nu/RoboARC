@@ -1,0 +1,21 @@
+{
+ "name": "P_claws_medium_cem_e23",
+ "base": "interlocked-claws-medium-i00",
+ "found_on_commit": "76516b188",
+ "pops": [
+  {
+   "tick": 1485,
+   "body": "piece_0::piece_0",
+   "before": 0.1696,
+   "after": 0.7843,
+   "partner": "left/gripper_link (weld)",
+   "partner_speed": 0.1973,
+   "bound": 0.6816,
+   "ke_gain_j": 0.0246,
+   "stored_before_j": 0.14445,
+   "stored_drop_j": 0.08942
+  }
+ ],
+ "sha256": "8b5715302bc383af4979d221db11a170fdd787a38b8caabc488b8099d355fc0e",
+ "expected": "legitimate dynamics (criteria v2+): a stored-energy pop at or below 3 m/s, never a BREAKDOWN"
+}

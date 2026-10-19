@@ -1,0 +1,12 @@
+{
+ "name": "B3_buzz_very_easy_gripper_press",
+ "base": "buzz-wire-3d-very-easy-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "one held joint target (41 rows) sweeps the Panda at its clamped speeds until the Robotiq body presses the wire: r85_right_spring_link 15.9 kN at 1.1 mm, the pads 5-7 kN on the terminal post; the (left_finger, wire) pair gives +12.33 J, X rises 0.35 J in 0.1 s while global X stays 0.0027 J (F5-local; round B14_1k, seed 95050 cem e25, under the TCP clamp)",
+ "found_on_commit": "217a21717",
+ "configuration": null,
+ "rows": 41,
+ "core_rows": 1,
+ "sha256": "9273736aa46eaa20ca994eb42dcefa1a5d85a7b1af98916661f4ef1a2ff90609",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

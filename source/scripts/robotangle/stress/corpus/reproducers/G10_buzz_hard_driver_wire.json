@@ -1,0 +1,12 @@
+{
+ "name": "G10_buzz_hard_driver_wire",
+ "base": "buzz-wire-3d-hard-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "a Robotiq driver on the wire (GPU search bz4bh on b1d1706a4, hard, top000_b2_e25; shrunk to 281 rows + 40 hold): the coupler and the left driver strike the wire (11.4 kN) and the r85_left_driver-wire pair gives +3.27 J (F5-local: X rose 1.29 J in 0.1 s, X+S 0.99 J); global X stays 0.005 J. BREAKDOWN through bbdbae3ad (final state 03693b5795eaca4a in two fresh processes); on a0b4dddef reachable only path-matched (the frictionless spring links change this stream's path at an early light touch, tick 123; switched in at row 280 from the identical pre-impact state it is still BREAKDOWN, +3.27 J: gpusearch g11/, core r4/switch); VIOLENT from 0f8654a49 (frictionless drivers; 46afed1fec24552f)",
+ "found_on_commit": "b1d1706a4",
+ "configuration": null,
+ "rows": 321,
+ "core_rows": 281,
+ "sha256": "877a14d1f29b4c95926afe265cb7a799a0567d2b70e2ace037ef4095add6b8d6",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

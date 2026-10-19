@@ -1,0 +1,12 @@
+{
+ "name": "K3_knot_easy_arm_corner_badqacc",
+ "base": "knot-untying-easy-i00",
+ "family": "knot_untying",
+ "mechanism": "fast arm motion into joint-limit corners after the i01 easy reference's rows 0-212 (GPU knot search kn1_0 b0_e99; truncated after the failing row: 268 rows; the harness shrink could not shorten it): a middle-link blow-up, mjWARN_BADQACC at row 267 (tick 1337). Its 35.6 mm robot depth and 7.4 kN are MuJoCo's auto-reset state (the arms overlap at knot's qpos0), not the event. BREAKDOWN on knot_chain_v4 (c4ebbcb3d / kn9, four fresh processes at gpusearch, two here)",
+ "found_on_commit": "c4ebbcb3d (knot_chain_v4)",
+ "configuration": null,
+ "rows": 268,
+ "core_rows": 268,
+ "sha256": "42629f72547b3cfc21e9e23f022a50e231d3647cdf45b9131517cfb6fb578a86",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

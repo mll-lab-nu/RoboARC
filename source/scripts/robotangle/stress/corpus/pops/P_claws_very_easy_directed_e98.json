@@ -1,0 +1,21 @@
+{
+ "name": "P_claws_very_easy_directed_e98",
+ "base": "interlocked-claws-very-easy-i00",
+ "found_on_commit": "76516b188",
+ "pops": [
+  {
+   "tick": 300,
+   "body": "piece_1::piece_1",
+   "before": 0.0672,
+   "after": 0.7394,
+   "partner": "right/right_finger_link",
+   "partner_speed": 0.1175,
+   "bound": 0.4084,
+   "ke_gain_j": 0.00787,
+   "stored_before_j": 0.58781,
+   "stored_drop_j": 0.12469
+  }
+ ],
+ "sha256": "0a02a62fd840ef71915196d0f809a3c9941b7f9c8784a1761ad68c6621c2e13f",
+ "expected": "legitimate dynamics (criteria v2+): a stored-energy pop at or below 3 m/s, never a BREAKDOWN"
+}

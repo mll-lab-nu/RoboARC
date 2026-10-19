@@ -1,0 +1,12 @@
+{
+ "name": "M4c_claws_medium_piece_pop_clamped",
+ "base": "interlocked-claws-medium-i00",
+ "family": "interlocked_claws",
+ "mechanism": "piece-piece pop: an uncaused jump that is not a stored-energy release",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 68,
+ "core_rows": 28,
+ "sha256": "ed8a4a8db00b05a4f00f24a66ea11ddce43867221b11eb70cdbd2ade577db4da",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

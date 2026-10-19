@@ -1,0 +1,69 @@
+name: checks
+# The cheap checks (no GPU, no image, no dataset access): the generator's check mode, the protocol invariants, the unit
+# tests, and the advisory checks (warnings only). Strict replays and Harbor trials need the image and a GPU
+# (README.md, Checks).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  generator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Task dirs equal a fresh render
+        run: umask 022 && python3 scripts/roboarc/mk_tasks.py --check
+  ikea:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: IKEA task dirs equal a fresh render (both generators)
+        run: bash ikea/ci/check.sh
+  invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Invariants (PROTOCOL Appendix H)
+        run: bash ci_checks/run_invariants.sh
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Test dependencies
+        run: python3 -m pip install --quiet numpy requests
+      - name: Unit tests, check-video, resources, cutoffs
+        run: |
+          set -e
+          bash ci_checks/check-unit-tests.sh --all
+          python3 ci_checks/check-video.py tasks/roboarc-*
+          python3 ci_checks/check-resources.py tasks/roboarc-*
+          python3 ci_checks/check-cutoffs.py tasks/roboarc-*
+  advisories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Advisory checks (warnings only)
+        env: { RCB_SKIP_UNIT_TESTS: "1" }
+        run: bash ci_checks/run_all.sh --tier advisory || [ $? -eq 3 ]

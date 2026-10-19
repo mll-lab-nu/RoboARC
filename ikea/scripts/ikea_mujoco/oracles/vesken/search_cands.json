@@ -1,0 +1,936 @@
+{
+ "comment": "candidate lists search.py used for the 2026-10-18 rebuild (params.json records the kept ones); 'code' = vesken_oracle.CANDIDATES",
+ "ops 1 (staging-release tweaks for cap_1, --cands)": [
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.25,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.3,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.4,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.45,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0.1,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      -0.1,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0.17,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0.005,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      -0.005,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0.005,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      -0.005,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      -0.003
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20200,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     22300,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0.17,
+      0.17,
+      0
+     ],
+     300
+    ]
+   ]
+  }
+ ],
+ "ops 8-22 (--cands, lat0 variants)": [
+  {},
+  {
+   "lat0": true
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "lat0": true
+  },
+  {
+   "g": 0.02,
+   "gr": 0.01,
+   "lat0": true
+  },
+  {
+   "g": 0.005,
+   "gr": 0.0025,
+   "lat0": true
+  },
+  {
+   "rot": false,
+   "ff_rot": false
+  },
+  {
+   "rot": false,
+   "ff_rot": false,
+   "lat0": true
+  },
+  {
+   "wait_s": 2.5,
+   "lat0": true
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "lat0": true
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300,
+   "lat0": true
+  },
+  {
+   "g": 0.02,
+   "gr": 0.01
+  }
+ ],
+ "op 18 (--op-cands)": [
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015
+  },
+  {
+   "ff": false,
+   "g": 0.04,
+   "gr": 0.02
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "max_off": 0.05
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "wait_s": 2.5
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "rot_stage": false,
+   "stage_decay": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.03
+  },
+  {
+   "ff": false,
+   "g": 0.05,
+   "gr": 0.025
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "rel_zone": 0.1
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.04,
+   "gr": 0.02,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "max_off": 0.05,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "wait_s": 2.5,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "rot_stage": false,
+   "stage_decay": true,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.03,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.05,
+   "gr": 0.025,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "rel_zone": 0.1,
+   "lat0": true
+  }
+ ],
+ "op 19 (--op-cands, wrist-roll tweaks)": [
+  {},
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0.17,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.17,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0.35,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      0.17,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      -0.17,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      0.35,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      -0.35,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0.17,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.17,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      0.17,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      -0.17,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0.004
+     ],
+     [
+      0,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      -0.005,
+      0,
+      0.002
+     ],
+     [
+      0,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0.004
+     ],
+     [
+      0,
+      0.17,
+      0
+     ],
+     400
+    ]
+   ]
+  }
+ ],
+ "op 20 in chain B (ff_rot_rows)": [
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300,
+   "rot_stage": false,
+   "stage_decay": true
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300,
+   "max_rot": 0.5
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300,
+   "ff_rate": 0.013333333333333334
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "rot_stage": false,
+   "stage_decay": true
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "max_rot": 0.5
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "ff_rate": 0.013333333333333334
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 800
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 800,
+   "rot_stage": false,
+   "stage_decay": true
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 800,
+   "max_rot": 0.5
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 800,
+   "ff_rate": 0.013333333333333334
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "rot_mode": "sym"
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "gr": 0.01
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "approach": 800
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 500,
+   "ff_yaw": true
+  }
+ ]
+}

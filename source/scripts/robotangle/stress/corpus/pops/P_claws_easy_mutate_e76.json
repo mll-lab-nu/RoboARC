@@ -1,0 +1,21 @@
+{
+ "name": "P_claws_easy_mutate_e76",
+ "base": "interlocked-claws-easy-i00",
+ "found_on_commit": "76516b188",
+ "pops": [
+  {
+   "tick": 2697,
+   "body": "piece_0::piece_0",
+   "before": 0.0691,
+   "after": 1.1011,
+   "partner": "left/gripper_link (weld)",
+   "partner_speed": 0.0982,
+   "bound": 0.3689,
+   "ke_gain_j": 0.10185,
+   "stored_before_j": 0.56573,
+   "stored_drop_j": 0.35614
+  }
+ ],
+ "sha256": "0de8b9fbf054e2d3d138aaccf24edbba0f435229342771ce3eb5f98f6717c296",
+ "expected": "legitimate dynamics (criteria v2+): a stored-energy pop at or below 3 m/s, never a BREAKDOWN"
+}

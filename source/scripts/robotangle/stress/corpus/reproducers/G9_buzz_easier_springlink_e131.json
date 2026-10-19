@@ -1,0 +1,12 @@
+{
+ "name": "G9_buzz_easier_springlink_e131",
+ "base": "buzz-wire-3d-easier-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "G8 class on easier (round B15_1k, seed 95061, random e131; shrunk to one held target + 40 hold): the left finger strikes the static wire_base (23.7 kN at 1 mm) and the passive r85_right_spring_link contact on wire_base gives +3.68 J (F5-local: X rose 0.97 J in 0.1 s, X+S 3.42 J); global X stays 0",
+ "found_on_commit": "bbdbae3ad",
+ "configuration": null,
+ "rows": 41,
+ "core_rows": 1,
+ "sha256": "92e94023779dbca3119eeb893254b618d198e73dee28359fef35e5f27addce2f",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

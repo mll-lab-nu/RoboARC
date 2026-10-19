@@ -1,0 +1,12 @@
+{
+ "name": "F2_fiber_medium_terminal_187kN",
+ "base": "fiber-bundling-medium-i00",
+ "family": "fiber_bundling",
+ "mechanism": "Robotiq against the fixed terminal: real penetration with ~0 force, then 187 kN and energy",
+ "found_on_commit": "38327281f",
+ "configuration": null,
+ "rows": 102,
+ "core_rows": 62,
+ "sha256": "28b75ae203be4bec778fb5efbb1864094326275e23ac7c252e459f53ec3bc06c",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

@@ -1,0 +1,12 @@
+{
+ "name": "G8_buzz_very_easy_springlink_press",
+ "base": "buzz-wire-3d-very-easy-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "top046 class under the lead bound (gpusearch bz3 very_easy top000_b0_e1493, 5 core rows + 40 hold): the left finger hits the static wire_base (14.9 kN at 1 mm), the TCP drops 1.13 -> 0.06 m/s in one tick; the passive four-bar r85_right_spring_link contact on wire_base gives +0.67 J (F5-local: X rose 1.03 J in 0.1 s, X+S 3.01 J); global X stays 0",
+ "found_on_commit": "bbdbae3ad",
+ "configuration": null,
+ "rows": 45,
+ "core_rows": 5,
+ "sha256": "2ae7889ef64430ff8a1cc3c6aecfc6bf8e89f5ecf407b4ba9b67a269e7f2a585",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

@@ -1,0 +1,126 @@
+{
+ "about": "knot_untying redesign: the robot-level routes per instance on the current head (10-13). Routes, not frozen references: every reference is recorded once after the physics freeze (oracle on the frozen head, fresh replays on two hosts, acceptance, videos). Rows are 40 per simulated second. 'chain': stage 1 ends with --stop-after-decisions N (its rows are saved), stage 2 resumes them (--resume <stage 1>/privileged.npz); every chain below was re-made from its flags on this code with rows and tick ledger byte-equal to the original. Hashes: 'actions' = sha256[:16] of the action rows, 'state' = the Session's state hash at the end.",
+ "environment": "PYTHONPATH=<repo>:<repo>/scripts/robotangle/shared:<repo>/scripts/robotangle/redesign (rcb_topogym, session_kit); MuJoCo 3.14, CPU float64",
+ "commands": {
+  "instance": "python scripts/robotangle/redesign/knot_untying/robot/build_instance.py scripts/robotangle/redesign/knot_untying/births/<name> <tier> <out>/<name>",
+  "checks": "python scripts/robotangle/redesign/knot_untying/robot/check_instance.py <out>/<name>/instance.json <out>/<name>/checks --part goal|nop|grasp|summary",
+  "oracle": "python scripts/robotangle/redesign/knot_untying/robot/run_robot_oracle.py <out>/<name>/instance.json <tier> <run> <flags>",
+  "chain_stage_2": "python scripts/robotangle/redesign/knot_untying/robot/run_robot_oracle.py <instance.json> <tier> <run2> --resume <run1>/privileged.npz <flags>",
+  "replay": "python scripts/robotangle/redesign/knot_untying/robot/replay_check.py <run>",
+  "placement": "python scripts/robotangle/redesign/knot_untying/robot/place_lab.py <instance.json> <tier> <lab> --resume <untie rows> --resume-rows N --settle-s 2 --once  (tries: <lab>/queue/<name>.json)"
+ },
+ "instances": {
+  "very_easy": {
+   "tier": "very_easy",
+   "status": "solved",
+   "route": {
+    "flags": "--budget-min 600 --press-pins --speed 0.045 --fast",
+    "rows": 7701,
+    "sim_s": 192.5,
+    "actions": "7da98ffc850cd911",
+    "state": "1d9ec17cd237dadf"
+   },
+   "backup": {
+    "flags": "--budget-min 600 --press-pins --speed 0.04",
+    "rows": 9012,
+    "state": "21107c1ba391f0f9"
+   },
+   "validated": "two hosts byte-identical rows; a fresh-process replay ends at the live state with success; nop, the old -i01 oracle and five breakers fail"
+  },
+  "easier_v8": {
+   "tier": "easier",
+   "region_instance": "easier_v8_r3",
+   "status": "untied, not placed",
+   "chain": [
+    {
+     "flags": "--budget-min 1050 --press-pins --speed 0.04 --real-fingers --retry-room --tight --stop-after-decisions 5",
+     "rows": 6672
+    },
+    {
+     "flags": "--budget-min 900 --press-pins --speed 0.04 --real-fingers --retry-room --tight --stall-adapt --stall-adapt-grasp --stop-after-decisions 6",
+     "rows": 13344,
+     "actions": "072c9156b25ffe77",
+     "state": "b63c9640928f08db"
+    }
+   ]
+  },
+  "easier_loose": {
+   "tier": "easier",
+   "region_instance": "easier_loose_r3",
+   "status": "untied, not placed",
+   "route": {
+    "flags": "--budget-min 1050 --press-pins --pin-order far --stop-after-decisions 22",
+    "rows": 23768,
+    "actions": "84276c864b08da5a",
+    "state": "3eb66d6307948e61"
+   },
+   "alternative": {
+    "flags": "--budget-min 1050 --press-pins --speed 0.04 --endgame --stop-after-decisions 14",
+    "rows": 19800,
+    "actions": "73297efe3bc4ac74",
+    "state": "93dde40417ff6d17"
+   }
+  },
+  "easy_v8": {
+   "tier": "easy",
+   "status": "untied, not placed",
+   "route": {
+    "flags": "--budget-min 1050 --press-pins --no-clear-tail --endgame --stop-after-decisions 32",
+    "rows": 28002,
+    "actions": "dc895aab9c57ed35",
+    "state": "f5ac7e6a55781075"
+   },
+   "region_instance": "easy_v8_r3"
+  },
+  "hard_nostop": {
+   "tier": "hard",
+   "region_instance": "hard_nostop_r2",
+   "status": "untied, not placed (best: rope b meets all its terms, rope a one crossing short)",
+   "chain": [
+    {
+     "flags": "--budget-min 1050 --press-pins --pin-order far --real-fingers --retry-room --tight --stop-after-decisions 4",
+     "rows": 5595
+    },
+    {
+     "flags": "--budget-min 900 --no-pins --real-fingers --retry-room --tight --stop-after-decisions 3",
+     "rows": 10350,
+     "actions": "1a8c0e6574b8aa8e",
+     "state": "3fff96222a33e62b"
+    }
+   ],
+   "alternative_chain": [
+    {
+     "flags": "--budget-min 1050 --press-pins --pin-order far --real-fingers --retry-room --stop-after-decisions 6",
+     "rows": 7072
+    },
+    {
+     "flags": "--budget-min 900 --press-pins --pin-order far --real-fingers --retry-room --tight --stall-adapt --stop-after-decisions 5",
+     "rows": 14492,
+     "actions": "a28b2585fd9b70ed",
+     "state": "ef2061e2d9158d18"
+    }
+   ]
+  },
+  "hard_nostop_ra": {
+   "tier": "hard",
+   "region_instance": "hard_nostop_ra_r2",
+   "status": "untied, not placed",
+   "route": {
+    "flags": "--budget-min 1050 --press-pins --pin-order far --real-fingers --retry-room --tight --stall-adapt --stall-adapt-grasp --flatten --fixup-if-untied --layout-stop-untied --stop-after-decisions 9",
+    "rows": 13901,
+    "actions": "a17b6d679fbb6e66",
+    "state": "ee35bfb713bb8f7b"
+   }
+  },
+  "not_untied": {
+   "medium_loose_ra": 1,
+   "medium_loose": 2,
+   "medium_b81": 2,
+   "easy_loose": 3,
+   "medium_v81": 4,
+   "hard": 5,
+   "easy": 6,
+   "about": "the fewest crossings any line reached at a decision"
+  }
+ }
+}

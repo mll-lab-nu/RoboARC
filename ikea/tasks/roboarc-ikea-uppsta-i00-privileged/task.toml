@@ -1,0 +1,42 @@
+schema_version = "1.3"
+artifacts = ["/app/output/"]
+
+[task]
+name = "robot-coding-bench/roboarc-ikea-uppsta-i00-privileged"
+description = "IKEA MuJoCo UPPSTÅ toy hammering block (dual Franka Panda + Menagerie Panda hand, MuJoCo 3.14.0 CPU): produce one replayable trajectory. Build the UPPSTÅ hammering block: set two dowels into one board end, press end block b onto them and drive screw b with the hex key; turn it over, set the other two dowels, press end block a on and drive screw a; stand the block on its feet and push the eight pegs into their holes. Frozen scene (the scene's keyframe 'box'); physical grasps, no assist."
+authors = [{ name = "Xiaoyu" }]
+keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "panda", "bimanual", "code-as-policy", "trajectory"]
+
+[metadata]
+author_name = "Xiaoyu"
+task_type = "trajectory"          # trajectory | policy   (see docs/protocol/README.md)
+simulator = "mujoco"              # plain MuJoCo 3.14.0, CPU float64, the scene's own runtime and mechanism
+robot = "franka-panda-bimanual"            # both arms (docs/TAXONOMY.md)
+family = "ikea_uppsta"
+mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
+dynamics = "static"               # scene dynamics (docs/protocol/README.md §2): only the robot and gravity do work; springs, latches and threads are passive
+oracle = "full"
+grasp = "physical (finger friction; no assisted grasp, no welds to a gripper)"
+success_rule = "the scene's success.py (port of the source assembly grader) + the terminal rules (released, at rest, no breakdown), after the last row and after a 1.0 s hold"
+instance_seed = 0                 # one frozen scene: images/ikea-mujoco scene uppsta, digest 8c884957c9be
+expert_time_estimate_hours = 10
+
+[verifier]
+timeout_sec = 25920.0
+environment_mode = "separate"     # verifier runs in its own sandbox (tests/Dockerfile); the agent container is gone by then
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 10800.0             # Agent wall-clock budget; verifier has its own budget
+network_mode = "allowlist"      # model APIs and package registries (scripts/set_agent_egress.py); PROTOCOL §2.11
+allowed_hosts = ["chatgpt.com", "*.chatgpt.com", "auth.openai.com", "api.openai.com", "*.openai.com", "api.anthropic.com", "*.anthropic.com", "openrouter.ai", "*.openai.azure.com", "*.cognitiveservices.azure.com"]
+
+[environment]
+build_timeout_sec = 1800.0
+cpus = 4
+memory_mb = 8192
+
+[verifier.environment]
+build_timeout_sec = 1800.0
+cpus = 4                          # two replays at once (+ the video replay, privileged): the timeouts assume a core each
+memory_mb = 8192

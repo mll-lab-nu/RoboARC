@@ -1,0 +1,12 @@
+{
+ "name": "G12_buzz_easier_coupler_wirebase",
+ "base": "buzz-wire-3d-easier-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "a Robotiq coupler on the static wire_base (GPU search bz6i_6 on 0f8654a49, easier, top001_b1_e1977; full stream, not shrunk): the r85_right_coupler-wire_base pair gives +1.90 J (F5-local: X rose 0.74 J in 0.1 s, X+S 0.84 J; force 5.3 kN); global X 0.007 J. BREAKDOWN on 0f8654a49 (final state 94fef7143e4eab0b in two fresh processes); VIOLENT on b1ec43997, the exact constraint diagonal (31b10d0671014c91, pair -0.0), also path-matched (DIAGEXACT switched on at rows 100-140 on 0f8654a49: VIOLENT)",
+ "found_on_commit": "0f8654a49",
+ "configuration": null,
+ "rows": 292,
+ "core_rows": 292,
+ "sha256": "f7c272e5b27953ed2ff5e2d08bfd01bd674eb164a6ce2720822d2cb5dff40356",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

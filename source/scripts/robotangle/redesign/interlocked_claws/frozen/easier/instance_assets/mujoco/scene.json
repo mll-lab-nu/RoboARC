@@ -1,0 +1,574 @@
+{
+ "entities": {
+  "goal_region": {
+   "collision": false,
+   "free_joint": null,
+   "joints": [],
+   "kind": "static",
+   "links": [
+    {
+     "body": "goal_region",
+     "name": "goal_region",
+     "parent": null
+    }
+   ],
+   "root": "goal_region"
+  },
+  "ground": {
+   "collision": true,
+   "free_joint": null,
+   "joints": [],
+   "kind": "static",
+   "links": [
+    {
+     "body": "ground",
+     "name": "ground",
+     "parent": null
+    }
+   ],
+   "root": "ground"
+  },
+  "piece_0": {
+   "collision": true,
+   "free_joint": "piece_0::root",
+   "joints": [],
+   "kind": "rigid",
+   "links": [
+    {
+     "body": "piece_0::piece_0",
+     "name": "piece_0",
+     "parent": null
+    },
+    {
+     "body": "piece_0::b_grip",
+     "name": "b_grip",
+     "parent": "piece_0"
+    },
+    {
+     "body": "piece_0::b_head",
+     "name": "b_head",
+     "parent": "piece_0"
+    }
+   ],
+   "root": "piece_0::piece_0"
+  },
+  "piece_1": {
+   "collision": true,
+   "free_joint": "piece_1::root",
+   "joints": [],
+   "kind": "rigid",
+   "links": [
+    {
+     "body": "piece_1::piece_1",
+     "name": "piece_1",
+     "parent": null
+    },
+    {
+     "body": "piece_1::a_grip",
+     "name": "a_grip",
+     "parent": "piece_1"
+    }
+   ],
+   "root": "piece_1::piece_1"
+  },
+  "robot": {
+   "collision": true,
+   "free_joint": null,
+   "home": {
+    "left": [
+     0.022009576329426732,
+     -1.8150812704636186,
+     1.2619766542345983,
+     8.974505942356755e-15,
+     0.7276375414284514,
+     -8.490828238966819e-15,
+     0.0222,
+     0.0222
+    ],
+    "right": [
+     0.4750855142343507,
+     0.3618249777907831,
+     0.47894028247377457,
+     1.0470284731005102,
+     -1.1499252219760268,
+     -0.6156504939726191,
+     0.0222,
+     0.0222
+    ]
+   },
+   "joints": [
+    {
+     "mj": "left/waist",
+     "name": "left/waist"
+    },
+    {
+     "mj": "left/shoulder",
+     "name": "left/shoulder"
+    },
+    {
+     "mj": "left/elbow",
+     "name": "left/elbow"
+    },
+    {
+     "mj": "left/forearm_roll",
+     "name": "left/forearm_roll"
+    },
+    {
+     "mj": "left/wrist_angle",
+     "name": "left/wrist_angle"
+    },
+    {
+     "mj": "left/wrist_rotate",
+     "name": "left/wrist_rotate"
+    },
+    {
+     "mj": "left/left_finger",
+     "name": "left/left_finger"
+    },
+    {
+     "mj": "left/right_finger",
+     "name": "left/right_finger"
+    },
+    {
+     "mj": "right/waist",
+     "name": "right/waist"
+    },
+    {
+     "mj": "right/shoulder",
+     "name": "right/shoulder"
+    },
+    {
+     "mj": "right/elbow",
+     "name": "right/elbow"
+    },
+    {
+     "mj": "right/forearm_roll",
+     "name": "right/forearm_roll"
+    },
+    {
+     "mj": "right/wrist_angle",
+     "name": "right/wrist_angle"
+    },
+    {
+     "mj": "right/wrist_rotate",
+     "name": "right/wrist_rotate"
+    },
+    {
+     "mj": "right/left_finger",
+     "name": "right/left_finger"
+    },
+    {
+     "mj": "right/right_finger",
+     "name": "right/right_finger"
+    }
+   ],
+   "kind": "robot",
+   "links": [
+    {
+     "body": "robot",
+     "name": "robot",
+     "parent": null
+    },
+    {
+     "body": "left/base_link",
+     "name": "left/base_link",
+     "parent": "robot"
+    },
+    {
+     "body": "right/base_link",
+     "name": "right/base_link",
+     "parent": "robot"
+    },
+    {
+     "body": "left/shoulder_link",
+     "name": "left/shoulder_link",
+     "parent": "left/base_link"
+    },
+    {
+     "body": "left/upper_arm_link",
+     "name": "left/upper_arm_link",
+     "parent": "left/shoulder_link"
+    },
+    {
+     "body": "left/upper_forearm_link",
+     "name": "left/upper_forearm_link",
+     "parent": "left/upper_arm_link"
+    },
+    {
+     "body": "left/lower_forearm_link",
+     "name": "left/lower_forearm_link",
+     "parent": "left/upper_forearm_link"
+    },
+    {
+     "body": "left/wrist_link",
+     "name": "left/wrist_link",
+     "parent": "left/lower_forearm_link"
+    },
+    {
+     "body": "left/gripper_link",
+     "name": "left/gripper_link",
+     "parent": "left/wrist_link"
+    },
+    {
+     "body": "left/gripper_base",
+     "name": "left/gripper_base",
+     "parent": "left/gripper_link"
+    },
+    {
+     "body": "left/left_finger_link",
+     "name": "left/left_finger_link",
+     "parent": "left/gripper_base"
+    },
+    {
+     "body": "left/right_finger_link",
+     "name": "left/right_finger_link",
+     "parent": "left/gripper_base"
+    },
+    {
+     "body": "right/shoulder_link",
+     "name": "right/shoulder_link",
+     "parent": "right/base_link"
+    },
+    {
+     "body": "right/upper_arm_link",
+     "name": "right/upper_arm_link",
+     "parent": "right/shoulder_link"
+    },
+    {
+     "body": "right/upper_forearm_link",
+     "name": "right/upper_forearm_link",
+     "parent": "right/upper_arm_link"
+    },
+    {
+     "body": "right/lower_forearm_link",
+     "name": "right/lower_forearm_link",
+     "parent": "right/upper_forearm_link"
+    },
+    {
+     "body": "right/wrist_link",
+     "name": "right/wrist_link",
+     "parent": "right/lower_forearm_link"
+    },
+    {
+     "body": "right/gripper_link",
+     "name": "right/gripper_link",
+     "parent": "right/wrist_link"
+    },
+    {
+     "body": "right/gripper_base",
+     "name": "right/gripper_base",
+     "parent": "right/gripper_link"
+    },
+    {
+     "body": "right/left_finger_link",
+     "name": "right/left_finger_link",
+     "parent": "right/gripper_base"
+    },
+    {
+     "body": "right/right_finger_link",
+     "name": "right/right_finger_link",
+     "parent": "right/gripper_base"
+    }
+   ],
+   "root": "robot"
+  },
+  "table": {
+   "collision": true,
+   "free_joint": null,
+   "joints": [],
+   "kind": "static",
+   "links": [
+    {
+     "body": "table",
+     "name": "table",
+     "parent": null
+    }
+   ],
+   "root": "table"
+  }
+ },
+ "files": {
+  "meshes/goal_region_08efb9ce9bc39c23.obj": "08efb9ce9bc39c2372cb7c93fe5a0d6b16b554c65ad48f1c6dc37ed4dd6fd0f0",
+  "scene.xml": "9a3f1840c5f72b7ddbbbb98ee9a69ccd2c5abd17a667ed7b57a68418396fa0bf"
+ },
+ "format": "robotangle-mujoco-scene/1",
+ "hulls": [],
+ "mujoco_version": "3.14.0",
+ "profile": {
+  "coacd": null,
+  "collision": {
+   "ccd_iterations": 500,
+   "ccd_tolerance": 1e-10
+  },
+  "contact": {
+   "condim": 3,
+   "friction": 0.3,
+   "margin": 0.0,
+   "rolling_friction": 0.0001,
+   "solimp": [
+    0.9,
+    0.99,
+    0.001,
+    0.5,
+    2.0
+   ],
+   "solref": [
+    0.00125,
+    2.0
+   ],
+   "table_friction": 1.0,
+   "torsional_friction": 0.005
+  },
+  "memory": "256M",
+  "name": "claws_v6",
+  "robot": {
+   "armature": 0.1,
+   "coupling": {
+    "solimp": [
+     0.9,
+     0.95,
+     0.001,
+     0.5,
+     2.0
+    ],
+    "solref": [
+     0.00125,
+     2.0
+    ]
+   },
+   "maxhullvert": 64,
+   "self_contact": {
+    "solimp": [
+     0.9,
+     0.95,
+     0.001,
+     0.5,
+     2.0
+    ],
+    "solref": [
+     0.005,
+     2.0
+    ]
+   }
+  },
+  "solver": {
+   "cone": "elliptic",
+   "impratio": 10.0,
+   "integrator": "implicitfast",
+   "iterations": 100,
+   "ls_iterations": 50,
+   "solver": "Newton",
+   "tolerance": 1e-08
+  },
+  "static_contact": {
+   "soft": {
+    "solimp": [
+     0.9,
+     0.95,
+     0.001,
+     0.5,
+     2.0
+    ],
+    "solref": [
+     0.005,
+     2.0
+    ]
+   }
+  },
+  "weld": {
+   "solimp": [
+    0.9,
+    0.95,
+    0.001,
+    0.5,
+    2.0
+   ],
+   "solref": [
+    0.0025,
+    1.0
+   ]
+  }
+ },
+ "robot": {
+  "actuators": [
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/waist",
+    "kp": 43.0,
+    "kv": 0.0,
+    "name": "left/drive/waist"
+   },
+   {
+    "force": 144.0,
+    "group": "left",
+    "joint": "left/shoulder",
+    "kp": 265.0,
+    "kv": 0.0,
+    "name": "left/drive/shoulder"
+   },
+   {
+    "force": 59.0,
+    "group": "left",
+    "joint": "left/elbow",
+    "kp": 227.0,
+    "kv": 0.0,
+    "name": "left/drive/elbow"
+   },
+   {
+    "force": 22.0,
+    "group": "left",
+    "joint": "left/forearm_roll",
+    "kp": 78.0,
+    "kv": 0.0,
+    "name": "left/drive/forearm_roll"
+   },
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/wrist_angle",
+    "kp": 37.0,
+    "kv": 0.0,
+    "name": "left/drive/wrist_angle"
+   },
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/wrist_rotate",
+    "kp": 10.4,
+    "kv": 0.0,
+    "name": "left/drive/wrist_rotate"
+   },
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/left_finger",
+    "kp": 2000.0,
+    "kv": 124.0,
+    "name": "left/drive/left_finger"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/waist",
+    "kp": 43.0,
+    "kv": 0.0,
+    "name": "right/drive/waist"
+   },
+   {
+    "force": 144.0,
+    "group": "right",
+    "joint": "right/shoulder",
+    "kp": 265.0,
+    "kv": 0.0,
+    "name": "right/drive/shoulder"
+   },
+   {
+    "force": 59.0,
+    "group": "right",
+    "joint": "right/elbow",
+    "kp": 227.0,
+    "kv": 0.0,
+    "name": "right/drive/elbow"
+   },
+   {
+    "force": 22.0,
+    "group": "right",
+    "joint": "right/forearm_roll",
+    "kp": 78.0,
+    "kv": 0.0,
+    "name": "right/drive/forearm_roll"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/wrist_angle",
+    "kp": 37.0,
+    "kv": 0.0,
+    "name": "right/drive/wrist_angle"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/wrist_rotate",
+    "kp": 10.4,
+    "kv": 0.0,
+    "name": "right/drive/wrist_rotate"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/left_finger",
+    "kp": 2000.0,
+    "kv": 124.0,
+    "name": "right/drive/left_finger"
+   }
+  ],
+  "mount_body": "robot",
+  "source_sha256": "18715c324af316854ef67a2955836ef7dc946ad10780dc504eb2e3cf7ccd6b61",
+  "source_xml": "aloha_tabletop_c6e382da3bc0e810.xml"
+ },
+ "welds": [
+  {
+   "body": "piece_0::b_grip",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/piece_0/b_grip",
+   "target": [
+    "piece_0",
+    "b_grip"
+   ]
+  },
+  {
+   "body": "piece_0::b_head",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/piece_0/b_head",
+   "target": [
+    "piece_0",
+    "b_head"
+   ]
+  },
+  {
+   "body": "piece_1::a_grip",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/piece_1/a_grip",
+   "target": [
+    "piece_1",
+    "a_grip"
+   ]
+  },
+  {
+   "body": "piece_0::b_grip",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/piece_0/b_grip",
+   "target": [
+    "piece_0",
+    "b_grip"
+   ]
+  },
+  {
+   "body": "piece_0::b_head",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/piece_0/b_head",
+   "target": [
+    "piece_0",
+    "b_head"
+   ]
+  },
+  {
+   "body": "piece_1::a_grip",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/piece_1/a_grip",
+   "target": [
+    "piece_1",
+    "a_grip"
+   ]
+  }
+ ],
+ "xml": "scene.xml"
+}

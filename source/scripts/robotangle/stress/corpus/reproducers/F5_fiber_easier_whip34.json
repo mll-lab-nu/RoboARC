@@ -1,0 +1,12 @@
+{
+ "name": "F5_fiber_easier_whip34",
+ "base": "fiber-bundling-easier-i00",
+ "family": "fiber_bundling",
+ "mechanism": "a 34 m/s cable whip with uncaused jumps and energy created",
+ "found_on_commit": "f9f42391d",
+ "configuration": null,
+ "rows": 101,
+ "core_rows": 61,
+ "sha256": "397342fdb6b65f65aef074275751147f3dee8333293eaf182d6110499822c1cd",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

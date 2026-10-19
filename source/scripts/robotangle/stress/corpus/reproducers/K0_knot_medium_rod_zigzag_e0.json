@@ -1,0 +1,12 @@
+{
+ "name": "K0_knot_medium_rod_zigzag_e0",
+ "base": "knot-untying-medium-i00",
+ "family": "knot_untying",
+ "mechanism": "an explicit rod zig-zag at the rope tail pinched between the left fingers (joint 233: 13 -> 2361 rad/s in 5 MuJoCo steps), a blow-up: fault, mjWARN_BADQACC, a 35.6 mm robot-robot contact (the auto-reset state), rope links at 300 m/s (rope agent's self-check, knot medium prefix e0). BREAKDOWN on knot_chain_v2; v3 and v4 replay it without BREAKDOWN (v4: VIOLENT)",
+ "found_on_commit": "93b176b09 (knot_chain_v2)",
+ "configuration": null,
+ "rows": 514,
+ "core_rows": 514,
+ "sha256": "4606ddf8f74632cae084fa94d649b31a29ac96ef41ab1854ceac4ca888badcad",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

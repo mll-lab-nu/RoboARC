@@ -1,0 +1,12 @@
+{
+ "name": "E1_claws_easier_lgrip20hz_n240",
+ "base": "interlocked-claws-easier-i00",
+ "family": "interlocked_claws",
+ "mechanism": "the ALOHA finger-coupling joint equality (MJCF default solref 0.02/1) creates energy under a 20 Hz half-stroke gripper oscillation: X rises ~0.034 J/s, global 0.13 J (found by the coordinator GPU batch search)",
+ "found_on_commit": "0cc192ac2",
+ "configuration": null,
+ "rows": 280,
+ "core_rows": null,
+ "sha256": "009d237d1c1c2ab04f3839e0c39bfe8fbdbbec0307626b5f6095d44306d6519c",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

@@ -1,0 +1,13 @@
+{
+ "name": "G7_buzz_very_easy_catchup_top023",
+ "base": "buzz-wire-3d-very-easy-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "B2 class reached through tracking catch-up under the TCP clamp: the target runs ahead of a held-back arm, the arm catches up at 2.6-3.4 m/s TCP and the pad passes the wire axis (gpusearch bz2/buzz-wire-3d-very-easy-i00__top023_b3_e3946, shrunk): energy_created(local) X rose 0.74J in 0.1 s, X+S 62.92J, contact ('left_finger', 'wire::wire') gave 9.05J @tick 421; triggers force 86225",
+ "found_on_commit": "b1d1706a4",
+ "configuration": null,
+ "rows": 81,
+ "core_rows": 41,
+ "sha256": "e8ecdb67fb19281dffa5c91c22fcb3be09809391147df56036f81b2dd0ba96b3",
+ "source": "/workspace/mj/gpusearch/repro/bz2/buzz-wire-3d-very-easy-i00__top023_b3_e3946.npz",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

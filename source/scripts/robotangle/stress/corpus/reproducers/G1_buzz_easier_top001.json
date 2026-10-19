@@ -1,0 +1,13 @@
+{
+ "name": "G1_buzz_easier_top001",
+ "base": "buzz-wire-3d-easier-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "gpusearch bz1 top001_b2_e1369 (shrunk): energy_created(global) 1.83J @tick 590; triggers force 185493",
+ "found_on_commit": "19bee571e",
+ "configuration": null,
+ "rows": 88,
+ "core_rows": 48,
+ "sha256": "1be6d3ae1b07e1d66e0fab6c975bf436226b6384d121757ee7eb86c931825a8b",
+ "source": "/workspace/mj/gpusearch/repro/bz1/buzz-wire-3d-easier-i00__top001_b2_e1369.npz",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

@@ -1,0 +1,12 @@
+{
+ "name": "B1b_buzz_medium_finger_wire_energy",
+ "base": "buzz-wire-3d-medium-i00",
+ "family": "buzz_wire_3d",
+ "mechanism": "Robotiq finger into the static wire: ~100 kN at 2 mm, energy created (the same mechanism on medium); on 19bee571e it is VIOLENT",
+ "found_on_commit": "15579a3b7",
+ "configuration": null,
+ "rows": 140,
+ "core_rows": null,
+ "sha256": "6bc711ff2dff9953bc51fc81fe4143bd75d4ca1d71f5990a3f83804b8af7ab6d",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

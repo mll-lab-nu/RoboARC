@@ -1,0 +1,12 @@
+{
+ "name": "S5_slotted_medium_chain_whip_uncaused",
+ "base": "slotted-post-ring-medium-chain-i00",
+ "family": "slotted_post_ring",
+ "mechanism": "a prefix branch of the medium_chain -i01 reference (search prefix, seed 9212, episode 6 on the armature-1e-6 instance, build 315526e0be): the chain flung at 3.1 m/s; four links jump with no causal partner. BREAKDOWN (uncaused_jump x4) on armature 1e-6 in two fresh processes (final state ff67774d92a768b3); VIOLENT (3.1 m/s, left_ws) on armature 1e-5 (5406216a1a; birth 77ec761119dc157a) in two fresh processes (final state eee987f35448beb2). In place of Jianwen's S1 (medium_chain prefix8_e1), which never reached us.",
+ "found_on_commit": "315526e0be (slotted_chain108_v2, armature 1e-6)",
+ "configuration": null,
+ "rows": 577,
+ "core_rows": 577,
+ "sha256": "a439260446ce646a8b0ed99f922b3e773d0355a5c4a2adfaff5712b51c97a4f4",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

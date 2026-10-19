@@ -1,0 +1,51 @@
+{
+ "about": "rope_threading redesign: the route recipe per tier for the final round on the frozen head (main 10-12: references are recorded once, after the physics freeze). Per tier: build the instance (session_build), plan (plan_tier.py; relay_plan's LAY_WALL_CLEAR_M default 0.08 = plan8), run the closed-loop oracle (robot_relay) with the settings below, then fresh replays (robot_replay) on 2 hosts; forcing is read from the fresh replays only (the Session's live summary can lose events across the executor's rewinds). A run with 0 rewinds has its live forcing summary equal to a fresh replay's (deterministic); with rewinds, read a fresh replay.",
+ "commands": {
+  "instance": "python -m topogym.planning.rope_threading.redesign.session_build <tier> <out>/inst/<tier>",
+  "plan": "python scripts/robotangle/redesign/rope_threading/plan_tier.py <tier> <out>/plan",
+  "oracle": "python -m topogym.planning.rope_threading.redesign.robot_relay <tier> <out>/inst/<tier>/instance.json <out>/plan/timeline_<tier>.json <out>/oracle/<tier> --hold-s 20 <settings>",
+  "replay": "python -m topogym.planning.rope_threading.redesign.robot_replay <tier> <out>/inst/<tier>/instance.json <out>/oracle/<tier>/rows.npz <out>/oracle/<tier>/replay_<host>.json --hold 0"
+ },
+ "tiers": {
+  "very_easy": {
+   "settings": [],
+   "validated": "inst5: 3716 rows, 0 rewinds, f308ceae6beb3000, no Session forcing event; forcing_kept 12 ticks, max 126 N"
+  },
+  "easier": {
+   "settings": [
+    "--set",
+    "PLAN_SEED=1"
+   ],
+   "validated": "inst5 / the 5d1a04625e instance: 3778 rows, 0 rewinds, 3dfc613f3e1ed146 (fresh replay on Quest identical), no Session forcing event; forcing_kept 5 ticks, max 93 N. Without PLAN_SEED (wave-1 reference eba08cae9c538b75): the re-aimed receive beyond G1 ended in the other wrist family and the plan's draw turned the wrist ~3 rad with the rope in hand (cap ticks up to 426 N, no Session event)"
+  },
+  "easy": {
+   "settings": [
+    "--set",
+    "SAMEHAND_LOWER_M=0.04",
+    "--set",
+    "SAMEHAND_RELEASE_ROWS=30"
+   ],
+   "validated": "inst5: 5543 rows, 3 rewinds, 3849fb7bad7aa4e1; fresh replay identical. One Session forcing event: the left finger on bulkhead strip1 at 102 N for 235 controls (9.4 s) while drawing the tip from G1 toward A after the hand-over (the plan's draw is in the other wrist family than the re-aimed receive); open item. forcing_kept 236 ticks, max 110 N. Tried and not adopted: PLAN_SEED (the A lay whipped), a held wall clearance and lifted-route margins of 2-4 cm (the press stays: it is in a re-tried receive after a rewind)"
+  },
+  "medium": {
+   "settings": [
+    "--set",
+    "PATH_CHECK=0"
+   ],
+   "validated": "inst5: 4685 rows, 0 rewinds, 1ea73b917c74f23e, no Session forcing event; forcing_kept 15 ticks, max 126 N"
+  },
+  "hard": {
+   "settings": [],
+   "validated": "inst5: 6056 rows, 2 rewinds, c9951849ee16cdcf, fresh replay identical with no Session forcing event; forcing_kept 11 ticks, max 121 N; alt LIFT 0.02 / 1 s: 6386 rows, b9681572674b0493, fresh replay identical, no forcing",
+   "alt_settings": [
+    "--set",
+    "LIFT_SPEED=0.02",
+    "--set",
+    "LIFT_WAIT_S=1.0"
+   ]
+  }
+ },
+ "executor": "robot_relay of this series (the inchworm and the held pi-twin grasp off): on inst5 it reproduces the validated routes bit for bit (sandbox df6ce6111 runs r8: very_easy f308ceae6beb3000, easier eba08cae9c538b75, hard e0 c9951849ee16cdcf, hard LIFT b9681572674b0493)",
+ "forcing_note": "Two reads: the Session's forcing summary (the task's evidence; transient cap ticks under its duration threshold are not events) and the executor's forcing_kept (every cap tick in the kept rows).",
+ "stress": "pre-freeze CPU confirmations (head 2f5ee7f3eb, criteria v2.11 and v2.10 alike) of the GPU screen's flags on these references: very_easy 23, easier 14, easy 26, medium 22 streams: 0 BREAKDOWN, all VIOLENT but causal (pop class, kicks <= 3 m/s after the guard)"
+}

@@ -1,0 +1,216 @@
+{
+ "left": [
+  {
+   "cs": 2761,
+   "oe": 39610,
+   "part": "board",
+   "path_mm": 600.5,
+   "spread_mm": 0.11
+  },
+  {
+   "cs": 42265,
+   "oe": 89186,
+   "part": null,
+   "path_mm": null,
+   "spread_mm": null
+  },
+  {
+   "cs": 95551,
+   "oe": 101128,
+   "part": "end_block_b",
+   "path_mm": 857.1,
+   "spread_mm": 2.97
+  },
+  {
+   "cs": 108629,
+   "oe": 117916,
+   "part": "screw_b",
+   "path_mm": 938.9,
+   "spread_mm": 0.25
+  },
+  {
+   "cs": 123497,
+   "oe": 128222,
+   "part": "screw_a",
+   "path_mm": 1036.6,
+   "spread_mm": 1.28
+  },
+  {
+   "cs": 133941,
+   "oe": 269244,
+   "part": "board",
+   "path_mm": 18.4,
+   "spread_mm": 0.05
+  },
+  {
+   "cs": 271719,
+   "oe": 380204,
+   "part": null,
+   "path_mm": null,
+   "spread_mm": null
+  },
+  {
+   "cs": 381337,
+   "oe": 396340,
+   "part": "screw_a",
+   "path_mm": 643.5,
+   "spread_mm": 0.2
+  },
+  {
+   "cs": 401627,
+   "oe": 417566,
+   "part": "peg_0",
+   "path_mm": 675.0,
+   "spread_mm": 2.05
+  },
+  {
+   "cs": 422503,
+   "oe": 433392,
+   "part": "peg_1",
+   "path_mm": 621.1,
+   "spread_mm": 1.41
+  },
+  {
+   "cs": 438281,
+   "oe": 449266,
+   "part": "peg_2",
+   "path_mm": 601.5,
+   "spread_mm": 1.41
+  },
+  {
+   "cs": 454155,
+   "oe": 465248,
+   "part": "peg_3",
+   "path_mm": 604.8,
+   "spread_mm": 1.39
+  }
+ ],
+ "right": [
+  {
+   "cs": 13241,
+   "oe": 21032,
+   "part": "dowel_3",
+   "path_mm": 802.1,
+   "spread_mm": 0.99
+  },
+  {
+   "cs": 26699,
+   "oe": 34762,
+   "part": "dowel_2",
+   "path_mm": 773.8,
+   "spread_mm": 1.11
+  },
+  {
+   "cs": 138301,
+   "oe": 149286,
+   "part": "end_block_b",
+   "path_mm": 815.7,
+   "spread_mm": 5.07
+  },
+  {
+   "cs": 159071,
+   "oe": 165018,
+   "part": "screw_b",
+   "path_mm": 633.2,
+   "spread_mm": 0.16
+  },
+  {
+   "cs": 169347,
+   "oe": 183296,
+   "part": null,
+   "path_mm": null,
+   "spread_mm": null
+  },
+  {
+   "cs": 190471,
+   "oe": 204706,
+   "part": "hex_key",
+   "path_mm": 693.6,
+   "spread_mm": 1.95
+  },
+  {
+   "cs": 209475,
+   "oe": 258346,
+   "part": "hex_key",
+   "path_mm": 494.7,
+   "spread_mm": 0.77
+  },
+  {
+   "cs": 276403,
+   "oe": 284316,
+   "part": "dowel_1",
+   "path_mm": 812.7,
+   "spread_mm": 0.31
+  },
+  {
+   "cs": 289603,
+   "oe": 298250,
+   "part": "dowel_0",
+   "path_mm": 790.5,
+   "spread_mm": 0.46
+  },
+  {
+   "cs": 306037,
+   "oe": 317140,
+   "part": "end_block_a",
+   "path_mm": 739.1,
+   "spread_mm": 4.95
+  },
+  {
+   "cs": 328901,
+   "oe": 335968,
+   "part": "screw_a",
+   "path_mm": 647.7,
+   "spread_mm": 0.1
+  },
+  {
+   "cs": 342657,
+   "oe": 354228,
+   "part": "hex_key",
+   "path_mm": 640.9,
+   "spread_mm": 1.89
+  },
+  {
+   "cs": 361147,
+   "oe": 379434,
+   "part": "hex_key",
+   "path_mm": 752.9,
+   "spread_mm": 0.21
+  },
+  {
+   "cs": 380639,
+   "oe": 386650,
+   "part": "hex_key",
+   "path_mm": 596.7,
+   "spread_mm": 3.85
+  },
+  {
+   "cs": 470197,
+   "oe": 482682,
+   "part": "peg_4",
+   "path_mm": 634.0,
+   "spread_mm": 1.47
+  },
+  {
+   "cs": 488129,
+   "oe": 501514,
+   "part": "peg_5",
+   "path_mm": 622.5,
+   "spread_mm": 1.48
+  },
+  {
+   "cs": 507135,
+   "oe": 520326,
+   "part": "peg_6",
+   "path_mm": 628.5,
+   "spread_mm": 1.47
+  },
+  {
+   "cs": 525771,
+   "oe": 538548,
+   "part": "peg_7",
+   "path_mm": 653.2,
+   "spread_mm": 1.46
+  }
+ ]
+}

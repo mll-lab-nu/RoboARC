@@ -1,0 +1,12 @@
+{
+ "name": "M5_claws_easier_session_instability",
+ "base": "interlocked-claws-easier-i00",
+ "family": "interlocked_claws",
+ "mechanism": "the Session's simulator_instability (M3 family)",
+ "found_on_commit": "f9f42391d",
+ "configuration": null,
+ "rows": 255,
+ "core_rows": 215,
+ "sha256": "7f25745b5aec0d25eeddb9537b0ccccc6b6b1fd580b0e32a8da3158d80da881d",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

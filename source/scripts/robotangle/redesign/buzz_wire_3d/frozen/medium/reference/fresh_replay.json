@@ -1,0 +1,31 @@
+{
+ "replays": [
+  {
+   "instance": "<cluster work dir>/rigid_integrate_20261012/runs/p1/out/inst_buzz_wire_3d_medium/instance.json",
+   "topogym": "<cluster work dir>/rigid_integrate_20261012/tree2ce1",
+   "birth": "bad0e371814aec40",
+   "rows": 18024,
+   "steps": 18024,
+   "success": true,
+   "first_success_row": 18024,
+   "episode_end": "success",
+   "final_sha": "d575dd5f3281e3d6",
+   "review": null,
+   "wall_s": 948.7
+  },
+  {
+   "instance": "<cluster work dir>/rigid_integrate_20261012/runs/p1/out/inst_buzz_wire_3d_medium/instance.json",
+   "topogym": "<cluster work dir>/rigid_integrate_20261012/tree2ce1",
+   "birth": "bad0e371814aec40",
+   "rows": 18024,
+   "steps": 18024,
+   "success": true,
+   "first_success_row": 18024,
+   "episode_end": "success",
+   "final_sha": "d575dd5f3281e3d6",
+   "review": null,
+   "wall_s": 950.1
+  }
+ ],
+ "jobs": "runs p3 9620258 + p7 9634898, replays 9642174"
+}

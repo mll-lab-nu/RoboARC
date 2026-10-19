@@ -1,0 +1,339 @@
+"""Shared material-region admission/state for FEM and PBD grasp adapters.
+
+Only array/geometry selection is shared; each backend owns its real constraints.
+Local offsets and material selection extracted from the historical Knot/Blanket
+helpers listed in soft_grasp_assist_engineering_plan_20260927_zh.md.
+"""
+from copy import deepcopy
+import hashlib
+import numpy as np
+from scipy.spatial import cKDTree, ConvexHull
+from topogym.robot.grasp_geometry import read_grasp_geometry
+from topogym.utils.arrays import to_numpy
+from topogym.utils.grasp import (closed_fraction, rotation, material_components,
+                                surface_distances, exposed_patch)
+
+
+def _needed_surface_distances(points, vertices, faces, signed, threshold):
+    """surface_distances(points, vertices, faces) for each point that may lie within `threshold` of the surface or be its
+    nearest; +inf for the others, each provably farther than both. A point's distance is surface_distances' own value
+    (computed point by point against every triangle), so a contact test at `threshold`, the minimum and the minimum over
+    any set holding a point within `threshold` are those of the full evaluation. The bound below is the larger of the
+    distances to the vertices' box and to the convex hull's supporting planes (`signed`, from the same vertices), less
+    1 um (far above the rounding of either)."""
+    box = np.maximum(np.maximum(vertices.min(axis=0)-points, points-vertices.max(axis=0)), 0.)
+    bound = np.maximum(np.linalg.norm(box, axis=1), signed)-1e-6
+    bound[np.isnan(bound)] = -np.inf
+    result = np.full(len(points), np.inf)
+    order = np.argsort(bound, kind='stable')
+    count = int(np.searchsorted(bound[order], threshold, side='right'))
+    distances = _NearTriangles(vertices, faces)
+    if count:
+        result[order[:count]] = distances(points[order[:count]])
+    best, rest = (result[order[:count]].min() if count else np.inf), order[count:]
+    while len(rest) and bound[rest[0]] <= best:
+        take = int(np.searchsorted(bound[rest], best, side='right')) if np.isfinite(best) else min(8, len(rest))
+        result[rest[:take]] = distances(points[rest[:take]])
+        best, rest = min(best, result[rest[:take]].min()), rest[take:]
+    return result
+
+
+class _NearTriangles:
+    """surface_distances(points, vertices, faces), evaluated on the triangles that can hold each point's nearest surface
+    point: those whose bounding sphere (centroid, radius) comes within the point's upper bound (the smallest centroid
+    distance plus radius over all triangles), with 1 um to spare. The minimum comes from that triangle set in the full
+    evaluation as well, and trimesh computes each point-triangle pair on its own, so the distances are the same
+    (bitwise on 300 recorded blanket calls: speed lane, 2026-10-12); a finger mesh has 1-46 k triangles, the set about
+    85. The bounds are plain array passes (a k-d tree's build cost more than the few points it served)."""
+
+    def __init__(self, vertices, faces):
+        self.vertices, self.faces = vertices, np.asarray(faces)
+        self.centres = None
+
+    def __call__(self, points):
+        points = np.asarray(points, dtype=np.float64)
+        if not np.isfinite(points).all():   # a non-finite point: the full evaluation
+            return surface_distances(points, self.vertices, self.faces)
+        if self.centres is None:
+            v = np.asarray(self.vertices, dtype=np.float64)
+            a, b, c = v[self.faces[:, 0]], v[self.faces[:, 1]], v[self.faces[:, 2]]
+            self.centres = (a+b+c)/3
+            self.radii = np.sqrt(np.maximum(np.maximum(((a-self.centres)**2).sum(axis=1), ((b-self.centres)**2).sum(axis=1)),
+                                            ((c-self.centres)**2).sum(axis=1)))
+        # the bounds only select triangles (a superset of each point's nearest), so they run on the triangles whose
+        # centre lies within `reach` of the points' box; a point whose bound needs more reach takes them all
+        rmax = float(self.radii.max())
+        reach = .02 + rmax
+        near = np.flatnonzero(((self.centres >= points.min(axis=0)-reach) & (self.centres <= points.max(axis=0)+reach))
+                              .all(axis=1))
+        keep = np.zeros(len(self.faces), dtype=bool)
+        for p in points:
+            sub = near
+            if len(sub):
+                d = np.sqrt(((self.centres[sub]-p)**2).sum(axis=1))
+                upper = (d+self.radii[sub]).min()
+            if not len(sub) or upper+1e-6 > .02:   # a farther triangle could hold the nearest point
+                sub = np.arange(len(self.faces))
+                d = np.sqrt(((self.centres-p)**2).sum(axis=1))
+                upper = (d+self.radii).min()
+            keep[sub[d-self.radii[sub] <= upper+1e-6]] = True
+        return surface_distances(points, self.vertices, self.faces[keep])
+
+
+class SoftGraspBackend:
+    # the exposure rule's covering test (topogym/utils/grasp.py exposed_patch): False = remote from the covered patch
+    # particle (the flex), True = remote from the whole patch (the VBD cloth: bend grips)
+    exposure_remote_from_patch = False
+
+    def __init__(self, world, robot, config):
+        self.world, self.robot, self.config = world, robot, config
+        self.hands = {n: robot.entity.get_link(g.hand_link) for n, g in robot.groups.items()}
+        self.specs = {s.entity: s for s in config.targets}
+        self.entities = {n: world.entities[n] for n in self.specs}
+        self.regions, self.active, self.last_candidates = {}, {}, {}
+        self.material, self.identities, self.edges, self.rest_lengths = {}, {}, {}, {}
+        self._last_health = {}
+        self._admission = {}
+
+    def initialize_material(self, name, coordinates, rest_positions, edges=None):
+        uv = np.asarray(coordinates, dtype=float)
+        self.material[name] = uv
+        self.identities[name] = hashlib.sha256(uv.tobytes()).hexdigest()
+        spec = self.specs[name]
+        if spec.material_min_m and len(spec.material_min_m) != uv.shape[1]:
+            raise ValueError("Grasp material bounds dimension mismatch")
+        if edges is None:
+            tree = cKDTree(uv)
+            distance, neighbors = tree.query(uv, k=min(5, len(uv)))
+            spacing = np.median(distance[:, 1])
+            edges = sorted(tree.query_pairs(1.6*spacing))
+        edges = np.asarray(edges, dtype=int).reshape(-1, 2)
+        lengths = np.linalg.norm(np.asarray(rest_positions)[edges[:, 1]]-np.asarray(rest_positions)[edges[:, 0]], axis=1)
+        valid = lengths > 1e-10
+        self.edges[name], self.rest_lengths[name] = edges[valid], lengths[valid]
+
+    def fraction(self, hand):
+        group = self.robot.groups[hand]
+        return closed_fraction(self.robot.capture_state().targets[hand][group.gripper_field],
+                               group.grasp.open_position, group.grasp.closed_position)
+
+    def finger_fractions(self, hand):
+        group = self.robot.groups[hand]
+        q = to_numpy(self.robot.entity.get_qpos()).reshape(-1)
+        return [closed_fraction(q[self.robot.entity.get_joint(n).qs_idx_local[0]],
+                                group.grasp.open_position, group.grasp.closed_position) for n in group.finger_joints]
+
+    def allowed(self, name):
+        uv, spec = self.material[name], self.specs[name]
+        mask = np.ones(len(uv), dtype=bool)
+        if spec.material_min_m:
+            mask &= np.all((uv >= spec.material_min_m) & (uv <= spec.material_max_m), axis=1)
+        return mask
+
+    def candidate_mask(self, name):
+        return self.allowed(name)
+
+    def candidates(self, hand):
+        geometry = read_grasp_geometry(self.robot, hand)
+        group = self.robot.groups[hand]
+        tcp = geometry['position'] + rotation(geometry['quaternion']).apply(group.tcp_position_in_hand_m)
+        results = []
+        for name, spec in self.specs.items():
+            x, uv = self.positions(name), self.material[name]
+            mask, from_tcp = self.candidate_mask(name), np.linalg.norm(x-tcp, axis=1)
+            near = mask & (from_tcp <= self.config.max_tcp_distance_m)
+            indices = np.flatnonzero(near)
+            strain = self.strain_ratio(name, x)
+            self._admission[hand] = dict(entity=name, nearby_vertices=len(indices), qualified_region_centers=0,
+                                         max_material_edge_ratio=strain, occluded_region_centers=0,
+                                         obstacle_rejected_region_centers=0,
+                                         require_exposed_patch=spec.require_exposed_patch)
+            # A transient squeeze must settle before registering a constraint;
+            # do not acquire an already unhealthy shape and lose it next tick.
+            if not np.isfinite(x).all() or strain > spec.max_strain_ratio:
+                self._admission[hand]['rejection'] = 'material_strain_or_nonfinite'
+                continue
+            if not len(indices):
+                continue
+            # Bilateral evidence belongs to one local material region. The
+            # two fingers normally touch different vertices on that region.
+            # Requiring a single vertex to be close to both incorrectly rejects
+            # valid cloth patches and thicker rope cross-sections.
+            nearby = np.flatnonzero(from_tcp <= self.config.max_tcp_distance_m+spec.spatial_radius_m)
+            distances = np.full((2, len(x)), np.inf)
+            inside_finger = np.zeros(len(x), dtype=bool)
+            for side, (vertices, faces) in enumerate(geometry['surfaces']):
+                hull = ConvexHull(vertices)
+                signed = (x[nearby] @ hull.equations[:, :3].T + hull.equations[:, 3]).max(axis=1)
+                inside_finger[nearby] |= signed < -self.config.max_penetration_m
+                # Only the contact test, the minima and a qualified patch's minimum read these distances.
+                distances[side, nearby] = _needed_surface_distances(x[nearby], vertices, faces, signed,
+                                                                    spec.contact_distance_m)
+            contact = (distances <= spec.contact_distance_m) & mask[None, :]
+            self._admission[hand]['minimum_finger_distances_m'] = distances.min(axis=1).tolist()
+            patches = {}
+            # A patch needs contact with both fingers; it lies within its center's material neighbourhood
+            # (material_patch = that neighbourhood within the spatial radius), so without contact there it fails.
+            allowed = self.allowed(name) if contact.any(axis=1).all() else None
+            for center in indices if allowed is not None else ():
+                center = int(center)
+                material = self._material_neighbours(name, center, spec.material_radius_m)
+                if not contact[:, material].any(axis=1).all():
+                    continue
+                patch = material[np.linalg.norm(x[material]-x[center], axis=1) <= spec.spatial_radius_m]
+                if (not len(patch) or not np.all(allowed[patch]) or inside_finger[patch].any()
+                        or not np.all(contact[:, patch].any(axis=1))):
+                    continue
+                patches[center] = patch
+            self._admission[hand]['qualified_region_centers'] = len(patches)
+            for component in material_components(list(patches), uv, spec.material_radius_m):
+                previous = self.last_candidates.get((hand, name))
+                ordered = sorted(map(int, component), key=lambda i: (i != previous, np.linalg.norm(x[i]-tcp), i))
+                for center in ordered:
+                    patch = patches[center]
+                    if (spec.require_exposed_patch and not exposed_patch(
+                            x, uv, patch, radius=spec.spatial_radius_m, clearance=spec.contact_distance_m,
+                            remote_from_patch=self.exposure_remote_from_patch)):
+                        self._admission[hand]['occluded_region_centers'] += 1
+                        continue
+                    if self.penetration_reason(name, patch):
+                        self._admission[hand]['obstacle_rejected_region_centers'] += 1
+                        continue
+                    key = (name, center)
+                    # Never mutate an owned region while considering another hand.
+                    if key not in self.active:
+                        self.regions[key] = dict(indices=patch.tolist(), evidence=dict(
+                            source=self.evidence_source, physics_step=self.world.physics_step,
+                            finger_surface_gaps_m=distances[:, patch].min(axis=1).tolist()))
+                    self.last_candidates[hand, name] = center
+                    results.append(key)
+                    break
+        return sorted(results)
+
+    def _material_neighbours(self, name, center, radius):
+        """material_patch's material condition: the particles within `radius` of `center` in material coordinates,
+        np.flatnonzero(norm(uv-uv[center], axis=1) <= radius) as there. The coordinates are set once per entity
+        (initialize_material), so each center's set is computed once."""
+        uv = self.material[name]
+        cache = self.__dict__.setdefault('_neighbour_cache', {})
+        source, table = cache.get((name, radius), (None, None))
+        if source is not uv:
+            table = {}
+            cache[name, radius] = (uv, table)
+        found = table.get(center)
+        if found is None:
+            found = table[center] = np.flatnonzero(np.linalg.norm(uv-uv[center], axis=1) <= radius)
+        return found
+
+    def conflicts(self, first, second):
+        first, second = tuple(first), tuple(second)
+        if first[0] != second[0]:
+            return False
+        a, b = self.regions[first]['indices'], self.regions[second]['indices']
+        return bool(np.intersect1d(a, b).size)
+
+    def acquire(self, hand, target):
+        key = tuple(target)
+        if key in self.active:
+            raise RuntimeError("Material region already held")
+        x = self.positions(key[0])[self.regions[key]['indices']]
+        parent = self.hands[hand]
+        pos, quat = to_numpy(parent.get_pos()).reshape(3), to_numpy(parent.get_quat()).reshape(4)
+        binding = dict(hand=hand, target=key, indices=list(self.regions[key]['indices']),
+                       material_identity=self.identities[key[0]],
+                       local_offsets=rotation(quat).inv().apply(x-pos).tolist(),
+                       finger_fractions=self.finger_fractions(hand),
+                       acquisition_evidence=deepcopy(self.regions[key]['evidence']))
+        self.attach_native(binding)
+        self.active[key] = deepcopy(binding)
+        if not self.exists(binding):
+            raise RuntimeError("Native soft grasp creation failed")
+        return binding
+
+    def targets(self, binding):
+        parent = self.hands[binding['hand']]
+        return to_numpy(parent.get_pos()).reshape(3) + rotation(to_numpy(parent.get_quat()).reshape(4)).apply(binding['local_offsets'])
+
+    def release(self, binding):
+        self.detach_native(binding)
+        self.active.pop(tuple(binding['target']))
+
+    def penetration_reason(self, name, indices):
+        """Guard actual convex rigid obstacles; this is not a contact solver."""
+        x = self.positions(name)[indices]
+        for entity_name, entity in self.world.entities.items():
+            if entity_name == 'robot' or not hasattr(entity, 'links'):
+                continue
+            for link in entity.links:
+                for geom in link.geoms:
+                    if not geom.is_convex:
+                        continue
+                    v = to_numpy(geom.get_verts()).reshape(-1, 3)
+                    if len(v) < 4 or np.linalg.matrix_rank(v-v.mean(axis=0)) < 3:
+                        continue
+                    if np.any(x.max(axis=0) < v.min(axis=0)) or np.any(x.min(axis=0) > v.max(axis=0)):
+                        continue
+                    planes = ConvexHull(v).equations
+                    distance = (x @ planes[:, :3].T + planes[:, 3]).max(axis=1)
+                    if np.any(distance < -self.config.max_penetration_m):
+                        return 'material_obstacle_penetration'
+        return None
+
+    def check_health(self, binding):
+        name = binding['target'][0]
+        x = self.positions(name)
+        error = float(np.linalg.norm(x[binding['indices']]-self.targets(binding), axis=1).max())
+        strain = self.strain_ratio(name, x)
+        self._last_health[binding['hand']] = dict(max_follow_error_m=error, max_material_edge_ratio=strain)
+        if not np.isfinite(x).all():
+            return 'nonfinite_material'
+        if np.max(np.asarray(binding['finger_fractions'])-self.finger_fractions(binding['hand'])) > self.config.max_finger_opening_fraction:
+            return 'physical_fingers_opened'
+        if error > self.config.max_translation_error_m:
+            return 'material_follow_error'
+        if strain > self.specs[name].max_strain_ratio:
+            return 'material_strain'
+        return self.penetration_reason(name, binding['indices'])
+
+    def strain_ratio(self, name, positions):
+        """The largest material edge stretch. The last value per entity is kept by the positions' bytes: within a
+        tick candidates and check_health ask for the same positions several times (speed lane, 2026-10-13)."""
+        edges = self.edges[name]
+        if not len(edges):
+            return 1.
+        x = np.asarray(positions)
+        cache = self.__dict__.setdefault('_strain_cache', {})
+        key = (x.dtype.str, x.shape, x.tobytes())
+        hit = cache.get(name)
+        if hit is not None and hit[0] == key:
+            return hit[1]
+        value = float((np.linalg.norm(x[edges[:, 1]]-x[edges[:, 0]], axis=1) / self.rest_lengths[name]).max())
+        cache[name] = (key, value)
+        return value
+
+    def capture(self):
+        return deepcopy(dict(schema_version=1, identities=self.identities,
+            regions=list(self.regions.items()), active=list(self.active.items()),
+            last_candidates=list(self.last_candidates.items()), health=self._last_health, admission=self._admission))
+
+    def restore(self, state):
+        if state['schema_version'] != 1 or state['identities'] != self.identities:
+            raise ValueError("Soft grasp material identity mismatch")
+        saved = deepcopy(state)
+        self.regions = {tuple(k): v for k, v in saved['regions']}
+        self.active = {tuple(k): v for k, v in saved['active']}
+        self.last_candidates = {tuple(k): v for k, v in saved['last_candidates']}
+        self._last_health = saved['health']
+        self._admission = saved['admission']
+
+    def verify_bindings(self, bindings):
+        expected = {tuple(b['target']) for b in bindings}
+        if expected != set(self.active) or any(not self.exists(b) for b in bindings):
+            raise ValueError("Restored soft ownership differs from native constraints")
+        self.verify_native_ownership(bindings)
+
+    def read_model(self):
+        return dict(constraint_model=self.config.model, acquisition_evidence=self.evidence_source,
+                    sampling_scope='one geometry sample per World tick; no contact-force claim',
+                    reaction_force=None, health=deepcopy(self._last_health), admission=deepcopy(self._admission),
+                    collision_scope='native backend contacts; convex obstacle penetration guard at World ticks')

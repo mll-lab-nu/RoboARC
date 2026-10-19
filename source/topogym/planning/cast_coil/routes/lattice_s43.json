@@ -1,0 +1,117 @@
+{
+ "schema_version": 1,
+ "geometry": "variations/cast_coil/lattice_s43.json",
+ "geometry_sha256": "424e60bd9dbda1515d36c77120fec12184bd5481cabe91260d1d387f8363670a",
+ "description": "The shortest assembly of variations/cast_coil/lattice_s43.json (11 constrained actions, turns about x, y and z), as a disassembly of silver relative to gold in gold's frame and cell units; assembly is the route played backwards. anchor, carry and pregrasp_rise_m set how the oracle executes it: both arms place the pair, a joint-space carry, a 6 cm descent before the grasp.",
+ "route": [
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    1.0,
+    0.0,
+    3.0
+   ],
+   "degrees": -90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "y",
+   "through": [
+    0.5,
+    0.0,
+    2.5
+   ],
+   "degrees": -90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "z",
+   "through": [
+    1.0,
+    2.0,
+    0.0
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "kind": "turn",
+   "axis": "x",
+   "through": [
+    0.0,
+    4.0,
+    1.0
+   ],
+   "degrees": 90.0
+  },
+  {
+   "kind": "slide",
+   "vector": [
+    0.0,
+    0.0,
+    -2.0
+   ],
+   "free": true
+  }
+ ],
+ "anchor": "arms",
+ "carry": "joint",
+ "pregrasp_rise_m": 0.06,
+ "source": "design search round 4 (seed 43, rank 0) with pregrasp_rise_m 0.06; MuJoCo physics success in runs/test_results/cast_coil_v2_design_candidates_20261010/s43_rise6 (28037 control steps)"
+}

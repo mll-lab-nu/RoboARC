@@ -1,0 +1,12 @@
+{
+ "name": "J1_keyhole_easier_arm_arm_depth",
+ "base": "cast-keyhole-easier-i01",
+ "family": "cast_keyhole",
+ "mechanism": "an ALOHA link driven more than 10 mm into the other arm (the acceptance round on df00ee35b, keyhole_v3, easier, random e57: left/right_finger_link 11.4 mm into right/gripper_base at 163 N; shrunk from 317 controls): robot-robot contacts on _RIGID's 20 ms class (robot.self_contact solref (0.02, 1), solimp (0.9, 0.95, 0.001, 0.5, 2)). In the shrunk stream right/left_finger_link sinks 11.3 mm into left/gripper_base. Energy clean (X 0.000 J). BREAKDOWN on df00ee35b (final state 67828a92548818d0, two fresh processes). CLEAN on keyhole_v4, robot.self_contact SOFT_CONTACT (3.0 mm, final state 12cb9d3721ca2dea, two fresh processes). On 151874501 (SOFT_CONTACT at the constant impedance .95 / .95, scene.migrate_contacts): CLEAN, 3.0 mm, final state 9235894fd771fa06, two fresh processes",
+ "found_on_commit": "df00ee35b",
+ "configuration": null,
+ "rows": 99,
+ "core_rows": 59,
+ "sha256": "0ed5dbd7095970997903fe2c920eaa8fc87a5e9b10e9b864546b8824ad17b56e",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}
