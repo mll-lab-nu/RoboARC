@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # Run one Harbor-native agent over tasks in both modes (<base>-privileged and <base>-standard), unattended; meant to be
 # started in the background (inside `sg docker -c` if docker needs the group):
-#   scripts/run_agent_batch.sh <batch-name> <base> [<base> ...]      # <base> = a task name without its -privileged / -standard
-# Official runs use Harbor's native agents only (PROTOCOL D11): no adapter; the transparent usage gateway below only
-# records and is off by default. Env (defaults):
-#   AGENT        codex | claude-code (codex)        MODEL   the -m model (openai/gpt-6-luna)
+#   MODEL=<provider/model> scripts/harbor/run_agent_batch.sh <batch-name> <base> [<base> ...]
+#   (<base> = a task name without its -privileged / -standard; docs/RUNNING.md)
+# Official runs use Harbor's native agents only (PROTOCOL D11): no adapter. Env (defaults):
+#   AGENT        codex | claude-code (codex)        MODEL   the -m model (required, e.g. openai/<model>)
 #   EFFORT       reasoning effort, --ak reasoning_effort=<EFFORT> (xhigh); `default` passes none
 #   AK           more agent options, e.g. "--ak reasoning_summary=detailed"
 #   WEB_SEARCH   disabled (default) = the harness offers the model no web search: Codex --ak web_search=disabled,
 #                Claude Code --ak disallowed_tools=WebSearch,WebFetch (PROTOCOL D11; the search runs at the model
 #                provider, past any egress allowlist), and Codex none of the other tools that run there (a ChatGPT
 #                login's connectors and apps, plugins, image generation: those features = false in a copy of
-#                AGENT_CONFIG, scripts/codex_tools_off.py); "allowed" = leave the harness default (not for official runs)
+#                AGENT_CONFIG, scripts/harbor/codex_tools_off.py); "allowed" = leave the harness default (not for official runs)
 #   AGENT_CONFIG a native config file, --ak config=<file>: Codex's config.toml (an Azure provider; retries with
 #                request_max_retries / stream_max_retries) or Claude Code's settings
 #   ENV_FILE     a .env file Harbor loads (--env-file); without it the credentials come from this environment
@@ -30,30 +30,34 @@
 #                0 = one job per mode ($JOBS/<batch>-<mode>/), the modes side by side, N_P / N_S concurrent trials (2 / 2;
 #                N_S also for standard-realtime)
 #   WAIT_FOR     a file that must exist before a mode starts, e.g. "standard:<path>" (default: none)
-#   JOBS         <repo>/jobs/agents     LABEL  the run's title for the results README
+#   JOBS         <repo>/jobs/agents (ignored by git)     LABEL  the run's title for the results README
 #   RUN_ID       the run id (PROTOCOL D4, docs/TAXONOMY.md): <harness>-<model>-<effort>, derived from AGENT / MODEL /
-#                EFFORT, e.g. codex-gpt6_luna-xhigh. Provider, service tier and settings go in metadata, never in the id.
-#   RESULTS      a directory OUTSIDE the repository: after each job scripts/write_task_results.py writes the per-task results
-#                for the results site there, <RESULTS>/<batch>/<task>/<RUN_ID>/ (PROTOCOL D3: no results in the repository);
+#                EFFORT, e.g. codex-gpt5-xhigh. Provider, service tier and settings go in metadata, never in the id.
+#   RESULTS      a directory OUTSIDE the repository: after each job scripts/harbor/write_task_results.py writes the per-task
+#                results there, <RESULTS>/<batch>/<task>/<RUN_ID>/ (PROTOCOL D3: no results in the repository);
 #                default <repo>/../rcb_results; "" = skip
 #   HOST_CPUS    the host's CPU count (`nproc`): a task's CPU cap above it ([environment] / [verifier.environment] cpus,
 #                a compose service's cpus) is clamped to it in the job's own copy of the task (below), as PROTOCOL §2.10
-#                requires of a runner (docker refuses a larger cap); tasks/ keeps its values (scripts/clamp_cpus.py)
+#                requires of a runner (docker refuses a larger cap); tasks/ keeps its values (scripts/harbor/clamp_cpus.py)
 #   Every job runs from its own copy of its tasks ($JOBS/.tasks/<job>/, removed afterwards), every file's mtime derived
 #   from its content (scripts/stamp_mtimes.py): Docker's BuildKit can otherwise build one task's image with another
-#   task's equal-size, equal-mtime file (issue #258, docs/RUNNING.md "Building task images")
-#   LOG_MIRROR / MEM_GUARD   1 (default) = start the agent-record mirror / the memory guard below if none runs; 0 = not
+#   task's equal-size, equal-mtime file (docs/RUNNING.md "Building task images")
+#   LOG_MIRROR   0 (default); 1 = start the append-only agent-record mirror below (a root container) if none runs
+#   MEM_GUARD    0 (default); 1 = start the memory guard below if none runs: while host memory is short it kills the
+#                running RoboARC trial container that uses the most memory (only containers named roboarc-*)
 #   GATEWAY      0 (default) = the agent calls its API directly, as Harbor runs it; 1 = route the agent's model API
-#                calls through scripts/usage_gateway/gateway.py, which forwards
+#                calls through a transparent usage gateway. The gateway is an EXTERNAL component, not part of this
+#                repository: install it at $USAGE_GATEWAY_DIR (default scripts/usage_gateway/: gateway.py, rawlog.py,
+#                api_paths.json); without it GATEWAY=1 stops at start. It forwards
 #                them unchanged (the agent keeps its own credentials) and records each trial's tokens per request in
 #                <trial>/gateway/ (usage.jsonl, totals.json). Before each job the runner checks that the gateway answers
 #                (/_gateway/health) and restarts it on its port, or stops the lane; a job during which it died gets
 #                <job>/gateway_down.json, and a trial whose last model calls failed at the gateway (upstream unreachable,
-#                stream broken off, provider 5xx) is published as "not a result", never the agent's 0 (board 0121 M4)
+#                stream broken off, provider 5xx) is published as "not a result", never the agent's 0
 #   GATEWAY_RAW  1 (default, takes effect with GATEWAY=1) = the gateway also keeps every request and response body
-#                (<trial>/gateway/raw.jsonl.xz, deduplicated, see scripts/usage_gateway/rawlog.py; private: it holds the
+#                (<trial>/gateway/raw.jsonl.xz, deduplicated, see the gateway's rawlog.py; private: it holds the
 #                whole conversation); 0 = token usage only
-#                The gateway forwards model-API calls only (scripts/usage_gateway/api_paths.json) and answers anything
+#                The gateway forwards model-API calls only (its api_paths.json) and answers anything
 #                else at the provider 403 (account connectors, files, web tools; counted in totals.json refused_paths)
 #   GATEWAY_EGRESS  gateway (default; takes effect with GATEWAY=1) = each job's copy of the task allows as egress only the gateway's address and the package registries (PyPI, apt), so the
 #                agent's container reaches its provider through the gateway's model-API paths only. (Harbor's allowlist
@@ -68,25 +72,31 @@
 #   GATEWAY_START_WAIT  seconds to wait for the gateway to come up (10); raise it on busy shared nodes
 #   TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT   per-trial token budget the gateway enforces (100000000 / 10000000, PROTOCOL
 #                §5): past it every further model request is refused and the trial counts as failed; 0 = no limit
-# Runner-side tools (not task code): while trials run, the container rcb-log-mirror copies every trial's agent/ directory
-# append-only into ${JOBS}_mirror/ (scripts/log_mirror.py; root-owned: neither the agent nor the host user can delete it),
-# and scripts/mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan with redaction
-# (scripts/scan_secrets.py), the task results, the summary table $JOBS/<batch>.summary.md, and a lane stop on structured
-# model-account failures (scripts/account_failure_check.py). Progress: $JOBS/<batch>.log; in a browser, every trial's
-# state (pending / running / done) with scripts/live_board.py --jobs $JOBS.
+# Runner-side tools (not task code), in this directory: with LOG_MIRROR=1 the container rcb-log-mirror copies every
+# trial's agent/ directory append-only into ${JOBS}_mirror/ (log_mirror.py; root-owned: neither the agent nor the host
+# user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
+# with redaction (scan_secrets.py), the task results, the summary table $JOBS/<batch>.summary.md, and a lane stop on
+# structured model-account failures (account_failure_check.py). Progress: $JOBS/<batch>.log; in a browser, every
+# trial's state (pending / running / done) with scripts/harbor/live_board.py --jobs $JOBS.
 set -u
-R="$(cd "$(dirname "$0")/.." && pwd)"
-[ $# -ge 2 ] || { sed -n 2,40p "$0"; exit 2; }
+H="$(cd "$(dirname "$0")" && pwd)"          # scripts/harbor/: the runner's tools
+R="$(cd "$H/../.." && pwd)"                 # the repository: tasks/, scripts/ (the task layer)
+[ $# -ge 2 ] || { sed -n 2,45p "$0"; exit 2; }
 batch="$1"; shift; tasks=("$@")
-AGENT="${AGENT:-codex}"; MODEL="${MODEL:-openai/gpt-6-luna}"; EFFORT="${EFFORT:-xhigh}"; AK="${AK:-}"
+AGENT="${AGENT:-codex}"; MODEL="${MODEL:-}"; EFFORT="${EFFORT:-xhigh}"; AK="${AK:-}"
 WEB_SEARCH="${WEB_SEARCH:-disabled}"
 AGENT_CONFIG="${AGENT_CONFIG:-}"; ENV_FILE="${ENV_FILE:-}"
 MODES="${MODES:-privileged standard}"; SEQ="${SEQ:-1}"; N_P="${N_P:-2}"; N_S="${N_S:-2}"; K="${K:-1}"; WAIT_FOR="${WAIT_FOR:-}"
 JOBS="${JOBS:-$R/jobs/agents}"; RESULTS="${RESULTS-$(dirname "$R")/rcb_results}"; LABEL="${LABEL:-$AGENT + $MODEL ($EFFORT)}"
-LOG_MIRROR="${LOG_MIRROR:-1}"; MEM_GUARD="${MEM_GUARD:-1}"
+LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
+USAGE_GATEWAY_DIR="${USAGE_GATEWAY_DIR:-$R/scripts/usage_gateway}"
 GATEWAY="${GATEWAY:-0}"; GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
 GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
 HOST_CPUS="${HOST_CPUS:-$(nproc)}"
+[ -n "$MODEL" ] || { echo "MODEL must be set: the -m model of the agent, e.g. MODEL=openai/<model> (docs/RUNNING.md)" >&2; exit 2; }
+if [ "$GATEWAY" = 1 ] && [ ! -f "$USAGE_GATEWAY_DIR/gateway.py" ]; then
+  echo "GATEWAY=1 needs the usage gateway, an external component not in this repository: no $USAGE_GATEWAY_DIR/gateway.py (set USAGE_GATEWAY_DIR, or run without GATEWAY)" >&2; exit 2
+fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
 case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
 # absolute paths: with the gateway on, Harbor is started from the job's own copy of the task (run_job), not from the repository
@@ -97,7 +107,7 @@ JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(ab
 TOKEN_BUDGET_IN="${TOKEN_BUDGET_IN:-100000000}"; TOKEN_BUDGET_OUT="${TOKEN_BUDGET_OUT:-10000000}"
 case "$AGENT" in codex|claude-code) ;; *) echo "AGENT must be a Harbor native agent: codex or claude-code (PROTOCOL D11)" >&2; exit 2 ;; esac
 # Run id (D4): harness = the agent name with - -> _; model = MODEL's last path segment, lower case, gpt-<n> joined
-# (gpt-6-luna -> gpt6_luna), a leading claude- dropped (claude-fable-5-1 -> fable_5_1), every other
+# (gpt-5 -> gpt5), a leading claude- dropped (claude-opus-4-1 -> opus_4_1), every other
 # character outside [a-z0-9] -> _; effort as given ("default" when the harness sets none).
 if [ -z "${RUN_ID:-}" ]; then
   f() { tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9]+/_/g; s/^_+|_+$//g'; }
@@ -117,7 +127,7 @@ AGENT_ARGS=(-a "$AGENT" -m "$MODEL")
 case " $AK " in *[[:space:]]config=*) echo "AK must not carry config=...: name the file in AGENT_CONFIG" >&2; exit 2 ;; esac
 if [ "$WEB_SEARCH" = disabled ] && [ "$AGENT" = codex ]; then
   mkdir -p "$JOBS/.agent-config" && cfg="$JOBS/.agent-config/config.toml.$$" \
-    && python3 "$R/scripts/codex_tools_off.py" ${AGENT_CONFIG:+"$AGENT_CONFIG"} > "$cfg" && grep -q '^features\.apps = false$\|^apps = false$' "$cfg" \
+    && python3 "$H/codex_tools_off.py" ${AGENT_CONFIG:+"$AGENT_CONFIG"} > "$cfg" && grep -q '^features\.apps = false$\|^apps = false$' "$cfg" \
     || { echo "no Codex config without provider-side tools could be written from AGENT_CONFIG=${AGENT_CONFIG:-(none)} (see above); WEB_SEARCH=disabled needs it" >&2; exit 2; }
   AGENT_CONFIG="$cfg"
 fi
@@ -141,7 +151,7 @@ LOG="$JOBS/$batch.log"
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 if [ -n "$ENV_FILE" ] && [ ! -f "$ENV_FILE" ]; then log "no env file $ENV_FILE"; exit 2; fi
 log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH"
-# the batch's plan, for scripts/live_board.py: every job this command runs, "pending" there until it starts
+# the batch's plan, for live_board.py: every job this command runs, "pending" there until it starts
 mkdir -p "$JOBS/.plan"
 python3 - "$R" "$JOBS/.plan/$batch.json" "$batch" "$RUN_ID" "$SEQ" "$MODES" "${tasks[@]}" <<'PY'
 import json, os, pathlib, sys
@@ -157,16 +167,16 @@ PY
 # append-only mirror of every trial's agent/ directory, out of every trial container's reach
 if [ "$LOG_MIRROR" = 1 ] && ! docker ps --format '{{.Names}}' | grep -qx rcb-log-mirror; then
   docker rm -f rcb-log-mirror >/dev/null 2>&1
-  docker run -d --name rcb-log-mirror --restart unless-stopped --network none -v "$R/scripts:/s:ro" -v "$JOBS:/src:ro" \
+  docker run -d --name rcb-log-mirror --restart unless-stopped --network none -v "$H:/s:ro" -v "$JOBS:/src:ro" \
     -v "${JOBS}_mirror:/mirror" python:3.12-slim python3 /s/log_mirror.py --src /src --mirror /mirror --interval 5 >/dev/null \
     && log "started rcb-log-mirror ($JOBS -> ${JOBS}_mirror)" || log "WARNING: could not start rcb-log-mirror"
 fi
 
-# host memory red line: scripts/mem_guard.py keeps 2 GiB available (the largest benchmark container is killed first)
-pid="$(cat "$R/jobs/journal/mem_guard.pid" 2>/dev/null)"
+# host memory red line (MEM_GUARD=1): mem_guard.py keeps 2 GiB available (the largest RoboARC trial container is killed first)
+pid="$(cat "$JOBS/.mem_guard.pid" 2>/dev/null)"
 if [ "$MEM_GUARD" = 1 ] && ! grep -qs mem_guard.py "/proc/${pid:-0}/cmdline"; then
-  setsid nohup python3 "$R/scripts/mem_guard.py" >/dev/null 2>&1 </dev/null &
-  log "started mem_guard (2 GiB red line; log jobs/journal/mem_guard.log)"
+  setsid nohup python3 "$H/mem_guard.py" --log "$JOBS/mem_guard.log" --pidfile "$JOBS/.mem_guard.pid" >/dev/null 2>&1 </dev/null &
+  log "started mem_guard (2 GiB red line; log $JOBS/mem_guard.log)"
 fi
 
 # job copies a killed runner left behind (run_job removes its own; never here on exit: Harbor may still be tearing a
@@ -190,12 +200,12 @@ if [ "$GATEWAY" = 1 ]; then
   [[ "$agent_up" =~ ^http://([A-Za-z0-9.-]+:[0-9]+)(/|$) ]] && gw_args+=(--http-host "${BASH_REMATCH[1]}")
   gw_start() {  # [port]: start the gateway (a restart: on the port the agent's base URLs already name); 0 = it listens
     rm -f "$ready"
-    setsid python3 "$R/scripts/usage_gateway/gateway.py" "${gw_args[@]}" ${1:+--port "$1"} >>"$JOBS/.gateway/gateway.$$.err" 2>&1 </dev/null &
+    setsid python3 "$USAGE_GATEWAY_DIR/gateway.py" "${gw_args[@]}" ${1:+--port "$1"} >>"$JOBS/.gateway/gateway.$$.err" 2>&1 </dev/null &
     gw_pid=$!
     local _; for _ in $(seq $((GATEWAY_START_WAIT * 5))); do [ -s "$ready" ] && return 0; kill -0 "$gw_pid" 2>/dev/null || return 1; sleep 0.2; done
     [ -s "$ready" ]
   }
-  gw_alive() {  # the gateway process runs and answers its health check (board 0121 M4: it was started once, never checked)
+  gw_alive() {  # the gateway process runs and answers its health check
     kill -0 "$gw_pid" 2>/dev/null && python3 -c 'import sys, urllib.request as u
 u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_gateway/health" 2>/dev/null
   }
@@ -255,7 +265,7 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
 fi
 
 gateway_check() {  # before a job is claimed (GATEWAY=1): the gateway answers, else it is restarted on its port; 1 = it is
-  # down for good and the lane stops (every trial would end as an infrastructure failure, board 0121 M4)
+  # down for good and the lane stops (every trial would end as an infrastructure failure)
   [ "$GATEWAY" = 1 ] || return 0
   gw_alive && return 0
   log "usage gateway $GW (pid $gw_pid) does not answer; restarting it on port $gw_port"
@@ -265,7 +275,7 @@ gateway_check() {  # before a job is claimed (GATEWAY=1): the gateway answers, e
 }
 
 gateway_after() {  # <job>: the gateway died during the job: its trials are infrastructure failures, not the agent's 0
-  # (<job>/gateway_down.json, read by scripts/account_failure_check.py and write_task_results.py)
+  # (<job>/gateway_down.json, read by account_failure_check.py and write_task_results.py)
   [ "$GATEWAY" = 1 ] && [ -d "$JOBS/$1" ] || return 0
   gw_alive && return 0
   printf '{"gateway": "%s", "pid": "%s", "checked": "%s"}\n' "$GW" "$gw_pid" "$(date -u +%FT%TZ)" > "$JOBS/$1/gateway_down.json"
@@ -284,9 +294,9 @@ wait_for() {  # <mode>: block until every WAIT_FOR file of this mode exists
 
 finish_job() {  # <job>: the raw logs compacted; no key in any saved file (+redact); the task results (D3)
   [ -d "$JOBS/$1" ] || return 0
-  [ "$GATEWAY" = 1 ] && [ "$GATEWAY_RAW" = 1 ] && python3 "$R/scripts/usage_gateway/rawlog.py" compact "$JOBS/$1" 2>&1 | sed "s/^/[$1] /" | tee -a "$LOG"
-  python3 "$R/scripts/scan_secrets.py" "$JOBS/$1" "${SCAN[@]}" --redact 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
-  [ -n "$RESULTS" ] && python3 "$R/scripts/write_task_results.py" "$JOBS" "$1" "$RUN_ID" "$LABEL" --out "$RESULTS/$batch" 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
+  [ "$GATEWAY" = 1 ] && [ "$GATEWAY_RAW" = 1 ] && python3 "$USAGE_GATEWAY_DIR/rawlog.py" compact "$JOBS/$1" 2>&1 | sed "s/^/[$1] /" | tee -a "$LOG"
+  python3 "$H/scan_secrets.py" "$JOBS/$1" "${SCAN[@]}" --redact 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
+  [ -n "$RESULTS" ] && python3 "$H/write_task_results.py" "$JOBS" "$1" "$RUN_ID" "$LABEL" --out "$RESULTS/$batch" 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
 }
 
 summary() {  # one table per comparable configuration over every job of this batch, rewritten after each job (atomically: lanes share it)
@@ -294,7 +304,7 @@ summary() {  # one table per comparable configuration over every job of this bat
 import json, pathlib, sys, datetime as dt
 from collections import defaultdict
 jobs, batch, R = pathlib.Path(sys.argv[1]), sys.argv[2], pathlib.Path(sys.argv[3])
-sys.path.insert(0, str(R / "scripts"))
+sys.path[:0] = [str(R / "scripts" / "harbor"), str(R / "scripts")]
 import task_conventions as tc, write_task_results as wtr  # noqa: E402
 from task_names import canonical  # noqa: E402
 # RUNNING.md "Results" (PROTOCOL v2.0): results are compared only within one configuration (task_conventions.config_key:
@@ -365,7 +375,7 @@ PY
 stamp_task_dirs() {  # <root>: give every file of the job's task copies a mtime derived from its content (scripts/stamp_mtimes.py)
   # BuildKit keeps one shared snapshot per build-context NAME (Harbor's are always "environment" and "tests") and re-sends a file
   # only when its name, size, mode or mtime changed: a tree whose files share mtimes (git checkout, tar, cp -r, sed loops) can
-  # build one task's image with ANOTHER task's equal-size file (issue #258). A content-derived mtime never matches another
+  # build one task's image with ANOTHER task's equal-size file. A content-derived mtime never matches another
   # content's. Always on the job's own copy: a checkout update during the trial cannot reset it before the verifier is built.
   python3 "$R/scripts/stamp_mtimes.py" --full "$1/tasks" >/dev/null
 }
@@ -408,10 +418,10 @@ run_job() {  # <job> <concurrency> <harbor -i args...>
   local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
   local root="$R" f dirs=()
   mapfile -t dirs < <(task_dirs "$R" "$@")
-  # every job runs from its own copy of the task ($JOBS/.tasks/<job>/, removed afterwards), stamped (issue #258); PROTOCOL §2.10:
+  # every job runs from its own copy of the task ($JOBS/.tasks/<job>/, removed afterwards), stamped; PROTOCOL §2.10:
   # a CPU cap above the host's CPU count is clamped to it in that copy (docker refuses such a container: "range of CPUs is
   # from 0.01 to 8.00"), never in tasks/
-  local clamp=0; python3 "$R/scripts/clamp_cpus.py" --cpus "$HOST_CPUS" --needs "${dirs[@]}" >/dev/null && clamp=1
+  local clamp=0; python3 "$H/clamp_cpus.py" --cpus "$HOST_CPUS" --needs "${dirs[@]}" >/dev/null && clamp=1
   [[ "$job" =~ ^[A-Za-z0-9._-]+$ ]] || { log "FAILED $job: not a job name (letters, digits, . _ -); not started"; return 1; }
   root="$JOBS/.tasks/$job"
   if [ "$GATEWAY" = 1 ] && [ "$GATEWAY_EGRESS" = gateway ]; then
@@ -422,8 +432,8 @@ run_job() {  # <job> <concurrency> <harbor -i args...>
   for f in .env .env.local; do [ -e "$R/$f" ] && ln -s "$R/$f" "$root/$f"; done     # what Harbor would load from the repository
   if [ "$clamp" = 1 ]; then
     mapfile -t dirs < <(task_dirs "$root" "$@")
-    python3 "$R/scripts/clamp_cpus.py" --cpus "$HOST_CPUS" "${dirs[@]}" | sed "s#^$root/tasks/#[$job] clamped #" | tee -a "$LOG" >/dev/null \
-      && ! python3 "$R/scripts/clamp_cpus.py" --cpus "$HOST_CPUS" --needs "${dirs[@]}" >/dev/null \
+    python3 "$H/clamp_cpus.py" --cpus "$HOST_CPUS" "${dirs[@]}" | sed "s#^$root/tasks/#[$job] clamped #" | tee -a "$LOG" >/dev/null \
+      && ! python3 "$H/clamp_cpus.py" --cpus "$HOST_CPUS" --needs "${dirs[@]}" >/dev/null \
       || { log "FAILED $job: could not clamp its CPU caps to the host's $HOST_CPUS ($root); not started"; rm -rf "$root"; return 1; }
   fi
   stamp_task_dirs "$root" || { log "FAILED $job: could not stamp its task copy (scripts/stamp_mtimes.py, $root); not started"; rm -rf "$root"; return 1; }
@@ -456,8 +466,8 @@ if [ "$SEQ" = 1 ]; then
       run_job "$job" 1 -i "$(name "$m" "$t")" || { rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
       gateway_after "$job"; finish_job "$job"; summary
       # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
-      # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): scripts/account_failure_check.py
-      why=$(python3 "$R/scripts/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
+      # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
+      why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
       if [ $rc -eq 4 ]; then
         log "STOP lane $$: $job hit a model-account or config failure, or its model API was unreachable through the gateway ($(grep -m1 '"stop": true' <<< "$why" | cut -c1-300)); move its dir and claim aside to rerun it"; break 2
       elif [ $rc -ne 0 ]; then
@@ -477,7 +487,7 @@ else
   wait "${pids[@]}"
   for m in $MODES; do gateway_after "$batch-$m"; finish_job "$batch-$m"; done
 fi
-[ -d "${JOBS}_mirror" ] && python3 "$R/scripts/scan_secrets.py" "${JOBS}_mirror" "${SCAN[@]}" 2>&1 | tail -2 | sed "s/^/[mirror] /" | tee -a "$LOG"
+[ -d "${JOBS}_mirror" ] && python3 "$H/scan_secrets.py" "${JOBS}_mirror" "${SCAN[@]}" 2>&1 | tail -2 | sed "s/^/[mirror] /" | tee -a "$LOG"
 summary
 log "summary: $JOBS/$batch.summary.md"
 cat "$JOBS/$batch.summary.md" | tee -a "$LOG" >/dev/null

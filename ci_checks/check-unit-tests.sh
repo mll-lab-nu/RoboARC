@@ -30,10 +30,10 @@ run() {   # run <timeout s> <test path under scripts/> [arguments of the test]: 
   cmds+="$(lane "$2")bash $self --one $*"$'\n'
 }
 # the standard-library tests
-for t in tests/test_codex_tools_off.py tests/test_retry_policy.py tests/test_stamp_mtimes.py; do
+for t in harbor/tests/test_codex_tools_off.py harbor/tests/test_retry_policy.py tests/test_stamp_mtimes.py; do
   run 300 "$t"
 done
-run 120 account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials
+run 120 harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials
 
 if python3 -c "import numpy, requests" 2>/dev/null; then
   export PATH="$(dirname "$(command -v python3)"):$PATH"   # run.sh starts `python`: the same interpreter

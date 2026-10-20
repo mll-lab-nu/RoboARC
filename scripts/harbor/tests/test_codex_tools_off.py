@@ -1,6 +1,6 @@
-"""Tests for scripts/codex_tools_off.py: the Codex config a run starts from has no provider-side tool on.
+"""Tests for scripts/harbor/codex_tools_off.py: the Codex config a run starts from has no provider-side tool on.
 
-    python3 scripts/tests/test_codex_tools_off.py     # stdlib only (the parse-back needs Python 3.11+)
+    python3 scripts/harbor/tests/test_codex_tools_off.py     # stdlib only (the parse-back needs Python 3.11+)
 """
 import pathlib
 import subprocess

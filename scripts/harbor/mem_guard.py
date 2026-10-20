@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
-"""Host memory red line: keep at least --min-gb (default 2) GiB available. While MemAvailable is below it, the benchmark
-container using the most memory is killed (docker kill), one every --cooldown s, so the machine never thrashes into the
-kernel OOM killer (which on 2026-09-25 froze the desktop for 20 minutes before it picked its victims). Candidates:
-running containers whose name or image matches --match, except --protect. Every kill (with the top containers at that
-moment) goes to --log, plus a heartbeat line every --heartbeat s. A runner-side tool: scripts/run_agent_batch.sh starts
-one if none runs.
-  python3 scripts/mem_guard.py [--min-gb 2] [--log jobs/journal/mem_guard.log] [--pidfile jobs/journal/mem_guard.pid]"""
+"""Host memory red line (opt-in): keep at least --min-gb (default 2) GiB available. While MemAvailable is below it, the
+trial container using the most memory is killed (docker kill), one every --cooldown s, so the machine never thrashes
+into the kernel OOM killer. Candidates: running containers whose NAME matches --match (default: RoboARC trial
+containers, whose compose project is the task name `roboarc-...`), except --protect; no other container is ever
+touched unless you widen --match yourself. Every kill (with the top containers at that moment) goes to --log, plus a
+heartbeat line every --heartbeat s. A runner-side tool: scripts/harbor/run_agent_batch.sh starts one with MEM_GUARD=1.
+  python3 scripts/harbor/mem_guard.py [--min-gb 2] [--match REGEX] [--log FILE] [--pidfile FILE]"""
 import argparse, os, re, subprocess, time
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ap = argparse.ArgumentParser()
 ap.add_argument("--min-gb", type=float, default=2.0)
-ap.add_argument("--match", default=r"rcb|eai-|hb__|robowits|robolab|behavior|robopaint|robotwin|robosuite|^mk-|^ck-")
+ap.add_argument("--match", default=r"^roboarc-")
 ap.add_argument("--protect", default="rcb-log-mirror")
 ap.add_argument("--interval", type=float, default=1.0)
 ap.add_argument("--cooldown", type=float, default=15.0)
 ap.add_argument("--heartbeat", type=float, default=600.0)
-ap.add_argument("--log", default=os.path.join(ROOT, "jobs/journal/mem_guard.log"))
-ap.add_argument("--pidfile", default=os.path.join(ROOT, "jobs/journal/mem_guard.pid"))
+ap.add_argument("--log", default=os.path.join(ROOT, "jobs/agents/mem_guard.log"))
+ap.add_argument("--pidfile", default=os.path.join(ROOT, "jobs/agents/.mem_guard.pid"))
 a = ap.parse_args()
 os.makedirs(os.path.dirname(a.log), exist_ok=True)
 with open(a.pidfile, "w") as f:
@@ -63,7 +63,7 @@ while True:
         if avail < floor and now - last_kill >= a.cooldown:
             last_kill = now
             rows = containers()
-            cands = [r for r in rows if r[1] not in protect and (match.search(r[1]) or match.search(r[2]))]
+            cands = [r for r in rows if r[1] not in protect and match.search(r[1])]
             if cands:
                 m, name, image = cands[0]
                 rc = subprocess.run(["docker", "kill", name], capture_output=True, text=True, timeout=60).returncode

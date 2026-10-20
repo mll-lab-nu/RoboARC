@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """A Codex config.toml that offers the model no tool run at the provider (PROTOCOL D11, §2.11).
 
-    scripts/codex_tools_off.py [<config.toml>] > <the config a run passes as --ak config=>
+    scripts/harbor/codex_tools_off.py [<config.toml>] > <the config a run passes as --ak config=>
 
 Under a ChatGPT login Codex hands the model the account's connectors and apps (`mcp__codex_apps__*`: web open and
 search, GitHub, mail, drives), an image generator and plugin installs. They run at OpenAI and are reached through
 chatgpt.com, the model's own host: past `web_search = "disabled"`, the egress allowlist and the usage gateway.
-`scripts/run_agent_batch.sh` therefore starts every Codex run (`WEB_SEARCH=disabled`, the default) from a config with
+`scripts/harbor/run_agent_batch.sh` therefore starts every Codex run (`WEB_SEARCH=disabled`, the default) from a config with
 the keys of OFF set to false: this script's output, the caller's config (`AGENT_CONFIG`) with those keys added.
 Measured on Codex 0.160.1 (2026-10-10): with these keys a ChatGPT login and an API key list the same 8 local tools;
 `features.apps = false` alone leaves the image generator.
@@ -64,7 +64,7 @@ def tools_off(text):
                 break
         else:
             top.append(f"{key} = false")
-    out = ["# scripts/codex_tools_off.py: no tool that runs at the model provider (PROTOCOL D11)", *top]
+    out = ["# scripts/harbor/codex_tools_off.py: no tool that runs at the model provider (PROTOCOL D11)", *top]
     for i, line in enumerate(lines):
         out.append(line)
         out.extend(inside.get(i, []))

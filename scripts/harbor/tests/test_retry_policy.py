@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """INVARIANT test (docs/PROTOCOL.md Appendix H.5), part of the required CI job `invariants`: infrastructure failures
 allow at most one full retry with the same instance, seed and configuration; a failed retry gets the default handling
-and no further retry; normal task failures never qualify (scripts/retry_policy.py). Standard library only."""
+and no further retry; normal task failures never qualify (scripts/harbor/retry_policy.py). Standard library only."""
 import sys
 from pathlib import Path
 
@@ -35,7 +35,7 @@ try:
     fails.append("an unknown outcome must be refused")
 except ValueError:
     pass
-expect(rp.MAX_INFRA_RETRIES == 1, "MAX_INFRA_RETRIES is 1 (owner 2026-10-14)")
+expect(rp.MAX_INFRA_RETRIES == 1, "MAX_INFRA_RETRIES is 1 (PROTOCOL H.5)")
 
 # retry_config(): the same instance, seed and configuration
 r = rp.retry_config(CFG)
@@ -68,7 +68,7 @@ expect(rp.counted([{"outcome": "infra_failure"}, {"outcome": "infra_failure", "i
        "a failed retry gets the default handling (it is the record), the first attempt stays void")
 
 if fails:
-    print("FAIL scripts/tests/test_retry_policy.py:")
+    print("FAIL scripts/harbor/tests/test_retry_policy.py:")
     for f in fails:
         print("  -", f)
     sys.exit(1)

@@ -33,7 +33,8 @@ What it does:
   Verification, Compute resources (rendered from `[metadata.resources]`), and Details for everything else.
 - last, `DIGEST`: the task's content digest (PROTOCOL §2.8; the digest Harbor publishes it under, `digest()`), one line
   `sha256:<hex>`. Each task carries its own, so pull requests that change different tasks never touch a shared file;
-  Harbor's dataset manifest `tasks/dataset.toml` is generated from them (`scripts/dataset_manifest.py`, not committed).
+  Harbor's dataset manifest `tasks/dataset.toml` is generated from them (`scripts/harbor/dataset_manifest.py`, not
+  committed).
 """
 from __future__ import annotations
 
@@ -992,7 +993,7 @@ def normalize_slowdown(task: Path) -> None:
 # ---------------------------------------------------------------------------------------------------------------------
 # PROTOCOL v2.0 §2: the settings a task declares, and the effective configuration of a trial, recorded with every
 # result so that results are ranked only within one comparable configuration (docs/RUNNING.md "Results"). Standard
-# library only: scripts/write_task_results.py reads these.
+# library only: scripts/harbor/write_task_results.py reads these.
 PROTOCOL_VERSION = "2.0"                         # docs/PROTOCOL.md
 NETWORKS = ("allowlist", "open")                 # `[metadata] network` (PROTOCOL §2, Appendix H.6); absent = allowlist
 RESET_DECL_RE = re.compile(r'^\s*RCB_RESET_BUDGET:\s*"?(?:\$\{RCB_RESET_BUDGET:-([0-9]+)\}|([0-9]+))"?\s*(?:#.*)?$', re.M)

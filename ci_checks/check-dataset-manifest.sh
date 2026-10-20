@@ -3,7 +3,7 @@
 # `sha256:<hex>`, written last by scripts/task_conventions.py `normalize`, so every generator and
 # every normalize run refresh it). A digest left over from before a change makes the published dataset and
 # the repository disagree, so it fails here: refresh with `python3 scripts/task_conventions.py tasks/<task>` (umask 022).
-# The release manifest tasks/dataset.toml is generated from the DIGEST files (scripts/dataset_manifest.py) and is not
+# The release manifest tasks/dataset.toml is generated from the DIGEST files (scripts/harbor/dataset_manifest.py) and is not
 # committed: pull requests that change different tasks share no file. This check fails when it is tracked again.
 # The digest is recomputed the way Harbor does it (harbor.publisher.packager.Packager.compute_content_hash, Harbor
 # 0.23.0), independently of scripts/task_conventions.py and without needing Harbor: sha256 over
@@ -13,7 +13,7 @@
 # Usage: check-dataset-manifest.sh [task dirs]   (default: every task; run_all.sh passes a pull request's scope)
 root="$(cd "$(dirname "$0")/.." && pwd)"
 if git -C "$root" ls-files --error-unmatch tasks/dataset.toml >/dev/null 2>&1; then
-  echo "FAIL tasks/dataset.toml is tracked: it is generated for a release (scripts/dataset_manifest.py write), not committed (git rm --cached tasks/dataset.toml)"; exit 1
+  echo "FAIL tasks/dataset.toml is tracked: it is generated for a release (scripts/harbor/dataset_manifest.py write), not committed (git rm --cached tasks/dataset.toml)"; exit 1
 fi
 # Every directory under tasks/ that holds a tracked file is a task: it has its task.toml. Every other check skips a
 # directory without one, so a half-deleted task (a DIGEST-only directory left behind by a merge) would pass

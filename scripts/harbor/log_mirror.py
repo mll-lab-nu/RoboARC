@@ -9,7 +9,7 @@ keeps a copy that is only ever added to (a runner-side tool, not task code):
   * any other file: every version it takes is kept (<name>.v0, .v1, ...);
   * a file that disappears keeps its mirror.
 Every such event goes to <mirror>/TAMPER.log. Run it as root in a container so the host user cannot delete the mirror
-either (scripts/run_agent_batch.sh starts one: rcb-log-mirror).
+either (scripts/harbor/run_agent_batch.sh starts one: rcb-log-mirror).
 
   python3 log_mirror.py --src jobs/agents --mirror jobs/agents_mirror [--interval 5] [--once]
 """

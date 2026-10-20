@@ -3,7 +3,7 @@
 `--ak reasoning_summary=detailed`), ran and saw, merged by wall-clock time with what the robot service recorded
 (limited mode: every /submit and /observe from episode.jsonl; unlimited: the tooling's session log).
 
-usage: scripts/agent_timeline.py <trial_dir> [--out <dir>] [--max-chars 400]
+usage: scripts/harbor/agent_timeline.py <trial_dir> [--out <dir>] [--max-chars 400]
 writes <out>/timeline.md (readable) and <out>/timeline.jsonl (one event per line). Default out: <trial_dir>/analysis.
 Account identifiers from Codex's session_meta are never copied.
 """

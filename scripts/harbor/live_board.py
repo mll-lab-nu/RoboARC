@@ -2,11 +2,11 @@
 """Live board of batch evaluations: one web page with every trial under Harbor jobs directories and its state, refreshed
 every few seconds while the batch runs. A runner-side tool (stdlib only); it only reads.
 
-    scripts/live_board.py [--jobs jobs/agents] [--jobs jobs] [--port N] [--bind 127.0.0.1]
+    scripts/harbor/live_board.py [--jobs jobs/agents] [--jobs jobs] [--port N] [--bind 127.0.0.1]
     # prints its address (default: the first free port from 8765); from a workstation: ssh -N -L 8765:127.0.0.1:<port> <host>,
     # then open http://localhost:8765
 
-States: pending (in a batch's plan, not started; scripts/run_agent_batch.sh writes <jobs>/.plan/<batch>.json), setup
+States: pending (in a batch's plan, not started; scripts/harbor/run_agent_batch.sh writes <jobs>/.plan/<batch>.json), setup
 (environment and agent install), running (with the agent's time limit), verifying, then success / failed, or aborted
 (the job ended without finishing the trial). Per trial: tokens (live from the usage gateway's totals.json when it runs,
 else Harbor's count at the end), reward, exception, the replay / live videos, and the tail of the agent's output.
@@ -32,7 +32,7 @@ import tomllib
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-REPO = pathlib.Path(__file__).resolve().parents[1]
+REPO = pathlib.Path(__file__).resolve().parents[2]
 SKIP = {"agent", "artifacts", "verifier", "gateway", "sessions", "_logs", "node_modules"}
 MEDIA = {".mp4": "video/mp4", ".png": "image/png", ".jpg": "image/jpeg", ".md": "text/plain; charset=utf-8",
          ".json": "application/json", ".txt": "text/plain; charset=utf-8", ".log": "text/plain; charset=utf-8"}
@@ -64,21 +64,21 @@ _TASKS: dict[str, dict] = {}
 
 
 def task_info(task: str) -> dict:
-    """Benchmark (the task name's prefix: robocasa-gr1-..., robotwin_2_0_..., kinder-...) and agent time limit."""
+    """Benchmark (the task name's prefix, e.g. roboarc) and agent time limit."""
     if task not in _TASKS:
         try:
             t = tomllib.loads((REPO / "tasks" / task / "task.toml").read_text())
         except (OSError, ValueError):
             t = {}
-        m = re.match(r"(robocasa-gr1|robocasa365|mujoco_playground|robotwin_2_0|[a-z0-9]+)", task)
+        m = re.match(r"([a-z0-9]+)", task)
         bench = m.group(1) if m else task
         _TASKS[task] = {"bench": bench, "timeout": (t.get("agent") or {}).get("timeout_sec")}
     return _TASKS[task]
 
 
 def run_id(agent: dict) -> str:
-    """<harness>-<model>-<effort> as scripts/run_agent_batch.sh derives it, except that an Azure deployment replica's
-    suffix is dropped (gpt-6-luna-3 -> gpt6_luna; claude-fable-5-1 stays fable_5_1)."""
+    """<harness>-<model>-<effort> as scripts/harbor/run_agent_batch.sh derives it, except that an Azure deployment replica's
+    suffix is dropped (gpt-5-mini-3 -> gpt5_mini; claude-opus-4-1 stays opus_4_1)."""
     f = lambda s: re.sub(r"^_+|_+$", "", re.sub(r"[^a-z0-9]+", "_", s.lower()))
     model = (agent.get("model_name") or "").split("/")[-1].lower()
     model = re.sub(r"^(gpt-\d+(?:\.\d+)?-[a-z]+)-\d+$", r"\1", model)

@@ -13,12 +13,12 @@ attempts.json: every trial of this task x run id seen so far. RUNNING.md "Infras
 counted, an agent's own failure is never retried, and more than 2 attempts of one task x run id is flagged
 (`attempts_over_cap`)."""
 import json, pathlib, shutil, sys, re, glob, datetime as dt, ast
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent)); from task_names import base, canonical, mode as mode_of  # noqa: E402
+sys.path[:0] = [str(pathlib.Path(__file__).resolve().parent), str(pathlib.Path(__file__).resolve().parents[1])]; from task_names import base, canonical, mode as mode_of  # noqa: E402
 import account_failure_check  # noqa: E402
 import task_conventions as tc  # noqa: E402
 import retry_policy as rp  # noqa: E402
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 MAX_ATTEMPTS = 1 + rp.MAX_INFRA_RETRIES   # PROTOCOL Appendix H.5: the first attempt and at most one retry after an infrastructure failure
 OUTCOME = {"not_a_result": "infra_failure", "success": "success"}   # anything else: the agent's failure (a result)
 OVERRIDES = ("RCB_RESET_BUDGET", "RCB_SLOWDOWN")   # run-time overrides of a task's declared settings (PROTOCOL §2)
@@ -43,7 +43,7 @@ NOT_A_RESULT = "**not a result** — infrastructure error ({}): run it again; it
 def not_a_result(trial, r, rw):
     """Why a trial that is not a success is no result either (PROTOCOL §2.6, §2.12: an infrastructure failure is neither a
     success nor the agent's 0; only the agent's own end, its deliverable or the cutoff, AgentTimeoutError, is a result),
-    or None. Board 0105 F-M2: a trial whose verifier never ran (no reward.json: `docker compose up` failed, e.g. a CPU
+    or None. A trial whose verifier never ran (no reward.json: `docker compose up` failed, e.g. a CPU
     cap above the host's; the verifier timed out) was published as the agent's 0."""
     if rw.get("infra_error") or rw.get("grader_error"):
         return "`infra_error` / `grader_error` in the verifier line"
@@ -55,8 +55,8 @@ def not_a_result(trial, r, rw):
     try:
         chk = account_failure_check.check(str(trial))
         if chk.get("stop") and not any(w.startswith("gateway:") for w in chk.get("why", [])):
-            return "a model-account or configuration failure (scripts/account_failure_check.py)"
-        # board 0121 M4: the usage gateway died, or the trial's last model calls failed on the way (upstream unreachable,
+            return "a model-account or configuration failure (scripts/harbor/account_failure_check.py)"
+        # the usage gateway died, or the trial's last model calls failed on the way (upstream unreachable,
         # a stream broken off, a provider 5xx): the agent could not reach its model
         gw = [w for w in chk.get("infra", []) if w.startswith("gateway:")]
         if gw:
@@ -94,7 +94,7 @@ def classify(trial, r, rw):
 
 def trial_config(trial, task, r):
     """The trial's effective configuration (task_conventions.effective_config) with how its seed is known. The seed: the
-    runner's copy of the task the trial ran from (scripts/task_seed.py materialize writes the chosen seed as its
+    runner's copy of the task the trial ran from (a runner that draws another seed writes it as the copy's
     `[metadata.seeds] default`), else the task's default seed (`seed_source = "default"`). Run-time overrides: the trial's
     recorded environment. A trial of another version of the task (its `task_checksum` is not the task's DIGEST now) keeps
     only what its name says; the rest is "legacy"."""

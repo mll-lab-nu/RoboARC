@@ -12,7 +12,7 @@
 #   H.2 no answer in reach      check-agent-pointers.py
 #   H.3 standard trust boundary check-standard-agent-image.sh, check-verifier-isolation.sh (ports, sidecar topology)
 #   H.4 trusted verdict         check-verifier-isolation.sh (evidence from a sidecar), check-instance-copies.sh
-#   H.5 infrastructure retry    scripts/tests/test_retry_policy.py (a voided attempt is never counted)
+#   H.5 infrastructure retry    scripts/harbor/tests/test_retry_policy.py (a voided attempt is never counted)
 #   H.6 egress                  check-verifier-isolation.sh (the allowlist unless the task declares open)
 #   H.7 comparable twins        check-twins.py, check-instance-copies.sh
 #   H.8 DIGEST                  check-dataset-manifest.sh
@@ -43,7 +43,7 @@ add pointers        python3 ci_checks/check-agent-pointers.py"$targs"           
 add dataset-manifest bash ci_checks/check-dataset-manifest.sh"$targs"                      # H.8
 add twins           python3 ci_checks/check-twins.py"$targs"                                # H.7
 add monitor         python3 ci_checks/check-monitor.py --tier invariants"$targs"            # H.1
-add retry-policy    python3 scripts/tests/test_retry_policy.py                              # H.5
+add retry-policy    python3 scripts/harbor/tests/test_retry_policy.py                       # H.5
 EXPECTED_NAMED=5
 if [ $explicit -eq 0 ]; then
   add selftest      python3 ci_checks/check-ci-selftest.py --tier invariants                # H.1-H.8: the rules fire

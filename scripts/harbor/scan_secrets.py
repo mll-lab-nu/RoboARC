@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Make sure no saved rollout contains a model-API key or a login token (a runner-side tool: scripts/run_agent_batch.sh).
+"""Make sure no saved rollout contains a model-API key or a login token (a runner-side tool: scripts/harbor/run_agent_batch.sh).
 
   scan_secrets.py <dir> [--env-file ../.env ...] [--var NAME ...] [--codex-auth ~/.codex/auth.json ...] [--redact]
 
@@ -59,7 +59,7 @@ def load_env(path: str) -> dict:
 
 ap = argparse.ArgumentParser()
 ap.add_argument("dir")
-ap.add_argument("--env-file", action="append", help="repeatable (default: <repo>/../.env)")
+ap.add_argument("--env-file", action="append", help="repeatable (default: <repo>/.env)")
 ap.add_argument("--var", action="append", help="repeatable (default: VARS)")
 ap.add_argument("--codex-auth", action="append", default=[], help="a Codex auth.json whose login tokens are secrets too")
 ap.add_argument("--redact", action="store_true")

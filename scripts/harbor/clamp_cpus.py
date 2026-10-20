@@ -2,15 +2,15 @@
 """Clamp the CPU caps of task copies to the host's CPU count (PROTOCOL §2.10: a runner MUST clamp every CPU cap to the
 host's count in the copy of the task it runs; the task's files keep their values).
 
-    python3 scripts/clamp_cpus.py [--cpus N] <task dir> ...           # rewrite the copies in place
-    python3 scripts/clamp_cpus.py [--cpus N] --needs <task dir> ...   # write nothing; exit 0 if a cap is above N, else 1
+    python3 scripts/harbor/clamp_cpus.py [--cpus N] <task dir> ...           # rewrite the copies in place
+    python3 scripts/harbor/clamp_cpus.py [--cpus N] --needs <task dir> ...   # write nothing; exit 0 if a cap is above N, else 1
 
 Docker refuses a container whose `cpus` exceeds the machine's ("range of CPUs is from 0.01 to 8.00"): a task whose cap is
 12 or 16 does not start on an 8-CPU host, and the trial would end in environment setup. What is clamped: every `cpus = <n>`
 line of task.toml (`[environment]`: Harbor passes it to docker as main's cap; `[verifier.environment]`: the separate
 verifier sandbox's) and every `cpus: <n>` line of the compose files under environment/ (the sidecars). Memory and pids
 caps are never clamped. N defaults to the CPUs this process may use (`nproc`); the pool runner clamps its host copies
-the same way (batch_eval_live prep_host.py CLAMP_CPUS). Never run it on tasks/ itself (scripts/run_agent_batch.sh runs
+the same way. Never run it on tasks/ itself (scripts/harbor/run_agent_batch.sh runs
 it on a job's own copy). Standard library only."""
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ def main(argv: list[str]) -> int:
             sys.exit("--cpus must be positive")
     if not args:
         sys.exit(__doc__)
-    repo_tasks = (Path(__file__).resolve().parents[1] / "tasks").resolve()
+    repo_tasks = (Path(__file__).resolve().parents[2] / "tasks").resolve()
     found = []
     for a in args:
         t = Path(a)
