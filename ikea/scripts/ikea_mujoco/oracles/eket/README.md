@@ -1,6 +1,6 @@
 # eket closed-loop reference
 
-`eket_ref.npz` is the one reference for both modes of `ikea-eket-i00` (privileged `solution/trajectory.npz`, standard
+`eket_ref.npz` is the one reference for both modes of `roboarc-ikea-eket-i00` (privileged `solution/trajectory.npz`, standard
 `solution/oracle_actions.npz`). Its rows are the EXECUTED targets: `data.ctrl` after `rcb_ikea.Session.applied()`. Every row
 is within the arm joint-speed limits + 1e-9 of the previous row, starting from the keyframe ctrl, so the clamp never
 changes a row on replay. Keys: `ctrl` (70210, 16) float64, `substeps` 4, `timestep` 0.000625, `actuators`.

@@ -1,6 +1,6 @@
 # burvik closed-loop reference
 
-`burvik.npz` is the one reference for both modes of `ikea-burvik-i00` (privileged `solution/trajectory.npz`, standard
+`burvik.npz` is the one reference for both modes of `roboarc-ikea-burvik-i00` (privileged `solution/trajectory.npz`, standard
 `solution/oracle_actions.npz`). Its rows are the EXECUTED targets (`data.ctrl` after `rcb_ikea.Session.applied()`): every
 row is within the arm joint-speed limits and the Franka Hand slew (0.1 m/s of finger width: 182.142857 command units/s
 in this scene, 0.4554 per tick) (+ the 1e-9 tolerance) of the previous row, from the keyframe ctrl, so the clamp never
@@ -98,7 +98,7 @@ times), base `burvik_p2cl.npz`:
 3. Harbor on the final dirs (host A, image 0.3.0 / -sim 0.4.0 Nyx): privileged oracle 1 (deterministic, both replays
    `60878a5e…`, replay_wall 1646 s, video), nop 0; standard oracle 1 (live settled success at control step 160,001 of
    162,534, 40 calls, live end `ebe8cde2…` on both runs, service time 1824-1986 s, video), nop 0.
-4. Timing (one execution against the 4320 s bar): 3781-3783 s on a dedicated the cluster Xeon Gold 6230R core (87.6 % of the
+4. Timing (one execution against the 4320 s bar): 3781-3783 s on a dedicated cluster Xeon Gold 6230R core (87.6 % of the
    bar, 35 % of the budget); 1694 s (15.7 %) on the quiet i9-14900HX; 1679-1684 s on host A.
 5. Leak check: `environment/` and `tests/` hold only the tooling; neither the rows nor their sha appear in them or in the
    instructions; no upstream pointer in the scene texts. `check-video`: both dirs pass.

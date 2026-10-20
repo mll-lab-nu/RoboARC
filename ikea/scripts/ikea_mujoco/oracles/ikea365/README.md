@@ -1,6 +1,6 @@
 # ikea365 closed-loop reference
 
-`ikea365_ref.npz` is the one reference for both modes of `ikea-ikea365-i00` (privileged `solution/trajectory.npz`,
+`ikea365_ref.npz` is the one reference for both modes of `roboarc-ikea-ikea365-i00` (privileged `solution/trajectory.npz`,
 standard `solution/oracle_actions.npz`). Its rows are the EXECUTED targets: `data.ctrl` after
 `rcb_ikea.Session.applied()`. Every row is within the arm joint-speed limits + 1e-9 of the previous row, starting from
 the keyframe ctrl, so the clamp never changes a row on replay. Keys: `ctrl` (89126, 16) float64, `substeps` 4,

@@ -1,6 +1,6 @@
 # UPPSTÅ closed-loop reference
 
-`uppsta.npz` is the one reference for both modes of `ikea-uppsta-i00` (privileged `solution/trajectory.npz`, standard
+`uppsta.npz` is the one reference for both modes of `roboarc-ikea-uppsta-i00` (privileged `solution/trajectory.npz`, standard
 `solution/oracle_actions.npz`). The physics is the final one: the prism rule (17 cylinders become 32-facet prisms: 4
 dowels, 2 x 2 on the screws, 8 pegs, the hammer), the arm joint-speed clamp at the real Panda limits, MuJoCo 3.14.0 with
 the EPA byte patch, numpy SIMD masking, and (image 0.3.1) the welded-group contact switch-off of `seat_weld.py`. It is a
@@ -115,10 +115,10 @@ off the guide, the hex key). Segment 8 (screw b into its hole) passes only with 
 pace, and its screw lands 21.5° off the guide's spin modulo 60, over the 8° segment gate; the key still meets the socket
 in segment 10 (the key is aligned to the true screw's spin), so the build ran segment 8 with `--spin-max 25`.
 
-**Build.** Every segment from the birth, chained through checkpoints, with the hand-slew `rcb_ikea.py` (branch
-dev/qineng-ikea-hand-slew: the Franka Hand at 0.1 m/s of finger width, 182.14 command units/s here) so that the rows
-also satisfy that rule; `finish.py` writes the file and checks the step rule and the verdict. The same build on an
-Intel Xeon (the cluster) and on Zen 4 (host B) wrote bit-identical rows (checked on the intermediate build).
+**Build.** Every segment from the birth, chained through checkpoints, with the hand-slew `rcb_ikea.py` (the Franka
+Hand at 0.1 m/s of finger width, 182.14 command units/s here) so that the rows also satisfy that rule; `finish.py`
+writes the file and checks the step rule and the verdict. The same build on an Intel Xeon (the cluster) and on Zen 4
+(host B) wrote bit-identical rows (checked on the intermediate build).
 
 ## Gates (2026-10-18)
 1. **Frozen birth.** Every replay builds to the bound `initial_state_sha256` (`3b69cfd5…`, bindings.json), loaded
@@ -138,7 +138,7 @@ Intel Xeon (the cluster) and on Zen 4 (host B) wrote bit-identical rows (checked
    - privileged, final dir (row cap 860,000, verifier 25,920 s): oracle reward 1 (deterministic 1, instance_exact 1,
      both replays `a748a42d…` / settled `a2d8a234…`, replay_wall 4157 s, video rendered), nop reward 0 (missing
      trajectory). The row cap comes from the first run (replay_wall 3827 s: oracle 1, nop 0);
-   - standard (PR #305 grading, the live episode), final dir: oracle reward 1 (live settled success at control step
+   - standard (graded by the live episode), final dir: oracle reward 1 (live settled success at control step
      430,225 in 54 calls, live end hash `a748a42d…` = the reference's, settle_failed 0, video), nop reward 0; the first
      run gave the same.
 5. **Stress** (the cluster, SIF 0.3.0 + the 0.3.1 uppsta scene files, RoboARC's observer v2.13b): 203 episodes, 29 per
@@ -163,7 +163,7 @@ Intel Xeon (the cluster) and on Zen 4 (host B) wrote bit-identical rows (checked
      candidate for the observer's limit-energy rule, as stenerik's; no physics was changed.
    - VIOLENT: a force trigger (38), surface speeds over 3 m/s (28) or angular speeds (13) of random / jerk targets; no
      breakdown follows.
-6. **check-video** (main's `ci_checks/check-video.py`): both dirs render and collect a replay video; the privileged
+6. **check-video** (`ci_checks/check-video.py`): both dirs render and collect a replay video; the privileged
    verifier's video and the standard live video were rendered in the Harbor runs.
 
 ## Timing

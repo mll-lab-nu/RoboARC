@@ -1,6 +1,6 @@
 # gladom closed-loop reference (Franka Hand slew)
 
-`gladom.npz` is the one reference for both modes of `ikea-gladom-i00` (privileged `solution/trajectory.npz`, standard
+`gladom.npz` is the one reference for both modes of `roboarc-ikea-gladom-i00` (privileged `solution/trajectory.npz`, standard
 `solution/oracle_actions.npz`). Its rows are the EXECUTED targets: `data.ctrl` after `rcb_ikea.Session.applied()`, so every
 row is within the arm joint-speed limits and the Franka Hand's 0.455357 command units per tick (182.142857 units/s, 50 mm/s
 per finger) of the previous row, from the keyframe ctrl, and the clamp never changes a row on replay. Keys: `ctrl`
@@ -34,7 +34,7 @@ The demo rows are executed through the clamp plus a left-arm offset that the clo
    until the retention weld latches; the extra turn goes back to the nearest whole turn once the driver is out of the socket.
 
 Rebuild: `python build.py --out DIR` (the 0.3.0 reference at `GLADOM_DEMO`, `rcb_ikea.py` and this directory on
-`PYTHONPATH`, inside `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0`); `DIR/ref.npz` is bit-identical to `gladom.npz`
+`PYTHONPATH`, inside the IKEA image 0.3.0); `DIR/ref.npz` is bit-identical to `gladom.npz`
 (host B: run `b8`, resumed from a wait-only diag checkpoint at demo row 10000, before any correction acts, and run `b9`
 from the birth both give sha256 `35190e10...`; ~5200 s on the loaded host). Its log in the build: all four screws latched (screw_long 9.53 turns after a
 489-tick seat drive; screw_bottom 8.21 and screw_ring_l by the demo's own spin; screw_ring_r 8.70 after 137 ticks), frame B
@@ -50,7 +50,7 @@ and the ring joined, the tray on the ring (2.45 N).
 | verdict | success: four screws latched, frame B and the ring joined, the tray on the ring (2.45 N); released, at rest, no breakdown (max part depth 0.82 mm); the same after the 1.0 s hold |
 | Harbor privileged | oracle 1 (deterministic, instance_exact, replay_wall 5091 s, video 750 frames), nop 0 (host B, image 0.3.0) |
 | Harbor standard | oracle 1 (live settled success at control step 184,000 in 46 calls, graded by the live episode, video), nop 0 (host B, -sim 0.4.0 Nyx) |
-| check-video | origin/main baf9e716b1 `ci_checks/check-video.py`: both dirs render and collect a video |
+| check-video | `ci_checks/check-video.py`: both dirs render and collect a video |
 | timing | 2630 s on the quiet i9-14900HX host (61 % of the 4320 s bar, 24.3 % of 10800 s); 8069 / 8082 s on Xeon 6230R cores (74.8 %, over the bar on that slow CPU, as before: the 0.3.0 reference took 5636 s there); 4550 s on the loaded host B |
 
 ## Files

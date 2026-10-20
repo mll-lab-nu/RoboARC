@@ -1,6 +1,6 @@
 # variera closed-loop reference (Franka Hand slew)
 
-`variera_ref.npz` is the one reference for both modes of `ikea-variera-i00` (privileged `solution/trajectory.npz`,
+`variera_ref.npz` is the one reference for both modes of `roboarc-ikea-variera-i00` (privileged `solution/trajectory.npz`,
 standard `solution/oracle_actions.npz`). Its rows are the EXECUTED targets: `data.ctrl` after
 `rcb_ikea.Session.applied()`. Every row is within the arm joint-speed limits and the Franka Hand slew (0.455357 command
 units per 2.5 ms tick, 182.142857 units/s) + 1e-9 of the previous row, starting from the keyframe ctrl, so the clamp never
@@ -68,11 +68,11 @@ Rebuild (the 0.3.0 image, `rcb_ikea.py` on `PYTHONPATH` with this directory):
 4. Harbor on host B (image 0.3.0 / -sim 0.4.0 Nyx, harbor_run_safe.sh):
    - privileged: oracle reward 1 (deterministic 1, instance_exact 1, both replays `95134e1f…` / `327c16c5…`, replay
      wall 3731 s, video 751 frames ending in the verdict's state), nop reward 0 (missing trajectory);
-   - standard (graded live, #305): oracle reward 1 (live settled success at control step 243,159 in 61 calls, live end
+   - standard (graded live): oracle reward 1 (live settled success at control step 243,159 in 61 calls, live end
      hash `95134e1f…`, service time 4274 s on the loaded host, video 1), nop reward 0.
    The runs used the dirs rendered before this evidence was recorded; the re-render changes only the row cap (463,000
    -> 486,000) and the privileged verifier timeout (21,120 -> 26,700 s), both derived from these measurements.
-5. `check-video` (main's `ci_checks/check-video.py`): both dirs render and collect a replay video.
+5. `check-video` (`ci_checks/check-video.py`): both dirs render and collect a replay video.
 6. Timing (one reference execution against the 4320 s bar, 40 % of 10800 s): 2664 s on the quiet i9-14900HX host
-   (61.7 % of the bar, 24.7 % of the budget); 3646-3688 s on loaded host B Zen 4 (85 %); 8024-8696 s on a dedicated the cluster
+   (61.7 % of the bar, 24.7 % of the budget); 3646-3688 s on loaded host B Zen 4 (85 %); 8024-8696 s on a dedicated cluster
    Xeon Gold 6230R core (over the bar on that slow CPU, as the old reference's 6839 s was).

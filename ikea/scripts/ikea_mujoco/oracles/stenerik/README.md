@@ -1,6 +1,6 @@
 # stenerik closed-loop reference
 
-`stenerik.npz` is the one reference for both modes of `ikea-stenerik-i00` (privileged `solution/trajectory.npz`,
+`stenerik.npz` is the one reference for both modes of `roboarc-ikea-stenerik-i00` (privileged `solution/trajectory.npz`,
 standard `solution/oracle_actions.npz`). Its rows are the EXECUTED targets: `data.ctrl` after
 `rcb_ikea.Session.applied()`. Every row is within the speed limits + 1e-9 of the previous row, starting from the
 keyframe ctrl: the arm joints at the Panda's limits and, since 2026-10-18, the Franka Hand command (`actuator8`) at
@@ -99,7 +99,7 @@ proof of the rows.
 4. Harbor (host B, Harbor 0.23.0, image 0.3.0 / -sim 0.4.0 Nyx; the task dirs of this commit):
    - privileged: oracle reward 1 (deterministic 1, instance_exact 1, both replays `a690aa1b…` / `20a59284…`,
      replay_wall 3324 s, video 750 frames), nop reward 0 (missing trajectory);
-   - standard, graded on the live episode (#305): oracle reward 1 (live settled success at control step 222,600 in 56
+   - standard, graded on the live episode: oracle reward 1 (live settled success at control step 222,600 in 56
      calls, live end hash `a690aa1b…` = the reference's, settle 1.0 s success, no resume, live service time 3672 s =
      34.0 % of the budget, video 5566 frames), nop reward 0.
 5. Stress: 203 episodes on the cluster (Xeon Gold 6230R, SIF 0.3.0; our stress harness with RoboARC's observer v2.13b), 29
@@ -127,9 +127,9 @@ proof of the rows.
      over 3 m/s; no breakdown follows.
 6. Timing (one reference execution against the 4320 s bar, 40 % of 10800 s): 2649 s on the quiet i9-14900HX host
    (61.3 % of the bar, 24.5 % of the budget); 3292-3313 s on host B's Ryzen 9 7950X (two at once, load ~15; 76.2-76.7 % of
-   the bar); 6944-7082 s on a dedicated the cluster Xeon Gold 6230R core (64.3-65.6 % of the budget: over the bar on that slow
+   the bar); 6944-7082 s on a dedicated cluster Xeon Gold 6230R core (64.3-65.6 % of the budget: over the bar on that slow
    CPU, as before the hand rule (6253-6286 s) and as gladom and variera); 3672 s for the standard live episode on host B.
-7. `check-video` (main's `ci_checks/check-video.py`): both dirs render and collect a replay video.
+7. `check-video` (`ci_checks/check-video.py`): both dirs render and collect a replay video.
 
 The gates of the reference before the hand rule (215,782 rows, `e0097d66…`, end `a02c9a18…` / settled `1a8e27ec…`):
 the same set, passed on 2026-10-17 (a cloud host EPYC 9354, host A / host B Ryzen 9 7950X, the cluster Xeon 6230R / 6338, the i9 workstation;

@@ -1,6 +1,6 @@
 # STEGESUND closed-loop reference (Franka Hand slew)
 
-`stegesund.npz` is the one reference for both modes of `ikea-stegesund-i00` (privileged `solution/trajectory.npz`,
+`stegesund.npz` is the one reference for both modes of `roboarc-ikea-stegesund-i00` (privileged `solution/trajectory.npz`,
 standard `solution/oracle_actions.npz`). It is a closed-loop build on the final physics (prism rule, the arm joint-speed
 clamp, the Franka Hand slew `GRIPPER_WIDTH_SPEED_M_S` = 0.1 m/s of finger width = 0.455357 units per tick here, MuJoCo
 3.14.0 with the EPA byte patch, numpy SIMD masking). Its rows are the EXECUTED targets (`data.ctrl` after
@@ -53,14 +53,14 @@ scratch with it on the cluster (Xeon, SIF 0.3.0, 2026-10-18): bit-identical to `
 1. Speed: 0 rows over the arm or hand limits, 0 clamped ticks on replay (`probe.py`).
 2. Frozen birth: every replay builds to `917b2bc6...` (bindings.json).
 3. Fresh replays (`probe.py`: rcb_ikea Session, clamp in, `final_check()`), all success with the hashes above:
-   AMD Zen 4 host B Ryzen 9 7950X (image 0.3.0) x2 (1546 / 1554 s, host load ~22); Intel AVX-512 the cluster Xeon Gold 6338
+   AMD Zen 4 host B Ryzen 9 7950X (image 0.3.0) x2 (1546 / 1554 s, host load ~22); Intel AVX-512 cluster Xeon Gold 6338
    (SIF 0.3.0) x2 (2450 / 2473 s); Intel AVX2 i9-14900HX host (PyPI mujoco 3.14.0 + EPA patch) x1, 1164 s quiet.
    The builder's own end state (the cluster Xeon) is the same.
 4. Harbor on host B (Harbor 0.23.0, image 0.3.0, -sim 0.4.0, `harbor_run_safe.sh`): privileged oracle 1 (deterministic 1,
    instance_exact 1, both replays `71688676...` / `a7da23fa...`, replay_wall 1553 s, video 751 frames whose end state is the
-   verdict's) / nop 0; standard oracle 1 (graded live, #305: live settled success at control step 376,000 in 94 calls,
+   verdict's) / nop 0; standard oracle 1 (graded live: live settled success at control step 376,000 in 94 calls,
    live end `802cd7d6...`, service time 1938 s, video) / nop 0.
-5. check-video (origin/main `ci_checks/check-video.py`): both task dirs pass.
+5. check-video (`ci_checks/check-video.py`): both task dirs pass.
 6. Timing: one execution 1164 s on the quiet i9 (10.8 % of the 10,800 s budget, under the 4320 s bar); 2450-2473 s on a
    Xeon 6338 core. The verifier's row cap (714,000) and time limit (10,080 s) are unchanged (evidence.json `budget_basis`).
 

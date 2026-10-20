@@ -1,6 +1,6 @@
 # VESKEN closed-loop reference
 
-`vesken.npz` is the reference of `ikea-vesken-i00-{privileged,standard}` under the final physics (prism rule, eket's
+`vesken.npz` is the reference of `roboarc-ikea-vesken-i00-{privileged,standard}` under the final physics (prism rule, eket's
 fix 3b, MuJoCo 3.14.0 with the EPA byte patch, numpy SIMD masking) and the shared speed rule: the arm joint-speed
 clamp and the Franka Hand slew (`actuator8` at most 0.455357 units per 2.5 ms tick, 50 mm/s per finger; Franka Hand
 manual 220010/1.2/EN 5.1). It is a normal `rcb_ikea` trajectory file (`ctrl`, `substeps` 4, `timestep` 0.000625,
@@ -88,7 +88,7 @@ why the deviation bound is 25 mm. The kept parameters are `params.json`.
 **Rebuild.** `rebuild.py` (a fresh process from the birth, every operation from a restored checkpoint as in the
 search) reaches the search's end state exactly: end `943aa32e…`, settled `29685e37…` (2400 s on a cluster Xeon).
 
-**Fresh replays** (`verify.py`, image `eai-ikea-mujoco:0.3.0` ed950d079b63): birth state `66aaaacb…` = bindings.json
+**Fresh replays** (`verify.py`, image 0.3.0 `ed950d079b63`): birth state `66aaaacb…` = bindings.json
 `initial_state_sha256`; 0 rows over the arm or hand limit, 0 clipped, `slewed_ticks` 0; success 23/23; end `943aa32e…`,
 settled `29685e37…` on every host:
 
@@ -100,16 +100,16 @@ settled `29685e37…` on every host:
 
 Against the 4320 s bar (40 % of the 10,800 s budget): 761 s on loaded Zen 4 (17.6 %), 1822 s on the Gold 6230R (42 %).
 
-**Harbor on host B** (Harbor 0.23.0, `harbor_run_safe.sh`, image `eai-ikea-mujoco:0.3.0` ed950d079b63, `-sim:0.4.0` a466a594c463):
+**Harbor on host B** (Harbor 0.23.0, `harbor_run_safe.sh`, image 0.3.0 `ed950d079b63`, `-sim:0.4.0` a466a594c463):
 
 | Mode | Run | Result |
 |---|---|---|
 | privileged | oracle | 1: deterministic, 2 replays (792 s), end `943aa32e…`, video rendered (751 frames) |
 | privileged | nop | 0 (missing trajectory) |
-| standard | oracle | 1, graded by the live episode (#305): live success at control step 388,000, 97 calls, `n_clipped` 0 on every call, service time 1889 s |
+| standard | oracle | 1, graded by the live episode: live success at control step 388,000, 97 calls, `n_clipped` 0 on every call, service time 1889 s |
 | standard | nop | 0 |
 
-`check-video` (main's `ci_checks/check-video.py`): both dirs render and collect a video.
+`check-video` (`ci_checks/check-video.py`): both dirs render and collect a video.
 
 ## Reproduce
 
