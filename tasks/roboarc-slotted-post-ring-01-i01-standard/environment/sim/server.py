@@ -1,6 +1,6 @@
 """eai-standard/2.2 sim service for TopoGym (Genesis 1.2.1 on CUDA, Nyx RGB; docs/STANDARD_MODE.md): the TopoGym
-adapter of the shared layer rcb_limited.py (scripts/eai_standard/, copied unchanged into every standard task). Adapted from
-robot_coding_bench's RoboWits service. HTTP surface (rcb_limited.py): GET /spec, GET /status, POST /observe, POST /submit
+adapter of the shared layer rcb_limited.py (scripts/eai_standard/, copied unchanged into every standard task). HTTP
+surface (rcb_limited.py): GET /spec, GET /status, POST /observe, POST /submit
 (RCB1 bodies, RCB1 responses), POST /kinematics (stateless FK / IK on the robot's own model). Logs every call to
 /data/episode.jsonl and keeps /data/final.json current. Nothing about objects ever leaves this process.
 
@@ -17,7 +17,7 @@ episode ends (success, the task's failure predicate, the wall clock, an error) t
 hook's SIGUSR1 makes it exit, releasing the GPU; environment/sim/finalize.sh then replays the trajectory once in a fresh
 process, rendering /data/replay.mp4 during that replay, and completes /data/final.json.
 
-Differences from the RoboWits service, all from the simulator: the physics runs on the GPU, so `deterministic` (live and
+Simulator-specific: `deterministic` (live and
 replay state hashes equal) is reported and not required; rows are streamed at the task's control rate (control_hz,
 physics_substeps physics steps each); the joint action is per arm the arm joint targets plus the frozen instance gripper target;
 `ee_pose` is solved by bounded least squares over the robot's Genesis forward kinematics; a task whose own failure
@@ -39,7 +39,7 @@ OBS_CALIBRATION = os.environ.get("RCB_OBS_CALIBRATION", "1") == "1"
 MAX_CHUNK_S = float(os.environ.get("RCB_MAX_CHUNK_S", "10")); MAX_WATCH_S = float(os.environ.get("RCB_MAX_WATCH_S", "30"))
 LOCK = threading.Lock()
 E = {"ready": False, "step": 0, "calls": 0, "done": False, "reason": None, "success": False, "t0": time.time(), "error": None,
-     "t_first": None}   # t_first: the agent's first request to this service (its clock starts there; main's #163 rule)
+     "t_first": None}   # t_first: the agent's first request to this service (its clock starts there)
 JOBS: queue.Queue = queue.Queue()      # simulator work, executed in order by the main thread
 PID_FILE = os.path.join(DATA, "server.pid")
 # Crash-safe episode bookkeeping, set up before the scene is built (start count, back-off, startup watchdog); the journal row

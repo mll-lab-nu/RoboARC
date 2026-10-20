@@ -1,8 +1,7 @@
 """Standard-mode verifier (eai-standard/2.2): reads what the sim service (which the agent could not touch) wrote:
 /data/final.json (live success, the fresh-process replay of the live rows done by environment/sim/finalize.sh, the
-crash-recovery fields), /data/trajectory.npz, /data/replay.mp4. Adapted from robot_coding_bench's RoboWits standard
-grader. success = live success AND replay success, and no infrastructure failure; TopoGym's physics runs on the GPU (the
-RoboWits GPU-backend rule): the live and replayed states need not agree bit for bit, so `deterministic` is reported, not
+crash-recovery fields), /data/trajectory.npz, /data/replay.mp4. success = live success AND replay success, and no
+infrastructure failure; the live and replayed states need not agree bit for bit, so `deterministic` is reported, not
 required. After a live success, a replay that produced no result is a grader error, not the agent's 0: grader_error = 1
 and infra_error = 1 (PROTOCOL §2.6: infra_error is the field that says "not the agent's failure"); after a live
 failure it changes nothing (a live failure is final). An instance this host could not reconstruct (the service's startup

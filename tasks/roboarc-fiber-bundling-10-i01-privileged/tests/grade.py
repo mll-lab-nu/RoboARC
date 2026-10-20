@@ -1,12 +1,10 @@
 """Verifier entry point: replay /app/output/trajectory.npz from the frozen instance and write Harbor rewards.
-Adapted from robot_coding_bench's RoboWits grader (fa59c1a6: tasks/robowits-stack-cubes-i00/tests/grade.py).
 
-    python /tests/grade.py --family cube_pick_place --instance /tests/instance.json --traj /app/output/trajectory.npz
+    python /tests/grade.py --family <family> --instance /tests/instance.json --traj /app/output/trajectory.npz
 
 Writes /logs/verifier/reward.txt (1/0), reward.json (numeric fields only — Harbor rejects strings), and a
 human-viewable replay video /logs/verifier/replay.mp4 (all cameras tiled) plus replay.last.png, rendered during the last of
-the `--repeat` (2) replays in this fresh process: two passes in all, no separate video replay. TopoGym's physics runs on
-the GPU, whose contact solver is not bit-exact (the rule of robot_coding_bench's GPU backend): every replay must complete
+the `--repeat` (2) replays in this fresh process: two passes in all, no separate video replay. Every replay must complete
 the task. Initial state and runtime binding must match exactly; final-state determinism is reported separately.
 The replays are grading replays (rcb_topogym.Session.replay(grading=True), tooling v16): for the GPU families the rows run
 with the instance's own thresholds and, if the episode has not ended after the last row, the final targets are held for up
@@ -15,7 +13,7 @@ of them to reach the goal with the instance's own (strict) thresholds within the
 tooling v16 again): the hold only confirms, as in standard mode, where the live episode is strict and its replay may
 confirm in the hold. R-hold (2026-10-05 to 2026-10-14) let every replay confirm within the hold and required no strict
 goal; privileged mode has no graded live run, so the hold's relaxed thresholds became the effective goal (blanket-flatten:
-92 % coverage instead of 95 %; failure analysis 2026-10-14, item 12). The cloth step runs on a deterministic solver and the
+92 % coverage instead of 95 %). The cloth step runs on a deterministic solver and the
 MuJoCo families on the CPU, so a replay reproduces the agent's own run, and a recording that stops on its own (strict)
 success reaches it within its rows. The strict goal is reported (`strict_goal_reached`, `strict_goal_row`; verdict.json
 `evidence.strict_goal`), `strict_replay_required` 1 marks the rule, and `success_in_hold_only` 1 a trajectory whose replays
