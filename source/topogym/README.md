@@ -1,24 +1,49 @@
-# TopoGym 模拟器模块
+# topogym: the simulator behind RoboARC's puzzles
 
-当前已接通标准生命周期与 FEM/IPC；[真实运行结果与证据](../docs/develop/dev-logs/simulator_base_runtime_implementation_zh.md)单独记录。
+The Python package the release image installs at `/opt/topogym/topogym` (`PYTHONPATH=/opt/topogym`). It started as
+TopoGym on Genesis physics; the released families run on MuJoCo 3.14.0 (`world/mujoco/`) and render through Nyx. The
+graded entry point is the pinned tooling, `scripts/roboarc/shared/rcb_topogym.py` (`Session`), which builds a world from
+a frozen instance; the package name, `/opt/topogym` and the `TOPOGYM_*` variables are part of the released runtime and
+keep their names.
 
-- `simulator/`：make/env_list、SimulatorConfig、管理方 Env、无 reset 的操作句柄、特权查询、逐 tick 历史和 transition。
-- `config/`：共享场景/相机/机器人配置、13 项任务身份和操作缺口；SimulatorConfig 的兼容导出来自 simulator/config.py。
-- `world/`：Genesis 场景、唯一物理推进及状态恢复；`lab.py` 构建唯一 compact_lab，`visuals/` 接线外观与渲染。
-- `robot/`：ALOHA 双臂与 Panda＋Robotiq 单臂的描述、TCP、JOINT/EE 控制模式和共享关节执行；不推进物理。
-- `solvers/`：Genesis FK/IK 与独立碰撞、间隙查询。
-- `sensors/`：EE/JOINT 观察、Nyx RGB、缓存和标定；默认双臂 4 路/单臂 3 路，848×480；录制默认 30 fps，共用 compact_lab。
-- `tasks/`：13 个任务子目录、`common.py` 共用逻辑及 `<task>_easy/medium/hard.py` 具体设置；缺失档位有明确拒绝运行的占位文件；没有独立场景循环。
-- `assets/`：任务几何和专属外观、物理材料声明、共享表面工具、机器人加载和必要资源。
-- `recording/`、`data/`：共享帧与真实 transition 的被动消费者。
-- `evaluation/`：布面测量与连续运动间隙证书；Task 定义成功语义。
-- `utils/`：通用数学、随机流、快照、数组和 I/O。
-- `../legacy/cleanup_20260929/topogym/agents/deferred/`：已归档的 agent/API/rollout 源码参考，不接入、不测试、不发行。
+| folder | content |
+|---|---|
+| `simulator/` | `make` / `env_list`, `SimulatorConfig`, the managed `Env` and its interaction handles, history, `frozen_binding.py` (the installed runtime every task binding names) |
+| `world/` | the worlds: `mujoco/` (the MuJoCo core: scenes, contact policy, profiles, rope and cloth backends, energy books, guards; [docs/simulator/MUJOCO_CORE.md](../../docs/simulator/MUJOCO_CORE.md)), `physics/` and `genesis_world.py` (the Genesis paths: render host, birth states), `visuals/` |
+| `tasks/` | the 14 families (`<family>/`: task, variations, success predicates, redesigned tiers), placement, goal descriptions |
+| `assets/` | task geometry (`geometry/`), frozen resources and variation records (`resources/`), robot loading |
+| `robot/`, `sensors/`, `solvers/` | robot descriptions and control modes; observations and cameras; kinematics and collision queries |
+| `config/`, `evaluation/`, `recording/`, `utils/` | shared configuration profiles; measurements behind success checks; frame and transition recording; helpers |
+| `planning/` | the oracle sources (not in the image; below) |
 
-此前 13 项基础设置有 CUDA 短程证据；本轮公共接口与回溯语义已改变，结果见[新实施报告](../docs/develop/dev-logs/simulator_public_api_implementation_20260924_zh.md)。七项未完成判据不能声明成功。`redundants/` 已删除，活动代码只有 Genesis 物理途径。
+Every file outside `planning/` and outside `*.md` is hashed into SOURCE.json (443 files in release 1.0.0): changing one
+changes every task's runtime binding (`source/README.md`).
 
-管理方可以 reset(seed=...) 切换场景。操作方只取得 `env.interaction(privileged=False/True)`，两种模式均没有 reset；特权可 rewind 当前 episode，回溯后旧未来失效。管理方 reset 使旧句柄失效，且不维护旧 episode 存档。
+## planning/: how the references were made
 
-[本轮精简记录](../docs/develop/dev-logs/simulator_simplification_20260923_zh.md) · [当前脚本清单](../legacy/cleanup_20260929/docs/develop/dev-logs/script_inventory_zh.md) · [逐测试脚本说明](../docs/develop/dev-logs/simulator_test_scripts_zh.md)。
+The reference solutions in `scripts/roboarc/oracles/` were recorded by these planners, run from the tools in
+`tools/references/` and `tools/redesign/` (the frozen instances and texts: `scripts/roboarc/release.json`; per-family
+notes: `docs/simulator/families/`).
 
-变体用 `make("cast_coil", variation_id="cast_coil_medium")` 选择，亦支持 `"medium"` 别名。`env_list(details=True)` 提供 `variation_details`（含占位原因）和 `base_variation`；部署状态见[实施记录](../docs/develop/tasks/variation_deployment_implementation_20260925_zh.md)。
+| family | released bases | planning | tools |
+|---|---|---|---|
+| blanket_flatten | 01-09 | `blanket_flatten/` (routes, robot oracle, hard port, `redesign/`; run-oracle entry `public_session.py`) | the Genesis-era routes: `tools/references/oracles_genesis/` |
+| blanket_fold | 01-05 | `blanket_fold/redesign/oracle.py` (through `blanket_flatten/`'s route runner) | |
+| buzz_wire_3d | 01-10 | `buzz_wire_3d/` (`redesign/` for the rd tiers) | `tools/references/buzz_wire_3d/` (`make_ref.py`, `ported/`), `tools/redesign/buzz_wire_3d/` |
+| cast_coil | 01-08 | `cast_coil/` | `tools/references/cast_coil/` |
+| cast_keyhole | 01-06 | `cast_keyhole/` | `tools/references/cast_keyhole/` |
+| fiber_bundling | 01-10 | `fiber_bundling/` (`redesign/`) | `tools/references/fiber_bundling/` (`replan.py`) |
+| hedgehog_in_cage | 01-08 | `hedgehog_in_cage/` | `tools/references/hedgehog_in_cage/` |
+| horseshoe_ring | 01-05 | `horseshoe_ring/`, `harbor_bridge/` (callbacks, `reference_data/horseshoe_ring/`) | `tools/references/horseshoe_ring/` |
+| interlocked_claws | 01-12 | `interlocked_claws/` (`redesign/`) | `tools/references/interlocked_claws/`, `tools/redesign/interlocked_claws/` |
+| knot_untying | 8 bases, 01-09 | `knot_untying/` (`redesign/`) | `tools/redesign/knot_untying/` |
+| lock_picking | 01-05 | `lock_picking/` (`public_session.py`) | `tools/references/oracle_runners/lock_picking_session_oracle.py` |
+| orbits | 01-02 | `orbits/` (`native_session.py`) | `tools/references/orbits/`, `tools/references/oracle_runners/orbits_session_oracle.py` |
+| rope_threading | 01-08 | `rope_threading/` (`redesign/`) | `tools/redesign/rope_threading/` |
+| slotted_post_ring | 01-05 | `slotted_post_ring/` (`public_session.py`, `chain/`) | `tools/references/slotted_post_ring/`, `tools/references/oracle_runners/slotted_*` |
+
+Shared by several planners: `base.py`, `oracle_ik.py`, `oracle_path.py`, `standard_rate.py` (the standard service's
+joint-speed limit applied to a route), `motions/`, `rigid_reference/`, `grasp_observation.py`, `solvability.py`,
+`instance_optimizer/`, `harbor_bridge/` (the Genesis-era Harbor oracle bridge; its callbacks and reference data are still
+used by the horseshoe_ring and cast_keyhole tools). Some modules are from the Genesis era (audits, below-easy tiers,
+policies over Genesis worlds) and are kept as the record of how the earlier references were made.
