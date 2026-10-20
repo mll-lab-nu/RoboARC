@@ -17,8 +17,8 @@ repository: <head> gives the simulator source (source/), the release inputs (too
   --bench         the benchmark the MuJoCo tasks belong to (default roboarc; BENCH in scripts/<bench>/mk_tasks.py): its
                   files are scripts/<bench>/ (release.json, assets.json, packages/, oracles/, shared/),
                   images/<bench>/VERSION, the image ghcr.io/embodied-first-exam/<bench>:<version> and the task dirs
-                  tasks/<bench>-<base>-<mode>. The Genesis-era task texts a new base starts from (its template) are
-                  tools/release/templates/ (read, never changed)
+                  tasks/<bench>-<base>-<mode>. A new base's texts start from its template's final package in the
+                  render tree (scripts/<bench>/packages/<template>-<mode>, the base's name replaced)
   --onto          required: render the task dirs on this commit (one whose scripts/<bench>/mk_tasks.py renders MuJoCo
                   bases): the release files are written there, with <head>'s tooling
                   (shared/rcb_topogym.py, render_bridge.py, nyx_direct.py) laid over it; then the repository checks
@@ -51,29 +51,24 @@ repository: <head> gives the simulator source (source/), the release inputs (too
 A manifest base with "reference": null has no reference solution (user 2026-10-13): no oracles/ copy, release.json
 evidence {} and oracle "none" (its texts say so), no birth comparison, and Harbor runs nop only for it (harbor_nop/).
 Steps:
-  1. a worktree of <head>; the image without MuJoCo instances (source/images/robotangle/Dockerfile.mujoco built from
-     source/, as images/roboarc/build.sh does, with an empty `instances` context): <bench>:<v>-noinst
+  1. a worktree of <head>; the image without MuJoCo instances (source/images/roboarc/Dockerfile built from source/, as
+     images/roboarc/build.sh does, with an empty `instances` context): <bench>:<v>-noinst
   2. every MuJoCo base's instance made inside it (rcb_topogym.py make-instance, the MuJoCo tasks' SIMD masking, no
      network), then the release image with them: ghcr.io/embodied-first-exam/<bench>:<v>; the runtime of both must be
      the same (installed_runtime)
-  3. the release written: VERSION; packages/<new>-* (the released base's texts, renamed, and the made instance's lock;
-     with --onto a benchmark of its own, a base the render tree already has packages for keeps those texts, only its
-     lock is new (or kept: below);
-     a family whose mujoco_release.json entry names package_text, a directory of the tree, takes the files of its
-     <package_text>/<released base>-<mode>/ over the released ones: the task texts of a changed design; a family's
-     new_bases are tasks of a new design: each takes its template's released texts, renamed, with the files of its
-     <package_text>/<new base>-<mode>/ over them, and leaves the template as it is);
+  3. the release written: VERSION; packages/<new>-* (a base the render tree already has packages for keeps those
+     texts, only its instance lock is new (or kept: below); a new base without packages gets its template's final
+     packages (mujoco_release.json new_bases "template": a base of the render tree, or its Genesis-era name, which
+     scripts/<bench>/roboarc_names.json maps), the name replaced: edit its texts in packages/ and run again);
      oracles/<new>/ (the reference; standard.npz is the same file: a MuJoCo standard oracle streams the reference's
      rows and mk_tasks.py reads only its actions; unless the tree's oracles/<new>/standard.npz is a reference re-timed
      to the standard service's joint-speed rule, meta "speed_rule": then that file, standard_reference()); release.json (runtime, tooling, the MuJoCo base records with their
-     evidence: this run); assets.json (the made instances' pins); the packages written from Genesis-era texts (a
-     template's or a released Genesis base's) turned into final packages (the render tree's mk_tasks.PORT_PACKAGE,
-     scripts/<bench>/port_package.py); every task dir rendered (mk_tasks.py).
+     evidence: this run); assets.json (the made instances' pins); every task dir rendered (mk_tasks.py).
      A base that comes out unchanged (the same frozen instance, references, runtime and tooling, so the same record
      but for its provenance words) keeps its lock and its release.json record; when every base does, release.json keeps
      its release commit too: re-making a release with its own instances and references changes no task file
   4. mk_tasks.py --check (every base) and --assets <work> --check (the MuJoCo bases' instance bytes); the render tree's
-     generator is driven only through its interface (mk_tasks.PACKAGE_FORMAT "final-texts/1", PORT_PACKAGE, MUJOCO_ENV)
+     generator is driven only through its interface (mk_tasks.PACKAGE_FORMAT "final-texts/1", MUJOCO_ENV)
   5. a local commit, then harbor_check.py --tasks: oracle and nop, both modes, rendering off, on that commit (a base
      on a GPU profile keeps its one-GPU reservation)
 Facts the texts state are read in the release image, per base, from its instance and the tooling (release.json):
@@ -298,18 +293,18 @@ def bases_of(spec: dict, families: list[str] | None) -> list[dict]:
                             render_host=r.get("render_host", False), frozen_assets=r.get("frozen_assets", False),
                             released_task_parameters=r.get("released_task_parameters", False),
                             grasp_weld_links=r.get("grasp_weld_links"),
-                            package_text=r.get("package_text"), task=f, template=None, design=r.get("design"),
+                            task=f, template=None, design=r.get("design"),
                             **{**spec["make_instance"], **r.get("make_instance", {})}))
         for new, n in r.get("new_bases", {}).items():   # a new design: no released base; its texts start from a template's
-            unknown = set(n) - {"template", "variation", "tier", "task", "scene_seed", "gripper_space", "package_text",
-                                "design", "note", "simulator_overrides"}
+            unknown = set(n) - {"template", "variation", "tier", "task", "scene_seed", "gripper_space", "design", "note",
+                                "simulator_overrides"}
             if unknown or not n.get("template") or not n.get("variation"):
                 raise SystemExit(f"{f} new_bases {new}: needs template and variation (unknown keys {sorted(unknown)})")
             out.append(dict(family=f, tier=n.get("tier", n["variation"].removeprefix(f"{f}_")), old=None, new=new,
                             variation=n["variation"], released_simulator_keys=[],
                             simulator_overrides=n.get("simulator_overrides", {}),   # fixed values only (no released instance)
                             render_host=False, frozen_assets=False, released_task_parameters=False, grasp_weld_links=None,
-                            package_text=n.get("package_text", r.get("package_text")), task=n.get("task", f),
+                            task=n.get("task", f),
                             template=n["template"], design=n.get("design"),
                             **{**spec["make_instance"], **r.get("make_instance", {}),
                                **{k: n[k] for k in ("scene_seed", "gripper_space") if k in n}}))
@@ -418,13 +413,24 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
         return dict(pool.map(one, bases))
 
 
-def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: dict, noinst: dict, facts: dict) -> dict:
+def template_base(rb: pathlib.Path, template: str) -> str:
+    """A new base's template as a base of the render tree: its own name, or the RoboARC name roboarc_names.json gives
+    its Genesis-era name (<family>-<tier>-i00)."""
+    if (rb / "packages" / f"{template}-privileged").is_dir():
+        return template
+    names = json.loads((rb / "roboarc_names.json").read_text())
+    old = "robotangle-" + re.sub(r"-i00$", "-i01", template)
+    if old not in names:
+        raise SystemExit(f"template {template}: neither a base of scripts/{rb.name}/packages nor in roboarc_names.json")
+    return names[old]["new"].removeprefix(rb.name + "-")
+
+
+def write_release(a, bases: list[dict], head: str, runtime: dict, noinst: dict, facts: dict) -> dict:
     """VERSION, packages/, oracles/, release.json and assets.json for the made instances, in the render tree (a.out: the
-    --onto worktree, else <head>'s); the old task dirs removed. Task texts of a changed or new design come from <head>
-    (package_text). Returns what it did: the bases whose packages it wrote from Genesis-era texts ("written", to port)
-    and the bases it found unchanged ("kept", with the record fields only this run's provenance words would change)."""
+    --onto worktree, else <head>'s); the old task dirs removed. Returns what it did: the bases whose packages it wrote
+    from their template's ("written": edit their texts) and the bases it found unchanged ("kept", with the record fields
+    only this run's provenance words would change)."""
     rb = a.out / "scripts" / a.bench                        # this benchmark's release files
-    released = a.repo / "tools/release/templates"   # the Genesis-era released texts (a new or newly ported base's template)
     new_bench = True                                # always a benchmark of its own (the Genesis in-place release is gone)
     (a.out / "images" / a.bench / "VERSION").write_text(a.version + "\n")
     rel = json.loads((rb / "release.json").read_text())
@@ -449,14 +455,15 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
                 except UnicodeDecodeError:
                     out[p.relative_to(src)] = (b, p.stat().st_mode)
         return out
-    # a new base's template texts, read before a renamed base of the template's family removes its released packages
-    template_texts = {(b["new"], m): texts_of((released if new_bench else rb / "packages") / f"{b['template']}-{m}",
-                                              b["template"], b["new"])
-                      for b in bases if b["template"] for m in ("privileged", "standard")}
-    # a base the benchmark already releases (its packages/<new>-* in the render tree, e.g. main's 0.1.0 bases) keeps
-    # those texts: they carry what main changed since (the 0.1.0 rename's doc paths, later text fixes), which the
-    # head's RoboTangle packages and package_text do not; a text change of a released base is made there. Only its
-    # instance lock is written again.
+    # a new base's template texts: its template's final packages in the render tree, the base's name replaced
+    template_texts = {}
+    for b in bases:
+        if b["template"] and not all((rb / "packages" / f"{b['new']}-{m}").is_dir() for m in ("privileged", "standard")):
+            t = template_base(rb, b["template"])
+            for m in ("privileged", "standard"):
+                template_texts[b["new"], m] = texts_of(rb / "packages" / f"{t}-{m}", t, b["new"])
+    # a base the benchmark already releases (its packages/<new>-* in the render tree) keeps those texts; a text change
+    # of a released base is made there. Only its instance lock is written again.
     onto_texts = {b["new"] for b in bases if new_bench and all((rb / "packages" / f"{b['new']}-{m}").is_dir()
                                                                for m in ("privileged", "standard"))}
     for b in bases:
@@ -466,21 +473,9 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
             written.append(new)
         for mode in ("privileged", "standard") if new not in onto_texts else ():
             dst = rb / "packages" / f"{new}-{mode}"
-            if b["template"]:             # a new base: its template's released texts, under the new name
-                texts, key = dict(template_texts[new, mode]), new
-                if not texts or not b.get("package_text"):
-                    raise SystemExit(f"{new}: needs its template's packages/{b['template']}-{mode} and its own texts "
-                                     "(package_text)")
-            else:                         # the released base's texts, under the new name
-                src = (released if new_bench else rb / "packages") / f"{old}-{mode}"
-                if not src.is_dir():
-                    src = dst
-                texts, key = texts_of(src, old, new), old
-            if b.get("package_text"):     # the base's own task texts over those (its design changed, or is new)
-                own = a.repo / b["package_text"] / f"{key}-{mode}"
-                if not own.is_dir():
-                    raise SystemExit(f"{new}: package_text has no {own}")
-                texts.update(texts_of(own, old or b["template"], new))
+            if not b["template"]:         # a released base needs its packages in the render tree
+                raise SystemExit(f"{new}: no packages/{new}-{mode} in the render tree (a released base keeps its texts there)")
+            texts = dict(template_texts[new, mode])   # a new base: its template's final texts, under the new name
             shutil.rmtree(dst, ignore_errors=True)
             for rel_path, (s, st_mode) in texts.items():
                 (dst / rel_path).parent.mkdir(parents=True, exist_ok=True)
@@ -581,7 +576,6 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     rel["tooling_sha256"] = tooling
     if not (same_release and len(kept) == len(bases)):   # the commit the release is built from (unless it re-made itself)
         rel["release_commit"] = rel["template_commit"] = head
-    assert {n: b["uipc_build_sha256"] for n, b in rel["uipc_builds"].items()} == uipc_builds, "uipc builds changed"
     (rb / "release.json").write_text(json.dumps(rel, indent=1, ensure_ascii=False) + "\n")
     assets["files"] = dict(sorted(assets["files"].items()))
     assets["instances"] = dict(sorted(assets["instances"].items()))
@@ -797,25 +791,25 @@ def main(argv: list[str]) -> int:
     for b in bases:
         if b["new"] not in a.no_oracle:
             reference(b, a.references, a.repo, a.ref_paths)        # every reference exists before anything is built
-        has_texts = all((a.out / "scripts" / a.bench / "packages" / f"{b['new']}-{m}").is_dir() for m in ("privileged", "standard"))
-        if b["template"] and not has_texts:           # and every new base's texts (a released base keeps its own)
-            for mode in ("privileged", "standard"):
-                need = [a.repo / "tools/release/templates" / f"{b['template']}-{mode}"] + \
-                       ([a.repo / b["package_text"] / f"{b['new']}-{mode}"] if b["package_text"] else [])
-                if not b["package_text"] or not all(p.is_dir() for p in need):
-                    raise SystemExit(f"{b['new']}: needs its template's texts and its own (package_text): "
-                                     f"{', '.join(str(p) for p in need if not p.is_dir()) or 'no package_text'}")
+        rb = a.out / "scripts" / a.bench
+        has_texts = all((rb / "packages" / f"{b['new']}-{m}").is_dir() for m in ("privileged", "standard"))
+        if not has_texts:                 # every base has texts: its own packages, or (a new base) its template's
+            if not b["template"]:
+                raise SystemExit(f"{b['new']}: no packages/{b['new']}-* in the render tree")
+            t = template_base(rb, b["template"])
+            if not all((rb / "packages" / f"{t}-{m}").is_dir() for m in ("privileged", "standard")):
+                raise SystemExit(f"{b['new']}: its template {t} has no packages in the render tree")
         if a.hf_revision and not (a.work / "instances" / b["new"] / "instance.json").is_file():
             raise SystemExit(f"--hf-revision uses the instances of a previous run in {a.work}: {b['new']} has none")
     # harbor_check.py is this checkout's (the runner), mk_tasks.py the render tree's; MUJOCO_ENV is the same in both
     gen = f"scripts/{a.bench}/mk_tasks.py"     # the render tree's generator
     mk, hc = module(a.out / gen), module(here / "scripts/roboarc/harbor_check.py")
-    if getattr(mk, "PACKAGE_FORMAT", None) != "final-texts/1" or not pathlib.Path(getattr(mk, "PORT_PACKAGE", "")).is_file():
+    if getattr(mk, "PACKAGE_FORMAT", None) != "final-texts/1":
         raise SystemExit(f"--onto {a.onto}: scripts/{a.bench}/mk_tasks.py does not render final packages "
-                         "(PACKAGE_FORMAT \"final-texts/1\" and its PORT_PACKAGE tool)")
+                         "(PACKAGE_FORMAT \"final-texts/1\")")
     empty = a.work / "empty"
     empty.mkdir(exist_ok=True)
-    build = ["docker", "buildx", "build", "--load", "-f", "images/robotangle/Dockerfile.mujoco",
+    build = ["docker", "buildx", "build", "--load", "-f", "images/roboarc/Dockerfile",
              "--build-arg", f"RELEASE_VERSION={a.version}"]       # as images/<bench>/build.sh builds it
     run([*build, "--build-context", f"instances={empty}", "-t", noinst_tag, "."], log=a.work / "logs/build_noinst.log",
         cwd=ctx)
@@ -861,18 +855,13 @@ def main(argv: list[str]) -> int:
     gpu_bases = [b["new"] for b in bases if facts[b["new"]]["gpu_physics"]]
     report.update(facts=facts, gpu_bases=gpu_bases)
     runtime = dict(rt["runtime"])
-    uipc = rt["uipc_builds"]
     report.update(images=dict(noinst=noinst, release=dict(reference=image, id=image_id(image))),
                   runtime=runtime, instances=instances)
 
     # 3. the release files, every task dir rendered; 4. the checks
-    done = write_release(a, bases, head, runtime, uipc, noinst, facts)
+    done = write_release(a, bases, head, runtime, noinst, facts)
     report.update(packages_written=done["written"], unchanged_bases=done["kept"])
     py = sys.executable
-    # the packages written from Genesis-era texts (a new base, or a re-made one without packages yet) become final
-    # packages, through the generator's own tool; a base that kept its packages is final already
-    if done["written"]:
-        run([py, str(mk.PORT_PACKAGE), *done["written"]], log=a.work / "logs/port_package.log", cwd=a.out)
     run([py, gen], log=a.work / "logs/mk_tasks.log", cwd=a.out)
     checks = {}
     for name, cmd in (("mk_tasks.py --check, all bases", [py, gen, "--check"]),

@@ -1,6 +1,6 @@
 """The hedgehog_in_cage easy -i01 reference: the released rows up to their release, then the ball carried out while held.
 
-The released route (tools/references/oracles_genesis/hedgehog-in-cage-easy-i00) opens the gripper at row 7126 with the ball
+The released route (oracles_genesis/ of RoboARC 1.0.0 (main 153eb8cf01:tools/references/oracles_genesis/), hedgehog-in-cage-easy-i00) opens the gripper at row 7126 with the ball
 88 mm from the cage axis and three of its spikes still inside the 0 deg window (a 60 mm slot between parallel walls,
 180 mm tall): the radial spike and two side spikes 30 deg either side, whose tips reach the slot walls. The free fall
 (0.1 m) runs down the slot onto the mount, and the ball comes out only by rolling there; on the exact constraint

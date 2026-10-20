@@ -1,11 +1,12 @@
 """Invariants of the task generator scripts/roboarc/mk_tasks.py (standard library only, Python >= 3.11, about 10 s;
 the full proof is `mk_tasks.py --check`, which renders all 202 task dirs):
-  1. every package is final (port_package.py --check) and holds only the fields mk_tasks fills in its mode, and no
+  1. every package is final (its fields, e.g. {{AGENT_EGRESS}} in task.toml) and holds only the fields mk_tasks fills in
+     its mode, and no
      internal dev image tag;
   2. every package's task.toml states a difficulty of TIERS, the one roboarc_names.json gives where it names the base;
   3. fill() refuses an unknown field;
   4. the pinned tooling is the release's (tooling_check), and the families that render with nyx_direct.py are read;
-     the interface tools/release/release_rebuild.py drives the generator through (PACKAGE_FORMAT, PORT_PACKAGE) holds;
+     the interface tools/release/release_rebuild.py drives the generator through (PACKAGE_FORMAT) holds;
   5. two bases (a rigid one, a cloth one with goal images) render to exactly their task dirs in tasks/.
 usage: python3 scripts/roboarc/tests/test_generator.py"""
 import pathlib, re, subprocess, sys, tempfile
@@ -23,8 +24,8 @@ DEV_TAG = re.compile(r"rcb-topogym:|\b(?:labv1\d\w*|hsbe2|obejw)/")
 
 def main() -> int:
     bases = sorted(M.REL["bases"])
-    r = subprocess.run([sys.executable, str(HERE.parent / "port_package.py"), "--check", *bases], capture_output=True, text=True)
-    assert r.returncode == 0, r.stdout + r.stderr
+    for b in bases:
+        assert "{{AGENT_EGRESS}}" in (M.PKG / f"{b}-privileged" / "task.toml").read_text(), f"packages/{b}: not a final package"
     named = {v["new"].removeprefix(M.BENCH + "-"): v["difficulty"] for v in M.NAMES.values()}
     for b in bases:
         for mode in ("privileged", "standard"):
@@ -46,7 +47,7 @@ def main() -> int:
     except AssertionError as e:
         assert "unknown fields" in str(e), e
     assert M.tooling_check() == [], M.tooling_check()
-    assert M.PACKAGE_FORMAT == "final-texts/1" and M.PORT_PACKAGE.is_file(), "the interface release_rebuild.py relies on"
+    assert M.PACKAGE_FORMAT == "final-texts/1", "the interface release_rebuild.py relies on"
     assert M.DIRECT and set(M.DIRECT) <= {r["family"] for r in M.REL["bases"].values()}, M.DIRECT
     with tempfile.TemporaryDirectory() as tmp:
         for b in ("orbits-01-i01", "blanket-fold-02-i01"):

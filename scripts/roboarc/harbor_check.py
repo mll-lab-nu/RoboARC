@@ -52,8 +52,8 @@ EXPECTED = {"oracle": 1.0, "nop": 0.0}
 EVIDENCE = ("all_success", "live_success", "replay_success", "deterministic", "instance_exact", "runtime_binding_ok",
             "review_events", "missing_trajectory", "infra_error", "grader_error")   # reward fields shown in results.md
 COST = {("standard", "oracle"): 2.5, ("privileged", "oracle"): 2.0}   # passes over the reference: the slowest start first
-RUNTIME = ("import json, sys; sys.path.insert(0, '/tooling'); import rcb_topogym as rt; r = rt.installed_runtime(); "
-           "b = r.pop('uipc_builds'); r['uipc_build_sha256'] = b['audited']; print(json.dumps(dict(runtime=r, uipc_builds=b)))")
+RUNTIME = ("import json, sys; sys.path.insert(0, '/tooling'); import rcb_topogym as rt; "
+           "print(json.dumps(dict(runtime=rt.installed_runtime())))")
 
 
 def sh(cmd: list[str], **kw) -> str:

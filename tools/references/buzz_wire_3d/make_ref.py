@@ -12,7 +12,7 @@ topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIM
 usage: make_ref.py <instance.json> <route.npz> --cut N --finish {simplified,easy,adaptive,...} --out ref.npz [--tail 400]
        [--log x] [--output-dir d]
 buzz_finish.py reads its knobs from the environment (BUZZ_REACH_DEG, BUZZ_ROUNDS, BUZZ_GRASP_BUDGET, BUZZ_PARTIAL, ...).
-The -i01 references (docs/simulator/families/buzz_wire_3d.md): the route tools/references/oracles_genesis/buzz-wire-3d-<tier>-i00/
+The -i01 references (docs/simulator/families/buzz_wire_3d.md): the route oracles_genesis/ of RoboARC 1.0.0 (main 153eb8cf01:tools/references/oracles_genesis/), buzz-wire-3d-<tier>-i00/
 privileged.npz, --finish adaptive, --cut 7000 (very_easy), 7850 (easier); on the Robotiq's springref 2.62 with the
 finish's staged grasps and slow releases (buzz_finish.STAGED, the default)."""
 import sys

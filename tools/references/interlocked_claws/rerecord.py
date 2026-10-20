@@ -7,7 +7,7 @@ topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIM
 
 usage: rerecord.py <instance.json> <reference.npz> <out.npz> [--tail N] [--note TEXT]
 The interlocked_claws -i01 references (docs/simulator/families/interlocked_claws.md): very_easy and easier from the released
-oracle tools/references/oracles_genesis/interlocked-claws-<tier>-i00/privileged.npz directly; easy, medium and hard from that
+oracle oracles_genesis/ of RoboARC 1.0.0 (main 153eb8cf01:tools/references/oracles_genesis/), interlocked-claws-<tier>-i00/privileged.npz directly; easy, medium and hard from that
 oracle with its wrist dither notched out (notch_ref.py --length <v5 rows>)."""
 import sys
 from pathlib import Path

@@ -56,7 +56,9 @@ a = ap.parse_args()
 out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
 base = f"fiber-bundling-{a.tier.replace('_', '-')}-i00"
 inst = str(Path(a.instance).resolve())
-released = HERE.parent / "oracles_genesis" / base / "privileged.npz"          # the released (Genesis) rows: the pickup
+# the released (Genesis) rows, the pickup: RoboARC 1.0.0's tools/references/oracles_genesis/ (main 153eb8cf01), checked out
+# next to this file or named by RCB_GENESIS_ORACLES
+released = Path(os.environ.get("RCB_GENESIS_ORACLES", HERE.parent / "oracles_genesis")) / base / "privileged.npz"
 sel = json.loads((Path(topogym.__file__).resolve().parent / "planning/harbor_bridge/reference_data/fiber_bundling" / a.tier
                   / "selection.json").read_text())
 s = Session("fiber_bundling", instance=inst, strict=True)

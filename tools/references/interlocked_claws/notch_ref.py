@@ -7,7 +7,7 @@ usage: notch_ref.py <in.npz> <out.npz> --cols left/wrist_rotate,right/wrist_rota
        [--fs 40] [--length N]
 --length: first pad the rows with copies of the last one (or cut them) to N rows; the band is removed over that length.
 The claws -i01 references: --length 792 (easy), 1416 (medium), 16202 (hard), claws v5's lengths (the released oracle
-padded with its last row), on the released oracle tools/references/oracles_genesis/interlocked-claws-<tier>-i00/privileged.npz."""
+padded with its last row), on the released oracle oracles_genesis/ of RoboARC 1.0.0 (main 153eb8cf01:tools/references/oracles_genesis/), interlocked-claws-<tier>-i00/privileged.npz."""
 import argparse, json
 import numpy as np
 

@@ -7,7 +7,7 @@ topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIM
 
 usage: rerecord.py <instance.json> <reference.npz> <out.npz> [--tail N] [--note TEXT]
 The hedgehog_in_cage -i01 references (docs/simulator/families/hedgehog_in_cage.md): very_easy, easier, medium and hard from
-the released oracle tools/references/oracles_genesis/hedgehog-in-cage-<tier>-i00/privileged.npz directly, on an instance in
+the released oracle oracles_genesis/ of RoboARC 1.0.0 (main 153eb8cf01:tools/references/oracles_genesis/), hedgehog-in-cage-<tier>-i00/privileged.npz directly, on an instance in
 its released gripper space (native)."""
 import sys
 from pathlib import Path
