@@ -1,9 +1,9 @@
 # MuJoCo 3.14.0 wheel + the EPA horizon fix (byte patch)
 
-The patch script `bytepatch_libmujoco.py` is copied into each image's build context:
-`source/images/robotangle/mujoco-3.14.0-epa/` (the RoboARC puzzles' image, `source/images/robotangle/Dockerfile.mujoco`)
-and `ikea/images/ikea-mujoco/mujoco-3.14.0-epa/` (IKEA MuJoCo); the two files are byte-identical. The source build that
-was tried and not used (below) is kept in `records/mujoco-3.14.0-epa-source-build/`.
+The patch script is `source/images/robotangle/mujoco-3.14.0-epa/bytepatch_libmujoco.py`, the one copy both images use:
+the RoboARC puzzles' image copies it from its build context (`source/images/robotangle/Dockerfile.mujoco`), and IKEA
+MuJoCo's `ikea/scripts/ikea_mujoco/stage_context.py` stages it into that image's context. The source build that was
+tried and not used (below) is kept in `records/mujoco-3.14.0-epa-source-build/`.
 
 ## The bug
 - **What happens:** eket replays crashed MuJoCo 3.14.0 with SIGSEGV in `mj_narrowphase`, when a dowel cylinder is

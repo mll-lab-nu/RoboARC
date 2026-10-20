@@ -33,7 +33,7 @@ task's `tests/runtime_binding.json` repeats its scene's pins, which the grader c
 What is staged per scene: `scene.py`, `scene.xml`, `task.json`, `layout.json`, `sw_cutover.json` (where present), the
 scene's own Python modules (not `_*.py` scripts) and `assets/`; then `assets.json` (its `note` and `tasks`, the pins the
 image carries at `/opt/ikea/assets.json`) and `bytepatch_libmujoco.py`, the EPA patch script, from RoboARC's one copy
-in `source/images/robotangle/mujoco-3.14.0-epa/` (its README there describes the patch). `stage_context.py` refuses any
+in `source/images/robotangle/mujoco-3.14.0-epa/` (`docs/simulator/MUJOCO_EPA_PATCH.md` describes the patch). `stage_context.py` refuses any
 file whose sha256 differs from the pins and any scene text that points at upstream material (PROTOCOL Appendix H.2);
 the scenes' upstream provenance is kept out of the image, in `scripts/ikea_mujoco/provenance.json`.
 

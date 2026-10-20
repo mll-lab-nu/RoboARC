@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Stress episodes for the IKEA MuJoCo scenes, read by the RoboTangle stress observer (scripts/robotangle/stress/
-observer.py, criteria v2.13b; verdict.py decides). The same methodology as the RoboARC families (docs/rcb/STRESS_HOWTO.md):
+"""Stress episodes for the IKEA MuJoCo scenes, read by the RoboTangle stress observer (tools/stress/
+observer.py, criteria v2.13b; verdict.py decides). The same methodology as the RoboARC families (docs/simulator/STRESS_HOWTO.md):
 random and perturbed action streams on the frozen scene, every MuJoCo step watched for non-finite state, bad warnings,
 contacts deeper than 10 mm, energy created, uncaused speed jumps and constraint-energy pops above 3 m/s (v2.11 energy
 share). The observer only reads; a run with it ends on the same state hash as a run without it.
