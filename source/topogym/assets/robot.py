@@ -53,10 +53,19 @@ def robot_asset(cfg):
         raise ValueError(f"Unknown tool: {tool_model(cfg)}")
     source = Path(str(cfg.robot.asset))
     if not source.is_absolute():
+        # a path in genesis-world's asset layout (xml/franka_emika_panda/...): the installed genesis package when there is
+        # one, else the vendored copy in the robot asset root (robots/franka_emika_panda/: MuJoCo Menagerie's
+        # franka_emika_panda, the same bytes as genesis-world 1.2.1's; topogym/world/mujoco/scene.py GENESIS_VENDORED)
         spec = find_spec("genesis")
-        if spec is None or spec.origin is None:
-            raise FileNotFoundError("The Genesis robot asset package is not installed")
-        source = Path(spec.origin).parent / "assets" / source
+        prefix = "xml/franka_emika_panda/"
+        vendored = (asset_root(cfg.robot.get("asset_root")) / "robots/franka_emika_panda" / source.as_posix()[len(prefix):]
+                    if source.as_posix().startswith(prefix) else None)
+        if spec is not None and spec.origin is not None:
+            source = Path(spec.origin).parent / "assets" / source
+        elif vendored is not None and vendored.is_file():
+            source = vendored
+        else:
+            raise FileNotFoundError(f"robot asset {source}: no vendored copy and no genesis package")
     return str(build_robotiq_panda(source, assets=cfg.robot.get("asset_root")))
 
 

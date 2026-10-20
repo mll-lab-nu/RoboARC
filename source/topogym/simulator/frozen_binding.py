@@ -72,19 +72,12 @@ def installed_runtime(root=None, *, check_imports=True):
             if path and not Path(path).resolve().is_relative_to(root/'topogym'):
                 raise BindingMismatch(f'Public simulator module loaded outside the bound image: {name}: {path}')
     dependencies = {}
-    for name in ('genesis-world', 'pyuipc', 'torch', 'numpy', 'scipy'):
+    for name in ('torch', 'numpy', 'scipy', 'mujoco', 'newton', 'warp-lang'):
         try:
             dependencies[name] = metadata.version(name)
         except metadata.PackageNotFoundError:
             dependencies[name] = None
-    for name in ('mujoco', 'newton', 'warp-lang'):   # MuJoCo and the VBD cloth's packages are bound where they are
-        try:                                           # installed (images without them keep their recorded runtime)
-            dependencies[name] = metadata.version(name)
-        except metadata.PackageNotFoundError:
-            pass
-    build = Path('/opt/uipc-build.json')
-    return dict(source=source, python=sys.version.split()[0], dependencies=dependencies,
-                uipc_build_sha256=file_hash(build) if build.is_file() else None)
+    return dict(source=source, python=sys.version.split()[0], dependencies=dependencies)
 
 
 def validate_lock(lock):

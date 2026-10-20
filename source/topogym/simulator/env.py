@@ -298,11 +298,10 @@ class Env:
             variation = variation_registration(self.config.task_id, SEEDED_VARIATION, episode_seed)
             task_class = task_definition(self.config.task_id, variation["variation_id"])
         require_task_support(self.config.task_id, "reset", variation["variation_id"])
-        # A MuJoCo scene has no IPC: its ropes and FEM cords are rigid chains (knot_untying, rope_threading, slotted_post_ring,
-        # orbits).
-        if task_class.physics_model == "fem_ipc" and self.config.physics_engine != "mujoco":
-            from topogym.world.physics.ipc import require_episode_checkpoint
-            require_episode_checkpoint(self.config.compute_backend)
+        # The physics is MuJoCo (the Genesis engine was removed in RoboARC 1.1.0). A MuJoCo scene has no IPC: its ropes and
+        # FEM cords are rigid chains (knot_untying, rope_threading, slotted_post_ring, orbits).
+        if self.config.physics_engine != "mujoco":
+            raise ValueError(f"physics_engine {self.config.physics_engine!r}: this simulator runs MuJoCo scenes only")
         active = self._active_env() if self._active_env is not None else None
         if active is not None and active is not self:
             raise RuntimeError(
@@ -328,11 +327,7 @@ class Env:
         type(self)._active_env = weakref.ref(self)
         try:
             from topogym.config.scene import load_scene_config
-            if self.config.physics_engine == "mujoco":
-                from topogym.world.mujoco import MujocoWorld as World, make_robot, profile_for
-            else:
-                from topogym.world.genesis_world import GenesisWorld as World
-                from topogym.robot.joint_position import make_robot
+            from topogym.world.mujoco import MujocoWorld as World, make_robot, profile_for
             from topogym.sensors.observation import SensorSuite
 
             from topogym.utils.variant_rng import seed_process
