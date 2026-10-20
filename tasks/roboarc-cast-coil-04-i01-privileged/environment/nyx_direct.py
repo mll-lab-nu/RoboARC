@@ -1186,7 +1186,12 @@ def light_asset(nps, d: dict):
 
 
 def _genesis_assets_dir():
-    """Where genesis-world keeps its textures (the ground plane's checker), found without importing genesis."""
+    """Where the ground plane's checker texture is (genesis-world 1.2.1's textures/checker.png, Apache-2.0): the release
+    image's copy, $TOPOGYM_VISUAL_ASSET_ROOT/genesis (RoboARC 1.1.0 on), else the textures of an installed genesis-world,
+    found without importing genesis, else nyx_assets/ next to this file."""
+    root = os.environ.get("TOPOGYM_VISUAL_ASSET_ROOT")
+    if root and (Path(root) / "genesis" / "textures" / "checker.png").is_file():
+        return str(Path(root) / "genesis")
     from importlib.util import find_spec
     spec = find_spec("genesis")
     if spec is None or not spec.submodule_search_locations:
