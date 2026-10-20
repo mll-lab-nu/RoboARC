@@ -10,3 +10,4 @@ __pycache__/
 !.env.example
 /tasks/dataset.toml
 ikea/images/ikea-mujoco/context/
+*.oci.tar
