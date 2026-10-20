@@ -69,6 +69,8 @@ def _puzzle_tasks(root: Path) -> dict[str, TaskInfo]:
     manifest = json.loads(manifest_path.read_text())["bases"] if manifest_path.is_file() else {}
     out = {}
     for d in sorted((root / "tasks").glob("roboarc-*-privileged")):
+        if d.name.startswith("roboarc-ikea-"):
+            continue
         base = d.name[len("roboarc-"):-len("-privileged")]
         meta = _toml(d / "task.toml")
         md = meta.get("metadata", {})
@@ -97,7 +99,7 @@ def _ikea_hashes() -> dict:
 def _ikea_tasks(root: Path) -> dict[str, TaskInfo]:
     out = {}
     hashes = _ikea_hashes()
-    folder = root / "ikea" / "tasks"
+    folder = root / "tasks"
     dirs = sorted(folder.glob("roboarc-ikea-*-i00-privileged")) or sorted(folder.glob("ikea-*-i00-privileged"))
     for d in dirs:
         stem = d.name[:-len("-privileged")]

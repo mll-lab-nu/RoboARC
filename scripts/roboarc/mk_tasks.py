@@ -647,7 +647,8 @@ def main(argv: list[str]) -> int:
                         shutil.rmtree(cur)
                     shutil.copytree(t, cur, symlinks=False)
         known = {f"{BENCH}-{b}-{m}" for b in REL["bases"] for m in ("privileged", "standard")}
-        stray = sorted(p.name for p in TASKS.glob(f"{BENCH}-*") if p.name not in known)
+        stray = sorted(p.name for p in TASKS.glob(f"{BENCH}-*") if p.name not in known
+                       and not p.name.startswith(f"{BENCH}-ikea-"))   # IKEA: ikea/scripts/ikea_mujoco/mk_*tasks.py
         bad += [f"tasks/{n}: not in scripts/roboarc/release.json" for n in stray]
         tools = {sha(p.read_bytes()) for p in TASKS.glob(f"{BENCH}-*/**/rcb_topogym.py")}
         if tools - {sha((SHARED / "rcb_topogym.py").read_bytes())}:

@@ -24,7 +24,7 @@ import argparse, filecmp, hashlib, json, pathlib, re, shutil, sys, tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-TASKS = ROOT / "tasks"
+TASKS = ROOT.parent / "tasks"                     # the repository's tasks/, next to the puzzles
 SHARED = HERE / "shared"
 VERSION = (ROOT / "images/ikea-mujoco/VERSION").read_text().strip()
 AGENT_S = 10800                 # 3 h wall clock, both modes, as RoboARC's puzzles (PROTOCOL v2.0 H.7)
@@ -33,11 +33,11 @@ ASSETS = json.loads((HERE / "assets.json").read_text())
 BIND = json.loads((HERE / "bindings.json").read_text())
 IMAGE = BIND["image"]["reference"]          # the one image of every task (a task's own bindings "image" would override it)
 assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # our registry name and version (RoboARC 1.0.0)
-sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT.parent / "scripts"))   # the repository's task layer (normalize)
 import task_conventions as TC  # noqa: E402  the protocol's conventions: every generator ends with normalize(task_dir)
-# The agent's egress (PROTOCOL §2.11, H.6): the two lines `scripts/set_agent_egress.py allowlist` writes, with that
-# script's HOSTS (read from its text: it acts on import), in both modes.
-_HOSTS = re.findall(r'"([^"]+)"', re.search(r"(?ms)^HOSTS = \[(.*?)\]", (ROOT / "scripts/set_agent_egress.py").read_text()).group(1))
+# The agent's egress (PROTOCOL §2.11, H.6): the two lines the repository's `scripts/set_agent_egress.py allowlist`
+# writes, with that script's HOSTS (read from its text: it acts on import; one list for every task), in both modes.
+_HOSTS = re.findall(r'"([^"]+)"', re.search(r"(?ms)^HOSTS = \[(.*?)\]", (ROOT.parent / "scripts/set_agent_egress.py").read_text()).group(1))
 EGRESS = ('network_mode = "allowlist"      # model APIs and package registries (scripts/set_agent_egress.py); PROTOCOL §2.11\n'
           "allowed_hosts = [" + ", ".join(f'"{h}"' for h in _HOSTS) + "]\n")
 

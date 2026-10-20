@@ -7,7 +7,9 @@
 #    - the standard agent side environment/rcb_client.py + rcb1.py and the sim service environment/sim/ (server.py,
 #      finalize.sh, run.sh, rcb1.py, rcb_limited.py);
 #    - the graders, tests/grade.py (one version per mode).
-#    A change to one of them is rolled out to every task at once.
+#    A change to one of them is rolled out to every task at once. The IKEA MuJoCo tasks (roboarc-ikea-*) are a group
+#    of their own (ikea/scripts/ikea_mujoco/: rcb_ikea.py, ikea_nyx.py, ikea_rig.py, their nyx_direct.py, graders and
+#    sim service), and their standard layer is the live-grading pair scripts/eai_standard/v2_4_live/.
 # 2. The eai-standard/2.4 layer (every task whose metadata.protocol is eai-standard/2.4): the agent's client
 #    environment/rcb_client.py + rcb1.py and the service's environment/sim/rcb_limited.py + rcb1.py + run.sh are
 #    byte-identical to their source (scripts/eai_standard/v2_4/rcb_client.py and rcb_limited.py, scripts/eai_standard/
@@ -23,17 +25,21 @@ from pathlib import Path
 tasks, src = sys.argv[1], sys.argv[2]
 sys.path.insert(0, os.path.dirname(os.path.abspath(src))); import task_conventions as tc   # the mode registry (§2.16)
 PREFIX = "roboarc-"
-MODULES = {"rcb_topogym.py", "render_bridge.py", "nyx_direct.py"}
+MODULES = {"rcb_topogym.py", "render_bridge.py", "nyx_direct.py",
+           "rcb_ikea.py", "ikea_nyx.py", "ikea_rig.py", "render_video.py"}   # the last four: IKEA's
+IKEA = "roboarc-ikea-"   # IKEA MuJoCo: its own group of copies, and its live-grading 2.4 pair (v2_4_live/)
 SHARED = {"environment/rcb_client.py", "environment/rcb1.py", "environment/sim/server.py", "environment/sim/finalize.sh",
           "environment/sim/run.sh", "environment/sim/rcb1.py", "environment/sim/rcb_limited.py", "tests/grade.py"}
 LAYER = {"environment/rcb_client.py": "v2_4/rcb_client.py", "environment/rcb1.py": "rcb1.py",
          "environment/sim/rcb_limited.py": "v2_4/rcb_limited.py", "environment/sim/rcb1.py": "rcb1.py",
          "environment/sim/run.sh": "run.sh"}
+LIVE = {**LAYER, "environment/rcb_client.py": "v2_4_live/rcb_client.py",
+        "environment/sim/rcb_limited.py": "v2_4_live/rcb_limited.py"}   # IKEA: graded by the live episode
 sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()[:16]  # noqa: E731
-canon = {f: sha(os.path.join(src, f)) for f in set(LAYER.values()) if os.path.isfile(os.path.join(src, f))}
+canon = {f: sha(os.path.join(src, f)) for f in set(LAYER.values()) | set(LIVE.values()) if os.path.isfile(os.path.join(src, f))}
 seen = collections.defaultdict(dict)   # role -> {sha: first copy}
 n_tasks = 0; bad = []; n_layer = 0
-bad += [f"scripts/eai_standard/{f} missing (the eai-standard/2.4 layer)" for f in sorted(set(LAYER.values()) - set(canon))]
+bad += [f"scripts/eai_standard/{f} missing (the eai-standard/2.4 layer)" for f in sorted((set(LAYER.values()) | set(LIVE.values())) - set(canon))]
 
 
 def sim_service(compose: str) -> str:
@@ -60,9 +66,10 @@ for t in sorted(os.listdir(tasks)):
     mode = tc.mode_of(Path(t))
     if tc.MODE_REGISTRY[mode]["sidecar"] and proto != "eai-standard/2.4":
         bad.append(f"{t}: protocol {proto!r}; this repository ships the eai-standard/2.4 layer only")
+    group = "ikea " if t.startswith(IKEA) else ""
     if proto == "eai-standard/2.4":
         n_layer += 1
-        for rel, f in sorted(LAYER.items()):
+        for rel, f in sorted((LIVE if group else LAYER).items()):
             p = os.path.join(tasks, t, rel)
             if not os.path.isfile(p):
                 bad.append(f"{t}: {rel} missing (eai-standard/2.4 layer, scripts/eai_standard/{f})")
@@ -80,6 +87,7 @@ for t in sorted(os.listdir(tasks)):
         for f in fns:
             rel = os.path.relpath(os.path.join(dp, f), os.path.join(tasks, t)).replace(os.sep, "/")
             role = f if f in MODULES else f"{mode} {rel}" if rel in SHARED else None
+            role = group + role if role else None
             if role:
                 seen[role].setdefault(sha(os.path.join(dp, f)), f"{t}/{rel}")
 bad += [f"{len(v)} versions of {role}: " + ", ".join(f"{h} ({p})" for h, p in sorted(v.items()))

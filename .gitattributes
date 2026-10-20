@@ -1,4 +1,3 @@
 # The task dirs are generated (scripts/roboarc/mk_tasks.py; ikea/scripts/ikea_mujoco/mk_tasks.py and mk_standard_tasks.py):
 # collapsed in review diffs and left out of the language statistics. Change them through the generators' inputs.
 tasks/** linguist-generated=true
-ikea/tasks/** linguist-generated=true

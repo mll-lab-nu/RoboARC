@@ -32,7 +32,7 @@ import mk_tasks as P  # noqa: E402  texts, bindings, the privileged runtime bind
 
 STD = HERE / "standard"
 EAI = ROOT.parent / "scripts/eai_standard"             # the repository's shared layer (TC.EAI_SHARED)
-EAI_LIVE = ROOT / "scripts/eai_standard/v2_4_live"     # IKEA's live-grading 2.4 service pair
+EAI_LIVE = ROOT.parent / "scripts/eai_standard/v2_4_live"   # IKEA's live-grading 2.4 service pair (its own variant)
 TC = P.TC
 IMAGE = P.IMAGE
 SIM_IMAGE = f"ghcr.io/embodied-first-exam/roboarc-ikea-sim:{(ROOT / 'images/ikea-mujoco/sim/VERSION').read_text().strip()}"
@@ -570,6 +570,9 @@ def main() -> int:
         dst = P.task_dir(t, "standard")
         with tempfile.TemporaryDirectory() as tmp:
             out = pathlib.Path(tmp) / name(t)
+            twin = P.task_dir(t)
+            if twin.is_dir():           # normalize reads the twin for the README's key table
+                (pathlib.Path(tmp) / twin.name).symlink_to(twin)
             render(t, out, a.refs)
             if dst.is_dir() and P.same(out, dst):
                 continue
