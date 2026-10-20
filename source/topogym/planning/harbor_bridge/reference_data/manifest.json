@@ -192,41 +192,6 @@
       "bytes": 141017,
       "source": "solvability_proof/interlocked_claws/2026-10-03/evidence/hard/run/submitted_witness.json"
     },
-    "buzz_wire_3d/medium/medium_traverse_guide.json": {
-      "sha256": "4511df68f53ded79077a12998ddfe76f1cbf65f6ac552b412fbdefa4bf16cd0f",
-      "bytes": 284534,
-      "source": "runs/test_results/buzz_staged_inputs_20260929/medium_traverse_guide.json"
-    },
-    "buzz_wire_3d/easy/selection.json": {
-      "sha256": "429c1a8a88bb555f18ff9ca4db2062f93df54a108c43ee29ca76c0b646bde107",
-      "bytes": 6115,
-      "source": "runs/test_results/buzz_staged_easy_20260929_01/qualification/selection.json + oraclefix 10: turn_2 candidates widened (2026-10-04) + oraclefix2 lowered release (2026-10-05)"
-    },
-    "buzz_wire_3d/easy/recipe.json": {
-      "sha256": "a38455b2fd67ade0f9a7dbc35769a50f5a424a541547b192891603c09f7bdd72",
-      "bytes": 1602089,
-      "source": "Derived from runs/test_results/buzz_staged_easy_20260929_01: report, audit, source geometry and complete policy input + oraclefix 10: selection.json re-pinned (2026-10-04) + oraclefix2 re-pinned selection (2026-10-05)"
-    },
-    "buzz_wire_3d/medium/policy_actions.json": {
-      "sha256": "3a8d182fcadb84575bbc5659313213016fb7369b821a87cb7dd6253468b0b60d",
-      "bytes": 8421310,
-      "source": "runs/demo_metadata/buzz_wire_3d/2026-10-03_medium_v12_continuous/execution/policy_actions.json"
-    },
-    "buzz_wire_3d/medium/recipe.json": {
-      "sha256": "21a35ae59136820b54fb58f81a6db1ebd9de1bca2970ded98699a0a34183792e",
-      "bytes": 4840065,
-      "source": "Derived from runs/demo_metadata/buzz_wire_3d/2026-10-03_medium_v12_continuous/execution: report, audit, source geometry and complete policy input + oraclefix2 re-timed replay and lowered release (2026-10-05)"
-    },
-    "buzz_wire_3d/hard/policy_actions.json": {
-      "sha256": "74c193e9688c63fdba59eb2074e1a6f9182fa028cc15a9597999b9e07825a0d4",
-      "bytes": 12618206,
-      "source": "runs/demo_metadata/buzz_wire_3d/2026-10-03_hard_v12_continuous/execution/policy_actions.json"
-    },
-    "buzz_wire_3d/hard/recipe.json": {
-      "sha256": "330aa25afe123c447727e56d6b8e2033287d4a0b1236b45b9f56acf5078e95b7",
-      "bytes": 4059114,
-      "source": "Derived from runs/demo_metadata/buzz_wire_3d/2026-10-03_hard_v12_continuous/execution: report, audit, source geometry and complete policy input + oraclefix2 re-timed replay and earlier release (2026-10-05)"
-    },
     "fiber_bundling/very_easy/selection.json": {
       "sha256": "fc408f23eeb2a967695b054adf7f7a195e4ebaea550a728feaa34c4248cdeece",
       "bytes": 1223,
