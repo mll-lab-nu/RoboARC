@@ -80,6 +80,8 @@ add python3 ci_checks/check-protocol.py"$targs"
 add python3 ci_checks/check-monitor.py --tier advisory"$targs"
 # every script that builds images builds from a stamped copy (scripts/stamp_mtimes.py; BuildKit and equal-size files)
 add python3 ci_checks/check-build-stamps.py
+# the documentation names only paths and links that exist (docs/history/ excepted)
+add python3 ci_checks/check-doc-paths.py
 # PROTOCOL §4: the easy set (docs/easy_set.toml) names existing task bases, with a known reason and their benchmark label
 add python3 scripts/task_conventions.py easy-set --check
 
