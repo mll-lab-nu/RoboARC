@@ -109,9 +109,8 @@ def check_task(task: Path) -> list[str]:
     if errs:
         return errs
     sec = tc.cutoff_for(task)
-    bench = tc.bench_of(task)
     ins = (task / "instruction.md").read_text(encoding="utf-8") if (task / "instruction.md").is_file() else ""
-    want = tc.render_cutoff(sec, mode, bench, task.name)
+    want = tc.render_cutoff(sec, mode)
     if not ins.startswith("# "):
         errs.append("instruction.md does not start with its `# ` title line")
     if not ins.endswith("\n\n" + want):

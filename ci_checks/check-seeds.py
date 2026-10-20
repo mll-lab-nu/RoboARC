@@ -10,7 +10,7 @@
     `instance.npz`, of the same kind as the default instance; and `tests/seeds/` holds nothing for a seed that is not
     allowed;
   - nothing under `environment/` is in a directory named `seeds` (another seed's instance where the agent, or the
-    agent's image, could reach it: the runner puts the drawn seed's instance in the usual place, scripts/task_seed.py).
+    agent's image, could reach it: a runner that draws another seed puts that seed's instance in the usual place).
 
     python3 ci_checks/check-seeds.py [task dirs]      # default: every task
 Fix: the generator writes `[metadata.seeds]` (scripts/task_conventions.py `normalize` completes it) and the seeds'

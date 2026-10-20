@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Protocol v1.0 conventions for a task directory (docs/PROTOCOL.md), applied in place and idempotently.
+"""Protocol conventions for a task directory (docs/PROTOCOL.md), applied in place and idempotently.
 
-Every generator ends with `normalize(task_dir)`, so a re-generated task equals the committed one. It also migrates a
-pre-v1.0 task (old field names, protocol spelling, README layout); renaming directories is the caller's job.
+The generator (scripts/roboarc/mk_tasks.py) ends with `normalize(task_dir)`, so a re-generated task equals the committed
+one. It also migrates an earlier task layout (old field names, protocol spelling, README layout).
 
     python3 scripts/task_conventions.py tasks/<task> [...]     # normalize these tasks
     python3 scripts/task_conventions.py --check tasks/<task>   # exit 1 if normalizing would change anything
 
 What it does:
-- `task.toml`: `mode` from the directory suffix (`-privileged` / `-standard` / `-standard-realtime`), no `tier`, `protocol = "eai-standard/2.1"`
-  for standard tasks (2.2 / 2.4 and standard-realtime tasks' `eai-standard/2.3` are set by their generators), `oracle` (+ `oracle_evidence`) for benchmarks whose oracle level is known from their files.
+- `task.toml`: `mode` from the directory suffix (`-privileged` / `-standard` / `-standard-realtime`), no `tier`; the
+  standard tasks' `protocol` (`eai-standard/2.4`) is set by the generator.
 - protocol spelling `rcb-limited/2.x` -> `eai-standard/2.x` and "limited mode" -> "standard mode" in the task's text and
   services; the client accepts both spellings.
 - `tests/test.sh` clears `/logs/verifier` first; graders write `success` (1/0) to `reward.txt` and only numbers to
@@ -33,7 +33,7 @@ What it does:
   Verification, Compute resources (rendered from `[metadata.resources]`), and Details for everything else.
 - last, `DIGEST`: the task's content digest (PROTOCOL §2.8; the digest Harbor publishes it under, `digest()`), one line
   `sha256:<hex>`. Each task carries its own, so pull requests that change different tasks never touch a shared file;
-  the release manifest `tasks/dataset.toml` is generated from them (`scripts/dataset_manifest.py`, not committed).
+  Harbor's dataset manifest `tasks/dataset.toml` is generated from them (`scripts/dataset_manifest.py`, not committed).
 """
 from __future__ import annotations
 
@@ -63,50 +63,10 @@ TEXT_REPLACEMENTS = [  # (old, new), applied to task text files in order
     ("limited mode", "standard mode"), ("limited twin", "standard twin"), ("unlimited task", "privileged task"),
     ("unlimited oracle", "privileged-mode oracle"), ("unlimited expert", "privileged-mode expert"),
 ]
-BENCHMARKS = [  # (directory prefix, label)
-    ("robotwin_2_0_", "RoboTwin 2.0"), ("dextoolbench_", "DexToolBench"), ("mujoco_playground_", "MuJoCo Playground"),
-    ("kinder-", "KinDER"), ("humanoidbench-", "HumanoidBench"),
-    ("metaworldplus-", "MetaWorld+"),
-    ("robowits-", "RoboWits"), ("robopaint-", "RoboPaint"), ("robolab-", "RoboLab"),
-    ("behavior-", "BEHAVIOR-1K"), ("maniguard-", "ManiGuard"),
-    ("molmospaces-", "MolmoSpaces"), ("myosuite-", "MyoSuite"), ("dexjoco-", "DexJoCo"), ("dexhand-", "DexHand"),
-    ("vlabench-", "VLABench"),
-    ("robocasa-gr1-", "RoboCasa-GR1"),  # before "robocasa-": the first matching prefix wins
-    ("robocasa-", "RoboCasa"), ("robocasa365-", "RoboCasa365"),
-    ("libero-max-", "LIBERO-MAX"),
-    ("roboarc-", "RoboARC"),
-    ("bigym2-", "BiGym 2.0"),
-    ("yamlab-", "YAMLab"),
-    ("robodojo-", "RoboDojo"),
-    ("roboolympics-", "RoboOlympics"),       # formerly RoboFunOlympics (`robofunolympics-`; renamed 2026-10-14, owner)
-    ("cell-", "RoboSafeBench"),   # neutral: an agent can read its task name (mountinfo, compose project, host name)
-    ("pandadyn-", "Panda Dynamic Scenes"),
-    ("ambench-", "AM-Bench"),
-    ("ispatialgym-", "iSpatialGym"),
-]
-# Modes (PROTOCOL §3, owner 2026-10-14): a benchmark ships any subset of the modes. A standard or standard-realtime
-# task without a privileged twin says why in its README's Twin row ("— (none: ...)"), the task's own declaration:
-# no_twin_reason() reads it back, so no list of such tasks is kept here (board 0124).
-# RoboOlympics' exported tasks (PROTOCOL v1 §4c; scripts/roboolympics/exported.toml) have a cutoff note of their own
-# (CUTOFF_NOTE_TASK below):
-RO_EXPORTED_TASKS = ("roboolympics-badminton-actskill-i00-standard",
-                     "roboolympics-badminton-match-i01-standard-realtime",
-                     "roboolympics-badminton-duelrl-i01-standard-realtime",
-                     "roboolympics-badminton-match-i02-standard-realtime",
-                     "roboolympics-badminton-match-i04-standard-realtime",
-                     "roboolympics-fencing-bout-i01-standard",
-                     "roboolympics-fencing-bout-i02-standard",
-                     "roboolympics-foosball-match-i01-standard-realtime",
-                     "roboolympics-soccer-match-i00-standard-realtime",
-                     "roboolympics-soccerssl-match-i00-standard-realtime",
-                     "roboolympics-soccerssl-match-i01-standard-realtime",
-                     "roboolympics-tabletennis-duelrl-i01-standard-realtime",
-                     "roboolympics-tabletennis-hitskill-i00-standard",
-                     "roboolympics-tabletennis-match-i01-standard-realtime",
-                     "roboolympics-tabletennis-match-i02-standard-realtime",
-                     "roboolympics-tabletennis-match-i03-standard-realtime",
-                     "roboolympics-tabletennis-match-i04-standard-realtime")
-# PROTOCOL §2.16 (owner, 2026-10-14): THE registry of modes. A mode's name is the whole suffix of its task directories
+BENCHMARKS = [("roboarc-", "RoboARC")]   # (directory prefix, label): the README's Benchmark row, the easy set's label
+# Modes (PROTOCOL §3): a benchmark ships any subset of the modes. A standard task without a privileged twin says why in
+# its README's Twin row ("— (none: ...)"), the task's own declaration: no_twin_reason() reads it back.
+# PROTOCOL §2.16: THE registry of modes. A mode's name is the whole suffix of its task directories
 # (`<base>-<mode>`) and its `[metadata] mode`; everything that parses or branches on a mode reads this table (mode_of,
 # base_of, the twins' equal cutoffs, the limits' scope, the checks under ci_checks/, which get it once per run through
 # `python3 scripts/task_conventions.py modes`). A new mode is one entry here plus its protocol section, by a mode
@@ -125,7 +85,7 @@ MODE_REGISTRY = {
                    "twin": None, "same_cutoff_as": None},
     "standard": {"short": "S", "section": "§4", "sidecar": True, "limit_scope": "agent",
                  "protocols": ("eai-standard/2.1", "eai-standard/2.2", "eai-standard/2.4"),
-                 "twin": "privileged", "same_cutoff_as": "privileged"},   # owner, 2026-10-12: one cutoff for both modes
+                 "twin": "privileged", "same_cutoff_as": "privileged"},   # one cutoff for both modes
     "standard-realtime": {"short": "RT", "section": "§4b", "sidecar": True, "limit_scope": "agent",
                           "protocols": ("eai-standard/2.3",), "twin": "privileged", "same_cutoff_as": None},
 }
@@ -143,16 +103,13 @@ DROP_ROWS = {"simulator / robot", "family / instance", "base image", "agent budg
 CORE = ["Task", "Difficulty", "Reference solution", "Verification"]
 # PROTOCOL §2.9: the minimum compute a task needs, `[metadata.resources]` in task.toml (same list: ci_checks/check-resources.py)
 RESOURCES_FILE = Path(__file__).resolve().parent / "task_resources.toml"
-# PROTOCOL §2 (v1 §2.14): scene dynamics, `[metadata] dynamics` in task.toml, the task's own declaration (board 0124:
-# no central table)
+# PROTOCOL §2: scene dynamics, `[metadata] dynamics` in task.toml, the task's own declaration (no central table)
 DYNAMICS = ("static", "dynamic")
 # PROTOCOL §4b: a standard-realtime task states its slowdown S, `[metadata] slowdown` in task.toml, written from its sim
 # service's `RCB_SLOWDOWN` default (environment/docker-compose.yaml); its reset budget is the `RCB_RESET_BUDGET` default
-# there (same rules: ci_checks/check-realtime.py)
+# there
 SLOWDOWN_RE = re.compile(r'RCB_SLOWDOWN:\s*"?\$\{RCB_SLOWDOWN:-([0-9.]+)\}"?')
 RESET_RE = re.compile(r'RCB_RESET_BUDGET:\s*"?\$\{RCB_RESET_BUDGET:-([0-9]+)\}"?')
-# a task a benchmark exports with its own service (PROTOCOL §4c) sets S its own way: RoboOlympics `RO_SLOWDOWN: "10"`
-OWN_SLOWDOWN_RE = re.compile(r'^\s*RO_SLOWDOWN:\s*"?([0-9.]+)"?\s*$', re.M)
 RESOURCE_KEYS = {  # key -> type; recommended_gpu is optional when gpu_required is false
     "min_cpus": float, "min_memory_gb": float, "min_gpu_memory_gb": float, "gpu_required": bool, "gpu_class": str,
     "recommended_gpu": str, "verifier_min_cpus": float, "verifier_min_memory_gb": float,
@@ -169,11 +126,10 @@ ENFORCE_ENV = "RCB_LIMITS_ENFORCE"   # §2.10: run-time switch (compose default 
 EMERGENCY_GPU_FACTOR = 1.5           # §2.10: host protection in enforced runs (the same value: rcb_monitor/monitor.py)
 LIMIT_SCOPES = {m: d["limit_scope"] for m, d in MODE_REGISTRY.items()}   # §2.10: who the limits bind
 LIMITS_HEADING = "## Resource limits"
-# PROTOCOL §2.11 (owner, 2026-10-11, board 0072; relaxed 2026-10-14, board 0107 E4): an honour rule, the same words in
-# every task's instruction.md, just before `## Resource limits` (generator-owned: edit it here, never in a task;
-# ci_checks/check-resources.py compares). Installing packages and reading whatever is installed in the container (the
-# simulator's and the benchmark's own source included) are fine; searching the web for, or downloading, a ready-made
-# solution to the task is not. No threat: trials are reviewed, the owner decides.
+# PROTOCOL §2.11: an honour rule, the same words in every task's instruction.md, just before `## Resource limits`
+# (generator-owned: edit it here, never in a task; ci_checks/check-resources.py compares). Installing packages and reading
+# whatever is installed in the container (the simulator's and the benchmark's own source included) are fine; searching
+# the web for, or downloading, a ready-made solution to the task is not. Trials are reviewed.
 EXTERNAL_HEADING = "## External material"
 EXTERNAL_TEXT = (
     "You may install packages you need (pip, apt), and you may read anything installed in your container, the "
@@ -181,7 +137,7 @@ EXTERNAL_TEXT = (
     "for, or download, a ready-made solution to it, such as published or reference solutions, recorded demonstrations, "
     "or policies trained for it. This is an honour rule; trials are reviewed. The network reaches your model's API and "
     "the package registries (PyPI, Debian / Ubuntu archives) only.")
-# Open network (PROTOCOL §2, Appendix H.6; owner 2026-10-14, board 0124): the task author's choice, declared as
+# Open network (PROTOCOL §2, Appendix H.6): the task author's choice, declared as
 # `[metadata] network = "open"` in task.toml. Such a task carries its own `## External material` paragraph (the author
 # says what may be used); normalize keeps it, and writes EXTERNAL_TEXT_OPEN where it has none.
 EXTERNAL_TEXT_OPEN = (
@@ -191,11 +147,11 @@ EXTERNAL_TEXT_OPEN = (
     "included. The one thing not to look up is a ready-made solution to this exact task, such as this benchmark's "
     "reference solutions. This is an honour rule; trials are reviewed.")
 
-# PROTOCOL §2.12 (owner, 2026-10-11 / 12 / 14; boards 0080, 0120): the agent's time cutoff. Each task sets its own, in
+# PROTOCOL §2.12: the agent's time cutoff. Each task sets its own, in
 # `[agent] timeout_sec` of its task.toml (its author decides it in the pull request that adds or changes the task; a
 # generator writes its benchmark's number, a constant of the generator), as in Terminal-Bench. There is no table: normalize
 # writes from the task's own number the standard modes' RCB_WALL_CLOCK_S and the last section of instruction.md, `## Time
-# limit`, the last thing the agent reads (owner: at the end, where Terminal-Bench has it): CUTOFF_SENTENCE (one format in
+# limit`, the last thing the agent reads (at the end, where Terminal-Bench has it): CUTOFF_SENTENCE (one format in
 # every task, Terminal-Bench's), then CUTOFF_NOTE, what the cutoff means in the task's mode. Generator-owned like the two
 # sections before it: edit `timeout_sec` or these words here, never the section in a task (ci_checks/check-cutoffs.py).
 CUTOFF_SENTENCE = ("You have {sec} seconds to complete this task. Do not cheat by using online solutions or hints specific "
@@ -205,20 +161,18 @@ CUTOFF_RE = (r"You have (\d+) seconds to complete this task\. Do not cheat by us
 CUTOFF_HEADING = "## Time limit"
 CUTOFF_REF = "the time limit (`## Time limit`)"    # how a benchmark's own text names the limit: never a duration
 _CUTOFF_CLOSE = " Installing packages is not cheating (`## External material` above)."
-# owner 2026-10-13 (board 0086): agents without a clock in their tool output guessed their elapsed time 2-7 times too
-# high and stopped early; every agent gets the same way to know it (a command, not a guess).
-# robot_coding_bench #231 (10-15): a sentence asking for `date` was not enough (agents still guessed); the resource
-# monitor now shows the clock itself (scripts/rcb_monitor/monitor.py clock(): from the trial environment's start, so it
+# Agents without a clock in their tool output guessed their elapsed time 2-7 times too high and stopped early; every
+# agent gets the same way to know it (a command, not a guess). A sentence asking for `date` was not enough (agents still
+# guessed); the resource monitor shows the clock itself (scripts/rcb_monitor/monitor.py clock(): from the trial environment's start, so it
 # never overstates the time left; `monitor.py beacon` keeps it on runners that cannot run the monitor).
 _CUTOFF_CLOCK = (" Your session started when you received this task. `/run/rcb-limits/usage.json`, rewritten every few "
                  "seconds, gives the time left on this limit (`time_left_s`) and its end (`deadline_utc`), counted from a "
                  "little before your session started, so it never gives you more time than you have: read it (or run "
                  "`date`) before you decide that time is short, never guess.")
-# robot_coding_bench #237 (10-15): agents that keep a simulator open as an interactive REPL sent each command with
-# Codex's write_stdin(yield_time_ms=30000); Codex 0.160.1 returns from a write to a still-running process only when the
-# yield is over (196 of 196 such calls in one Luna RoboARC trial took 30.0 s; ~98 min of a 3 h budget), and has no
-# config knob to cap it (background_terminal_max_timeout caps only empty polls). Harness-neutral advice, same text for
-# every agent; no duration in it (ci_checks/check-cutoffs.py).
+# Agents that keep a simulator open as an interactive REPL sent each command with Codex's
+# write_stdin(yield_time_ms=30000); Codex 0.160.1 returns from a write to a still-running process only when the yield is
+# over (in one trial 196 of 196 such calls took 30.0 s, about 98 min of a 3 h budget), and has no config knob to cap it.
+# Harness-neutral advice, same text for every agent; no duration in it (ci_checks/check-cutoffs.py).
 _CUTOFF_WAITS = (" Waiting counts too: a tool call that sends input to a process that keeps running (an interactive "
                  "interpreter, a simulator loop, a server) can wait for the whole wait or yield time you give it (for "
                  "example Codex's `yield_time_ms`) even when the answer is printed at once, so give such calls a short "
@@ -237,22 +191,6 @@ CUTOFF_NOTE = {
 }
 CUTOFF_NOTE["standard-realtime"] = CUTOFF_NOTE["standard"]
 assert set(CUTOFF_NOTE) == set(MODE_REGISTRY), "every mode of MODE_REGISTRY needs its CUTOFF_NOTE (PROTOCOL §2.12)"
-# A benchmark whose service does not count from the agent's first request keeps the earlier, weaker sentence, and its own
-# text says what its service counts (PROTOCOL §2.12). None today: RoboARC's service counts from the first request
-# since its MuJoCo release (2026-10-13).
-_CUTOFF_NOTE_OWN_CLOCK = (
-    "This is wall-clock time from the start of your session; the time you wait for the simulator service "
-    "counts. When it is up you are stopped without warning and the episode is graded as it stands at that "
-    "moment. The service's `time_left_s` is its own count of this limit, from the service's start or from "
-    "your first request, so it can differ from the time you really have left." + _CUTOFF_CLOCK + _CUTOFF_WAITS + _CUTOFF_CLOSE)
-CUTOFF_NOTE_OWN = {}   # (benchmark label, mode) -> its note; RoboARC's (then RoboTangle's) entry went with its MuJoCo release (2026-10-13)
-# RoboOlympics' exported tasks (PROTOCOL §4c): their own service reports no `time_left_s` and does not read
-# RCB_WALL_CLOCK_S (its clocks are the game's own), and a skill task has no episode (board 0121 m4)
-CUTOFF_NOTE_TASK = {n: (
-    "This is wall-clock time from the start of your session; the time you wait for the simulator service counts. When "
-    "it is up you are stopped without warning and graded on what stands at that moment, as the sections above say. The "
-    "service does not count this limit for you: the clocks it reports are the game's own." + _CUTOFF_CLOCK + _CUTOFF_WAITS + _CUTOFF_CLOSE)
-    for n in RO_EXPORTED_TASKS}
 CUTOFF_NOTE_START = "This is wall-clock time from the start of your session;"   # how an earlier note is recognised
 WALL_CLOCK_ENV = "RCB_WALL_CLOCK_S"              # the standard modes' sim service: what its /spec budget and time_left_s report
 CUTOFF_CAP = 14400                               # PROTOCOL D8 / §2.3, no benchmark excepted; the same cap: ci_checks/check-task-fields.sh
@@ -315,33 +253,6 @@ def write_if_changed(p: Path, s: str) -> None:
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def dtb_goals(task: Path) -> tuple[int, int] | None:
-    """(goals reached, goals) by the DexToolBench oracle, from the privileged twin's README oracle row."""
-    priv = task.with_name(base_of(task) + "-privileged")
-    for f in (priv / "README.md", task / "README.md"):
-        s = read_text(f) or ""
-        m = re.search(r"\*\*(\d+)/(\d+) goals\*\*", s)
-        if m:
-            return int(m.group(1)), int(m.group(2))
-    return None
-
-
-def oracle_level(task: Path) -> tuple[str, str] | None:
-    """(oracle, oracle_evidence) for benchmarks whose oracle level follows from their own files; None = keep as is."""
-    n = task.name
-    if n.startswith(("robotwin_2_0_", "mujoco_playground_")):
-        return "full", ""
-    if n.startswith("dextoolbench_"):
-        g = dtb_goals(task)
-        if g is None:
-            return None
-        if g[0] >= g[1]:
-            return "full", ""
-        return "partial", (f"SimToolReal's pretrained policy, replayed in this scene, reaches {g[0]}/{g[1]} goals "
-                           f"(solution/; README of {base_of(task)}-privileged)")
-    return None
-
-
 def normalize_toml(task: Path) -> None:
     p = task / "task.toml"
     s = p.read_text()
@@ -354,12 +265,6 @@ def normalize_toml(task: Path) -> None:
         s = re.sub(r'(?m)^(family = .*\n)', rf'\1mode = "{mode}"\n', s, count=1)
     if mode == "standard":
         s = re.sub(r'(?m)^protocol = "rcb-limited/(2\.\d)"', r'protocol = "eai-standard/\1"', s)
-    lvl = oracle_level(task)
-    meta = tomllib.loads(s).get("metadata", {})
-    if lvl and "oracle" not in meta:
-        o, ev = lvl
-        line = f'oracle = "{o}"\n' + (f'oracle_evidence = "{ev}"\n' if ev else "")
-        s = re.sub(r'(?m)^(mode = .*\n(?:protocol = .*\n)?)', lambda m: m.group(1) + line, s, count=1)
     s = replace_words(s)
     s = s.replace('"limited-mode"', '"standard-mode"').replace('"unlimited"', '"privileged"')
     write_if_changed(p, s)
@@ -584,8 +489,7 @@ def render_external(task: "Path | str" = "") -> str:
     text = EXTERNAL_TEXT
     if isinstance(task, Path) and network_of(task) == "open":
         text = external_paragraph(read_text(task / "instruction.md") or "") or EXTERNAL_TEXT_OPEN
-    # owner 2026-10-14: the words above are the baseline every task carries; a task may add STRICTER requirements of
-    # its own on top (never looser), as `[metadata.honour] stricter = "..."` in its task.toml, rendered after them
+    # the words above are the baseline every task carries; a task may add STRICTER requirements of its own on top (never looser), as `[metadata.honour] stricter = "..."` in its task.toml, rendered after them
     stricter = ""
     if isinstance(task, Path):
         try:
@@ -648,12 +552,10 @@ def no_twin_reason(task: Path) -> str | None:
     return None
 
 
-def render_cutoff(sec: int, mode: str, bench: str = "", name: str = "") -> str:
+def render_cutoff(sec: int, mode: str) -> str:
     """instruction.md's last section (PROTOCOL §2.12): the heading, the cutoff sentence, then what the cutoff means in
-    the mode (`bench`, a BENCHMARKS label: a benchmark whose service counts on a clock of its own has its own note;
-    `name`, the task directory's name: a task exported with its own service, CUTOFF_NOTE_TASK)."""
-    note = CUTOFF_NOTE_TASK.get(name) or CUTOFF_NOTE_OWN.get((bench, mode), CUTOFF_NOTE[mode])
-    return CUTOFF_HEADING + "\n" + CUTOFF_SENTENCE.format(sec=sec) + "\n\n" + note + "\n"
+    the mode."""
+    return CUTOFF_HEADING + "\n" + CUTOFF_SENTENCE.format(sec=sec) + "\n\n" + CUTOFF_NOTE[mode] + "\n"
 
 
 def strip_cutoff(s: str) -> str:
@@ -745,14 +647,13 @@ def normalize_instruction(task: Path) -> None:
         env = tomllib.loads((task / "task.toml").read_text()).get("environment", {})
         s += "\n" + render_limits(lim, md.get("mode", mode_of(task)), sidecars_of(task), env.get("cpus"))
     if sec is not None:
-        s += "\n" + render_cutoff(sec, mode_of(task), bench_of(task), task.name)
+        s += "\n" + render_cutoff(sec, mode_of(task))
     write_if_changed(p, s)
 
 
 def _shared_sources() -> set[bytes]:
-    """Contents of the files generators copy unchanged from scripts/eai_standard/ (the eai-standard/2.2 layer, and the 2.4
-    layer in v2_4/; D9): their copies must stay byte-identical to the source (check-tooling-identity.sh), so normalize never
-    rewrites them."""
+    """Contents of the files the generator copies unchanged from scripts/eai_standard/ (the eai-standard/2.4 layer; D9):
+    their copies must stay byte-identical to the source (check-tooling-identity.sh), so normalize never rewrites them."""
     src = Path(__file__).resolve().parent / "eai_standard"
     shared = {p.read_bytes() for p in src.rglob("*") if p.is_file() and "__pycache__" not in p.parts} if src.is_dir() else set()
     return shared | rcb_monitor_inject.generated_sources()     # the resource monitor's copies (scripts/rcb_monitor/)
@@ -783,8 +684,6 @@ def normalize_grader(t: str) -> str:
     t = t.replace("reward.txt = progress when both replays agree bit-exactly (else 0); success = every goal reached.",
                   "reward.txt = success (1/0): every goal reached and both replays agree bit-exactly; progress = goals reached / goals,\n"
                   "in reward.json.")
-    t = t.replace("DexToolBench: reward = task progress (goals reached / goals); Playground: reward = success.",
-                  "reward.txt = success (1/0); DexToolBench's task progress (goals reached / goals) is in reward.json.")
     old = ('    out.update(infra_error=1, grader_error=int(bool(d.get("finalize_error"))), reason=str(d.get("reason") or ""), '
            'finalize_error=str(d.get("finalize_error") or "")[:300])')
     new = ('    out.update(infra_error=1, grader_error=int(bool(d.get("finalize_error"))))   # reward.json: numbers only\n'
@@ -874,16 +773,6 @@ def default_difficulty(task: Path, rows: dict[str, str]) -> str:
                 "loses resets, privileged state and planning primitives: it sees camera images and proprioception only, "
                 "acts through the client, and gets one episode, so it has to estimate the scene from images and "
                 "recover from its own mistakes without starting over.")
-    if task.name.startswith("dextoolbench_"):
-        g = dtb_goals(task)
-        ref = f" SimToolReal's pretrained policy reaches {g[0]}/{g[1]} goals here." if g else ""
-        return ("Dexterous tool use: a KUKA iiwa 14 arm with a 22-DoF Sharpa HA4 hand (29 position-controlled joints) "
-                "must carry the tool along DexToolBench's goal trajectory, every goal within 1.5 cm on all keypoints, "
-                f"and success needs every goal.{ref}")
-    if task.name.startswith("mujoco_playground_"):
-        return ("MuJoCo Playground defines only a shaped RL reward; this task scores a binary success defined from it "
-                f"({re.sub(r'^Playground has only a shaped RL reward(?: [(][^)]*[)])?; defined here[^:]*: ', '', rows.get('success', 'see Verification'))}), so a trajectory has to actually finish the manipulation "
-                "rather than collect partial reward.")
     return "Not documented yet."
 
 
@@ -916,7 +805,7 @@ def render_readme(task: Path) -> str:
     rt = realtime_of(task)
     if rt is not None:
         head.append(("Real time", f"slowdown S = {slowdown_text(rt[0])} (the world runs at 1/S of real speed: one control "
-                                  f"step every S x control_dt s of wall time; `{slowdown_var(task)}`'s default)"
+                                  f"step every S x control_dt s of wall time; `RCB_SLOWDOWN`'s default)"
                                   + (f"; reset budget {rt[1]} (`RCB_RESET_BUDGET`'s default)" if rt[1] is not None else "")
                                   + " (PROTOCOL §4b)"))
     head.append(("Base image", f"`{image_of(task)}`"))
@@ -1068,20 +957,14 @@ def normalize_dynamics(task: Path) -> None:
 def realtime_of(task: Path) -> tuple[float, int | None] | None:
     """A standard-realtime task's (slowdown S, reset budget) as its sim service starts by default: the `RCB_SLOWDOWN`
     and `RCB_RESET_BUDGET` defaults in environment/docker-compose.yaml (PROTOCOL §4b). None: not a standard-realtime task,
-    or a service without `RCB_SLOWDOWN` (ci_checks/check-realtime.py fails a 2.3 one)."""
+    or a service without `RCB_SLOWDOWN`."""
     if mode_of(task) != "standard-realtime":
         return None
     c = read_text(task / "environment/docker-compose.yaml") or ""
-    m, r = SLOWDOWN_RE.search(c) or OWN_SLOWDOWN_RE.search(c), RESET_RE.search(c)
+    m, r = SLOWDOWN_RE.search(c), RESET_RE.search(c)
     if not m:
         return None
     return float(m.group(1)), (int(r.group(1)) if r else None)
-
-
-def slowdown_var(task: Path) -> str:
-    """The setting S comes from: `RCB_SLOWDOWN`, or a §4c service's own (RoboOlympics `RO_SLOWDOWN`)."""
-    c = read_text(task / "environment/docker-compose.yaml") or ""
-    return "RCB_SLOWDOWN" if SLOWDOWN_RE.search(c) or not OWN_SLOWDOWN_RE.search(c) else "RO_SLOWDOWN"
 
 
 def slowdown_text(S: float) -> str:
@@ -1097,7 +980,7 @@ def normalize_slowdown(task: Path) -> None:
     if rt is not None:
         line = f"slowdown = {slowdown_text(rt[0])}"
         line += " " * max(1, 34 - len(line)) + ("# standard-realtime: the world runs at 1/S of real speed (docs/PROTOCOL.md "
-                                                 f"§4b); {slowdown_var(task)}'s default\n")
+                                                 "§4b); RCB_SLOWDOWN's default\n")
         s, n = re.subn(r'(?m)^(dynamics = "[^"]*".*\n)', lambda m: m.group(1) + line, s, count=1)
         if n != 1:
             s, n = re.subn(r'(?m)^(mode = "[^"]*".*\n)', lambda m: m.group(1) + line, s, count=1)
@@ -1107,10 +990,9 @@ def normalize_slowdown(task: Path) -> None:
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-# PROTOCOL v2.0 §2 (owner, 2026-10-14, board 0124): the settings a task declares, and the effective configuration of a
-# trial, recorded with every result so that results are ranked only within one comparable configuration (RUNNING.md
-# "Results"). Standard library only: scripts/write_task_results.py, scripts/dataset_manifest.py and the scheduler's run
-# policy (batch_eval_live) read these.
+# PROTOCOL v2.0 §2: the settings a task declares, and the effective configuration of a trial, recorded with every
+# result so that results are ranked only within one comparable configuration (docs/RUNNING.md "Results"). Standard
+# library only: scripts/write_task_results.py reads these.
 PROTOCOL_VERSION = "2.0"                         # docs/PROTOCOL.md
 NETWORKS = ("allowlist", "open")                 # `[metadata] network` (PROTOCOL §2, Appendix H.6); absent = allowlist
 RESET_DECL_RE = re.compile(r'^\s*RCB_RESET_BUDGET:\s*"?(?:\$\{RCB_RESET_BUDGET:-([0-9]+)\}|([0-9]+))"?\s*(?:#.*)?$', re.M)

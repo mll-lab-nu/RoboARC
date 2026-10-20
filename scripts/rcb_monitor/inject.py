@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Wires the resource-limits monitor into a task directory (docs/PROTOCOL.md §2.10, v1.2), from its task.toml
-`[metadata.resources.limits]` and `[metadata.resources.caps]`. Called by scripts/task_conventions.py `normalize`, so every
+`[metadata.resources.limits]` and `[metadata.resources.caps]`. Called by scripts/task_conventions.py `normalize`, so the
 generator's output already has it and `task_conventions.py --check` keeps it in step; idempotent.
 
 What it writes (every generated line ends in `# rcb-monitor`, or sits between the `# >>> rcb_monitor` and
@@ -12,7 +12,7 @@ What it writes (every generated line ends in `# rcb-monitor`, or sits between th
     its code read-only, RCB_LIMITS_ENFORCE from the run-time environment, default 0);
   - the beacon volumes: `rcb_limits` read-only at /run/rcb-limits in every service the limits bind (kind_of: main, and
     in privileged mode every service the agent drives), `rcb_observe` at /run/rcb-observe in the ones only recorded
-    (the benchmark's own services: the simulator sidecar of standard modes, RoboPaint's privileged `scorer`);
+    (the benchmark's own services: the simulator sidecar of standard modes, a privileged `scorer` service);
   - the caps (`[metadata.resources.caps]`): pids_limit on main (Harbor writes main's cpus and memory from
     [environment]; scripts/task_conventions.py sets [environment].memory_mb to caps.main.memory_gb); cpus, mem_limit and
     pids_limit on every other service, unless the service sets one itself (ci_checks/check-resources.py then requires
@@ -54,7 +54,7 @@ DOCKER_COPY = "# resource limits: the verifier step and its copy of the limits (
     "COPY rcb_limits.py rcb_limits.json /tests/"
 SIDECAR_MODES = ("standard", "standard-realtime")
 # Privileged mode: compose services that are the benchmark's own, not the agent's to drive (it cannot start, stop or
-# size them): recorded, never part of the scope the limits bind. Today RoboPaint's scoring service.
+# size them): recorded, never part of the scope the limits bind (no RoboARC task has one).
 BENCHMARK_SERVICES = ("scorer",)
 MONITOR_CAPS = {"cpus": 0.5, "mem": "256m", "pids": 64}
 
@@ -108,7 +108,7 @@ def limits_json(task: Path, cfg: dict, gpu: bool) -> dict | None:
     # gpu: NVML must work (a fatal record otherwise) when the limits count GPU memory
     out.update(tick_sec=TICK, disk_tick_sec=DISK_TICK, gpu=bool(gpu and float(out.get("max_gpu_memory_gb") or 0) > 0))
     # the agent's time limit (PROTOCOL §2.12, the task's own `[agent] timeout_sec`): the monitor shows the agent its
-    # clock in /run/rcb-limits/usage.json (elapsed_s, time_left_s, deadline_utc; robot_coding_bench #231)
+    # clock in /run/rcb-limits/usage.json (elapsed_s, time_left_s, deadline_utc)
     timeout = (cfg.get("agent") or {}).get("timeout_sec")
     if isinstance(timeout, (int, float)) and timeout > 0:
         out["agent_timeout_sec"] = int(timeout)
@@ -116,16 +116,14 @@ def limits_json(task: Path, cfg: dict, gpu: bool) -> dict | None:
 
 
 def caps_of(task: Path, cfg: dict) -> dict:
-    """Per-service docker caps: `[metadata.resources.caps]` (memory_gb in GiB). Without it: only pids limits (by simulator:
-    Isaac Sim's Kit runs thousands of threads); a sidecar's memory and CPU stay uncapped until the task declares them."""
+    """Per-service docker caps: `[metadata.resources.caps]` (memory_gb in GiB). Without it: only pids limits; a sidecar's
+    memory and CPU stay uncapped until the task declares them."""
     res = (cfg.get("metadata") or {}).get("resources") or {}
     caps = res.get("caps")
     if isinstance(caps, dict) and caps:
         return {k: dict(v) for k, v in caps.items()}
     env = cfg.get("environment") or {}
-    isaac = str((cfg.get("metadata") or {}).get("simulator", "")).lower().startswith(("isaac", "omni")) or \
-        task.name.startswith(("behavior-", "robolab-", "maniguard-", "yamlab-"))
-    pids = 16384 if isaac else 8192
+    pids = 8192
     return {"main": {"cpus": float(env.get("cpus", 4)), "memory_gb": round(float(env.get("memory_mb", 8192)) / 1024, 2),
                      "pids": pids}, "*": {"pids": pids}}
 
