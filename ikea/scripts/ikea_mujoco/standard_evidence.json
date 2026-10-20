@@ -343,28 +343,28 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B <host work dir>",
-    "note": "the hand-slew reference 7a1e6e502d63 (2026-10-18, dev/qineng-ikea-hand-slew; image 0.3.0 / -sim 0.4.0 Nyx), PR #305 grading (live episode, no grading replay): live settled success at control step 222600 (56 calls), live end hash a690aa1b973b = the reference's in every fresh replay, settled hash 20a59284ab83, settle_failed 0, 1 sim start-up, no resume, video 1 (live.mp4, 5566 frames); live service time 3672 s (34 % of the 3 h budget) on host B (load ~15)"
+    "note": "the hand-slew reference 7a1e6e502d63 (2026-10-18; image 0.3.0 / -sim 0.4.0 Nyx), live-episode grading (live episode, no grading replay): live settled success at control step 222600 (56 calls), live end hash a690aa1b973b = the reference's in every fresh replay, settled hash 20a59284ab83, settle_failed 0, 1 sim start-up, no resume, video 1 (live.mp4, 5566 frames); live service time 3672 s (34 % of the 3 h budget) on host B (load ~15)"
    },
    {
     "agent": "nop",
     "reward": 0,
     "job": "host B <host work dir>",
-    "note": "PR #305 grading (live episode): no call, reward 0, video 1"
+    "note": "live-episode grading (live episode): no call, reward 0, video 1"
    },
    {
     "agent": "oracle",
     "reward": 1,
     "job": "host B <host work dir>",
-    "note": "the first reference (215,782 rows, before the Franka Hand rule): PR #305 grading (live episode, no grading replay; dev/robotangle_mujoco ec3114219c ported onto main 765fc3ce16, monitor and caps on): live settled success at control step 215782 (54 calls), live end hash a02c9a18abca = the reference's (the earlier runs' live and replay hash), settle_failed 0, no resume, video 1; live service time 6169 s (57 % of the 3 h budget) on host B under heavy load (load average about 81 on 32 threads; 2958-3104 s on the earlier, quieter runs)"
+    "note": "the first reference (215,782 rows, before the Franka Hand rule): live-episode grading (no grading replay; rendered on the shared task layer with the resource monitor and caps on): live settled success at control step 215782 (54 calls), live end hash a02c9a18abca = the reference's (the earlier runs' live and replay hash), settle_failed 0, no resume, video 1; live service time 6169 s (57 % of the 3 h budget) on host B under heavy load (load average about 81 on 32 threads; 2958-3104 s on the earlier, quieter runs)"
    },
    {
     "agent": "nop",
     "reward": 0,
     "job": "host B <host work dir>",
-    "note": "the first reference (215,782 rows, before the Franka Hand rule): PR #305 grading (live episode): no call, reason timeout, reward 0, video 1"
+    "note": "the first reference (215,782 rows, before the Franka Hand rule): live-episode grading (live episode): no call, reason timeout, reward 0, video 1"
    }
   ],
-  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); the first two are the hand-slew reference's (222,600 rows, 7a1e6e502d63), the rest the first reference's. Kept apart from `checks` (the replay-graded history of the first reference, 215,782 rows, e0097d6689ea, end a02c9a18abca, before the Franka Hand rule; the standard README renders `checks` only). rows, sim_time_s, service_time_s, live_sha, settled_sha and reference are the hand-slew reference's."
+  "live_checks_note": "Harbor runs under live-episode grading (the live episode's verdict, no grading replay); the first two are the hand-slew reference's (222,600 rows, 7a1e6e502d63), the rest the first reference's. Kept apart from `checks` (the replay-graded history of the first reference, 215,782 rows, e0097d6689ea, end a02c9a18abca, before the Franka Hand rule; the standard README renders `checks` only). rows, sim_time_s, service_time_s, live_sha, settled_sha and reference are the hand-slew reference's."
  },
  "burvik": {
   "date": "2026-10-18",
@@ -388,7 +388,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host A harbor/jobs/S2_std_oracle/ikea-burvik-i00-standard__cMaK4eU",
-    "note": "Franka Hand slew reference, PR #305 grading (live episode), the final dir: live settled success at control step 160001 of the reference's 162534 (40 calls; during the hands' retreat), live end hash ebe8cde26415 (= the first run's), settle_failed 0, no resume, video 1; live service time 1824 s (16.9 % of the 3 h budget)"
+    "note": "Franka Hand slew reference, live-episode grading (live episode), the final dir: live settled success at control step 160001 of the reference's 162534 (40 calls; during the hands' retreat), live end hash ebe8cde26415 (= the first run's), settle_failed 0, no resume, video 1; live service time 1824 s (16.9 % of the 3 h budget)"
    },
    {
     "agent": "nop",
@@ -410,7 +410,7 @@
    }
   ],
   "checks": [],
-  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py is main's file and renders `checks` only."
+  "live_checks_note": "Harbor runs under live-episode grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py renders `checks` only."
  },
  "uppsta": {
   "date": "2026-10-18",
@@ -446,13 +446,13 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B harbor/jobs/C_std_oracle/ikea-uppsta-i00-standard__kfe5CeL",
-    "note": "PR #305 grading (live episode), the final dir: live settled success at control step 430225 (54 calls), live end hash a748a42dc36d = the reference's, settle_failed 0, no resume, video 1; live service time 4685 s (43.4 % of the 3 h budget; host B load 25-30 with the privileged verifier's two replays alongside)"
+    "note": "live-episode grading (live episode), the final dir: live settled success at control step 430225 (54 calls), live end hash a748a42dc36d = the reference's, settle_failed 0, no resume, video 1; live service time 4685 s (43.4 % of the 3 h budget; host B load 25-30 with the privileged verifier's two replays alongside)"
    },
    {
     "agent": "nop",
     "reward": 0,
     "job": "host B harbor/jobs/C_std_nop/ikea-uppsta-i00-standard__nSLedxa",
-    "note": "PR #305 grading (live episode), the final dir: no call, reward 0, video 1"
+    "note": "live-episode grading (live episode), the final dir: no call, reward 0, video 1"
    },
    {
     "agent": "oracle",
@@ -468,7 +468,7 @@
    }
   ],
   "checks": [],
-  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py is main's file and renders `checks` only."
+  "live_checks_note": "Harbor runs under live-episode grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py renders `checks` only."
  },
  "kyrre": {
   "date": "2026-10-19",
@@ -504,7 +504,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B 2026-10-17_ikea_v3_kyrre/cyl/harbor/jobs/C_std_oracle/ikea-kyrre-i00-standard__oBS9GX2",
-    "note": "first run (the candidate branch): live settled success at control step 733558 (184 calls), live end hash 0a9f1a9e6d77 = the reference's, settle_failed 0, no resume, video 1; live service time 3073 s (28.5 % of the 3 h budget) with the privileged verifier's replays alongside"
+    "note": "first run (the candidate build): live settled success at control step 733558 (184 calls), live end hash 0a9f1a9e6d77 = the reference's, settle_failed 0, no resume, video 1; live service time 3073 s (28.5 % of the 3 h budget) with the privileged verifier's replays alongside"
    },
    {
     "agent": "nop",
@@ -514,6 +514,6 @@
    }
   ],
   "checks": [],
-  "live_checks_note": "Harbor runs under the PR #305 grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py is main's file and renders `checks` only."
+  "live_checks_note": "Harbor runs under live-episode grading (the live episode's verdict, no grading replay); `checks` (the replay-graded history the standard README renders) is empty: this twin was never graded by replays. mk_standard_tasks.py renders `checks` only."
  }
 }

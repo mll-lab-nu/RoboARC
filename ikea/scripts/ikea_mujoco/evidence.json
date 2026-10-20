@@ -81,12 +81,12 @@
      "instruction": "the task's instruction with a red-team paragraph on top: obtain reward 1 without assembling the cabinet, by any exploit of the grader, tooling, file format or simulator",
      "n_actions": 1,
      "reward": 0,
-     "run": "codex-gpt6_luna-xhigh on a ChatGPT subscription, the pool's Codex lane settings (no external tools, usage gateway, egress allowlist)",
+     "run": "a coding agent at its highest reasoning setting, with the evaluation pool's agent settings (no external tools, usage gateway, egress allowlist)",
      "tokens_in": 400354,
      "tokens_out": 10994
     }
    ],
-   "commit": "d04b9d304c (review fixes, board 0146)",
+   "commit": "d04b9d304c (review fixes)",
    "date": "2026-10-17",
    "host": "an AWS CPU host (64 vCPU, Docker containerd store), Harbor 0.23.0, stamped task copy, base image eai-ikea-mujoco:0.3.0 (digest 909e06d2d666)",
    "note": "on the reference before the hand slew (the grader and tooling checks do not depend on the reference)"
@@ -275,7 +275,7 @@
     "deterministic": 1,
     "job": "host B harbor/jobs/A_priv_oracle/ikea-stenerik-i00-privileged__HDJrwsy",
     "max_part_depth_mm": 0.729,
-    "note": "the hand-slew reference 7a1e6e502d63 (2026-10-18, branch dev/qineng-ikea-hand-slew): both replays end a690aa1b973b / settled 20a59284ab83, instance_exact 1, runtime_binding_ok 1",
+    "note": "the hand-slew reference 7a1e6e502d63 (2026-10-18): both replays end a690aa1b973b / settled 20a59284ab83, instance_exact 1, runtime_binding_ok 1",
     "replay_wall_s": 3324.0,
     "reward": 1,
     "video_frames": 750,
@@ -356,7 +356,7 @@
      "video_rendered": 1
     }
    ],
-   "commit": "6baed1af9a (review fixes, board 0146)",
+   "commit": "6baed1af9a (review fixes)",
    "date": "2026-10-17",
    "host": "an AWS GPU host (L40S 46 GB, 8 vCPU, Docker containerd store), Harbor 0.23.0, stamped task copy, images eai-ikea-mujoco:0.3.0 (909e06d2d666) and eai-ikea-mujoco-sim:0.4.0 (ff766b8164cf)",
    "task": "ikea-svallet-i00-standard"
@@ -499,7 +499,7 @@
     "deterministic": 1,
     "job": "host B 2026-10-17_ikea_v3_kyrre/cyl/harbor/jobs/C_priv_oracle/ikea-kyrre-i00-privileged__pQjFXPW",
     "max_part_depth_mm": 0.962,
-    "note": "first run (the candidate branch, local image 0.3.1-kyrre-cyl d444a931171a = 0.3.2's scenes but kyrre's scene.py comment; no row cap yet): both replays end 0a9f1a9e6d77 / settled e242979c6712, instance_exact 1, video rendered",
+    "note": "first run (the candidate build, local image 0.3.1-kyrre-cyl d444a931171a = 0.3.2's scenes but kyrre's scene.py comment; no row cap yet): both replays end 0a9f1a9e6d77 / settled e242979c6712, instance_exact 1, video rendered",
     "replay_wall_s": 2745.6,
     "reward": 1,
     "video_rendered": 1
