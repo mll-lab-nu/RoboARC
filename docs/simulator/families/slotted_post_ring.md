@@ -1,7 +1,7 @@
 # slotted_post_ring on MuJoCo
 
-Jianwen, 2026-10-10 / 11. Shared mechanisms are in `docs/rcb/MUJOCO_CORE.md`; this note covers what is specific to
-slotted_post_ring and why. Evidence: `runs/robotangle_mujoco/v2/slotted_orbits/`.
+Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md); this note (2026-10-10 / 11) covers what is specific to
+slotted_post_ring and why. The evidence was kept outside this repository.
 
 ## The task
 
@@ -11,8 +11,8 @@ ring in the goal area. Nine settings:
 
 | settings | cord | assisted grasp |
 |---|---|---|
-| `very_easy`, `easier` | #108's rigid chain file (`topogym/assets/geometry/slotted_chain.py`, 88 links) on the easy geometry (28 mm slot), since dev/jianwen c15011129 | contact weld on the ring only |
-| `easy_chain`, `medium_chain`, `hard_chain` (#108) | the same chain file, 34 mm slot, ring radius 64 / 62.5 / 61 mm | contact weld on the ring only |
+| `very_easy`, `easier` | the rigid chain file (`topogym/assets/geometry/slotted_chain.py`, 88 links) on the easy geometry (28 mm slot), since c15011129 | contact weld on the ring only |
+| `easy_chain`, `medium_chain`, `hard_chain` | the same chain file, 34 mm slot, ring radius 64 / 62.5 / 61 mm | contact weld on the ring only |
 | `easy`, `medium`, `hard`, `clearance36` (FEM on Genesis) | on MuJoCo the cord is a rigid chain (task parameter `cord_model: chain`, set by `rcb_topogym.simulator_config`): the 10-07 chain of `tasks/slotted_post_ring/fem_chain.py` and `assets/geometry/slotted_post_chain.py` along the setting's authored cord | none (unassisted, as the FEM contract) |
 
 Geometry, goals and rules are the task files'; the port changes none of them. A chain cannot stretch or squeeze as the
@@ -24,10 +24,10 @@ FEM cord (E 50 kPa) did, and the FEM-only integrity rules (tet inversion, attach
   stiff follower-finger coupling, the soft class on robot-robot and robot-static contacts), 0.625 ms steps (2.5 ms ticks
   of 4 substeps).
 - Every geom of the chain entities takes the claws contact class through the profile option `mjcf` (`_CHAIN_GEOMS`:
-  solref 1.25 ms / dampratio 2, solimp .9 .99 .001): `slotted_chain` (#108's file; `_SLOTTED_108`, also very_easy /
+  solref 1.25 ms / dampratio 2, solimp .9 .99 .001): `slotted_chain` (the chain file; `_SLOTTED_108`, also very_easy /
   easier), `cord` and `target_ring` (the FEM settings' chains; `_SLOTTED_FEM_CHAIN`).
 - `_SLOTTED_FEM_CHAIN` splits the post (one extrusion with the slot as a hole) into exact fat convex prisms
-  (`slotted_post_chain.post_parts`, 82 pieces, thinnest 0.86 mm); #108's fixture is exact boxes in `<entity>::world`.
+  (`slotted_post_chain.post_parts`, 82 pieces, thinnest 0.86 mm); the chain file's fixture is exact boxes in `<entity>::world`.
 - MJCF entities with their own collision bits are remapped so that MuJoCo reproduces Genesis' per-entity masks
   (`mjcf_entity.py`): the ALOHA collides with the beads, discs, ring and links.
 
@@ -72,29 +72,30 @@ nyx_direct (`TASKS` renderer "direct"). The FEM settings are drawn as the FEM se
 cord is skinned on the chain's links and the rigid parts ride the MuJoCo bodies that hold them
 (`nyx_direct.chain_cord_host`, as the render bridge's `_chain_cord_host`). Against the bridge's Genesis host
 (`test_nyx_direct.py`, birth and after a 40-row nop): input buffers bitwise but rounding at birth, RGB within the host's
-own run-to-run spread. Known asset issue, not fixed here: #108's fixture authors a collision box and a visual twin of
+own run-to-run spread. Known asset issue, not fixed here: the chain file's fixture authors a collision box and a visual twin of
 the same size; the two coincident surfaces flicker between grey and wood from run to run on either renderer (up to
 ~10,000 pixels per camera).
 
-## References (`scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
+## References (`source/scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
 
 Recorded live on MuJoCo by the family's feedback oracles through `rcb_topogym.py run-oracle`
-(`scripts/robotangle/references/slotted_post_ring/record_reference.sh`; oracle code in `scripts/oracle_runners/`), on
+(`source/scripts/robotangle/references/slotted_post_ring/record_reference.sh`; oracle code in `scripts/oracle_runners/`, not included in this repository), on
 an instance built in **native** gripper space (the oracles command native gripper targets; same scene and settling as the
-width instances above). Each replays in two fresh processes to the recording's hash.
+width instances above). Each replays in two fresh processes to the recording's hash. (The base names below are development names; these
+-i01 directories are not included in this repository under these names.)
 
 | base | instance state_sha | rows | final state_sha | oracle |
 |---|---|---|---|---|
 | slotted-post-ring-very-easy-i01 | 3cb1151a6c3f5afb | 437 | 5a730ec14ba1b22c | `planning/slotted_post_ring/below_easy_oracle.py` (BelowEasyPolicy) |
 | slotted-post-ring-easier-i01 | 88c14ec362546ea4 | 969 | 69b0d12f924a8ad0 | the same (EasierPolicy) |
-| slotted-post-ring-easy-chain-i01 | 146a3e5a43839f37 | 9193 | 53166fda8ebc81ba | `planning/slotted_post_ring/chain/` (#108, below) |
+| slotted-post-ring-easy-chain-i01 | 146a3e5a43839f37 | 9193 | 53166fda8ebc81ba | `planning/slotted_post_ring/chain/` (the chain settings, below) |
 | slotted-post-ring-medium-chain-i01 | 77ec761119dc157a | 10580 | cf9b8cc743473af3 | the same |
 | slotted-post-ring-hard-chain-i01 | 48302a49de756a78 | 9407 | fd92819c3925a0cb | the same |
 
-Armature 1e-5 (Qineng, 2026-10-13; `docs/rcb/handover/slotted_orbits_takeover_qineng_20261012.md`): the chain file's
+Armature 1e-5 (2026-10-13): the chain file's
 ball joints at 1e-5 (was 1e-6), the fix for the stress breakdowns of a link pressed into the fixture (S1, prefix4_e20,
 corpus S3 / S4). Every setting is born anew (table above, two fresh strict replays each). very_easy and easier keep their
-recordings, which still succeed on the new births; the three #108 settings are re-recorded by the chain oracle with
+recordings, which still succeed on the new births; the three chain settings are re-recorded by the chain oracle with
 53fc82bf70 (M1's from-home IK branch) and 988cc270b6 (three fallbacks). The paragraph below describes the earlier
 armature-1e-6 instances.
 
@@ -105,12 +106,12 @@ profiles keep no static piece (no `static_contact.keep`), so an instance frozen 
 model (easier's instance frozen at ac8dafe6a replays to the rebuilt one's final state). very_easy makes no robot-robot
 or robot-static contact at all and replays to its old final state; easier makes 906 robot-robot (left finger on the right
 gripper base, from tick 5709) and 42 robot-static (right finger on the fixture) contact steps, and its final state
-changed (the recording is unchanged and still succeeds). The three #108 recordings no longer succeed on this head (the stress
-session's head check: CLEAN, final states dc0f919fefc35253 / d2e3a4fb21f24aa0 / b854e5a4d391e701 for hard / medium /
+changed (the recording is unchanged and still succeeds). The three chain-setting recordings no longer succeed on this head (the stress
+validation's head check: CLEAN, final states dc0f919fefc35253 / d2e3a4fb21f24aa0 / b854e5a4d391e701 for hard / medium /
 easy) and are re-recorded.
 
 Recipe: `record_reference.sh slotted_post_ring slotted_post_ring_<tier> native
-scripts/oracle_runners/slotted_below_easy_session_oracle.py <out> <work>`; for #108
+scripts/oracle_runners/slotted_below_easy_session_oracle.py <out> <work>`; for the chain settings
 `... slotted_post_ring_<tier>_chain native scripts/oracle_runners/slotted_chain_session_oracle.py <out> <work>`.
 
 Oracle changes for MuJoCo (plans only; goals, rules, geometry unchanged):
@@ -125,11 +126,11 @@ All references also pass the stress observer as single replays (`stress/replay.p
 v2.10): CLEAN (easy / medium / hard_chain: peak task speed 1.61 / 1.59 / 1.58 m/s, spin 45 / 45 / 55 rad/s, three / two
 / one chain whips under 3 m/s).
 
-### #108 (easy / medium / hard_chain)
+### The chain settings (easy / medium / hard_chain)
 
 `planning/slotted_post_ring/chain/` (M1 disc1 through the slot, M2 ring over the post, M3 ring back through the slot and
 off the bight, M4b discs and cord to the system side, M4a ring into the goal) through
-`scripts/oracle_runners/slotted_chain_session_oracle.py`, native gripper space. The dev/jianwen plan stopped at the end
+`scripts/oracle_runners/slotted_chain_session_oracle.py`, native gripper space. The original plan stopped at the end
 of M1 on MuJoCo; contacts are harder (the hand stops where Genesis let it press on) and the chain does not stretch.
 Plan changes so far, each from one observed failure (goals, rules, geometry unchanged):
 

@@ -1,10 +1,10 @@
 # cast_coil on MuJoCo (the five released tiers)
 
-Jianwen, 2026-10-10. Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md). This note covers the five released
+Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md). This note (2026-10-10) covers the five released
 Genesis tiers (very_easy .. hard) on MuJoCo and their -i01 references. The official two-axis redesign
 (`cast_coil_v2_very_easy`, `cast_coil_v2_easier`, `cast_coil_v2_easy`, `cast_coil_v2_design`, profile
-`cast_coil_official_v3`, its own `OfficialCoilPolicy`; task texts in `scripts/robotangle/package_text/cast_coil/`) is a
-separate session's work and is not covered or released here.
+`cast_coil_official_v3`, its own `OfficialCoilPolicy`; task texts in `source/scripts/robotangle/package_text/cast_coil/`) is
+separate work and is not covered or released here.
 
 ## The task
 
@@ -35,7 +35,7 @@ Goals, rules, geometry and difficulty are the released ones.
   and 2.9 mm, CLEAN, each in two fresh processes with one final state hash. The references touch no robot-robot pair:
   rebuilt on v3, every tier keeps its birth hash, and every
   reference below replays to its recorded final state hash. The shrunk stream is
-  `scripts/robotangle/stress/corpus/reproducers/J2_coil_easier_arm_arm_depth`.
+  `source/scripts/robotangle/stress/corpus/reproducers/J2_coil_easier_arm_arm_depth`.
 - Collision geometry: each piece is declared as exact disjoint collision boxes (`topogym.assets.geometry.cast_coil`:
   orthogonal CSG partitioned on the coordinate planes), which MuJoCo collides as box primitives: no hull, no CoACD, no
   slivers. The assembled clearances (0.3 mm comb / baffle, 0.75 mm between layers) stay exact.
@@ -44,13 +44,12 @@ Goals, rules, geometry and difficulty are the released ones.
 
 ## Instances
 
-Made as the release makes them (`scripts/robotangle/mujoco_release.json`):
+Made as the release makes them (`source/scripts/robotangle/mujoco_release.json`):
 `rcb_topogym.py make-instance --task cast_coil --variation cast_coil_<tier> --scene-seed 0 --gripper-space native`.
 No simulator overrides or task parameters. (The released Genesis instances are native too.)
 
 Scene acceptance on coil_legacy_v2 (nop 400 + 40 hold rows under the stress observer;
-`references/cast_coil/geom_check.py` for the geometry, the assembled clearance and the rest; evidence
-`runs/robotangle_mujoco/v2/cast_coil/step1_summary.json`):
+`references/cast_coil/geom_check.py` for the geometry, the assembled clearance and the rest):
 
 | tier | birth sha | collision boxes | thinnest | assembled clearance in MuJoCo | nop 400 + 40 | deepest contact | drift after the birth drop |
 |---|---|---|---|---|---|---|---|
@@ -77,13 +76,14 @@ Recipe (the RoboTangle image's Python; `RCB_RENDER=off` for the oracle and repla
 rcb_topogym.py make-instance --task cast_coil --variation cast_coil_<tier> --scene-seed 0 --gripper-space native \
     --out <dir>/instance.json
 rcb_topogym.py run-oracle --task cast_coil --instance <dir>/instance.json \
-    --code scripts/robotangle/references/cast_coil/oracle_cast_coil.py --out <dir>/privileged.npz
+    --code source/scripts/robotangle/references/cast_coil/oracle_cast_coil.py --out <dir>/privileged.npz
 rcb_topogym.py replay --task cast_coil --instance <dir>/instance.json --traj <dir>/privileged.npz --repeat 2 --strict
-scripts/robotangle/stress/replay.py --instance <dir>/instance.json --actions nop:<rows> --out <nop.json>
+source/scripts/robotangle/stress/replay.py --instance <dir>/instance.json --actions nop:<rows> --out <nop.json>
 ```
 
 Recorded on 8cdf9a228 (coil_legacy_v2) on a cloud host, as `scripts/robotangle/oracles/cast-coil-<tier>-i01/`
-(`privileged.npz`; `standard.npz` is the same file). Every oracle succeeds without a review or forcing event.
+(`privileged.npz`; `standard.npz` is the same file; development names, the tier-named -i01 directories are not
+included in this repository). Every oracle succeeds without a review or forcing event.
 
 | tier | rows, released -> i01 | sim s | final state sha | npz sha256 |
 |---|---|---|---|---|
@@ -93,7 +93,7 @@ Recorded on 8cdf9a228 (coil_legacy_v2) on a cloud host, as `scripts/robotangle/o
 | medium | 7436 -> 8972 | 224.3 | 86ae706d00ac28db | 6140f0eb306c0847bab720602c4abc174e6fbd2f793a34b5af1f0272fcc6996a |
 | hard | 6698 -> 8832 | 220.8 | 2b7798806c064723 | 93ef41e06d0bf77ae38f2baa4c31ae2f35026c25b3926f49935e673e180c58ad |
 
-Checks on this tree (jianwen/mj3-wrapup at fd50b2d21; a cloud host, the RoboTangle runtime, `RCB_RENDER=off`): each instance
+Checks on this tree (fd50b2d21; a cloud host, the RoboTangle runtime, `RCB_RENDER=off`): each instance
 re-made with the release recipe; the reference replayed in a fresh process (`rcb_topogym.py replay --repeat 2
 --strict`); a nop of the same length through `stress/replay.py`.
 
@@ -105,15 +105,14 @@ re-made with the release recipe; the reference replayed in a fresh process (`rcb
 | medium | f11ed465d7059125 | success at row 8972, 86ae706d00ac28db both (re-checked 2026-10-13, below) | yes | no success |
 | hard | 4babdba86c1af954 | success at row 8832, 2b7798806c064723 both (re-checked 2026-10-13, below) | yes | no success |
 
-**Joint-speed rule (validate, 2026-10-13).** The standard service moves an arm joint target at most
+**Joint-speed rule (2026-10-13).** The standard service moves an arm joint target at most
 `JOINT_STEP_LIMIT_RAD` (0.04 rad) per control step (rules 2026-10-03); a row asking for more takes the control steps it
 needs. The medium and hard references each had one such row (medium row 8905, hard row 8765, a right-arm joint, about
 0.05 rad), so the standard-mode oracle ran one control step longer than the privileged replay and ended in another state
-(both successes; Harbor run J). The references are now the control steps the standard service executed: that row is
+(both successes, in a Harbor run). The references are now the control steps the standard service executed: that row is
 split into its two steps (medium 8971 -> 8972 rows, hard 8831 -> 8832), every other row unchanged, no arm step above
-0.04 rad. Replayed twice in the privileged grader (release image eai-robotangle-new:0.1.0-j1, fresh processes): success
+0.04 rad. Replayed twice in the privileged grader (a release-candidate image, fresh processes): success
 at the last row, medium 86ae706d00ac28db, hard 2b7798806c064723, the standard oracle's end states; both modes now run the
 same rows. `meta.speed_rule` in each file records the change; the previous files are in git history.
 
-Evidence (oracle logs, replays, nops, nyx_direct videos): `runs/robotangle_mujoco/v2/cast_coil/` (`a cloud host/`, `videos/`,
-`step3_summary.json`); the checks on fd50b2d21: `runs/robotangle_mujoco/v2/mj3_wrapup/`.
+Evidence (oracle logs, replays, nops, nyx_direct videos, the checks on fd50b2d21) was kept outside this repository.

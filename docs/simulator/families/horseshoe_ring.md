@@ -1,7 +1,7 @@
 # horseshoe_ring on MuJoCo
 
-Jianwen's agent, 2026-10-10. Shared mechanisms (the ALOHA, its finger coupling, the contact classes, the exact constraint
-diagonal) are in `docs/rcb/MUJOCO_CORE.md`; this note records the five released tiers' references on MuJoCo.
+Shared mechanisms (the ALOHA, its finger coupling, the contact classes, the exact constraint diagonal) are in
+[MUJOCO_CORE.md](../MUJOCO_CORE.md); this note (2026-10-10) records the five released tiers' references on MuJoCo.
 
 ## The task
 
@@ -34,12 +34,13 @@ Every stage checks the task's contact limits and loop interlocks on every tick.
 
 ## References
 
-`scripts/robotangle/oracles/horseshoe-ring-<tier>-i01/privileged.npz`; `standard.npz` is the same file. Each was recorded
-by `rcb_topogym.py run-oracle` with the Harbor callback (`scripts/robotangle/references/horseshoe_ring/` holds the tools),
+`scripts/robotangle/oracles/horseshoe-ring-<tier>-i01/privileged.npz` (development names; the tier-named -i01
+directories are not included in this repository); `standard.npz` is the same file. Each was recorded
+by `rcb_topogym.py run-oracle` with the Harbor callback (`source/scripts/robotangle/references/horseshoe_ring/` holds the tools),
 in a fresh Session on an instance made on this head (`make-instance --variation horseshoe_ring_<tier> --scene-seed 0
 --gripper-space native`; the state hash is the same as in width space). Runs end at the success row (the oracle stops
 there). Session-mode stages need a runtime binding next to the instance; for the recordings a dev binding was written
-(the evidence tool `bind_dev.py`, as core's `work/bind_dev.py`).
+(the evidence tool `bind_dev.py`, not included in this repository).
 
 | tier | instance birth | change on MuJoCo | rows | state hash | file sha256 | 2 fresh replays | nop |
 |---|---|---|---|---|---|---|---|
@@ -50,11 +51,11 @@ there). Session-mode stages need a runtime binding next to the instance; for the
 | hard | f416cbe0b5c79222 | hand swap instead of the release in the air (below) | 7817 | 11ee018da5421bd5 | 57aabe42b8b7bcdc | same hash, success; observer CLEAN | no success, CLEAN |
 
 "2 fresh replays": `rcb_topogym.py replay --repeat 2 --strict` in a fresh process; the stress observer's replay
-(`scripts/robotangle/stress/replay.py`, criteria v2.10) is a third process and reaches the same state hash. "nop": as
+(`source/scripts/robotangle/stress/replay.py`, criteria v2.10) is a third process and reaches the same state hash. "nop": as
 many rows holding the birth targets, under the observer.
 
-**On the 32-facet cylinder prisms (2026-10-12, dev 64820cfbf).** The instance build makes every cylinder a robot geom
-can touch a convex prism of 32 facets (`docs/rcb/MUJOCO_CORE.md`). horseshoe_ring's wires are chains of short cylinders
+**On the 32-facet cylinder prisms (2026-10-12, 64820cfbf).** The instance build makes every cylinder a robot geom
+can touch a convex prism of 32 facets ([MUJOCO_CORE.md](../MUJOCO_CORE.md)). horseshoe_ring's wires are chains of short cylinders
 (radius 2.8 mm) and spheres (`topogym/assets/geometry/horseshoe_ring.py`, `cylinder_between`): every tier's
 `scene.json` lists 152 `cylinder_prisms`, and every birth changed (the old births, in the same order: 144382069257e898,
 326271cbacebbb2d, edbf7c52f6b8d465, e037cf2101a49695, 859fbc7b07bae463; the bodies' birth poses in instance.json are
@@ -64,7 +65,7 @@ by the family oracle. very_easy, easier, medium and hard succeeded with their co
 easy did not: its one-hand hang now ends with the ring around the held shoe's eye end, and the recipe adds the early
 shed tilt (below). A re-run of easier's callback on the final head gives the same rows and state hash.
 
-Earlier, on the soft contact class at a constant impedance (dev 151874501), the births and very_easy's reference were
+Earlier, on the soft contact class at a constant impedance (151874501), the births and very_easy's reference were
 unchanged; medium's, hard's, easier's and easy's references were recorded on that physics (hard on head 564748029,
 medium on 305767514, easier and easy on 91be8e64c, 2026-10-11/12).
 
@@ -176,10 +177,10 @@ a +90 deg turn runs out of reach partway; with 40 deg at 0.16 m the ring falls c
 which the pull-over recipe does not expect. The rest is unchanged: the ring grasp, the swing over the hanging shoe and
 the placement (this run: the direct swing).
 
-## Tools (`scripts/robotangle/references/horseshoe_ring/`)
+## Tools (`source/scripts/robotangle/references/horseshoe_ring/`)
 
 ```bash
-R=scripts/robotangle/references/horseshoe_ring
+R=source/scripts/robotangle/references/horseshoe_ring
 # try shoe grasps from the birth (oracle's own opening sequence), then screen the recorded fold with each
 python $R/grasp_probe.py <instance.json> <tier> probe.json --side right --angles 200,160 --openings 0.0165
 # write a passing trial into a recipe directory (grasps.json, approach.json re-made; recipe sha256 updated)
@@ -191,7 +192,7 @@ python $R/hang_probe.py <instance.json> <tier> out.json --lift 0.32 --views out
 # easy on the prisms: with the early shed tilt (recipe hang shed_tilt_deg / shed_yaw_deg / shed_lift_m)
 python $R/hang_probe.py <instance.json> easy out.json --lift 0.32 --shed 30 --yaw -90 --shed-lift 0.12
 # the staged oracle with a recipe of one's own (HS_RECIPE, HS_ORACLE_OUTPUT), before it goes into reference_data
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task horseshoe_ring --instance <bound instance.json> \
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task horseshoe_ring --instance <bound instance.json> \
     --code $R/dev_oracle.py --out ref.npz
 ```
 

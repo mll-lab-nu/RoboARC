@@ -1,17 +1,15 @@
-<!-- Paths under /workspace/mj/ and work-note paths name the authors' work hosts; those artifacts are not part of this repository. Everything needed to rebuild instances is in source/. -->
-
-# blanket_flatten on MuJoCo (2026-10-10, blanket agent)
+# blanket_flatten on MuJoCo (2026-10-10)
 
 blanket_flatten's PBD cloth (Genesis) runs on MuJoCo 3.14 as a 2D flex over contact-sphere vertices. The shared code,
-the profile and the books are on dev/robotangle_mujoco. Step 1 (references) is in progress on b1ec43997 (the exact
+the profile and the books are in the development history. Step 1 (references) is in progress on b1ec43997 (the exact
 constraint diagonal): the released Genesis references do not acquire on MuJoCo (why: below), so each tier's reference
 comes from the family's own feedback policy run on MuJoCo. Step 2 waits for the observer's cloth support (the
 validator's open items, below).
 
-## Commits (dev/robotangle_mujoco)
+## Commits (development history)
 | commit | what | kind |
 |---|---|---|
-| 24c3faceb | `flex_energy`: a 2D flex's membrane / bending potential, which mujoco 3.14's own energy leaves out (`topogym/world/mujoco/energy.py`, `scripts/robotangle/test_flex_energy.py`) | shared |
+| 24c3faceb | `flex_energy`: a 2D flex's membrane / bending potential, which mujoco 3.14's own energy leaves out (`topogym/world/mujoco/energy.py`, `source/scripts/robotangle/test_flex_energy.py`) | shared |
 | e50b9f1cd | the stress observer books the flex energy | stress |
 | 323a223fc | MuJoCo PBD cloth: a `pbd_cloth` declaration becomes a 2D flex over contact-sphere vertices (`cloth.py`; scene dispatch next to the rope branch; world readout, checkpoints, `restore_cloth_births`) | shared |
 | 7c2c1fe3a | `pbd_local_patch_v1` on MuJoCo (`grasp_cloth.py`): the soft grasp's rules on connect pins, the 20 ms slip window | shared |
@@ -77,7 +75,7 @@ The pending series on b1ec43997 (for review; references follow when they pass):
   `@released_instance`, `mujoco_birth_settle`: as above}, `released_simulator_keys` = [`grasp_assist`], variations
   {very_easy: `very_easy`} (the released very_easy variation id), scene seed 0, gripper space native.
 - The settle runs physics, so the births were made again on b1ec43997 (the exact constraint diagonal), as claws'
-  were (`instances_dx/` on a cloud host, then in two steps: an unsettled instance, the settle, make-instance from the settled
+  were (first in two steps: an unsettled instance, the settle, make-instance from the settled
   source). The one-step make inside the release image (0.3.0-rc runtime, on host A) gives the same four births: state_sha
   equal, scene.xml and cloth_blanket.npz byte-identical; scene.json differs only in the settle evidence's source path.
 
@@ -92,7 +90,8 @@ The pending series on b1ec43997 (for review; references follow when they pass):
   m/s, lowest vertex 3.5-4.4 mm above the table). medium's 0.51 m/s is a late slip, not a snap: a pleat layer at the
   birth's near-left corner (flex vertex 83, x -0.40, y 0.035) creeps 4 mm down over 5.8 s and then drops the last 7 mm
   onto the table (0.16 m/s over a control step). It is left as it is: CLEAN, and a longer settle could still miss a
-  later slip of the same kind (`work/vertex_track.py`).
+  later slip of the same kind (`work/vertex_track.py`; the `work/` tools named in this note are development scripts, not
+  included in this repository).
 
   **Known easing:** the snap itself spreads the gathered cloth, so easy starts +0.017 and medium +0.011 closer to the
   0.95 coverage goal than the released PBD birth, and the PBD birth's stretch (up to 1.18) relaxes to about 1.02-1.04.
@@ -198,7 +197,7 @@ The released hard route needs Genesis' PBD creep, and no measured re-plan within
   strips are tucked, and its far side is beyond reach. Coverage on MuJoCo: 0.40 after stage A, 0.405 after stage B.
 - Genesis gets 0.604 after stage A, 0.671 after its 4 s pause, and 0.693 -> 0.776+ in the 15 s after stage B, with
   nothing touching the cloth.
-- The measured re-plan, all on b1ec43997 (`refs/hard_xv*` on a cloud host; route overrides in work/):
+- The measured re-plan, all on b1ec43997 (route overrides in the development work notes):
   - Slide the near side toward the robot to y -0.15 from just inside its lower envelope. The farther hand pulls longer,
     so the sheet turns toward the x axis and into reach: 0.641.
   - Then a far-side slide to y +0.28, putting tension on the pleats: 0.732.
@@ -219,7 +218,7 @@ successor under the same designs). Two findings for that solver.
 **Small flaps stay folded: the collision surface.** In the videos a small turned-over piece at one side is never turned
 back (the near-right ear of the redesign's flatten finals; medium's reference also ends with 0.3 % turned there).
 Diagnosis on two finals' ears in the redesign's FlexSim lab (blanket_v1 scene, exact diagonal, no robot, the assist's
-patch rule; the work notes):
+patch rule):
 - Not the patch rule: the ear's corner is exposed and admitted (10 particles, 4 pinned vertices).
 - The contact spheres (r 4.5 mm on the 12 mm grid) leave holes. A small flap's spheres sink into the holes of the layer
   under it: 2.8 mm above it instead of 9 mm, contact normals 18 deg from horizontal, so sliding out takes 5.7x the load
@@ -253,12 +252,12 @@ own would not share the contacts' solve.
 
 ## The VBD cloth backend (profile `blanket_vbd`, 2026-10-11; the flex stays the default until acceptance)
 The cloth is Newton's VBD (`topogym/world/mujoco/cloth_vbd.py`) on the authored 51 x 41 grid, stepped after every
-`mj_step` with lane S's deterministic CPU step (`vbd_fast.py`, frozen 2dbf9fce...ae2e on 10-11, with the coarse
+`mj_step` with the deterministic CPU step (`vbd_fast.py`, frozen 2dbf9fce...ae2e on 10-11, with the coarse
 correction; first 54e8df91...40f8). The interface it keeps:
 `blanket_cloth_interface.md`. Selected by `SimulatorConfig.mujoco_profile = "blanket_vbd"`.
 
-**On the GPU (profile `blanket_vbd_gpu`, 2026-10-12; user decision: the blanket references are recorded on GPU, within
-the 72 min budget).** The same cloth stepped by lane S's deterministic CUDA step (`vbd_gpu.GpuDetSolverVBD`: the frozen
+**On the GPU (profile `blanket_vbd_gpu`, 2026-10-12; decision: the blanket references are recorded on GPU, within
+the 72 min budget).** The same cloth stepped by the deterministic CUDA step (`vbd_gpu.GpuDetSolverVBD`: the frozen
 CPU step's kernels and kwargs on one device, self-contact incidence in a canonical order, exact-min truncation,
 fixed-order coarse assembly, CUDA graphs, FMA contraction off in the process). Bit-identical across fresh processes and
 GPU classes (sm_80 / sm_89 / sm_90 / sm_120), not bit-identical to the CPU step: a reference replays on the profile it
@@ -270,9 +269,9 @@ Two more changes ride on this profile only:
   energy (validator BLF2c / 3c / 4a, eq:1). The cloth's colliders and pins take the fresh kinematics after the 4th step,
   so they move over the cloth step from the tick's start pose to its end pose. Before, they lagged one step and never
   moved within a cloth step.
-- `cloth_floor`: the table guard keeps non-pad gripper geometry above the local cloth stack (lane A). The cloth is
+- `cloth_floor`: the table guard keeps non-pad gripper geometry above the local cloth stack. The cloth is
   one-way coupled, so without it a gripper base could press a stack flat into the table (directed_e0: 227 N over 18 mm).
-- `adaptive` iterations (user approval 2026-10-13; on in blanket_vbd_gpu and blanket_vbd_cpu_twin, off in
+- `adaptive` iterations (adopted 2026-10-13; on in blanket_vbd_gpu and blanket_vbd_cpu_twin, off in
   blanket_vbd). After the step's 20 Gauss-Seidel iterations, blocks of 20 more run (up to 80) while the last iteration's
   largest vertex update is above 0.1 mm. The test is an exact max, so it stays deterministic, and a step under the
   threshold is the plain step.
@@ -293,7 +292,7 @@ Two more changes ride on this profile only:
   - Cost: on the very_easy, very_easy4, easier4 and fold very_easy routes 20.004-20.04 iterations per step on average
     (under 0.1 % of steps extended); in a pressed pile +28 %. With it off, every run is bit-identical to before.
 
-**The family's material (blanket agent's choice, from lane S's plastic-bending study):**
+**The family's material (chosen from the plastic-bending study):**
 | quantity | value | why |
 |---|---|---|
 | areal mass | 0.5 kg/m^2 | a real blanket (0.3-0.8) |
@@ -317,7 +316,7 @@ settle 1.3 s (52 controls), coverage 0.8593 -> 0.8625, state_sha ed36dbbfece3ca4
 
 **very_easy reference on VBD (f3bf61560, the cluster CPU).** The route oracle unchanged succeeds in 1341 rows (the flex's:
 1897): coverage 0.99995, height 3.9 mm, the stretch peak 1.02 at the second corner's lay (1.24 on the step without the
-coarse correction); final state_sha 8e3cb95c197621ee; 53 min at 2.4 s per control on a busy the cluster node.
+coarse correction); final state_sha 8e3cb95c197621ee; 53 min at 2.4 s per control on a busy cluster node.
 privileged.npz sha256 a20e39aba5519453bdf3f56be8bd0de88c2c9522d78a9d15bd179a1f5c3baf86.
 - Energy books (the stress observer, ve_F1 rows 1-260): the same end state with and without the observer; the cloth's
   X -35 mJ (dissipative), its largest rise 4.3 uJ; the pins' work +0.67 J; plastic loss 2.2 uJ; observer errors 0.
@@ -340,7 +339,7 @@ privileged.npz sha256 a20e39aba5519453bdf3f56be8bd0de88c2c9522d78a9d15bd179a1f5c
   (coverage +0.002 over 8 s).
 - Grasp: pin forces 0.5-7 N while the right hand lifts its corner (the 60 N slip rule never fires).
 - Render: nyx_direct shows the fabric; MuJoCo's depth raster has the cloth surface 3.4-3.7 mm in front of the table.
-- Cost: 1.6-2.5 s per control on a cloud host at nice 19 and load ~120 (lane S: 0.49 s/control on an idle host A).
+- Cost: 1.6-2.5 s per control on a cloud host at nice 19 and load ~120 (0.49 s/control on an idle host A).
 
 **Drag forces (2026-10-11).** At 20 Gauss-Seidel iterations, table friction kept the solver from carrying smooth tension
 across the sheet. Dragging a lifted corner 25 cm at 10 cm/s read 37 N at the pins (physical: at most mu m g = 0.71 N),
@@ -350,11 +349,11 @@ with peak strain 1.39 next to the hand and 19 N still there after the hand stopp
 - Damping changes nothing, and the residual stopping rule makes it worse.
 - friction_eps 1 m/s gives 10 N but loses static friction: a laid fold creeps 21 mm in 3 s.
 - Table mu 0 gives 0.54 N, which is the diagnosis.
-The fix is lane S's coarse correction in `vbd_fast.py`: an exact Newton step on the free vertices' common translation
+The fix is the coarse correction in `vbd_fast.py`: an exact Newton step on the free vertices' common translation
 every few iterations, with table friction entering it as a Coulomb capacity. The same drag then reads about 1 N.
 
 **Tiers on VBD.** very_easy is the released tier migrated to VBD. easy and medium are superseded by the redesign's VBD
-tiers (main, 2026-10-11): their PBD gathered starts are not a VBD equilibrium. easy carries 17 % membrane strain, and
+tiers (2026-10-11): their PBD gathered starts are not a VBD equilibrium. easy carries 17 % membrane strain, and
 PBD's pleat layers nest far closer than the 7 mm offset. Settled on VBD, with or without rest angles set to the shape
 and kinetic damping, 40-120 hinges keep ratcheting plastically and slips recur after 10 s.
 
@@ -367,7 +366,7 @@ the covered patch particle. On VBD it is measured from the WHOLE patch (`exposed
   every bend grip read "occluded", including the apex. On the flex the layers were 3 mm apart and this never fired.
 - The top layer there continues the patch's own surface: it is within 36 mm of the patch's top part. A layer folded
   over a patch is at least twice its distance to the crease away in material, so it still covers.
-- `scripts/robotangle/test_exposure_rule.py` checks the cases:
+- `source/scripts/robotangle/test_exposure_rule.py` checks the cases:
   - bend grips pass;
   - the bottom layer under a half fold fails 1.5-15 cm from the crease;
   - the sheet under a dog-ear's tip fails;
@@ -376,19 +375,19 @@ the covered patch particle. On VBD it is measured from the WHOLE patch (`exposed
   - the flex rule equals the previous code.
 - The clearance stays 6 mm. At 8 mm, both rules would pass the bottom layer under a 7 mm fold.
 
-**Known simplification (accepted for acceptance, main 2026-10-11).** The robot links feel no reaction from cloth
+**Known simplification (accepted for acceptance, 2026-10-11).** The robot links feel no reaction from cloth
 contact, only from the pins: the pins' reaction goes into the hand's `xfrc_applied` one step later, while the robot's
 other contacts act on the cloth only. The sheet weighs 0.144 kg (1.4 N in total) and the pins carry the real loads.
-The energy books are lane D's. The proper fix is the two-way coupling below (off by default).
+The proper fix is the two-way coupling below (off by default).
 
-**Two-way coupling (profile `cloth.two_way`: ON in `blanket_vbd_gpu` (user decision 2026-10-12, the cloth floor kept as a second line of defence), off in `blanket_vbd` (the frozen CPU references); `cloth_coupling.py`).** The cloth's
+**Two-way coupling (profile `cloth.two_way`: ON in `blanket_vbd_gpu` (decided 2026-10-12, the cloth floor kept as a second line of defence), off in `blanket_vbd` (the frozen CPU references); `cloth_coupling.py`).** The cloth's
 contact forces on every robot body go back to MuJoCo, so a gripper pressing a stack is held up by it.
 - Per cloth step (after the solver, at its end positions against its start): per robot contact (particle and edge /
   face), Newton's force on the cloth's free corners (pinned vertices are the pins'), the rigid contact point, and an
   effective stiffness: the penalty in series with the particle's own support (its vertex-solve Hessian without this
   contact: inertia, membrane, bending, table and other contacts, self-contacts), so a hanging corner gives ~12 N/m per
   vertex and a stack at most ke. A Warp kernel, one thread per contact, FMA contraction off; the host sorts the robot
-  contacts by (shape, corners) (lane S's GPU key order) and sums per body in float64, in that order.
+  contacts by (shape, corners) (the GPU step's key order) and sums per body in float64, in that order.
 - The wrench for the next cloth step's MuJoCo steps (held over them: 4 x 0.625 ms on `blanket_vbd_gpu`), linearly
   implicit in the robot's motion: (I + dt (c dt K + D) W) G = F - (dt K + D) v - dt (c dt K + D) a, W the bodies'
   mobility at implicitfast's metric (M + h D_joint), a the last MuJoCo step's non-cloth acceleration, c = (k + 1) / (2 k).
@@ -397,7 +396,7 @@ contact forces on every robot body go back to MuJoCo, so a gripper pressing a st
 - Limits (clamp, never fail): no pull along the body's stiffness-weighted contact normal; friction's tangential wrench at
   most max(|F_t|, 0.4 G_n) (0.4: the weakest pair friction, where a dragged stack slips; friction's Hessian holds within
   a 2.5 um slip only); the cloth's torque on any actuated joint at most 2x its actuator's limit (per arm).
-- Books (user term: the coupling's work is booked apart, never as the cloth's own excess): `cloth.coupling` exposes
+- Books (the coupling's work is booked apart, never as the cloth's own excess): `cloth.coupling` exposes
   `work_on_robot_j` / `step_work_on_robot_j` (the wrench's work on the robot over a cloth step's MuJoCo steps),
   `work_on_cloth_j` / `step_work_on_cloth_j` (the robot contacts' work on the cloth's free vertices over the cloth step)
   and `applied` (the wrench per body, held in `xfrc_applied` beside the pins' reaction). The cloth book reports W_react,
@@ -419,11 +418,11 @@ Measured (validator easier4 directed_e0; `cloth_floor` off so the coupling acts 
 Routes, two-way vs one-way (the cluster CPU, blanket_vbd, the route oracles closed-loop):
 | route | one-way | two-way |
 |---|---|---|
-| flatten very_easy -i01 | success, 1279 rows, 7274ae93 (= lane A's reference), pins p50 / p95 / max 0.51 / 1.05 / 1.12 N | success, 1294 rows, coverage 0.99993, pins 0.50 / 1.04 / 1.14 N |
+| flatten very_easy -i01 | success, 1279 rows, 7274ae93 (= the recorded reference), pins p50 / p95 / max 0.51 / 1.05 / 1.12 N | success, 1294 rows, coverage 0.99993, pins 0.50 / 1.04 / 1.14 N |
 | fold very_easy -i01 | success, 929 rows, pins 1.65 / 7.5 / 11.8 N | success, 885 rows, every term, pins 1.67 / 10.1 / 13.0 N |
 On `blanket_vbd_gpu` (4 substeps, cloth_floor on) with two-way: flatten very_easy success in 1298 rows (coverage
 0.99994, pins 0.51 / 1.02 / 1.13 N), fold very_easy success in 881 rows (every term, pins 1.64 / 10.2 / 15.4 N).
-No pin force near the 60 N slip rule in any. Lane S's MuJoCo-actuated accept and fold-8 s programs give the same verdicts
+No pin force near the 60 N slip rule in any. The MuJoCo-actuated accept and fold-8 s test programs give the same verdicts
 (dog-ear freed and open; fold 600 turned triangles, gaps 7.0 mm, creep 3.2 / 2.7 mm over 3 s), finger wrenches <= 7 N;
 drag, stack crease / corner and press-release use kinematic hands only, which two-way does not touch.
 Rejected on the way: G . F as the no-pull test and unbounded friction stiffness (impact G_x -63 N under F_x -1 N, G_z
@@ -432,8 +431,8 @@ With `cloth_floor` on (`blanket_vbd_gpu`) the guard keeps the gripper above the 
 
 ## The redesigned tiers on VBD (2026-10-11)
 
-The blanket redesign (its coordinator's clone, `qineng-rt-softbody-robot`) replaces the tiers with five flatten starts
-(`very_easy4`, `easier4`, `easy4`, `medium4`, `hard4`) and adds the family `blanket_fold` (ladder B). Lane A's part:
+The blanket redesign replaces the tiers with five flatten starts
+(`very_easy4`, `easier4`, `easy4`, `medium4`, `hard4`) and adds the family `blanket_fold` (ladder B). The MuJoCo side:
 
 - **Births.** Each start is a VBD lab state: 8181 particles, plus the bending rest angles (`rest_angle`) in Newton's
   edge order (`edge_indices`, checked equal to the product cloth's). The birth source is the released instance of
@@ -443,7 +442,7 @@ The blanket redesign (its coordinator's clone, `qineng-rt-softbody-robot`) repla
   - make-instance settles the birth as for every VBD birth, in 2-3.4 s. Coverage changes by at most 0.003 from the
     lab's.
   - Without the rest angles, the very_easy4 start never got quiet in 10 s, because the folds kept yielding.
-  - Tools: `work/redesign_birth_source.py` and `work/quest_rd.py`.
+  - Tools: `work/redesign_birth_source.py` and a cluster batch script.
 - **Fence (hard4).** New task parameter `obstacles` (default `()`, in `hash_when_changed`, so existing instance ids
   are unchanged). Each entry is `dict(name, center_xy_m, half_size_m, yaw_deg=0, friction=.5)` and becomes a fixed box
   standing on the table top. MuJoCo collides it with the robot; the VBD cloth takes it as a static collider, like the
@@ -467,8 +466,8 @@ The blanket redesign (its coordinator's clone, `qineng-rt-softbody-robot`) repla
     fence), very_easy / easier from a flat settled birth. The flat birth is the product grid's particle view, centred
     at (-0.1356786, 0.05), at table + 3 mm.
   - The archive's acceptance comes from the flatten tier's own Task (the hard archive is `scene_layout`).
-- **GPU search** (exploration only; records are CPU): host C the work notes, in the record
-  image with the bound tree. Its `cloth_vbd.py` is patched to lane S's `GpuDetSolverVBD` (`VBD_DEVICE=cuda:0`).
+- **GPU search** (exploration only; records are CPU): on host C, in the record
+  image with the bound tree. Its `cloth_vbd.py` is patched to the deterministic `GpuDetSolverVBD` (`VBD_DEVICE=cuda:0`).
   It runs at about 0.6-1 s per control on an RTX 4090; the CPU step on the cluster takes about 2.7-7 s, depending on the
   node's load.
 - **Fingertip footing (3975f4c68).** A lab hand is a point; a robot pinch is two fingers.
@@ -479,7 +478,7 @@ The blanket redesign (its coordinator's clone, `qineng-rt-softbody-robot`) repla
     cloth tops within 3 mm of each other; joint margin breaks the tie. After this, the GPU search had no unadmitted stage.
   - A planner that takes `last` gets the previous planned stage's outcome. redesign_routes re-plans a skipped, unadmitted
     or lost stage once (4 cm grasp search) and otherwise reports it to the lab program as not done.
-- **Fast calls (2026-10-11 night, main's option a).** Each planner call used to cost about 6000 physics steps on medium4e,
+- **Fast calls (2026-10-11 night).** Each planner call used to cost about 6000 physics steps on medium4e,
   about 4300 of them robot overhead: a 3 s approach, a 1.5 s descent, 0.3 s holds, a 10-control contact dwell, a 0.5 s
   release and a 1.5 s, 8 cm retreat. Routes with `fast` (all ten redesign routes) now use:
   - an approach at the standard joint-step limit (0.04 rad per control, x0.975, smoothstep peak 1.5x the mean, at least
@@ -494,14 +493,13 @@ The blanket redesign (its coordinator's clone, `qineng-rt-softbody-robot`) repla
 
 ## Route validation on the GPU step (2026-10-12; references wait for the physics freeze)
 
-The family ships on `blanket_vbd_gpu` (lane S's deterministic CUDA step, 4 MuJoCo substeps per cloth step, the table
-guard's cloth floor). Per main's process (10-12), references are recorded once, after the physics freeze. Until then
+The family ships on `blanket_vbd_gpu` (the deterministic CUDA step, 4 MuJoCo substeps per cloth step, the table
+guard's cloth floor). Per the process of 10-12, references are recorded once, after the physics freeze. Until then
 each tier's route is checked on the current head by one closed-loop run, below.
 
 - Runs: host C RTX 4090, the record image plus the bound tree, with the masks. The births are the rec1 instances
   (the CPU `blanket_vbd` births) re-pointed to `mujoco_profile: blanket_vbd_gpu` (same states).
-- Tools: host C the work notes, a cloud host `/workspace/mj/blanket/rec_gpu/run_gpu.sh`, the cluster
-  `work/quest_gpu.sbatch`.
+- Tools: run scripts for host C, a cloud host and the cluster (development work notes).
 
 | tier | route | head | rows | end | coverage |
 |---|---|---|---|---|---|
@@ -515,7 +513,7 @@ each tier's route is checked on the current head by one closed-loop run, below.
 - Before 2a5f6adf0, the fast routes' full jaw opening at release stretched the cloth 2-3.6x on this step. After it,
   release stretch is mostly <= 1.2, peaking at 1.7-1.8 on medium4e / hard4b.
 - very_easy: deterministic x2 in fresh processes (fdabb6f25: 6989b1861d7d7109 twice).
-- CPU records on `blanket_vbd` (ccd4ba7fa SIF, rd4 / rd6 trees, masked, x2 fresh replays), kept as data:
+- CPU records on `blanket_vbd` (ccd4ba7fa SIF, masked, x2 fresh replays), kept as data:
   - very_easy: 1279 rows, 7274ae938f8ba75f;
   - very_easy4c: 3217 rows, a5f0b9fc7a1fb907;
   - easier4: 2372 rows, 84c00969a60773ff;
@@ -550,12 +548,11 @@ privileged.npz: every arm joint step is within the standard service's 0.04 rad.
 - Result: slack 0 in every column except u +0.30 (1.9 cm), coverage 0.954, and success at the retreat. The route's
   measured slide / crease stages after it are not reached.
 - 25 cm / 10 cm instead also opens it, but stretches the cloth to 1.20 at the release.
-- Evidence: the work notes (INDEX.md); host A / host B <host work dir>
 
 **medium: checks, all in eai-roboarc:0.1.0 with the MuJoCo task masks.**
 - Birth probe on host B: instance_exact and assets_exact, state 49ee5e7e16239616.
 - Strict fresh replay on host A: success at row 1480, end d539d4d85d80ab0e, 843.0 s. The same GPU was also running the
-  re-record and another user's job.
+  re-record and another job.
 - Observer replay on host B (host-local cuda-compat override): success, the same end, CLEAN under v2.13b.
 - nop 400 on host B: no success, CLEAN.
 - A re-record from the committed route (no override) gives byte-identical rows and tick ledger.
@@ -573,7 +570,7 @@ parts (`robot_oracle.run_sequence`, new: each part is a route of its own, run fr
 | 2 | hang and lay, as medium's: pinch the near side at (-0.20, -0.22) / (0.05, -0.17) (low, single layer), lift 12 cm, rise to 20 cm moving 3 cm toward the robot, hold 2 s, lay it 9 cm toward the robot; then the measured re-centring (reverse.recenter, 2 rounds on the planner hook) | the pleat opens (0.659); near pair to its flat places 0.884, far pair 0.905; the sheet flat and close to axis-aligned, only the far-left strip still tucked |
 | 3 | the measured slide toward the robot (slide_stage, far side to y 0.16: 13.1 cm), then re-centring, fold layouts and finishing relays while the goal is not met | the tucked strip rolls out (its bottom layer stays on the table while the sheet above moves away from the crease); success at the first settle: coverage 0.958, 28.2 mm, stretch 1.014, robot clearance 24 mm |
 
-What did not work (branching lab on host C, the work notes, INDEX.md):
+What did not work (branching lab on host C):
 - stage B variants after the page turns (the released couple, its reverse, a left-half drag, a far-edge drag): pinches
   over the standing pleat are not admitted, or the sheet is dragged with its folds (0.58-0.61);
 - the measured crease layouts on the far strip (drop-then-lay, or lift-drag-lower at its crease): the plastic crease keeps
@@ -581,11 +578,11 @@ What did not work (branching lab on host C, the work notes, INDEX.md):
 - the family's fold layout on the far-left corner before the slide: the corner drag turns the sheet ~20 deg into the left
   arm base's cover (goal true at 0.976, the release clearance never).
 
-**The reference** (`scripts/robotangle/oracles/blanket-flatten-09-i01/`, standard.npz = privileged.npz):
+**The reference** (`source/scripts/robotangle/oracles/blanket-flatten-09-i01/`, standard.npz = privileged.npz):
 - 2813 rows, end 6a9c4796da46cf47, sha256 4fbd7aba306e9720ab49ae45e3b2536e1f9902c9d6d909a2fb39ceb8637f5253; recorded by
   the route oracle in eai-roboarc:0.2.0 with the branch's planning bound in (host C RTX 4090);
 - a re-record from the committed code: the same rows and tick ledger (only the file's wall-time meta differs);
-- a re-record on dev/robotangle_mujoco 8beebf0b71 (the rate-limiter clamp 48409e39d6 included): the same rows and tick
+- a re-record on 8beebf0b71 (the rate-limiter clamp 48409e39d6 included): the same rows and tick
   ledger, 734 s for the whole oracle run on a quiet host C RTX 4090 (6.8 % of 3 h);
 - max arm joint step 0.0328 rad (every row one control step under the standard service's 0.04 rad);
 - birth probe in eai-roboarc:0.2.0: instance_exact, assets_exact, c7e8fe0051099141;
@@ -606,9 +603,10 @@ What did not work (branching lab on host C, the work notes, INDEX.md):
 ## References in the repository
 (The flex references of 2026-10-10. For easy / medium they are superseded by the wave-2 ports above:
 `oracles/blanket-flatten-easy-i01` became `blanket-flatten-07-i01`, and `oracles/blanket-flatten-medium-i01` became
-`blanket-flatten-08-i01`, each with the new reference.)
+`blanket-flatten-08-i01`, each with the new reference. The tier-named -i01 directories below are development names, not
+included in this repository.)
 
-| tier | `scripts/robotangle/oracles/` | rows | birth (state_sha) | end (state_sha) | privileged.npz sha256 |
+| tier | `source/scripts/robotangle/oracles/` | rows | birth (state_sha) | end (state_sha) | privileged.npz sha256 |
 |---|---|---|---|---|---|
 | very_easy | `blanket-flatten-very-easy-i01/` | 1897 | 21441c0569cfbef9 | 2f3ed0fa25ffd525 | ffe810d4c9aec47c72a848f1fecaf2427ef192750d2715d41b5191c0c9e0a40b |
 | easy | `blanket-flatten-easy-i01/` | 753 | f146812a31afc5c5 | 3ad1a55ce1dbc26a | 16ebf45e4e4e0bbb9bd7d57198ffc76aff390616dda581a0ab5cbb5600199ad2 |
@@ -619,20 +617,20 @@ standard.npz is the same file as privileged.npz (a MuJoCo standard oracle stream
 two fresh replays with the stress observer (criteria v2.8, b1ec43997): CLEAN, the same end state. The -i00 dirs are
 the released Genesis references, untouched.
 
-## Per tier (the -i01 births made on b1ec43997, a cloud host `instances_dx/`; references on b1ec43997 + the series)
+## Per tier (the -i01 births made on b1ec43997; references on b1ec43997 + the series)
 | tier | birth (state_sha) | reference | status |
 |---|---|---|---|
-| very_easy | 21441c0569cfbef9 | `oracles/blanket-flatten-very-easy-i01` (refs/ve_F1): 1897 rows, 47.4 s | success: coverage 0.975, height 18.3 mm, stretch 1.015, robot clearance 10 mm; final 2f3ed0fa25ffd525. The corner route, two measured fold layouts, the base clearance slide (the sheet had come to rest 5.5 mm inside the right base's cover). Validator: 2 fresh replays CLEAN, equal; X - Wc -4.2 mJ; 2.0-2.1 s per control on a host loaded to 150/128 (65-67 min per observed run, near the 72 min limit) |
-| easy | f146812a31afc5c5 | `oracles/blanket-flatten-easy-i01` (refs/easy_F1): 753 rows, 18.8 s | success: coverage 0.960, height 15.7 mm, stretch 1.013, robot clearance 43 mm; final 3ad1a55ce1dbc26a. The easy route unchanged. Validator: 2 fresh replays CLEAN, equal; X - Wc +3.0 mJ. Cross-CPU: workstation i9 = a cloud host Zen 4 (76 checkpoints) |
-| medium | 68c784b1288dc881 | `oracles/blanket-flatten-medium-i01` (refs/medium_F2): 1511 rows, 37.8 s | success: coverage 0.964, height 23.7 mm, stretch 1.015, robot clearance 40 mm; final b39cd3f0fb5ee97c. The route unchanged (coverage 0.871, the far strip tucked at y 0.45-0.52), then the measured slide (11.6 cm toward the robot: the tucked strip rolls out, 0.964); the measured crease finds nothing left. Validator: 2 fresh replays CLEAN, equal; X - Wc +0.4 mJ |
+| very_easy | 21441c0569cfbef9 | `oracles/blanket-flatten-very-easy-i01` (run ve_F1): 1897 rows, 47.4 s | success: coverage 0.975, height 18.3 mm, stretch 1.015, robot clearance 10 mm; final 2f3ed0fa25ffd525. The corner route, two measured fold layouts, the base clearance slide (the sheet had come to rest 5.5 mm inside the right base's cover). Validator: 2 fresh replays CLEAN, equal; X - Wc -4.2 mJ; 2.0-2.1 s per control on a host loaded to 150/128 (65-67 min per observed run, near the 72 min limit) |
+| easy | f146812a31afc5c5 | `oracles/blanket-flatten-easy-i01` (run easy_F1): 753 rows, 18.8 s | success: coverage 0.960, height 15.7 mm, stretch 1.013, robot clearance 43 mm; final 3ad1a55ce1dbc26a. The easy route unchanged. Validator: 2 fresh replays CLEAN, equal; X - Wc +3.0 mJ. Cross-CPU: Intel i9 workstation = AMD Zen 4 cloud host (76 checkpoints) |
+| medium | 68c784b1288dc881 | `oracles/blanket-flatten-medium-i01` (run medium_F2): 1511 rows, 37.8 s | success: coverage 0.964, height 23.7 mm, stretch 1.015, robot clearance 40 mm; final b39cd3f0fb5ee97c. The route unchanged (coverage 0.871, the far strip tucked at y 0.45-0.52), then the measured slide (11.6 cm toward the robot: the tucked strip rolls out, 0.964); the measured crease finds nothing left. Validator: 2 fresh replays CLEAN, equal; X - Wc +0.4 mJ |
 | hard | 3aacbcd368c4d449 | none: BLOCKED, flagged for step 3 | best measured re-plan 0.79 (below); the redesign's hard4b replaces this tier |
 
-Before the switch to the exact diagonal (old physics, `instances_short/`; superseded): very_easy `refs/ve_short2` (1348
-rows, final 2d64ec9dadf010a9) and easy `refs/easy_short1` (798 rows, 65dff236fc53b421) succeeded, two fresh replays
+Before the switch to the exact diagonal (old physics; superseded): very_easy `ve_short2` (1348
+rows, final 2d64ec9dadf010a9) and easy `easy_short1` (798 rows, 65dff236fc53b421) succeeded, two fresh replays
 equal each. On the new physics ve_short2's rows still succeed when replayed (final 9f8493bff2ac2b11, twice).
 
 ## Open items
-1. hard: ported on the GPU step as blanket-flatten-09-i01 (V3, above); the user approved its review (2026-10-18), shipped
+1. hard: ported on the GPU step as blanket-flatten-09-i01 (V3, above); its review was approved (2026-10-18), shipped
    in RoboARC 0.2.1.
 2. Done: blanket in `mujoco_release.json` (45790f509; the entry under Birth).
 3. The observer's cloth support (the validator's, before blanket's formal round): flex contacts through
@@ -646,12 +644,11 @@ equal each. On the new physics ve_short2's rows still succeed when replayed (fin
 5. The flex's interlocking collision surface and limp bending (above): not fixed; the replacing cloth solver should not
    inherit them.
 
-## a cloud host (`/workspace/mj/blanket/`)
-- `instances_dx/` (-i01 on b1ec43997: `sources/` the settled birth sources, `unsettled/`), `instances_rel/` (the released
-  Genesis instances), `instances_short/` (-i01 on the old physics), `refs/<name>/` (privileged.npz, summary.json,
-  final.npz, oracle/oracle_report.json; newer runs also phases.jsonl and snaps.npz), `results/`, `logs/`, dev runtime
-  roots `rt*/` (`rtF1` = the series head).
-- Tools (the work notes = a cloud host `work/`): `settle_tier.sh <tier> <root>`,
+## Development working files (not included in this repository)
+- Instance sets: the -i01 births on b1ec43997 (with the settled birth sources and the unsettled instances), the released
+  Genesis instances, the -i01 births on the old physics. Per reference run (`ve_F1`, ...): privileged.npz, summary.json,
+  final.npz, oracle/oracle_report.json; newer runs also phases.jsonl and snaps.npz.
+- Tools (`work/`): `settle_tier.sh <tier> <root>`,
   `make_mj_instance.sh <tier> <root> [birth source]`, `ref_blanket.py` (ROUTE_OVERRIDE=<route.json> for experiments),
   `replay_ref.py`, `reach_map.py`, `cover_gap.py`, `plot_cloth.py` / `plot_material.py` / `plot_section.py`,
   `books_check.py` + `books_table.py`, `grasp_geom.py`, `discrete_books.py`, `diag_cost.py`.

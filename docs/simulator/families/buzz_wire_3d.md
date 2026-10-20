@@ -1,18 +1,19 @@
 # buzz_wire_3d on MuJoCo
 
-The buzz agent ported the family (2026-10-09 / 10); the core agent re-planned its references on the exact constraint
-diagonal (2026-10-10). Shared mechanisms (the Panda command-lead bound, the Robotiq's frictionless spring links and
-drivers, the static contacts, the exact constraint diagonal) are in `docs/rcb/MUJOCO_CORE.md`.
+The family was ported on 2026-10-09 / 10, and its references were re-planned on the exact constraint diagonal on
+2026-10-10. Shared mechanisms (the Panda command-lead bound, the Robotiq's frictionless spring links and
+drivers, the static contacts, the exact constraint diagonal) are in [MUJOCO_CORE.md](../MUJOCO_CORE.md).
 
 ## References on the Robotiq's springref 2.62 (buzz_v2 profile, from 2026-10-11)
 
 The Robotiq's spring links now keep the MJCF's springref 2.62 and a Robotiq grasp lets go 0.2 s after its fingers leave
-the held body (c64294012; `docs/rcb/MUJOCO_CORE.md`, "The Robotiq's spring links"). The references below (b1ec43997)
+the held body (c64294012; [MUJOCO_CORE.md](../MUJOCO_CORE.md), "The Robotiq's spring links"). The references below (b1ec43997)
 held the wand at the curled fingertips: on 2.62 none of them succeeds as recorded (very_easy / easier finish 5.25 mm /
 7.0 deg and 8.3 mm / 9.1 deg off; easy and hard touch the wire). very_easy and easier are re-planned from the same cut;
-`scripts/robotangle/oracles/buzz-wire-3d-<tier>-i01/` now holds them.
+they were committed as `scripts/robotangle/oracles/buzz-wire-3d-<tier>-i01/` (development names; the tier-named -i01
+directories are not included in this repository).
 
-The finish tool (`buzz_finish.py`) grasps and releases as the buzz redesign agent's oracle does on 2.62 (`STAGED`,
+The finish tool (`buzz_finish.py`) grasps and releases as the buzz redesign's oracle does on 2.62 (`STAGED`,
 default on; `BUZZ_STAGED=0`: the earlier behaviour): wide open, the pads hang ~9.7 mm below the TCP and land on the deck
 before the wand, so a grasp's transfer stops at the pre-grasp pose, the gripper closes to 0.30 in the air, the hand
 descends at 2 cm/s, closes, and lifts the wand 8 mm (`BUZZ_LIFT`); the final approach's check ignores the deck slab
@@ -20,8 +21,8 @@ descends at 2 cm/s, closes, and lifts the wand 8 mm (`BUZZ_LIFT`); the final app
 settles 8 s (a fast open set the parallel-held wand turning: 11-12 deg after the first release).
 
 ```bash
-python scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
-    scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
+python source/scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
+    source/scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
 ```
 
 | tier | cut | rows (success row) | final error | quiet window | state hash | file sha256 | observer | fresh replays |
@@ -34,26 +35,26 @@ python scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
 Instances: the gpusearch b0f births (`buzz-wire-3d-<tier>-i00`, birth f5e748b7 for very_easy; a fresh make-instance on
 c64294012 gives the same birth). easy and hard need their route re-planned around the parallel grasp (low priority).
 
-**Release (2026-10-11):** easy and hard are out of `scripts/robotangle/mujoco_release.json`'s buzz tiers: the released
-routes fail on springref 2.62; superseded by the step-3 redesign. Their `-i01` files stay in `scripts/robotangle/oracles/`
+**Release (2026-10-11):** easy and hard are out of `source/scripts/robotangle/mujoco_release.json`'s buzz tiers: the released
+routes fail on springref 2.62; superseded by the step-3 redesign. Their `-i01` files stayed in the oracles directory
 as history (they succeed only before c64294012).
 
 ## References before the springref change (buzz v2, on b1ec43997)
 
 `scripts/robotangle/oracles/buzz-wire-3d-<tier>-i01/privileged.npz`; `standard.npz` is the same file (the release
-rebuild's references, `scripts/robotangle/release_rebuild.py`). A reference here is the released Genesis route's rows up
-to a cut, then the family's feedback finish planned live on MuJoCo from the measured state (the buzz agent's
-`scripts/robotangle/references/buzz_wire_3d/make_ref.py`, finish "adaptive"), then hold rows until the episode ends.
+rebuild's references, `source/scripts/robotangle/release_rebuild.py`). A reference here is the released Genesis route's rows up
+to a cut, then the family's feedback finish planned live on MuJoCo from the measured state
+(`source/scripts/robotangle/references/buzz_wire_3d/make_ref.py`, finish "adaptive"), then hold rows until the episode ends.
 Each was planned in a fresh Session on the physics of b1ec43997, on the instances made on 0f8654a49 (buzz births run no
 physics: the same birth hashes), and re-made with the repository's tool (the same rows and state hashes):
 
 ```bash
-python scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
-    scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
+python source/scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
+    source/scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
 # easy: BUZZ_REACH_DEG=9 in the environment (the final release from up to 9 deg of remaining turn)
 ```
 
-The tool holds after a finish that reports a failure as well (the buzz agent's version did not): hard's live finish
+The tool holds after a finish that reports a failure as well (the earlier version did not): hard's live finish
 left the wand at 0.05 mm / 0.4 deg, then gave up looking for another grasp before its 1 s stability window closed; 20
 hold rows complete it.
 
@@ -77,9 +78,9 @@ The success row closes that window.
   much closer, so the default finish (4 deg reach, 3 rounds) fails (best 5.4-5.7 mm / 8-18 deg; its last partial release
   touched the wire), and a 10 deg reach passes only at the tolerance (10.0 deg). The tier is probably harder for agents
   than designed: flagged for step 3.
-- **medium stays blocked on the exact diagonal** (core, 2026-10-11). `make_ref.py` from the released route's row 7340,
-  the traversal end, with the ring around the finish post and the wand 51.9 deg off. Five finish variants (a cloud host
-  `/workspace/mj/core/results/buzzmed`, about 2 h CPU) all fail:
+- **medium stays blocked on the exact diagonal** (2026-10-11). `make_ref.py` from the released route's row 7340,
+  the traversal end, with the ring around the finish post and the wand 51.9 deg off. Five finish variants (about 2 h CPU on a cloud
+  host) all fail:
   - held turn: none exists; every candidate's wrist meets the arches;
   - lower release: none exists;
   - adaptive rounds without a release first: no grasp with a turn;
@@ -97,8 +98,8 @@ released routes fail on 2.62: their wand path clears the wire kinematically (the
 grasp: >= 1-2 mm everywhere), but the 2.62 gripper's pads and followers run into the wire (live contact logs: the
 right finger / left follower on the wire just before each touch); slowing the route down does not change the touch row.
 
-Method (the user's floating solution -> grasp schedule; the robot base is the frozen instance's, so there is no base
-search), tools in `scripts/robotangle/references/buzz_wire_3d/ported/`:
+Method (floating solution -> grasp schedule; the robot base is the frozen instance's, so there is no base
+search), tools in `source/scripts/robotangle/references/buzz_wire_3d/ported/`:
 1. Floating solution and grasp schedule: the released route's own pick and deck regrasp (`oracles/buzz-wire-3d-<tier>-i00`),
    with the traversal grip taken 14 mm further out along the handle (the approach rows after the deck release
    re-solved by IK, seeded by the route's own rows); one grip for the whole wire, as in the route.
@@ -123,7 +124,7 @@ easy recipe: `nplan.py prep <instance> oracles/buzz-wire-3d-easy-i00/privileged.
 from the dropped wand, `BUZZ_REACH_DEG=9 BUZZ_ROUNDS=5 ported_oracle.py ... --resume <actions.npy> --resume-rows 5067
 --adaptive` (one continuous recording: the resumed rows are the first run's own rows). The easy prep was made before the
 prefix IK was seeded by the route's rows (it then continued from the previous row's solution); its prep / plan and the
-first run's rows are kept in the agent's folder the work notes The angle's margin is small
+first run's rows are kept in the development work notes (not included). The angle's margin is small
 (9.81 of 10 deg), as the released easy's was.
 
 Status of hard (2026-10-14, no reference yet). medium is solved (above).

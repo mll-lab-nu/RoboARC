@@ -1,22 +1,23 @@
 # interlocked_claws on MuJoCo
 
-The core agent, 2026-10-10. Shared mechanisms (the ALOHA, its finger coupling, the contact classes, the exact constraint
-diagonal) are in `docs/rcb/MUJOCO_CORE.md`; this note records the references.
+Shared mechanisms (the ALOHA, its finger coupling, the contact classes, the exact constraint diagonal) are in
+[MUJOCO_CORE.md](../MUJOCO_CORE.md); this note (2026-10-10) records the references.
 
 ## References (claws v6, on b1ec43997; grasp welds at 2.5 ms since the claws_v6 profile)
 
-`scripts/robotangle/oracles/interlocked-claws-<tier>-i01/privileged.npz`; `standard.npz` is the same file (the release
-rebuild's references, `scripts/robotangle/release_rebuild.py`). Each was recorded in a fresh Session on b1ec43997 (the
+`scripts/robotangle/oracles/interlocked-claws-<tier>-i01/privileged.npz` (development names; the tier-named -i01
+directories are not included in this repository); `standard.npz` is the same file (the release
+rebuild's references, `source/scripts/robotangle/release_rebuild.py`). Each was recorded in a fresh Session on b1ec43997 (the
 exact constraint diagonal), on an instance made on that commit (`rcb_topogym.py make-instance`, scene seed 0, native
 gripper space):
 - the rows: claws v5's (the released Genesis rows, re-recorded on MuJoCo), with the wrist dither removed (below);
 - then hold rows of the last row until the episode ends.
 
-The tools are in `scripts/robotangle/references/interlocked_claws/` (run them like the stress tools). Claws v5's rows
+The tools are in `source/scripts/robotangle/references/interlocked_claws/` (run them like the stress tools). Claws v5's rows
 are the released oracle's rows padded with copies of their last row, so the references are reproduced from the tree:
 
 ```bash
-R=scripts/robotangle/references/interlocked_claws; O=scripts/robotangle/oracles
+R=source/scripts/robotangle/references/interlocked_claws; O=source/scripts/robotangle/oracles
 # very_easy, easier: the released oracle, re-recorded on the current physics
 python $R/rerecord.py <instance.json> $O/interlocked-claws-<tier>-i00/privileged.npz ref.npz
 # easy, medium, hard: first the dither notched out over claws v5's length (792 / 1416 / 16202 rows)
@@ -46,7 +47,7 @@ Success: every target inside and quiet for 0.5 s. The success row closes that wi
   record.
 - Prisms (2026-10-12, the cylinder -> prism rule b2b751580): only medium has robot-touchable cylinders (12 bar
   geoms of r 2.8-5.0 mm). Re-made on the head (f9db156d16) its birth stays d47e72299f96f4a6 and its reference still
-  succeeds at row 1442, but it now ends on 1d991d7010559803 (2 fresh replays; the cluster `rigid_integrate_20261012/runs/i1`).
+  succeeds at row 1442, but it now ends on 1d991d7010559803 (2 fresh replays on the cluster).
   The same head without the rule (`treeNP`) ends on 094d2865820e6292, so the change is the prisms'. The file is
   unchanged (a re-recording stops at the same first success, row 1442).
 

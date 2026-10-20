@@ -1,7 +1,7 @@
 # orbits on MuJoCo
 
-Jianwen, 2026-10-10 / 11. Shared mechanisms are in `docs/rcb/MUJOCO_CORE.md`; this note covers what is specific to orbits
-and why. Evidence: `runs/robotangle_mujoco/v2/slotted_orbits/`.
+Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md); this note (2026-10-10 / 11) covers what is specific to
+orbits and why. The evidence was kept outside this repository.
 
 ## The task
 
@@ -10,10 +10,10 @@ rings. The ALOHA frees the whole cord and handle and places them in the goal are
 
 | settings | cord | assisted grasp |
 |---|---|---|
-| `very_easy` (one ball post), `easier` (one ring, two posts) | rigid chain (`assets/geometry/orbits_chain.py`): capsule links r 1.87 mm, 16.5 mm long, on ball joints (damping 2e-4, armature 1e-5, bend stiffness of E 100 MPa), the handle the free root, two branches tied at the middle by a `<connect>`; easier's ring collides as a loop of 48 capsules (dev/jianwen 9249ebffc) | contact weld on any link (an 8 mm sphere at each link's middle), `max_translation_error_m` 15 mm |
+| `very_easy` (one ball post), `easier` (one ring, two posts) | rigid chain (`assets/geometry/orbits_chain.py`): capsule links r 1.87 mm, 16.5 mm long, on ball joints (damping 2e-4, armature 1e-5, bend stiffness of E 100 MPa), the handle the free root, two branches tied at the middle by a `<connect>`; easier's ring collides as a loop of 48 capsules (9249ebffc) | contact weld on any link (an 8 mm sphere at each link's middle), `max_translation_error_m` 15 mm |
 | `easy`, `medium`, `hard`, `reference85` (FEM on Genesis) | on MuJoCo the cord is the same kind of chain (task parameter `cord_model: chain`, set by `rcb_topogym.simulator_config`) along the setting's authored cord, joints from the FEM material; the rings keep their mesh | none (unassisted, as the FEM contract) |
 
-Rules of the chain settings, as on dev/jianwen (`below_easy_v12_tie_3mm_v1`): the middle tie stays within 3 mm, the weld
+Rules of the chain settings, as on the development line (`below_easy_v12_tie_3mm_v1`): the middle tie stays within 3 mm, the weld
 may drift 15 mm. Both were loosened on the Genesis line (from 2 mm and 10 mm) for easier; the measurements below show
 what MuJoCo needs.
 
@@ -32,14 +32,14 @@ what MuJoCo needs.
 
 ## Speed clamp (orbits_chain_v3 / v4 / fem_v2, 2026-10-11)
 
-The stress session's `prefix_e1` on very_easy (the reference's first 2654 rows, then 200 rows that fling the cord at up
+The stress validation's `prefix_e1` on very_easy (the reference's first 2654 rows, then 200 rows that fling the cord at up
 to 8.0 m/s) was a BREAKDOWN on orbits_chain_v1 (8fa6c8edc, final state 28054e21e425068b). At tick 27340 the handle
 lands on the ground (90 N) and is spun up to 120 rad/s (the fastest spin of any cord body the tick before: 67 rad/s);
 within that tick twelve links (link_11 .. link_22) gain 0.9-1.7 m/s. Rule 6 of the stress criteria asks that the cord's kinetic energy rise by no
 more than the outside work on it; it missed by 0.046 J, so the links' jumps were uncaused. No energy was created over
 the run, and nothing ran away.
 
-What the tick's books say (`tools/energy_probe.py` in the evidence directory: every force class's work on the cord's
+What the tick's books say (`energy_probe.py`, a development tool not included in this repository: every force class's work on the cord's
 own dofs, per MuJoCo step, with the velocity averaged over the step):
 
 | term | J |
@@ -63,10 +63,10 @@ The clamp (`MujocoWorld._clamp_apply`, `MUJOCO_CORE.md`) keeps a flung cord from
 |---|---|---|
 | none (orbits_chain_v1) | BREAKDOWN, 25 uncaused jumps at tick 27340 | - |
 | 6 m/s, 300 rad/s | BREAKDOWN, 18 uncaused jumps at tick 27338: the landing whips links from 5 to 8 m/s within one tick | 0.083 J removed |
-| 4 m/s, 150 rad/s (set) | VIOLENT (speed 4.2 m/s, cord off the table), no uncaused jump; final state e552d86f4533c6d9 in three fresh processes (on 9b5c7c28b's rebuilt instance: VIOLENT, d8f8bbf38fd2bc97, the stress session's two fresh processes) | 0.235 J removed over 869 steps from tick 26805 |
+| 4 m/s, 150 rad/s (set) | VIOLENT (speed 4.2 m/s, cord off the table), no uncaused jump; final state e552d86f4533c6d9 in three fresh processes (on 9b5c7c28b's rebuilt instance: VIOLENT, d8f8bbf38fd2bc97, the stress validation's two fresh processes) | 0.235 J removed over 869 steps from tick 26805 |
 | 3 m/s, 120 rad/s | VIOLENT (speed 3.2 m/s), no uncaused jump | 0.317 J removed |
 
-Since 2026-10-13 (Qineng, 7625c2156c; profiles orbits_chain_v5 / v6 / fem_v3) the thresholds are 3 m/s / 120 rad/s, as
+Since 2026-10-13 (7625c2156c; profiles orbits_chain_v5 / v6 / fem_v3) the thresholds are 3 m/s / 120 rad/s, as
 slotted_post_ring's: the easier acceptance round's prefix7_e2 (a cord landing at ~124 rad/s) read rule 6 short by ~4 mJ,
 traced to the MuJoCo step's own energy error in that landing (+3.9 mJ) plus 0.64 mJ of armature release, no contact
 creating energy; at 3 / 120 it is VIOLENT (590bd82d9350237b), O1 too (cd7a7a313b4ffc9e), and the references never
@@ -78,14 +78,14 @@ thresholds: both replay to their recorded hashes with 0 activations. The stream 
 remove the landing's bookkeeping gap itself, so a cord flung below 4 m/s whose handle lands spinning can still show a
 smaller one.
 
-## easier on a 0.3125 ms step: orbits-02-i01 (V3, Qineng, 2026-10-17/18)
+## easier on a 0.3125 ms step: orbits-02-i01 (V3, 2026-10-17/18)
 
 easier's acceptance round FZ3 (v2.13b, 300 episodes, on the 0.625 ms step) failed on one confirmed BREAKDOWN,
 `prefix12_e2` (reproducer `O2_orbits_easier_handle_landing_step_residual`): 8 uncaused jumps at tick 59647. The stream
 reproduces from the frozen birth a3659d4f47244929 to 69a97615d604cc65 on eai-roboarc 0.1.0 (ef4df961a2) and 0.2.0
 (docker on host B, the 0.2.0 SIF on the cluster); a fresh make-instance on 0.2.0 gives the same birth.
 
-What happens (the integrator's books, chains2's `energy_probe.py` on the saved states of ticks 59500-59700): the cord,
+What happens (the integrator's books, `energy_probe.py` on the saved states of ticks 59500-59700): the cord,
 flung at up to 3.17 m/s (the speed clamp holds it at 3 m/s), falls; its handle (14.7 g, the chain's free root, spinning
 ~40 rad/s) lands on the table. In the landing tick the static contacts do -12.83 mJ on the cord while its kinetic energy
 (armature included) drops only 10.93 mJ: the implicitfast step's own energy residual is +2.31 mJ (then +0.14, +2.63,
@@ -118,9 +118,9 @@ measured no-go before (2026-10-14, excluded tiers: +13-29 %).
 | visual | the reference video (oblique + top, 3x) and the fastest stress episode (prefix6_e4: the cord flung at 4.3 m/s, falling back over the fixture) look physical: no kink, no tunnelling, the loop lies flat |
 | Harbor | oracle 1 / nop 0 in both modes on the 0.2.0 runtime (a local image = eai-roboarc:0.2.0 + this instance; rendering off; host A): oracle trials 3992 / 3991 s, end b9c68d6502105df4 in every replay |
 
-Shipped in RoboARC 0.2.1 (V3 release, 2026-10-18): the user approved the texts and the demo (2026-10-18). The instance
-is in the HF dataset (`eai-v2-internal/robotangle-assets` 9f34f894a454) and in the image; the release build is
-`release_rebuild.py` with `scripts/robotangle/freeze_manifest.v3.json` (step_s 0.23).
+Shipped in RoboARC 0.2.1 (V3 release, 2026-10-18): the texts and the demo were approved (2026-10-18). The instance
+is in the assets dataset (revision 9f34f894a454) and in the image; the release build is
+`release_rebuild.py` with `source/scripts/robotangle/freeze_manifest.v3.json` (step_s 0.23).
 
 ## Settling (frozen with the instance)
 
@@ -149,11 +149,12 @@ nyx_direct (`TASKS` renderer "direct"); the FEM settings are drawn as the FEM se
 through `nyx_direct.chain_cord_host`. Against the bridge's Genesis host: input buffers bitwise but rounding at birth,
 RGB within the host's own run-to-run spread (at most ~110 pixels > 8 levels per camera, as host against host).
 
-## References (`scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
+## References (`source/scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
 
 Recorded live on MuJoCo by `planning/orbits/native_session.py` (run_feedback_policy) through `rcb_topogym.py run-oracle`
-(`scripts/robotangle/references/orbits/record_reference.sh`, oracle code `scripts/oracle_runners/orbits_session_oracle.py`)
-on the width-space instances above. Each replays in two fresh processes to the recording's hash.
+(`source/scripts/robotangle/references/orbits/record_reference.sh`, oracle code `scripts/oracle_runners/orbits_session_oracle.py`, not included in this repository)
+on the width-space instances above. Each replays in two fresh processes to the recording's hash. (`orbits-very-easy-i01`
+is a development name, not included in this repository under that name.)
 
 | base | instance state_sha | rows | final state_sha | largest tie gap | largest weld drift |
 |---|---|---|---|---|---|
@@ -170,14 +171,14 @@ in the last bits at the first contact of a kept piece with a cord link or a gras
 
 So on MuJoCo both references stay far inside the limits these settings had before the Genesis line loosened them (tie
 2 mm, weld 10 mm). The limits themselves are unchanged here (3 mm, 15 mm, as imported); whether to tighten them back is
-the user's decision.
+still to be decided.
 
 (`references/orbits/measure_tie_weld.py`: a fresh-process replay measuring, after every control step, the middle tie's
 gap and every held weld's translation error.)
 
 Both references also pass the stress observer as single replays (`stress/replay.py --hold 0`, verdict v2.9): CLEAN
 (peak task speed 0.88 / 2.16 m/s, deepest task contact 0.37 / 1.85 mm); on 9b5c7c28b's rebuilt instances CLEAN under
-v2.10 (the stress session's head check).
+v2.10 (the stress validation's head check).
 
 Oracle changes for MuJoCo (plans only):
 - shared with knot: `KnotIK` runs on MuJoCo entity views (FK, collision pairs, geom poses);

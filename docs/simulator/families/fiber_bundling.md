@@ -1,6 +1,6 @@
 # fiber_bundling on MuJoCo
 
-The fiber agent, 2026-10-09 / 10. Shared mechanisms are in `docs/rcb/MUJOCO_CORE.md`; this note covers what is specific
+Ported 2026-10-09 / 10. Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md); this note covers what is specific
 to fiber and why.
 
 ## The task
@@ -46,7 +46,7 @@ every family.
 
 - **The cable's own contacts: 1.25 ms, dampratio 2** (`mjcf`). That is the same stiffness as 2.5 ms at dampratio 1,
   with twice the damping.
-  - Core's finding on the reproducer S1 cem_e52: the arm pressing a trunk link at ~530 N stored ~0.5 J in the soft
+  - The finding on the reproducer S1 cem_e52: the arm pressing a trunk link at ~530 N stored ~0.5 J in the soft
     penetration, and the contact released it into the light cable.
   - Pair net work +0.47 J → ≤ 0; X rise 0.19 → 0.04 J.
 
@@ -58,7 +58,7 @@ resolves at 0.625 ms steps. Its effect at normal speeds:
 | 0.1 m/s | 5e-7 N |
 | 1 m/s | 5e-5 N (0.17 % of the link's speed per tick) |
 
-**The wire** (`joints`, `plastic`). The user: it bends like everyday iron wire under force, stays bent, and nothing
+**The wire** (`joints`, `plastic`). The requirement: it bends like everyday iron wire under force, stays bent, and nothing
 bends before contact.
 - Every cable joint is elastoplastic: a spring, elastic up to 0.4 deg. Past its yield torque the joint's rest
   orientation follows it, so a bent joint stays bent and nothing creeps below the yield.
@@ -96,7 +96,7 @@ bends before contact.
 
   The sheath no longer droops in the hand.
 
-## Wire checks (very_easy instance, a probe pushing a strand / the sheath; `fiber/work/vobs/wire_probe.py`, `wire_long.py`)
+## Wire checks (very_easy instance, a probe pushing a strand / the sheath; development probes `wire_probe.py`, `wire_long.py`, not included)
 
 | check | strand (fiber_00_05) | sheath (lead_10) |
 |---|---|---|
@@ -131,7 +131,7 @@ strands fold outward. They are **re-planned, seeded by the released ones**; goal
 4. On the exact diagonal, very_easy's and easier's closed-loop rows, replayed, still carried their 8 mm lateral
    correction for the old weld's droop. The front reached the ring 5-7 mm off its axis, the front link met the rim, and
    the hand pushed on: the weld stretched 1.8 mm and held 62.7 N (20 ms mean) until the link slipped through. No strand
-   sank into the rim (at most 0.07 mm, 0.3 N; the fiber agent's jamtrace.py). Those two feeds are re-planned on the
+   sank into the rim (at most 0.07 mm, 0.3 N; a development trace, `jamtrace.py`). Those two feeds are re-planned on the
    exact diagonal from the end of their combs (the same pickup and comb rows), with more gates:
    - a slow zone: 4 mm/s from 15 mm before to 10 mm past the ring plane, the front within 0.5 mm of the axis;
    - no advance while the commanded front leads the measured one by more than 3 mm;
@@ -139,13 +139,13 @@ strands fold outward. They are **re-planned, seeded by the released ones**; goal
 
    Easy and medium keep their rows (open-loop feeds).
 
-The tools are in `scripts/robotangle/references/fiber_bundling/`: `replan.py` (the re-planner: pickup, comb loop, gated
+The tools are in `source/scripts/robotangle/references/fiber_bundling/`: `replan.py` (the re-planner: pickup, comb loop, gated
 closed-loop feed) and `weldforce.py` (the weld's force and the slip rule's 20 ms mean, the final strand radii). The
-recording is `scripts/robotangle/references/interlocked_claws/rerecord.py` (any MuJoCo family). Run them with the
+recording is `source/scripts/robotangle/references/interlocked_claws/rerecord.py` (any MuJoCo family). Run them with the
 RoboTangle image's Python, as the stress tools. The recipe of the -i01 references, on the exact diagonal:
 - The instance: `rcb_topogym.py make-instance --task fiber_bundling --variation fiber_bundling_<tier> --scene-seed 0
   --gripper-space native --simulator-overrides <file>`, the file holding the released instance's `grasp_assist`
-  (`scripts/robotangle/mujoco_release.json`).
+  (`source/scripts/robotangle/mujoco_release.json`).
 - very_easy and easier. Their pickup and combs, rows 0-2940 and 0-2840, are the v4 references' (replan.py from the
   released rows, `--presses .032,.030,.028,.026,.024,.022,.020`, on bbdbae3ad + fiber v4). The feed is re-planned from
   them:
@@ -166,8 +166,8 @@ with the same tick ledgers and final state hashes.
 
 **Re-recorded on c64294012 (the Robotiq's spring links at springref 2.62, the pads parallel; a Robotiq grasp lets go
 0.2 s after its fingers leave), FB2/FB3 included.** The current files in
-`scripts/robotangle/oracles/fiber-bundling-<tier>-i01/` (`privileged.npz`; `standard.npz` is the same file) are these
-recordings: the same rows, executed live until the first success (`retag.sh`: `validate_tier.sh`, then two fresh
+`scripts/robotangle/oracles/fiber-bundling-<tier>-i01/` (`privileged.npz`; `standard.npz` is the same file; development
+names, the tier-named -i01 directories are not included in this repository) are these recordings: the same rows, executed live until the first success (`retag.sh`: `validate_tier.sh`, then two fresh
 observer replays, the weld force and the 60 s hold). The births are unchanged; the instance bytes change with the robot
 MJCF.
 
@@ -187,7 +187,7 @@ without finger contact on springref 0 was 0.01-0.03 % (only the distal pad boxes
 (f9db156d16, release_rebuild's MAKE_ONE: the released `grasp_assist`), each tier builds 71 robot-touchable cylinders as
 32-facet prisms (the terminal gland, the six trunk shells, the 64 ring tube segments), and its birth changes. The same
 rows were recorded again on those instances (`rerecord.py --tail 40`, the recipe above) and replayed in 2 fresh
-processes each (the cluster, `rigid_integrate_20261012/runs/i1`):
+processes each (the cluster):
 
 | tier | birth (prisms) | rows | final state sha | 2 fresh replays | weld 20 ms mean |
 |---|---|---|---|---|---|
@@ -233,7 +233,7 @@ BREAKDOWN on easier, prefix2_e7 (the easier reference's rows 0-3411 plus a 9-row
 - the sheath's own contact parameters had won the contact (solref .00125 2, solimp .95 .99).
 
 The fix gives the sheath and the ring their own contact class, an explicit pair for every `fiber_bundle::trunk_*`
-geom x `bundling_ring::ring` geom (1536 per scene; core's profile field `pairs`, e8fd2c34a):
+geom x `bundling_ring::ring` geom (1536 per scene; the profile field `pairs`, e8fd2c34a):
 - condim 3, friction 1 1 .005 .0001 .0001;
 - solref .00125 2, solimp **.999 .9999** .001 .5 2;
 - margin and gap 0.
@@ -256,17 +256,17 @@ the scene now carries the pairs. The validator's FB2 re-round (easier, plus a sh
 and medium) runs on this build.
 
 **FB3: the sheath meets only the ring tube's spheres (ca3afe9dc).** That re-round (FB3_1k on 13faed450) found
-prefix15_e6: trunk_05 "13.7 mm" into the ring at 115.7 kN, +3.57 J. Core's forensics showed the depth was not real:
+prefix15_e6: trunk_05 "13.7 mm" into the ring at 115.7 kN, +3.57 J. Forensics showed the depth was not real:
 - the sheath's flat front cap pressed up against the ring's underside, 0.1-0.37 mm deep on the tube's cylinder segments;
 - for single MuJoCo steps, the general convex collider (GJK/EPA) returned one short cylinder's witness (1.7 mm long)
   5-14 mm deep along its own axis (the ring's tangent);
 - the near-hard pair then pushed 20-115 kN for one step.
 
-Core's offline test reproduced it: 11.5-14.6 % wrong witnesses in jittered poses. The result depended on the argument
+An offline test reproduced it: 11.5-14.6 % wrong witnesses in jittered poses. The result depended on the argument
 order.
 
 The pairs now take only the tube's 64 spheres. They are 1.72 mm apart, so the dents are at most 0.093 mm. Sphere x
-cylinder and sphere x sphere are analytic contacts, and core's test gave 0 / 4000 wrong witnesses with them. The scene
+cylinder and sphere x sphere are analytic contacts, and the same test gave 0 / 4000 wrong witnesses with them. The scene
 gains no geom, and the strands keep the whole tube. A pairs entry can now name `geom_types` per selector. On this build:
 - the four -i01 references are bit-identical (fresh replays, the same final states, no sheath-ring contact);
 - the births are unchanged;

@@ -1,8 +1,8 @@
 # cast_keyhole on MuJoCo
 
-Jianwen, 2026-10-10. The port itself (profile keyhole_v1 / v2, MuJoCo IK/FK for the family's oracles, the oracle plan
-changes) is Qineng's keyhole agent's: [handover/cast_keyhole.md](../handover/cast_keyhole.md). Shared mechanisms are in
-[MUJOCO_CORE.md](../MUJOCO_CORE.md). This note covers the -i01 references on the current physics.
+The port itself (profile keyhole_v1 / v2, MuJoCo IK/FK for the family's oracles, the oracle plan changes) is described
+in an internal port note, not included in this repository. Shared mechanisms are in
+[MUJOCO_CORE.md](../MUJOCO_CORE.md). This note (2026-10-10) covers the -i01 references on the current physics.
 
 ## The task
 
@@ -26,10 +26,9 @@ Goals, rules, geometry and difficulty are the released ones.
   right finger; BREAKDOWN in a fresh process). On v4 the same streams read 3.4 and 4.7 mm, CLEAN, each in two fresh
   processes with one final state hash. The references touch no robot-robot pair:
   rebuilt on v4, every tier keeps its birth hash, and every reference below replays to its recorded final state hash.
-  The shrunk stream is `scripts/robotangle/stress/corpus/reproducers/J1_keyhole_easier_arm_arm_depth`.
+  The shrunk stream is `source/scripts/robotangle/stress/corpus/reproducers/J1_keyhole_easier_arm_arm_depth`.
 
-Scene acceptance (make-instance, nop 400 + 40 under the stress observer; runs/robotangle_mujoco/v2/cast_keyhole/
-step1_summary.json): birth hashes as in the handover; no observer flags; the released standing assembly topples at
+Scene acceptance (make-instance, nop 400 + 40 under the stress observer): birth hashes as recorded at the port; no observer flags; the released standing assembly topples at
 birth (15-22 mm, medium 3 mm) and rests within 0.45 s. Accepted: on very_easy and easier the toppled gold then leans
 with its friction saturated and slides on at about 1 um/s (profile comment). The authored-pose clearance in MuJoCo
 equals the declared one (4.807 / 4.807 / 3.900 / 0.630 / 3.900 mm).
@@ -44,26 +43,27 @@ The family's own closed-loop oracles, unchanged, run live in the recording Sessi
 - easy, medium, hard: `cast_keyhole.harbor_session` -> `runner.worker`, CastKeyholePolicy with its two regrasps, the
   coupled-IK route along the released reference poses, closed loop on the measured pieces.
 
-No plan change was needed. The handover's hard stall (pull-through jammed at row ~12600, weld 35-40 N;
-MUJOCO_HANDOVER_JIANWEN.md) was the k4 reference replayed open loop on the exact diagonal; the oracle re-run closed loop
-on the new physics (the handover's second suggestion) passes the channel with the welds' 20 ms mean at most 6.7 N.
+No plan change was needed. The hard stall reported at the port (pull-through jammed at row ~12600, weld 35-40 N) was
+the k4 reference replayed open loop on the exact diagonal; the oracle re-run closed loop
+on the new physics (the port note's second suggestion) passes the channel with the welds' 20 ms mean at most 6.7 N.
 
 Recipe (the RoboTangle image's Python; `RCB_RENDER=off` for the oracle and replays):
 ```
 rcb_topogym.py make-instance --task cast_keyhole --variation cast_keyhole_<tier> --scene-seed 0 --gripper-space native \
     --out <dir>/instance.json
 KEYHOLE_ORACLE_OUTPUT=<dir>/oracle_out rcb_topogym.py run-oracle --task cast_keyhole --instance <dir>/instance.json \
-    --code scripts/robotangle/references/cast_keyhole/oracle.py --out <dir>/privileged.npz
+    --code source/scripts/robotangle/references/cast_keyhole/oracle.py --out <dir>/privileged.npz
 rcb_topogym.py replay --task cast_keyhole --instance <dir>/instance.json --traj <dir>/privileged.npz --repeat 1 --strict  # x2, fresh processes
-scripts/robotangle/stress/replay.py --instance <dir>/instance.json --actions nop:400 --hold 40 --out <nop.json>
-scripts/robotangle/references/cast_keyhole/weldforce.py <dir>/instance.json <dir>/privileged.npz <out.json> \
+source/scripts/robotangle/stress/replay.py --instance <dir>/instance.json --actions nop:400 --hold 40 --out <nop.json>
+source/scripts/robotangle/references/cast_keyhole/weldforce.py <dir>/instance.json <dir>/privileged.npz <out.json> \
     --phases <dir>/oracle_out/private/keyhole_monitor.jsonl
 render_reference_video.py --instance <dir>/instance.json --traj <dir>/privileged.npz --out <video dir> \
     --label "cast_keyhole <tier>" --expect-sha <final sha> --renderer direct
 ```
 
 Recorded on 53a93693f (keyhole_v3 with the re-cut) + the oracle code of bb59e378f, as
-`scripts/robotangle/oracles/cast-keyhole-<tier>-i01/` (`privileged.npz`; `standard.npz` is the same file):
+`scripts/robotangle/oracles/cast-keyhole-<tier>-i01/` (`privileged.npz`; `standard.npz` is the same file; development
+names, the tier-named -i01 directories are not included in this repository):
 
 | tier | birth sha | rows | sim s | final state sha | npz sha256 | weld 20 ms mean max L / R (N) |
 |---|---|---|---|---|---|---|
@@ -78,4 +78,4 @@ exact); nop 400 + 40 is not a success and the observer flags nothing; the nyx_di
 The weld peaks are the regrasp releases and the lift, all under the 60 N slip rule (0 slips); through the precise
 channel stages at most 5.4-6.7 N. The oracles' own choices: pickup opening .028 / raise 3 mm (very_easy, easier);
 the left regrasp by joint transit on easy and hard, and goal drops 6 / 0 / 2 cm (easy / medium / hard).
-Evidence (oracle logs, replays, nops, weld scans, videos): runs/robotangle_mujoco/v2/cast_keyhole/ref/r1/.
+Evidence (oracle logs, replays, nops, weld scans, videos) was kept outside this repository.

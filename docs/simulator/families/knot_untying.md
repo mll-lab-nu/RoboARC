@@ -3,8 +3,8 @@
 The released Genesis family is the ALOHA untying a knot in an IPC FEM rope. It has five tiers: very_easy, easier,
 easy, medium and hard. The double_overhand variant has no released instance, so it is not ported. On MuJoCo the rope
 is a rigid capsule chain (`topogym/world/mujoco/rope_chain.py`), using profile `knot_chain_v7`
-(`topogym/world/mujoco/profiles.py`). The rope agent ported it on 2026-10-09/10; its working evidence is in
-the work notes
+(`topogym/world/mujoco/profiles.py`). It was ported on 2026-10-09/10; the working evidence was kept
+outside this repository.
 
 ## The rope
 
@@ -41,8 +41,8 @@ the work notes
     - easier kn5_22 top000_b1_e79: the connects' net work rose from +0.04 to +200 mJ per step within 30 steps, as a
       wave running out to the tail, then a bad qacc at 2560 m/s;
     - easy top029_b1_e151: +0.004 → +0.9 mJ per step at 40 → 700 rad/s, then an uncaused 14.0 → 15.4 m/s jump.
-    Every other force class balances the kinetic energy there (a per-step energy trace by class, work/dev/tail_trace2.py
-    in the rope agent's evidence).
+    Every other force class balances the kinetic energy there (a per-step energy trace by class, the development
+    script `tail_trace2.py`, not included).
   - The thresholds are 3x the references' maxima (0.63 m/s, 48 rad/s). It only removes energy, and the stress
     observer books it as dissipation (W). Below both thresholds it writes nothing, so a run that never reaches them is
     bit-identical to v5: the five -i01 references replay to their v5 hashes with 0 activations.
@@ -96,7 +96,7 @@ the work notes
 ## Energy books (stress observer)
 
 The rod is booked as stored energy: E includes ½ θᵀKθ, and W leaves out the rod's elastic couples
-(`rope_energy` / `rope_elastic_qfrc`; checked by `scripts/robotangle/test_rope_energy.py`). A rope link's stored energy
+(`rope_energy` / `rope_elastic_qfrc`; checked by `source/scripts/robotangle/test_rope_energy.py`). A rope link's stored energy
 for the pop clause includes its rod joints. Old and new books agree within 2.2e-7 J. A free swing under the rod
 alone shows X ≈ 0: the largest rise above the running minimum is 4e-5 J.
 
@@ -118,9 +118,9 @@ The gap stays flat under a steady load. No real grasp passes a rope more than ab
 
 ## References (step 1)
 
-The references are committed as `scripts/robotangle/oracles/knot-untying-<tier>-i01/privileged.npz`; `standard.npz`
-is the same file. Each is the released route plus 200 hold rows of its last row, executed open-loop in a fresh process
-with knot_chain_v5 on the exact constraint diagonal. The rope agent's tree was at 1eb2a37ed's code, with instances
+The references are committed as `scripts/robotangle/oracles/knot-untying-<tier>-i01/privileged.npz` (development names;
+the tier-named -i01 directories are not included in this repository); `standard.npz` is the same file. Each is the released route plus 200 hold rows of its last row, executed open-loop in a fresh process
+with knot_chain_v5 on the exact constraint diagonal. The development tree was at 1eb2a37ed's code, with instances
 made on that code. All five tiers succeed and replay to the same state in two fresh processes.
 
 | tier | rows | min | final hash @ success row (two fresh replays) | file sha256, first 16 (privileged = standard) | nops | observer (v2.8) | node gap / robot depth |
@@ -132,8 +132,8 @@ made on that code. All five tiers succeed and replay to the same state in two fr
 | hard | 2391 | 21.4 | 46c94c1ebe3d8458 @2391 | 8bf03b10223e6d0e | fail / fail | CLEAN, X −19.8 J | 0.004 / 0.97 mm |
 
 **On ccd4ba7fa** (the soft contact class at a constant impedance, solimp .95 .95; knot_chain_v7 with the tension guard;
-the same rows and the same births, re-bound to the rope agent's tree kn13), the five references replay in two fresh
-processes each (validate, the cluster, 2026-10-11) to: very_easy cb0e1ae48af8ffc0 @1208, easier 2b9088531bc1a524 @1072,
+the same rows and the same births, re-bound to the development tree), the five references replay in two fresh
+processes each (the cluster, 2026-10-11) to: very_easy cb0e1ae48af8ffc0 @1208, easier 2b9088531bc1a524 @1072,
 easy 191d932660caa264 @753 (unchanged), medium 25da90d051da4a35 @1941, hard 14ed4da2f8b16ff4 @2391. All succeed; easier
 and medium succeed one and three rows earlier than above.
 
@@ -143,13 +143,13 @@ The knot_chain_v4 references (pushed in a2933d0bb) were, in the same order: c74c
 - **very_easy's two-arm pull is one continuous ramp.** The released route drives it (rows 208-717, 5-18 s) as 13
   one-second segments. Each starts with a one-row command step of 15-33 mrad on the elbows and wrist_angles, and
   1-4 mrad on the right waist, then rises along a bell and stops. The reference replaces those rows of the arm
-  columns with a clamped cubic spline through the step midpoints (`work/dev/smooth_phase.py` of the rope agent), so
+  columns with a clamped cubic spline through the step midpoints (the development script `smooth_phase.py`, not included), so
   the phase starts and ends where it did, at rest.
   - The peak joint-space step falls from 57.5 to 8.3 mrad per row.
   - The largest departure from the released commands is 44 mrad, on the left elbow, where the first segment's step
     is spread over the first second.
   - On knot_chain_v4 the released route, unsmoothed, also succeeded (1208 rows, d14b030a6e2661df, CLEAN).
-- Minutes are wall time on the a cloud host box at load 70-110; every tier is within the 72-minute rule.
+- Minutes are wall time on a cloud host at load 70-110; every tier is within the 72-minute rule.
 - The nops are a missing trajectory and 400 rows holding the birth command.
 - The observer reads criteria v2.8 with the rope books.
 - Frames are birth and final, rendered by the Session's own route (nyx_direct).
@@ -160,8 +160,8 @@ The knot_chain_v4 references (pushed in a2933d0bb) were, in the same order: c74c
 
 ## Stress (step 2)
 
-- **Four blow-ups,** all the rod zig-zag above, kept as reproducers (on the rope agent's box in
-  /workspace/mj/rope/stress/knot_repro):
+- **Four blow-ups,** all the rod zig-zag above, kept as reproducers (`K0`-`K3` in
+  `source/scripts/robotangle/stress/corpus/reproducers/`):
   - K0 and K1, found on knot_chain_v2 by the self-check's prefix search (e0, e1). In their reports the "robot-robot
     contact" (left finger against right wrist, 35.6 mm / 2242 N) is the arms overlapping after MuJoCo's reset to
     qpos0. It is not a cause.
@@ -176,7 +176,7 @@ The knot_chain_v4 references (pushed in a2933d0bb) were, in the same order: c74c
     - The end curls past the 0.9 rad stops to 1.2 rad (stop penetration 1.6 mm / 37 N). Links 13-25 then grow
       17 -> 700 m/s in 6 MuJoCo steps until BADQACC.
     - No robot-robot contact precedes it. The solver used at most 10 of 100 iterations per step. The 7.4 kN
-      robot-robot contact in its report is MuJoCo's reset to qpos0, as core confirmed.
+      robot-robot contact in its report is MuJoCo's reset to qpos0, as a separate check confirmed.
 - **The headroom sweep.** In-memory variants of the rod from the recorded state 10 rows before each fault (e2: rows
   718-735). The headroom is inertia_rule × (1 − 2 damping_rule).
 
@@ -259,7 +259,7 @@ The knot_chain_v4 references (pushed in a2933d0bb) were, in the same order: c74c
     BREAKDOWN, and K0 / K1 / K2 read VIOLENT / CLEAN / VIOLENT.
   - On v3 the same search found K2 (medium FAIL); on v2, K0 and K1.
 - **The cinch fault.** Cinching a knot past a critical tension also blows the chain up (found by the soft-body
-  redesign), and the threshold rises with the headroom. Test (rope agent, `work/dev/cinch_test.py`): the instance's
+  redesign), and the threshold rises with the headroom. Test (the development script `cinch_test.py`, not included): the instance's
   knotted chain, its first link welded to the world and its last welded to a hand that pulls away at 2 cm/s, both
   welds as stiff as the node connects, the exact diagonal on. The knot cinches, the tension ramps, and the chain blows
   up within ~20 ms once the steady tension reaches:
@@ -272,8 +272,8 @@ The knot_chain_v4 references (pushed in a2933d0bb) were, in the same order: c74c
   On medium the fault comes at about the same tension inside the tightly cinched knot on v4 and v5 (28-29 N), so
   there the floor buys little. A contact_weld_v1 rope grasp lets go at 8.2-8.5 N, so from v4 on the weld slips before
   a cinch faults the chain. The friction pinch of the released tasks slips below 1 N.
-- **Hooks and pins with the real robot** (main's question after the redesign's kinematic two-hook test reached
-  22.6 N). Test: `work/dev/hook_check.py`, live in the Session on v4 at the servo caps and the ViperX torques.
+- **Hooks and pins with the real robot** (the question raised after the redesign's kinematic two-hook test reached
+  22.6 N). Test: the development script `hook_check.py`, live in the Session on v4 at the servo caps and the ViperX torques.
   - The closed grippers hook the knot's main loop and pull apart, or pin (press 6 or 15 mm) the two tails 4 cm
     outside the knot and drag them apart, or hook one side and pin the other. Pulls are 0.3 m in 3 s or 0.6 s, all
     five tiers.
@@ -293,13 +293,13 @@ An instance is make-instance on MuJoCo with these overrides:
 - the released Genesis instance copied to `instance_assets/render_host/`, where the Genesis render bridge and
   nyx_direct read the rope's birth.
 
-The rope agent's script is the work notes The rope agent's dev
+The port script is not included in this repository. Its dev
 bindings also name nyx_direct.py (`nyx_direct_sha256`), as `mk_tasks.dev_binding` does for families that render
 "direct". The instances on knot_chain_v5 (1eb2a37ed's code) have the births very_easy 46dd7e5fda9ecfdf, easier
 ab6b75ab24a5771b, easy 3fe175d34a4dbf8c, medium 3564452a7a4a8503 and hard 03de1494d1e7453e (v4's: 6a72fc56, 3e7e1540,
 7f4c65ea, 9693ada1, 2a2426a3).
 
-knot_untying is not in `scripts/robotangle/mujoco_release.json` yet. Adding it needs three things the release rebuild
+knot_untying is not in `source/scripts/robotangle/mujoco_release.json` yet. Adding it needs three things the release rebuild
 does not do today:
 - the make-instance `gripper_space` "width" (the file names "native" for every base);
 - `mujoco_birth` pointing at the released instance's `instance_assets/ipc_state/manifest.json` (its
@@ -309,17 +309,17 @@ does not do today:
 ## rd easier, re-timed: knot-untying-07-i01 (V3, 2026-10-18)
 The knot_untying rd easier tier (a loose figure-eight, its standing end clamped under a staple, two posts beside it and a
 curb) ships as knot-untying-07-i01 in RoboARC 0.2.1. Its 2026-10-14 route et1 (14172 rows) took ~39 % of the 3 h budget;
-the reference is the same route re-timed, not re-planned (`redesign/knot_untying/robot/retime_search.py`): original waits
+the reference is the same route re-timed, not re-planned (`source/scripts/robotangle/redesign/knot_untying/robot/retime_search.py`): original waits
 x3, moves while the rope was quiet in the original (every node < 2 mm/s) x3, other moves x1.75, gripper changes as
 recorded, every arm joint step at most 0.0385 rad, then the final targets held to the Session's success. No physics,
 substep or task change.
-- Instance: premade (`redesign/knot_untying/premade/make_premade.py` in eai-roboarc:0.2.0-noinst, from inst10/easier_v8_r2
+- Instance: premade (`source/scripts/robotangle/redesign/knot_untying/premade/make_premade.py` in eai-roboarc:0.2.0-noinst, from easier_v8_r2
   with the 2026-10-13 back strip, `premade/region_source.py`), birth a3c58ab73130b9b3; two makes byte-identical, births
   exact.
 - Reference g333: 7419 rows, end 8ae062ea4c733dbc, sha256 82c65a96cbaca655...; strict double replay (host A), the same end on
   host B and the cluster (Gold 6230R, 6338, Platinum 8592+); max arm joint step 0.0385 rad.
 - Timing: 3037 s = 28.1 % of 3 h on host B (Ryzen 9 7950X, a quiet control in the same window), within the knot bar (<= 30 %,
-  user 2026-10-14). The texts state 0.41 s per control step.
+  set 2026-10-14). The texts state 0.41 s per control step.
 - Harbor oracle 1 / nop 0 in both modes; leak probe = knot-09's findings; stress (the cluster, 300 episodes, v2.13b): PASS.
-- The rd hard tier (hu1) stays out: its re-timed untie never stays untied (the work notes).
-- The user approved the review on 2026-10-18.
+- The rd hard tier (hu1) stays out: its re-timed untie never stays untied.
+- The review was approved on 2026-10-18.

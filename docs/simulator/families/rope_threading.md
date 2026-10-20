@@ -4,8 +4,8 @@ The released Genesis family is the ALOHA threading an IPC FEM rope through rings
 three released tiers: easy, medium and hard. very_easy and easier are defined but not released, so they have no
 frozen birth. On MuJoCo the rope is the same rigid capsule chain as knot_untying's
 (`topogym/world/mujoco/rope_chain.py`; see `knot_untying.md` for the model), using profile `rope_chain_v3`
-(`topogym/world/mujoco/profiles.py`). The rope agent ported it on 2026-10-10; its working evidence is in
-the work notes
+(`topogym/world/mujoco/profiles.py`). It was ported on 2026-10-10; the working evidence was kept
+outside this repository.
 
 ## The rope and the scene
 
@@ -34,8 +34,8 @@ tolerances are kept. Consequences:
 
 The released route fails open-loop: its pinches leave the pads 6 mm off the rope. The references are the family's
 own feedback relay (contact_relaxed_v16, `topogym.planning.rope_threading.public_session.run_feedback_policy`) run
-live in the frozen MuJoCo Session and recorded. Two changes apply, both outside the planner, in the rope agent's
-wrapper (tmp/.../rope/work/dev/rt_relay.py):
+live in the frozen MuJoCo Session and recorded. Two changes apply, both outside the planner, in a development
+wrapper (`rt_relay.py`, not included in this repository):
 - **The pinch closes the fingers fully,** to the ALOHA's closed position.
 - **A measured-keeper regrasp measures the rope only once it is quiet:** ≤ 1 cm/s for 0.2 s, waiting at most 10 s.
   On hard, the keeper measured a rope still swinging at 0.1 m/s after a release, and the hand closed 22-27 mm off it.
@@ -47,8 +47,8 @@ wrapper (tmp/.../rope/work/dev/rt_relay.py):
 The run_feedback_policy check of the simulator options against the Genesis release is skipped: the MuJoCo instance's
 options are its own.
 
-The references are committed as `scripts/robotangle/oracles/rope-threading-<tier>-i01/privileged.npz`;
-`standard.npz` is the same file. They were recorded on the exact constraint diagonal (b1ec43997), on the rope agent's
+The references are committed as `scripts/robotangle/oracles/rope-threading-<tier>-i01/privileged.npz` (development
+names; the tier-named -i01 directories are not included in this repository); `standard.npz` is the same file. They were recorded on the exact constraint diagonal (b1ec43997), on the development
 tree at 1b0a8960b's code, with instances made on that code. The relays recorded before the exact diagonal (easy 1882
 rows, hard 3326) no longer succeed on it, so both were run again; medium, parked before, now succeeds with the plain
 relay. All three replay to the same state in two fresh processes.
@@ -60,22 +60,22 @@ relay. All three replay to the same state in two fresh processes.
 | medium | 3386 | 28.2 | f47a92608d0e31d3 @3386 | 7a736bb517f4c9ba | fail / fail | CLEAN (155 causal whips <= 3 m/s) | 0.042 / 0.93 mm |
 
 - **On ccd4ba7fa** (the soft contact class at a constant impedance; the rings keep the task's contact against the
-  robot; rope_chain_v3), the same rows on the same births (re-bound to the rope agent's tree kn13), two fresh processes
-  each (validate, the cluster, 2026-10-11): easy 5ba000a6bd8b327b @2675 and medium 740d4048045ab81d @3366 succeed; hard no
+  robot; rope_chain_v3), the same rows on the same births (re-bound to the development tree), two fresh processes
+  each (the cluster, 2026-10-11): easy 5ba000a6bd8b327b @2675 and medium 740d4048045ab81d @3366 succeed; hard no
   longer succeeded with its rows (ends 5c06d5cc4bf31e89 after its 3345 rows) and is re-planned:
-  - **hard, re-planned on ccd4ba7fa** (core, 2026-10-11): the same recipe, the plain contact_relaxed_v16 relay through
-    the rope agent's wrapper (`rt_relay.py <instance> <out> rope_threading_hard`: fingers closed fully, the quiet wait
-    before measured keepers), run live on the hard birth on kn12 + ccd4ba7fa's three files (the cluster). 3345 rows, success
+  - **hard, re-planned on ccd4ba7fa** (2026-10-11): the same recipe, the plain contact_relaxed_v16 relay through
+    the wrapper (`rt_relay.py <instance> <out> rope_threading_hard`: fingers closed fully, the quiet wait
+    before measured keepers), run live on the hard birth on the development tree plus ccd4ba7fa's three files (the cluster). 3345 rows, success
     at row 3345; `scripts/robotangle/oracles/rope-threading-hard-i01/privileged.npz` (= `standard.npz`), file sha256
-    6c429cfd38608b63. Two fresh replays on kn13 + rtinst14 hard (the canonical tree at ccd4ba7fa): success at row
+    6c429cfd38608b63. Two fresh replays on the canonical tree at ccd4ba7fa: success at row
     3345, 41632c4dace19971 both; the stress observer (criteria v2.10) CLEAN (144 causal whips <= 3 m/s, robot depth
     0.33 mm, task speed 2.64 m/s). The --station-shift .02 variant gives the same rows; --keeper-deeper .006 fails
-    (no collision-checked measured keeper path). Validate's step-2 round on it (RT4 hard, the cluster, kn13, 300 episodes)
+    (no collision-checked measured keeper path). The step-2 round on it (RT4 hard, the cluster, 300 episodes)
     replays it twice more to 41632c4dace19971 @3345, CLEAN, and PASSes (0 confirmed BREAKDOWN, criteria v2.10).
 - Quiet waits before the measured keepers: easy 3.0 s and 10 s (the cap; the rope still moved at 1.4 cm/s); hard
   4.4, 10 (6.2 cm/s), 2.9 and 1.0 s; medium 3.0, 10 (1.4 cm/s), 2.4 and 2.2 s.
 - The nops are a missing trajectory and 400 rows holding the birth command.
-- The minutes are the relay's wall time on the a cloud host box at load 90-140.
+- The minutes are the relay's wall time on a cloud host at load 90-140.
 
 - **medium, before the exact diagonal:** with the quiet wait and the deeper keeper pinch the relay got past its first
   failure (the left keeper pinch at s = 1.0) and stopped at the right hand's measured-keeper receive at R2
@@ -84,8 +84,8 @@ relay. All three replay to the same state in two fresh processes.
 
 - The angular trigger of v2.6 flagged the earlier references VIOLENT through rope links at 112 rad/s; v2.7 counts a
   spin only on a link whose surface moves faster than 3 m/s, and v2.8 a whip only when its link ends above 3 m/s.
-- Frames: rope_threading renders with nyx_direct since 11c886249, which exports the glTF rings. The render agent's
-  parity on easy and hard against the Genesis host is bitwise in every buffer.
+- Frames: rope_threading renders with nyx_direct since 11c886249, which exports the glTF rings. The render
+  parity check on easy and hard against the Genesis host is bitwise in every buffer.
 
 ## Speed clamp and tension guard (rope_chain_v2 / v3, 2026-10-11)
 
@@ -107,16 +107,16 @@ the references (peak connect tension 3.1 N) replay to their hashes with 0 activa
     energy, which never counts.
   - If the formal search finds such weld losses often, the fix is on the rope side: stiffer connects, or a gentler
     weld release.
-- **The angular trigger.** At 60 rad/s it fires on 5.5 mm links turning at a few tenths of a metre per second. Main
-  has asked the validator for a link-size-aware form.
+- **The angular trigger.** At 60 rad/s it fires on 5.5 mm links turning at a few tenths of a metre per second. A
+  link-size-aware form was requested for the stress criteria.
 
 ## Rebuilding the instances
 
 An instance is the knot procedure plus the grasp override: `grasp_assist` contact_weld_v1 with a target on every
 link, `{"entity": "rope", "link": "000".."199", "center_m": [L/n/2, 0, 0], "radius_m": 0.008}`, and the released
-tolerances. The rope agent's port script does this with `--weld-links 0.0055`. The instance assets built on
+tolerances. The port script (not included in this repository) does this with `--weld-links 0.0055`. The instance assets built on
 818debf8a, f92d9f6dc and 1b0a8960b's code are byte-identical. The instances keep the released `gripper_space`
 "native", and their births are easy 7c294d48661292a8, medium c45012f92e572106 and hard f5bbde9d87c3b05d.
 
-rope_threading is not in `scripts/robotangle/mujoco_release.json` yet. Adding it needs knot_untying's items except the
+rope_threading is not in `source/scripts/robotangle/mujoco_release.json` yet. Adding it needs knot_untying's items except the
 gripper space (`mujoco_birth`, the frozen rope volume and the render host), plus the `grasp_assist` override.

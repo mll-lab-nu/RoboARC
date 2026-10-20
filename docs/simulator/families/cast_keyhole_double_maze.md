@@ -1,9 +1,12 @@
 # cast_keyhole_double_maze on MuJoCo (the double maze)
 
-Jianwen, 2026-10-12. An experimental setting of the cast_keyhole family beside its five tiers (variation id
+Released later as the base `roboarc-cast-keyhole-06-i01`; this note records its development, from when it was an experimental
+setting (statements below about its release status are of that time).
+
+An experimental setting (2026-10-12) of the cast_keyhole family beside its five tiers (variation id
 `cast_keyhole_double_maze`, pool experimental, tier open until the model evaluation); the five tiers are unchanged (their
-instances built from this branch have the births their -i01 references recorded). Design record, searches and every
-measurement: `runs/cast_keyhole_v3_double_maze_20261011/` (PROGRESS.md; not in git).
+instances built from this branch have the births their -i01 references recorded). The design record, searches and every
+measurement were kept outside this repository.
 
 ## The puzzle and the setting
 
@@ -41,17 +44,18 @@ solved interleaved. Slots are 2 mm wider than the plates.
 
 ## Reference (-i01)
 
-`scripts/robotangle/oracles/cast-keyhole-double-maze-i01/privileged.npz` (`standard.npz` is the same file), 8082 rows
+`scripts/robotangle/oracles/cast-keyhole-double-maze-i01/privileged.npz` (not included in this repository; `standard.npz`
+is the same file), 8082 rows
 (202.0 s), native gripper space, on the instance made on this branch with profile keyhole_double_maze_v2
 (`rcb_topogym.py make-instance --task cast_keyhole --variation cast_keyhole_double_maze --scene-seed 0 --gripper-space
 native`, with the MuJoCo tasks' SIMD masking; birth c15ba78d2bfda87e). Recorded with
 
 ```bash
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task cast_keyhole --instance <instance.json> \
-    --code scripts/robotangle/references/cast_keyhole/double_maze_oracle.py --out <dir>/privileged.npz
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task cast_keyhole --instance <instance.json> \
+    --code source/scripts/robotangle/references/cast_keyhole/double_maze_oracle.py --out <dir>/privileged.npz
 ```
 
-The oracle code follows `scripts/robotangle/references/cast_keyhole/double_maze_plan.npz`: per 40 Hz control step the
+The oracle code follows `source/scripts/robotangle/references/cast_keyhole/double_maze_plan.npz`: per 40 Hz control step the
 planned joints of both arms, the planned centres of mass of both plates and the silver's pose in the gold's frame. The
 plan: from the birth joints to the route's first sample (58 rows), the designed route (1254 samples, 6528 rows), the
 silver 40 mm further out of the gold's bottom opening (189 rows), then the gold 4 cm toward -y (behind the separator)
@@ -75,13 +79,13 @@ actions bit for bit), the plates never touch; along the route the silver's pose 
 are thick); each hand's pads touch their plate at 2 points on average (never none); the grasp welds carry at most
 9.8 N (gold) and 11.1 N (silver) as 20 ms means (the plates' weight; slip at 60 N). All of these read the same on v1.
 
-Checks of the reference on profile v2 (2026-10-12), in the dev image `topogym-coil-v2:20261009-02` on the AMD Ryzen 9
-7950X host with this branch's code (runs/cast_keyhole_v3_double_maze_20261011/r4/sa/ref_v2/checks/):
+Checks of the reference on profile v2 (2026-10-12), in a local dev image on the AMD Ryzen 9
+7950X host with this branch's code:
 - The same oracle code and plan, run with the same physics (birth c15ba78d2bfda87e) on the RoboTangle runtime python on
   a cloud host (mujoco 3.14.0, the AMD EPYC 9354 host), record the same actions bit for bit.
 - Two fresh-process strict replays (`rcb_topogym.py replay --repeat 2 --strict`): success at row 8082, both
   5bc8f1e7136b3f59 (the recording's own final state), the instance exact.
-- The stress observer (`scripts/robotangle/stress/replay.py --hold 0`): CLEAN; no fail, trigger or pop; no grasp slip;
+- The stress observer (`source/scripts/robotangle/stress/replay.py --hold 0`): CLEAN; no fail, trigger or pop; no grasp slip;
   no speed or torque clamp. Its peaks are the birth's first 20 ms (before the welds bind): the fastest task link
   0.096 m/s, a finger on the silver 45.1 N, finger-pad depth 0.55 mm; energy created 0.0045 J.
 - The equal-length nop (8082 rows of the birth targets, under the observer): no success, CLEAN.
@@ -92,22 +96,20 @@ Kinematically (the plan's joints on the ALOHA model, every sample): no robot-rob
 stays at least 66.4 mm from the right arm, the silver at least 19.9 mm from the left arm, both plates at least 52 mm above
 the table.
 
-Evidence (plans, runs, diagnostics, check outputs): `runs/cast_keyhole_v3_double_maze_20261011/r4/` (PROGRESS.md, rounds 4
-and 5).
+Evidence (plans, runs, diagnostics, check outputs) was kept outside this repository.
 
-A video of the v1 reference's physics run (nyx_direct, `render_reference_video.py --renderer direct`):
-`runs/cast_keyhole_v3_double_maze_20261011/viz/dm4b_ref_i01_nyx/video.mp4` (54 s at 30 fps, 3.75x; the replay
-reproduces that recording, c18098f933020b0f). The v2 recording's actions differ from it by at most 1.3e-6 rad.
+A video of the v1 reference's physics run was made with nyx_direct (`render_reference_video.py --renderer direct`; 54 s
+at 30 fps, 3.75x; not included; the replay reproduces that recording, c18098f933020b0f). The v2 recording's actions differ from it by at most 1.3e-6 rad.
 
 ## Harbor under the new base name (2026-10-12, profile v1)
 
 This run graded the base on profile keyhole_double_maze_v1 (birth a804367eaf3bfdd3, the v1 reference); on v2 it ran
-again on 2026-10-13 ("Harbor under the new base name on v2" below). `release_rebuild.py b38a7f6be --version 0.3.0-dryrun-keyhole-dm4 --families cast_keyhole` (with Harbor), on the
-test-only commit b38a7f6be of the temporary branch `jianwen/keyhole-dm4-harbor-test` (167f4bbd8 + a cast_keyhole entry
+again on 2026-10-13 ("Harbor under the new base name on v2" below). `release_rebuild.py b38a7f6be --version <dry-run version> --families cast_keyhole` (with Harbor), on the
+test-only commit b38a7f6be (167f4bbd8 + a cast_keyhole entry
 in mujoco_release.json with `"tiers": []` and the new base `cast-keyhole-double-maze-i01`, template
-`cast-keyhole-easy-i00`; never merged; the real manifest lists no cast_keyhole entry). Image
-`eai-robotangle:0.3.0-dryrun-keyhole-dm4` (sha256:214444106259c90e2afeda800bda03db69be7a71a4fda1228118fed52be9fb0f), built
-with `images/robotangle/Dockerfile.mujoco` from that commit; make-instance inside it gives the birth a804367eaf3bfdd3
+`cast-keyhole-easy-i00`; never merged; the real manifest lists no cast_keyhole entry). A local dry-run image
+(sha256:214444106259c90e2afeda800bda03db69be7a71a4fda1228118fed52be9fb0f), built
+with `source/images/robotangle/Dockerfile.mujoco` from that commit; make-instance inside it gives the birth a804367eaf3bfdd3
 (the reference's); `mk_tasks.py --check` passes for every base and for the MuJoCo instance bytes. Rendering off
 (`RCB_RENDER=off`). Expected oracle 1, nop 0; all four trials as expected:
 
@@ -119,18 +121,16 @@ with `images/robotangle/Dockerfile.mujoco` from that commit; make-instance insid
 | standard | nop | 0 | 90 s | no action, ends on the timeout in the birth state |
 
 The texts Harbor graded: the release's `packages/cast-keyhole-double-maze-i01-<mode>/{task.toml,README.md,instruction.md}`
-are the files of `scripts/robotangle/package_text/cast_keyhole/` at 167f4bbd8, byte for byte; the task dirs Harbor ran are
+are the files of `source/scripts/robotangle/package_text/cast_keyhole/` at 167f4bbd8, byte for byte; the task dirs Harbor ran are
 the rendered ones, named `robotangle-cast-keyhole-double-maze-i01-<mode>`, with no word of easy's scene, no difficulty
 line, `oracle = "full"`, the 60 N grasp rule, 0.036 s per control step and the 2 mm sustained contact rule, in both
-modes. Report: `runs/cast_keyhole_v3_double_maze_20261011/r4/harbor/work/REPORT.md` (and `work/harbor/results.md`);
-the text check: `r4/harbor/check_harbor.json`.
+modes. The report and the text check were kept outside this repository.
 
 ## The first acceptance round and keyhole_double_maze_v2 (2026-10-12)
 
-The 1,000-episode acceptance on f2449335c (topogym-da, keyhole_dm_r1, criteria v2.10, seeds 104001-104009) failed on one
+The 1,000-episode acceptance on f2449335c (round keyhole_dm_r1, criteria v2.10, seeds 104001-104009) failed on one
 confirmed BREAKDOWN, cem_e157: "energy_created(local): X rose 1.37 J in 0.1 s, contact (table, silver) gave 1.44 J"
-(999 episodes otherwise; 424 VIOLENT, 599 grasp slips). Analysis only, then the user's decision (all evidence:
-runs/cast_keyhole_v3_double_maze_20261011/r4/sa/, PROGRESS.md round 5):
+(999 episodes otherwise; 424 VIOLENT, 599 grasp slips). Analysis only, then the decision below:
 
 - The stream: from row 0 it commands the left gripper slightly open (0.0057 against the birth's 0.002), so the gold is
   never welded; at row 30 it opens the right gripper and lets the silver go (a release, not a slip). The arms had swung
@@ -155,12 +155,12 @@ runs/cast_keyhole_v3_double_maze_20261011/r4/sa/, PROGRESS.md round 5):
 | v1 as recorded | 9 / 40 | BREAKDOWN | 1 / 63 / 1.44 J (table, silver) |
 | multiccd off (v2) | 0 / 0 | VIOLENT, 0.012 J | 0 / 0 / 0.19 J (a finger on the silver; 0.19 J on v1 too) |
 | collision pieces re-cut to 2 mm (fatten_m; thinnest 1.05 mm) | 5 / 38 | VIOLENT, 0.012 J | 0 / 12 / 0.65 J (two fingers; the same on v1) |
-| density 3300 kg/m^3 | 6 / 40 (energies halved) | VIOLENT (topogym-da) | not run |
+| density 3300 kg/m^3 | 6 / 40 (energies halved) | VIOLENT | not run |
 
-  topogym-da's density test (`runs/stress_20261012/keyhole_double_maze_f2449335c/density_test/`): at 3300 and 1650 kg/m^3
+  The density test: at 3300 and 1650 kg/m^3
   cem_e157 creates no energy, but the plates fly faster and never reach the tumble; the v1 reference recorded at 6600
   does not succeed open loop on the lighter plates.
-- The user's decision (2026-10-12): multiccd off in the double maze's own profile only (keyhole_double_maze_v2); the
+- The decision (2026-10-12): multiccd off in the double maze's own profile only (keyhole_double_maze_v2); the
   oracle unchanged, the reference recorded again; density, sizes, texts and difficulty unchanged. The scene builder takes
   the setting as an option no other profile uses (cba44aeba): instances of the five keyhole tiers, claws easy, Cast ABC,
   hedgehog easy, cast_coil easy, cast_coil_v2 easier and buzz easy built with it are byte for byte those built before,
@@ -172,20 +172,19 @@ runs/cast_keyhole_v3_double_maze_20261011/r4/sa/, PROGRESS.md round 5):
 
 ## The acceptance round on v2 (2026-10-13)
 
-On e9e29c39e (topogym-da, keyhole_dm_r2, criteria v2.10, seeds 106001-106009): **PASS**. Report:
-`runs/stress_20261013/keyhole_double_maze_v2_e9e29c39e/`.
+On e9e29c39e (round keyhole_dm_r2, criteria v2.10, seeds 106001-106009): **PASS**.
 - Self-check first: the reference success, CLEAN, 5bc8f1e7136b3f59 twice; the nop no success, CLEAN; cem_e157 as the
   reproducer DM1_keyhole_double_maze_silver_table_edge VIOLENT twice (BREAKDOWN on v1); 70 search episodes, 0 BREAKDOWN.
 - The round: 1,000 episodes, 529,671 control steps, 0 confirmed BREAKDOWN; the reference success, CLEAN, the same final
   state (16.1 min under the observer on the loaded host); the nop no success, CLEAN; DM1 VIOLENT; 627 grasp slips.
-- The local dev merge of this branch (37d27b3f6) builds the same birth c15ba78d2bfda87e, so the round carries over.
+- The merge of this branch (37d27b3f6) builds the same birth c15ba78d2bfda87e, so the round carries over.
 
 ## Harbor under the new base name on v2 (2026-10-13)
 
-`release_rebuild.py 0956310dd --version 0.3.0-dryrun-keyhole-dm4-v2 --families cast_keyhole --lanes 2` (with Harbor),
-on the test-only commit 0956310dd of the temporary branch `jianwen/keyhole-dm4-v2-harbor-test` (e9e29c39e + b38a7f6be's
-cast_keyhole entry in mujoco_release.json, its note updated to v2; never merged). Image
-`eai-robotangle:0.3.0-dryrun-keyhole-dm4-v2` (sha256:86d3245e6d06d1063f2dec1a90b9cc5968d859c76ec7f44f31f90ecf71ab2b63);
+`release_rebuild.py 0956310dd --version <dry-run version> --families cast_keyhole --lanes 2` (with Harbor),
+on the test-only commit 0956310dd (e9e29c39e + b38a7f6be's
+cast_keyhole entry in mujoco_release.json, its note updated to v2; never merged). A local dry-run image
+(sha256:86d3245e6d06d1063f2dec1a90b9cc5968d859c76ec7f44f31f90ecf71ab2b63);
 make-instance inside it gives the birth c15ba78d2bfda87e (the reference's; instance sha256 5ebf97fa3b9142f3, 97
 files); `mk_tasks.py --check` passes for every base and for the MuJoCo instance bytes. Rendering off. Expected oracle 1,
 nop 0; all four trials as expected:
@@ -198,18 +197,17 @@ nop 0; all four trials as expected:
 | standard | nop | 0 | 70 s | no action, no success |
 
 The texts Harbor graded: the release's `packages/cast-keyhole-double-maze-i01-<mode>/{task.toml,README.md,instruction.md}`
-are the files of `scripts/robotangle/package_text/cast_keyhole/` at e9e29c39e, byte for byte; the task dirs Harbor ran
+are the files of `source/scripts/robotangle/package_text/cast_keyhole/` at e9e29c39e, byte for byte; the task dirs Harbor ran
 are the rendered ones, named `robotangle-cast-keyhole-double-maze-i01-<mode>`, with no word of easy's scene, no
 difficulty line, `oracle = "full"`, the 60 N grasp rule, 0.031 s per control step and the 2 mm sustained contact rule,
-in both modes. Report: `runs/cast_keyhole_v3_double_maze_20261011/r4/harbor_v2/work/REPORT.md` (and
-`work/harbor/results.md`); the text check: `r4/harbor_v2/check_harbor.json`. The instance upload and the image push a
+in both modes. The report and the text check were kept outside this repository. The instance upload and the image push a
 release would need were not done.
 
 ## Still open
 
-- The tier, after the model evaluation; whether the base goes onto the release list is the user's decision (then the
+- The tier, after the model evaluation; whether the base goes onto the release list is still to be decided (then the
   instance upload and the image push).
 - Grasp slips under random actions: 627 in the v2 round (599 on v1), from the opening with both interlocked 1 kg plates
   in hand (the five tiers open with empty hands: 29-49 per round). Not a failure under the criteria; the reference slips
-  0 times. Whether to change anything is the user's decision.
+  0 times. Whether to change anything is still to be decided.
 - The pipeline's step 4 (noise: other arm orientations, a release onto the table, small reorientations) is not done.

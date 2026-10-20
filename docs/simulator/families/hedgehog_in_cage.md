@@ -1,14 +1,14 @@
 # hedgehog_in_cage on MuJoCo
 
-Jianwen's session, 2026-10-10. Shared mechanisms are in `docs/rcb/MUJOCO_CORE.md`; the port (profiles `hedgehog_v2` and
-medium's `hedgehog_v1_waisted`, the exact cage partitions) is in `docs/rcb/handover/hedgehog_in_cage.md`. This note
-records the instances and the references on the exact constraint diagonal.
+Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md); the port (profiles `hedgehog_v2` and medium's
+`hedgehog_v1_waisted`, the exact cage partitions) is described in an internal port note, not included in this
+repository. This note (2026-10-10) records the instances and the references on the exact constraint diagonal.
 
 **Profiles now (2026-10-11): `hedgehog_v4`, medium `hedgehog_v3_waisted`.** v3 / v2_waisted came with the Robotiq's
 springref 2.62 (c64294012). v4 / v3_waisted put robot-robot contacts on the soft class (`robot.self_contact =
-SOFT_CONTACT`, as claws, keyhole and coil; Qineng's decision): a random arm target in the stress round folded the wrist
+SOFT_CONTACT`, as claws, keyhole and coil): a random arm target in the stress round folded the wrist
 until link5 pressed the open Robotiq's right coupler, and on the springref 2.62 that contact grew to 166 kN in 9 ticks
-(R1, `runs/stress_20261011/robotiq_springref_coupler_breakdown/`); with the soft class it stays VIOLENT (2.6 kN, 1.2 mm),
+(R1); with the soft class it stays VIOLENT (2.6 kN, 1.2 mm),
 not BREAKDOWN. The births and every reference below are unchanged on v4: each reference's two fresh-process strict
 replays end at the same state hash with success, the stress observer (`replay.py --hold 0`) is CLEAN with success, and a
 nop of the same length is CLEAN without success. Their hashes are identical, so none of them touches robot to robot.
@@ -22,12 +22,12 @@ to the cage, below 237 mm above the table, still for 2 s. Holding is allowed (as
 
 ## Instances
 
-Made as the release makes them (`scripts/robotangle/mujoco_release.json`):
+Made as the release makes them (`source/scripts/robotangle/mujoco_release.json`):
 `rcb_topogym.py make-instance --task hedgehog_in_cage --variation <variation> --scene-seed 0 --gripper-space native`.
 very_easy and easier keep their released variation ids (`very_easy`, `easier`); the others are
 `hedgehog_in_cage_<tier>`.
 
-Checks (evidence: `runs/robotangle_mujoco/v2/hedgehog_in_cage/`):
+Checks:
 - **Collision geometry.** Each cage's MuJoCo pieces come from the build's exact partition and its own checks (scene.json
   `hulls`). The thinnest piece is measured on the compiled model.
 - **Birth.** The ball's pose in the cage frame equals the declaration on every tier (0 mm, 0 deg). Its clearance to the
@@ -53,9 +53,10 @@ Checks (evidence: `runs/robotangle_mujoco/v2/hedgehog_in_cage/`):
 
 ## References (on the Robotiq spring references, 2026-10-11)
 
-`scripts/robotangle/oracles/hedgehog-in-cage-<tier>-i01/privileged.npz`; `standard.npz` is the same file.
+`scripts/robotangle/oracles/hedgehog-in-cage-<tier>-i01/privileged.npz`; `standard.npz` is the same file. (Development
+names: the tier-named and experimental -i01 directories in this note are not included in this repository.)
 
-**The physics change.** c64294012 (in `dev/robotangle_mujoco` 2f576d681) sets the Robotiq's spring links to the MJCF's
+**The physics change.** c64294012 (merged as 2f576d681) sets the Robotiq's spring links to the MJCF's
 springref 2.62 and lets a grasp go once no finger has touched the welded body for 0.2 s (`robot.SPRING_REFS`,
 `grasp.WELD_CONTACT_LOST_S`; MUJOCO_CORE.md, "The Robotiq's spring links"). The births are unchanged. On it the earlier
 references (below) still succeed on very_easy and easier, with new state hashes and the same files; easy, medium and
@@ -79,17 +80,17 @@ not.
   transport after it touches the mount (its route keeps 0.1 mm, and the hand lags), and the guard stops the run.
 
 ```bash
-R=scripts/robotangle/references/hedgehog_in_cage
+R=source/scripts/robotangle/references/hedgehog_in_cage
 # medium, hard: the family's oracle, closed loop on the frozen instance
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
     --code $R/oracle_code.py --out ref.npz
 # easy: the same run gives the first grasp (it stops at its regrasp's transport); its first 7300 rows, then the held exit
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
     --code $R/oracle_code.py --out stage1.npz
 python $R/easy_held_exit.py <instance.json> stage1.npz ref.npz --release-row 7300
 ```
 
-Run them with this checkout first on the import path, as the stress tools do (`scripts/robotangle/stress/_env.py`;
+Run them with this checkout first on the import path, as the stress tools do (`source/scripts/robotangle/stress/_env.py`;
 in a RoboTangle image, `PYTHONPATH=<checkout>` and `TOPOGYM_SOURCE` pointing elsewhere). Each closed-loop run was made
 twice, with identical rows. Every reference passes two fresh-process replays as the graders replay
 (`rcb_topogym.py replay --repeat 1 --strict`, one process each), the stress observer (`replay.py --hold 0`) and a nop
@@ -105,23 +106,22 @@ of the same length:
 
 hard's end state on the 32-facet prism rule (2026-10-13): hard's cage carries one cylinder geom, the fixed internal
 post the star stands on at the start (r 8 mm, length 125.5 mm; the other 428 cage pieces are meshes). Since the rule
-(`b2b751580`, in local dev as `64820cfbf` on 2026-10-12) builds a cylinder the robot can collide with as a 32-facet
+(`b2b751580`, also as `64820cfbf` on 2026-10-12) builds a cylinder the robot can collide with as a 32-facet
 convex prism, the post is a prism in every instance made since. The birth is unchanged (e1b0676facb80f8c: the star
 settles on the post the same way), but the star's contacts with the post differ while it moves, so the unchanged rows
 now end on b03a22cba8259202. Checked on 126cf1b6c (the merge of the remote): two fresh replays on that hash with
-success, the stress observer CLEAN, the nop CLEAN and not successful (`runs/stress_20261013/m126_replays/m126_hedgehog/`),
-and Harbor under the release rebuild, both modes, oracle 1 and nop 0, both ending on that hash (local run B,
-2026-10-13). The 1,000-episode acceptance round on the prism instance (a cloud host, m126_hedgehog_hard_round on 126cf1b6c,
+success, the stress observer CLEAN, the nop CLEAN and not successful,
+and Harbor under the release rebuild, both modes, oracle 1 and nop 0, both ending on that hash (a local run,
+2026-10-13). The 1,000-episode acceptance round on the prism instance (a cloud host, round m126_hedgehog_hard_round on 126cf1b6c,
 seeds from 108001): **PASS**, 559,018 controls, 0 confirmed BREAKDOWN under every reading v2-v2.12 (466 candidates
-replayed in fresh processes: 293 VIOLENT, 173 CLEAN), 29 grasp slips, 0 pops; the reference CLEAN on b03a22cba8259202
-(`runs/stress_20261013/m126_replays/m126_hedgehog_hard_round/`).
+replayed in fresh processes: 293 VIOLENT, 173 CLEAN), 29 grasp slips, 0 pops; the reference CLEAN on b03a22cba8259202.
 
 ### Before: on the exact constraint diagonal, springs about 0 (superseded)
 
-Recorded in a fresh Session on the same instances (jianwen/mj2-hedgehog: jianwen/mj-integrate merged with e75390aab),
+Recorded in a fresh Session on the same instances (a development branch merged with e75390aab),
 with `rerecord.py` (very_easy, easier, medium, hard: the released oracle's rows, the -i00 references, then hold rows of
 the last row) and `easy_held_exit.py` (easy: the released rows to their release, row 7126, then the held exit).
-Core's check of the port's references on that physics (MUJOCO_HANDOVER_JIANWEN.md) ended at the same four hashes.
+An independent check of the port's references on that physics ended at the same four hashes.
 
 | tier | rows, released -> i01 | state hash | file sha256 |
 |---|---|---|---|
@@ -176,9 +176,9 @@ samples 0.056 rad. Recorded: 8255 rows, success; no review event, no forcing eve
 `hedgehog_in_cage_window_change` has its own oracle (`topogym/planning/hedgehog_in_cage/window_change.py`): three grasps
 and two set-downs. On the exact constraint diagonal with the springs about 0 it took 2683 rows, ended at
 56eff074da9fcdc6, and passed two fresh replays; a nop of the same length did not succeed. The design note is
-`docs/develop/tasks/hedgehog_in_cage_window_change_zh.md`.
+internal and not included in this repository.
 
-On the Robotiq spring references (2026-10-11) that reference no longer succeeded (the stress session's replay ended at
+On the Robotiq spring references (2026-10-11) that reference no longer succeeded (the stress validation's replay ended at
 20497bfcbfc054e5, observer CLEAN), and the plan (`window_change_plan.json`) was re-fitted; the oracle's code is
 unchanged. The set-downs' landings are this design's sensitive point (the design note says so): with the new fingers
 the first set-down landed 19 mm and 33 deg from where the plan's second stage starts (S10 then lay inside the cage,
@@ -200,24 +200,24 @@ out of reach), and the second one now rolls off the mount onto the table.
 The instance is made in the width gripper space (the oracle commands widths), and the reference is run-oracle code:
 
 ```bash
-python scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
+python source/scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
     --variation hedgehog_in_cage_window_change --scene-seed 0 --gripper-space width --out <dir>/instance.json
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
-    --code scripts/robotangle/references/hedgehog_in_cage/window_change_code.py --out <dir>/privileged.npz
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
+    --code source/scripts/robotangle/references/hedgehog_in_cage/window_change_code.py --out <dir>/privileged.npz
 ```
 
 `scripts/robotangle/oracles/hedgehog-in-cage-window-change-i01/` (`mujoco_release.json` new_bases: template
-`hedgehog-in-cage-very-easy-i00`, gripper space width, texts in `scripts/robotangle/package_text/hedgehog_in_cage/`): birth
+`hedgehog-in-cage-very-easy-i00`, gripper space width, texts in `source/scripts/robotangle/package_text/hedgehog_in_cage/`): birth
 2ecb7e00fc766fb8, 2961 rows, state hash 45d1fdb91dfcf298, file sha256 005916f1b7f43f78 (`standard.npz` is the same
 file). Two fresh-process strict replays end at that hash with success; the stress observer (`replay.py --hold 0`) is
 CLEAN with success (its peaks, 1.2 m/s and 22 rad/s, are the ball rolling off the mount onto the table after the
-second set-down); a nop of the same length is CLEAN without success. The offline tools of the re-fit are in `runs/hedgehog_window_change_mujoco_20261010/scripts_20261011/` (wc_plan_adapt.py, wc_place_extend.py,
-wc_refit.py; not in the repository, like the design's).
+second set-down); a nop of the same length is CLEAN without success. The offline tools of the re-fit (wc_plan_adapt.py, wc_place_extend.py,
+wc_refit.py) are not in the repository, like the design's.
 
 ## cast_cage (experimental; its own base, hedgehog-in-cage-cast-cage-i01)
 
-`hedgehog_in_cage_cast_cage` is Hanayama's Cast Cage at four times its real size (design record:
-`runs/hedgehog_cast_cage_20261010/faithful/README.md`, not in the repository): a closed barrel with four side windows,
+`hedgehog_in_cage_cast_cage` is Hanayama's Cast Cage at four times its real size (the design record is not in the
+repository): a closed barrel with four side windows,
 a six-spiked star inside, and a push rod lying on the table as a tool. The star starts at rest with spike E 2.7 mm out of
 W0, too little to hold; nothing else sticks out. The scene: `topogym/tasks/hedgehog_in_cage/cast_cage.py` (cage turned
 120 deg on a 0.24 m mount at (0.05, 0.05) m; the placement study and why the mount, in the design record), profile
@@ -243,14 +243,14 @@ Its oracle (`topogym/planning/hedgehog_in_cage/cast_cage.py`, the designed route
 The instance is made in the width gripper space (the default), and the reference is run-oracle code:
 
 ```bash
-python scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
+python source/scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
     --variation hedgehog_in_cage_cast_cage --scene-seed 0 --out <dir>/instance.json
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
-    --code scripts/robotangle/references/hedgehog_in_cage/cast_cage_code.py --out <dir>/privileged.npz
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
+    --code source/scripts/robotangle/references/hedgehog_in_cage/cast_cage_code.py --out <dir>/privileged.npz
 ```
 
 `scripts/robotangle/oracles/hedgehog-in-cage-cast-cage-i01/` (`mujoco_release.json` new_bases: template
-`hedgehog-in-cage-hard-i00`, gripper space width, texts in `scripts/robotangle/package_text/hedgehog_in_cage/`): birth ad1fcefad2565341,
+`hedgehog-in-cage-hard-i00`, gripper space width, texts in `source/scripts/robotangle/package_text/hedgehog_in_cage/`): birth ad1fcefad2565341,
 2864 rows (71.6 s), state hash 72fac357df0221a0, file sha256 523c1406649f6d0f (`standard.npz` is the same file). Two
 fresh-process strict replays end at that hash with success (69 s each); the stress observer (`replay.py --hold 0`) is
 CLEAN with success (deepest task contact 0.14 mm, held finger 0.64 mm, no forcing, no review event); a nop of the same
@@ -258,8 +258,8 @@ length is CLEAN without success.
 
 ## owl (Bird in Cage; experimental; its own base, hedgehog-in-cage-owl-i01)
 
-`hedgehog_in_cage_owl` is the wooden Bird in Cage puzzle at 2.5 times its real size (design record:
-`runs/bird_in_cage_design_20261010/README.md`, not in the repository): a cage of bars between two discs with a rung across
+`hedgehog_in_cage_owl` is the wooden Bird in Cage puzzle at 2.5 times its real size (the design record is not in the
+repository): a cage of bars between two discs with a rung across
 its widest gap, a wooden owl standing inside with its tail sticking out through that gap, two wing plates on one hinge
 that turn together, and a thin rod with a box handle lying on the table as a tool. The owl leaves only through the widest
 gap, below the rung, lying on its side; laying it down inside the cage works only with the wings between about 205 and
@@ -270,7 +270,7 @@ task text says the rod is a tool, that where it ends up does not matter, and tha
 episode in failure (it is a task piece; `placement_scene_note`).
 
 The reference was built piece by piece against the Session by the design's offline builder
-(`runs/bird_in_cage_design_20261010/scripts/v7_build.py` with `v8_session.py`; not in the repository), each piece
+(`v7_build.py` with `v8_session.py`; not in the repository), each piece
 planned from the state the simulation had actually reached: rod strokes from a physics search checked for the arm,
 carried routes from a push search with the real gripper's hulls on the tail. One arm, the rod and the tail in turns:
 - **Wings 1:** the rod picked from the table, two strokes turn the wings from 270 to 221 deg with the owl standing free,
@@ -284,14 +284,14 @@ The instance is made in the native gripper space (the rows command the Robotiq d
 steps the reference's rows:
 
 ```bash
-python scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
+python source/scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
     --variation hedgehog_in_cage_owl --scene-seed 0 --gripper-space native --out <dir>/instance.json
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
-    --code scripts/robotangle/references/hedgehog_in_cage/owl_code.py --out <dir>/privileged.npz
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
+    --code source/scripts/robotangle/references/hedgehog_in_cage/owl_code.py --out <dir>/privileged.npz
 ```
 
 `scripts/robotangle/oracles/hedgehog-in-cage-owl-i01/` (`mujoco_release.json` new_bases: template
-`hedgehog-in-cage-very-easy-i00`, gripper space native, texts in `scripts/robotangle/package_text/hedgehog_in_cage/`): birth
+`hedgehog-in-cage-very-easy-i00`, gripper space native, texts in `source/scripts/robotangle/package_text/hedgehog_in_cage/`): birth
 e22fac98a9c3807a, 7224 rows (180.6 s), state hash f587cfd6835c9308, file sha256 23c2871db1b55c6b (`standard.npz` is the
 same file). Two fresh-process strict replays end at that hash with success (about 175 s each, MuJoCo 3.14); the stress
 observer (`replay.py --hold 0`) is CLEAN with success (deepest task contact 0.38 mm, held finger 0.66 mm, no forcing, no

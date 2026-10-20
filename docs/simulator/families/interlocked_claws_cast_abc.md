@@ -1,8 +1,11 @@
 # interlocked_claws_cast_abc on MuJoCo (Hanayama Cast ABC)
 
-Jianwen, 2026-10-11. An experimental setting of the interlocked_claws family beside its five tiers (variation id
+Released later as the base `roboarc-interlocked-claws-11-i01`; this note records its development, from when it was an experimental
+setting (statements below about its release status are of that time).
+
+An experimental setting (2026-10-11) of the interlocked_claws family beside its five tiers (variation id
 `interlocked_claws_cast_abc`, pool experimental, tier open until the model evaluation); the five tiers are unchanged.
-Design record, sources and every measurement: `runs/cast_abc_design_20261011/` (README.md, PROGRESS.md; not in git).
+The design record, sources and every measurement were kept outside this repository.
 
 ## The puzzle and the setting
 
@@ -14,7 +17,7 @@ is turned over once, then the C comes out of the B's lower window.
 
 - Geometry (`topogym/assets/geometry/cast_abc.py`, model v4): both pieces from a top-down video frame, 10 mm per bar width
   (plate 233 x 137 x 19 mm, 101 g; C ring 70 x 127 x 15 mm, 36 g; density 600 as every claws piece). Two dimensions differ
-  from the measurements so that the official route is the shortest one in this geometry (the user accepted them on
+  from the measurements so that the official route is the shortest one in this geometry (accepted on
   2026-10-11): the C 7.0 instead of 7.2 bar widths wide, and the A cross-bar groove 0.4 bar widths toward the A's right
   leg. With the measured values a two-groove shortcut opens (A cross bar, then the bottom bar).
 - Collision: profile `claws_v6_cast_abc` = claws_v6 plus `split`: each piece collides as its exact convex decomposition
@@ -29,17 +32,18 @@ is turned over once, then the C comes out of the B's lower window.
 
 ## Reference (-i01)
 
-`scripts/robotangle/oracles/interlocked-claws-cast-abc-i01/privileged.npz` (`standard.npz` is the same file), 5979 rows
+`scripts/robotangle/oracles/interlocked-claws-cast-abc-i01/privileged.npz` (not included in this repository; `standard.npz`
+is the same file), 5979 rows
 (149.5 s), native gripper space, on the instance made on this branch (`rcb_topogym.py make-instance --task
 interlocked_claws --variation interlocked_claws_cast_abc --scene-seed 0 --gripper-space native`; birth
 e6f9667c9f67c760). Recorded with
 
 ```bash
-python scripts/robotangle/shared/rcb_topogym.py run-oracle --task interlocked_claws --instance <instance.json> \
-    --code scripts/robotangle/references/interlocked_claws/cast_abc_oracle.py --out <dir>/privileged.npz
+python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task interlocked_claws --instance <instance.json> \
+    --code source/scripts/robotangle/references/interlocked_claws/cast_abc_oracle.py --out <dir>/privileged.npz
 ```
 
-The oracle code follows `scripts/robotangle/references/interlocked_claws/cast_abc_plan.npz`: per 40 Hz control step the
+The oracle code follows `source/scripts/robotangle/references/interlocked_claws/cast_abc_plan.npz`: per 40 Hz control step the
 planned joints of both arms (the reference route's inverse kinematics) and the planned pose of the C in the plate's frame.
 Each arm joint gets its planned target plus feedforwards of its drive's velocity lag and Coulomb friction, and a slow
 correction: the left arm integrates its joint error (the plate's weight makes the low-gain drives sag), the right arm
@@ -53,18 +57,18 @@ welds carry at most 5.1 N (slip at 60 N).
 
 Checks of the reference on this branch's code (2026-10-11), on the RoboTangle 0.2.22 runtime python (mujoco 3.14.0,
 trimesh 5.1.0, shapely 2.1.2, scipy 1.17.1, numpy 2.3.5; the image's libraries): make-instance there gives the same birth
-e6f9667c9f67c760, instance.json and asset bytes as the image `topogym-coil-v2:20261009-02` (the recording's).
+e6f9667c9f67c760, instance.json and asset bytes as the local dev image the recording used.
 - Two fresh-process strict replays (`rcb_topogym.py replay --repeat 2 --strict`): success at row 5979, both
   4701f99e7860e8c9 (the recording's own final state).
-- The stress observer (`scripts/robotangle/stress/replay.py --hold 0`, criteria v2.10): CLEAN; no fail, trigger or pop;
+- The stress observer (`source/scripts/robotangle/stress/replay.py --hold 0`, criteria v2.10): CLEAN; no fail, trigger or pop;
   the fastest task link 0.044 m/s, task contact force at most 9.5 N (the holding fingers), task contact depth at most
   0.41 mm (finger pads on their pieces), energy created 0.0003 J, no grasp slip, no speed or torque clamp.
 - The equal-length nop (5979 rows of the birth targets, under the observer): no success, CLEAN.
 - One run without the observer: 197 s of wall clock (33 ms per control step) on a loaded 128-core host.
 
-A video of the reference's physics run (nyx_direct): `runs/cast_abc_design_20261011/phys/video/cast_abc_i01_nyx.mp4`.
+A video of the reference's physics run was made with nyx_direct (not included).
 
-Rechecked on dev 7f5516d02 (2026-10-12; `runs/cast_abc_design_20261011/phys/head_7f5516d02/`). The commits since
+Rechecked on 7f5516d02 (2026-10-12). The commits since
 6d7ee21e4 leave Cast ABC's physics and scene as they were: `grasp_rules` text (1cbd0283d); placement-only goal text;
 `scene._family_parts`' winding-number recheck of part vertices more than 1e-7 m outside the mesh (Cast ABC's worst is
 7.06e-8 m); the claws grasp TCP distance default (0.06, unchanged); new profile keys of other settings. No commit touched
@@ -75,13 +79,13 @@ nyx_direct, the render bridge, the MuJoCo world, grasp or robot, or Cast ABC's o
   0.41 mm (finger pads).
 - Collision geoms: 201 and 101 convex meshes; their volume is 168.5 and 59.9 cm^3 against the pieces' own convex hulls'
   493.6 and 117.5 cm^3, so no hull closes a window or notch; thinnest 1.038 mm and 2.289 mm, none under 0.5 mm.
-- Nyx (nyx_direct): one frame per camera, both pieces in their hands, colours and occlusion as expected (`nyx/`).
+- Nyx (nyx_direct): one frame per camera, both pieces in their hands, colours and occlusion as expected.
 - Two fresh-process strict replays (one process each): success at row 5979, both 4701f99e7860e8c9.
 
 ## Harbor (2026-10-11)
 
-Image `eai-robotangle:0.3.0-dev-cast-abc` (sha256:ae1cd42c1435edcddced02f24c2be22723081b62a591e99aded79ca423bc5f88),
-built with `images/robotangle/Dockerfile.mujoco` from 6d7ee21e4. make-instance inside it gives the birth e6f9667c9f67c760
+A local dev image (sha256:ae1cd42c1435edcddced02f24c2be22723081b62a591e99aded79ca423bc5f88),
+built with `source/images/robotangle/Dockerfile.mujoco` from 6d7ee21e4. make-instance inside it gives the birth e6f9667c9f67c760
 with the same asset bytes; its instance.json adds only `topogym_source`. `harbor_check.py --tasks --lanes 1`, rendering
 off (`RCB_RENDER=off`). Expected oracle 1, nop 0; all four trials as expected:
 
@@ -94,19 +98,20 @@ off (`RCB_RENDER=off`). Expected oracle 1, nop 0; all four trials as expected:
 
 New settings had no release base yet, so this check rendered the package of the released base `interlocked-claws-easy-i00`
 and replaced its scene-describing lines with Cast ABC's (15 lines in privileged, 10 in standard; no easy-scene word
-left). The texts that were graded: `runs/cast_abc_design_20261011/out/task_texts/`. The grading holds; the package text is
+left). The graded texts were kept outside this repository. The grading holds; the package text is
 not a release text. The setting's own base followed on 2026-10-12 (next section).
 
 ## Harbor under its own base interlocked-claws-cast-abc-i01 (2026-10-12)
 
-Cast ABC is made evaluable, not released (the user, 2026-10-12, as for Rotor): `mujoco_release.json` lists nothing for
-it. Its texts are `scripts/robotangle/package_text/interlocked_claws/interlocked-claws-cast-abc-i01-<mode>/` (7f5516d02;
+Cast ABC is made evaluable, not released (2026-10-12, as for Rotor): `mujoco_release.json` lists nothing for
+it. Its texts are `scripts/robotangle/package_text/interlocked_claws/interlocked-claws-cast-abc-i01-<mode>/` (not included in this
+repository; 7f5516d02;
 the sustained contact rule corrected to 2 mm in 62d8d0d5c), laid over the released `interlocked-claws-easy-i00` by
-release_rebuild's new_bases. The base is made on a test-only commit, 21b3e083d on the branch
-`jianwen/cast-abc-harbor-test` (dev 62d8d0d5c plus the interlocked_claws entry reduced to `"tiers": []` and this new base;
+release_rebuild's new_bases. The base is made on a test-only commit, 21b3e083d
+(62d8d0d5c plus the interlocked_claws entry reduced to `"tiers": []` and this new base;
 never merged):
-`release_rebuild.py 21b3e083d --version 0.3.0-dryrun-cast-abc-newbase --families interlocked_claws` (with Harbor): **PASS**.
-- Image `ghcr.io/mll-lab-nu/eai-robotangle:0.3.0-dryrun-cast-abc-newbase` (sha256:f132c1c7e41c54f5…, local only). The
+`release_rebuild.py 21b3e083d --version <dry-run version> --families interlocked_claws` (with Harbor): **PASS**.
+- A local dry-run image (sha256:f132c1c7e41c54f5…). The
   instance made in its image without instances: birth e6f9667c9f67c760, the reference's (instance sha256
   79b3fd3e9b73e6e0, 306 files). `mk_tasks.py --check`: every base and the MuJoCo instance bytes ok.
 - The texts Harbor graded: the release's `packages/interlocked-claws-cast-abc-i01-<mode>/` task.toml, README.md and
@@ -123,14 +128,14 @@ never merged):
 | standard | oracle | 1 | 753 s | live and replay both success, both 4701f99e7860e8c9; instance and assets exact |
 | standard | nop | 0 | 83 s | no action, ends on the timeout in the birth state |
 
-Run: `runs/cast_abc_design_20261011/harbor_newbase/` (REPORT.md; `work/harbor/results.md`). The instance upload and the
+The run report was kept outside this repository. The instance upload and the
 image push that a release would need were not done.
 
 ## Stress acceptance (2026-10-12)
 
 On 6d7ee21e4, criteria v2.10, 1,000 episodes over the six strategies, seeds 98001-98009: **PASS**. No confirmed BREAKDOWN;
 the reference success, CLEAN, same final state (10.5 min under the observer); the nop no success, CLEAN; 110 VIOLENT in
-the search (71 from cem; reported, not failed); 229 grasp slips. Report: `runs/stress_20261012/cast_abc_6d7ee21e4/`.
+the search (71 from cem; reported, not failed); 229 grasp slips.
 
 ## Grasp slips under random actions
 
@@ -149,17 +154,17 @@ with the weld's force split by source, per substep:
   (cast_coil v2, hedgehog and lock_picking open with empty hands.)
 - The reference loses nothing: the welds carry at most 5.1 N.
 
-Nothing was changed in the grasp itself. The agent's task text now states MuJoCo's slip rule as well (the user's decision,
+Nothing was changed in the grasp itself. The agent's task text now states MuJoCo's slip rule as well (decided
 2026-10-12): the shared commit 1cbd0283d added it to `Session.grasp_rules()`, and Cast ABC's texts carry it (package_text
 since 7f5516d02, so 62d8d0d5c and the test commit 21b3e083d): the privileged instruction.md's "Grippers:" line (line 102)
 and the standard instruction.md's "Grasping:" line (line 116; line 115 of the rendered standard task) say a hold is also
 lost when it "has to push or pull its part with more than 60 N averaged over 20 ms", with the example of two held parts
-that hook into each other being pulled apart. Data: `runs/cast_abc_design_20261011/phys/slip/summary.json`.
+that hook into each other being pulled apart.
 
 ## Still open
 
-- Not on the release list (the user, 2026-10-12): evaluable through the test-only manifest above; listing it, with the
-  instance upload and the image, would be the user's decision.
+- Not on the release list (2026-10-12): evaluable through the test-only manifest above; listing it, with the
+  instance upload and the image, is still to be decided.
 - The tier, after the model evaluation.
 - Public release: Cast ABC is a Hanayama product design; confirm before publishing (as for the Rotor setting).
 - The pipeline's step 4 (noise: other arm orientations, a release onto the table, small reorientations) is not done.
