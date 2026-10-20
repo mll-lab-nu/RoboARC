@@ -10,14 +10,14 @@ keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "traject
 [metadata]
 author_name = "Jianwen Lyu"
 tooling_version = "{{TOOLING_VERSION}}"
-task_type = "trajectory"          # trajectory | policy   (see docs/rcb/PROTOCOL.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU physics, CUDA cloth step, Nyx RGB)
 robot = "aloha-2"
 family = "blanket_flatten"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14): scripts/task_dynamics.toml
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
 {{ORACLE}}
-difficulty = "easy"               # the variation's tier (docs/rcb/TAXONOMY.md)
+difficulty = "easy"               # the variation's tier (docs/TAXONOMY.md)
 grasp = "assisted (the pbd_local_patch_v1 grasp regions on blanket)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision release_settling_v1)"
 instance_seed = 0                 # scene = environment/instance.json (variation blanket_flatten_easy, eval index None); identity = dataset.toml digest

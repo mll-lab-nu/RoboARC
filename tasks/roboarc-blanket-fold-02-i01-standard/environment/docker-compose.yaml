@@ -3,7 +3,7 @@
 # RoboARC renders camera images with Nyx and steps its cloth on CUDA: the GPU goes to the sidecar.
 # Nyx renders through Vulkan: the device reservation below passes exactly one GPU (Nyx needs exactly one), and
 # NVIDIA_DRIVER_CAPABILITIES=all makes the container toolkit mount the driver's graphics libraries, which the image's
-# Vulkan ICD and EGL vendor files name (images/roboarc/Dockerfile). No `runtime: nvidia`: with the image's
+# Vulkan ICD and EGL vendor files name (images/roboarc/Dockerfile.genesis-0.2.22). No `runtime: nvidia`: with the image's
 # NVIDIA_VISIBLE_DEVICES=all it can expose every GPU of the host.
 # Crash recovery (docs/STANDARD_MODE.md §13): run.sh exits non-zero when the service crashes, compose restarts the
 # container (same container, same /data) and the service replays its journal into the same episode, never a reset.

@@ -1,4 +1,4 @@
-# Base image = TopoGym's simulator (see images/topogym/). Everything task-specific is copied here.
+# Base image = the RoboARC release image (images/roboarc/). Everything task-specific is copied here.
 FROM {{IMAGE}}
 # MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes
 ENV NPY_DISABLE_CPU_FEATURES=AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR OPENBLAS_CORETYPE=Haswell

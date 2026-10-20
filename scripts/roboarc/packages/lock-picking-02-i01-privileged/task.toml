@@ -10,14 +10,14 @@ keywords = ["robotics", "roboarc", "mujoco", "panda_robotiq", "code-as-policy", 
 [metadata]
 author_name = "Jianwen Lyu"
 tooling_version = "{{TOOLING_VERSION}}"
-task_type = "trajectory"          # trajectory | policy   (see docs/rcb/PROTOCOL.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU physics, Nyx RGB)
 robot = "franka-robotiq-2f85"
 family = "lock_picking"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14): scripts/task_dynamics.toml
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
 {{ORACLE}}
-difficulty = "easier"               # the variation's tier (docs/rcb/TAXONOMY.md)
+difficulty = "easier"               # the variation's tier (docs/TAXONOMY.md)
 grasp = "assisted (the contact_weld_v1 grasp regions on lock_key)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision terminal_v6_chain_lock)"
 instance_seed = 0                 # scene = environment/instance.json (variation lock_picking_easier, eval index None); identity = dataset.toml digest

@@ -10,14 +10,14 @@ keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "traject
 [metadata]
 author_name = "Jianwen Lyu"
 tooling_version = "19"
-task_type = "trajectory"          # trajectory | policy   (see docs/rcb/PROTOCOL.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "aloha-2"
 family = "slotted_post_ring"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14): scripts/task_dynamics.toml
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
 oracle = "full"
-difficulty = "hard"               # the variation's tier (docs/rcb/TAXONOMY.md)
+difficulty = "hard"               # the variation's tier (docs/TAXONOMY.md)
 grasp = "assisted (the contact_weld_v1 grasp regions on slotted_chain)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision placement_region_v2_default_success)"
 instance_seed = 0                 # scene = environment/instance.json (variation slotted_post_ring_hard_chain, eval index None); identity = dataset.toml digest

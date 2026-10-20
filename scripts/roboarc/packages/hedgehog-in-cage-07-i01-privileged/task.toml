@@ -10,13 +10,13 @@ keywords = ["robotics", "roboarc", "mujoco", "panda_robotiq", "code-as-policy", 
 [metadata]
 author_name = "Jianwen Lyu"
 tooling_version = "{{TOOLING_VERSION}}"
-task_type = "trajectory"          # trajectory | policy   (see docs/rcb/PROTOCOL.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "franka-robotiq-2f85"
 family = "hedgehog_in_cage"
 difficulty = "easy"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14): scripts/task_dynamics.toml
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
 {{ORACLE}}
 grasp = "assisted (the contact_weld_v1 grasp regions on owl, rod)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision hedgehog_placement_v4_grasp_contact_2mm)"
