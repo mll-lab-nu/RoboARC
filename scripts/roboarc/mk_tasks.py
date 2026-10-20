@@ -414,6 +414,8 @@ def check_texts(base: str, mode: str, rec: dict, texts: dict[str, str]) -> None:
     if mode == "standard":
         assert f"One call returns at most {MAX_FRAMES} images" in ins and f"`depth=\"frames\"` counts {DEPTH_FRAME}" in ins, \
             f"{where}: the image budget is not server.py's"
+    # the task's own declarations, never taken from the committed task dir by normalize (a render depends on its inputs only)
+    assert re.search(r'(?m)^dynamics = "(?:static|dynamic)"', texts["task.toml"]), f"{where}: task.toml declares no dynamics"
     d = re.search(r'(?m)^difficulty = "([^"]*)"', texts["task.toml"])
     assert d and d[1] in TIERS, f"{where}: task.toml has no difficulty of {TIERS}"
     named = [v["difficulty"] for v in NAMES.values() if v["new"] == f"{BENCH}-{base}"]
