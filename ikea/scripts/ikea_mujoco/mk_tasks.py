@@ -261,7 +261,7 @@ def task_toml(t: str) -> str:
 artifacts = ["/app/output/"]
 
 [task]
-name = "robot-coding-bench/{name(t)}"
+name = "roboarc/{name(t)}"
 description = "IKEA MuJoCo {x['title']} ({r['short']}, MuJoCo 3.14.0 CPU): produce one replayable trajectory. {x['goal']} Frozen scene (the scene's keyframe '{keyframe(t)}'); physical grasps, no assist."
 authors = [{{ name = "Xiaoyu" }}]
 keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "{TEXTS['tasks'][t]['robot']}", "bimanual", "code-as-policy", "trajectory"]

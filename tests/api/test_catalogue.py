@@ -28,6 +28,7 @@ def test_counts():
 @pytest.mark.parametrize("alias,canonical", [
     ("roboarc-orbits-02-i01", "roboarc-orbits-02-i01"), ("orbits-02-i01", "roboarc-orbits-02-i01"),
     ("orbits-02", "roboarc-orbits-02-i01"), ("roboarc-orbits-02-i01-standard", "roboarc-orbits-02-i01"),
+    ("roboarc/roboarc-orbits-02-i01-privileged", "roboarc-orbits-02-i01"),
     ("robot-coding-bench/roboarc-orbits-02-i01-privileged", "roboarc-orbits-02-i01"),
     ("roboarc-ikea-lack-i00", "roboarc-ikea-lack-i00"), ("lack", "roboarc-ikea-lack-i00"),
     ("ikea-lack", "roboarc-ikea-lack-i00"), ("roboarc-ikea-svallet-i00-standard", "roboarc-ikea-svallet-i00")])

@@ -150,7 +150,7 @@ def resolve(task_id: str) -> TaskInfo:
     """The TaskInfo of a task id or alias (see the module docstring); KeyError with suggestions otherwise."""
     cat = catalogue()
     s = str(task_id).strip()
-    s = s.split("/", 1)[1] if s.startswith("robot-coding-bench/") else s
+    s = s.split("/", 1)[1] if s.startswith(("roboarc/", "robot-coding-bench/")) else s   # Harbor names, 1.0.1 and 1.0.0
     for suffix in ("-privileged", "-standard"):
         if s.endswith(suffix):
             s = s[:-len(suffix)]
