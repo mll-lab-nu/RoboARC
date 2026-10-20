@@ -28,7 +28,7 @@ AXES = {
         dict(path="center_xy_m", kind="offset", range=[[-.03, .04], [-.01, .03]]),
         dict(path="yaw_deg", kind="offset", range=[-10., 10.]),
         # Silver would match the horseshoes; keep the ring distinguishable.
-        dict(path="target_ring_finish", kind="choice", values=["copper", "coated_metal"], visual=True),
+        dict(path="target_ring_finish", kind="choice", values=["copper", "coated_metal", "brass"], visual=True),
     ),
     "cast_coil": (
         # Both pieces move together; the silver offset stays in world XY. +y moves the
@@ -65,12 +65,17 @@ AXES = {
         # The scene sits near x ~ 0.2, ~0.8 m from the Panda base: no +x.
         # Strand fan/bend/curl are already drawn from the episode seed by FiberLayout.
         dict(path="center_xy_m", kind="offset", range=[[-.02, 0.], [-.02, .02]]),
+        # The copper ring and the red strand stay (the instructions name them); the jacket is black, dark grey, navy
+        # or dark green, and the other strands' colours trade places.
+        dict(path="sheath_color", kind="choice", visual=True, values=[
+            [.026, .029, .032], [.24, .25, .27], [.05, .09, .22], [.07, .17, .10]]),
+        dict(path="strand_palette_shift", kind="choice", values=[0, 2, 4], visual=True),
     ),
     "lock_picking": (
         # The chain lock (2026-10-10, it replaced the original tiers): each tier's geometry, stops and key tray are one
         # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move; its
         # rotor count differs by tier (3 or 4), so the rotor colours keep their order. Only the base's finish varies.
-        dict(path="base_finish", kind="choice", values=["coated_metal", "engineering_plastic"], visual=True),
+        dict(path="base_finish", kind="choice", values=["coated_metal", "engineering_plastic", "silver"], visual=True),
     ),
     "orbits": (
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
@@ -108,6 +113,13 @@ AXES = {
         dict(path="texture.pattern", kind="choice", values=["grid", "stripes"], visual=True),
         dict(path="center_xy_m", kind="offset", range=[[-.04, .04], [0., .03]]),
     ),
+    "blanket_fold": (
+        # Looks only (the fold target images must be rendered in the drawn look); the cloth stays where its frozen
+        # start and target put it, so there is no centre axis.
+        dict(path="color", kind="choice", visual=True, values=[
+            [.22, .46, .70], [.70, .20, .18], [.22, .52, .30], [.80, .62, .18], [.45, .47, .50]]),
+        dict(path="texture.pattern", kind="choice", values=["grid", "stripes"], visual=True),
+    ),
     "knot_untying": (
         # The knot sits at world x = 0, 13.6 cm right of the table centre: shift leans -x.
         # Its tails point -y, away from the arm line (y = -0.019): -y and a positive turn
@@ -117,11 +129,46 @@ AXES = {
         dict(path="yaw_deg", kind="offset", range=[-30., 15.]),
         dict(path="rope_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
     ),
+    # The fixed-scene families below vary appearance only (appearance(); the user, 2026-10-20): every axis re-colours
+    # visual geoms or meshes, never a colliding one; the values leave out the default and their order is the looks of
+    # appearance seeds 1, 2, ... Colours the texts name stay (battery cells, red "+" marks, the stick's yellow blade and
+    # blue handle; caliper labels, scale and the knob's white line; Trinity's green goal region).
+    "bed_bolt": (
+        dict(path="wood_finish", kind="choice", values=["walnut", "white_painted", "white_oak"], visual=True),
+        dict(path="bolt_finish", kind="choice", values=["zinc", "yellow_zinc"], visual=True),
+        dict(path="key_finish", kind="choice", values=["black_oxide", "blue_coated"], visual=True),
+    ),
+    "caliper_sorting": (
+        # The four sleeves stay alike (one finish for all); bins keep the white label cards.
+        dict(path="fixture_finish", kind="choice", values=["forest_green", "safety_orange", "wood"], visual=True),
+        dict(path="bin_finish", kind="choice", values=["pale_blue", "pale_yellow"], visual=True),
+        dict(path="sleeve_finish", kind="choice", values=["brass", "black_oxide"], visual=True),
+    ),
+    "clock_assembling": (
+        dict(path="movement_finish", kind="choice", values=["rhodium", "gilt"], visual=True),
+        dict(path="stand_finish", kind="choice", values=["walnut", "white_plastic"], visual=True),
+        dict(path="screw_finish", kind="choice", values=["gilt", "steel"], visual=True),
+    ),
+    "battery_replacement": (
+        dict(path="controller_finish", kind="choice", values=["white", "red", "blue"], visual=True),
+        dict(path="tray_finish", kind="choice", values=["grey", "white"], visual=True),
+        dict(path="box_finish", kind="choice", values=["blue", "green"], visual=True),
+        dict(path="props_finish", kind="choice", values=["wood", "black"], visual=True),
+    ),
 }
 
 
+def _defines(tree, path):
+    for name in path.split("."):
+        if not isinstance(tree, Mapping) or name not in tree:
+            return False
+        tree = tree[name]
+    return True
+
+
 def axes(task_class):
-    return tuple(AXES.get(task_class.task_id, ()))
+    """The task's axes whose leaf the class defines (cast_coil's v2 designs have no centre or yaw parameter)."""
+    return tuple(axis for axis in AXES.get(task_class.task_id, ()) if _defines(task_class.defaults, axis["path"]))
 
 
 def _stream_name(task_class, axis):
@@ -162,6 +209,27 @@ def draw(task_class, seed):
             value = axis["values"][int(stream.integers(len(axis["values"])))]
         else:
             raise ValueError(f"Unknown scene variation kind: {axis['kind']!r}")
+        _assign(values, axis["path"], _plain(value))
+    return values
+
+
+def appearance(task_class, seed):
+    """Task parameters of appearance seed ``seed`` for a fixed-scene base whose task seed stays 0, visual axes only: {}
+    for seed 0 (the scene as its reference was recorded); else each choice axis takes its values other than the default
+    in order, seed 1 the first (so two consecutive seeds differ on every choice axis: independent draws for seeds 1 and 2
+    can coincide), and each offset axis the seed's draw."""
+    if seed == 0:
+        return {}
+    drawn, values = draw(task_class, seed), {}
+    for axis in axes(task_class):
+        if not axis.get("visual"):
+            continue
+        if axis["kind"] == "choice":
+            default = _plain(_parameter_at(task_class.defaults, axis["path"]))
+            others = [v for v in axis["values"] if _plain(v) != default]
+            value = others[(seed - 1) % len(others)]
+        else:
+            value = _parameter_at(drawn, axis["path"])
         _assign(values, axis["path"], _plain(value))
     return values
 

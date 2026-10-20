@@ -17,7 +17,9 @@ the barrel arbor, a click; 3:46-4:26). The scene (`topogym/assets/geometry/clock
 - a brass main plate 304 mm across (38 mm real) on a holder, its top 10 cm above the table; four lower pivot holes, three
   pillars (two with screw holes), two steady pins;
 - on a stand: the barrel (90 teeth; a drum and its arbor with the ratchet and the square), the center wheel (80 + a 12-leaf
-  pinion), the third wheel (75 + 10) and the fourth wheel (70 + 10), axes vertical, each turned by the seed in its cup; the
+  pinion), the third wheel (75 + 10) and the fourth wheel (70 + 10), axes vertical, each turned in its cup by scene
+  seed 0's draw for every seed (a seed varies appearance only, the user 2026-10-20: `movement_finish`, `stand_finish`,
+  `screw_finish` re-colour visual geoms only); the
   train bridge (six 20 mm bars, 12 mm thick, 60 g; a click drawn by the barrel's boss) on four posts; two screws in a tray; a
   9 cm probe on its stand. The layout is the design's after its base placement search (the whole scene moved by (-0.03,
   -0.06) m).

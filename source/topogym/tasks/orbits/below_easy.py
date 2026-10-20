@@ -12,9 +12,9 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from topogym.assets.geometry.orbits import OrbitsLayout, generate_assets, make_meshes
-from topogym.assets.geometry.orbits_chain import chain_polyline, resample_links, write_cord_assembly
+from topogym.assets.geometry.orbits_chain import CORD_RGBA, chain_polyline, resample_links, write_cord_assembly
 from topogym.assets.geometry.orbits_initial import natural_working_state, resample
-from topogym.assets.scene_visuals import visual_collision_urdf
+from topogym.assets.scene_visuals import surface, visual_collision_urdf
 from topogym.evaluation.task_metrics import body_points, quiet_body, rigid_asset_vertices
 from topogym.tasks.base import merge_parameters, EntitySpec, TaskSpec
 from topogym.tasks.scene_presets import record_preset
@@ -60,7 +60,7 @@ class OrbitsBelowEasyTask(OrbitsTask):
         folder = Path(asset_dir)
         xml, self.link_names, self.link_lengths, self.tie_link = write_cord_assembly(
             folder, self.layout, roots, radius_m=self.CHAIN_RADIUS_M, joint_damping=self.JOINT_DAMPING,
-            young_modulus_pa=self.YOUNG_MODULUS_PA, armature=self.JOINT_ARMATURE)
+            young_modulus_pa=self.YOUNG_MODULUS_PA, armature=self.JOINT_ARMATURE, cord_rgba=self.cord_rgba())
         self.link_roots = roots
         parts, _ = make_meshes(self.layout, initial_cord=cord)
         yaw = float(self.config["yaw_deg"])
@@ -128,6 +128,12 @@ class OrbitsBelowEasyTask(OrbitsTask):
                 goal_evaluation_complete=bool(self.goal_complete),
             ),
         )
+
+    def cord_rgba(self):
+        """The chain links' colour (appearance only): CORD_RGBA at the default cord_finish, else the finish's."""
+        if self.config["cord_finish"] == self.defaults["cord_finish"]:
+            return CORD_RGBA
+        return " ".join(f"{v:.4g}" for v in surface(self.config["cord_finish"])["color"])
 
     RING_SEGMENTS = 48
 

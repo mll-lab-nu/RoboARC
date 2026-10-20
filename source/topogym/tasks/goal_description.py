@@ -254,7 +254,7 @@ def describe_goal(task):
             "The caliper is fixed face up on a stand, its jaws out over the table: it cannot be picked up. Bring each "
             "sleeve to its jaws, set the jaws with the slider and read the vernier.",
             "The caliper is not graduated in millimetres. Its scale is in its own unit (one main-scale division; the vernier "
-            "reads tenths of it); the size of that unit and the reading with the jaws closed differ from scene to scene and "
+            "reads tenths of it); the size of that unit and the reading with the jaws closed are this caliper's own and "
             "are not given, so a size measured in millimetres any other way cannot be matched to a label: the readings must "
             "come from the scale.",
             "The slider is locked at the start. Its locking screw is the knurled knob on the slider's front face, left of "

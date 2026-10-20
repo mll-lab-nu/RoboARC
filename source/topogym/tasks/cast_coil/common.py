@@ -70,12 +70,13 @@ class CastCoilTask(RigidTaskDefinition):
             raise ValueError("Invalid Cast Coil initial position")
         assembly, report = self.build_assets(folder)
         if cfg["piece_tint"] != self.defaults["piece_tint"]:
-            # Appearance only: rescale each piece's baked GLB colour after generation.
-            from topogym.assets.scene_visuals import scale_glb_color
+            # Appearance only: rescale each piece's baked GLB colour and its URDF material colour after generation.
+            from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color
             for body in assembly.bodies:
                 metal = "gold" if "gold" in body.name else "silver"
                 for path in sorted((folder/body.name).glob("*.glb")):
                     scale_glb_color(path, cfg["piece_tint"][metal])
+                scale_urdf_color(folder/body.name/f"{body.name}.urdf", cfg["piece_tint"][metal])
         rotation = Rotation.from_euler("z", float(cfg["yaw_deg"]), degrees=True)
         origin = np.r_[xy, self.table_height_m-min(rotation.apply(b.visual.vertices)[:, 2].min()
                                                   for b in assembly.bodies)+clearance]

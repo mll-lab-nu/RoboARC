@@ -85,10 +85,15 @@ class HedgehogInCageTask(PlacementGoalMixin, RigidTaskDefinition):
         preset = record_preset(self, folder)
         cage, ball, cage_bottom, report = self.build_assets(folder)
         if cfg["wood_tint"] != 1.:
-            # Appearance only: darken the baked wood textures of cage and ball.
-            from topogym.assets.scene_visuals import scale_glb_color
+            # Appearance only: darken the baked wood textures of cage and ball. Nyx draws a URDF visual with the
+            # URDF's own <material><color> (here "1 1 1 1"), not the GLB's baseColorFactor, so the wood bodies'
+            # URDF colours scale too.
+            from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color
             for path in sorted(folder.glob("*.glb")):
                 scale_glb_color(path, cfg["wood_tint"], materials=("wood",))
+            for path in sorted(folder.glob("*.urdf")):
+                if '<material name="wood"' in path.read_text():
+                    scale_urdf_color(path, cfg["wood_tint"])
         xy = np.asarray(cfg["center_xy_m"], dtype=float)
         if xy.shape != (2,) or not np.isfinite(xy).all():
             raise ValueError("Invalid Hedgehog center_xy_m")

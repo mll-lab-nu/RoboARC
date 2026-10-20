@@ -156,7 +156,7 @@ CUP_LIFT = LOW_PIVOT_L + .002     # a wheel rests in its cup with its lower pivo
 CUP = {"barrel": (.020, .040, .002), "center": (.008, .014, .026), "third": (.006, .012, .029),
        "fourth": (.004, .010, .032)}         # cup inner / outer radius, height of the resting face in the wheel frame
 WHEEL_STAND_POS = {"barrel": (-.055, 0.), "center": (.050, .030), "third": (.030, -.045), "fourth": (.088, -.035)}
-BASE_SPIN = {"barrel": .3, "center": 1.1, "third": -.7, "fourth": 2.}      # plus the seed's turn (task)
+BASE_SPIN = {"barrel": .3, "center": 1.1, "third": -.7, "fourth": 2.}      # plus scene seed 0's turn (task)
 BRIDGE_STAND_TOP = .06
 SCREW_TRAY_TOP = .03
 SCREW_TRAY_X = (-.022, .022)
@@ -185,6 +185,24 @@ WELD_SOLREF = "0.002 1"   # the task's welds (seats, screws, the bridge's fixing
 C = dict(plate=(.78, .55, .45, 1), brass=(.80, .66, .30, 1), steel=(.70, .72, .76, 1), ruby=(.75, .10, .35, 1),
          bridge=(.82, .58, .48, 1), dark=(.18, .18, .20, 1), wood=(.62, .48, .34, 1), tool=(.20, .45, .70, 1),
          red=(.90, .10, .10, 1), screw=(.35, .40, .70, 1))
+# The appearance parameters (ClockAssemblingTask defaults movement_finish, stand_finish, screw_finish; the user,
+# 2026-10-20: a seed varies appearance only): each replaces the colours of the visual geoms drawn in the first entry's
+# colours (the look above) and no colliding geom's (those are drawn "1 1 1 0"). Movement: the plate and its pillars, the
+# bridge, the center and third wheels (barrel and fourth stay steel); stand: the stands, the cups, the tray, the posts.
+MOVEMENT_FINISHES = dict(
+    rose_gilt=(C["plate"], C["bridge"], COLORS["center"], COLORS["third"]),
+    rhodium=((.80, .81, .83, 1), (.84, .85, .87, 1), COLORS["center"], COLORS["third"]),
+    gilt=((.84, .70, .40, 1), (.87, .73, .44, 1), (.78, .45, .30, 1), (.82, .48, .32, 1)))
+STAND_FINISHES = dict(beech=(C["wood"],), walnut=((.38, .26, .17, 1),), white_plastic=((.86, .86, .84, 1),))
+SCREW_FINISHES = dict(blued=(C["screw"],), steel=((.72, .73, .76, 1),), gilt=((.85, .70, .38, 1),))
+
+
+def finish_colours(movement="rose_gilt", stand="beech", screw="blued") -> dict:
+    """{default look colour: its colour in these finishes} (entity_xml's look)."""
+    out = {}
+    for table, name in ((MOVEMENT_FINISHES, movement), (STAND_FINISHES, stand), (SCREW_FINISHES, screw)):
+        out.update({_v(a): _v(b) for a, b in zip(next(iter(table.values())), table[name])})
+    return out
 
 
 def _v(x) -> str:
@@ -511,8 +529,9 @@ def opening_poses(spins=None):
     return P
 
 
-def entity_xml(spins=None) -> str:
-    """The MJCF text of the entity at birth, in the mount frame; spins: {wheel: turn about its axis (rad)}."""
+def entity_xml(spins=None, look=None) -> str:
+    """The MJCF text of the entity at birth, in the mount frame; spins: {wheel: turn about its axis (rad)}; look:
+    finish_colours() (None: the look as drawn)."""
     P = opening_poses(spins)
     root = ET.Element("mujoco", model=ENTITY)
     ET.SubElement(root, "compiler", angle="radian", autolimits="true")
@@ -543,6 +562,9 @@ def entity_xml(spins=None) -> str:
                   solref=WELD_SOLREF)
     for s in ("screw1", "screw2"):
         ET.SubElement(eq, "weld", name=f"{s}_fix", body1="bridge", body2=s, active="false", solref=WELD_SOLREF)
+    for g in root.iter("geom"):                 # visual geoms only: no colliding geom changes
+        if look and g.get("contype") == "0" and g.get("rgba") in look:
+            g.set("rgba", look[g.get("rgba")])
     ET.indent(root)
     return ET.tostring(root, encoding="unicode")
 

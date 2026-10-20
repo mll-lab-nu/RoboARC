@@ -6,6 +6,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from topogym.assets.geometry.fiber_bundling import FiberLayout
 from topogym.assets.geometry.fiber_bundling import (
+    COLORS,
+    JACKET_COLOR,
     AnchoredLayout,
     generate_anchored_assets,
 )
@@ -47,8 +49,12 @@ class FiberBundlingTask(TaskDefinition):
     goal_complete = True
     defaults = defaults(task_id,
         geometry={}, anchor={}, center_xy_m=[-0.1, -0.25], stable_duration_s=0.5,
-        terminal=dict(maximum_bend_deg=60.)
+        terminal=dict(maximum_bend_deg=60.),
+        # Looks only (scene_variation's visual axes): the jacket's colour, and the strand palette's slots 1-7 turned by
+        # this many places (slot 0, the red strand, stays: the redesigned tiers' instructions name the red fiber)
+        sheath_color=list(JACKET_COLOR[:3]), strand_palette_shift=0,
     )
+    hash_when_changed = ("sheath_color", "strand_palette_shift")
     # Passage is judged where a point crosses the ring's own plane. There a strand
     # centre is either in the hole (<= aperture - fiber radius) or outside the ring
     # (>= outer radius + fiber radius); in between it would be inside the tube.
@@ -62,7 +68,10 @@ class FiberBundlingTask(TaskDefinition):
         self.table_height_m = float(table_height_m)
         layout = self.layout_class(**{**self.config["geometry"], "seed": self.seed})
         anchor = AnchoredLayout(**self.config["anchor"])
-        self.layout, report = generate_anchored_assets(asset_dir, layout, anchor)
+        k = int(self.config["strand_palette_shift"]) % (len(COLORS)-1)
+        self.layout, report = generate_anchored_assets(
+            asset_dir, layout, anchor, strand_colors=(COLORS[0], *COLORS[1+k:], *COLORS[1:1+k]),
+            jacket_color=(*map(float, self.config["sheath_color"]), 1.))
         self.origin = np.r_[
             self.config["center_xy_m"], table_height_m + anchor.axis_height_m
         ]

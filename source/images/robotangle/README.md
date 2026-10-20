@@ -18,6 +18,9 @@ it. Maintainers push it with `scripts/push_images.sh` after validating a build.
     builds", below). The image installs it in `/opt/uipc_sm86` (`install_uipc_prefix.py`);
   - `instances/`: every task's frozen instance. `stage_instance.py` copies a task's instance next to its
     `runtime_binding.json` and checks it (privileged `environment/` and `tests/` images; the standard `sim` entrypoint).
+    A base's appearance seeds are `instances/<base>/seeds/<S>/`: `stage_instance.py --seed-file` stages the seed a
+    runner's copy of the task names (its `seed` file) with the task's `runtime_binding.s<S>.json`. The MuJoCo image
+    (`Dockerfile.mujoco`) installs this script; the Genesis base image's copy has no `--seed-file`.
 
   Access: a member of `eai-v2-internal`, logged in with `hf auth login`, or `HF_TOKEN` in the environment (never printed).
 

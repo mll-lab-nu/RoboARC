@@ -39,7 +39,10 @@ class ClockAssemblingTask(RigidTaskDefinition):
         wind_min_rad=float(np.radians(120.)),   # the arbor's wind held by the click when the run test starts
         run_turns_min=5.,                       # the fourth wheel's turns in the rules' 5 s window
         run_stall_max_s=.2,                     # time in that window with the fourth wheel under 10 % of its free-run speed
-        ratio_tolerance=.02))                   # the fourth wheel's turn per drum turn in that window, relative to -450
+        ratio_tolerance=.02),                   # the fourth wheel's turn per drum turn in that window, relative to -450
+        movement_finish="rose_gilt", stand_finish="beech", screw_finish="blued")
+    # Appearance only (geo.finish_colours; scene_variation.appearance): the defaults are the recorded scene's look
+    hash_when_changed = ("movement_finish", "stand_finish", "screw_finish")
     # the bridge is 21 cm wide and the probe 10 cm long: a hand holding either far from its middle (bed_bolt's setting)
     grasp_max_tcp_distance_m = .15
 
@@ -58,8 +61,9 @@ class ClockAssemblingTask(RigidTaskDefinition):
         return self.origin() + geo.P_W
 
     def spins(self):
-        """Each wheel's turn about its axis in its cup at birth: the design's turn plus the seed's U(-pi, pi)."""
-        rng = np.random.default_rng(self.seed)
+        """Each wheel's turn about its axis in its cup at birth: the design's turn plus scene seed 0's U(-pi, pi), for
+        every task seed (the -i01 reference was recorded on it; a seed varies appearance only: the user, 2026-10-20)."""
+        rng = np.random.default_rng(0)
         return {n: float(np.angle(np.exp(1j * (geo.BASE_SPIN[n] + rng.uniform(-np.pi, np.pi))))) for n in geo.WHEELS}
 
     def declare(self, asset_dir, table_height_m):
@@ -67,7 +71,8 @@ class ClockAssemblingTask(RigidTaskDefinition):
         folder = Path(asset_dir)
         folder.mkdir(parents=True, exist_ok=True)
         path = folder / f"{geo.ENTITY}.xml"
-        path.write_text(geo.entity_xml(self.spins()))
+        path.write_text(geo.entity_xml(self.spins(), geo.finish_colours(
+            self.config["movement_finish"], self.config["stand_finish"], self.config["screw_finish"])))
         self.local_vertices = {geo.ENTITY: geo.part_points("barrel")}     # the entity's base link
         return TaskSpec((EntitySpec(geo.ENTITY, "mjcf", path, tuple(self.origin()), fixed=False),), {}, dict(
             task_id=self.task_id, instance_id=self.instance_id, physics_engine="mujoco",

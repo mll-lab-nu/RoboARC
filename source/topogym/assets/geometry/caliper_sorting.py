@@ -112,6 +112,13 @@ STEEL, DARK, KNURL, ROLLER_RGB = (0.80, 0.81, 0.83), (0.14, 0.14, 0.16), (0.35, 
 KNOB_MARK = (0.97, 0.97, 0.97)                  # the knob's white index line
 FIXTURE_RGB, BIN_RGB, SLEEVE_RGB = (0.25, 0.42, 0.55), (0.86, 0.87, 0.88), (0.80, 0.81, 0.83)
 SCALE_BG, VERNIER_BG, INK = (205, 208, 212), (222, 224, 228), (12, 12, 12)
+# The appearance parameters (CaliperSortingTask defaults fixture_finish, bin_finish, sleeve_finish; the user, 2026-10-20:
+# a seed varies appearance only): the rack's and the stand's colour, the bins' and all four sleeves' (they stay alike);
+# the first entry of each is the colour above. The caliper, its scale and the label cards keep theirs.
+FIXTURE_FINISHES = dict(slate_blue=FIXTURE_RGB, forest_green=(0.20, 0.40, 0.28), safety_orange=(0.85, 0.45, 0.12),
+                        wood=(0.62, 0.47, 0.32))
+BIN_FINISHES = dict(light_grey=BIN_RGB, pale_blue=(0.62, 0.75, 0.88), pale_yellow=(0.92, 0.86, 0.55))
+SLEEVE_FINISHES = dict(steel=SLEEVE_RGB, brass=(0.80, 0.64, 0.32), black_oxide=(0.18, 0.18, 0.20))
 
 
 # ================================================================ scenario
@@ -688,8 +695,9 @@ def build_caliper(folder: Path, k: float, b: float):
     return path, verts, regions
 
 
-def build_sleeve(folder: Path, index: int, id_mm: float, od_mm: float):
-    """sleeve_<index>.urdf: one link `sleeve` (axis local z), 192-box ring collision. Returns (path, drawn vertices (m))."""
+def build_sleeve(folder: Path, index: int, id_mm: float, od_mm: float, rgb=SLEEVE_RGB):
+    """sleeve_<index>.urdf: one link `sleeve` (axis local z), 192-box ring collision, drawn in rgb. Returns (path, drawn
+    vertices (m))."""
     ro, ri = od_mm / 2, id_mm / 2
     half_t = math.tan(math.pi / SLEEVE_N_BOX) * ro
     rc = (ro + ri) / 2
@@ -702,9 +710,9 @@ def build_sleeve(folder: Path, index: int, id_mm: float, od_mm: float):
     ixx = m * (3 * r2 + (SLEEVE_L * MM) ** 2) / 12
     link.inertial = (m, (0.0, 0.0, 0.0), (ixx, ixx, m * r2 / 2))
     tube = tube_mesh(ro, ri)
-    atlas = Atlas([SLEEVE_RGB])
+    atlas = Atlas([rgb])
     vm = VisualMesh(atlas)
-    vm.mesh(tube, SLEEVE_RGB)
+    vm.mesh(tube, rgb)
     vm.export(folder / f"sleeve_{index}.glb", metallic=0.2, roughness=0.5)
     link.visual = folder / f"sleeve_{index}.glb"
     path = folder / f"sleeve_{index}.urdf"
@@ -812,10 +820,11 @@ def caliper_lock_equality() -> dict:
                 solref=[0.00125, 1.0], solimp=[0.99, 0.999, 0.001, 0.5, 2.0])
 
 
-def build_caliper_sorting(folder, seed: int):
+def build_caliper_sorting(folder, seed: int, fixture_finish="slate_blue", bin_finish="light_grey", sleeve_finish="steel"):
     """Write every part's URDF and GLB into folder/caliper_sorting; return the scene description: entities (name, URDF,
     mount-frame position and quaternion, fixed, initial joint positions, morph options), the scenario, local vertices of
-    the movable parts, grasp regions and the bins' centres (mount frame, m)."""
+    the movable parts, grasp regions and the bins' centres (mount frame, m). The finishes (FIXTURE_FINISHES,
+    BIN_FINISHES, SLEEVE_FINISHES) change only the GLB textures."""
     folder = Path(folder) / "caliper_sorting"
     folder.mkdir(parents=True, exist_ok=False)
     scen = scenario(seed)
@@ -828,21 +837,22 @@ def build_caliper_sorting(folder, seed: int):
     local["caliper"] = cal_verts
     regions.update({("caliper", k): v for k, v in cal_regions.items()})
     for k, s in enumerate(scen["sleeves"]):
-        path, verts = build_sleeve(folder, k, s["id_mm"], s["od_mm"])
+        path, verts = build_sleeve(folder, k, s["id_mm"], s["od_mm"], SLEEVE_FINISHES[sleeve_finish])
         rx, ry = L["rack"][s["slot"]]
         ents.append(SimpleNamespace(name=f"sleeve_{k}", path=path, pos=(float(rx), float(ry), (RACK["floor"] + s["od_mm"] / 2) * MM),
                                     quat=SLEEVE_QUAT_WXYZ, fixed=False, joints={}, options={}))
         local[f"sleeve_{k}"] = verts
         regions[(f"sleeve_{k}", "sleeve")] = (np.zeros(3), SLEEVE_GRASP_RADIUS_M)
     rx, ry = L["rack"][0]
-    ents.append(SimpleNamespace(name="sleeve_rack", path=build_fixture(folder, "sleeve_rack", rack_boxes(), FIXTURE_RGB),
+    fixture_rgb = FIXTURE_FINISHES[fixture_finish]
+    ents.append(SimpleNamespace(name="sleeve_rack", path=build_fixture(folder, "sleeve_rack", rack_boxes(), fixture_rgb),
                                 pos=(float(rx), float(ry), 0.0), quat=(1.0, 0.0, 0.0, 0.0), fixed=True, joints={}, options={}))
-    ents.append(SimpleNamespace(name="caliper_stand", path=build_fixture(folder, "caliper_stand", stand_boxes(), FIXTURE_RGB),
+    ents.append(SimpleNamespace(name="caliper_stand", path=build_fixture(folder, "caliper_stand", stand_boxes(), fixture_rgb),
                                 pos=tuple(float(v) for v in L["caliper"]), quat=CALIPER_QUAT_WXYZ, fixed=True, joints={},
                                 options={}))
     for k, cls in enumerate(scen["bins"]):
         bx, by = L["bins"][k]
-        path = build_fixture(folder, f"bin_{k}", bin_boxes(), BIN_RGB,
+        path = build_fixture(folder, f"bin_{k}", bin_boxes(), BIN_FINISHES[bin_finish],
                              extra=([label_canvas(label_lines(scen, cls))], _label_drawer(back=k // 2 == 0)))
         ents.append(SimpleNamespace(name=f"bin_{k}", path=path, pos=(float(bx), float(by), 0.0), quat=(1.0, 0.0, 0.0, 0.0),
                                     fixed=True, joints={}, options={}))

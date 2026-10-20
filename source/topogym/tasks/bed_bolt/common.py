@@ -28,7 +28,10 @@ class BedBoltTask(RigidTaskDefinition):
     task_id = "bed_bolt"
     physics_model = "rigid_articulated"
     terminal_revision = "bed_bolt_seated_v1"
-    defaults = dict(stable_duration_s=.5, terminal=dict(seat_tolerance_m=.0015, axis_tolerance_rad=float(np.radians(2.))))
+    defaults = dict(stable_duration_s=.5, terminal=dict(seat_tolerance_m=.0015, axis_tolerance_rad=float(np.radians(2.))),
+                    wood_finish="pine", bolt_finish="black_oxide", key_finish="chrome")
+    # Appearance only (geo.look_colours; scene_variation.appearance): the defaults are the recorded scene's look
+    hash_when_changed = ("wood_finish", "bolt_finish", "key_finish")
     # The key is 20 cm long: a hand holding it near the bend has its TCP far from the key's centre (Rotor's setting).
     grasp_max_tcp_distance_m = .15
     # The bolt's recess and the tool's tips (topogym.assets.geometry.bed_bolt DRIVES); the public words for the tool
@@ -55,7 +58,8 @@ class BedBoltTask(RigidTaskDefinition):
         entities = []
         for name in geo.ENTITIES:
             path = folder / f"{name}.xml"
-            path.write_text(geo.entity_xml(name, drive=self.drive))
+            path.write_text(geo.entity_xml(name, drive=self.drive, look=geo.look_colours(
+                self.config["wood_finish"], self.config["bolt_finish"], self.config["key_finish"])))
             entities.append(EntitySpec(name, "mjcf", path, tuple(self.origin()), fixed=name == "bed_frame"))
         self.local_vertices = {"bolt": geo.bolt_points(), "key": geo.key_points()}
         hole = self.hole_T()

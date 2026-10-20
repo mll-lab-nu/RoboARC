@@ -36,7 +36,7 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
   the beam's tail (C x 165-209 mm: the slider reaches C x 155 mm at 80 mm open) from the table to the beam's underside; a
   rack of six slots (pitch 44 mm) at x = W + 0.17 m, y = W + 0.04 ... 0.26 m, four of them holding sleeves; four bins
   (cavity 80 x 80 x 40 mm, walls 3 mm) at W + (0.06 or 0.15, -0.14 or -0.23) m, each with a label card (drawn only,
-  no collision). Per scene the caliper and its stand shift by +-15 mm. The label cards (2026-10-19, the user: readable
+  no collision). Scene seed 0: no shift of the caliper and its stand. The label cards (2026-10-19, the user: readable
   in cam_high, 848 x 480, about 1.5 mm per pixel at the bins): 84 x 40 mm, tilted 25 deg up from the horizontal toward
   cam_high (18-26 deg off its line of sight; 35-44 deg before), black text of cap height 14 mm with strokes 0.17 cap and
   0.15 cap more space between glyphs on white (before: 76 x 40 mm at 50 deg, 10 mm, 0.13), texture 24 px/mm. A
@@ -67,6 +67,9 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
 - Textures (main scale and vernier in the scene's unit and zero, labels) are drawn by the generator with numpy and a
   stroke font of its own (no system font). Every link has ONE textured GLB visual whose material, texture and image carry
   names of their own (Nyx draws unnamed materials of different GLB files of one scene with the first file's image).
+- The task builds scene seed 0's scenario for every seed (the user, 2026-10-20: a seed varies appearance only;
+  `fixture_finish`, `bin_finish` and `sleeve_finish` re-colour the GLBs of the rack and stand, the bins and all four
+  sleeves; the caliper and the label cards keep theirs).
 - Per scene seed: seed 0 is the reference's scene (k 1.08 mm per unit, b 31.4; ID 38.8 / 39.1, OD 96.2 / 96.5 = 7.99 /
   8.32 and 69.98 / 70.31 mm; classes A and B, both OD 96.2, in rack slots 0-3 as A B B A; labels C A D B; no shift). Other
   seeds draw k, b, the class readings (sizes 66-74 mm outside, 7.5-9.4 mm inside), which diameter the two classes share

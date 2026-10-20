@@ -36,8 +36,10 @@ MOUNT_XY_M = (-.1356786, 0.)
 # A firm hold of a cell: its two finger contacts at least 150 deg apart around the cell (force closure at mu = tan 15 deg);
 # a weak (fingertip) hold of an old cell is lost once the cell has moved this far from where it was taken.
 FIRM_MU, WEAK_TRAVEL_M = .268, .06
-# The new cells' polarity in the tray per scene seed (seed % 4): '+' = that cell's + end toward +x.
-POLARITIES = ("+-", "-+", "++", "--")
+# The new cells' polarity in the tray ('+' = that cell's + end toward +x): scene seed 0's of the former per-seed choice
+# ("+-", "-+", "++", "--" by seed % 4), for every task seed: the -i01 reference was recorded on it, and a seed varies
+# appearance only (the user, 2026-10-20).
+POLARITY = "+-"
 
 
 def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
@@ -52,11 +54,11 @@ class BatteryReplacementTask(RigidTaskDefinition):
     defaults = dict(stable_duration_s=.5, terminal=dict(
         axis_tolerance_rad=float(np.radians(5.)), lateral_tolerance_m=.0012, vertical_tolerance_m=.001, axial_tolerance_m=.0015,
         spring_min_compression_m=.001, cover_tolerance_m=.0005, cover_sink_m=.0002, cover_lift_m=.0006,
-        cover_tilt_rad=float(np.radians(1.)), plunger_min_m=.00025, quiet_speed_m_s=.005, quiet_spin_rad_s=.1))
-
-    @property
-    def polarity(self):
-        return POLARITIES[self.seed % len(POLARITIES)]
+        cover_tilt_rad=float(np.radians(1.)), plunger_min_m=.00025, quiet_speed_m_s=.005, quiet_spin_rad_s=.1),
+        controller_finish="black", tray_finish="green", box_finish="orange", props_finish="grey")
+    # Appearance only (geo.finish_colours; scene_variation.appearance): the defaults are the recorded scene's look
+    hash_when_changed = ("controller_finish", "tray_finish", "box_finish", "props_finish")
+    polarity = POLARITY
 
     def grasp_assist(self):
         """contact_weld_v1 on the cover, the stick's handle and the four cells, each as a whole part; the old cells on a
@@ -92,7 +94,9 @@ class BatteryReplacementTask(RigidTaskDefinition):
         entities = []
         for name in geo.ENTITIES:
             path = folder / f"{name}.xml"
-            path.write_text(geo.entity_xml(name, self.polarity))
+            path.write_text(geo.entity_xml(name, self.polarity, geo.finish_colours(
+                self.config["controller_finish"], self.config["tray_finish"], self.config["box_finish"],
+                self.config["props_finish"])))
             # The controller's shell body has no joint: MuJoCo welds it to the world (as fiber_bundling's terminal); the
             # entity is not declared fixed, so nyx_direct draws its visuals at the body (it draws no fixed MJCF entity).
             entities.append(EntitySpec(name, "mjcf", path, tuple(self.origin())))

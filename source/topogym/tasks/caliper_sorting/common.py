@@ -25,7 +25,10 @@ class CaliperSortingTask(RigidTaskDefinition):
     difficulty = None
     defaults = dict(stable_duration_s=.5,
                     terminal=dict(bin_half_extent_m=.04, min_height_m=.003, max_height_m=.04,
-                                  max_linear_speed_m_s=.001, max_angular_speed_rad_s=.02))
+                                  max_linear_speed_m_s=.001, max_angular_speed_rad_s=.02),
+                    fixture_finish="slate_blue", bin_finish="light_grey", sleeve_finish="steel")
+    # Appearance only (build_caliper_sorting's finishes; scene_variation.appearance): the defaults are the recorded look
+    hash_when_changed = ("fixture_finish", "bin_finish", "sleeve_finish")
     # Every sleeve and the slider are grasp targets of both hands: a sleeve as a whole link, the slider within 20 mm of its
     # grip (slider x 44 mm), so that a pinch on the locking screw's knob never takes hold of it. The caliper's beam is fixed
     # on its stand (2026-10-18) and no target; the knob is no target either: it turns by friction only.
@@ -34,7 +37,10 @@ class CaliperSortingTask(RigidTaskDefinition):
     def declare(self, asset_dir, table_height_m):
         from topogym.assets.geometry.caliper_sorting import build_caliper_sorting
         self.table_height_m = float(table_height_m)
-        scene = build_caliper_sorting(Path(asset_dir), self.seed)
+        # Scene seed 0's scenario (unit, zero, sleeves, labels, places) for every task seed: the -i01 reference was
+        # recorded on it, and a seed varies appearance only (the user, 2026-10-20)
+        scene = build_caliper_sorting(Path(asset_dir), 0, self.config["fixture_finish"], self.config["bin_finish"],
+                                      self.config["sleeve_finish"])
         self.scenario = scene.scenario
         self.sleeves = tuple(f"sleeve_{k}" for k in range(len(scene.scenario["sleeves"])))
         self.local_vertices = dict(scene.local_vertices)

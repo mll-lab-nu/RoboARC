@@ -33,4 +33,4 @@ jianwen/release-rebuild-family), not from files here.
     678.3 s for 22962 control steps, Harbor on d0a35aff89; the family notes).
 - The standard texts use only what the standard client gives (cameras, proprioception): the sleeves' classes come from
   measuring them with the caliper and reading the vernier in the images, in the caliper's own unit (the labels give
-  readings; the unit and zero differ from scene to scene).
+  readings; the unit and zero are this caliper's own and are not given).

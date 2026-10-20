@@ -198,7 +198,11 @@ def scene_identity(config, scene_config, task, spec, asset_build):
     parameters = deepcopy(task.config)
     for key in ("initialization_mode", "initial_state_path", "initial_state_resource", "initial_state_sha256"):
         parameters.pop(key, None)
+    for key in getattr(task, "appearance_parameters", ()):    # looks only: their nominal values
+        parameters[key] = deepcopy(task.defaults[key])
+    looks = set(getattr(task, "appearance_files", ()))        # asset files only a drawn look writes
     return to_jsonable(dict(schema_version=1, task_id=task.task_id, seed=task.seed,
         parameters=parameters, physics_options=spec.physics_options,
-        scene=scene, asset_sha256=dict(asset_build.sha256), robot_asset_sha256=robot_sources,
+        scene=scene, asset_sha256={k: v for k, v in asset_build.sha256.items() if k not in looks},
+        robot_asset_sha256=robot_sources,
         compute_backend=config.compute_backend, precision=config.precision))

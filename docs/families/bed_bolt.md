@@ -51,7 +51,10 @@ again).
     ball at the corner; the ratcheting driver's handle dark, its housing and bit bright, a ring on the housing;
   - additions: a zinc threaded insert's flange in the block face (the hole's drawn thread in zinc), zinc screw heads on
     the slats, the cradle walls drawn as solid V-blocks down to the table, the key's stand drawn as one block with its
-    hole's mouth dark on top.
+    hole's mouth dark on top;
+  - appearance parameters (2026-10-20, the user: a seed varies appearance only): `wood_finish`, `bolt_finish` and
+    `key_finish` (`WOOD_FINISHES`, `BOLT_FINISHES`, `KEY_FINISHES`; their first entries are the colours above) change
+    only these looks' colours (`scene_variation.appearance`: appearance seed 0 is this look).
   The MuJoCo scene drops the geoms with no contact and no mass and the meshes only they use
   (`topogym.world.mujoco.mjcf_entity.merge_mjcf_entity`), so each instance's physics `scene.xml` is byte for byte dev
   a0856f6b32's; only `instance.json`'s asset identity (the entity files' sha256) differs. The births are unchanged and

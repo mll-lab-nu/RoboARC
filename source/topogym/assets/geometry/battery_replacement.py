@@ -410,6 +410,14 @@ def _quat(T):
     return Rotation.from_matrix(T[:3, :3]).as_quat()[[3, 0, 1, 2]]
 
 
+def _repaint(line, look):
+    """A visual geom's line with its colour replaced as look ({colour: colour}) says."""
+    for a, b in look.items():
+        if f'rgba="{a}"' in line:
+            return line.replace(f'rgba="{a}"', f'rgba="{b}"')
+    return line
+
+
 def _visual_twins(lines):
     """Every colliding geom outside group 3 moved to group 3 and followed by its visual twin (contype 0, no mass, its
     colour): the renderer (nyx_direct, as Genesis) draws a colliding geom of groups 0-2 grey and only visual geoms in
@@ -427,8 +435,35 @@ def _visual_twins(lines):
     return out
 
 
-def entity_xml(name, polarity="+-") -> str:
-    """The MJCF text of one entity at the task's birth (ENTITIES), in the mount frame."""
+# The appearance parameters (BatteryReplacementTask defaults controller_finish, tray_finish, box_finish, props_finish; the
+# user, 2026-10-20: a seed varies appearance only): each replaces the colours of the visual geoms drawn in the first
+# entry's colours (as written above) and no colliding geom's. Controller: its outer body, the cover, its ridge, its
+# arrow (the compartment, its marks and contacts keep theirs); props: the cradle, the stick's holder, the cover's pad.
+# The cells, the red "+" marks and the stick keep their colours: the texts name them.
+CONTROLLER_FINISHES = dict(
+    black=("0.16 0.16 0.17 1", "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1"),
+    white=("0.86 0.87 0.88 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1"),
+    red=("0.62 0.08 0.10 1", "0.58 0.07 0.09 1", "0.48 0.06 0.08 1", "0.75 0.32 0.32 1"),
+    blue=("0.14 0.28 0.62 1", "0.13 0.26 0.58 1", "0.11 0.22 0.48 1", "0.40 0.50 0.75 1"))
+TRAY_FINISHES = dict(green=("0.25 0.55 0.35 1",), white=("0.85 0.85 0.83 1",), grey=("0.60 0.62 0.64 1",))
+BOX_FINISHES = dict(orange=("0.80 0.45 0.10 1",), blue=("0.15 0.35 0.65 1",), green=("0.20 0.50 0.25 1",))
+PROPS_FINISHES = dict(grey=("0.36 0.38 0.42 1", "0.45 0.45 0.48 1", "0.55 0.6 0.7 1"),
+                      wood=("0.55 0.40 0.26 1", "0.60 0.45 0.30 1", "0.80 0.70 0.55 1"),
+                      black=("0.14 0.14 0.15 1", "0.20 0.20 0.21 1", "0.30 0.30 0.32 1"))
+
+
+def finish_colours(controller="black", tray="green", box="orange", props="grey") -> dict:
+    """{default look colour: its colour in these finishes} (entity_xml's look)."""
+    out = {}
+    for table, name in ((CONTROLLER_FINISHES, controller), (TRAY_FINISHES, tray), (BOX_FINISHES, box),
+                        (PROPS_FINISHES, props)):
+        out.update(zip(next(iter(table.values())), table[name]))
+    return out
+
+
+def entity_xml(name, polarity="+-", look=None) -> str:
+    """The MJCF text of one entity at the task's birth (ENTITIES), in the mount frame; look: finish_colours() (None: the
+    look as drawn)."""
     meshes, body = [], []
     if name == "controller":
         C = compartment_T()
@@ -455,6 +490,8 @@ def entity_xml(name, polarity="+-") -> str:
     else:
         raise ValueError(f"battery_replacement has no entity {name!r}")
     body = _visual_twins(body)
+    if look:                                    # visual geoms only: no colliding geom changes
+        body = [_repaint(line, look) if 'contype="0"' in line else line for line in body]
     lines = [f'<mujoco model="{name}">', '<compiler angle="radian" autolimits="true"/>']
     if meshes:
         lines += ["<asset>", *meshes, "</asset>"]

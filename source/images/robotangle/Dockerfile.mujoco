@@ -39,6 +39,9 @@ RUN chmod -R a+rX /opt/topogym-assets
 ENV WARP_CACHE_PATH=/opt/warp-cache
 COPY images/robotangle/warp_precompile.py /tmp/warp_precompile.py
 RUN python /tmp/warp_precompile.py && rm /tmp/warp_precompile.py && chmod -R a+rX,a-w /opt/warp-cache
+# The staging script with appearance seeds (stage_instance.py --seed-file: a base's seed S is instances/<base>/seeds/<S>/,
+# 2026-10-20); the base image's copy (Genesis 0.2.22) has no --seed-file. Without a seed file it stages as before.
+COPY images/robotangle/stage_instance.py /opt/robotangle/stage_instance.py
 RUN --mount=type=bind,from=instances,target=/tmp/mj-instances \
     set -e; for d in /tmp/mj-instances/*/; do [ -d "$d" ] || continue; b=$(basename "$d"); test -f "$d/instance.json"; \
       python -c "import json, sys; assert json.load(open(sys.argv[1]))['simulator']['physics_engine'] == 'mujoco'" "$d/instance.json"; \

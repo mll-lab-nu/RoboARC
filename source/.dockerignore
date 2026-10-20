@@ -16,6 +16,7 @@
 !images/robotangle/warp_precompile.py
 !images/robotangle/mujoco-3.14.0-epa/
 !images/robotangle/mujoco-3.14.0-epa/bytepatch_libmujoco.py
+!images/robotangle/stage_instance.py
 !images/topogym/build_uipc.sh
 !images/topogym/verify_uipc_wheel.py
 !images/topogym/uipc-build.json

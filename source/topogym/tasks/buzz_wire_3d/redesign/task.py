@@ -159,6 +159,14 @@ class BuzzWireRedesignTask(BuzzWireTask):
         layout = self.layout = design.layout()
         self.route, report = generate_assets(asset_dir, layout)
         folder = Path(asset_dir)
+        # Appearance only, as BuzzWireTask.declare (which this declare replaces): the baked wood and the rail's colour.
+        from topogym.assets.scene_visuals import scale_glb_color
+        for path in sorted(folder.glob("*.glb")):
+            if self.config["wood_tint"] != 1.:
+                scale_glb_color(path, self.config["wood_tint"], materials=("wood",))
+            if self.config["rail_rgb"] != self.defaults["rail_rgb"]:
+                scale_glb_color(path, 1., materials=("rail_metal", "brushed_copper"),
+                                color=[*self.config["rail_rgb"], 1.])
         sleeves = add_sleeves(folder, design, self.route.rail)
         obstacles = add_obstacles(folder, design, layout)
         report = dict(report, redesign=dict(design=design.name, tier=design.tier, sleeves=[list(x) for x in design.sleeves],

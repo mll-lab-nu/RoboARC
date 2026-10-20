@@ -30,8 +30,12 @@ frame; m, z = 0 the table top):
 - the new cells new_1, new_2 in the tray at (0.065, -0.025); the recycling box (inner 70 x 50 x 30 mm) at
   (-0.065, -0.025), empty; a pad for the cover at (-0.12, 0.22) (display only).
 
-The scene seed sets only the new cells' polarity in the tray (seed % 4: `+-`, `-+`, `++`, `--`, a cell's + end toward +x
-or -x; seed 0 `+-`). Everything else is fixed.
+The new cells lie in the tray as `+-` (new_1's + end toward +x, new_2's toward -x) for every seed: until 2026-10-20 the
+scene seed chose the polarity (seed % 4: `+-`, `-+`, `++`, `--`; seed 0 `+-`); since then a seed varies appearance only
+(the user). The appearance parameters `controller_finish` (outer body and cover), `tray_finish`, `box_finish` and
+`props_finish` (cradle, stick holder, cover pad) re-colour visual geoms only (`scene_variation.appearance`: appearance
+seed 0 is the recorded look); the cells, the red "+" marks and the stick keep the colours the texts name. Everything else
+is fixed.
 
 Every mechanism is physical: the controller is one MJCF entity whose shell body has no joint (MuJoCo welds it to the
 world) with three slide joints (the two spring contacts, the plunger; their stiffness and spring zero in the MJCF); the

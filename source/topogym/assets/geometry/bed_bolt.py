@@ -787,9 +787,9 @@ def _tip_torx(body, asset, c, end, x_bar, x_end, pos, R):
         body.geom(f"key_{end}_tip_{part}", "mesh", pos, C_KEY, R=R, mesh=mesh, **kw)
 
 
-def entity_xml(name, place=PLACE, drive="hex") -> str:
+def entity_xml(name, place=PLACE, drive="hex", look=None) -> str:
     """The MJCF text of one entity at the task's birth (ENTITIES), in the mount frame, the bolt's recess and the tool's
-    tips of `drive` (DRIVES)."""
+    tips of `drive` (DRIVES), its visual geoms in the finishes `look` (look(); None: the defaults)."""
     root = ET.Element("mujoco", model=name)
     ET.SubElement(root, "compiler", angle="radian", autolimits="true")
     asset = ET.SubElement(root, "asset")
@@ -825,7 +825,7 @@ def entity_xml(name, place=PLACE, drive="hex") -> str:
         _key(world, asset, key_start_T(), drive=drive)
     else:
         raise ValueError(f"bed_bolt has no entity {name!r}")
-    _dress(world, asset, name, drive)
+    _dress(world, asset, name, drive, look or look_colours())
     if not len(asset):
         root.remove(asset)
     ET.indent(root)
@@ -857,33 +857,46 @@ LOOK_BEVEL = (("rail_", .0015), ("end_left", .0015), ("middle_board", .0015), ("
 PINE, BIRCH, HARDWOOD = (.70, .50, .30, 1), (.85, .74, .55, 1), (.47, .32, .19, 1)
 ZINC, BLACK_OXIDE, CHROME = (.66, .67, .69, 1), (.16, .16, .17, 1), (.66, .68, .71, 1)
 SHADE = dict(rail_near=1., rail_far=.95, end_left=1.04, end_r=.97, middle_board=1.02, leg=.94, ledge=1.03)
+# The appearance parameters (BedBoltTask defaults wood_finish, bolt_finish, key_finish; the user, 2026-10-20: a seed
+# varies appearance only): the first entry of each is the look above. Wood: (boards, slats, corner block and holders).
+WOOD_FINISHES = dict(pine=(PINE, BIRCH, HARDWOOD), walnut=((.42, .27, .16, 1), (.56, .40, .26, 1), (.30, .19, .11, 1)),
+                     white_oak=((.80, .68, .50, 1), (.88, .80, .64, 1), (.62, .48, .32, 1)),
+                     white_painted=((.90, .90, .88, 1), BIRCH, (.84, .84, .82, 1)))
+BOLT_FINISHES = dict(black_oxide=BLACK_OXIDE, zinc=(.72, .73, .75, 1), yellow_zinc=(.80, .68, .36, 1))
+KEY_FINISHES = dict(chrome=CHROME, black_oxide=BLACK_OXIDE, blue_coated=(.18, .32, .62, 1))
+
+
+def look_colours(wood="pine", bolt="black_oxide", key="chrome"):
+    """The colours _dress draws with for the finishes named."""
+    boards, slats, block = WOOD_FINISHES[wood]
+    return dict(boards=boards, slats=slats, block=block, bolt=BOLT_FINISHES[bolt], key=KEY_FINISHES[key])
 
 
 def _shade(rgba, f):
     return tuple(min(1., c * f) for c in rgba[:3]) + (rgba[3],)
 
 
-def _look_rgba(entity, name, drive):
-    """The look's colour (None: keep it), by its geom name (a twin's without "_look")."""
+def _look_rgba(entity, name, drive, look):
+    """The look's colour (None: keep it), by its geom name (a twin's without "_look"); look: look_colours()."""
     if entity == "bed_frame":
         if name.startswith(("cradle_", "stand_", "key_rest", "vblock_")):
-            return HARDWOOD
+            return look["block"]
         if name.startswith("slat_"):
-            return _shade(BIRCH, (.97, 1.03, 1., .98, 1.02)[int(name.split("_")[1]) % 5])
+            return _shade(look["slats"], (.97, 1.03, 1., .98, 1.02)[int(name.split("_")[1]) % 5])
         if name.startswith(("block_", "bore_")):
-            return _shade(HARDWOOD, 1.25)
+            return _shade(look["block"], 1.25)
         if name.startswith(("hole_thread", "insert_", "screw_")):
             return ZINC
         for k, f in SHADE.items():
             if name.startswith(k):
-                return _shade(PINE, f)
+                return _shade(look["boards"], f)
         return None
     if entity == "bolt":
-        return None if name == "notch" else BLACK_OXIDE
+        return None if name == "notch" else look["bolt"]
     if DRIVES[drive].get("ratchet"):
         dark = name.startswith(("key_long", "key_bend"))
-        return _shade(CHROME, .3) if dark else _shade(CHROME, 1.1)
-    return CHROME
+        return _shade(look["key"], .3) if dark else _shade(look["key"], 1.1)
+    return look["key"]
 
 
 def _box_corners(h, c=0.):
@@ -924,8 +937,9 @@ def _look_geom(parent, name, mesh, rgba, pos=(0, 0, 0), quat=None):
     return ET.SubElement(parent, "geom", a)
 
 
-def _dress(world, asset, entity, drive):
-    """The entity's look (the section above): its visual geoms changed and added, its colliding geoms untouched."""
+def _dress(world, asset, entity, drive, look):
+    """The entity's look (the section above) in the colours look (look_colours()): its visual geoms changed and added,
+    its colliding geoms untouched."""
     def visual(g):
         return g.get("contype") == "0" and g.get("conaffinity") == "0" and g.get("mass") == "0"
 
@@ -951,25 +965,25 @@ def _dress(world, asset, entity, drive):
                     del g.attrib[k]
                 g.set("type", "mesh")
                 g.set("mesh", f"{name}_m")
-            rgba = _look_rgba(entity, base, drive)
+            rgba = _look_rgba(entity, base, drive, look)
             if rgba is not None:
                 g.set("rgba", _v(rgba))
     if entity == "bed_frame":
-        _dress_frame(world, asset, DRIVES[drive].get("stand_hole_y", .005))
+        _dress_frame(world, asset, DRIVES[drive].get("stand_hole_y", .005), look["block"])
     elif entity == "bolt":
         _dress_head(world, asset)
     elif entity == "key" and not DRIVES[drive].get("ratchet"):
-        _dress_bend(world, asset, drive)
+        _dress_bend(world, asset, drive, look["key"])
     elif entity == "key":
-        _dress_ratchet(world, asset)
+        _dress_ratchet(world, asset, look["key"])
 
 
 INSERT_T = .0003                # the insert's flange: in the block face, this thick
 
 
-def _dress_frame(world, asset, hole_y, h=HOLD):
+def _dress_frame(world, asset, hole_y, block, h=HOLD):
     """The insert's flange, the slats' screw heads, the bolt's V-blocks and the key's stand as one block (its five
-    pieces' looks shaded apart) with its hole's mouth drawn dark on top."""
+    pieces' looks shaded apart) with its hole's mouth drawn dark on top; block: the V-blocks' and the stand's colour."""
     frame, holders = world.find("body[@name='bedframe']"), world.find("body[@name='holders']")
     p, _ = hole_frame_point()
     _annulus(asset, "insert_flange_m", THREAD_LOOK["hole_outer"], RB + WALL, 0., INSERT_T)
@@ -993,13 +1007,13 @@ def _dress_frame(world, asset, hole_y, h=HOLD):
         base[:, 2] = 0.
         mesh = f"vblock_{g.get('name')}_m"
         ET.SubElement(asset, "mesh", name=mesh, vertex=_v(np.vstack([C, base])))
-        _look_geom(holders, f"vblock_{g.get('name')}", mesh, HARDWOOD)
+        _look_geom(holders, f"vblock_{g.get('name')}", mesh, block)
     for part in ("base", "n", "f", "l", "r"):
         holders.remove(holders.find(f"geom[@name='stand_{part}_look']"))
         asset.remove(asset.find(f"mesh[@name='stand_{part}_look_m']"))
     (x, y), w = h["key_xy"], h["stand_w"] / 2
     ET.SubElement(asset, "mesh", name="stand_block_m", vertex=_v(_box_corners((w, w, h["stand_h"] / 2), .001)))
-    _look_geom(holders, "stand_block", "stand_block_m", HARDWOOD, pos=(x, y, h["stand_h"] / 2))
+    _look_geom(holders, "stand_block", "stand_block_m", block, pos=(x, y, h["stand_h"] / 2))
     ET.SubElement(asset, "mesh", name="stand_hole_m", vertex=_v(_box_corners((.005, hole_y, .0001))))
     _look_geom(holders, "stand_hole", "stand_hole_m", C_HOLE, pos=(x, y, h["stand_h"] + .0001))
 
@@ -1036,7 +1050,7 @@ def _dress_head(world, asset, n=48):
         g.attrib.pop("quat", None)
 
 
-def _dress_bend(world, asset, drive, k=KEY, n=24):
+def _dress_bend(world, asset, drive, colour, k=KEY, n=24):
     """The hex or Torx key bent round BEND_R (centre line) at the corner: the arms' looks stop where the bend starts, the
     ball's look goes, and one mesh of the hex bar swept through the quarter turn in n steps (its faces sharing corners
     along the sweep, so each side shades smoothly round the bend and the hex edges stay sharp) takes its place."""
@@ -1050,7 +1064,7 @@ def _dress_bend(world, asset, drive, k=KEY, n=24):
         if g.get("name") in ("key_long_look", "key_short_look"):
             g.set("mesh", g.get("name") + "_m")
     body.remove(body.find("geom[@name='key_bend_look']"))
-    _look_geom(body, "key_bend_arc", "key_bend_arc_m", CHROME)
+    _look_geom(body, "key_bend_arc", "key_bend_arc_m", colour)
     ET.SubElement(asset, "mesh", name="key_bend_arc_m", **bend_arc(k, n))
 
 
@@ -1072,12 +1086,12 @@ def bend_arc(k=KEY, n=24) -> dict:
     return dict(vertex=_v(np.array(V)), face=" ".join(str(int(v)) for f in F for v in f))
 
 
-def _dress_ratchet(world, asset, r=RATCHET):
+def _dress_ratchet(world, asset, colour, r=RATCHET):
     """The ratchet housing's top: a ring proud of it by 0.15 mm."""
     body = world.find("body[@name='key']")
     bend = np.array([KEY["long"] - KEY["s"] / 2, 0, 0])
     _annulus(asset, "key_ratchet_ring_m", r["house_r"] - .0025, r["house_r"] - .0012, -.00015, 0.)
-    _look_geom(body, "key_ratchet_ring", "key_ratchet_ring_m", _shade(CHROME, .75), pos=bend + (0, 0, r["house_z"][0]))
+    _look_geom(body, "key_ratchet_ring", "key_ratchet_ring_m", _shade(colour, .75), pos=bend + (0, 0, r["house_z"][0]))
 
 
 def bolt_points() -> np.ndarray:

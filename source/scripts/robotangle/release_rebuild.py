@@ -42,6 +42,24 @@ usage: scripts/robotangle/release_rebuild.sh <head> --version <v> [options]
                   gated step: REPORT.md prints it); those instances are used again, not made again. Without it,
                   assets.json keeps its revision and its new pins name files that are not uploaded
   --lanes, --jobs concurrent Harbor trials (default 3) and make-instance runs (default 4)
+  --appearance-seeds  also make each base's instance for these appearance seeds (comma-separated, >= 1; manifest
+                  "appearance_seeds": a list): the base's make with the task parameters
+                  topogym.tasks.scene_variation.appearance(<task class>, S) over its own (the released ones where
+                  released_task_parameters), scene seed unchanged (the user, 2026-10-20: a seed varies appearance only,
+                  one reference serves every seed). Written to instances/<base>/seeds/<S>/ (instance.json +
+                  instance_assets/), which the image copies with its base (/opt/robotangle/instances/<base>/seeds/<S>/)
+                  and assets.json pins (files under instances/<base>/seeds/<S>/, instances[<base>].seeds[<S>]
+                  instance_sha256); a premade base (--instances / the manifest) brings its own seeds/<S>/. Seed 0 is
+                  the base instance itself, made as without this option. For each seed S the release files also get
+                  (write_seed_files): packages/<base>-privileged/runtime_binding.s<S>.upstream.json, the seed
+                  instance's lock (mk_tasks.py: runtime_binding.s<S>.json), and oracles/<base>/privileged.s<S>.npz, the
+                  reference re-stamped (restamp: the same rows, instance_sha = seed S's birth; mk_tasks.py:
+                  solution/trajectory.s<S>.npz); and, for a base whose packages show goal pictures (environment/goal/),
+                  the seed's own in packages/<base>-<mode>/tests/seeds/<S>/goal/, pinned in assets.json under
+                  instances[<base>].seeds[<S>].goal (seed_goal_pictures)
+  --goal-pictures the appearance seeds' goal pictures rendered elsewhere, <dir>/<base>/seeds/<S>/ (the renderer's
+                  pictures and its record *_images.json; manifest "goal_pictures"), used instead of rendering them in
+                  this run (the render tree's scripts/<bench>/goal_images/<renderer>, in the release image on --gpu)
   --no-harbor     stop after the checks
 A manifest base with "reference": null has no reference solution (user 2026-10-13): no oracles/ copy, release.json
 evidence {} and oracle "none" (its texts say so), no birth comparison, and Harbor runs nop only for it (harbor_nop/).
@@ -63,7 +81,9 @@ Steps:
      oracles/<new>/ (the reference; standard.npz is the same file: a MuJoCo standard oracle streams the reference's
      rows and mk_tasks.py reads only its actions; unless the tree's oracles/<new>/standard.npz is a reference re-timed
      to the standard service's joint-speed rule, meta "speed_rule": then that file, standard_reference()); release.json (runtime, tooling, the MuJoCo base records with their
-     evidence: this run); assets.json (the made instances' pins); every task dir rendered (mk_tasks.py)
+     evidence: this run); assets.json (the made instances' pins); with --appearance-seeds the seeds' locks, re-stamped
+     references and goal pictures (rendered in the release image unless --goal-pictures); every task dir rendered
+     (mk_tasks.py)
   4. mk_tasks.py --check (every base) and --assets <work> --check (the MuJoCo bases' instance bytes)
   5. a local commit, then harbor_check.py --tasks: oracle and nop, both modes, rendering off, on that commit (a base
      on a GPU profile keeps its one-GPU reservation)
@@ -143,8 +163,14 @@ argv = ["make-instance", "--task", job["task"], "--variation", job["variation"],
 if over:
     json.dump(over, open(job["overrides_file"], "w"), indent=1)
     argv += ["--simulator-overrides", job["overrides_file"]]
-if job["released_task_parameters"]:
-    json.dump(inst["simulator"]["task_parameters"], open(job["task_parameters_file"], "w"), indent=1)
+params = inst["simulator"]["task_parameters"] if job["released_task_parameters"] else None
+if job.get("appearance_seed"):   # an appearance seed's instance: appearance(<task class>, S) over the base's parameters
+    from topogym.config.registry import task_definition
+    from topogym.tasks.base import merge_parameters
+    from topogym.tasks.scene_variation import appearance
+    params = merge_parameters(params or {}, appearance(task_definition(job["task"], job["variation"]), job["appearance_seed"]))
+if job["released_task_parameters"] or job.get("appearance_seed"):
+    json.dump(params, open(job["task_parameters_file"], "w"), indent=1)
     argv += ["--task-parameters", job["task_parameters_file"]]
 print(" ".join(argv), flush=True)
 sys.argv = ["rcb_topogym.py", *argv]
@@ -264,6 +290,33 @@ def npz_text(path: pathlib.Path, name: str) -> str | None:
         raw = z.read(name)
     size = 4 if raw[6] >= 2 else 2                      # .npy: magic, version, header length, header, data
     return raw[8 + size + int.from_bytes(raw[8:8 + size], "little"):].decode("utf-32-le").rstrip("\0")
+
+
+def restamp(ref: bytes, birth: str) -> bytes:
+    """A reference re-stamped with another birth (an appearance seed's state_sha; the user, 2026-10-20: a seed changes
+    the looks only, so the reference's rows serve every seed): instance_sha.npy's text replaced under its own .npy header
+    (the birth padded to the header's width, never longer), every other entry byte for byte, in the same order and with
+    the same names, dates and compression. Standard library only (npz_text's layout)."""
+    zin = zipfile.ZipFile(io.BytesIO(ref))
+    raw = zin.read("instance_sha.npy")
+    size = 4 if raw[6] >= 2 else 2
+    head = 8 + size + int.from_bytes(raw[8:8 + size], "little")
+    new = birth.encode("utf-32-le")
+    if b"'descr': '<U" not in raw[:head] or len(new) > len(raw) - head:
+        raise SystemExit(f"restamp: the reference's instance_sha.npy cannot hold the birth {birth!r}")
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w") as zout:
+        for info in zin.infolist():           # fresh records: the reader's extra fields (zip64) are not carried over
+            zi = zipfile.ZipInfo(info.filename, info.date_time)
+            zi.compress_type, zi.external_attr = info.compress_type, info.external_attr
+            zout.writestr(zi, raw[:head] + new.ljust(len(raw) - head, b"\0") if info.filename == "instance_sha.npy"
+                          else zin.read(info.filename))
+    data = out.getvalue()
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        same = z.namelist() == zin.namelist() and all(z.read(n) == zin.read(n) for n in z.namelist() if n != "instance_sha.npy")
+    if not same or npz_text(io.BytesIO(data), "instance_sha.npy") != birth:
+        raise SystemExit(f"restamp: the re-stamped reference is not the reference with birth {birth}")
+    return data
 
 
 def canonical(inst: dict) -> str:
@@ -451,29 +504,125 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
            "RCB_TORCH_THREADS=1", "HOME=/tmp", "XDG_CACHE_HOME=/work/cache"]
     tooling = a.repo / "scripts/robotangle/shared"
 
-    def one(b: dict) -> tuple[str, float]:
+    def one(b: dict, seed: int | None = None) -> tuple[str, float]:
+        name = b["new"] if seed is None else f"{b['new']}/seeds/{seed}"      # an appearance seed: instances/<base>/seeds/<S>/
+        tag = b["new"] if seed is None else f"{b['new']}.seed{seed}"
         job = {k: b[k] for k in ("variation", "released_simulator_keys", "simulator_overrides", "scene_seed",
                                  "gripper_space", "render_host", "frozen_assets", "released_task_parameters",
                                  "grasp_weld_links")}
-        job.update(task=b["task"], released=b["old"] or b["template"], out=f"/work/instances/{b['new']}/instance.json",
-                   overrides_file=f"/work/mk/{b['new']}.overrides.json",
-                   task_parameters_file=f"/work/mk/{b['new']}.task_parameters.json")
+        job.update(task=b["task"], released=b["old"] or b["template"], out=f"/work/instances/{name}/instance.json",
+                   overrides_file=f"/work/mk/{tag}.overrides.json",
+                   task_parameters_file=f"/work/mk/{tag}.task_parameters.json")
+        if seed is not None:
+            job["appearance_seed"] = seed
         if b["render_host"]:     # the released task's binding goes with the released instance into the render host
             shutil.copyfile(a.repo / "tasks" / f"robotangle-{b['old']}-privileged/environment/runtime_binding.json",
                             mk / f"{b['new']}.released_binding.json")
             job["released_binding"] = f"/work/mk/{b['new']}.released_binding.json"
-        (inst / b["new"]).mkdir()
-        (mk / f"{b['new']}.json").write_text(json.dumps(job, indent=1) + "\n")
+        (inst / name).mkdir(parents=True, exist_ok=True)
+        (mk / f"{tag}.json").write_text(json.dumps(job, indent=1) + "\n")
         t0 = datetime.datetime.now()
         gpu = (b["simulator_overrides"].get("mujoco_profile") or "") in a.gpu_profiles   # a GPU profile: its make needs one
         dev = ["--gpus", f"device={a.gpu}"] if gpu else ["-e", "CUDA_VISIBLE_DEVICES="]
         run(["docker", "run", "--rm", "--network", "none", "--user", f"{os.getuid()}:{os.getgid()}", *dev,
              *(x for e in env for x in ("-e", e)), "-v", f"{tooling}:/tooling:ro", "-v", f"{a.work}:/work", noinst,
-             "python", "/work/mk/make_one.py", f"/work/mk/{b['new']}.json"], log=a.work / "logs" / f"make_{b['new']}.log")
-        return b["new"], (datetime.datetime.now() - t0).total_seconds()
+             "python", "/work/mk/make_one.py", f"/work/mk/{tag}.json"], log=a.work / "logs" / f"make_{tag}.log")
+        return name, (datetime.datetime.now() - t0).total_seconds()
 
+    jobs = [(b, None) for b in bases] + [(b, s) for b in bases for s in a.appearance_seeds]
     with cf.ThreadPoolExecutor(max_workers=a.jobs) as pool:
-        return dict(pool.map(one, bases))
+        return dict(pool.map(lambda j: one(*j), jobs))
+
+
+def write_seed_files(a, rb: pathlib.Path, new: str, d: pathlib.Path, ref: bytes | None, lock: dict) -> dict:
+    """One base's appearance-seed release files (--appearance-seeds; without it only the clean-up, a no-op on a tree
+    without them): per seed S, the lock of instances/<new>/seeds/<S>/ (packages/<new>-privileged/
+    runtime_binding.s<S>.upstream.json: seed 0's lock with that instance's canonical sha256, asset files and creation
+    source) and, where the base has a reference, the reference re-stamped with the seed's birth (oracles/<new>/
+    privileged.s<S>.npz; the standard oracle streams only the rows, which every seed shares). A previous release's seed
+    files of the base go first, its packages' tests/seeds/ too (seed_goal_pictures writes them). Returns the base's
+    assets.json `seeds` ({} without seeds)."""
+    for p in [*(rb / "packages" / f"{new}-privileged").glob("runtime_binding.s*.upstream.json"),
+              *(rb / "oracles" / new).glob("privileged.s*.npz")]:
+        p.unlink()
+    for mode in ("privileged", "standard"):
+        shutil.rmtree(rb / "packages" / f"{new}-{mode}" / "tests" / "seeds", ignore_errors=True)
+    pins = {}
+    for s in a.appearance_seeds:
+        sd = d / "seeds" / str(s)
+        si = json.loads((sd / "instance.json").read_text())
+        files = {p.relative_to(sd).as_posix(): sha(p.read_bytes()) for p in sorted((sd / "instance_assets").rglob("*"))
+                 if p.is_file()}
+        (rb / "packages" / f"{new}-privileged" / f"runtime_binding.s{s}.upstream.json").write_text(json.dumps(
+            dict(lock, instance_sha256=canonical(si), asset_files=files, creation_source=si["topogym_source"]), indent=2) + "\n")
+        if ref is not None:
+            (rb / "oracles" / new / f"privileged.s{s}.npz").write_bytes(restamp(ref, si["state_sha"]))
+        pins[str(s)] = {"instance_sha256": canonical(si)}
+    return pins
+
+
+# The goal pictures of a task family whose instruction shows some (packages' environment/goal/: blanket_fold's
+# target_cam_*.png, knot_untying's region tiers' region_cam_*.png) are rendered for an appearance seed by the render
+# tree's scripts/<bench>/goal_images/<renderer> (in the release image, one GPU); each writes the pictures and a record
+# <kind>_images.json that names the birth it rendered (state_sha).
+GOAL_RENDERERS = {"blanket_fold": "fold_target_images.py", "knot_untying": "region_images.py"}
+
+
+def goal_command(a, base: str, seed: int, renderer: str, image: str, mujoco_env) -> list[str]:
+    """The render of one seed's goal pictures: in the release image on --gpu, from a writable copy of the seed's instance
+    (instances mounted read-only), into <work>/goal/<base>/seeds/<seed>/."""
+    env = [*(f"{k}={v}" for k, v in mujoco_env), "OMP_NUM_THREADS=1", "MKL_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
+           "RCB_TORCH_THREADS=1", "HOME=/tmp", "XDG_CACHE_HOME=/work/cache"]
+    return ["docker", "run", "--rm", "--network", "none", "--user", f"{os.getuid()}:{os.getgid()}", "--gpus", f"device={a.gpu}",
+            *(x for e in env for x in ("-e", e)), "-v", f"{a.repo / 'scripts/robotangle/shared'}:/tooling:ro",
+            "-v", f"{a.out / 'scripts' / a.bench / 'goal_images'}:/goal_images:ro",
+            "-v", f"{a.work / 'instances'}:/instances:ro", "-v", f"{a.work}:/work", image,
+            "sh", "-c", 'cp -a "$1" /tmp/instance && exec python "/goal_images/$2" /tmp/instance/instance.json "$3" --tooling /tooling',
+            "render", f"/instances/{base}/seeds/{seed}", renderer, f"/work/goal/{base}/seeds/{seed}"]
+
+
+def seed_goal_pictures(a, bases: list[dict], image: str, mujoco_env) -> None:
+    """--appearance-seeds: each seed's goal pictures for the bases whose packages show some (environment/goal/; the user,
+    2026-10-20: rendered in the seed's looks, committed in both task dirs as tests/seeds/<S>/goal/, which
+    scripts/task_seed.py materialize copies over environment/goal/). They come from --goal-pictures <dir>/<base>/seeds/<S>/,
+    or are rendered in this run into <work>/goal/<base>/seeds/<S>/ (goal_command; a picture already there is used again).
+    The run stops when a picture is missing or its renderer's record names another birth than the seed's. Written to
+    packages/<base>-<mode>/tests/seeds/<S>/goal/ and pinned in assets.json, instances[<base>].seeds[<S>].goal."""
+    rb = a.out / "scripts" / a.bench
+    assets = json.loads((rb / "assets.json").read_text())
+    for b in bases:
+        new = b["new"]
+        pkgs = [rb / "packages" / f"{new}-{m}" for m in ("privileged", "standard")]
+        names = [sorted(p.name for p in (q / "environment/goal").glob("*") if p.is_file()) for q in pkgs]
+        if not any(names):
+            continue
+        if names[0] != names[1]:
+            raise SystemExit(f"{new}: the twins show other goal pictures ({names[0]} / {names[1]})")
+        renderer = GOAL_RENDERERS.get(b["task"])
+        script = rb / "goal_images" / (renderer or "")
+        for s in a.appearance_seeds:
+            birth = json.loads((a.work / "instances" / new / "seeds" / str(s) / "instance.json").read_text())["state_sha"]
+            src = (a.goal_pictures or a.work / "goal") / new / "seeds" / str(s)
+            cmd = goal_command(a, new, s, renderer or "<renderer>", image, mujoco_env)
+            if not a.goal_pictures and not all((src / n).is_file() for n in names[0]):
+                if not renderer or not script.is_file():
+                    raise SystemExit(f"{new} seed {s}: its goal pictures {names[0]} need a renderer: no "
+                                     f"{script if renderer else 'GOAL_RENDERERS entry for ' + b['task']} (or pass --goal-pictures)")
+                shutil.rmtree(src, ignore_errors=True)
+                run(cmd, log=a.work / "logs" / f"goal_{new}.seed{s}.log")
+            missing = [n for n in names[0] if not (src / n).is_file()]
+            records = [json.loads(p.read_text()) for p in sorted(src.glob("*_images.json"))] if src.is_dir() else []
+            if missing or len(records) != 1 or records[0].get("state_sha") != birth:
+                raise SystemExit(f"{new} seed {s}: goal pictures in {src}: " + (f"missing {missing}" if missing else
+                                 f"{len(records)} renderer records (*_images.json), want one naming the birth {birth}"
+                                 + (f", it names {records[0].get('state_sha')}" if len(records) == 1 else ""))
+                                 + f"; render them with: {' '.join(cmd)}")
+            for q in pkgs:
+                (q / "tests/seeds" / str(s) / "goal").mkdir(parents=True, exist_ok=True)
+                for n in names[0]:
+                    shutil.copyfile(src / n, q / "tests/seeds" / str(s) / "goal" / n)
+            assets["instances"][new]["seeds"][str(s)]["goal"] = {n: sha((src / n).read_bytes()) for n in names[0]}
+    (rb / "assets.json").write_text(json.dumps(assets, indent=1, ensure_ascii=False) + "\n")
 
 
 def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: dict, noinst: dict, facts: dict) -> None:
@@ -629,6 +778,9 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
         if old and not new_bench:
             assets["instances"].pop(old, None)
         assets["instances"][new] = {"instance_sha256": canonical(inst)}
+        seeds = write_seed_files(a, rb, new, d, None if no_ref else per_mode["privileged"], lock)
+        if seeds:                         # the appearance seeds' instances (their files are under instances/<new>/seeds/)
+            assets["instances"][new]["seeds"] = seeds
         for t in a.out.glob(f"tasks/robotangle-{old}-*") if old and not new_bench else ():
             shutil.rmtree(t)
     # release.json: the records in place (a new base where its released one was), one runtime and tooling for all
@@ -777,6 +929,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--hf-revision")
     ap.add_argument("--lanes", type=int)
     ap.add_argument("--jobs", type=int)
+    ap.add_argument("--appearance-seeds")
+    ap.add_argument("--goal-pictures", type=pathlib.Path)
     ap.add_argument("--harbor", default="harbor")
     ap.add_argument("--host-label", default=socket.gethostname().split(".")[0])
     ap.add_argument("--replace-tag", action="store_true")
@@ -786,10 +940,13 @@ def main(argv: list[str]) -> int:
     m = json.loads(a.manifest.read_text()) if a.manifest else {}
     mdir = a.manifest.resolve().parent if a.manifest else pathlib.Path.cwd()
     for k, default in (("head", None), ("version", None), ("onto", None), ("bench", BENCH), ("families", None), ("only", None), ("hf_revision", None),
-                       ("gpu", "0"), ("lanes", 3), ("jobs", 4)):
+                       ("gpu", "0"), ("lanes", 3), ("jobs", 4), ("appearance_seeds", None)):
         if getattr(a, k) is None:
             v = m.get(k, default)
-            setattr(a, k, ",".join(v) if k in ("families", "only") and isinstance(v, list) else v)
+            setattr(a, k, ",".join(map(str, v)) if k in ("families", "only", "appearance_seeds") and isinstance(v, list) else v)
+    a.appearance_seeds = sorted({int(x) for x in (a.appearance_seeds or "").split(",") if x.strip()})
+    if any(x < 1 for x in a.appearance_seeds):
+        ap.error("--appearance-seeds: seeds >= 1 (seed 0 is the base instance)")
     if not a.head or not a.version:
         ap.error("the head and --version are needed (on the command line or in the manifest)")
     if a.bench != "robotangle" and not a.onto and not a.harbor_only:
@@ -806,6 +963,9 @@ def main(argv: list[str]) -> int:
     if a.instances:
         a.premade.update({d.name: d.resolve() for d in a.instances.iterdir() if (d / "instance.json").is_file()})
     a.step_s = {b: float(r["step_s"]) for b, r in per.items() if r.get("step_s")}
+    if a.goal_pictures is None and m.get("goal_pictures"):
+        a.goal_pictures = path(m["goal_pictures"])
+    a.goal_pictures = a.goal_pictures.resolve() if a.goal_pictures else None
     expect = {b: r["expect"] for b, r in per.items() if r.get("expect")}
     here = pathlib.Path(__file__).resolve().parents[2]
     head = run(["git", "-C", str(here), "rev-parse", "--verify", f"{a.head}^{{commit}}"]).strip()
@@ -879,8 +1039,14 @@ def main(argv: list[str]) -> int:
                                      f"{', '.join(str(p) for p in need if not p.is_dir()) or 'no package_text'}")
         if a.hf_revision and not (a.work / "instances" / b["new"] / "instance.json").is_file():
             raise SystemExit(f"--hf-revision uses the instances of a previous run in {a.work}: {b['new']} has none")
+        src = a.work / "instances" / b["new"] if a.hf_revision else a.premade.get(b["new"])
+        lacking = [s for s in a.appearance_seeds if src and not (src / "seeds" / str(s) / "instance.json").is_file()]
+        if lacking:                       # a premade or reused base: its appearance seeds come with it
+            raise SystemExit(f"{b['new']}: --appearance-seeds {','.join(map(str, lacking))}: {src} has no seeds/<S>/instance.json")
     # harbor_check.py is this checkout's (the runner), mk_tasks.py the render tree's; MUJOCO_ENV is the same in both
     gen = f"scripts/{a.bench if a.onto else 'robotangle'}/mk_tasks.py"     # the render tree's generator
+    if a.appearance_seeds and "def seeds_of_base" not in (a.out / gen).read_text():
+        raise SystemExit(f"--appearance-seeds: the render tree's {gen} does not render appearance seeds (seeds_of_base)")
     mk, hc = module(a.out / gen), module(here / "scripts/robotangle/harbor_check.py")
     empty = a.work / "empty"
     empty.mkdir(exist_ok=True)
@@ -918,6 +1084,21 @@ def main(argv: list[str]) -> int:
                                    make_s=("made elsewhere (--instances), source " + inst["topogym_source"]["sha256"][:8]
                                            if b["new"] in a.premade else round(walls[b["new"]], 1) if walls
                                            else "uploaded, used again"))
+        seeds = {}
+        for s in a.appearance_seeds:      # each appearance seed's instance: same make, appearance(cls, S) parameters
+            si = json.loads((d / "seeds" / str(s) / "instance.json").read_text())
+            assert si["simulator"]["physics_engine"] == "mujoco", f"{b['new']} seed {s}"
+            if b["new"] not in a.premade:
+                assert si["topogym_source"]["sha256"] == rt["runtime"]["source"]["sha256"], f"{b['new']} seed {s}: made on another source"
+            seeds[str(s)] = dict(birth=si["state_sha"], instance_sha256=canonical(si),
+                                 task_parameters=si["simulator"].get("task_parameters"),
+                                 simulator_keys_differing=sorted(k for k in set(si["simulator"]) | set(inst["simulator"])
+                                                                 if k != "task_parameters"
+                                                                 and si["simulator"].get(k) != inst["simulator"].get(k)),
+                                 make_s=round(walls[f"{b['new']}/seeds/{s}"], 1) if f"{b['new']}/seeds/{s}" in walls
+                                 else "made elsewhere / uploaded")
+        if seeds:
+            instances[b["new"]]["seeds"] = seeds
     run([*build, "--build-context", f"instances={a.work / 'instances'}", "-t", image, "-t", f"{a.bench}:{a.version}",
          "."], log=a.work / "logs/build_release.log", cwd=a.repo)
     rel_rt = installed(image)
@@ -935,6 +1116,15 @@ def main(argv: list[str]) -> int:
 
     # 3. the release files, every task dir rendered; 4. the checks
     write_release(a, bases, head, runtime, uipc, noinst, facts)
+    if a.appearance_seeds:               # the seeds' goal pictures (rendered in the release image); the report names
+        seed_goal_pictures(a, bases, image, mk.MUJOCO_ENV)       # their re-stamped references and pictures
+        rb = a.out / "scripts" / a.bench
+        pins = json.loads((rb / "assets.json").read_text())
+        for b in bases:
+            for s, x in instances[b["new"]].get("seeds", {}).items():
+                ref = rb / "oracles" / b["new"] / f"privileged.s{s}.npz"
+                x.update(reference_sha256=sha(ref.read_bytes()) if ref.is_file() else None,
+                         goal=pins["instances"][b["new"]]["seeds"][s].get("goal"))
     py = sys.executable
     run([py, gen], log=a.work / "logs/mk_tasks.log", cwd=a.out)
     checks = {}
@@ -1026,6 +1216,17 @@ def report_md(r: dict, a, bases: list[dict]) -> str:
            "|---|---|---|---|---|---|---|---|---|"]
     out += [f"| {n} | {i['replaces']} | {i['variation']} | `{i['birth']}` | {'yes' if i['reference_birth'] else 'not recorded'} | "
             f"`{i['instance_sha256'][:16]}` | {i['files']} | {i['bytes']} | {i['make_s']} |" for n, i in r["instances"].items()]
+    seeded = {n: i["seeds"] for n, i in r["instances"].items() if i.get("seeds")}
+    if seeded:                            # --appearance-seeds: instances/<base>/seeds/<S>/
+        out += ["", "## Appearance seeds (instances/<base>/seeds/<S>/: the base's make, appearance(cls, S) task parameters)", "",
+                "| base | seed | birth (state_sha) | instance sha256 | task parameters | simulator keys differing | make s | "
+                "reference re-stamped (oracles/<base>/privileged.s<S>.npz) | goal pictures |",
+                "|---|---|---|---|---|---|---|---|---|"]
+        out += [f"| {n} | {s} | `{x['birth']}` | `{x['instance_sha256'][:16]}` | `{json.dumps(x['task_parameters'])[:120]}` | "
+                f"{', '.join(x['simulator_keys_differing']) or 'none'} | {x['make_s']} | "
+                f"{'`' + x['reference_sha256'][:16] + '`' if x.get('reference_sha256') else 'none'} | "
+                f"{', '.join(f'{k} `{v[:12]}`' for k, v in (x.get('goal') or {}).items()) or 'none'} |"
+                for n, ss in seeded.items() for s, x in ss.items()]
     out += ["", "## Checks", ""] + [f"- {k}: {'ok' if c['ok'] else 'FAIL'}"
                                      + ("" if c["ok"] else ": " + " / ".join(c["output"])) for k, c in r["checks"].items()]
     if "harbor" in r:
