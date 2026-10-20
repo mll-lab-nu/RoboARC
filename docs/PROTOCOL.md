@@ -1,11 +1,17 @@
 # RoboARC task protocol (Robot Coding Bench task protocol v2.0)
 
 **In this repository.** RoboARC's tasks follow the task protocol of Robot Coding Bench, the multi-benchmark
-repository RoboARC's task layer comes from (v2.0, unchanged here). RoboARC ships two modes, privileged and standard
-(`eai-standard/2.4`); the parts about standard-realtime mode and exported tasks are kept for completeness, and no
-RoboARC task uses them. RoboARC's own choices (grading replays, safety telemetry, world frame, time budget) are in
+repository RoboARC's task layer comes from (v2.0, with the one change below). RoboARC ships two modes, privileged and
+standard (`eai-standard/2.4`); the parts about standard-realtime mode and exported tasks are kept for completeness, and
+no RoboARC task uses them. RoboARC's own choices (grading replays, safety telemetry, world frame, time budget) are in
 [benchmarks/roboarc.md](benchmarks/roboarc.md). Task files cite this document by section number: the numbers do not
 change.
+
+**Changes from the shared protocol.** RoboARC is a standalone benchmark and departs from the shared protocol in one
+point: recording the agent's model-API usage (tokens, cost) is optional. An official run does not need the usage
+gateway. A run may record usage through it (the runner's `USAGE_GATEWAY` option, [RUNNING.md](RUNNING.md) "Usage
+recording"); without it, the usage a result reports is what the harness itself logs, if anything. Every result records
+which (§4, H.6).
 
 **Recommended conventions, and eight invariants that bind.** Sections 1–7 describe how a task is usually built, so that
 tasks from different benchmarks can be run, compared and reviewed the same way. They recommend; a task or a benchmark
@@ -91,7 +97,7 @@ infrastructure, a reference implementation, one benchmark using it, CI support t
 | Success judged on the end state of the replay; ≥ 2 replays with matching final-state hashes (`deterministic`), or one by the task's declared choice | within H.4 |
 | An infrastructure failure is `infra_error = 1`: not a result, neither a success nor the agent's 0 (H.5) | `scripts/harbor/write_task_results.py` |
 | `nop` scores 0; with `oracle = "full"` the oracle scores 1 on every seed in `seeds.oracle` (Harbor `-a oracle`, DEVELOPING.md); a task without an oracle gets a human review (a positive example, the predicate, `nop` 0, determinism; recorded in the PR) | the `validated` marker (§2) |
-| Results report success with cost (tokens, money, turns, wall clock, simulation steps) per mode and per comparable configuration; run id `<harness>-<model>-<effort>`; not committed to the repository | RUNNING.md |
+| Results report success with cost (turns, wall clock, simulation steps; tokens and money where usage was recorded) per mode and per comparable configuration; each result records whether usage was recorded and by what (the usage gateway or the harness's own logs; optional, H.6); run id `<harness>-<model>-<effort>`; not committed to the repository | RUNNING.md |
 | The easy set: task bases listed in [`easy_set.toml`](easy_set.toml) (solved through a shortcut, judged too easy by the benchmark owner, or solved in every mode by the screening runs) stay in the repository and are run, but are reported apart from the main table and left out of the headline statistics; each result records `set` (`core` / `easy`) as a marker, never part of the configuration. Listing a task changes none of its files | `task_conventions.py easy-set --check` |
 
 ## 5. Instructions and information
@@ -180,10 +186,12 @@ voided attempt is moved aside and never counted. The rule is the runner's: `scri
 
 **H.6 Egress.** During the agent phase the agent's container, and every service in its network namespace, reaches only
 the allowlist `scripts/set_agent_egress.py` `HOSTS` (the model APIs and the package registries; `[agent] network_mode =
-"allowlist"` with exactly those hosts, no step with a policy of its own; an official run narrows it further to the usage
-gateway and the registries), unless the task's author declares open egress, `[metadata] network = "open"` (then
-`[agent]` sets no other policy). The runner applies what the task declares; open-network results are ranked apart.
-The verifier has no network. *CI:* `check-verifier-isolation.sh`.
+"allowlist"` with exactly those hosts, no step with a policy of its own; a run that records usage through the optional
+usage gateway narrows it further to the gateway and the registries), unless the task's author declares open egress,
+`[metadata] network = "open"` (then `[agent]` sets no other policy). The runner applies what the task declares;
+open-network results are ranked apart. The verifier has no network. Usage recording is optional: an official run needs
+no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. *CI:*
+`check-verifier-isolation.sh`.
 
 **H.7 Comparable twins.** Where a task ships both a privileged and a standard (or standard-realtime) version, they
 share one frozen instance (byte-identical copies), one success rule and the same seeds (`default`, `allowed`,

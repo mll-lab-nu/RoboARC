@@ -30,7 +30,6 @@ RECORDS = {   # pages that record the development repository: their prose paths 
     "docs/simulator/TOPOGYM_PROTOCOL.md": "the Genesis-era protocol record the task files cite; its preface says so",
 }
 ABSENT = {
-    "scripts/usage_gateway": "the optional usage gateway, an external component (docs/RUNNING.md)",
     "tests/api": "the Python package's tests, once added (CI job api-tests is skipped without them)",
 }
 

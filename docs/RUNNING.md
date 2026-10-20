@@ -64,9 +64,9 @@ A result is official only when its run had all of these:
   `override_timeout_sec`), and **nothing added to the instruction** (no prompt template, no extra instruction).
 - **The runner's seed, the task's network, at most one infrastructure retry** (below), and the effective configuration
   recorded with the result.
-- **A token budget** per trial (100M input tokens, cache included, and 10M output tokens, reasoning included, by
-  default) and **the usage gateway** as the agent's egress (PROTOCOL H.6). The usage gateway is an external component
-  that this repository does not ship (see "Usage gateway"); runs made without it record that in their metadata.
+
+Recording the agent's model-API usage is **optional** (PROTOCOL H.6): an official run does not need the usage gateway.
+Each result records whether usage was recorded and by what ("Usage recording" below).
 
 ## Batches: `scripts/harbor/run_agent_batch.sh`
 
@@ -90,6 +90,7 @@ variable; the main ones:
 | web search | `WEB_SEARCH=disabled` (default) or `allowed` (not for official runs) |
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
+| usage recording | `USAGE_GATEWAY=<dir>`: route the agent's model-API calls through the usage gateway installed in `<dir>` ("Usage recording" below). Empty (default) = off |
 | optional host tools | `LOG_MIRROR=1`: an append-only mirror of every trial's `agent/` record in a root-owned container (`rcb-log-mirror`, `scripts/harbor/log_mirror.py`), so neither the agent nor the host user can delete it. `MEM_GUARD=1`: `scripts/harbor/mem_guard.py` keeps 2 GiB of host memory available by killing the largest running RoboARC trial container (names `roboarc-*` only). Both are off by default |
 
 After each job the runner scans the job for keys and redacts them (`scripts/harbor/scan_secrets.py`), writes the
@@ -172,12 +173,14 @@ Results are not committed. `scripts/harbor/write_task_results.py <jobs_dir> <job
 writes, per task and run id, `<dir>/<task>/<run id>/`: `README.md` (the result and its cost),
 `replay.mp4` and `replay.last.png`, `config.json` (the trial's effective configuration: `protocol_version`, `mode`,
 `cutoff_s`, `reset_budget`, `slowdown`, `seed`, `network`, `validated`, `set`, `oracle`, `service_protocol`, `digest`,
-the result and whether it counts) and `attempts.json`. The run id is `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md));
+the result and whether it counts, and the usage recording: `usage_gateway`, `usage_source`, `usage_recorded`,
+`token_budget`, see "Usage recording") and `attempts.json`. The run id is `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md));
 provider, service tier and settings go in the metadata.
 
 Rankings compare trials only within one comparable configuration (`task_conventions.config_key`: protocol version,
 mode, cutoff, reset budget, S, network), report success together with cost (tokens, money, turns, wall clock,
-simulation steps), and align reasoning effort, `max_turns` and the token budget before comparing agents. Validated and
+simulation steps; tokens and money where usage was recorded), and align reasoning effort, `max_turns` and the token
+budget (`token_budget`; null when none was enforced) before comparing agents. Validated and
 unvalidated tasks are ranked together (every puzzle task has `oracle = "full"`). The easy set
 ([`easy_set.toml`](easy_set.toml), `task_conventions.set_of`) is kept apart: its tasks are run and their results shown,
 marked, but every headline number counts `core` tasks only. `set` in `config.json` is the value when the result was
@@ -231,14 +234,32 @@ values from `scripts/task_resources.toml`, checked by `ci_checks/check-resources
   merges the agent's messages, reasoning summaries, tool calls and token use with the robot service's log into
   `analysis/timeline.md`.
 
-## Usage gateway (optional, external)
+## Usage recording (optional)
 
-The runner can route the agent's model-API calls through a transparent usage gateway (`GATEWAY=1`) that forwards model
-calls only, records each trial's tokens per request (`<trial>/gateway/usage.jsonl`, `totals.json`, optionally the raw
-bodies), enforces the token budget (`TOKEN_BUDGET_IN` / `TOKEN_BUDGET_OUT`), and becomes, with the package registries,
-the agent container's only egress (each job's task copy is narrowed with `scripts/set_agent_egress.py only`). **The
-gateway is not part of this repository**: install it at `USAGE_GATEWAY_DIR` (default `scripts/usage_gateway/`:
-`gateway.py`, `rawlog.py`, `api_paths.json`); without it, `GATEWAY=1` stops at start with a message, and runs go
-without it (the default). The runner's code path for it (start, health check and restart, `gateway_down.json`, the
-egress-narrowed copy, the summary's token columns) is kept as it is. A trial whose last model calls failed at the
-gateway, or whose job has `gateway_down.json`, is an infrastructure failure, never the agent's 0.
+Recording the agent's model-API usage is optional, and off by default. Without it, the token counts a result shows are
+the harness's own (Harbor's `result.json`, `agent_result`), where the harness reports them.
+
+With `USAGE_GATEWAY=<dir>`, the batch runner routes the agent's model-API calls through a transparent usage gateway
+installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). **The gateway is an external component, not part
+of this repository**; a `USAGE_GATEWAY` without `gateway.py` stops the runner at start, before any job. The gateway
+forwards model calls only, unchanged (the agent keeps its own credentials), records each trial's tokens per request
+(`<trial>/gateway/usage.jsonl`, `totals.json`; with `GATEWAY_RAW=1`, the default, also the raw request and response
+bodies, which hold the whole conversation: keep them private), enforces the token budget (`TOKEN_BUDGET_IN` /
+`TOKEN_BUDGET_OUT`, 100M input tokens, cache included, and 10M output tokens, reasoning included, by default; past it
+every further request is refused and the trial counts as failed), and becomes, with the package registries, the agent
+container's only egress (each job's task copy is narrowed with `scripts/set_agent_egress.py only`; `GATEWAY_EGRESS=task`
+keeps the task's own list). The runner checks the gateway before each job and restarts it if needed; a trial whose last
+model calls failed at the gateway, or whose job has `gateway_down.json`, is an infrastructure failure, never the
+agent's 0. The header of `scripts/harbor/run_agent_batch.sh` lists the other `GATEWAY_*` options.
+
+Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget), and every result's
+`config.json` says what it has:
+
+| field | value |
+|---|---|
+| `usage_gateway` | `true` / `false`: whether the trial ran through the usage gateway; `null` for a job without the runner's record (a plain `harbor run`) |
+| `usage_source` | where the token counts come from: `"usage gateway"`, `"harness"` (Harbor's `result.json`), or `null` (none recorded) |
+| `usage_recorded` | `usage_source` is not `null` |
+| `token_budget` | `{"input": ..., "output": ...}`, the budget the gateway enforced (0 = no limit); `null` without the gateway |
+
+Without the gateway no token budget is enforced: the task's cutoff bounds the trial.
