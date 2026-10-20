@@ -2,7 +2,7 @@
  "note": "Standard-mode evidence of the IKEA MuJoCo tasks under the standard rules (the agent's wall clock, robot frame, the robots' real joint-speed limits, live verdict = the grader's settled verdict (final_check)). Written from Harbor runs on the lab's RTX 4090 workstations (job names relative to the run directories). budget_pct_live = live service time / the wall clock of the run; the verifier's replays run after the agent's time.",
  "lack": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, 54694704aa75); graded by the live episode",
   "rows": 67697,
   "sim_time_s": 169.24,
   "service_time_s": 1277.0,
@@ -52,7 +52,7 @@
  },
  "svallet": {
   "date": "2026-10-16",
-  "host": "host A (RTX 4090; shared, loaded) (oracle), host B (nop), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB; built per host from one context: host B a466a594c463, host C 53d8800bfa22, host A 3f9218fb9864); the live, replay and settled hashes equal the 0.3.0 (EGL) run's",
+  "host": "two RTX 4090 workstations (shared, loaded; the oracle on one, nop on the other), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB; built on each of three hosts from one context: a466a594c463, 53d8800bfa22, 3f9218fb9864); the live, replay and settled hashes equal the 0.3.0 (EGL) run's",
   "rows": 68000,
   "sim_time_s": 170.0,
   "service_time_s": 396.6,
@@ -97,7 +97,7 @@
  },
  "gladom": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode",
   "rows": 184000,
   "sim_time_s": 460.0,
   "service_time_s": 4780.4,
@@ -129,7 +129,7 @@
  },
  "variera": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463)",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463)",
   "rows": 243159,
   "sim_time_s": 607.9,
   "service_time_s": 4273.5,
@@ -142,7 +142,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B harbor/jobs/A_std_oracle/ikea-variera-i00-standard__QZAYZgq",
-    "note": "graded live: live settled success at control step 243159 (61 calls, n_clipped 0 on every call), live end hash 95134e1fbd5c = the privileged replays'; live service time 4274 s on loaded host B; video 1"
+    "note": "graded live: live settled success at control step 243159 (61 calls, n_clipped 0 on every call), live end hash 95134e1fbd5c = the privileged replays'; live service time 4274 s on the loaded workstation; video 1"
    },
    {
     "agent": "nop",
@@ -161,7 +161,7 @@
  },
  "eket": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, 54694704aa75); graded by the live episode",
   "rows": 83181,
   "sim_time_s": 207.95,
   "service_time_s": 1048.7,
@@ -193,7 +193,7 @@
  },
  "ikea365": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, 54694704aa75); graded by the live episode",
   "rows": 96000,
   "sim_time_s": 240.0,
   "service_time_s": 1285.0,
@@ -225,7 +225,7 @@
  },
  "vesken": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 a466a594c463 (Nyx RGB)",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 a466a594c463 (Nyx RGB)",
   "rows": 388000,
   "sim_time_s": 970.0,
   "service_time_s": 1889.1,
@@ -238,7 +238,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B 2026-10-17_ikea_hs_vesken/harbor/jobs/hs_S_oracle/ikea-vesken-i00-standard__ANNyiJS",
-    "note": "graded by the live episode: live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on loaded host B"
+    "note": "graded by the live episode: live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on the loaded workstation"
    },
    {
     "agent": "nop",
@@ -256,7 +256,7 @@
  },
  "stegesund": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463)",
+  "host": "a Ryzen 9 7950X / RTX 4090 workstation (shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463)",
   "rows": 376000,
   "sim_time_s": 940.0,
   "service_time_s": 1938.2,
@@ -288,7 +288,7 @@
  },
  "stenerik": {
   "date": "2026-10-17",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared) (oracle, nop) and host A (the same class; a second oracle), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, host B a466a594c463, host A 3f9218fb9864)",
+  "host": "two Ryzen 9 7950X / RTX 4090 workstations (shared; oracle and nop on one, a second oracle on the other), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, built on each from one context: a466a594c463, 3f9218fb9864)",
   "rows": 222600,
   "sim_time_s": 556.5,
   "service_time_s": 3671.8,
@@ -322,7 +322,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host A harbor/jobs/C_std_oracle_ws/ikea-stenerik-i00-standard__tHMuTUA",
-    "note": "before the Nyx start-up retry: a second host (host A, loaded): live settled success at control step 215782, live service time 3906 s, verifier replays 3603 s, live_matches_replay 1, deterministic 1, video 1"
+    "note": "before the Nyx start-up retry, on a second workstation of the same class (loaded): live settled success at control step 215782, live service time 3906 s, verifier replays 3603 s, live_matches_replay 1, deterministic 1, video 1"
    },
    {
     "agent": "nop",

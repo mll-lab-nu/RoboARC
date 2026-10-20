@@ -40,7 +40,7 @@ the scene file by file against `runtime_binding.json` and by its initial-state h
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
 the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
-Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode (2026-10-18): `oracle` scored 1 (the hand-slew reference: live settled success at control step 184000 (46 calls), startup binding 700c53dd (instance_exact), video 1; live service time 4780 s on the loaded host); `nop` scored 0 (video 1).
+Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on a Ryzen 9 7950X / RTX 4090 workstation (shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode (2026-10-18): `oracle` scored 1 (the hand-slew reference: live settled success at control step 184000 (46 calls), startup binding 700c53dd (instance_exact), video 1; live service time 4780 s on the loaded host); `nop` scored 0 (video 1).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.

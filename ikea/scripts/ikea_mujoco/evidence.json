@@ -20,15 +20,15 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host A (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 1740.8,
   "rows": 162534,
   "sim_time_s": 406.34,
   "slow_replay_wall_s": 3783.0,
   "timing": {
-   "text": "one unobserved replay 3780-3783 s (35.0 %, inside the 40 % bar: 87.6 % of its 4320 s) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'; 1694 s (15.7 %) on the quiet i9-14900HX host; 1679-1684 s on host A (Ryzen 9 7950X, Docker, image 0.3.0, two replays at once)."
+   "text": "one unobserved replay 3780-3783 s (35.0 %, inside the 40 % bar: 87.6 % of its 4320 s) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'; 1694 s (15.7 %) on a quiet i9-14900HX host; 1679-1684 s on a Ryzen 9 7950X workstation (Docker, image 0.3.0, two replays at once)."
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`60878a5edc5d` / `02732bf5d33e`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`60878a5edc5d` / `02732bf5d33e`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`60878a5edc5d` / `02732bf5d33e`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`60878a5edc5d` / `02732bf5d33e`, on the same workstation)."
  },
  "eket": {
   "checks": [
@@ -52,7 +52,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
+  "host": "a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
   "maintainer_checks": {
    "checks": [
     {
@@ -96,7 +96,7 @@
   "sim_time_s": 175.5,
   "slow_replay_wall_s": 472.0,
   "timing": {
-   "text": "one unobserved replay of the hand-slew reference 220 s (2.0 %; 5.1 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared workstation lock, image 0.3.1's scene); 652 s on the loaded host B Ryzen 9 7950X (load 40-90); 575 s on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays."
+   "text": "one unobserved replay of the hand-slew reference 220 s (2.0 %; 5.1 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 652 s on a loaded Ryzen 9 7950X workstation (load 40-90); 575 s on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays."
   },
   "image": {
    "id": "sha256:b9552184c2dec691d5603ee3e250058a7792de8bc123a76d6b9a61f099da0243",
@@ -105,7 +105,7 @@
   "ref_rows": 83181,
   "ref_sim_time_s": 207.95,
   "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the row cap and the verifier's time limit were set from (the reference before the hand slew, 2026-10-16), kept so the grading budget is unchanged; the hand-slew reference's own numbers are ref_rows / ref_sim_time_s and the checks",
-  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`25be8deaa1fe` / `1d2906d52c38`, host B)."
+  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`25be8deaa1fe` / `1d2906d52c38`, on a Ryzen 9 7950X workstation)."
  },
  "gladom": {
   "checks": [
@@ -128,19 +128,19 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded ~35-65), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded ~35-65), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 5091.2,
   "rows": 186611,
   "sim_time_s": 466.5,
   "slow_replay_wall_s": 8081.5,
   "timing": {
-   "text": "one unobserved replay 2630 s (24.3 %; 61 % of the 4320 s bar) on a quiet i9-14900HX host core (Intel AVX2, under the shared workstation lock); 8069 / 8082 s (74.8 %, OVER the 40 % bar) on the cluster Xeon Gold 6230R cores (2.1 GHz, a slow trial-class CPU; two at once on one node); 4550 s on the loaded host B Ryzen 9 7950X (load 50-65 on 32 threads); end and settled hashes equal everywhere"
+   "text": "one unobserved replay 2630 s (24.3 %; 61 % of the 4320 s bar) on a quiet i9-14900HX host core (Intel AVX2, one process at a time); 8069 / 8082 s (74.8 %, OVER the 40 % bar) on Xeon Gold 6230R cores (2.1 GHz, a slow trial-class CPU; two at once on one node); 4550 s on a loaded Ryzen 9 7950X workstation (load 50-65 on 32 threads); end and settled hashes equal everywhere"
   },
   "image": {
    "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
    "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`88048a4ff775` / `5c2edffa330c`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`88048a4ff775` / `5c2edffa330c`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`88048a4ff775` / `5c2edffa330c`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`88048a4ff775` / `5c2edffa330c`, on the same workstation)."
  },
  "ikea365": {
   "checks": [
@@ -164,13 +164,13 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
+  "host": "a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
   "replay_wall_s": 359.5,
   "rows": 89126,
   "sim_time_s": 222.8,
   "slow_replay_wall_s": 604.0,
   "timing": {
-   "text": "one unobserved replay of the hand-slew reference 249 s (2.3 %; 5.8 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared workstation lock, image 0.3.1's scene); 835 s on the loaded host B Ryzen 9 7950X (load 40-90); 649 s on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays."
+   "text": "one unobserved replay of the hand-slew reference 249 s (2.3 %; 5.8 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 835 s on a loaded Ryzen 9 7950X workstation (load 40-90); 649 s on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays."
   },
   "image": {
    "id": "sha256:b9552184c2dec691d5603ee3e250058a7792de8bc123a76d6b9a61f099da0243",
@@ -179,7 +179,7 @@
   "ref_rows": 96747,
   "ref_sim_time_s": 241.87,
   "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the row cap and the verifier's time limit were set from (the reference before the hand slew, 2026-10-16), kept so the grading budget is unchanged; the hand-slew reference's own numbers are ref_rows / ref_sim_time_s and the checks",
-  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`7db46c5971cd` / `0e2e03a9c068`, host B)."
+  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`7db46c5971cd` / `0e2e03a9c068`, on a Ryzen 9 7950X workstation)."
  },
  "lack": {
   "checks": [
@@ -212,13 +212,13 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
+  "host": "a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
   "replay_wall_s": 530.7,
   "rows": 63697,
   "sim_time_s": 159.2,
   "slow_replay_wall_s": 923.0,
   "timing": {
-   "text": "one unobserved replay of the hand-slew reference 372 s (3.4 %; 8.6 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared workstation lock, image 0.3.1's scene); 1342 s on the loaded host B Ryzen 9 7950X (load 40-90); 1127 s on a cluster Xeon Gold 6230R core including the re-time step (reported only), end and settled hashes equal on every host and in the Harbor replays."
+   "text": "one unobserved replay of the hand-slew reference 372 s (3.4 %; 8.6 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 1342 s on a loaded Ryzen 9 7950X workstation (load 40-90); 1127 s on a Xeon Gold 6230R core including the re-time step (reported only), end and settled hashes equal on every host and in the Harbor replays."
   },
   "image": {
    "id": "sha256:b9552184c2dec691d5603ee3e250058a7792de8bc123a76d6b9a61f099da0243",
@@ -227,7 +227,7 @@
   "ref_rows": 67697,
   "ref_sim_time_s": 169.24,
   "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the row cap and the verifier's time limit were set from (the reference before the hand slew, 2026-10-16), kept so the grading budget is unchanged; the hand-slew reference's own numbers are ref_rows / ref_sim_time_s and the checks",
-  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`684fe3c488e0` / `a4bc18f244c3`, host B)."
+  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`684fe3c488e0` / `a4bc18f244c3`, on a Ryzen 9 7950X workstation)."
  },
  "stegesund": {
   "checks": [
@@ -251,13 +251,13 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 1508.1,
   "rows": 357221,
   "sim_time_s": 893.05,
   "slow_replay_wall_s": 3160.0,
   "timing": {
-   "text": "one unobserved replay of the closed-loop reference 1164 s (10.8 %) on the quiet i9-14900HX host; 1546-1554 s on host B (Ryzen 9 7950X, shared, load ~22); 2450-2473 s on a dedicated the cluster Xeon Gold 6338 core (2.0 GHz, a slow trial-class CPU); end and settled hashes equal on all three CPU classes and in the Harbor replays."
+   "text": "one unobserved replay of the closed-loop reference 1164 s (10.8 %) on a quiet i9-14900HX host; 1546-1554 s on a Ryzen 9 7950X workstation (shared, load ~22); 2450-2473 s on a dedicated Xeon Gold 6338 core (2.0 GHz, a slow trial-class CPU); end and settled hashes equal on all three CPU classes and in the Harbor replays."
   },
   "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the verifier's row cap (714000) and time limit (10080 s) were set from (the author's demo, 2026-10-16), kept so the grading budget is unchanged; the closed-loop reference's own numbers are ref_rows / ref_sim_time_s and the checks below",
   "ref_rows": 379529,
@@ -266,7 +266,7 @@
    "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
    "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`71688676098e` / `a7da23fa3988`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`71688676098e` / `a7da23fa3988`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`71688676098e` / `a7da23fa3988`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`71688676098e` / `a7da23fa3988`, on the same workstation)."
  },
  "stenerik": {
   "checks": [
@@ -290,20 +290,20 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, load ~15), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, load ~15), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 5063.7,
   "rows": 215782,
   "sim_time_s": 539.45,
   "slow_replay_wall_s": 6286.0,
   "timing": {
-   "text": "one unobserved replay of the hand-slew reference (222,600 rows) 2649 s (24.5 %) on the quiet i9-14900HX host (61.3 % of the 4320 s bar); 3292-3313 s (30.6 %) on host B's Ryzen 9 7950X (load ~15, two at once); 6944-7082 s (64.3-65.6 %, OVER the 40 % bar, as before the hand rule: 6253-6286 s) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on every host."
+   "text": "one unobserved replay of the hand-slew reference (222,600 rows) 2649 s (24.5 %) on a quiet i9-14900HX host (61.3 % of the 4320 s bar); 3292-3313 s (30.6 %) on a Ryzen 9 7950X workstation (load ~15, two at once); 6944-7082 s (64.3-65.6 %, OVER the 40 % bar, as before the hand rule: 6253-6286 s) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on every host."
   },
   "cap_basis": "replay_wall_s, rows and slow_replay_wall_s are the first reference's measurements (2026-10-17: 215,782 rows, host A 5063.7 s, the cluster 6230R 6286 s); they set the row cap (431,000) and the verifier timeout (19,440 s) and are kept so the grading is unchanged; the hand-slew reference (222,600 rows, host B replay_wall 3324 s, 6230R 6944-7082 s) fits both",
   "image": {
    "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
    "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`a690aa1b973b` / `20a59284ab83`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a690aa1b973b` / `20a59284ab83`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`a690aa1b973b` / `20a59284ab83`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a690aa1b973b` / `20a59284ab83`, on the same workstation)."
  },
  "svallet": {
   "checks": [
@@ -326,7 +326,7 @@
   ],
   "date": "2026-10-16",
   "end_hashes_equal_0.2.0": true,
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "maintainer_checks_standard": {
    "checks": [
     {
@@ -366,13 +366,13 @@
   "sim_time_s": 173.5,
   "slow_replay_wall_s": 478.0,
   "timing": {
-   "text": "one unobserved replay 478 s (4.4 %, inside the 40 % bar) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'."
+   "text": "one unobserved replay 478 s (4.4 %, inside the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'."
   },
   "image": {
    "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
    "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene): a fresh replay of the reference in it ends and settles on the same hashes as in 0.3.0 (`19d049469045` / `6413de2d8af8`, host B, 2026-10-17). Merged head with the Franka Hand slew (not applied to the ViperX): a fresh replay in 0.3.1 ends and settles on `19d049469045` / `6413de2d8af8` (host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`19d049469045` / `6413de2d8af8`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene): a fresh replay of the reference in it ends and settles on the same hashes as in 0.3.0 (`19d049469045` / `6413de2d8af8`, on a Ryzen 9 7950X workstation, 2026-10-17). Merged head with the Franka Hand slew (not applied to the ViperX): a fresh replay in 0.3.1 ends and settles on `19d049469045` / `6413de2d8af8` (on the same workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`19d049469045` / `6413de2d8af8`, on the same workstation)."
  },
  "uppsta": {
   "checks": [
@@ -395,15 +395,15 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, load ~15-20), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.1 sha256:b9552184c2de, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, load ~15-20), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.1 sha256:b9552184c2de, the replay-video verifier",
   "replay_wall_s": 3826.5,
   "rows": 430225,
   "sim_time_s": 537.78,
   "slow_replay_wall_s": 8424.7,
   "timing": {
-   "text": "3199 s (29.6 % of the 10800 s budget, 74 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared lock); 3519 s (32.6 %) on host B (Ryzen 9 7950X, Docker, image 0.3.1, host load 12-17); one unobserved replay 8414-8425 s (78.0 %, OVER the 40 % bar) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik on that CPU."
+   "text": "3199 s (29.6 % of the 10800 s budget, 74 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time); 3519 s (32.6 %) on a Ryzen 9 7950X workstation (Docker, image 0.3.1, host load 12-17); one unobserved replay 8414-8425 s (78.0 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik on that CPU."
   },
-  "image_note": "Merged head with the Franka Hand slew in the shared rule (2026-10-18): a fresh replay in image 0.3.1 ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, host B, 7676 s at load 40-90): the reference was built within the slew. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, host B)."
+  "image_note": "Merged head with the Franka Hand slew in the shared rule (2026-10-18): a fresh replay in image 0.3.1 ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on a Ryzen 9 7950X workstation, 7676 s at load 40-90): the reference was built within the slew. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on the same workstation)."
  },
  "variera": {
   "checks": [
@@ -427,19 +427,19 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 3731.4,
   "rows": 243159,
   "sim_time_s": 607.9,
   "slow_replay_wall_s": 8696.1,
   "timing": {
-   "text": "one unobserved replay 2664 s (24.7 %) on a quiet i9-14900HX host; 3646-3688 s (34.0 %) on host B's Ryzen 9 7950X (loaded, load 50-60); 8024-8696 s (74.3-80.5 %, OVER the 40 % bar) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on all three."
+   "text": "one unobserved replay 2664 s (24.7 %) on a quiet i9-14900HX host; 3646-3688 s (34.0 %) on a Ryzen 9 7950X workstation (loaded, load 50-60); 8024-8696 s (74.3-80.5 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on all three."
   },
   "image": {
    "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
    "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`95134e1fbd5c` / `327c16c5f007`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`95134e1fbd5c` / `327c16c5f007`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`95134e1fbd5c` / `327c16c5f007`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`95134e1fbd5c` / `327c16c5f007`, on the same workstation)."
  },
  "vesken": {
   "checks": [
@@ -461,19 +461,19 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 792.1,
   "rows": 389504,
   "sim_time_s": 973.8,
   "slow_replay_wall_s": 1822.2,
   "timing": {
-   "text": "one unobserved replay 1822 s (16.9 %, inside the 40 % bar) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), 983 s on a cluster Xeon Platinum 8592+, 748-761 s on host B (Ryzen 9 7950X, loaded); end and settled hashes equal to the Harbor runs'."
+   "text": "one unobserved replay 1822 s (16.9 %, inside the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), 983 s on a Xeon Platinum 8592+ core, 748-761 s on a Ryzen 9 7950X workstation (loaded); end and settled hashes equal to the Harbor runs'."
   },
   "image": {
    "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
    "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`943aa32ee13e` / `29685e37f6fe`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`943aa32ee13e` / `29685e37f6fe`, host B)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`943aa32ee13e` / `29685e37f6fe`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`943aa32ee13e` / `29685e37f6fe`, on the same workstation)."
  },
  "kyrre": {
   "checks": [
@@ -513,13 +513,13 @@
    }
   ],
   "date": "2026-10-19",
-  "host": "host B (Ryzen 9 7950X; shared, load ~10 first run, 30-65 final), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.2 sha256:5d5090ea1910 (final; first run on the candidate's local 0.3.1-kyrre-cyl), the replay-video verifier",
+  "host": "a Ryzen 9 7950X workstation (shared, load ~10 first run, 30-65 final), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.2 sha256:5d5090ea1910 (final; first run on the candidate's local 0.3.1-kyrre-cyl), the replay-video verifier",
   "replay_wall_s": 2745.6,
   "rows": 733558,
   "sim_time_s": 1833.89,
   "slow_replay_wall_s": 8283.3,
   "timing": {
-   "text": "2740 s (25.4 % of the 10800 s budget, 63 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared lock); 2694 s (24.9 %) on host B (Ryzen 9 7950X, Docker, host load 5-10); one unobserved replay 8283 s (76.7 %, OVER the 40 % bar) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU) and 7953 s (73.6 %) on a Xeon Gold 6338 core, end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik / uppsta on the slow class."
+   "text": "2740 s (25.4 % of the 10800 s budget, 63 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time); 2694 s (24.9 %) on a Ryzen 9 7950X workstation (Docker, host load 5-10); one unobserved replay 8283 s (76.7 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU) and 7953 s (73.6 %) on a Xeon Gold 6338 core, end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik / uppsta on the slow class."
   },
   "image_note": "kyrre is the one scene with MuJoCo's native cylinders (scene.py, the prism rule off; decided on 2026-10-19, ikea/scripts/ikea_mujoco/REVIEW.md): end 0a9f1a9e6d77 / settled e242979c6712 on AMD Zen 4 (7950X), Intel AVX2 (i9-14900HX) and Intel AVX-512 (Xeon Gold 6338, Xeon Gold 6230R)."
  }
