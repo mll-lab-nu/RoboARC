@@ -2,8 +2,8 @@
 # kyrre reference (the scene with native cylinders, the one exception to the prism rule): the demo -> Franka Hand slew with grip waits -> screw 3-1's
 # second grasp re-aimed at the screw's actual pose -> the hex key set down 12 mm along its rest (off the knife-edge pose).
 # Run in the IKEA image (0.3.2+: kyrre's scene.py has NATIVE_CYLINDERS = True) with scripts/ikea_mujoco/shared on
-# PYTHONPATH; RCB = that shared dir. DEMO = the author's demo rows (kyrre_vlim, 659,752 rows, sha256 465163457683...: the
-# former WIP tasks' scripts/ikea_mujoco/wip/tasks/ikea-kyrre-i00-privileged/solution/trajectory.npz, git dd8d36fef6).
+# PYTHONPATH; RCB = that shared dir. DEMO = the author's demo rows (kyrre_vlim, 659,752 rows, sha256 465163457683...,
+# from the IKEA MuJoCo source tree's demos; not in this repository).
 set -euo pipefail
 H=$(cd "$(dirname "$0")" && pwd); DEMO=${DEMO:?}; RCB=${RCB:?}; OUT=${OUT:-$H/out}; mkdir -p "$OUT"
 python "$RCB/../standard/std_reference.py" make --task kyrre --priv "$DEMO" --out "$OUT/A.npz" --method clamp --despike 0 \

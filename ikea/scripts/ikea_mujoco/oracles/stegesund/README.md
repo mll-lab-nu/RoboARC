@@ -64,5 +64,5 @@ scratch with it on the cluster (Xeon, SIF 0.3.0, 2026-10-18): bit-identical to `
 6. Timing: one execution 1164 s on the quiet i9 (10.8 % of the 10,800 s budget, under the 4320 s bar); 2450-2473 s on a
    Xeon 6338 core. The verifier's row cap (714,000) and time limit (10,080 s) are unchanged (evidence.json `budget_basis`).
 
-The previous reference (the author's demo, unchanged) and its stress record are in git history (this file before
-2026-10-18); `diag/` holds that record's forensic tools.
+The previous reference (the author's demo, unchanged), its stress record and that record's forensic tools are in git
+history (this file before 2026-10-18).
