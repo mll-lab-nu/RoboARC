@@ -54,11 +54,11 @@ Dockerfiles, the compose files, `tests/test.sh`) is the template's, and the rebu
   birth c15ba78d2bfda87e, final state 5bc8f1e7136b3f59).
   Harbor graded the texts of 167f4bbd8 (0.036 s per step) on profile keyhole_double_maze_v1 (birth a804367eaf3bfdd3, the
   reference then ending on c18098f933020b0f) under the new base's name on 2026-10-12, from the test-only commit
-  b38a7f6be (167f4bbd8 + the manifest entry above; branch jianwen/keyhole-dm4-harbor-test, never merged): oracle 1, nop 0
+  b38a7f6be (167f4bbd8 + the manifest entry above; a test branch, never merged): oracle 1, nop 0
   in both modes, the release's package files equal to those texts byte for byte
   (`docs/simulator/families/cast_keyhole_double_maze.md`, "Harbor under the new base name"). On keyhole_double_maze_v2, after
   its acceptance round passed, Harbor graded these texts (e9e29c39e, 0.031 s per step) under the new base's name on
-  2026-10-13, from the test-only commit 0956310dd (e9e29c39e + the manifest entry above; branch
-  jianwen/keyhole-dm4-v2-harbor-test, never merged): oracle 1, nop 0 in both modes, the oracle ending on 5bc8f1e7136b3f59,
+  2026-10-13, from the test-only commit 0956310dd (e9e29c39e + the manifest entry above; a second
+  test branch, never merged): oracle 1, nop 0 in both modes, the oracle ending on 5bc8f1e7136b3f59,
   the release's package files equal to these texts byte for byte (the same document, "Harbor under the new base name on
   v2").

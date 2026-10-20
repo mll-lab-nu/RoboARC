@@ -1,4 +1,4 @@
-"""Grader details for the TopoGym tier instructions (both modes), added to Jianwen's public goal text.
+"""Grader details for the TopoGym tier instructions (both modes), added to each family's public goal text (TopoGym's task descriptions).
 
 The base text is his: topogym/tasks/goal_description.py describe_goal() + render_goal() (the instance's "public_goal" in
 describe.json, rendered by the generators as "## Success requirements" + "## Task failure conditions"). It is copied

@@ -15,8 +15,8 @@ freeze_instance() then writes a frozen instance (instance.json + instance_assets
 (`--new-instance`), and that replays deterministically.
 
     import session_kit as sk
-    sk.use_lane_tmp("knot_untying")                         # Session temp dirs under /workspace/mj/redesign/<lane>/tmp
-    base = sk.instance_settings("/workspace/mj/rope/instances7/knot-untying-easy-i00/instance.json")
+    sk.use_lane_tmp("knot_untying")                         # Session temp dirs under $RD_WORK/<lane>/tmp
+    base = sk.instance_settings("<instances>/knot-untying-easy-i00/instance.json")
     V = sk.load_rope_birth(base["mujoco_birth"])["rope"]    # the released birth (FEM vertices)
     manifest = sk.write_rope_birth(out_dir / "birth", {"rope": V + [0.05, 0, 0]}, note="easy shifted 5 cm")
     s = sk.make_session("knot_untying", base["variation_id"], seed=base["seed"],
@@ -39,8 +39,9 @@ import numpy as np
 
 
 def use_lane_tmp(lane: str) -> str:
-    """Keep the Session's temporary episode folders inside the lane's the cloud host tree (not /tmp)."""
-    d = Path(f"/workspace/mj/redesign/{lane}/tmp")
+    """Keep the Session's temporary episode folders inside the lane's work tree: $RD_WORK/<lane>/tmp (RD_WORK defaults to
+    <the system temp dir>/roboarc-redesign)."""
+    d = Path(os.environ.get("RD_WORK") or Path(tempfile.gettempdir()) / "roboarc-redesign") / lane / "tmp"
     d.mkdir(parents=True, exist_ok=True)
     os.environ["TMPDIR"] = str(d)
     tempfile.tempdir = str(d)
@@ -417,7 +418,9 @@ def _rope_birth_from_task_volume(base, spec, task_parameters, work: Path) -> str
 def _example_knot(out_dir):
     out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
     use_lane_tmp(os.environ.get("RD_LANE", "tooling"))
-    src = os.environ.get("KIT_INSTANCE", "/workspace/mj/redesign/tooling/work/refs/knot_untying-easy/instance/instance.json")
+    src = os.environ.get("KIT_INSTANCE")
+    if not src:
+        raise SystemExit("set KIT_INSTANCE to a knot_untying easy instance.json")
     base = instance_settings(src)
     V = load_rope_birth(base["mujoco_birth"])["rope"]
     shift = np.array([0.05, 0.0, 0.0])

@@ -1401,7 +1401,7 @@ class Observer:
                             # move it at the guard's speed; the suffix keeps its class up to v2.10
                             self._event("pop_share_v211_" + cls_, rec)
                         elif fast28 and fast29:
-                            self._event("pop_fast", rec)            # a breakdown: the 力大砖飞 guard
+                            self._event("pop_fast", rec)            # a breakdown: the brute-force launch guard
                         elif fast28:
                             self._event("pop_fast_v28", rec)        # fast after-speed, small kick: a breakdown up to v2.8
                         else:
