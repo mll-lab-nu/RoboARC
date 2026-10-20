@@ -161,7 +161,7 @@ artifacts = [
 [task]
 name = "roboarc/{name(t)}"
 description = "STANDARD MODE (robot as a service, {PROTOCOL}): IKEA MuJoCo {x['title']} ({r['short']}, MuJoCo 3.14.0 CPU) on the same frozen scene as the privileged task. {x['goal']} The agent only gets a client: get_obs (RGB from four ALOHA-style cameras, optional depth, proprioception, calibrated cameras), submit (joint_position chunks, joint targets within the robot's joint velocity limits), stateless kinematics, every pose in the robot's frame. No reset, no privileged state; the sim service records and grades the live episode (no grading replay)."
-authors = [{{ name = "Xiaoyu" }}]
+authors = [{{ name = "Xiaoyu" }}, {{ name = "Zhen Wu" }}]
 keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "{robot(t)}", "bimanual", "standard-mode", "trajectory"]
 
 [metadata]

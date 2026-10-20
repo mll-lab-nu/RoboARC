@@ -4,7 +4,7 @@ artifacts = [{ source = "/var/rcb-monitor/", service = "rcb_monitor" }, "/app/ou
 [task]
 name = "roboarc/roboarc-ikea-kyrre-i00-privileged"
 description = "IKEA MuJoCo KYRRE stool (dual Franka Panda + Menagerie Panda hand, MuJoCo 3.14.0 CPU): produce one replayable trajectory. Fasten the three legs to the upside-down seat of the KYRRE stool: place each leg and drive its two screws, in the scene's order (leg 1, its two screws, leg 2, its two screws, leg 3, its two screws), and leave the stool upside-down on the table. Frozen scene (the scene's keyframe 'home'); physical grasps, no assist."
-authors = [{ name = "Xiaoyu" }]
+authors = [{ name = "Xiaoyu" }, { name = "Zhen Wu" }]
 keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "panda", "bimanual", "code-as-policy", "trajectory"]
 
 [metadata]

@@ -4,7 +4,7 @@ artifacts = [{ source = "/var/rcb-monitor/", service = "rcb_monitor" }, "/app/ou
 [task]
 name = "roboarc/roboarc-ikea-burvik-i00-privileged"
 description = "IKEA MuJoCo BURVIK side table (dual Franka Panda + Menagerie Panda hand, MuJoCo 3.14.0 CPU): produce one replayable trajectory. Assemble the BURVIK side table: screw two legs into the upside-down top, turn the top on its side, push the handle through the two remaining top holes, screw the other two legs into the handle's sleeves, and turn the table upright. Frozen scene (the scene's keyframe 'home'); physical grasps, no assist."
-authors = [{ name = "Xiaoyu" }]
+authors = [{ name = "Xiaoyu" }, { name = "Zhen Wu" }]
 keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "panda", "bimanual", "code-as-policy", "trajectory"]
 
 [metadata]
