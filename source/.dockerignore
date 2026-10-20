@@ -1,14 +1,14 @@
-# Build context of the RoboARC release image (images/roboarc/build.sh builds images/robotangle/Dockerfile.mujoco from
-# source/): only what the recipe COPYs.
+# Build context of the RoboARC release image (images/roboarc/build.sh builds images/roboarc/Dockerfile from source/): only what the recipe COPYs.
 **
 !assets/
 !assets/robots/
 !assets/robots/**
+!assets/textures/
+!assets/textures/genesis/
+!assets/textures/genesis/**
 !images/topogym/prune.py
-!images/robotangle/vbd-requirements.txt
-!images/robotangle/warp_precompile.py
-!images/robotangle/mujoco-3.14.0-epa/
-!images/robotangle/mujoco-3.14.0-epa/bytepatch_libmujoco.py
+!images/roboarc/
+!images/roboarc/**
 !topogym/
 !topogym/**
 # no solutions in any image (images/topogym/prune.py removes them again after COPY)

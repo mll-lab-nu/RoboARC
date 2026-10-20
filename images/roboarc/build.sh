@@ -3,20 +3,22 @@
 #
 #   images/roboarc/build.sh [--instances <dir>] [--download <dir>] [--tag <ref>] [--noinst]
 #
-# The recipe is source/images/robotangle/Dockerfile.mujoco, built from source/ (its .dockerignore keeps the context to
-# the paths the recipe copies), with the frozen instances as the named build context `instances`. This is the build
-# step of tools/release/release_rebuild.py, which made the 0.2.1 release image that 1.0.0 carries forward
-# file for file:
+# The recipe is source/images/roboarc/Dockerfile, built from source/ (its .dockerignore keeps the context to the paths
+# the recipe copies), with the frozen instances as the named build context `instances`. This is the build step of
+# tools/release/release_rebuild.py:
 #   1. the frozen instances: --instances <dir> (one directory per base, instance.json + instance_assets/), or, by default,
 #      the private HF dataset pinned in scripts/roboarc/assets.json, downloaded into --download <dir> (default
 #      $RCB_ROBOTANGLE_ASSETS or ~/.cache/robotangle-assets). Either way the context must hold exactly the pinned bases
 #      and files, each with its sha256 (scripts/roboarc/assets.py check-instances);
-#   2. `docker buildx build` of Dockerfile.mujoco FROM the published Genesis base image (pinned by digest);
+#   2. `docker buildx build` of the recipe: the Python base image pinned by digest, Debian packages at exact versions from
+#      the Debian snapshot archive, wheels by sha256 (source/images/roboarc/runtime.lock, vbd-requirements.txt);
 #   3. the installed-runtime check: the image must install exactly the runtime every task is bound to
 #      (scripts/roboarc/release.json `runtime`), or the tag is removed again.
 # --noinst builds the image without instances (release_rebuild's `-noinst` image, used to make new instances).
-# Needs Docker with BuildKit (the default `docker` driver), ~25 GB of free disk, network access to ghcr.io for the base
-# image, and (for the default instance source) read access to the HF dataset (`hf auth login` or HF_TOKEN; never printed).
+# Needs Docker with BuildKit (the default `docker` driver), ~25 GB of free disk, network access to Docker Hub (the
+# Python base image), snapshot.debian.org, pypi.org / download.pytorch.org (the wheels) and dl.polyhaven.org (the Nyx
+# studio HDRI and wood maps, sha256-checked), and (for the default instance source) read access to the HF dataset
+# (`hf auth login` or HF_TOKEN; never printed).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 VERSION="$(cat "$ROOT/images/roboarc/VERSION")"
@@ -50,11 +52,12 @@ PY
     || cp -a "$(readlink -f "$d")" "$WORK/ctx/$(basename "$d")"; done
   INST="$WORK/ctx"
 fi
+INST="$(cd "$INST" && pwd)"   # the build runs from source/: an absolute path for the named context
 [ $NOINST -eq 1 ] || python3 "$ROOT/scripts/roboarc/assets.py" check-instances "$INST" \
   || { echo "the instances are not the ones pinned in scripts/roboarc/assets.json: nothing built" >&2; exit 1; }
 n=$(find "$INST" -mindepth 2 -maxdepth 2 -name instance.json | wc -l)
 echo "build $TAG from source/ with $n instances"
-(cd "$ROOT/source" && docker buildx build --load -f images/robotangle/Dockerfile.mujoco --build-arg "RELEASE_VERSION=$VERSION" \
+(cd "$ROOT/source" && docker buildx build --load -f images/roboarc/Dockerfile --build-arg "RELEASE_VERSION=$VERSION" \
   --build-context "instances=$INST" -t "$TAG" .)
 # the runtime check (images/roboarc/README.md, Check a build)
 docker run --rm --network none "$TAG" python -c 'import json; from topogym.simulator.frozen_binding import installed_runtime; print(json.dumps(installed_runtime(), sort_keys=True))' \
