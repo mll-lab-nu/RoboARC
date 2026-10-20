@@ -48,7 +48,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Test dependencies
-        run: python3 -m pip install --quiet numpy requests
+        run: python3 -m pip install --quiet numpy requests scipy
       - name: Unit tests, check-video, resources, cutoffs
         run: |
           set -e

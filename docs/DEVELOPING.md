@@ -47,11 +47,11 @@ The generator ends every task with `scripts/task_conventions.py` `normalize` (RE
 python3 scripts/roboarc/mk_tasks.py --check           # every task dir equals a fresh render
 bash ikea/ci/check.sh [--image-tests]                 # IKEA: both generators' check modes (+ unit tests in its image)
 bash ci_checks/run_invariants.sh                      # the protocol's invariants (PROTOCOL Appendix H); required
-bash ci_checks/check-unit-tests.sh --all              # unit tests (numpy + requests for the service-layer tests)
+bash ci_checks/check-unit-tests.sh --all              # unit tests (numpy, requests, scipy for the second tier)
 bash ci_checks/run_all.sh                             # the invariants plus the advisory checks (exit 3: advisories only)
 ```
 
-They need Python >= 3.11 (with numpy and requests for the second tier of unit tests), no GPU and no image.
+They need Python >= 3.11 (with numpy, requests and scipy for the second tier of unit tests), no GPU and no image.
 `.github/workflows/checks.yml` runs them on pushes to `main` and `dev/**` and on pull requests, in the jobs `generator`,
 `ikea`, `invariants` (required), `unit-tests` (with `check-video.py`, `check-resources.py`, `check-cutoffs.py`),
 `api-tests` (the Python package's fast tests, once `tests/api/` exists) and `advisories` (warnings only).
