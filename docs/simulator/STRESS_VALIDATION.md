@@ -7,7 +7,7 @@ the simulator break.** The tools are in `tools/stress/`.
 - They judge the *simulator*, not the agent. They add no episode-ending rule; the protocol stays as it is.
 - Robot behaviour is limited by clamps (joint speed, torque, grasp slip), never failed.
 
-Criteria **v2.13b** (adopted by the user 2026-10-13) are in force for rounds from 2026-10-13 on; rounds PASSed before keep
+Criteria **v2.13b** (adopted 2026-10-13) are in force for rounds from 2026-10-13 on; rounds PASSed before keep
 their v2.12 verdicts. Any change needs three things: a traced false positive, a regression run that keeps every
 reproducer flagged, and the coordinator's OK.
 
@@ -315,7 +315,7 @@ An instance PASSES when all of these hold on the same commit:
 - a fresh self-play search of a declared size, with recorded seeds, finds no BREAKDOWN after fresh-process
   confirmation.
 
-**The size of an acceptance round (the user's decision, 2026-10-09):** about **1,000 episodes per tier**, so about 5k
+**The size of an acceptance round (decided 2026-10-09):** about **1,000 episodes per tier**, so about 5k
 for a 5-tier family and 2k for a 2-tier one.
 - All six strategies share the episodes equally: `round.py run --episodes 1000` gives each about 167 per instance.
 - Every worker gets a fresh seed, and the seeds are contiguous. An extension is a new round from the next seed
@@ -659,7 +659,7 @@ A fixed build must replay every reproducer without BREAKDOWN.
 Three energy_created (local) breakdowns came from one physics class, not from the criteria: an arm driven into a static
 fixture holding several coupled rows of the soft robot-static class (rope_threading hard kt1_3 e116, fiber easier
 FB5b e131, knot easy_v8 e245). The class now has a constant impedance and rope_threading's rings keep the task's
-contact against the robot (`docs/rcb/MUJOCO_CORE.md`, "The soft class's impedance"); with it the three read VIOLENT
+contact against the robot (`docs/simulator/MUJOCO_CORE.md`, "The soft class's impedance"); with it the three read VIOLENT
 or CLEAN, and of the four other flagged rope streams of that search (pops, a jump) three do; e144 keeps a 3.2 m/s
 pop kick of the rope, which v2.11's energy share reads VIOLENT (its constraint share gives 1.80 m/s). Rounds run before the
 change replay on it as built: re-confirm their candidates on the current head before quoting them.

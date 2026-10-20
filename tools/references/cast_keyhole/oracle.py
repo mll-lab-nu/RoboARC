@@ -1,4 +1,4 @@
-# Oracle code for `rcb_topogym.py run-oracle --task cast_keyhole --code <this file>` (docs/rcb/families/cast_keyhole.md):
+# Oracle code for `rcb_topogym.py run-oracle --task cast_keyhole --code <this file>` (docs/simulator/families/cast_keyhole.md):
 # the tier's own Harbor session callback (catalog.session_callback: very_easy / easier -> below_easy ->
 # cast_keyhole.public_session, SimplifiedKeyholePolicy; easy / medium / hard -> cast_keyhole.harbor_session ->
 # runner.worker, CastKeyholePolicy with its regrasps), closed loop in the given Session (`session` is in scope), which

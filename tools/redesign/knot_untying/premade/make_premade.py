@@ -1,5 +1,5 @@
-"""The knot_untying rd bases ship premade frozen instances (rope rd's precedent; docs/rcb/HARBOR_FREEZE_RUNBOOK.md "Bases
-made elsewhere"): make one INSIDE the release image (bound in its runtime) from the exact inputs of a frozen source
+"""The knot_untying rd bases ship premade frozen instances (rope rd's precedent; bases made elsewhere,
+release_rebuild.py --instances): make one INSIDE the release image (bound in its runtime) from the exact inputs of a frozen source
 instance: its task parameters, its rope birth archive and its grasp, as build_instance.py passed them to make-instance.
 Nothing is derived again (no lab rebuild, no birth sweep). knot-untying-06-i01 = inst10/very_easy, knot-untying-09-i01 =
 inst10/medium_loose (their instance.json sha256 and birth archive sha256 are in mujoco_release.json's notes). Run it

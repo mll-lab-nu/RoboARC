@@ -14,7 +14,7 @@ videos. At the end the final state hash must equal --expect-sha; otherwise the v
 Writes DIR/video.mp4 (H.264 CRF 17, 30 fps), DIR/stills/*.png (birth, quarters, end), DIR/manifest.json (speed-up,
 stride, frames, hashes, timings, per-frame task-contact depth and body speed for review).
 
-No temporal aliasing (docs/rcb/RENDER_BRIDGE.md, "Reference videos"): the stride aims at a video of at most
+No temporal aliasing (docs/simulator/RENDER_BRIDGE.md, "Reference videos"): the stride aims at a video of at most
 --max-seconds at 30 fps, but never renders fewer than --frames-per-sim-second states per simulated second (default 8:
 motions up to 4 Hz stay below Nyquist). A long reference makes a longer video rather than skipping more states.
 """

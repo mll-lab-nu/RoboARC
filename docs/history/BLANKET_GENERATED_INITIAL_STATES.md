@@ -3,10 +3,10 @@
 **Why.** A Blanket instance starts from a frozen numeric PBD archive (`pbd_initial_state.py`, codec
 `rigid_pbd_numeric_v2`). An archive restores only on the resource profile it was prepared on
 (`initial_state_compatibility.resource_profile()`: CUDA compute capability, SM count and the software stack), because the
-GPU physics is deterministic on one GPU model but not across models. Every shipped Blanket archive was prepared on lab's
+GPU physics is deterministic on one GPU model but not across models. Every shipped Blanket archive was prepared on host L's
 RTX PRO 6000 (`cuda_sm120_mp188`). So every Blanket task, agent runs included, failed at sim start on any other GPU. The
 RoboTangle PR #81 nop on an RTX 4090 failed with `Frozen initial-state incompatibility at
-backend/device/compute_capability`. Qineng decided on 2026-10-08: when a frozen state is missing or does not match the
+backend/device/compute_capability`. Decided on 2026-10-08: when a frozen state is missing or does not match the
 runtime, the simulator generates one on the spot.
 
 **What changed (simulator, `topogym/`).**
@@ -93,7 +93,7 @@ of the archive:
   follows GPU atomics. So two identical preparations differ there, and in the zip timestamps, but not in
   `state_sha256`.
 
-**Unchanged on the evidence GPU.** On the stored archive's own profile (lab's `cuda_sm120_mp188` for the packages) nothing
+**Unchanged on the evidence GPU.** On the stored archive's own profile (host L's `cuda_sm120_mp188` for the packages) nothing
 is generated. The archive restores exactly as before, with the same restore report and state hashes.
 
 **Cost and budget.** very_easy on an RTX 4090 (host A, a loaded shared host): the preparation took 320-511 s for 6081
@@ -111,13 +111,13 @@ archives) stay the same.
 **Validation status (2026-10-08).** The tree was handed over before the planned validation finished.
 - Run on host A, on a private image of this tree, for very_easy only. The image predates only the `state_sha256` definition
   and the `getattr` tolerance in the service and graders.
-  - The generation ran: 6081 ticks with release at tick 5840, as in the lab archive; it qualified, including motion.
+  - The generation ran: 6081 ticks with release at tick 5840, as in the host L archive; it qualified, including motion.
   - The generated state restored and ran 40 control steps (`instance_exact` 0, `instance_matches` 1,
     `instance_generated` 1).
   - Two independent generations gave the same physical state: the same `state_sha256`, every non-scratch array
     bit-identical, and the same state hash at birth and after 40 steps.
   - A cache hit in a fresh process restored the same state.
-  - The generated cloth is within 13 µm of the lab state: max particle distance 12.8 µm, mean 7.4 µm. Its birth coverage
+  - The generated cloth is within 13 µm of the host L state: max particle distance 12.8 µm, mean 7.4 µm. Its birth coverage
     is 0.860.
 - Not run on a GPU:
   - easy, medium and hard;
@@ -125,5 +125,5 @@ archives) stay the same.
   - the privileged verifier;
   - the stored path with the evidence profile simulated. The stored path is covered by a unit test (the decision returns
     None and `frozen_initial_state()` returns the stored archive) and by construction.
-- CI: the TopoGym tests that touch these modules pass and fail exactly as on origin/dev/jianwen (two tests fail in both
+- CI: the TopoGym tests that touch these modules pass and fail exactly as on the Genesis development branch (two tests fail in both
   trees for the same environmental reasons), and the new test passes.

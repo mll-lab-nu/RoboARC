@@ -5,7 +5,7 @@ its template (`tools/release/release_rebuild.py` new_bases); one section per new
 
 ## interlocked-claws-11-i01 (Cast ABC, `interlocked_claws_cast_abc`)
 
-Cast ABC (`interlocked_claws_cast_abc`, an experimental variation without a tier; `docs/rcb/families/interlocked_claws_cast_abc.md`)
+Cast ABC (`interlocked_claws_cast_abc`, an experimental variation without a tier; `docs/simulator/families/interlocked_claws_cast_abc.md`)
 has no released base. Its own base, `interlocked-claws-11-i01`, is made from the released `interlocked-claws-easy-i00`
 as its template (`release_rebuild.py` new_bases). These directories hold the new base's `task.toml`, `README.md` and
 `instruction.md` for both modes; every other file of a package (the Dockerfiles, the compose files, `tests/test.sh`) is
@@ -81,12 +81,12 @@ the template's, and the rebuild writes `runtime_binding.upstream.json`.
   4701f99e7860e8c9). Harbor graded it on 2026-10-11 under the template's name with an earlier version of these texts
   (before the 60 N rule entered `grasp_rules()`), and on 2026-10-12 under the new base's name with these texts: test-only
   commit 21b3e083d (dev 62d8d0d5c plus the entry above), `release_rebuild.py --families interlocked_claws` PASS, oracle 1
-  and nop 0 in both modes (`docs/rcb/families/interlocked_claws_cast_abc.md`).
+  and nop 0 in both modes (`docs/simulator/families/interlocked_claws_cast_abc.md`).
 
 ## interlocked-claws-12-i01 (Rotor, `interlocked_claws_rotor`)
 
 Hanayama's Cast Rotor (`interlocked_claws_rotor`, `very_hard` in its variation record;
-`docs/rcb/families/interlocked_claws_rotor.md`): two identical interlocked rotor pieces, both held from the start, separated
+`docs/simulator/families/interlocked_claws_rotor.md`): two identical interlocked rotor pieces, both held from the start, separated
 along the official 13-move route. It has no released base either; its own base, `interlocked-claws-12-i01`, is made from
 the released `interlocked-claws-easy-i00` as its template, as Cast ABC's is.
 
@@ -168,4 +168,4 @@ the released `interlocked-claws-easy-i00` as its template, as Cast ABC's is.
   the review rule said 1 mm, the objects were in easy's order, a step took "about 0.13 s", and the grasping line had no
   60 N rule. Under the new base's name, with these texts, it was graded later on 2026-10-12: test-only commit d2abf8f9d
   (dev 1ee40ae14 plus the entry above), `release_rebuild.py --families interlocked_claws` PASS, oracle 1 and nop 0 in
-  both modes, the same final states (`docs/rcb/families/interlocked_claws_rotor.md`).
+  both modes, the same final states (`docs/simulator/families/interlocked_claws_rotor.md`).

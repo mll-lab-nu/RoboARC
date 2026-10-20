@@ -1,4 +1,4 @@
-"""The fiber_bundling redesign oracle (docs/rcb/redesign/fiber_bundling.md), robot level, in the production Session:
+"""The fiber_bundling redesign oracle (docs/simulator/redesign/fiber_bundling.md), robot level, in the production Session:
 the fiber re-planner's stages (tools/references/fiber_bundling/replan.py: the released pickup, the
 planner's comb loop, the gated closed-loop feed), with the redesign's own stages added:
 - `--route-program`: after the pickup, the route's moves of the held sheath (lift, move, swing about a formboard

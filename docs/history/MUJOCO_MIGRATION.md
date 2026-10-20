@@ -1,25 +1,21 @@
-# RoboTangle → MuJoCo: migration status
+# RoboTangle → MuJoCo: migration status (record of 2026-10-09)
 
-Since 2026-10-09, `dev/robotangle_mujoco` is RoboTangle's main development branch. It started from `dev/jianwen` at 095761f92. `dev/jianwen` stays the Genesis line of the 0.2.22 release.
+Kept as the record of the port's goal and acceptance bar; every family has since been ported and released
+(CHANGELOG.md).
+
+From 2026-10-09 the MuJoCo port was developed on its own branch, started from the Genesis line of the 0.2.22
+release at 095761f92.
 
 The goal:
 - every family runs on MuJoCo physics;
 - after that, Genesis is removed completely;
 - the Nyx look stays.
 
-## Working on this branch
-
-- Branch from `dev/robotangle_mujoco`, and merge back when your change is ready.
-- Never force-push. Merges need no review for now (2026-10-09).
-- Porting a family: see [MUJOCO_CORE.md](MUJOCO_CORE.md), section "Porting a family".
-- Frames: see [RENDER_BRIDGE.md](RENDER_BRIDGE.md).
-- Update the status table below in the same commit as your change.
-
 ## Acceptance bar (every family, every tier)
 
 1. **References and nop.** The reference succeeds, the nop fails, and a fresh-process replay reaches the recording's state hash.
 2. **Speed.** One full reference execution takes at most ~72 min (20 % of the 6 h agent budget) on the trial host.
-3. **Stress.** The regression corpus is clean, and a fresh fixed-budget self-play search finds no breakdown. The budget is about 1,000 episodes per tier, about 5k for a 5-tier family (user decision, 2026-10-09).
+3. **Stress.** The regression corpus is clean, and a fresh fixed-budget self-play search finds no breakdown. The budget is about 1,000 episodes per tier, about 5k for a 5-tier family (decided 2026-10-09).
    - A breakdown is any of:
      - a non-finite state;
      - energy created by a contact: the pair's net work above 0.25 J, or the global energy excess above 0.1 J;
@@ -31,14 +27,14 @@ The goal:
 
 ## Status (2026-10-09)
 
-| family | who | physics | tiers | 1 refs/nop/replay | 2 speed | 3 stress | 4 standard + leak | 5 frames |
-|---|---|---|---|---|---|---|---|---|
-| interlocked_claws | Qineng | MuJoCo | all 5 | ok (contact policy v2, references re-recorded) | ok (hard 15 min) | fix in: contact policy v2 (converged CCD, robot hulls <= 64 vertices, dampratio 2, dmax .99): the validator's 95 reproducers 61 -> 0 breakdowns; validator re-test pending | ok, 0 findings | ok |
-| fiber_bundling | Qineng | MuJoCo, profile fiber_v4: the cable as iron wire (elastoplastic joints, 0.4 deg); family note docs/rcb/families/fiber_bundling.md | very_easy..medium; hard physics only | ok: references re-planned on the wire (the released pickup, the planner's combs, a closed-loop feed), 2 fresh replays equal, nops 0 | ok (medium 21 min live, 23 min with the observer) | criteria v2.5: corpus 21 and the 16 fiber reproducers 0 BREAKDOWN, search 70k controls 0 | ok, 0 / 18 | ok |
-| cast_coil | Jianwen | Genesis → MuJoCo | in progress | | | | | |
-| rope_threading, knot_untying, slotted_post_ring | | Genesis (rigid-chain work) | | | | | | |
-| buzz_wire_3d, cast_keyhole, hedgehog_in_cage, horseshoe_ring, lock_picking | | Genesis | | | | | | |
-| blanket_flatten | | Genesis (cloth) | | | | | | |
+| family | physics | tiers | 1 refs/nop/replay | 2 speed | 3 stress | 4 standard + leak | 5 frames |
+|---|---|---|---|---|---|---|---|
+| interlocked_claws | MuJoCo | all 5 | ok (contact policy v2, references re-recorded) | ok (hard 15 min) | fix in: contact policy v2 (converged CCD, robot hulls <= 64 vertices, dampratio 2, dmax .99): the validator's 95 reproducers 61 -> 0 breakdowns; validator re-test pending | ok, 0 findings | ok |
+| fiber_bundling | MuJoCo, profile fiber_v4: the cable as iron wire (elastoplastic joints, 0.4 deg); family note docs/simulator/families/fiber_bundling.md | very_easy..medium; hard physics only | ok: references re-planned on the wire (the released pickup, the planner's combs, a closed-loop feed), 2 fresh replays equal, nops 0 | ok (medium 21 min live, 23 min with the observer) | criteria v2.5: corpus 21 and the 16 fiber reproducers 0 BREAKDOWN, search 70k controls 0 | ok, 0 / 18 | ok |
+| cast_coil | Genesis → MuJoCo | in progress | | | | | |
+| rope_threading, knot_untying, slotted_post_ring | Genesis (rigid-chain work) | | | | | | |
+| buzz_wire_3d, cast_keyhole, hedgehog_in_cage, horseshoe_ring, lock_picking | Genesis | | | | | | |
+| blanket_flatten | Genesis (cloth) | | | | | | |
 
 ## Road to no Genesis
 
@@ -64,4 +60,4 @@ The goal:
    One command does the first three, once every family has landed: `tools/release/release_rebuild.sh <head>
    --version <v>`. `tools/release/mujoco_release.json` lists the MuJoCo bases and how their instances are made;
    the instances are made inside the release image. The HF upload of the instances, the image push and the PR stay
-   separate steps that need the user's OK.
+   separate steps that need the owner's OK.

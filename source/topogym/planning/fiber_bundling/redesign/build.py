@@ -1,7 +1,7 @@
 """Freeze the fiber_bundling redesign tiers as MuJoCo instances (rcb_topogym make-instance in-process), with the
 released grasp assistance (contact_weld_v1 on the second-to-last sheath link) and the variations registered in-process
 (the soft-body redesign tooling's session_kit, tools/redesign on dev/robotangle_softbody_redesign, must be
-on PYTHONPATH). docs/rcb/redesign/fiber_bundling.md.
+on PYTHONPATH). docs/simulator/redesign/fiber_bundling.md.
 
 usage: build.py <out_dir> [tier | lab_<name> ...]   -> <out_dir>/<name>/instance.json (+ instance_assets/)
 """

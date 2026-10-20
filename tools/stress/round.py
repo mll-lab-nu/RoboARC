@@ -1,4 +1,4 @@
-"""A stress acceptance round, or a quick self-check, on frozen MuJoCo instances (docs/rcb/STRESS_VALIDATION.md).
+"""A stress acceptance round, or a quick self-check, on frozen MuJoCo instances (docs/simulator/STRESS_VALIDATION.md).
 
 usage: round.py run --instances <instance.json> [...] --out <dir> [--refs <dir> [--routes-only]] [--corpus <manifest.json>]
                     [--reproducers <dir>] [--seed0 S] [--episodes N | --replicas R --budget B] [--strategies ...]
@@ -27,7 +27,7 @@ run, in <dir>:
   report.md, .json     the verdict per instance (criteria v2.11 decide), with the v2 / v2.2 / v2.3 / v2.4 / v2.5 / v2.6 /
                        v2.7 / v2.8 / v2.9 / v2.10 / v2.11 readings side by side and the detection power
 --self-check: a quick setup check (2,000 controls per worker, one replica); it is never an acceptance round.
-Acceptance (docs/rcb/STRESS_VALIDATION.md): about 1,000 episodes per instance, all strategies, fresh seeds.
+Acceptance (docs/simulator/STRESS_VALIDATION.md): about 1,000 episodes per instance, all strategies, fresh seeds.
 A rerun resumes: finished replays and search workers are kept."""
 import _env  # noqa: F401  (before numpy: SIMD masking, threads, sys.path)
 import argparse, hashlib, json, os, subprocess, sys, threading, time

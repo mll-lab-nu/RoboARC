@@ -1,5 +1,5 @@
 """Plan a fiber_bundling reference on the current physics in the production Session, seeded from the released one (the
-fiber agent's re-planner; docs/rcb/families/fiber_bundling.md, "References"):
+fiber agent's re-planner; docs/simulator/families/fiber_bundling.md, "References"):
 1. the released rows up to the end of the pickup (the sheath held, the arm still), or the first --prefix-rows rows of
    --from-rows (a previous reference's pickup and combs);
 2. the planner's comb loop (topogym/planning/fiber_bundling/stages.py: plan_comb, the strand farthest from the sheath

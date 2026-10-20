@@ -17,7 +17,7 @@ After every World tick (2.5 ms):
   - S = sum max(0, -1/2 f pos) over the active constraint rows (an estimate of the soft constraints' stored energy) and
     the rise of X + S above its minimum; X's rise within 0.1 s; each contact pair's net work over its contact episode.
 
-The causal check (docs/rcb/STRESS_VALIDATION.md, criteria v2.6): a task link whose centre-of-mass speed rises by more than
+The causal check (docs/simulator/STRESS_VALIDATION.md, criteria v2.6): a task link whose centre-of-mass speed rises by more than
 JUMP_M_S within one tick needs a cause:
   - a contact or weld partner moving fast enough: |v_after| <= max(sqrt(|v_before|^2 + w.Iw/m), its own peak speed over
     the last 50 ms) + 2 * v_partner + 0.1 m/s;

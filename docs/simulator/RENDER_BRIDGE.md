@@ -229,7 +229,7 @@ Kinematic MuJoCo models were built from the release instances. The model holds t
 - **cloth**: flex A built on the 8,181 particles, and flex B built on the 2,091-vertex visual mesh.
 
 The links and flex vertices were moved programmatically; no physics port was involved. Scripts are on a cloud host:
-`/workspace/mj/render/deform/{rope_proto,cloth_proto}.py`, with outputs in `results/deform/`.
+`<work dir>/render/deform/{rope_proto,cloth_proto}.py`, with outputs in `results/deform/`.
 
 | | rope (knot very_easy) | cloth (blanket very_easy) |
 |---|---|---|
@@ -644,8 +644,8 @@ same tier's Genesis instance (built by the same code, physics_engine genesis) ag
 ### Acceptance: hedgehog_in_cage (the switch)
 
 The five released tiers on MuJoCo (very_easy .. hard, seed 0, native gripper space: the -i01 references' instances,
-docs/rcb/families/hedgehog_in_cage.md) and the experimental hedgehog_in_cage_window_change, on jianwen/mj2-hedgehog
-(jianwen/mj-integrate merged with e75390aab). Per tier a 40-row nop run, states at rows 0, 20 and 40, the Genesis host
+docs/simulator/families/hedgehog_in_cage.md) and the experimental hedgehog_in_cage_window_change, on a hedgehog porting branch
+(an integration branch merged with e75390aab). Per tier a 40-row nop run, states at rows 0, 20 and 40, the Genesis host
 recorded twice, nyx_direct once (`test_nyx_direct.py host / direct / spread`); and the birth frame of the same tier's
 Genesis instance (built by the same code, physics_engine genesis) against nyx_direct.
 

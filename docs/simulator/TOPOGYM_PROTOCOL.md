@@ -1,5 +1,12 @@
 # TopoGym tier tasks (protocol v1.0)
 
+> Record of the TopoGym task protocol of the Genesis era (protocol v1.0, tooling up to v19, October 2026), kept
+> because RoboARC's task files cite its sections ("Grading replays", "Replay tolerances and their evidence",
+> "Deterministic GPU physics", "Cloth settle speed", "Physical-validity policy"): the MuJoCo release kept those
+> rules. Scripts and paths named here belong to the earlier development repository unless this repository has them;
+> "host L" is the workstation most measurements ran on (RTX PRO 6000 Max-Q, EPYC 9534). The current simulator is
+> described in MUJOCO_CORE.md and RENDER_BRIDGE.md, the current task protocol in docs/PROTOCOL.md.
+
 39 frozen instances (13 families × easy / medium / hard) in both modes: 78 task packages. The published ones (v14) are
 the dirs `tasks/topogym-<family>-<tier>-i00-{privileged,standard}`. Since Jianwen's release mechanism
 (`ci_checks/topogym_active_release.json`, `scripts/topogym_versions.py`) the active release's packages are built by
@@ -35,7 +42,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   log (agent_sessions / resets / sim_steps 0); it now reaches only the warm-up sessions, and the script fails if a tag
   carries it.
   Environment profile `merged-v18` (`topogym/tasks/release_profile.py`): K2 changes knot's timing and solver and the IPC
-  instances are re-settled, so the environment changed. For Jianwen: the label also enters the slotted oracle's
+  instances are re-settled, so the environment changed. Note: the label also enters the slotted oracle's
   submission fingerprints (computed at run time) and the blanket re-key records. The three blanket records differ from
   v17's only in `metadata.identity_rekey.by`, and their state arrays are byte-identical; the record hash (the task
   parameter `initial_state_sha256`) enters `task.instance_id` and with it the task state that `Session.state_sha` hashes,
@@ -45,8 +52,8 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   `rcb_topogym.py`): knot inherits K2 from `TASKS["knot_untying"]`, and both families need the v18 image for their
   settled IPC states (the settled-state identity includes the pyuipc version, now 0.0.25+topogym.det1). Their simplified
   oracles were developed under v17's 2.5 ms full Newton solve, so they should be re-validated under K2 when built.
-  Proposal for Jianwen (his instruction texts): the step time the task description states comes from steps before the
-  first contact; on fiber_bundling the contact phases cost more (lab sweep: medium ~0.23 s per control step against the
+  Proposal (the instruction texts): the step time the task description states comes from steps before the
+  first contact; on fiber_bundling the contact phases cost more (host L sweep: medium ~0.23 s per control step against the
   stated 0.16, hard ~0.40 against 0.31). Measuring it over a contact phase would state what an agent pays.
 - v17 (2026-10-05) = merged-v16 + the R-hold grading (privileged replays may confirm within the same tolerant hold as
   standard) + fiber_bundling on the CPU (image 0.2.15-dev: Genesis tree patch, exact fast paths; below) + deterministic
@@ -62,7 +69,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   pipeline and the environment profile `topogym/tasks/release_profile.py`; ba01d029c: oracle portability, knot_untying
   terminal v5) + our grading rules, developed as the local "tooling v15" below and never published (live-strict,
   replay-tolerant grading; the physical-validity policy) + blanket_flatten's live coverage 0.95 in the environment profile
-  + the blanket identity fix found by the lab oracle sweep (BUG 2: the frozen state's absolute path entered the instance
+  + the blanket identity fix found by the host L oracle sweep (BUG 2: the frozen state's absolute path entered the instance
   identity, so no blanket candidate restored exactly). Image 0.2.14-dev: the public source differs from 0.2.13-dev's, and
   a new tag leaves the packages bound to 0.2.13-dev untouched. How the two sides' rules fit: One policy across both sides
   (below).
@@ -77,7 +84,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
     `scripts/topogym_regrade_v16.py` only where the v16 instance's state hash equals the trial's (families whose task code,
     profile and terminal revision did not change; known once the candidate is built); the others are rerun.
 - v15 (2026-10-04, Jianwen, not published) = the merged-v15 source candidate on image 0.2.13-dev. Its tooling hashes are frozen
-  in `ci_checks/topogym_tooling_versions.json` (`v15`); packages built from it (the lab oracle sweep's) keep their own
+  in `ci_checks/topogym_tooling_versions.json` (`v15`); packages built from it (the host L oracle sweep's) keep their own
   runtime binding.
 - Local tooling v15 (2026-10-03 / 04, ours, not published; its rules ship in v16) = v14 + live-strict, replay-tolerant grading for the six families whose physics runs on the GPU
   (blanket_flatten, knot_untying, rope_threading, slotted_post_ring, orbits, lock_picking; the user's decision, 2026-10-03)
@@ -142,7 +149,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   reproduce the reference's violent-impact tet inversion, which is robust to noise; one and two substeps would be
   12-15x but more lenient there).
   0.2.11 = 0.2.10 + that restore + one shared kernel / shader cache for every user (`XDG_CACHE_HOME`,
-  `CUDA_CACHE_PATH` = /opt/rcb-cache), filled on a lab GPU by `images/topogym/warm_cache.sh` and committed into the tag:
+  `CUDA_CACHE_PATH` = /opt/rcb-cache), filled on a host L GPU by `images/topogym/warm_cache.sh` and committed into the tag:
   a fresh container's first build + first frame 88-239 s + 20-24 s -> 27-62 s + < 1 s (physics unchanged: claws easy
   replays to the same state hash).
 - v10 (Jianwen, f0d233115) = v9 + his A01 ZIP/NPZ error classification, A03 evidence export and the owner-only
@@ -173,7 +180,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   penetration predicate), GPU 0 of 16 (Fisher p 0.04); claws easy passed. Six rigid families stay on the CPU.
 - v7 = v6 + seven rigid families (buzz_wire_3d, cast_coil, cast_keyhole, fiber_bundling, hedgehog_in_cage, horseshoe_ring,
   interlocked_claws until v8) on the CPU in float64 with one global constraint solve (`rigid_options = {use_contact_island: false}`;
-  Nyx still renders on the GPU; their 21 instances made again on lab) + frames rendered on demand (`Env.defer_rgb`: the
+  Nyx still renders on the GPU; their 21 instances made again on host L) + frames rendered on demand (`Env.defer_rgb`: the
   per-step observation skips the camera pass; `render_frame` / `render_grid` / `render_depth` / videos render the current
   state when asked). lock_picking keeps v6's GPU float32 (slower on the CPU); the soft-body families keep their instances.
   0.2.9 = 0.2.8 + `SimulatorConfig.rigid_options`, CPU physics with Nyx RGB, `Env.defer_rgb` and exact per-tick fast paths:
@@ -181,16 +188,15 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   readout layouts, cached weld pairs (`grasp_rigid.RigidGraspBackend.pairs`). `topogym/world/state.py` stays byte-identical:
   its hash is part of the blanket frozen states' identity (`ci_checks/check-topogym-tooling.py` checks it).
 - v6 = v5 + float32 physics for the 8 rigid families (`TASKS` in `harbor_templates/topogym/common/rcb_topogym.py`; their 24
-  instances made again on lab with v6). 0.2.8 = 0.2.7 + blanket's coverage skip + the exact cheaper IPC diagnostics. Evidence:
-  robot_coding_bench `jobs/journal/2026-10-02/sim_tradeoff/REPORT.md` (precision / speed study) and the check scripts below.
-- v5 / 2.3 = Jianwen's post-merge repairs B04–B13 (`docs/rcb/STANDARD_MODE_2_3.md`,
-  `docs/debug_logs/run_trials_post_merge_repair_20261001_zh.md`): invalid submissions graded as such, scores persisted
+  instances made again on host L with v6). 0.2.8 = 0.2.7 + blanket's coverage skip + the exact cheaper IPC diagnostics. Evidence:
+  the precision / speed study's report (not in this repository) and the check scripts below.
+- v5 / 2.3 = Jianwen's post-merge repairs B04–B13 (the 2.3 standard-mode notes of that release): invalid submissions graded as such, scores persisted
   before the video, only executed actions recorded with their actual ticks, non-integer `dt` refused, instance mismatch
   never a success, operation ids and request deadlines (a retried request is not executed twice).
 - `eai-standard/2.3` is a TopoGym-local extension of robot_coding_bench main's 2.2 (`ci_checks/rcb_vendor.json`
   `local_adaptations`), to be proposed for main.
 - 0.2.7 = Jianwen's 0.2.6 simulator changes + the batched rigid readback (Step time below).
-- The 15 soft-body instances (blanket_flatten and the four IPC families) were made again with the v5 tooling on lab's
+- The 15 soft-body instances (blanket_flatten and the four IPC families) were made again with the v5 tooling on host L's
   RTX PRO 6000 (`make-instance --variation <family>_<tier> --scene-seed 0`, image 0.2.7): `instance_contract_version` 2
   with complete soft-body node references, which v5 requires (B08). blanket_flatten's initial states were prepared again in
   0.2.7 (`scripts/prepare_blanket_initial_states.py --tier <tier> --seed 0 --acceptance scene_layout`: the 0.2.3 archives
@@ -198,11 +204,6 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   fresh-process smoke (build, 3 hold steps with RGB, replay; `instance_matches`). The rigid instances are unchanged.
 
 ## Budget
-Current helper preset (2026-10-04): **43200 s (12 h), 150M input / 10M output per trial**, native Codex / GPT-6 Sol xhigh,
-10 tasks excluding Knot, Slotted Post Ring and Orbits, three named tiers, both modes, K=3 (180 trials).
-See [helper operations](../standard_helper_operations_zh.md). Token limits are applied during post-run scoring;
-missing usage blocks complete acceptance. These new packages have not yet been formally published.
-
 Historical packages: agent wall clock **21600 s** (6 h) for every family (decision of 2026-10-01; before: 6 h, knot_untying 10 h). This is above
 protocol v1.0's cap of 14400 s ([agent].timeout_sec ≤ 4 h): a TopoGym exception, so its results form their own budget
 group (PROTOCOL D8) and the tasks would need a shorter budget on main. The privileged verifier may take `2 × budget + 1800`
@@ -232,23 +233,23 @@ step time unchanged.
 
 ## Step time
 The speed-up record from v4 (10-01) to v18 (10-06): one fixed benchmark per family plus end-to-end oracle times, in
-[`../TOPOGYM_SPEEDUP_RECORD.md`](../TOPOGYM_SPEEDUP_RECORD.md). The profiles below are the 10-01 starting point.
+[`../TOPOGYM_SPEEDUP_RECORD.md`](../history/TOPOGYM_SPEEDUP_RECORD.md). The profiles below are the 10-01 starting point.
 
 A control step is 10 physics ticks; `Env.step` reads the world state after every tick (the task predicate and the history
 need it) and renders every camera once (Nyx). Profiles of one sim alone (2026-10-01, seconds per control step):
 
 | scene | host | step | physics | state readback | render |
 |---|---|---|---|---|---|
-| buzz_wire_3d easy | lab (RTX PRO 6000 Max-Q, EPYC 9534) | 1.01-1.10 | 0.17 | 0.85 | 0.02 |
+| buzz_wire_3d easy | host L (RTX PRO 6000 Max-Q, EPYC 9534) | 1.01-1.10 | 0.17 | 0.85 | 0.02 |
 | buzz_wire_3d easy | workstation (RTX 4090 Laptop, i9-14900HX) | 0.56-0.62 | 0.11 | 0.43 | 0.03 |
-| cast_keyhole hard | lab | 0.56-0.60 | 0.19 | 0.35 | 0.02 |
+| cast_keyhole hard | host L | 0.56-0.60 | 0.19 | 0.35 | 0.02 |
 | cast_keyhole hard | workstation | 0.34-0.38 | 0.14 | 0.18 | 0.03 |
 
 The readback made about 700 separate GPU->CPU copies per tick (four per link, per entity): CPU and driver latency, which is
-why lab's server CPU made it twice as slow and the GPU sat mostly idle. NUMA pinning and fewer torch threads changed nothing.
+why host L's server CPU made it twice as slow and the GPU sat mostly idle. NUMA pinning and fewer torch threads changed nothing.
 Since 0.2.7 `GenesisWorld.read_state` reads the rigid solver once per field (`_RigidReadout`, six copies per tick);
 `scripts/check_read_state_batch.py` compares it with the per-link getters at every tick: bit-identical.
-On lab with 0.2.7 (one sim alone, GPU 4): buzz_wire_3d easy 0.26 s per control step (readback 0.055), cast_keyhole hard
+On host L with 0.2.7 (one sim alone, GPU 4): buzz_wire_3d easy 0.26 s per control step (readback 0.055), cast_keyhole hard
 0.25 (readback 0.046): 4x and 2.3x faster. At that speed one reference-length solution (Jianwen's solvability proofs: cast_coil
 6.5-7.3k control steps, cast_keyhole 18-21k, hedgehog_in_cage 2.3-9.6k) executes in about 0.5 h, 1.4 h and 0.2-0.7 h.
 
@@ -262,7 +263,7 @@ outcome of replayed agent trajectories, deviation against the baseline's own 1e-
   2 x the substep, so contacts got 4-16x softer and the tasks' 1 mm penetration predicate fired), 5 ms and 25 ms ticks.
 - **Rigid families: CPU float64** (tooling v7, six families since v8; jobs/journal/2026-10-02/rigid_fast/): seven families run their physics on
   the CPU in float64 with one global constraint solve (`use_contact_island` off: the island machinery was most of the CPU
-  constraint time); Nyx still renders on the GPU. Lab s/step, CPU vs v6's GPU float32: interlocked_claws easy 0.058-0.072
+  constraint time); Nyx still renders on the GPU. Host L s/step, CPU vs v6's GPU float32: interlocked_claws easy 0.058-0.072
   vs 0.164, horseshoe_ring 0.092 vs 0.195, cast_coil easy 0.080-0.088 vs 0.146 (workstation GPU), buzz_wire_3d 0.11 vs ~0.17,
   fiber_bundling medium 3.3x; 8 CPU sims on one host run as fast as one (GPU throughput is flat with sims per GPU); cold
   builds halve (63-107 s vs 181-289 s). Accuracy: per-substep contact penetration, trajectory deviation and outcomes of
@@ -300,7 +301,7 @@ outcome of replayed agent trajectories, deviation against the baseline's own 1e-
 ### fiber_bundling on the CPU: the articulated bundle (image 0.2.15-dev, 2026-10-05)
 Target (the user, 2026-10-04): one full reference execution within about 20 % of the 6 h agent budget, the budget being
 for the agent's reasoning; fiber hard may run longer (the user, 2026-10-05). Dual validation as above (metrics and frames;
-lab journal topospeed/NOTES.md).
+host L journal topospeed/NOTES.md).
 - **Cause.** The bundle is one articulated tree (slack lead, trunk, 8 / 16 strands of 10 links; ball joints): 318 DOFs
   (medium) / 558 (hard). Genesis' CPU branch factors each tree's mass matrix densely (O(n^3) per substep: 94 / 98 % of
   `kernel_step_1`, which was 67 / 80 % of a control step), and its skyline order keeps an entity's DOFs root-first, so every
@@ -332,19 +333,19 @@ to patch 1 alone at every step):
 | cast_coil easy | 6502 | yes | equal | success / success |
 | fiber_bundling medium / hard (patch 1 only) | 200 / 200 | yes (every link pose and joint) | equal | - |
 
-Fiber, per control step on lab (2 cores, hard rows 0-199): 2.10 s unpatched -> 0.64 (patch 1) -> 0.354 (+ patch 2 + fast
+Fiber, per control step on host L (2 cores, hard rows 0-199): 2.10 s unpatched -> 0.64 (patch 1) -> 0.354 (+ patch 2 + fast
 paths), solver substeps unchanged (4). Patch 2 against patch 1 on the medium oracle trajectory (13,770 rows + hold, open
 loop): bit-identical until the bundle's first constraint solves (row ~550), then round-off grows in the chaotic bundle: the
 floppy slack lead drifts by up to 2.2 mm (first > 1 mm at row 5975), the strand tips stay within 0.14 mm, the outcome is
 the same (success); per-substep contact depth per role pair unchanged (max: sheath-gripper 0.086 mm both, sheath-ring
 0.014 vs 0.014, strand-ring 0.012 vs 0.011, strand-strand 0.002 vs 0.002); rendered frames of both at 12 rows show the
-same bundle, strands and ring passage (sheets in the lab journal). The children-first order applied to every
+same bundle, strands and ring passage (sheets in the host L journal). The children-first order applied to every
 entity (robots included) gave 12 mm on the slack lead with the same tips, hence the 64-DOF threshold.
 The built image (labv17 0.2.15-dev) reproduces the tested code: interlocked_claws medium's 1364 rows bit-identical to
 unpatched v16 (physical state) and to the tested patch at every step; fiber medium rows 0-399 bit-identical to the tested
 patch + fast paths.
 
-| tier | oracle, closed loop (lab, 2 cores) | fresh-process replay of its trajectory | before |
+| tier | oracle, closed loop (host L, 2 cores) | fresh-process replay of its trajectory | before |
 |---|---|---|---|
 | medium | success, 13,770 steps, 69.0 min (19.2 % of 6 h) | success, the same final state_sha (bit-exact), 51.5 min | 125.5 min |
 | hard | success, 25,554 steps, 205 min (57 % of 6 h; the user accepts a longer fiber hard) | success, the same final state_sha (bit-exact), 152 min | ~15.6 h (2.2 s/step); tree factor alone 5.6 h |
@@ -379,19 +380,19 @@ after genesis.init; no Genesis file, image, frozen state or instance sha changes
   (16 m, 2^16 N, 2^17 N m) makes the result NaN, so the instability guard ends the episode as before. The constraint
   math, iterations and apply loops are Genesis' expressions. Largest contributions over the whole replay: 1.57 mm
   (collision), 0.96 mm (stretch + bending), 1.9 N, 0.42 N m.
-- **Evidence** (lab RTX PRO 6000, image 0.2.14-dev; lab journal topogym_v1/determinism/NOTES.md): five fresh-process
+- **Evidence** (host L RTX PRO 6000, image 0.2.14-dev; host L journal topogym_v1/determinism/NOTES.md): five fresh-process
   replays of EtWpiBp (1443 rows + 80-step hold) bit-identical at every control step on every digest (particle positions
   and velocities, rigid links / joints, contacts in canonical order, the grasp-assist record, state_sha; final
   e33f375dac5296de); in-process whole-tick repeats identical; unpatched v16 differs from row 0. The trajectory was
   recorded under v16's nondeterministic physics, so its patched replays agree with each other, not with v16's live run.
-- **Speed** (solo, lab GPU 7, image 0.2.14-dev): blanket_flatten easy (EtWpiBp rows 0-199) 0.373 s per control step
+- **Speed** (solo, host L GPU 7, image 0.2.14-dev): blanket_flatten easy (EtWpiBp rows 0-199) 0.373 s per control step
   (median 0.356) vs v16's 0.360 (0.342), about +4 %; lock_picking easy (rows 0-299) monolith 0.0770 / 0.0770 vs autotuned
   0.0768 / 0.0782 (no cost; the decomposed arm alone 0.0819), and the two autotuned passes from one state end in different
   digests while the monolith passes are identical. (Measurements on a GPU shared with IPC sims were 4-6x inflated.)
 
 ### Exact speed-ups (tooling v18, 2026-10-05)
 Target as above (one full reference execution within about 20 % of the 6 h agent budget). Every change below leaves
-results identical; each has a check script and a lab replay with both versions compared (lab journal
+results identical; each has a check script and a host L replay with both versions compared (host L journal
 topogym_v1/topospeed/NOTES.md).
 - **blanket_flatten.** Two costs dominated the hard reference: the coverage union in the settle phases, and the PBD grasp
   assist while a closed hand had no hold yet. In those grasp windows `SoftGraspBackend.candidates()` cost 0.5 s per hand
@@ -404,9 +405,9 @@ topogym_v1/topospeed/NOTES.md).
   - `exposed_patch` scans only the patch's horizontal reach.
   - Checks:
     - `scripts/check_grasp_candidates_exact.py`: 8400 cloth and rope cases identical to the previous code;
-    - live calls recorded on lab: 1757 blanket and 13 rope `candidates()` calls identical; 0.51 -> 0.011 s and 0.35 -> 0.022
+    - live calls recorded on host L: 1757 blanket and 13 rope `candidates()` calls identical; 0.51 -> 0.011 s and 0.35 -> 0.022
       s per call.
-  - Measured (shipped hard oracle, 4 cores, rgb on, lab GPU 7 next to light CPU sims): **29.1 min** (8 % of 6 h). The run
+  - Measured (shipped hard oracle, 4 cores, rgb on, host L GPU 7 next to light CPU sims): **29.1 min** (8 % of 6 h). The run
     is byte-identical to the v17 run without the changes: the same 4075-step trajectory, task result and final state_sha
     c105e712e2af818b. Its close / contact windows now cost 0.5-1.0 s per control step; they were 3.7-5.4 s with the
     previous oracle.
@@ -440,7 +441,7 @@ topogym_v1/topospeed/NOTES.md).
     invariant monitor.
   - That monitor must observe every tick: a tick-level violation latches and fails the stage, and `run()` raises on a
     missing tick. Freezing less often is therefore not equivalent.
-  - An exact option, for Jianwen: give that owner monitor an unfrozen or lazily frozen record. The values and decisions
+  - An exact option: give that owner monitor an unfrozen or lazily frozen record. The values and decisions
     stay the same, but `Env.tick_record`'s sink contract changes. Estimated medium ~62 min, hard ~189 min. Not done in v18.
 
 ## Grading: two passes
@@ -498,8 +499,8 @@ never turn a failure into one.
 Rule: a slack only where a continuous threshold's quantity shows a material replay-to-replay spread at the same control
 step; slack = 2 x the largest measured spread, rounded up. Spreads below 1 % of a threshold get none; branch-like
 divergence (another contact outcome) is not noise a tolerance can absorb, so it gets none either (the hold still applies).
-Lab, rcb-topogym:0.2.12-cu128, GPUs 5-7 under the v14 sweep's load, 2026-10-03; probes in
-`/DATA2/qineng/rcb/topogym_v1/v15/out/` (`probe_spread.py`: R in-process replays + 80 hold steps, every control step's
+Host L, rcb-topogym:0.2.12-cu128, GPUs 5-7 under the v14 sweep's load, 2026-10-03; probes in
+`topogym_v1/v15/out/` (`probe_spread.py`: R in-process replays + 80 hold steps, every control step's
 metrics, margins against the live thresholds, positions).
 
 | family | threshold (task parameter) | live | grading hold | measured spread (trajectory, replays) |
@@ -509,7 +510,7 @@ metrics, margins against the live thresholds, positions).
 | blanket_flatten | displacement from the start of the confirmation 3 mm (`maximum_drift_m`), 0.5 s window, height, stretch | unchanged | unchanged | not relaxed: the displacement limit is what proves the cloth is still |
 | knot_untying | rope speed (`terminal.maximum_speed_m_s`: quiet and final settling) | 1 mm/s | 1.25 mm/s | v14 success WWfaVD9 (365 rows), 2 replays, both strict successes at row 365: the window's speeds 0.43-0.90 mm/s, same-step spread up to 0.12 mm/s (just after the release); rope vertices within 11.7 um |
 | knot_untying | planar clearance 8 mm, table band (z), drift 1 mm; the release (terminal v5 since v16: 1 mm from every robot part that can move, world-fixed bases may touch, no overlap with any robot part's interior; v14: 5 mm from every part by bounding boxes) | unchanged | unchanged | same replays: 16.4 mm (spread 1.5e-8 m); margins 2.8 / 1.19 mm (< 1e-8 m); 0.7 um; 7e-8 m (measured on v14's release check). The release conditions are geometric: never relaxed |
-| rope_threading | merged-v16 profile: rope speed 10 mm/s (was 1), crossing aperture (0.1 mm margin, 1 mm compression allowance, round-ring passage test), thickness planes | unchanged | unchanged | no trajectory on the v14 instances yet (the sweep's rope trials still ran): no slack until a measurement; the profile's live thresholds are not loosened again. The lab oracle sweep's rope hard standard (4aac2a4e6) failed exactly where the hold helps: live success at row 1864, its replay of those rows without one |
+| rope_threading | merged-v16 profile: rope speed 10 mm/s (was 1), crossing aperture (0.1 mm margin, 1 mm compression allowance, round-ring passage test), thickness planes | unchanged | unchanged | no trajectory on the v14 instances yet (the sweep's rope trials still ran): no slack until a measurement; the profile's live thresholds are not loosened again. The host L oracle sweep's rope hard standard (4aac2a4e6) failed exactly where the hold helps: live success at row 1864, its replay of those rows without one |
 | slotted_post_ring | ring speed 1 mm/s / 0.02 rad/s, containment (1 mm boundary, z band), separator | unchanged | unchanged | v12 agent ULq3ATD (92 rows + hold), 3 replays: ring position 3 um, speeds 6e-6 m/s / 6e-5 rad/s (< 1 %); the cord, beads and discs (remainder) diverge by 0.3-8 mm (branch-like) |
 | orbits | target speed 1 mm/s / 0.02 rad/s (cord and handle), containment, separator | unchanged | unchanged | v12 agent HHnLEzf (154 rows + 80 hold), 1 replay (the second was stopped by the RAM guard): the cord crept at 1.9-3.3 mm/s through the hold (above the limit, not near it); handle 0.9-2.1e-3 rad/s; separator and z margins constant. No spread measured: no slack |
 | lock_picking | shaft-bore excess 10 um, insertion margin 1 mm, slot clearances | unchanged | unchanged | v12 agents oRtMyhk (1178 rows) / JPLHPHT (1285 rows), 3 replays each: bit-identical up to control step 543 / 476, then a contact branch (32-42 um at onset, 1.2 / 5.7 mm key position and 0.27 rad rotor angle at the end); no success trajectory exists to measure at the goal |
@@ -519,7 +520,7 @@ The user's decision (2026-10-06, "option 1"): a cloth particle's speed is its en
 (x(t) - x(t - dt)) / dt with dt the 2.5 ms physics tick. It is no longer the velocity Genesis' PBD solver stores, which
 is the last solver substep's (pos - ipos) / substep_dt (0.625 ms; 4 substeps per tick). The thresholds are unchanged: live
 0.03 m/s, grading hold 0.08 m/s, displacement from the start of the confirmation 3 mm (`maximum_drift_m`), window 0.5 s.
-- Why. Blanket very_easy (Jianwen's oracle; lab probe 2026-10-06): after the release, particle 7458 sits in a PBD
+- Why. Blanket very_easy (Jianwen's oracle; host L probe 2026-10-06): after the release, particle 7458 sits in a PBD
   self-collision 2-cycle with three neighbours at the 8 mm particle-size threshold. Stretch and bending move it about
   50 um, the self-collision puts it back, so it alternates between two points 20.65 um apart every substep. Its end-of-tick
   position is constant to 1 um, but the stored velocity reads 33.04 mm/s, above the 30 mm/s gate, for as long as the
@@ -545,7 +546,7 @@ is the last solver substep's (pos - ipos) / substep_dt (0.625 ms; 4 substeps per
   - `topogym/tasks/blanket_flatten/below_easy_preview.py` and `scripts/check_builder_feedback.py` keep their native
     continuity checks;
   - rigid bodies and FEM vertices have their own readers.
-- Validation (lab GPU 4, 2026-10-06). Grading replays of graded trajectories under the patched world, compared with their
+- Validation (host L GPU 4, 2026-10-06). Grading replays of graded trajectories under the patched world, compared with their
   v18-sweep / below-easy grades. Per tick, old = Genesis' velocity read by a hook, new = the displacement; the speeds are
   the cloth's maximum over its particles.
 
@@ -582,10 +583,10 @@ is the last solver substep's (pos - ipos) / substep_dt (0.625 ms; 4 substeps per
     merged-v18.)
   - Visual. very_easy's verifier video around the chatter onset (tick ~6041) and after the release: the sheet lies flat
     and still from the release on; mid-lay frames show the carried corner moving.
-- v19 re-grades (lab, 2026-10-06). The five blanket instances of the release (candidate built and preflighted with
+- v19 re-grades (host L, 2026-10-06). The five blanket instances of the release (candidate built and preflighted with
   Jianwen's pipeline, exact restores; image `rcb-topogym:0.2.17-dev-cu128` = sha256:06554307), graded with his launcher
-  (`scripts/oracle_runners/test_harbor_oracles.py --candidate --no-nop --execute`, both modes) on lab GPUs 4 / 7, at most
-  two blanket simulations per GPU. Times in minutes, under lab load: privileged = the oracle's live run (the reference
+  (`scripts/oracle_runners/test_harbor_oracles.py --candidate --no-nop --execute`, both modes) on host L GPUs 4 / 7, at most
+  two blanket simulations per GPU. Times in minutes, under host L load: privileged = the oracle's live run (the reference
   execution) and the verifier's two replays; standard = the live episode and the collect hook's replay. No pass needed
   a replay tolerance, and every grading replay succeeded strictly within the trajectory's rows (hold 0). Each tier ends
   in one state hash across both privileged replays and the standard live episode and replay.
@@ -605,10 +606,10 @@ is the last solver substep's (pos - ipos) / substep_dt (0.625 ms; 4 substeps per
 
   Against v18: easy and medium succeed at the same rows and ticks; hard one tick later; very_easy now passes both modes
   strictly (v18 below-easy grades: 1454 rows, privileged only through the hold, standard failed); easier is unchanged,
-  an oracle problem left for Jianwen. The reference executions stay under 72 min (hard 54.1). These grades ran on v19 itself
+  an oracle problem left open. The reference executions stay under 72 min (hard 54.1). These grades ran on v19 itself
   (89cc32674). The next commit, da47d3a49 (rope below-easy profile), changes the public source hash, so candidates built
   from later heads need a rebuilt image.
-- Follow-ups for Jianwen (not done):
+- Follow-ups (not done):
   - Rigid bodies: their speeds are the rigid solver's velocities at the end of the tick (the IPC coupling's for
     IPC-coupled bodies). The families that settle rigid bodies could use the same end-of-tick displacement if a similar
     artifact shows up; none has been seen.
@@ -671,9 +672,9 @@ The forcing memory that attributes a breakdown and the review contacts' persiste
 ended need a rerun (their agent never got to continue): QKSrtdL (claws hard) and diFXNtw (claws medium). No finished v14
 privileged replay was cut by R1 (all ended without an episode end, or in success).
 
-### Calibration and validation (lab 2026-10-03 / 04)
+### Calibration and validation (host L 2026-10-03 / 04)
 Per physics tick, per arm: the largest arm-drive control force as a fraction of its cap and the contact force between
-the arm's own bodies and the rest (`/DATA2/qineng/rcb/topogym_v1/v15/bin/pstop_probe.py`, outputs in `v15/out/pstop/`;
+the arm's own bodies and the rest (`topogym_v1/v15/bin/pstop_probe.py`, outputs in `v15/out/pstop/`;
 the old tooling with R1's verdicts off for the measurement, then the committed tooling for the outcomes). "Longest" = the
 longest run of consecutive ticks with the forcing condition (95 % of cap, 20 N); a forcing event from 200 (0.5 s).
 
@@ -705,7 +706,7 @@ evidence only (above). The exploit R1 was made for (bodies forced through each o
 4.8 mm: R1 failed it at once, as it failed QKSrtdL's passive impact; 3 ticks of forcing make no forcing event and the
 breakdown bound is 10 mm, so the deep contact is what holds that success for review.
 
-End to end on lab with the committed task dirs (`v15/root_v15c`): the 15 cm tug's trajectory (74 rows, a success)
+End to end on host L with the committed task dirs (`v15/root_v15c`): the 15 cm tug's trajectory (74 rows, a success)
 through the privileged verifier: both replays succeed with the same state hash, `success` 0, `success_pending_review` 1,
 `review_events` 1, `review_max_depth_mm` 4.8, verdict.json `evidence.review` (control step 2, physics tick 13, 3 ticks,
 claw 1 / claw 0, 22980 N) and `review_frames/` around it. The standard pipeline in one sim container (the sidecar
@@ -740,19 +741,19 @@ nothing is relaxed twice and no rule contradicts another (2026-10-04):
 | rope still speed | 10 mm/s (was 1) | no slack (hold only) | one relaxation (his, live) |
 | rope rim | 1 mm compression allowance, round-ring passage test | none | his; the texts give the passage radii and the allowance |
 | rope and robot | fingers only (the IPC contact set, for rope and rings) | not measured (FEM) | his environment model; the texts now say so |
-| blanket coverage | task default 0.90 | live 0.95 (the user), hold 0.92 | 0.95 in his profile (re-keyed states), hold 0.92 |
+| blanket coverage | task default 0.90 | live 0.95 (the owner), hold 0.92 | 0.95 in his profile (re-keyed states), hold 0.92 |
 | keyhole standard oracle | his privileged references move a joint up to 0.10 rad per control step; his bridge refuses rows the service slows | the 0.04 rad per step limit exists only in the standard service | open (below) |
 
 Results: a success held for review (`success_pending_review` 1) is `pending_review` in Jianwen's result pipeline
 (`scripts/collect_batch_results.py`, the difficulty runner, the HF export, helper assignments): complete, neither solved nor
 unsolved, out of the success rate until a reviewer decides; `scripts/write_task_results.py` says so on the result page.
 
-For Jianwen to confirm:
+Open points at the time:
 1. knot v5's overlap check: IPC and the release check see the same robot geometry (else a rope resting on a base could read
    as an overlap and withhold success), and `unresolved` geometry is rare (it also withholds success).
 2. The rope profile's contact set: only the fingers touch the rope and the rings; now stated in the texts.
 3. blanket coverage 0.95 in his profile, with the packaged states re-keyed (arrays unchanged) rather than prepared again.
-4. The blanket identity fix (lab BUG 2) in `topogym/tasks/blanket_flatten/common.py`.
+4. The blanket identity fix (host L BUG 2) in `topogym/tasks/blanket_flatten/common.py`.
 5. Release labels: v16 = merged-v16, image 0.2.14-dev; his v15 frozen; the name `contact_relaxed_v16` stays his profile's.
 6. `pending_review` as a result status of his pipeline (above).
 7. Open: the standard joint-speed limit (0.04 rad per control step) against privileged references that move faster
@@ -760,7 +761,7 @@ For Jianwen to confirm:
    modes.
 
 ## Grading GPU
-- Privileged: the verifier is its own container; on a host with a spare GPU (lab) the host's copy of
+- Privileged: the verifier is its own container; on a host with a spare GPU (host L) the host's copy of
   `tests/docker-compose.yaml` pins it to that grading GPU, so it never runs on the agents' GPUs.
 - Standard: the replay runs in the sidecar on its own GPU after the live service has exited: it takes the place of the
   live simulator, adding no load to that GPU. Nyx renders only in a container that sees exactly one GPU (a sidecar given a
@@ -768,7 +769,7 @@ For Jianwen to confirm:
   replay container of its own (a possible later step).
 
 ## Standard mode
-`eai-standard/2.3` with crash recovery (`docs/rcb/STANDARD_MODE_2_2.md` §13,
+`eai-standard/2.3` with crash recovery (`docs/STANDARD_MODE.md` §13,
 `STANDARD_MODE_2_3.md`), resume class `approx` (GPU nondeterminism), `RCB_STARTUP_TIMEOUT_S` = 1800. The shared layer is
 `scripts/eai_standard/` (from robot_coding_bench, with the 2.3 changes as `local_adaptations` in `ci_checks/rcb_vendor.json`);
 the TopoGym adapter is `environment/sim/server.py`. Genesis' CUDA context belongs to the
@@ -777,26 +778,26 @@ main thread's job queue.
 
 ## Instruction texts
 The per-step wall times quoted in the texts come from each instance's `describe.json`. Since v14: the unloaded figure is
-the v14 describe's own measurement (lab, 3 hold steps, 2026-10-03), the shared figure twice that (the v12 sweep's
+the v14 describe's own measurement (host L, 3 hold steps, 2026-10-03), the shared figure twice that (the v12 sweep's
 standard trials ran at 1.0-2.2x the unloaded figure under its load). Until v12 the texts still quoted the first builds'
 times (knot_untying: 37.7 s unloaded / 67 s shared per control step, against about 2 s since v11-v12). The
 client-timeout advice derives the chunk sizes from the shared figure with a 2× margin.
 
 ## Oracle and review
 No reference solutions for the tier instances: `oracle = "none"` with `oracle_evidence`, no `solution/`; human review per
-family (PROTOCOL §2.7). Model positives so far: interlocked_claws easy in both modes (sweep topogym-lunamax-assist-1001,
-the previous version of these dirs).
+family (PROTOCOL §2.7). Model positives so far: interlocked_claws easy in both modes (an earlier sweep,
+on the previous version of these dirs).
 
 ## Hosts
-- Base image `ghcr.io/luigivamper/rcb-topogym:<images/topogym/VERSION>-cu128` (v16: 0.2.14-dev; the published v14 dirs:
+- Base image `rcb-topogym:<images/topogym/VERSION>-cu128` (a development registry) (v16: 0.2.14-dev; the published v14 dirs:
   0.2.12) (`images/topogym/VERSION` + the CUDA profile of `scripts/cuda_profiles.py`; outside the `eai-<sim>` registry: a
   legacy warning). Neither is on GHCR: the candidate pipeline's `build_image.sh` builds the active one; by hand, build on
   the host with `TOPOGYM_CUDA_FLAVOR=cu128 scripts/build_images.sh topogym` (a
-  large host may add `--build-arg UIPC_BUILD_JOBS=16`; the default 3 took about 1.5 h on lab), then warm its cache on that
+  large host may add `--build-arg UIPC_BUILD_JOBS=16`; the default 3 took about 1.5 h on host L), then warm its cache on that
   host's GPU: `images/topogym/warm_cache.sh <built tag> <published tag> <gpu> tasks` (one Session per family; without it
   every container compiles the kernels again).
 - blanket_flatten's packaged PBD states restore only on the GPU profile they were prepared on (RTX PRO 6000, sm_120):
-  run blanket on lab.
+  run blanket on host L.
 - The IPC families are slow (50-90 s per control step in motion, 15 s holds, one sim per GPU): a precision / speed study
   of the simulator settings is under way (2026-10-02).
 

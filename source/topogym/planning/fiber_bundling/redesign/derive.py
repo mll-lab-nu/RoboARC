@@ -1,4 +1,4 @@
-"""Inverse generation of the fiber_bundling redesign tiers (docs/rcb/redesign/fiber_bundling.md).
+"""Inverse generation of the fiber_bundling redesign tiers (docs/simulator/redesign/fiber_bundling.md).
 
 The oracle's motion comes first: a top-view route for the sheath, from the cradle exit to the front's final pose. A
 free-bend tier's route is made of straight runs and bends (`route_points`). A formboard tier's route is the cable

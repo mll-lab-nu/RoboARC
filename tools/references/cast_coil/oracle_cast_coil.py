@@ -1,5 +1,5 @@
 # Oracle code for `rcb_topogym.py run-oracle --task cast_coil --code <this file>` on the released tiers
-# (docs/rcb/families/cast_coil.md): the family's own closed-loop policy
+# (docs/simulator/families/cast_coil.md): the family's own closed-loop policy
 # (topogym.planning.cast_coil.public_session.run_feedback_policy: CastCoilPolicy / SimplifiedCoilPolicy, measured piece
 # poses in, EE_ABS out) in this MuJoCo Session, unchanged. If the policy finishes before the episode has ended, the last
 # targets are held (hold rows, as core's re-record does) until the episode ends or 20 s pass.

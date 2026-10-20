@@ -40,7 +40,7 @@ Template: `hedgehog-in-cage-very-easy-i00`. Each file is the template's released
   Harbor under this base's name with these texts (release_rebuild dry run on 3d8436413, 2026-10-12): oracle 1 and nop 0
   in both modes. Listed in `mujoco_release.json`'s hedgehog_in_cage new_bases (the user's decision, 2026-10-12): template
   `hedgehog-in-cage-very-easy-i00`, the family's gripper space (native).
-- Design, oracle and evidence: `docs/rcb/families/hedgehog_in_cage.md` (owl).
+- Design, oracle and evidence: `docs/simulator/families/hedgehog_in_cage.md` (owl).
 
 ## hedgehog-in-cage-08-i01 (window change, `hedgehog_in_cage_window_change`)
 
@@ -75,7 +75,7 @@ replaced:
 - The reference: `scripts/roboarc/oracles/hedgehog-in-cage-08-i01/` (bb481d502; birth 2ecb7e00fc766fb8,
   2 961 rows; run-oracle code `tools/references/hedgehog_in_cage/window_change_code.py`). Acceptance round:
   hedgehog_v4 on 3297f29cb, PASS.
-- Design, oracle and evidence: `docs/rcb/families/hedgehog_in_cage.md` (window_change) and
+- Design, oracle and evidence: `docs/simulator/families/hedgehog_in_cage.md` (window_change) and
   `docs/develop/tasks/hedgehog_in_cage_window_change_zh.md`.
 
 ## hedgehog-in-cage-06-i01 (Cast Cage, `hedgehog_in_cage_cast_cage`)
@@ -113,4 +113,4 @@ Template: `hedgehog-in-cage-hard-i00`. Each file is the template's released -i00
 - The reference: `scripts/roboarc/oracles/hedgehog-in-cage-06-i01/` (94874eee3; birth ad1fcefad2565341,
   2 864 rows; run-oracle code `tools/references/hedgehog_in_cage/cast_cage_code.py`). Acceptance round on
   d1b764ddc, PASS.
-- Design, oracle and evidence: `docs/rcb/families/hedgehog_in_cage.md` (cast_cage).
+- Design, oracle and evidence: `docs/simulator/families/hedgehog_in_cage.md` (cast_cage).

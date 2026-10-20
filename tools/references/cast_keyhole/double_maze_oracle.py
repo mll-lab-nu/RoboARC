@@ -1,5 +1,5 @@
 # Oracle code for `rcb_topogym.py run-oracle --task cast_keyhole --code <this file>` on the double-maze setting
-# (cast_keyhole_double_maze; docs/rcb/families/cast_keyhole_double_maze.md).
+# (cast_keyhole_double_maze; docs/simulator/families/cast_keyhole_double_maze.md).
 #
 # Input: double_maze_plan.npz next to this file (DM_PLAN overrides): per 40 Hz control step the planned joints of both
 # arms (RL, RR: from the birth joints to the designed route's first sample, the route's inverse kinematics, then the

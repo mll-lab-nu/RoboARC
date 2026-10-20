@@ -6,7 +6,7 @@ Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_en
 topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIMD masking, one thread per library).
 
 usage: rerecord.py <instance.json> <reference.npz> <out.npz> [--tail N] [--note TEXT]
-The interlocked_claws -i01 references (docs/rcb/families/interlocked_claws.md): very_easy and easier from the released
+The interlocked_claws -i01 references (docs/simulator/families/interlocked_claws.md): very_easy and easier from the released
 oracle tools/references/oracles_genesis/interlocked-claws-<tier>-i00/privileged.npz directly; easy, medium and hard from that
 oracle with its wrist dither notched out (notch_ref.py --length <v5 rows>)."""
 import sys

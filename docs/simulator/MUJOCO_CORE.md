@@ -157,7 +157,7 @@ points per pair (`multiccd`). The validate agent's breakdown search (2026-10-09)
 deep contacts with wrong depths or normals, each injecting energy. The settings that remove them:
 
 - **The exact constraint diagonal, every model** (`MujocoWorld.build` sets `mjENBL_DIAGEXACT` on the loaded model,
-  frozen scenes included; Qineng's decision, 2026-10-10). MuJoCo regularises each constraint row by
+  frozen scenes included; decided 2026-10-10). MuJoCo regularises each constraint row by
   R = (1 - d) / d x A_ii (d: the row's impedance) and by default estimates A_ii from the bodies' and dofs' inverse
   weights at qpos0. On our scenes that estimate was 0.0023-435x off per row (gpusearch, CPU): contact normals about 4x
   too stiff, grasp welds and connects up to 435x too soft. On the Robotiq's passive four-bar the mis-regularised rows
@@ -171,7 +171,7 @@ deep contacts with wrong depths or normals, each injecting energy. The settings 
     ends); buzz's finish lands the wand elsewhere (re-planned). Instances whose birth runs physics (claws easy,
     medium) are re-made: their birth hashes change.
   - MJWarp 3.14 rejects the flag (`put_model`: NotImplementedError); the GPU screen ports it (gpusearch).
-  - Evidence (the physics of 441b884e7 with the flag on and off; a cloud host `/workspace/mj/core/results/diag/`):
+  - Evidence (the physics of 441b884e7 with the flag on and off; a cloud host `<work dir>/core/results/diag/`):
     - Stress: G1-G11, gpusearch's 23 known streams and B1 / B1b / B2 / B3 (26 streams), each in 2 fresh processes,
       read with criteria v2.8: 0 BREAKDOWN (24 VIOLENT, 2 CLEAN), every stream deterministic. G11's X rise goes from
       0.39 J (BREAKDOWN) to 0.036 J; the largest X rise is 0.065 J and the largest pair net work 0.017 J.
@@ -231,7 +231,7 @@ deep contacts with wrong depths or normals, each injecting energy. The settings 
     The rule needs no margin: with it e30 ends clean (47 N peak), and the pads may cross while the 27 mm hulls stop the
     fingers.
   - Evidence. Physics: the head (956c17ab8's code) with the rule. Knot and rope_threading ran on the rope agent's bound
-    runtimes with the rule and re-bound instance copies. Results on a cloud host in `/workspace/mj/core/results/padA/`.
+    runtimes with the rule and re-bound instance copies. Results on a cloud host in `<work dir>/core/results/padA/`.
 
     | check | result |
     |---|---|
@@ -254,7 +254,7 @@ deep contacts with wrong depths or normals, each injecting energy. The settings 
       wrist mount may now pass into the forearm.
     - A joint-range guard (wrist_angle <= 2.0 rad) instead would cut keyhole's, horseshoe_ring's and rope_threading's
       references: they command wrist_angle up to 127 deg, never with the wrist rotated near 180 deg.
-    - Evidence (a cloud host `/workspace/mj/core/results/wrist/`; fresh replays, the exclusion on CL8t's tree, on the head and
+    - Evidence (a cloud host `<work dir>/core/results/wrist/`; fresh replays, the exclusion on CL8t's tree, on the head and
       on the rope agent's bound runtimes with re-bound instance copies):
 
       | check | result |
@@ -373,7 +373,7 @@ deep contacts with wrong depths or normals, each injecting energy. The settings 
     The rope meets them exactly as before: kept geoms win with `solmix` 2^60 (`scene.KEEP_SOLMIX`), whose weight against
     the rope's `solmix` 1 rounds to exactly 1, and the rings' own parameters are the rope's (rope_threading easy and hard
     -i01 end on the same states with and without the rule).
-  - Candidates, each on every soft geom from row 0 (a cloud host `/workspace/mj/core/results/softsw*`, the cluster runs `core_sw_*`,
+  - Candidates, each on every soft geom from row 0 (a cloud host `<work dir>/core/results/softsw*`, the cluster runs `core_sw_*`,
     `core_s_*`; tools `core/work/springref/sr_replay.py --soft`, `core/work/softsw/soft_wrap.py`):
 
     | stream | as built | constant impedance (.95 .95) | 2.5 ms | constant + rings kept |
@@ -460,7 +460,7 @@ deep contacts with wrong depths or normals, each injecting energy. The settings 
   - Cost: 11-13 us per step when nothing yields, 0.2-0.8 % of a control step.
   - A family without the option builds and steps as before.
 - **Fiber** (`profiles._FIBER`, `fiber_v5`; `fiber_v4` before the Robotiq springref, 2026-10-11): the cable as iron wire (elastoplastic joints, 0.4 deg), its contacts
-  (the cable's own overdamped) and its re-planned references: `docs/rcb/families/fiber_bundling.md`.
+  (the cable's own overdamped) and its re-planned references: `docs/simulator/families/fiber_bundling.md`.
 
 Evidence: the validate agent's 95 claws reproducers (its S1 / S2 searches and corpus), each in a fresh Session under its
 observer (energy balance, per-substep depth, causality): shipped 61 breakdowns, this policy 0; the deepest task contact
@@ -581,7 +581,7 @@ the followers back: the fingertips curl inward, the pads close in a V and touch 
 - At 2.62 the pads close parallel (closed fraction 0.85-0.87 at acquisition, against 0.80), both touch the held body
   for the whole weld at 5-9 N each, and the wand's pose in the hand at acquisition is the same within 0.2 mm.
 - Robotiq references on springref 2.62 with the contact rule below (fresh replays on this commit; a cloud host
-  `/workspace/mj/core/results/springref2`, tool `core/work/springref/sr_replay.py`; every one CLEAN under the stress
+  `<work dir>/core/results/springref2`, tool `core/work/springref/sr_replay.py`; every one CLEAN under the stress
   observer, none released by the contact rule; the same states as the springs set at runtime on the commit before):
 
   | references | result | next |
@@ -624,8 +624,8 @@ onward with 340-483 N, while the other families' references need at most 41 N ro
 hard's coupler: one tick at 175-247 N on the wire). Lower torque caps would break buzz's references, which press at up
 to 72 % of today's caps, and the ALOHA already runs at its real servos; at today's caps a hand pushes 164-203 N (ALOHA)
 or 269-427 N (Panda) in its strongest direction. Each such breakdown is fixed at the contact that makes it (F1, W4, rule
-A, the wrist pair, fiber's sheath x ring pair). Tools and results: a cloud host `/workspace/mj/core/results/clamp/` and
-`/workspace/mj/core/work/` (`reflex.py`, `reflex_replay.py`, `press_trace.py`, `push_ceiling.py`).
+A, the wrist pair, fiber's sheath x ring pair). Tools and results: a cloud host `<work dir>/core/results/clamp/` and
+`<work dir>/core/work/` (`reflex.py`, `reflex_replay.py`, `press_trace.py`, `push_ceiling.py`).
 
 ## Porting a family
 

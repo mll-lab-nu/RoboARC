@@ -59,7 +59,7 @@ def main(argv=None):
                        old=dict(trajectory=old["trajectory"]), new_trajectory=new["trajectory"], new_object=None,
                        old_on_new=dict(method="mujoco_replay", success=not fails(oon), closest_approach=closest(oon),
                                        evidence=a.old_on_new),
-                       breakers=breakers, scene=a.scene, design=f"docs/rcb/redesign/fiber_bundling.md#{a.tier}",
+                       breakers=breakers, scene=a.scene, design=f"docs/simulator/redesign/fiber_bundling.md#{a.tier}",
                        new_source=a.source, metrics_file=a.strict)
     print(write_report(rep, a.out))
 

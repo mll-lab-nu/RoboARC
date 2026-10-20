@@ -1,4 +1,4 @@
-"""Verdicts of stress results (docs/rcb/STRESS_VALIDATION.md, criteria v2.11) and one table per instance.
+"""Verdicts of stress results (docs/simulator/STRESS_VALIDATION.md, criteria v2.11) and one table per instance.
 
 usage: verdict.py <results dir> [<results dir> ...] [--reading v2.13b|v2.12|v2.11|v2.10|v2.9|v2.8|v2.7|v2.6|v2.5|v2.4|v2.3|v2.2|v2] [--json out.json]
                   [--md out.md]

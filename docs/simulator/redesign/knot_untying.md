@@ -1,6 +1,6 @@
 # knot_untying redesign: anchored ropes, clutter, goal regions (5 tiers, MuJoCo)
 
-Status (10-13): design accepted by the user with the 10-12 region decision (`_r2`) and the 10-13 back strip (`_r3`); robot-level routes on the current
+Status (10-13): design accepted by the owner with the 10-12 region decision (`_r2`) and the 10-13 back strip (`_r3`); robot-level routes on the current
 head for very_easy (solved) and for the untying of easier, easy and hard (placement into the goal region still open);
 medium not untied. Nothing here is a frozen reference: every reference is recorded once after the physics freeze
 (oracle on the frozen head, fresh replays on two hosts, acceptance, videos). Agent "knot" (from the soft-body redesign
@@ -71,7 +71,7 @@ recording). Strategies: far-side-first serpentine plans laid by two-hand lays (`
 or the old layout (`lay`). Measured limits on the weld: the first pinch >= 24 cm from the clamp, no wrist turn while
 holding, carries at 3 cm/s at curb height.
 
-## 6. Goal regions: the user's decision 10-12 (`_r2`)
+## 6. Goal regions: the owner's decision 10-12 (`_r2`)
 Goal regions only (births, curb, posts, clamps and ropes unchanged; the same rows give identical world and robot hashes on
 the old and the `_r2` instances): easier's back strip ends at y 0.31 (was 0.33; the far layout level at 0.28 is where
 both arms reach a rope-along-x pinch around x 0, and 0.31 is the shallowest strip that still takes three full legs at

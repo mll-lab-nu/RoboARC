@@ -3,7 +3,7 @@
 Scene (HorseshoePolicy.drop_ring_by_hand_swap): after the fold, the tilt and the left hand's release, the right hand
 holds the right shoe by one leg with its plane upright; the left shoe hangs from the chain links; the ring hangs
 around the right hand's two fingers, free of the puzzle. The right hand cannot leave the ring without opening, and
-opening drops the shoes (docs/rcb/families/horseshoe_ring.md). So the left hand takes the same shoe by its other leg,
+opening drops the shoes (docs/simulator/families/horseshoe_ring.md). So the left hand takes the same shoe by its other leg,
 the right hand opens and carries the ring on its open fingers over the goal region, a few centimetres above the table,
 and pitches them down; the ring is then in the goal (on the fingers or on the table under them), the remainder in the
 left hand. Holding is allowed by the task's rule ("remainder behind separator; holding allowed"), so the shoes are

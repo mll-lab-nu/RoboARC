@@ -17,7 +17,7 @@ usage: tools/release/package_text_tool.py --template <released base> --template-
                        after the task sentence, extra success conditions) states them; describe's public_goal has only the
                        family's rendering. Without it, the texts say what public_goal says
   --task-note          one sentence added after the task sentence (e.g. naming a design's parts); words only, no rule
-  --difficulty         the new base's tier (very_easy .. hard; docs/rcb/TAXONOMY.md) for task.toml's difficulty line, e.g.
+  --difficulty         the new base's tier (very_easy .. hard; docs/TAXONOMY.md) for task.toml's difficulty line, e.g.
                        a redesigned tier set; default: the variation record's tier, and no line when it has none (as the
                        experimental new bases)
 

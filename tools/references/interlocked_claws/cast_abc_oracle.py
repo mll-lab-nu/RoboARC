@@ -1,5 +1,5 @@
 # Oracle code for `rcb_topogym.py run-oracle --task interlocked_claws --code <this file>` on the Cast ABC setting
-# (interlocked_claws_cast_abc; docs/rcb/families/interlocked_claws.md, "Cast ABC").
+# (interlocked_claws_cast_abc; docs/simulator/families/interlocked_claws.md, "Cast ABC").
 #
 # Input: cast_abc_plan.npz next to this file (ABC_PLAN overrides): per 40 Hz control step the planned joints of both arms
 # (RL, RR: the reference route's inverse kinematics, time-scaled to at most 0.1 rad/s per joint and 10 mm/s, 0.1 rad/s of

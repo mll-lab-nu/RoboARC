@@ -1,7 +1,7 @@
 # buzz_wire_3d: a harder 5-tier set (design note; agent buzz, 2026-10-10/11)
 
-Status: DRAFT for the user's review. Code in the sandbox clone the work notes, branch
-`qineng-rt-redesign-buzz_wire_3d` (new files only):
+Status: design record (the tiers shipped as buzz-wire-3d rd bases). Code in the sandbox clone the work notes, branch
+a sandbox branch (new files only):
 - `topogym/tasks/buzz_wire_3d/redesign/`: `design.py` (a tier as data -> the family's own BuzzWireLayout), `motifs.py`
   (a 3D wire-bender with exact bend radii), `task.py` (the redesign task class: the family's BuzzWireTask with its
   predicate unchanged, plus insulated rest sleeves and wooden obstacles), `tiers.py` (the generators);
@@ -115,7 +115,7 @@ Hanging rests: the wand is lowered onto the sleeve (the ring's inner top edge 0.
 low-friction sleeve and may hang yawed on it; the regrasp plans on the measured pose, or on the ideal hanging pose
 (the closing pads square the grip up).
 
-### Robot mount (the user's method, 10-11)
+### Robot mount (the owner's method, 10-11)
 1 floating solution = the wire path; 2 grasp schedule = the all-pairs chain (one arm, regrasps on the rest sleeves);
 3 base search: a tier's `Design.robot_mount` (x, y, yaw) sets `scene_config.env.robot_mount` in
 `BuzzWireRedesignTask.finalize_spec` before the scene is built (the existing scene mechanism; the frozen instance keeps
@@ -155,7 +155,7 @@ Results:
 - **-92.3 deg (dead end):** no grasp, turn or push at all: the finish run's arch and a wood stop sit over the handle.
 
 A wand that comes to rest there stays there for good, which is unfair to an agent. The current references avoid it by
-releasing higher up the post (medium: `--drop-backs 0.16`, landing +136). Two possible design fixes, for the user to choose:
+releasing higher up the post (medium: `--drop-backs 0.16`, landing +136). Two possible design fixes, for the owner to choose:
 - **Smallest: a low wooden deflector on the deck** under the finish run, in the -60..-120 deg sector about the post. The
   handle can then no longer settle under the arch.
   - It touches neither the wire nor the routes before the drop.
@@ -235,7 +235,7 @@ easier and easy and shorter for hard (1.87 vs 2.34 m: the old hard wire was long
 hard 7 vs 5. Motion phases are fewer only for easy (33 vs 42: the old easy route had many short moves). The new
 tiers' grips are forced (all-pairs analysis); the old routes' were a choice.
 
-## 6. Open questions for main / the user
+## 6. Open questions at the time
 - The instruction text should mention the insulated rest sleeves and the insulated finish post (the TASKS text is
   shared: a patch for main).
 - The deck is 0.62 x 0.45 m (released: 0.52 x 0.37) to make room for the routes.

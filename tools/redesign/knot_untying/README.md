@@ -1,6 +1,6 @@
 # knot_untying redesign: scripts
 
-Design note: `docs/rcb/redesign/knot_untying.md`. Routes per instance (flags, rows, hashes): `routes.json`.
+Design note: `docs/simulator/redesign/knot_untying.md`. Routes per instance (flags, rows, hashes): `routes.json`.
 
 - `births/<name>/`: the object-level lab start of each instance (scene_start.json, start_state.npz, lab_nodes.npz), from
   the lab's inverse generation (`topogym/planning/knot_untying/redesign/birth.py`). `<name>_r2`: the same start with
@@ -35,7 +35,7 @@ Design note: `docs/rcb/redesign/knot_untying.md`. Routes per instance (flags, ro
   targets), for the two scripts above.
 - `premade/make_premade.py <source instance dir> <out dir>` and `premade/premade_checks.py birth|nop|speed ...` (release
   noinst image, its shared tooling at /tooling): the rd bases' premade frozen instances and their checks
-  (docs/rcb/HARBOR_FREEZE_RUNBOOK.md, "Bases made elsewhere").
+  (passed to tools/release/release_rebuild.py with --instances or as the manifest's instance).
 - `region_images.py <instance.json> <out>` (release image, one GPU): a region tier's region images, the start scene from
   cam_high / cam_low with each goal region's dashed line drawn in (the scene does not draw it); the task's texts name
   them (task_rd.REGION_IMAGES), package_text/<base>-<mode>/environment/goal/ ships them.

@@ -22,7 +22,7 @@ from .held_oracle import plan_held_path
 # 62-97 mm with their inner faces at +-17.4 mm. Now the pads close parallel and reach farther: .5 gives the same opening
 # (+-17.5 mm) with the pads at hand z 64-115 mm. So the hand approaches and lets go at APPROACH_GRIP, and every grasp
 # pose is held HAND_BACKOFF_M farther back along the hand's approach axis than its design, which puts the fingertips
-# where the design had them (docs/rcb/families/hedgehog_in_cage.md, "Re-recorded on the Robotiq spring references").
+# where the design had them (docs/simulator/families/hedgehog_in_cage.md, "Re-recorded on the Robotiq spring references").
 APPROACH_GRIP, HAND_BACKOFF_M = .5, .018
 
 

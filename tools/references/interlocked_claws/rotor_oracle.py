@@ -1,5 +1,5 @@
 # Oracle code for `rcb_topogym.py run-oracle --task interlocked_claws --code <this file>` on the Rotor setting
-# (interlocked_claws_rotor; docs/rcb/families/interlocked_claws_rotor.md).
+# (interlocked_claws_rotor; docs/simulator/families/interlocked_claws_rotor.md).
 #
 # Input: rotor_plan.npz next to this file (ROTOR_PLAN overrides): per 40 Hz control step the planned joints of both arms
 # (Q: the reference route's inverse kinematics with the regrasps' re-orientations and hand motions, time-scaled to at most

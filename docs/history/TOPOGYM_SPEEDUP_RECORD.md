@@ -11,12 +11,12 @@ control steps (10-01 sweep). The speed-ups below are what made the 6 h budget mo
   about 250x in this benchmark, which measures it near rest.
 - **Scene build:** 3-11x faster (about 3-7 min down to 25-60 s).
 - **First rendered frame:** from 20+ s down to 0.03-0.3 s, thanks to the warm kernel cache.
-- **One full oracle execution** (end to end, lab) now fits the 72 min rule (20 % of 6 h) for 31 of the 33 tasks that
+- **One full oracle execution** (end to end, host L) now fits the 72 min rule (20 % of 6 h) for 31 of the 33 tasks that
   have an oracle. The exceptions are fiber hard (185 min) and buzz hard (74 min), both accepted.
 
 ## Method (same as the 10-03 benchmark)
 
-- Host: lab (TAMU, RTX PRO 6000 Max-Q, EPYC 9534).
+- Host: host L (RTX PRO 6000 Max-Q, EPYC 9534).
 - Each family's easy tier runs in a fresh container, alone on its GPU, with no network.
 - Measured:
   - `Session(...)` build time;
@@ -24,7 +24,7 @@ control steps (10-01 sweep). The speed-ups below are what made the 6 h budget mo
   - N control steps of the same small arm wave in every version: each arm joint at `hold + 0.04 sin(2 pi i / 40)`
     rad, grippers held. N is 100 for rigid families, 40 for blanket and 5 for the IPC families.
 - Reported value: the median step time.
-- Script: lab `topogym_v1/bin/bench_step.py`, run per family by `bin/bench_fam.sh`. Raw lines: lab `topogym_v1/bench/`
+- Script: `topogym_v1/bin/bench_step.py` (a work directory on host L, not in this repository), run per family by `bin/bench_fam.sh`. Raw lines: `topogym_v1/bench/` on host L
   (`old_v4.jsonl`, `new_v10.jsonl`, `new_v10_orbits.jsonl`, `new_v12.jsonl`, `new_v18.jsonl`, `new_v18g.jsonl`).
 - Versions:
   - **v4:** root v4 packages + `ghcr.io/luigivamper/rcb-topogym:0.2.5-cu128`, the 10-01 sweep version.
@@ -59,9 +59,9 @@ Reading the table:
   the BUG 7 state restore and the safety checks. claws' first frame (0.27 s) suggests its render kernels were not in
   the warm cache of this image.
 
-## End to end: one full oracle execution on lab (privileged live, min)
+## End to end: one full oracle execution on host L (privileged live, min)
 
-"Before" is the earliest full lab execution, on 10-04, already after the 10-02 round. On v4 these executions were
+"Before" is the earliest full host L execution, on 10-04, already after the 10-02 round. On v4 these executions were
 not feasible: for example rope medium, at about 2900 steps x 39 s, would have taken about 32 h. "v18" is the final
 oracle sweep of 10-05/06.
 

@@ -1,5 +1,5 @@
 """Preview sheets of the fiber_bundling redesign tiers: CPU-only offscreen renders (the soft-body redesign tooling's
-previews.render, EGL on Mesa's software device), framed on the cable and its fixtures. docs/rcb/redesign/
+previews.render, EGL on Mesa's software device), framed on the cable and its fixtures. docs/simulator/redesign/
 fiber_bundling.md. The start state by default; with --actions, the states after the given rows of a stream, replayed
 in the production Session (run it through run_registered.py then).
 

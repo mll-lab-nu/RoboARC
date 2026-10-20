@@ -14,8 +14,8 @@ usage: python3 scripts/robotangle/mk_tasks.py [--check] [--list] [--assets <dir>
             frozen instance directory ("instance") and the reference trajectory both modes replay ("reference"); the
             binding then names that instance, image and runtime (scripts/robotangle/harbor_check.sh writes dev.json)
 A MuJoCo instance (simulator.physics_engine "mujoco", known from the local instance) makes a MuJoCo task: the numpy /
-OpenBLAS SIMD masking in every container that runs a Session (docs/rcb/MUJOCO_CORE.md), render_bridge.py next to every
-copy of the tooling (its frames, docs/rcb/RENDER_BRIDGE.md) and its sha256 in the binding (render_bridge_sha256). The
+OpenBLAS SIMD masking in every container that runs a Session (docs/simulator/MUJOCO_CORE.md), render_bridge.py next to every
+copy of the tooling (its frames, docs/simulator/RENDER_BRIDGE.md) and its sha256 in the binding (render_bridge_sha256). The
 families whose MuJoCo tasks render with nyx_direct.py (NYX_DIRECT: rcb_topogym.TASKS renderer "direct") ship that file
 next to the tooling too, and its sha256 in the binding (nyx_direct_sha256).
 
@@ -59,9 +59,9 @@ VERSION = (ROOT / "images/robotangle/VERSION").read_text().strip()
 IMAGE = f"ghcr.io/mll-lab-nu/eai-robotangle:{VERSION}"
 ROBOT = {"aloha": "aloha-2", "panda_robotiq": "franka-robotiq-2f85"}
 ROBOT_WORDS = {"(aloha, Genesis)": "(ALOHA 2, Genesis)", "(panda_robotiq, Genesis)": "(Franka Panda + Robotiq 2F-85, Genesis)"}
-DOCS = [("docs/rcb/STANDARD_MODE_2_3.md", "docs/STANDARD_MODE_2_4.md"), ("docs/rcb/STANDARD_MODE_2_2.md", "docs/STANDARD_MODE_2_2.md"),
-        ("docs/rcb/benchmarks/topogym.md", "docs/benchmarks/robotangle.md"), ("docs/rcb/PROTOCOL.md", "docs/PROTOCOL.md"),
-        ("docs/rcb/TAXONOMY.md", "docs/TAXONOMY.md"), ("docs/rcb/LIMITED_MODE_PROTOCOL.md", "docs/LIMITED_MODE_PROTOCOL.md")]
+DOCS = [("docs/rcb/STANDARD_MODE_2_3.md", "docs/STANDARD_MODE_2_4.md"), ("docs/STANDARD_MODE.md", "docs/STANDARD_MODE_2_2.md"),
+        ("docs/simulator/TOPOGYM_PROTOCOL.md", "docs/benchmarks/robotangle.md"), ("docs/PROTOCOL.md", "docs/PROTOCOL.md"),
+        ("docs/TAXONOMY.md", "docs/TAXONOMY.md"), ("docs/rcb/LIMITED_MODE_PROTOCOL.md", "docs/LIMITED_MODE_PROTOCOL.md")]
 IMAGE_RX = re.compile(r"(?:[\w.-]+/)+rcb-topogym:[\w.-]+")
 EAI = ROOT / "scripts/eai_standard"
 LAYER = {"environment/rcb_client.py": EAI / "v2_4/rcb_client.py", "environment/rcb1.py": EAI / "rcb1.py",
@@ -97,7 +97,7 @@ MUJOCO_WORDS = (("(ALOHA 2, Genesis)", "(ALOHA 2, MuJoCo)"),
 
 
 def is_mujoco(rec: dict) -> bool:
-    """A base whose frozen instance runs on MuJoCo (release.json physics_engine; docs/rcb/MUJOCO_CORE.md)."""
+    """A base whose frozen instance runs on MuJoCo (release.json physics_engine; docs/simulator/MUJOCO_CORE.md)."""
     return rec.get("physics_engine") == "mujoco"
 
 
@@ -168,7 +168,7 @@ def ref_solution(mode: str, rec: dict) -> str:
     if is_mujoco(rec) and ev:
         if mode == "privileged":
             route = ("this design's oracle, recorded on MuJoCo" if rec.get("template") or rec.get("design") else
-                     "the released route re-recorded on MuJoCo with a held tail, docs/rcb/MUJOCO_CORE.md")
+                     "the released route re-recorded on MuJoCo with a held tail, docs/simulator/MUJOCO_CORE.md")
             return (f"`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `{ev['trajectory_sha256'][:16]}…`) to "
                     f"`/app/output/`: the MuJoCo reference ({route}), which the verifier scored 1 in two fresh-process "
                     f"replays on {run_words(ev)}.")
@@ -254,19 +254,19 @@ def rewrite_toml(s: str, base: str, rec: dict) -> str:
     return s
 
 
-MUJOCO_CHANGE = ("- 2026-10-10: physics moved from Genesis 1.2.1 to MuJoCo 3.14.0 (docs/rcb/MUJOCO_CORE.md, "
-                 "docs/rcb/MUJOCO_MIGRATION.md): a new frozen instance of the same scene, goal and rules, a new reference, "
+MUJOCO_CHANGE = ("- 2026-10-10: physics moved from Genesis 1.2.1 to MuJoCo 3.14.0 (docs/simulator/MUJOCO_CORE.md, "
+                 "docs/history/MUJOCO_MIGRATION.md): a new frozen instance of the same scene, goal and rules, a new reference, "
                  "the numpy / OpenBLAS SIMD masking in every container that runs a Session, and the render bridge next to "
-                 "the tooling (Nyx frames unchanged, docs/rcb/RENDER_BRIDGE.md). This task replaces `robotangle-{old}-{mode}` "
+                 "the tooling (Nyx frames unchanged, docs/simulator/RENDER_BRIDGE.md). This task replaces `robotangle-{old}-{mode}` "
                  "under PROTOCOL §2.8 (MuJoCo physics).")
 # A released base whose design changed with the port (mujoco_release.json design: one line, what changed).
-DESIGN_CHANGE = ("- {date}: physics moved from Genesis 1.2.1 to MuJoCo 3.14.0 (docs/rcb/MUJOCO_CORE.md, "
-                 "docs/rcb/MUJOCO_MIGRATION.md), and the task's design changed: {design}. A new frozen instance, task text, "
+DESIGN_CHANGE = ("- {date}: physics moved from Genesis 1.2.1 to MuJoCo 3.14.0 (docs/simulator/MUJOCO_CORE.md, "
+                 "docs/history/MUJOCO_MIGRATION.md), and the task's design changed: {design}. A new frozen instance, task text, "
                  "rules, goal and reference, the numpy / OpenBLAS SIMD masking in every container that runs a Session, and "
-                 "the render bridge next to the tooling (docs/rcb/RENDER_BRIDGE.md). This task replaces "
+                 "the render bridge next to the tooling (docs/simulator/RENDER_BRIDGE.md). This task replaces "
                  "`robotangle-{old}-{mode}` under PROTOCOL §2.8.")
 # A new base (mujoco_release.json new_bases): no released task, so no earlier change log.
-NEW_TASK = ("- {date}: new task on MuJoCo 3.14.0 (docs/rcb/MUJOCO_CORE.md): variation `{variation}` of {family}{design}. "
+NEW_TASK = ("- {date}: new task on MuJoCo 3.14.0 (docs/simulator/MUJOCO_CORE.md): variation `{variation}` of {family}{design}. "
             "Its task files start from `robotangle-{template}-{mode}`, with this design's own task text, rules and goal, "
             "its own frozen instance and its own reference.")
 
@@ -416,7 +416,7 @@ def staged(name: str, s: str, base: str) -> str:
 
 
 MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"),
-              ("OPENBLAS_CORETYPE", "Haswell"))   # docs/rcb/MUJOCO_CORE.md: the containers of a MuJoCo task
+              ("OPENBLAS_CORETYPE", "Haswell"))   # docs/simulator/MUJOCO_CORE.md: the containers of a MuJoCo task
 NYX_DIRECT = ("blanket_flatten", "blanket_fold", "buzz_wire_3d", "cast_coil", "cast_keyhole", "fiber_bundling",
               "hedgehog_in_cage", "horseshoe_ring", "interlocked_claws", "knot_untying", "lock_picking", "orbits",
               "rope_threading", "slotted_post_ring")   # rcb_topogym.TASKS renderer "direct"
@@ -435,7 +435,7 @@ def mujoco_lines(name: str, s: str, direct: bool = False) -> str:
     def sub(a: str, b: str) -> str:
         assert s.count(a) == 1, f"{name}: expected one {a!r}"
         return s.replace(a, b)
-    env = ("# MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes (docs/rcb/MUJOCO_CORE.md)\n"
+    env = ("# MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes (docs/simulator/MUJOCO_CORE.md)\n"
            "ENV " + " ".join(f"{k}={v}" for k, v in MUJOCO_ENV) + "\n")
     if name in ("environment/Dockerfile", "tests/Dockerfile") and f"FROM {IMAGE}\n" in s:
         s = sub(f"FROM {IMAGE}\n", f"FROM {IMAGE}\n" + env)

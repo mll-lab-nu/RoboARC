@@ -1,9 +1,9 @@
 # rope_threading redesign: bulkhead lacing (5 tiers, MuJoCo)
 
-Status: **design draft for the user's review** (10-11 morning). Robot-level oracles (step 4): very_easy, easier and easy
+Status: **design record** (10-11 morning). Robot-level oracles (step 4): very_easy, easier and easy
 succeed live with deterministic fresh-process replays, a failing nop, a failing old -i01 oracle and failing breakers;
 medium and hard are being re-run after the T redesign (see the packets). Agent "rope" (took the family over from the soft-body redesign
-session on 10-10 21:15). Sandbox branch `qineng-rt-redesign-rope_threading` (never pushed). Evidence and packets:
+session on 10-10 21:15). Sandbox branch (never pushed). Evidence and packets:
 the work notes.
 
 ## 1. The released tiers, and why they are too easy

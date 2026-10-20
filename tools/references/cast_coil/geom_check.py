@@ -1,5 +1,5 @@
 """cast_coil legacy tiers on MuJoCo: collision geometry and rest checks of one frozen instance (evidence for
-docs/rcb/families/cast_coil.md).
+docs/simulator/families/cast_coil.md).
 
 usage (in the image; PYTHONPATH also has scripts/roboarc/shared): python geom_check.py <instance.json> <out.json>
 

@@ -1,6 +1,6 @@
 """Scene generators of the redesigned interlocked_claws tiers (inverse generation).
 
-Every tier is generated the same way (docs/rcb/redesign/interlocked_claws.md):
+Every tier is generated the same way (docs/simulator/redesign/interlocked_claws.md):
   1. the key B (brown, the target) is a compound of boxes with grip blocks;
   2. the separated goal is B free of A; the designed insertion is a list of exact moves from that free pose
      (paths.py); the start (engaged) pose is where the insertion ends, and the disengagement is its exact reverse;

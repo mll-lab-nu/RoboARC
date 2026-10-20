@@ -2,12 +2,12 @@
 
 For porters who have their tiers and references and now need step 2 (stress acceptance) and step 4's short stress check.
 It covers the commands, the sizes, how to read the result and what to do when something breaks. The criteria and their
-reasons are in [STRESS_VALIDATION.md](STRESS_VALIDATION.md) (criteria v2.9, frozen). Written 2026-10-11 by Qineng's
+reasons are in [STRESS_VALIDATION.md](STRESS_VALIDATION.md) (criteria v2.9, frozen). Written 2026-10-11 by the
 coordinator.
 
 ## 0. What you need
 
-- **Code:** the head of `dev/robotangle_mujoco`. Pull it before every round, and run the whole round on one commit.
+- **Code:** the head of the development branch. Pull it before every round, and run the whole round on one commit.
 - **Python:** the RoboTangle MuJoCo image (built from `images/robotangle/Dockerfile.mujoco`), or any Python with
   `mujoco==3.14.0` and the repo's requirements.
   - The tools import `tools/stress/_env.py` first. It puts this checkout's `topogym` and
@@ -114,11 +114,11 @@ Per-stream tables: `python $S/verdict.py out/round_1/results/confirm`.
 5. **Prove the fix:** the reproducer now reads non-BREAKDOWN in two fresh processes, every reference stays bit-identical
    (or is re-recorded), and the round re-runs. Add the reproducer to `corpus/reproducers/` (`.npz` plus a `.json` with
    base, family, mechanism, the commit it was found on and sha256), so every later round replays it.
-6. If you are stuck, send the reproducer and its trace to Qineng.
+6. If you are stuck, send the reproducer and its trace to the maintainers.
 
 ## 5. Optional: GPU screening
 
-On a GPU you can screen many more episodes with the MJWarp port on `dev/robotangle_gpusearch` (exact diagonal
+On a GPU you can screen many more episodes with an MJWarp port (a separate GPU-search branch, not in this repository) (exact diagonal
 included). Its hits must be replayed on CPU with `replay.py`; only the CPU float64 result counts. We use this "plan B"
 for the rope and cloth families: CPU 300 per tier, plus a GPU screen of ≥ 1,000 per tier with CPU confirmations.
 
