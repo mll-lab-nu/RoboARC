@@ -1,5 +1,5 @@
 # The RoboARC release image: the published Genesis base image (RoboTangle 0.2.22, pinned by digest below) plus
-#   - the simulator source (topogym/, with the MuJoCo core topogym/world/mujoco/), pruned by prune.py:
+#   - the simulator source (topogym/, with the MuJoCo core topogym/world/mujoco/), pruned by images/topogym/prune.py:
 #     /opt/topogym/SOURCE.json is its hash, which every task's runtime binding names;
 #   - the robot assets (assets/robots/ -> /opt/topogym-assets/robots/, TOPOGYM_ASSET_ROOT);
 #   - the frozen MuJoCo instances (the named build context `instances`, one directory per task base: instance.json +
@@ -19,7 +19,9 @@
 # it belongs to the tasks' containers (agent, sim, verifier); the task generator writes it (scripts/roboarc/mk_tasks.py).
 #
 # Build: images/roboarc/build.sh (the release build, with the runtime check), which runs from source/ (this directory's
-# parent's parent; source/.dockerignore keeps the context to topogym/, assets/robots/ and the files below):
+# parent's parent; source/.dockerignore keeps the context to topogym/, assets/robots/ and the helper files the
+# recipe copies). Keep the bytes and paths of every COPY input when editing: a changed input misses the build
+# cache, and a cache-cold build writes .pyc files whose source-mtime field differs from the released image's.
 #   docker buildx build --load -f images/robotangle/Dockerfile.mujoco --build-context instances=<dir of instance bases> \
 #     -t <tag> .
 ARG BASE=ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad
@@ -31,7 +33,7 @@ RUN python -m pip install --no-cache-dir --no-deps --require-hashes -r /tmp/vbd-
  && python -c "from importlib.metadata import version as v; assert (v('newton'), v('warp-lang')) == ('1.6.1', '1.18.0')"
 RUN rm -rf /opt/topogym/topogym /opt/topogym/SOURCE.json /opt/topogym-assets/robots
 COPY topogym/ /opt/topogym/topogym/
-COPY images/robotangle/prune.py /opt/prune.py
+COPY images/topogym/prune.py /opt/prune.py
 RUN python /opt/prune.py /opt/topogym && rm /opt/prune.py && chmod -R a+rX /opt/topogym
 COPY assets/robots/ /opt/topogym-assets/robots/
 RUN chmod -R a+rX /opt/topogym-assets

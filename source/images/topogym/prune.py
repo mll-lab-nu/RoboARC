@@ -1,9 +1,8 @@
-"""Build step of the release image (Dockerfile.mujoco): keep the simulator, drop everything that could hold a solution,
-record the source hash.
+"""Build step of images/topogym: keep the simulator, drop everything that could hold a solution, record the source hash.
 
     python prune.py /opt/topogym
 
-The image is infrastructure only (docs/PROTOCOL.md §1, §4): the agent must not find a reference motion in it. Removed:
+The image is infrastructure only (docs/rcb/PROTOCOL.md §1, §4): the agent must not find a reference motion in it. Removed:
 topogym/{agents,planning,data,deferred,legacy,redundants,rollout_simulation} (scripted policies, recorded runs; also left
 out by .dockerignore) and the authoring-only `synthesize` of topogym/assets/geometry/cast_coil.py, which embeds a
 reference motion (runtime tasks build the frozen geometry from templates and never call it), with its helper

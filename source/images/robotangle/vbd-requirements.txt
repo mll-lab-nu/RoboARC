@@ -1,4 +1,4 @@
-# The VBD cloth's Python packages (docs/simulator/VBD_CLOTH.md): newton's SolverVBD on NVIDIA Warp's CPU
+# The VBD cloth's Python packages (images/robotangle/README.md, "VBD cloth"): newton's SolverVBD on NVIDIA Warp's CPU
 # backend, pinned exactly by version and wheel sha256. Dockerfile.mujoco installs them with --no-deps --require-hashes:
 # newton needs only warp-lang, and warp-lang only numpy, which the image already has.
 warp-lang==1.18.0 --hash=sha256:090962bfae7dd22ade0d8e0258f41635e0e58980f15bcc9e7a7d312819dfe440
