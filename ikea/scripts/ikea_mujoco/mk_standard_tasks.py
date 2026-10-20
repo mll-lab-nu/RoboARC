@@ -48,13 +48,6 @@ assert "(2.175, 2.175, 2.175, 2.175, 2.61, 2.61, 2.61)" in _RCB_SRC and "j: 3.14
     and '\nGRIPPER_WIDTH_SPEED_M_S = {"panda": {"actuator8": 0.1}}' in _RCB_SRC, \
     "rcb_ikea's speed table changed: update SPEEDS and the texts"
 PROTOCOL = "eai-standard/2.4"
-# Tasks that ship privileged-only (a privileged task without a standard twin): none. The tasks out of this wave in BOTH
-# modes are mk_tasks.WIP (no reference passes under the arm joint-speed clamp; P.task_dir: rendered under
-# scripts/ikea_mujoco/wip/tasks/, never under tasks/). Their standard twins render there too, without a reference. The
-# scans behind WIP (2026-10-15, fresh replays with final_check): eket, 10 retimings + the original rows on the fix-3b scene
-# with the EPA-patched MuJoCo (track at lags 0-0.3, centred, straight-line dilation) all stop before side B's slide;
-# vesken, 11 retimings (the same, plus two despike settings) all stop at 6 of the 23 snap connections.
-NO_TWIN: dict[str, str] = {}
 EVID = json.loads((HERE / "standard_evidence.json").read_text()) if (HERE / "standard_evidence.json").is_file() else {}
 
 
@@ -467,7 +460,7 @@ velocity limits ({speed_words(t, 0, True)}). The reference needs {e.get('rows', 
 time).
 
 ## Reference solution
-{f"None yet: this task is work in progress ({P.WIP[t]}); `solution/solve.sh` needs a `solution/oracle_actions.npz` that passes. " if t in P.WIP else ""}`solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
+`solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
 `Robot.submit` sends float32), so the service executes exactly those rows. {std_ref_text(t, ref)},
 so the service's speed limiter never has to act (`n_clipped` 0).
@@ -566,17 +559,8 @@ def main() -> int:
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--refs", type=pathlib.Path, default=None)
     a = ap.parse_args()
-    bad = [t for t in a.tasks if t in NO_TWIN]
-    if bad:
-        ap.error(f"{bad}: privileged-only in this wave (NO_TWIN)")
-    tasks = a.tasks or [t for t in P.default_tasks() if t not in NO_TWIN]
+    tasks = a.tasks or P.default_tasks()
     changed = []
-    for t in sorted(set(NO_TWIN) | set(P.WIP)) if not a.tasks else []:
-        dst = P.TASKS / name(t)                 # a twin-less or WIP task has no standard dir under tasks/
-        if dst.is_dir():
-            changed.append(f"{name(t)} (removed from tasks/: {'NO_TWIN' if t in NO_TWIN else 'WIP'})")
-            if not a.check:
-                shutil.rmtree(dst)
     for t in tasks:
         dst = P.task_dir(t, "standard")
         with tempfile.TemporaryDirectory() as tmp:

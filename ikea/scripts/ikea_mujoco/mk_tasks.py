@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Render the IKEA MuJoCo tasks: tasks/roboarc-ikea-<task>-i00-privileged (images/ikea-mujoco/README.md).
 
-usage: python3 scripts/ikea_mujoco/mk_tasks.py [--check] [--demos <ikea tree>/demos] [task ...]
+usage: python3 scripts/ikea_mujoco/mk_tasks.py [--check] [task ...]
   no task   every task in bindings.json
   --check   write nothing; exit 1 if a task directory would change
-  --demos   also (re)write solution/trajectory.npz from <demos>/<demo>/actions.npz (needs numpy; <demo> = the task's
-            tasks.json "demo", default the task name): the demo's ctrl rows, float64, unchanged, in the task's layout
-            (ctrl, substeps, timestep, actuators); a demo recorded at tasks.json "demo_substeps" (a multiple of 4)
-            physics steps per row has each row repeated demo_substeps / 4 times
+
+solution/trajectory.npz is the task's one reference for both modes: oracles/<task>/<task>[_ref].npz where the task has a
+closed-loop reference (CLOSED_LOOP), else the standard twin's solution/oracle_actions.npz (standard/std_reference.py).
 
 Ends with scripts/task_conventions.normalize, like every generator. Inputs (all in scripts/ikea_mujoco/):
   tasks.json     per task: title, goal, success requirements and mechanism in plain words, robot type
@@ -36,13 +35,6 @@ IMAGE = BIND["image"]["reference"]          # the one image of every task (a tas
 assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # our registry name and version (RoboARC 1.0.0)
 sys.path.insert(0, str(ROOT / "scripts"))
 import task_conventions as TC  # noqa: E402  the protocol's conventions: every generator ends with normalize(task_dir)
-# Work in progress, not shipped (owner 2026-10-16, the YAMLab rule: a task ships only with an oracle): no reference passes
-# the arm joint-speed clamp in either mode yet; each needs a new closed-loop reference. Rendered to
-# scripts/ikea_mujoco/wip/tasks/ (not tasks/, not in any manifest) so the work stays on the branch.
-WIP = {
-    # the second batch (2026-10-16): in WIP until its reference passes every acceptance gate on the final physics
-}
-WIP_TASKS = HERE / "wip" / "tasks"
 # The agent's egress (PROTOCOL §2.11, H.6): the two lines `scripts/set_agent_egress.py allowlist` writes, with that
 # script's HOSTS (read from its text: it acts on import), in both modes.
 _HOSTS = re.findall(r'"([^"]+)"', re.search(r"(?ms)^HOSTS = \[(.*?)\]", (ROOT / "scripts/set_agent_egress.py").read_text()).group(1))
@@ -51,12 +43,12 @@ EGRESS = ('network_mode = "allowlist"      # model APIs and package registries (
 
 
 def default_tasks() -> list[str]:
-    """Every task in bindings.json; the WIP ones only where their render directory exists (not on main)."""
-    return sorted(t for t in BIND["tasks"] if t not in WIP or WIP_TASKS.is_dir())
+    """Every task in bindings.json."""
+    return sorted(BIND["tasks"])
 
 
 def task_dir(t: str, mode: str = "privileged") -> pathlib.Path:
-    return (WIP_TASKS if t in WIP else TASKS) / name(t, mode)
+    return TASKS / name(t, mode)
 
 
 # Closed-loop references (built phase by phase on the final physics with true-state feedback, recorded as the executed
@@ -151,17 +143,13 @@ def ref_words(t: str):
 
 def closed_loop_ref(t: str):
     """The task's own reference file (CLOSED_LOOP or OWN_REFS), None if it has none."""
-    for d in (HERE / "oracles" / t, HERE / "wip" / "oracles" / t):      # a WIP task's reference lives under wip/oracles/
-      for f in (d / f"{t}_ref.npz", d / f"{t}.npz"):
+    d = HERE / "oracles" / t
+    for f in (d / f"{t}_ref.npz", d / f"{t}.npz"):
         if ref_words(t) and f.is_file():
             return f
     return None
 
 
-TAILS = {  # task -> what its reference's release tail (scripts/ikea_mujoco/tails/<task>.npy) does; the demo ended holding a part
-    "variera": "both grippers open and the arms hold for 0.6 s (240 rows): the demo ended with the left hand still closed on "
-               "the screwdriver, which the terminal rules' release check refuses",
-}
 EVID = json.loads((HERE / "evidence.json").read_text()) if (HERE / "evidence.json").is_file() else {}
 
 
@@ -181,12 +169,6 @@ def demo(t: str) -> str:
 
 def keyframe(t: str) -> str:
     return TEXTS["tasks"][t].get("keyframe", "home")
-
-
-def demo_repeat(t: str) -> int:
-    n = int(TEXTS["tasks"][t].get("demo_substeps", 4))
-    assert n % 4 == 0, t
-    return n // 4
 
 
 def name(t: str, mode: str = "privileged") -> str:
@@ -411,17 +393,9 @@ a better one.
 def shared_ref(t: str):
     """The standard twin's reference (solution/oracle_actions.npz, the demo time-dilated to the joint-speed limits by
     scripts/ikea_mujoco/standard/std_reference.py), which is the privileged reference too: the original demos command
-    joint targets faster than the robots' real limits and fail under the joint-speed clamp. None for a WIP task."""
-    if t in WIP:
-        return None
+    joint targets faster than the robots' real limits and fail under the joint-speed clamp. None if it is missing."""
     f = TASKS / name(t, "standard") / "solution/oracle_actions.npz"
     return f if f.is_file() else None
-
-
-def tail_text(t: str) -> str:
-    if t not in TAILS:
-        return ""
-    return (f", then a release tail of our own appended (`scripts/ikea_mujoco/tails/{t}.npy`): {TAILS[t]}")
 
 
 def ref_text(t: str, sha: str) -> str:
@@ -429,23 +403,13 @@ def ref_text(t: str, sha: str) -> str:
     if closed_loop_ref(t) is not None:
         return (head + f"the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the "
                 f"same rows): {ref_words(t)}. It never trips the speed clamp (arm joints and Franka Hand).")
-    if shared_ref(t) is not None:
-        return (head + f"the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the "
-                f"same rows): the robot demo of the IKEA MuJoCo tree (`demos/{demo(t)}/actions.npz`){tail_text(t)}, time-dilated "
+    return (head + f"the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the "
+                f"same rows): the robot demo of the IKEA MuJoCo tree (`demos/{demo(t)}/actions.npz`), time-dilated "
                 "to the robots' real joint-speed limits by `scripts/ikea_mujoco/standard/std_reference.py`"
                 + (" (each row whose gripper command steps faster than the Franka Hand's speed held until the hand reaches "
                    "it, `--grip wait`)" if gripper_speed(t) else "")
                 + ", so the speed clamp never changes a row. The demo itself commands faster than the limits and fails "
                 "under the clamp.")
-    return (head + f"the robot demo of the IKEA MuJoCo tree (`demos/{demo(t)}/actions.npz`, ctrl rows replayed open-loop from "
-            "the keyframe to success.py true), converted to this layout without changing a value "
-            f"(`scripts/ikea_mujoco/mk_tasks.py --demos`){tail_text(t)}{repeat_note(t)}.")
-
-
-def repeat_note(t: str) -> str:
-    k = demo_repeat(t)
-    return (f"; the demo's rows are {4 * k} physics steps each (the scene's tick), so each is {k} rows here" if k > 1
-            else "")
 
 
 def readme(t: str, traj: pathlib.Path) -> str:
@@ -602,7 +566,7 @@ def video_view(t: str) -> str:
     return json.dumps({k: v[k] for k in ("center", "front", "scale")}, indent=1) + "\n"
 
 
-def render(t: str, out: pathlib.Path, demos: pathlib.Path | None) -> None:
+def render(t: str, out: pathlib.Path) -> None:
     files = {"task.toml": task_toml(t), "instruction.md": instruction(t),
              "environment/Dockerfile": ENV_DOCKERFILE.format(image=image(t)["reference"]),
              "tests/Dockerfile": TESTS_DOCKERFILE.format(image=image(t)["reference"]), "tests/test.sh": test_sh(t),
@@ -617,29 +581,10 @@ def render(t: str, out: pathlib.Path, demos: pathlib.Path | None) -> None:
                      "tests/grade.py": "grade.py", "tests/render_video.py": "render_video.py"}.items():
         shutil.copyfile(SHARED / src, out / rel)
     traj = out / "solution/trajectory.npz"
-    shared = closed_loop_ref(t) or shared_ref(t)
-    if shared is not None:          # one reference for both modes: the standard twin's, within the joint-speed limits
-        shutil.copyfile(shared, traj)
-    elif demos is not None:
-        import numpy as np
-        z = np.load(demos / demo(t) / "actions.npz")
-        b = BIND["tasks"][t]
-        ctrl = np.ascontiguousarray(z["ctrl"], dtype=np.float64)
-        k = demo_repeat(t)
-        assert ctrl.shape[1] == b["nu"] and int(z["substeps"]) == 4 * k and float(z["timestep"]) == b["timestep"], t
-        assert np.array_equal(ctrl, z["ctrl"]), t
-        ctrl = np.repeat(ctrl, k, axis=0)
-        tail = HERE / "tails" / f"{t}.npy"          # a release tail appended for the terminal rules (README, TAILS)
-        if tail.is_file():
-            ctrl = np.concatenate([ctrl, np.load(tail).astype(np.float64)])
-        np.savez_compressed(traj, ctrl=ctrl, substeps=np.int64(4), timestep=np.float64(b["timestep"]),
-                            actuators=np.array(b["actuators"]))
-    else:
-        old = task_dir(t) / "solution/trajectory.npz"
-        if not old.is_file():
-            old = TASKS / name(t) / "solution/trajectory.npz"
-        if old.is_file() and old.resolve() != traj.resolve():
-            shutil.copyfile(old, traj)
+    ref = closed_loop_ref(t) or shared_ref(t)   # one reference for both modes, within the joint-speed limits
+    if ref is None:
+        raise SystemExit(f"{t}: no reference: oracles/{t}/ (CLOSED_LOOP) or {name(t, 'standard')}/solution/oracle_actions.npz")
+    shutil.copyfile(ref, traj)
     (out / "README.md").write_text(readme(t, traj))
     TC.normalize(out)
 
@@ -654,33 +599,17 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tasks", nargs="*")
     ap.add_argument("--check", action="store_true")
-    ap.add_argument("--demos", type=pathlib.Path, default=None)
     a = ap.parse_args()
     tasks = a.tasks or default_tasks()
     changed = []
     for t in tasks:
         dst = task_dir(t)
-        for mode in ("privileged", "standard"):        # a task promoted out of WIP leaves scripts/ikea_mujoco/wip/
-            old_wip = WIP_TASKS / name(t, mode)
-            if t not in WIP and old_wip.is_dir():
-                changed.append(f"{old_wip.name} (removed from {WIP_TASKS.relative_to(ROOT)})")
-                if not a.check:
-                    shutil.rmtree(old_wip)
-        stale = TASKS / name(t)
-        if t in WIP and stale.is_dir():        # a WIP task leaves tasks/ (its render lives under scripts/ikea_mujoco/wip/)
-            changed.append(f"{name(t)} (moved to {WIP_TASKS.relative_to(ROOT)})")
-            if not a.check:
-                WIP_TASKS.mkdir(parents=True, exist_ok=True)
-                if not dst.exists():
-                    shutil.move(str(stale), str(dst))
-                else:
-                    shutil.rmtree(stale)
         with tempfile.TemporaryDirectory() as tmp:
             out = pathlib.Path(tmp) / name(t)
             twin = task_dir(t, "standard")
             if twin.is_dir():           # normalize reads the twin for the README's key table
                 (pathlib.Path(tmp) / twin.name).symlink_to(twin)
-            render(t, out, a.demos)
+            render(t, out)
             if dst.is_dir() and same(out, dst):
                 continue
             changed.append(name(t))
