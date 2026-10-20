@@ -9,16 +9,16 @@ tasks/ has, PROTOCOL §2.11), or, for a run's own copy of a task, `only <hosts>`
     scripts/set_agent_egress.py public       <task dirs...>     # a run's copy with no restriction: Harbor's default, open
 
 HOSTS below is the one list, and the one switch: every task ships with it, ci_checks/check-verifier-isolation.sh requires
-exactly it of every task in tasks/, the generators and the usage gateway read it from this file's text. It is the model
+exactly it of every task in tasks/, the generator (and an external usage gateway) read it from this file's text. It is the model
 APIs (what was measured to keep Codex with a ChatGPT login, Claude Code and OpenRouter working, 2026-09-24) and
-PACKAGE_HOSTS, the package registries (owner, 2026-10-11: installing packages is part of what an agent may do): PyPI
+PACKAGE_HOSTS, the package registries (installing packages is part of what an agent may do): PyPI
 (pip contacts pypi.org for the index and files.pythonhosted.org for the files) and the apt archives the images'
 distributions name in their sources (Debian: deb.debian.org; Ubuntu: archive / security / snapshot.ubuntu.com; plain
 HTTP, which Harbor's egress control allows by the request's Host). GitHub, Hugging Face and the general web stay closed:
-that is where the benchmarks' sources, demonstrations and trained policies are (with open egress agents downloaded them,
-board 0072); registries mostly are not (the PyPI distributions that do carry a solution: PROTOCOL §2.11). To change what agents reach, edit the two lists, run `allowlist` (it rewrites the
+that is where the benchmarks' sources, demonstrations and trained policies are (with open egress agents downloaded
+them); registries mostly are not (the PyPI distributions that do carry a solution: PROTOCOL §2.11). To change what agents reach, edit the two lists, run `allowlist` (it rewrites the
 `allowed_hosts` line of every task and leaves the other lines as the generators wrote them), update the generators'
-copies of the list, and `cd tasks && harbor add --scan .`.
+copies of the list, and re-render the tasks (docs/DEVELOPING.md).
 
 A task whose author chose open egress declares it, `[metadata] network = "open"` (PROTOCOL §2, Appendix H.6): `allowlist`
 leaves such a task alone, and a runner does not narrow its copy to the gateway (`network` prints the declaration).
@@ -29,7 +29,7 @@ there), and run that copy (docs/RUNNING.md).
 `only <hosts>`: Harbor can add hosts to a task's allowlist at run time (`--allow-agent-host`) but not take any off, and
 the model APIs' hosts also serve what a trial does not get (account connectors, files, web tools). A run through the
 usage gateway therefore runs from a copy of the task whose allowlist is the gateway's address and PACKAGE_HOSTS
-(scripts/run_agent_batch.sh, GATEWAY=1; plus chatgpt.com for Codex with a ChatGPT login, whose start-up lookup needs
+(scripts/harbor/run_agent_batch.sh, GATEWAY=1; plus chatgpt.com for Codex with a ChatGPT login, whose start-up lookup needs
 it); the gateway forwards the model-API paths and refuses the rest. `only` and
 `public` take explicit directories and refuse one inside this repository's tasks/."""
 import pathlib, re, sys
