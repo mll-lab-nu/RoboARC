@@ -20,8 +20,6 @@ What it does:
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import re
 import shutil
 import sys
@@ -151,34 +149,12 @@ def _shared_sources() -> set[bytes]:
     return {p.read_bytes() for p in src.rglob("*") if p.is_file() and "__pycache__" not in p.parts} if src.is_dir() else set()
 
 
-def _frozen_topogym_tooling() -> set[str]:
-    """TopoGym (adapted): sha256 of the frozen tooling copies of the historical TopoGym packages (versioned and
-    unversioned generations, ci_checks/topogym_tooling_versions.json). They keep their bytes (check-topogym-tooling.py)
-    although scripts/eai_standard/ moved on (eai-standard/2.3), so normalize never rewrites them either."""
-    p = Path(__file__).resolve().parents[1] / "ci_checks/topogym_tooling_versions.json"
-    if not p.is_file():
-        return set()
-    frozen = json.loads(p.read_text(encoding="utf-8"))
-    out: set[str] = set()
-
-    def walk(o) -> None:
-        if isinstance(o, dict):
-            for v in o.values():
-                walk(v)
-        elif isinstance(o, str) and re.fullmatch(r"[0-9a-f]{64}", o):
-            out.add(o)
-    for key, value in frozen.items():
-        if key == "generations" or re.fullmatch(r"v\d+(?:_local_[a-z0-9_]+)?", key):
-            walk(value)
-    return out
-
-
 def normalize_text_files(task: Path) -> None:
-    shared, frozen = _shared_sources(), _frozen_topogym_tooling()
+    shared = _shared_sources()
     for f in sorted(task.rglob("*")):
         if not f.is_file() or f.suffix not in TEXT_SUFFIXES or f.name in ("task.toml", "README.md") or f.stat().st_size > 2_000_000:
             continue
-        if f.read_bytes() in shared or hashlib.sha256(f.read_bytes()).hexdigest() in frozen:
+        if f.read_bytes() in shared:
             continue
         s = read_text(f)
         if s is None:
