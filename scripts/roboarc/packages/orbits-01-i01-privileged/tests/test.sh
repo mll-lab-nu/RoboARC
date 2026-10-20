@@ -5,7 +5,7 @@
 # left there (a planted reward, a symlink) can count. rm never follows symlinks.
 rm -rf /logs/verifier/*   # verdicts from an earlier run never survive (docs/PROTOCOL.md §2.6)
 mkdir -p /logs/verifier
-python /tests/grade.py --family horseshoe_ring --instance /tests/instance.json --traj /app/output/trajectory.npz --repeat 2 \
+python /tests/grade.py --family orbits --instance /tests/instance.json --traj /app/output/trajectory.npz --repeat 2 \
   2> /logs/verifier/grade.log
 # Recover compatibility rewards if the replay process died after committing its verdict.
 python -c "import sys; sys.path.insert(0, '/tests'); from rcb_topogym import recover_reward; recover_reward('/logs/verifier')"
