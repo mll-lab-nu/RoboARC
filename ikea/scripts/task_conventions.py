@@ -141,12 +141,18 @@ def normalize_toml(task: Path) -> None:
     write_if_changed(p, s)
 
 
+# The files the standard generator copies unchanged from the repository's shared eai-standard layer (scripts/eai_standard/)
+EAI_SHARED = ("client.env", "client-requirements.txt", "rcb1.py", "run.sh")
+
+
 def _shared_sources() -> set[bytes]:
-    """Contents of the files generators copy unchanged from scripts/eai_standard/ (the eai-standard/2.2 layer, and the 2.4
-    layer in v2_4/; D9): their copies must stay byte-identical to the source (check-tooling-identity.sh), so normalize never
-    rewrites them."""
-    src = Path(__file__).resolve().parent / "eai_standard"
-    return {p.read_bytes() for p in src.rglob("*") if p.is_file() and "__pycache__" not in p.parts} if src.is_dir() else set()
+    """Contents of the files the standard generator copies unchanged (D9): IKEA's live-grading eai-standard/2.4 service
+    pair (eai_standard/v2_4_live/ here) and EAI_SHARED from the repository's scripts/eai_standard/. Their copies keep
+    their bytes, so normalize never rewrites them."""
+    here = Path(__file__).resolve().parent
+    files = [p for p in (here / "eai_standard").rglob("*") if p.is_file() and "__pycache__" not in p.parts]
+    files += [here.parents[1] / "scripts/eai_standard" / n for n in EAI_SHARED]
+    return {p.read_bytes() for p in files if p.is_file()}
 
 
 def normalize_text_files(task: Path) -> None:

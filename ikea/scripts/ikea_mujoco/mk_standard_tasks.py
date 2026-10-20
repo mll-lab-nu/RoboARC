@@ -10,14 +10,17 @@ usage: python3 scripts/ikea_mujoco/mk_standard_tasks.py [--check] [--refs <dir>]
             rule); without it, the task's existing solution/oracle_actions.npz is kept
 
 Inputs: tasks.json, assets.json, bindings.json (as mk_tasks.py), standard/rigs.json (the camera rig per task) and the files
-copied unchanged into every task:
-  scripts/eai_standard/v2_4/   rcb_limited.py (the 2.4 service layer), rcb_client.py (the agent's client)
-  scripts/eai_standard/        rcb1.py, run.sh, client-requirements.txt
-  scripts/ikea_mujoco/shared/  rcb_ikea.py (the scene runtime the service steps)
-  scripts/ikea_mujoco/standard/ server.py, ikea_rig.py, finalize.sh (the sim service), grade.py (the verifier: transcribes
-                               the live episode's final.json; no grading replay, owner 2026-10-17, board 0150/0151),
-                               oracle_replay.py (the reference solution); std_reference.py makes the references
-Images: the sim sidecar runs images/ikea-mujoco/sim (eai-ikea-mujoco + Nyx in its own venv, EGL, ffmpeg); the agent and the
+copied unchanged into every task (paths from ikea/):
+  scripts/eai_standard/v2_4_live/  rcb_limited.py (the eai-standard/2.4 service layer, IKEA's variant: the live episode's
+                                   verdict stands, no grading replay), rcb_client.py (the agent's client). The task texts
+                                   cite them as scripts/eai_standard/v2_4/, their path when the tasks were rendered
+  ../scripts/eai_standard/         rcb1.py, run.sh, client-requirements.txt (the repository's shared layer; client.env
+                                   names the client base image)
+  scripts/ikea_mujoco/shared/      rcb_ikea.py (the scene runtime the service steps)
+  scripts/ikea_mujoco/standard/    server.py, ikea_rig.py, finalize.sh (the sim service), grade.py (the verifier: transcribes
+                                   the live episode's final.json; no grading replay), oracle_replay.py (the reference
+                                   solution); std_reference.py makes the references
+Images: the sim sidecar runs images/ikea-mujoco/sim (roboarc-ikea + Nyx in its own venv, EGL, ffmpeg); the agent and the
 verifier the shared standard client base (scripts/eai_standard/client.env)."""
 from __future__ import annotations
 import argparse, json, math, pathlib, shutil, sys, tempfile
@@ -28,7 +31,8 @@ sys.path.insert(0, str(HERE))
 import mk_tasks as P  # noqa: E402  texts, bindings, the privileged runtime binding
 
 STD = HERE / "standard"
-EAI = ROOT / "scripts/eai_standard"
+EAI = ROOT.parent / "scripts/eai_standard"             # the repository's shared layer (TC.EAI_SHARED)
+EAI_LIVE = ROOT / "scripts/eai_standard/v2_4_live"     # IKEA's live-grading 2.4 service pair
 TC = P.TC
 IMAGE = P.IMAGE
 SIM_IMAGE = f"ghcr.io/embodied-first-exam/roboarc-ikea-sim:{(ROOT / 'images/ikea-mujoco/sim/VERSION').read_text().strip()}"
@@ -530,9 +534,9 @@ def render(t: str, out: pathlib.Path, refs: pathlib.Path | None) -> None:
         p.write_text(s)
         if rel.endswith(".sh"):
             p.chmod(0o755)
-    copies = {"environment/rcb_client.py": EAI / "v2_4/rcb_client.py", "environment/rcb1.py": EAI / "rcb1.py",
+    copies = {"environment/rcb_client.py": EAI_LIVE / "rcb_client.py", "environment/rcb1.py": EAI / "rcb1.py",
               "environment/client-requirements.txt": EAI / "client-requirements.txt",
-              "environment/sim/rcb_limited.py": EAI / "v2_4/rcb_limited.py", "environment/sim/rcb1.py": EAI / "rcb1.py",
+              "environment/sim/rcb_limited.py": EAI_LIVE / "rcb_limited.py", "environment/sim/rcb1.py": EAI / "rcb1.py",
               "environment/sim/run.sh": EAI / "run.sh", "environment/sim/rcb_ikea.py": P.SHARED / "rcb_ikea.py",
               "environment/sim/server.py": STD / "server.py", "environment/sim/ikea_rig.py": STD / "ikea_rig.py",
               "environment/sim/finalize.sh": STD / "finalize.sh", "tests/grade.py": STD / "grade.py",
