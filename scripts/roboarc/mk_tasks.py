@@ -4,12 +4,17 @@
 task.toml's `difficulty`.
 
 usage: python3 scripts/roboarc/mk_tasks.py [--check] [--list] [--assets <dir>] [base ...]
+       python3 scripts/roboarc/mk_tasks.py --dev <dev.json> --out <dir> base ...
   no base   every base in release.json
   --check   write nothing; exit 1 if a task would change, or if an identity check fails
   --list    print the bases with their evidence
   --assets  a local copy of the pinned HF dataset (the instances/<base>/ layout, scripts/roboarc/assets.py fetch): also
             check the frozen instances' bytes against the runtime bindings (without it, the pins in assets.json are
             compared)
+  --dev     task dirs of a locally built image, written to --out (never tasks/; scripts/roboarc/harbor_check.py
+            --instances): dev.json names the image ("image": reference, id; "runtime" and "uipc_builds" as its
+            installed_runtime() reports them) and, per base, a local frozen instance directory ("instance") and the
+            reference trajectory both modes replay ("reference")
 
 A task dir is: the package's texts with their fields filled in, the pinned tooling and graders, the runtime binding,
 the reference solution, then scripts/task_conventions.normalize (the protocol's shared sections) and the DIGEST.
@@ -74,6 +79,8 @@ MAX_STEPS = 200000        # rcb_topogym.MAX_STEPS (RCB_MAX_STEPS): the runaway g
 MAX_CALL_WALL_S = 900     # v2_4/rcb_limited.MAX_CALL_WALL_S (RCB_MAX_CALL_WALL_S): no compose file overrides it
 CHUNK_S, WATCH_S = 10, 30  # the sim service's RCB_MAX_CHUNK_S / RCB_MAX_WATCH_S defaults
 BUILD_ALLOWANCE_S = 1800  # scene build, kernel compilation and video encoding inside the verifier's timeout
+MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"),
+              ("OPENBLAS_CORETYPE", "Haswell"))   # every container that runs a Session (docs/simulator/MUJOCO_CORE.md)
 sha = lambda b: hashlib.sha256(b).hexdigest()  # noqa: E731
 
 # Agent egress (owner, 2026-10-10 / 10-11): the model APIs and the package registries, the two lines
@@ -420,6 +427,9 @@ def check_texts(base: str, mode: str, rec: dict, texts: dict[str, str]) -> None:
                 and not re.search(r"(?m)^\s*runtime: nvidia$", s), f"{where}/{name}: one GPU, no `runtime: nvidia`"
         if name in ("environment/Dockerfile", "tests/Dockerfile") and mode == "privileged":
             assert ("nyx_direct.py" in s) == (fam in DIRECT) and "render_bridge.py" in s, f"{where}/{name}: tooling files"
+            assert "ENV " + " ".join(f"{k}={v}" for k, v in MUJOCO_ENV) + "\n" in s, f"{where}/{name}: no SIMD masking"
+        if name == "environment/docker-compose.yaml" and mode == "standard":
+            assert all(f"      {k}: {v}\n" in s for k, v in MUJOCO_ENV), f"{where}/{name}: the sim service has no SIMD masking"
 
 
 # ---------------------------------------------------------------- the task dir
@@ -458,6 +468,22 @@ def binding(base: str, inst_dir: pathlib.Path | None, direct: bool) -> bytes:
     return (json.dumps(lock, indent=2) + "\n").encode()
 
 
+def dev_binding(inst_dir: pathlib.Path, dev: dict, direct: bool) -> bytes:
+    """--dev: the binding of a local frozen instance (canonical sha256, every asset's sha256) to the dev image's runtime
+    and identity, with the same keys as binding()."""
+    inst = json.loads((inst_dir / "instance.json").read_text())
+    canon = json.dumps(inst, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    assets = {p.relative_to(inst_dir).as_posix(): sha(p.read_bytes()) for p in sorted((inst_dir / "instance_assets").rglob("*"))
+              if p.is_file() and "__pycache__" not in p.parts}
+    lock = dict(schema_version=1, instance_sha256=sha(canon.encode()), asset_files=assets,
+                tooling_sha256=sha((SHARED / "rcb_topogym.py").read_bytes()), creation_source=inst["topogym_source"],
+                runtime=dev["runtime"], image=dev["image"], uipc_builds=dev["uipc_builds"],
+                render_bridge_sha256=sha((SHARED / "render_bridge.py").read_bytes()))
+    if direct:
+        lock["nyx_direct_sha256"] = sha((SHARED / "nyx_direct.py").read_bytes())
+    return (json.dumps(lock, indent=2) + "\n").encode()
+
+
 def put(dst: pathlib.Path, data: bytes, exe: bool = False) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst.write_bytes(data)
@@ -478,11 +504,12 @@ def goal_images(up: pathlib.Path, t: pathlib.Path, instruction: str, dockerfile:
         put(t / GOAL_DIR / p.name, p.read_bytes())
 
 
-def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None) -> list[pathlib.Path]:
+def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, dev: dict | None = None) -> list[pathlib.Path]:
     rec = REL["bases"][base]
     assert rec.get("physics_engine") == "mujoco", f"{base}: every base of {BENCH} is a MuJoCo base (release.json physics_engine)"
     direct = rec["family"] in DIRECT
-    lock = binding(base, inst_src, direct)
+    lock = binding(base, inst_src, direct) if dev is None else dev_binding(inst_src, dev, direct)
+    reference = pathlib.Path(dev["bases"][base]["reference"]) if dev else None
     tool = (SHARED / "rcb_topogym.py").read_bytes()
     extra = [("render_bridge.py", (SHARED / "render_bridge.py").read_bytes())] + \
             ([("nyx_direct.py", (SHARED / "nyx_direct.py").read_bytes())] if direct else [])
@@ -503,7 +530,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None) -
                 for n, b in extra:
                     put(t / d / n, b)
             put(t / "tests/grade.py", (SHARED / "privileged/grade.py").read_bytes())
-            traj = ORC / base / "privileged.npz"
+            traj = reference or ORC / base / "privileged.npz"
             if traj.is_file():
                 put(t / "solution/trajectory.npz", traj.read_bytes())
                 put(t / "solution/solve.sh", (
@@ -521,7 +548,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None) -
                 put(t / "environment/sim" / n, b)
             put(t / "tests/grade.py", (SHARED / "standard/grade.py").read_bytes())
             put(t / "tests/runtime_binding.json", lock)
-            traj = ORC / base / "standard.npz"
+            traj = reference or ORC / base / "standard.npz"
             if traj.is_file():
                 with zipfile.ZipFile(traj) as z:
                     put(t / "solution/oracle_qpos.npy", z.read("actions.npy"))
@@ -556,12 +583,35 @@ def snapshot(d: pathlib.Path) -> dict:
             for p in sorted(d.rglob("*")) if p.is_file()}
 
 
+def dev_main(a) -> int:
+    """--dev: render the named bases from dev.json into --out (local only; never tasks/, nothing checked against
+    release.json's instance pins). The texts name the dev image."""
+    global IMAGE
+    if a.out is None or not a.bases or a.check or a.assets:
+        raise SystemExit("--dev needs --out and the bases, and takes neither --check nor --assets")
+    dev = json.loads(a.dev.read_text())
+    resolve = lambda v: (a.dev.parent / v).resolve()  # noqa: E731  (dev.json paths: absolute, or relative to dev.json)
+    dev["bases"] = {b: {k: str(resolve(v)) for k, v in r.items()} for b, r in dev["bases"].items()}
+    IMAGE = dev["image"]["reference"]
+    a.out.mkdir(parents=True, exist_ok=True)
+    for b in a.bases:
+        for m in ("privileged", "standard"):
+            shutil.rmtree(a.out / f"{BENCH}-{b}-{m}", ignore_errors=True)
+        for t in render(b, a.out, pathlib.Path(dev["bases"][b]["instance"]), dev):
+            print(f"dev task {t}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true"); ap.add_argument("--list", action="store_true")
     ap.add_argument("--assets", type=pathlib.Path, help="a local copy of the pinned HF dataset (assets.py fetch)")
+    ap.add_argument("--dev", type=pathlib.Path, help="dev.json: task dirs of a locally built image (see usage)")
+    ap.add_argument("--out", type=pathlib.Path, help="with --dev: where the dev task dirs go")
     ap.add_argument("bases", nargs="*")
     a = ap.parse_args(argv)
+    if a.dev is not None:
+        return dev_main(a)
     bases = a.bases or sorted(REL["bases"])
     if a.list:
         for b in bases:
