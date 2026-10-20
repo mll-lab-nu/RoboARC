@@ -122,4 +122,7 @@ the ids 5d5090ea1910 and 050cd45d70f6.
 repository's paths and carry no internal notes, `[task].name` is `roboarc/<dir>`, and the IKEA tasks moved from
 `ikea/tasks/` to `tasks/` onto the repository's task layer (`ikea/scripts/task_conventions.py` and
 `ikea/scripts/set_agent_egress.py` removed). The pinned tooling, the graders' and the sim services' logic, the frozen
-instances, the references, the IKEA scenes and the images are those of 1.0.0.
+instances, the references, the IKEA scenes and the images are those of 1.0.0, except the monitor sidecar's image:
+`ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0@sha256:ea1b0d4b859998d6a47e2cb7a72c3a9ae85870b32c75de1bc1448e387da07093`, built by RoboARC from
+`images/monitor/` (reproducibly; its five layers have the diff ids of the 1.0.0 pin `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f5…`,
+whose package RoboARC does not control; the config adds three OCI labels).

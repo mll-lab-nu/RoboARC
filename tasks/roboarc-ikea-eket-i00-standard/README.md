@@ -96,8 +96,9 @@ Mitres, keyholes, dowels and back grooves are contact. The four frame joints (we
   and its `[task].name` is `roboarc/<dir>` (it was `robot-coding-bench/<dir>`). For the agent: the instruction's closing
   sections are the shared ones (`## External material`, `## Resource limits`, `## Time limit`); the network allowlist
   adds the package registries (PyPI, the Debian / Ubuntu archives) that `## External material` already named (the
-  repository's one list, `scripts/set_agent_egress.py` `HOSTS`); a resource-monitor sidecar records the trial's
-  resources (a limit fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`); the agent's container gets the
+  repository's one list, `scripts/set_agent_egress.py` `HOSTS`); a resource-monitor sidecar (its image
+  `ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0`, images/monitor/) records the trial's resources (a limit
+  fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`); the agent's container gets the
   declared caps. The task declares its compute resources, limits and seeds, and has a `DIGEST`; its texts cite this
   repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
   runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not

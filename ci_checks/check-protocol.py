@@ -15,7 +15,7 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REGISTRY = ("ghcr.io/embodied-first-exam/", "ghcr.io/mll-lab-nu/efe:")   # the RoboARC image; the resource monitor (by digest)
+REGISTRY = ("ghcr.io/embodied-first-exam/",)   # RoboARC's images: the simulator, IKEA's two, the resource monitor
 sys.path.insert(0, str(ROOT / "scripts"))
 import task_conventions as tc  # noqa: E402  (the mode registry, PROTOCOL §2.16)
 # the `protocol` values each mode may declare: standard 2.1 / 2.2 / 2.4 (2.4: the operations capability),
@@ -89,7 +89,7 @@ def check_task(task: Path) -> None:
 
     for ref in image_refs(task):
         if ref.startswith("ghcr.io/") and not ref.startswith(REGISTRY):
-            warn("base image outside the registry (`ghcr.io/embodied-first-exam/<name>` or the shared `ghcr.io/mll-lab-nu/efe:<name>-<tag>`, PROTOCOL §2.4)", f"{name}: {ref}")
+            warn("base image outside the registry (`ghcr.io/embodied-first-exam/<name>`, PROTOCOL §2.4)", f"{name}: {ref}")
 
     if (task / "results").exists():
         warn("results/ in a task directory (results are published on the results site, PROTOCOL D3)", name)

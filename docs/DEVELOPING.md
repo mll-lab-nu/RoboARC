@@ -87,9 +87,11 @@ ikea/images/ikea-mujoco/build.sh             # the two IKEA images
 `images/roboarc/build.sh` builds `source/images/robotangle/Dockerfile.mujoco` from `source/` with the frozen instances
 as a named build context, checks every instance file against `scripts/roboarc/assets.json`, and checks that the image
 installs the runtime every task is bound to (`scripts/roboarc/release.json` `runtime`). It needs about 25 GB of disk
-([images/roboarc/README.md](../images/roboarc/README.md)). The monitor sidecar (`images/monitor/`) is not rebuilt:
-every task pins its published digest (`scripts/rcb_monitor/inject.py` `IMAGE`). `images/roboarc/push.sh` pushes a
-verified build (each local tag must be its expected image id; the registry token on stdin only).
+([images/roboarc/README.md](../images/roboarc/README.md)). `images/roboarc/push.sh` pushes a verified
+build (each local tag must be its expected image id; the registry token on stdin only). The monitor sidecar's image
+is built reproducibly by `images/monitor/build.sh` (an OCI archive whose manifest digest every task pins,
+`scripts/rcb_monitor/inject.py` `IMAGE`) and pushed byte for byte by `images/monitor/push.sh`
+([images/monitor/README.md](../images/monitor/README.md)).
 
 ## Cutting a release
 
