@@ -29,7 +29,7 @@ that holds it in this repository.
 |---|---|
 | `images/roboarc/Dockerfile`, `images/topogym/` | the release image's recipe: [`source/images/robotangle/Dockerfile.mujoco`](../../source/images/robotangle/Dockerfile.mujoco), built from `source/` by `images/roboarc/build.sh`; the Vulkan ICD and EGL vendor files come from its base image, whose recipe is `images/roboarc/Dockerfile.genesis-0.2.22` |
 | `images/robotangle/Dockerfile` | the base image's recipe, `images/roboarc/Dockerfile.genesis-0.2.22` (the libuipc builds: `images/roboarc/README.md`) |
-| `images/roboarc/stage_instance.py` | `/opt/robotangle/stage_instance.py` in the base image; its source is kept in `images/roboarc/` |
+| `images/roboarc/stage_instance.py` | `/opt/robotangle/stage_instance.py` in the base image; `images/roboarc/stage_instance.py` holds the same bytes |
 | `images/topogym/prune.py` | [`source/images/topogym/prune.py`](../../source/images/topogym/prune.py) |
 | `images/robotangle/mujoco-3.14.0-epa/` | [`source/images/robotangle/mujoco-3.14.0-epa/`](../../source/images/robotangle/mujoco-3.14.0-epa/), notes in [`docs/simulator/MUJOCO_EPA_PATCH.md`](../simulator/MUJOCO_EPA_PATCH.md) |
 
