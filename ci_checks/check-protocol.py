@@ -15,32 +15,12 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REGISTRY = ("ghcr.io/embodied-first-exam/", "ghcr.io/mll-lab-nu/efe:")   # RoboARC; the shared monitor and base by digest
+REGISTRY = ("ghcr.io/embodied-first-exam/", "ghcr.io/mll-lab-nu/efe:")   # the RoboARC image; the resource monitor (by digest)
 sys.path.insert(0, str(ROOT / "scripts"))
 import task_conventions as tc  # noqa: E402  (the mode registry, PROTOCOL §2.16)
 # the `protocol` values each mode may declare: standard 2.1 / 2.2 / 2.4 (2.4: the operations capability, issue #89),
 # standard-realtime 2.3 (the realtime capability, §4b), privileged none
 MODE_PROTOCOLS = {m: set(d["protocols"]) for m, d in tc.MODE_REGISTRY.items()}
-# Tasks a benchmark exports with its own service inside (PROTOCOL §4c): each such benchmark keeps a manifest,
-# scripts/<bench>/exported.toml, that lists the directories (`[[tasks]] name`) and the protocol(s) each mode serves
-# (`[protocols]`, a string or a list); a listed directory may declare one of its manifest's protocols for its mode. No
-# per-benchmark table here.
-def _own_protocols() -> dict[str, dict[str, set[str]]]:
-    out: dict[str, dict[str, set[str]]] = {}
-    for man in sorted((ROOT / "scripts").glob("*/exported.toml")):
-        d = tomllib.loads(man.read_text())
-        protos = {m: {p} if isinstance(p, str) else set(p) for m, p in d.get("protocols", {}).items()}
-        for t in d.get("tasks", []):
-            out[t["name"]] = protos
-    return out
-
-
-OWN_PROTOCOLS = _own_protocols()
-
-
-def own_protocols(name: str, mode: str | None) -> set[str]:
-    """The protocols a benchmark's own exported task may declare instead (empty: not such a task)."""
-    return OWN_PROTOCOLS.get(name, {}).get(mode or "", set())
 
 
 PERSONAL_PATH = re.compile(rb"/(home|Users)/[A-Za-z0-9_.-]+/")
@@ -87,15 +67,12 @@ def check_task(task: Path) -> None:
     if name.endswith("-realtime") and not name.endswith("-standard-realtime") or mode == "realtime":
         warn("mode name `realtime` / `-realtime` (the third mode is `standard-realtime`, PROTOCOL D12)", name)
     proto = meta.get("protocol")
-    if proto is not None and proto in own_protocols(name, mode):
-        pass                                   # PROTOCOL §4c: the benchmark's own protocol
-    else:
-        for m in {mode, named} & set(tc.MODES):
-            allowed = MODE_PROTOCOLS[m]
-            if allowed and proto not in allowed:
-                warn(f"{m}-mode `protocol` not in {sorted(allowed)}", f"{name} ({proto})")
-            if not allowed and proto is not None:
-                warn(f"`protocol` set on a {m} task", name)
+    for m in {mode, named} & set(tc.MODES):
+        allowed = MODE_PROTOCOLS[m]
+        if allowed and proto not in allowed:
+            warn(f"{m}-mode `protocol` not in {sorted(allowed)}", f"{name} ({proto})")
+        if not allowed and proto is not None:
+            warn(f"`protocol` set on a {m} task", name)
 
     oracle = meta.get("oracle")
     if oracle is None:

@@ -4,13 +4,13 @@
 A rule that reads compose files or task.toml by pattern can go blind without anyone noticing: the trailing comment that
 scripts/rcb_monitor/inject.py writes after `volumes:` once hid every volume of the agent's container from
 check-verifier-isolation.sh, and all checks stayed green on a task whose agent container mounted the simulator's trusted
-volume (review of 2026-10-10, M5). This script copies a few real tasks into a temporary directory, breaks each copy in one
+volume (found in a review). This script copies a few real tasks into a temporary directory, breaks each copy in one
 way a rule exists for, and requires that the rule's check fails with the rule's message -- and that the unbroken copy
 passes. A mutation that passes is a blind rule: fix the check, not this list.
 
     python3 ci_checks/check-ci-selftest.py [--tier invariants|advisory|all]    # default: all. Standard library only.
 
-Two tiers (board 0124). `--tier invariants` (the required CI job `invariants`, ci_checks/run_invariants.sh): the
+Two tiers. `--tier invariants` (the required CI job `invariants`, ci_checks/run_invariants.sh): the
 mutations of the rules that enforce docs/PROTOCOL.md Appendix H; each must FAIL its check. `--tier advisory` (the job
 `advisories`): the mutations of the advisory rules; each must still be reported (a finding, not blocking).
 """
@@ -30,7 +30,6 @@ POINTERS = [sys.executable, str(ROOT / "ci_checks/check-agent-pointers.py")]
 IDENTITY = ["bash", str(ROOT / "ci_checks/check-tooling-identity.sh")]   # repo-level: runs on a tasks directory (see main)
 CUTOFFS = [sys.executable, str(ROOT / "ci_checks/check-cutoffs.py")]
 SEEDS = [sys.executable, str(ROOT / "ci_checks/check-seeds.py")]
-REALTIME = [sys.executable, str(ROOT / "ci_checks/check-realtime.py")]
 VIDEO = [sys.executable, str(ROOT / "ci_checks/check-video.py")]
 TWINS = [sys.executable, str(ROOT / "ci_checks/check-twins.py")]              # repo-level-ish: reads the twin next to it
 INSTANCE = ["bash", str(ROOT / "ci_checks/check-instance-copies.sh")]
@@ -43,14 +42,10 @@ FIELDS = ["bash", str(ROOT / "ci_checks/check-task-fields.sh")]
 INVARIANT_CMDS = (ISOLATION, POINTERS, TWINS, INSTANCE, STDIMG, MONITOR, DIGESTS)
 WITH_NEIGHBOURS = (IDENTITY, TWINS)   # run on the broken copy among (links to) every other task
 
-# RoboARC repository: the mutations run on RoboARC tasks; those written for features no RoboARC task has (a trusted cache
-# volume, standard-realtime, open egress, another benchmark's leak hook or shared files) stay in the shared repository
-RP_LEAK = None
+# the fixtures: real RoboARC tasks, copied and broken one way each
 STD = "roboarc-orbits-02-i01-standard"         # a standard task: the agent container and the sim sidecar
 PRIV = "roboarc-orbits-02-i01-privileged"      # its privileged twin
 HEAVY = "roboarc-knot-untying-07-i01-standard"  # an allowlist; a GPU sidecar
-OTHER = None                                    # the shared repository's other fixtures (RT, DTB, MJ, MWP, TWIN_P, OPEN, RP)
-RT = DTB = DTB_P = MJ = MWP = MWP_P = TWIN_P = OPEN = RP = OTHER
 
 
 def sub(pattern: str, repl: str, count: int = 1, flags: int = re.M):
@@ -99,31 +94,28 @@ NO_TRAP = sub(r"^(trap .*EXIT.*\n)", r"\1trap - EXIT\n")       # the resource st
 MUTATIONS = [
     # ---- the agent's container and the trusted volumes (the M5 class: every way of writing the same mount)
     ("the agent container mounts the sim's trusted volume (short form, under the generated `volumes:   # rcb-monitor`)",
-     STD, COMPOSE, in_service("main", "      - rcb_behavior_cache_trusted:/cache", VOL), ISOLATION, "mounts trusted volume"),
+     STD, COMPOSE, in_service("main", "      - rcb_sim_cache_trusted:/cache", VOL), ISOLATION, "mounts trusted volume"),
     ("... long form (type: volume / source:)",
-     STD, COMPOSE, in_service("main", "      - type: volume\n        source: rcb_behavior_cache_trusted\n        target: /cache", VOL),
+     STD, COMPOSE, in_service("main", "      - type: volume\n        source: rcb_sim_cache_trusted\n        target: /cache", VOL),
      ISOLATION, "mounts trusted volume"),
     ("... long form, source first",
-     STD, COMPOSE, in_service("main", "      - source: rcb_behavior_cache_trusted\n        target: /cache\n        type: volume", VOL),
+     STD, COMPOSE, in_service("main", "      - source: rcb_sim_cache_trusted\n        target: /cache\n        type: volume", VOL),
      ISOLATION, "mounts trusted volume"),
     ("... quoted",
-     STD, COMPOSE, in_service("main", '      - "rcb_behavior_cache_trusted:/cache:ro"', VOL), ISOLATION, "mounts trusted volume"),
+     STD, COMPOSE, in_service("main", '      - "rcb_sim_cache_trusted:/cache:ro"', VOL), ISOLATION, "mounts trusted volume"),
     ("... with the service line and the volumes line carrying other comments",
-     STD, COMPOSE, lambda s: in_service("main", "      - rcb_behavior_cache_trusted:/cache   # cache", r"^    volumes:.*$")(
+     STD, COMPOSE, lambda s: in_service("main", "      - rcb_sim_cache_trusted:/cache   # cache", r"^    volumes:.*$")(
          sub(r"^  main:\s*$", "  main:   # the agent's container")(s)), ISOLATION, "mounts trusted volume"),
     ("... through volumes_from",
      STD, COMPOSE, in_service("main", "    volumes_from: [sim]"), ISOLATION, "`volumes_from` is not allowed"),
     ("an inline volumes list (which the reader would have to guess at) with the trusted volume",
      STD, COMPOSE, lambda s: sub(r"^      - rcb_limits:/run/rcb-limits:ro.*\n", "")(
-         sub(r"^  main:\n((?:    .*\n)*?)    volumes:.*$", r"  main:\n\1    volumes: [rcb_limits:/run/rcb-limits:ro, rcb_behavior_cache_trusted:/cache]")(s)),
+         sub(r"^  main:\n((?:    .*\n)*?)    volumes:.*$", r"  main:\n\1    volumes: [rcb_limits:/run/rcb-limits:ro, rcb_sim_cache_trusted:/cache]")(s)),
      ISOLATION, "mounts trusted volume"),
     ("a volume entry the reader does not understand is a failure, not skipped",
      STD, COMPOSE, in_service("main", "      - *shared_cache", VOL), ISOLATION, "not understood"),
     ("a sidecar mounts a volume that is not *_trusted",
      STD, COMPOSE, in_service("sim", "      - shared_scratch:/scratch", VOL), ISOLATION, "which is not a *_trusted volume"),
-    ("the verifier mounts a volume that is not *_trusted",
-     PRIV, TEST_COMPOSE, sub(r"rcb_behavior_cache_trusted:/cache", "rcb_behavior_cache:/cache"), ISOLATION,
-     "the verifier mounts rcb_behavior_cache"),
     # ---- the agent's container reaches the task's trusted files or the host
     ("the agent container bind-mounts the sidecar's code",
      STD, COMPOSE, in_service("main", "      - ./sim:/sim:ro", VOL), ISOLATION, "bind-mounts ./sim"),
@@ -153,7 +145,7 @@ MUTATIONS = [
     ("the allowlist opens another host",
      HEAVY, TOML, sub(r'allowed_hosts = \["chatgpt\.com"', 'allowed_hosts = ["github.com", "chatgpt.com"'), ISOLATION,
      "allowed_hosts differs from scripts/set_agent_egress.py"),
-    # ---- review round 3, M4: a service with its own network setting is outside Harbor's egress control (the allowlist)
+    # ---- a service with its own network setting is outside Harbor's egress control (the allowlist)
     ("the agent container on a network of its own (`networks:`): the allowlist no longer applies to it",
      HEAVY, COMPOSE, in_service("main", "    networks: [default]"), ISOLATION, "service main: `networks` is not allowed"),
     ("... `network_mode: bridge`", HEAVY, COMPOSE, in_service("main", "    network_mode: bridge"), ISOLATION, "service main: `network_mode` is not allowed"),
@@ -161,34 +153,16 @@ MUTATIONS = [
     ("a top-level networks block", STD, COMPOSE, append("networks:\n  default:\n    driver: bridge\n"), ISOLATION, "top-level `networks` is not allowed"),
     ("a task drops its allowlist (PROTOCOL §2.11: one host list, in every task)",
      HEAVY, TOML, sub(r'^network_mode = "allowlist".*\nallowed_hosts = .*\n', ""), ISOLATION, '[agent].network_mode must be "allowlist"'),
-    ("... a task of a benchmark that was open until 2026-10-10",
-     TWIN_P, TOML, sub(r'^network_mode = "allowlist".*\nallowed_hosts = .*\n', ""), ISOLATION, '[agent].network_mode must be "allowlist"'),
-    ("a task that declares open egress but sets an allowlist of its own in [agent]",
-     OPEN, TOML, sub(r'^\[agent\]\n', '[agent]\nnetwork_mode = "allowlist"\nallowed_hosts = ["pypi.org"]\n'), ISOLATION,
-     "sets another network policy"),
-    ("a task without an allowlist that does not declare open egress (the default is the allowlist)",
-     OPEN, TOML, sub(r'^network = "open".*\n', ""), ISOLATION, '[agent].network_mode must be "allowlist"'),
-    ("a network declaration that is neither the allowlist nor open",
-     OPEN, TOML, sub(r'^network = "open"', 'network = "any"'), ISOLATION, "[metadata] network = 'any'"),
     ("the instruction no longer states the external-material rule",
      STD, "instruction.md", sub(r"(?ms)^## External material\n.*?(?=^## )", ""), RESOURCES, "does not state `## External material`"),
-    ("the frozen instance the agent reads names where its scene came from",
-     PRIV, "environment/instance.json", sub(r"^\{", '{"source_url": "https://example.org/demos/data/manifest.json", ', count=1, flags=0),
-     POINTERS, "key `source_url` locates upstream material"),
-    ("... names the recording its reference replays",
-     PRIV, "environment/instance.json", sub(r"^\{", '{"source": {"file": "demos/boxing_books_017.hdf5", "demo": 3}, ', count=1, flags=0),
-     POINTERS, "file `boxing_books_017.hdf5` locates upstream material"),
-    ("... names the demonstration its scene was restored from (the reference replays that demonstration's actions)",
-     PRIV, "environment/instance.json", sub(r"^\{", '{"demo": "boxing_books_demo_17", ', count=1, flags=0),
-     POINTERS, "id `demo` locates upstream material"),
-    ("... in a string member of a numpy archive the agent reads (DexJoCo's instance.npz `meta`, board 0105)",
+    ("... in a string member of a numpy archive the agent reads (an instance archive's `meta`)",
      PRIV, "+environment/extra.npz", lambda s: npz_text("meta.npy", '{"source": "x", "demo": "water_plant_demo_10_2026"}'),
      POINTERS, "environment/extra.npz[meta.npy]:1: id `demo`"),
     ("a step with a network policy of its own (Harbor would let it override [agent])",
      STD, TOML, append('\n[[steps]]\nname = "s1"\n[steps.agent]\nnetwork_mode = "public"\n'), ISOLATION, "a step sets its own network policy"),
     ("the instruction links the upstream repository",
-     STD, "instruction.md", append("\nThe benchmark's code: https://github.com/StanfordVL/BEHAVIOR-1K\n"), POINTERS,
-     "URL `https://github.com/StanfordVL/BEHAVIOR-1K` locates upstream material"),
+     STD, "instruction.md", append("\nThe benchmark's code: https://github.com/example-org/upstream-benchmark\n"), POINTERS,
+     "URL `https://github.com/example-org/upstream-benchmark` locates upstream material"),
     ("the instruction states the external-material rule in other words",
      STD, "instruction.md", sub(r"This is an honour rule; trials are reviewed\.", "Do as you like."), RESOURCES,
      "does not state `## External material`"),
@@ -245,34 +219,25 @@ MUTATIONS = [
      STD, "README.md", sub(r"^(\| Agent time budget \| )\d+ s;", r"\g<1>28800 s;"), CUTOFFS, "README.md's `Agent time budget` row does not say"),
     ("the sim service is told another wall clock than the task's cutoff",
      STD, COMPOSE, sub(r'(RCB_WALL_CLOCK_S: ")\d+', r"\g<1>3600"), CUTOFFS, "RCB_WALL_CLOCK_S = 3600, the task's cutoff is"),
-    ("the sim service is not told the wall clock (it would report its code's default)",
-     MWP, COMPOSE, sub(r"^ *RCB_WALL_CLOCK_S:.*\n", ""), CUTOFFS, "does not give the sim service RCB_WALL_CLOCK_S"),
-    # ---- review round 3, M5: a variable in a volume source, the top level of the file, files by another road
+    # ---- a variable in a volume source, the top level of the file, files by another road
     ("the sim's trusted volume as the default of a variable",
-     STD, COMPOSE, in_service("main", "      - ${RCB_CACHE_VOL:-rcb_behavior_cache_trusted}:/cache", VOL), ISOLATION, VAR),
+     STD, COMPOSE, in_service("main", "      - ${RCB_CACHE_VOL:-rcb_sim_cache_trusted}:/cache", VOL), ISOLATION, VAR),
     ("the sidecar's code as the default of a variable", STD, COMPOSE, in_service("main", "      - ${RCB_SIM_DIR:-./sim}:/sim:ro", VOL), ISOLATION, VAR),
     ("... `${X-../tests}`", STD, COMPOSE, in_service("main", "      - ${X-../tests}:/t:ro", VOL), ISOLATION, VAR),
     ("a path after a variable", STD, COMPOSE, in_service("main", "      - ${PWD}/sim:/sim:ro", VOL), ISOLATION, VAR),
     ("a variable that is not the runner's (Harbor's own: the task's environment directory)",
      STD, COMPOSE, in_service("main", "      - ${CONTEXT_DIR}:/ctx:ro", VOL), ISOLATION, VAR),
-    ("a variable inside a volume's name", STD, COMPOSE, in_service("main", "      - rcb_${B:-behavior}_cache_trusted_${E:-}x:/cache", VOL), ISOLATION, VAR),
+    ("a variable inside a volume's name", STD, COMPOSE, in_service("main", "      - rcb_${B:-sim}_cache_trusted_${E:-}x:/cache", VOL), ISOLATION, VAR),
     ("... long form",
-     STD, COMPOSE, in_service("main", "      - type: volume\n        source: ${V:-rcb_behavior_cache_trusted}\n        target: /cache", VOL), ISOLATION, VAR),
+     STD, COMPOSE, in_service("main", "      - type: volume\n        source: ${V:-rcb_sim_cache_trusted}\n        target: /cache", VOL), ISOLATION, VAR),
     ("... inline list",
      STD, COMPOSE, lambda s: sub(r"^      - rcb_limits:/run/rcb-limits:ro.*\n", "")(
-         sub(r"^  main:\n((?:    .*\n)*?)    volumes:.*$", r"  main:\n\1    volumes: [rcb_limits:/run/rcb-limits:ro, '${V:-rcb_behavior_cache_trusted}:/cache']")(s)),
+         sub(r"^  main:\n((?:    .*\n)*?)    volumes:.*$", r"  main:\n\1    volumes: [rcb_limits:/run/rcb-limits:ro, '${V:-rcb_sim_cache_trusted}:/cache']")(s)),
      ISOLATION, VAR),
-    ("... in the verifier's compose file", PRIV, TEST_COMPOSE, sub(r"^      - \$\{RCB_BEHAVIOR_DATA:\?[^}]*\}", "      - ${RCB_BEHAVIOR_DATA:-../solution}"), ISOLATION, VAR),
-    ("two names for one volume (top-level `name:`): the agent's volume is the sim's trusted one",
-     STD, COMPOSE, lambda s: in_service("main", "      - agent_scratch:/cache", VOL)(s).replace(
-         "  rcb_behavior_cache_trusted:\n", "  rcb_behavior_cache_trusted:\n    name: shared_kit_cache\n  agent_scratch:\n    name: shared_kit_cache\n"),
-     ISOLATION, "is not a bare name"),
     ("... `external:`", STD, COMPOSE, lambda s: in_service("main", "      - agent_scratch:/cache", VOL)(s) + "  agent_scratch:\n    external: true\n",
      ISOLATION, "is not a bare name"),
     ("a top-level volume that binds the sidecar's code (driver_opts)",
      STD, COMPOSE, lambda s: in_service("main", "      - agent_view:/sim", VOL)(s) + "  agent_view:\n    driver_opts:\n      type: none\n      o: bind\n      device: ${PWD}/sim\n",
-     ISOLATION, "is not a bare name"),
-    ("... in the verifier's compose file", PRIV, TEST_COMPOSE, sub(r"^  rcb_behavior_cache_trusted:\n", "  rcb_behavior_cache_trusted:\n    name: rcb_kit_cache\n"),
      ISOLATION, "is not a bare name"),
     ("the reference solution as a secret of the agent container",
      STD, COMPOSE, lambda s: in_service("main", "    secrets: [sol]")(s) + "secrets:\n  sol:\n    file: ../solution/solve.sh\n", ISOLATION, "service main: `secrets` is not allowed"),
@@ -287,49 +252,24 @@ MUTATIONS = [
     ("the kernel's OOM killer switched off for a container", STD, COMPOSE, in_service("sim", "    oom_kill_disable: true"), ISOLATION, "`oom_kill_disable` is not allowed"),
     # ---- pinned images in every stage and file; the verifier's log directory emptied, not a look-alike of it
     ("a second, unpinned stage in the verifier's Dockerfile", STD, TEST_DF, append("FROM python:latest\nCOPY --from=0 /tests /tests\n"), DOCKERFILE, "must be a pinned registry image"),
-    ("a sidecar image whose tag is a variable", STD, COMPOSE, sub(r"^(    image: ghcr\.io/mll-lab-nu/eai-behavior):\S+", r"\1:${TAG:-latest}"), DOCKERFILE, "must be pinned"),
     ("tests/test.sh removes only a look-alike of the verifier's logs",
      STD, TEST_SH, sub(r"^rm -rf /logs/verifier/\*", "rm -rf /logs/verifier/*.bak"), ISOLATION, "must empty /logs/verifier"),
-    # ---- review round 3, M6: benchmarks without a generator check mode (one task hand-edited, its digest refreshed)
-    ("DexToolBench: one task's grader edited", DTB, "tests/grade.py", append("# drift\n"), IDENTITY, "dextoolbench: 2 versions of standard tests/grade.py"),
-    ("... its service", DTB, "environment/sim/server_mj.py", append("# drift\n"), IDENTITY, "environment/sim/server_mj.py differs from images/mujoco/limited/server_mj.py"),
-    ("... its client", DTB, "environment/rcb_client.py", append("# drift\n"), IDENTITY, "dextoolbench: 2 versions of standard environment/rcb_client.py"),
-    ("... its tooling module", DTB_P, "tests/rcb_dtb.py", append("# drift\n"), IDENTITY, "dextoolbench: 2 versions of rcb_dtb.py"),
-    ("... tests/test.sh without the resource step", DTB_P, TEST_SH, NO_TRAP, IDENTITY, "dextoolbench: 2 versions of privileged tests/test.sh"),
-    ("MuJoCo Playground (ALOHA): the same service edited", MJ, "environment/sim/server_mj.py", append("# drift\n"), IDENTITY, "dextoolbench: 2 versions of standard environment/sim/server_mj.py"),
-    ("MetaWorld+: one task's service edited", MWP, "environment/sim/server_mw.py", append("# drift\n"), IDENTITY, "environment/sim/server_mw.py differs from images/metaworld/standard/server_mw.py"),
-    ("... its grader", MWP_P, "tests/grade.py", append("# drift\n"), IDENTITY, "metaworldplus: 2 versions of privileged tests/grade.py"),
-    ("... its tooling module", MWP, "environment/sim/mw_tool.py", append("# drift\n"), IDENTITY, "metaworldplus: 2 versions of mw_tool.py"),
-    ("... tests/test.sh without the resource step", MWP, TEST_SH, NO_TRAP, IDENTITY, "metaworldplus: 2 versions of standard tests/test.sh"),
-    ("RoboTwin: a privileged task's tests/test.sh without the resource step", TWIN_P, TEST_SH, NO_TRAP, IDENTITY, "robotwin_2_0: 2 versions of privileged tests/test.sh"),
-    ("... its grader", TWIN_P, "tests/grade.py", append("# drift\n"), IDENTITY, "robotwin_2_0: 2 versions of privileged tests/grade.py"),
+    # ---- shared sources (D9): one version of each shared file, the eai-standard/2.4 layer as in scripts/eai_standard/
+    ("one standard task's client edited", STD, "environment/rcb_client.py", append("# drift\n"), IDENTITY,
+     "differs from scripts/eai_standard/v2_4/rcb_client.py"),
+    ("one privileged task's grader edited", PRIV, "tests/grade.py", append("# drift\n"), IDENTITY,
+     "2 versions of privileged tests/grade.py"),
+    ("one task's tooling module edited", PRIV, "tests/rcb_topogym.py", append("# drift\n"), IDENTITY,
+     "2 versions of rcb_topogym.py"),
     # ---- caps and minimums (PROTOCOL §2.10)
-    ("a sidecar's memory cap below the verifier phase's declared minimum (the kernel would kill it at a cap the task itself says is too low)",
-     HEAVY, None, {TOML: sub(r"^(sim = \{ cpus = [0-9.]+, memory_gb = )[0-9.]+", r"\g<1>20.0"),
-                   COMPOSE: sub(r"^    mem_limit: \d+m(   # rcb-monitor)$", r"    mem_limit: 20480m\1")},
-     RESOURCES, "verifier_min_memory_gb 22.0 > the memory cap of the sidecar"),
-    ("the CPU minimum above the CPU caps of all services together",
-     RT, TOML, sub(r"^min_cpus = [0-9.]+", "min_cpus = 9.0"), RESOURCES, "min_cpus 9.0 > the CPU caps of all services together 8"),
     ("a declared cap that docker does not apply",
      STD, COMPOSE, sub(r"^    mem_limit: \d+m(   # rcb-monitor)$", r"    mem_limit: 1024m\1"), RESOURCES, "declare the cap that is applied"),
-    # ---- seeds (PROTOCOL §2.13): the runner draws the seed; no other seed's instance where the agent's image is built
-    ("the default seed is not among the allowed ones",
-     TWIN_P, TOML, sub(r"^allowed = \[.*\]$", "allowed = [12345]"), SEEDS, "is not in seeds.allowed"),
-    ("an allowed seed without its frozen instance",
-     TWIN_P, TOML, sub(r"^allowed = \[(.*)\]$", r"allowed = [\1, 12345]"), SEEDS, "has no frozen instance"),
-    ("another seed's instance in the agent's build context",
-     TWIN_P, "+environment/seeds/7/instance.json", append("{}"), SEEDS, "a `seeds` directory where the agent's image"),
-    # PROTOCOL §2: scene dynamics, the task's own declaration (no table)
-    ("a task.toml without dynamics",
-     TWIN_P, TOML, sub(r'^dynamics = .*\n', ""), FIELDS, "[metadata].dynamics must be declared"),
     # ---- Appendix H.7: twins share cutoff, seeds and frozen instance; H.3: no simulator in the agent's image; H.1: the
-    # monitor's own isolation and the sanitize step; H.8: DIGEST; H.2: a benchmark's own leak hook
+    # monitor's own isolation and the sanitize step; H.8: DIGEST
     ("a standard task whose cutoff is not its privileged twin's", STD, TOML,
      sub(r"(^\[agent\]\n(?:(?!\[).*\n)*?timeout_sec = )[0-9.]+", r"\g<1>1234.0"), TWINS, "the twins have the same cutoff"),
     ("a standard task whose allowed seeds are not its privileged twin's", STD, TOML,
      sub(r"^allowed = \[(.*)\]$", r"allowed = [\1, 12345]"), TWINS, "differ from its privileged twin's"),
-    ("the verifier's frozen instance is not the one the task runs from", PRIV, "tests/instance.json",
-     sub(r"^\{", '{"x": 1, ', count=1, flags=0), INSTANCE, "differ, or one is missing"),
     ("a standard task's agent image takes the sidecar's code", STD, "environment/Dockerfile",
      append("COPY sim/ /opt/sim/\n"), STDIMG, "name files outside sim/ only"),
     ("the monitor sidecar gets a network", STD, COMPOSE, sub(r"^    network_mode: none\n", ""), MONITOR,
@@ -338,25 +278,6 @@ MUTATIONS = [
      sub(r"^.*rcb_limits\.py sanitize /app/output.*\n", ""), MONITOR, "no `rcb_limits.py sanitize /app/output` line"),
     ("a task file changed without its DIGEST", PRIV, "README.md", append("\nedited\n"), DIGESTS,
      "a DIGEST that is not the digest of the task's current files"),
-    ("a RoboPaint agent image gets a file derived from the target", RP, "+environment/target_strokes.json", append("{}"),
-     RP_LEAK, "not an allowed agent-side file"),
-    # PROTOCOL §4b: a standard-realtime task declares its slowdown S and its reset budget, and they agree
-    ("a standard-realtime task.toml whose slowdown is not its service's",
-     "humanoidbench-loco-walk-i00-standard-realtime", TOML, sub(r"^slowdown = [0-9.]+", "slowdown = 2"), REALTIME,
-     "but its service's default is 1"),
-    ("a standard-realtime service whose reset budget is not the one its instruction states",
-     "humanoidbench-loco-walk-i00-standard-realtime", COMPOSE, sub(r"RCB_RESET_BUDGET:-50\}", "RCB_RESET_BUDGET:-7}"),
-     REALTIME, "instruction.md states 50 resets, but the task's reset budget is 7"),
-    ("a standard-realtime service that declares no reset budget",
-     "humanoidbench-loco-walk-i00-standard-realtime", COMPOSE, sub(r"^\s*RCB_RESET_BUDGET:.*\n", ""), REALTIME,
-     "must declare its reset budget"),
-    # PROTOCOL §4 (board 0136): every graded trial leaves a replay video
-    ("a privileged verifier that renders no video", DTB_P, "tests/grade.py", sub(r"\.mp4\b", ".bin", count=0), VIDEO,
-     "its verifier renders no replay video"),
-    ("a standard task whose sim video is not collected", "humanoidbench-loco-walk-i00-standard", TOML,
-     sub(r'^\s*\{ source = "/data/replay\.mp4", service = "sim" \},\n', ""), VIDEO, "the sim's video is never collected"),
-    ("a video time bound shorter than the verdict replay's", MWP_P, "+tests/grading.json",
-     append('{"replay_timeout_s": 1400, "video_timeout_s": 300}'), VIDEO, "shorter than the verdict replay's 1400 s"),
 ]
 
 
@@ -402,21 +323,6 @@ def twin_cutoffs(tmp: Path) -> int:
         print(f"check-ci-selftest: a task's own cutoff ({sec} s) rendered by normalize and accepted alone, refused next to its "
               "privileged twin")
     return bad
-
-# not applicable here (see above): a mutation of another benchmark's fixture, or of a feature RoboARC tasks do not have
-NOT_HERE = {   # BEHAVIOR's trusted cache volume and data mount, a task-local instance.json, a sidecar image tag of its own,
-            # a verifier minimum above the sidecar cap (RoboARC tasks stage their instance from the image)
-    'the verifier mounts a volume that is not *_trusted',
-    'the frozen instance the agent reads names where its scene came from',
-    '... names the recording its reference replays',
-    "... names the demonstration its scene was restored from (the reference replays that demonstration's actions)",
-    "... in the verifier's compose file",
-    "two names for one volume (top-level `name:`): the agent's volume is the sim's trusted one",
-    'a sidecar image whose tag is a variable',
-    "a sidecar's memory cap below the verifier phase's declared minimum (the kernel would kill it at a cap the task itself says is too low)",
-    "the verifier's frozen instance is not the one the task runs from",
-}
-MUTATIONS = [m for m in MUTATIONS if isinstance(m[1], str) and m[1].startswith("roboarc-") and m[0] not in NOT_HERE]
 
 
 def main(argv: list[str]) -> int:

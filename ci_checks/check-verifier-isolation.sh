@@ -20,7 +20,7 @@
 # namespaces, volumes_from ...), no published port on a sidecar, the agent's container binds only directories the
 # runner names through an environment variable (never the task's own ./sim, ../tests, ../solution or a docker socket),
 # beacons read-only; standard modes: the verifier's evidence is collected from a sidecar, never from `main`.
-# Review round 3 (M4, M5) closed four ways around these rules, all of them green before:
+# Four ways around these rules that a review found (all of them green before) are closed:
 # - a service with `networks:` or `network_mode:` is one Harbor's egress control leaves alone (harbor 0.23
 #   docker.py _egress_controlled_service_names routes only services without either key through the allowlist): not
 #   allowed on any service but the generated rcb_monitor (`network_mode: none`, ci_checks/check-monitor.py);

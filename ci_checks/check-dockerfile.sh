@@ -2,7 +2,7 @@
 # ADVISORY (docs/PROTOCOL.md §1: images pinned for reproducibility; the frozen instance's hash check backs it up at run
 # time): every FROM of environment/Dockerfile and tests/Dockerfile (every stage) is a registry image with an explicit,
 # non-`latest` tag or digest, and so is every compose `image:` (environment/ and tests/). Moved here from
-# check-verifier-isolation.sh (board 0124): a pin is reproducibility, not the trust boundary.
+# check-verifier-isolation.sh: a pin is reproducibility, not the trust boundary.
 t="$1"; python3 - "$t" <<'PY'
 import pathlib, re, sys
 t = pathlib.Path(sys.argv[1]); rc = 0

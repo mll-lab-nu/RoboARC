@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
-# ADVISORY helper (docs/PROTOCOL.md §5: world-frame information in the texts is decided per benchmark, consistent within
-# it). A benchmark that declares "no world coordinates in the standard tasks' texts" (its docs/benchmarks/<bench>.md,
-# "World-frame information") runs this from its own hook, scripts/<bench>/ci/advisory-world-frame.sh, with its directory
-# prefix; shared CI names no benchmark (board 0124). Such a benchmark's standard tasks never say WHERE things are in the
-# world: no object poses or positions and no world coordinates of workspace items (table / sheet heights, sheet or well
-# centres, a pixel-to-world formula, a camera's distance to the scene), in anything that describes the task:
-# instruction.md, README.md, the task.toml description. Names, inventories, categories, sizes, colours and a detailed goal
-# are provided; so are the robot (its base pose included), camera calibration and world conventions ("the floor is the
-# plane z = 0" defines a world frame and stays). Only what a pattern can see is checked; a review covers the rest.
+# ADVISORY check (docs/PROTOCOL.md §5; docs/benchmarks/roboarc.md, "Standard mode, world frame, network"): the standard
+# tasks' texts never say WHERE things are in the world: no object poses or positions and no world coordinates of
+# workspace items (table heights, a pixel-to-world formula, a camera's distance to the scene), in anything that describes
+# the task: instruction.md, README.md, the task.toml description. Names, inventories, categories, sizes, colours and a
+# detailed goal are provided. Coordinates right after `base`, `origin` or `robot` are not flagged (the definition of the
+# agent's robot frame); RoboARC's texts state no robot base pose and no table height either, which the review covers.
+# Only what a pattern can see is checked. run_all.sh runs it with `--prefix roboarc-`.
 # Usage: check-world-frame-texts.sh --prefix <dir prefix> <task dirs...>   (the -standard ones with the prefix are checked)
 set -uo pipefail
 [ "${1:-}" = --prefix ] && [ $# -ge 2 ] || { echo "usage: check-world-frame-texts.sh --prefix <dir prefix> <task dirs...>"; exit 2; }
@@ -28,7 +26,7 @@ PATTERNS = [
     ("camera scale on the scene", re.compile(r"per\s+pixel\s+on\b", re.I)),
 ]
 ALLOWED_BEFORE = {"coordinates": re.compile(r"base|origin|robot", re.I),        # the robot's own pose stays
-                  "height / plane": re.compile(r"floor", re.I),                   # BEHAVIOR: the floor z = 0 defines the frame
+                  "height / plane": re.compile(r"floor", re.I),                   # "the floor is z = 0" defines a frame
                   "workspace height": re.compile(r"floor", re.I)}
 texts = {}
 for f in ("instruction.md", "README.md"):

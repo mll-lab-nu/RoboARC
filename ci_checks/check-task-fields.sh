@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ADVISORY. task.toml: name matches folder, required metadata (docs/PROTOCOL.md §1, §2, docs/TAXONOMY.md), deliverable
-# dir, agent timeout cap (14400 s for every task), the task's declared scene dynamics (no central table, board 0124).
+# dir, agent timeout cap (14400 s for every task), the task's declared scene dynamics (no central table).
 t="$1"; python3 - "$t" "$(cd "$(dirname "$0")/.." && pwd)" <<'PY'
 import sys, tomllib, pathlib
 t = pathlib.Path(sys.argv[1]); d = tomllib.load(open(t / "task.toml", "rb")); rc = 0

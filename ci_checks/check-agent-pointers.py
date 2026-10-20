@@ -11,16 +11,16 @@ files this check refuses:
   3. the name of a demonstration or dataset file (FILES): `*.hdf5`, `*.mcap`, `*.parquet`, `*.rlds`, a Hugging Face
      `datasets/<org>/<name>` id;
   4. a key that names the demonstration or episode a file was made from (IDS): `"demo": "<demo id>"`, `demo_id`,
-     `episode_id`, `source_demo`, ... (board 0105: DexJoCo's instance.npz `meta` named the demonstration whose actions
-     are the reference solution).
+     `episode_id`, `source_demo`, ... (an instance archive's `meta` that names the demonstration whose actions are the
+     reference solution).
 Binary files are skipped except numpy archives (`.npz`, a zip of `.npy` members): their string members (`<U`, `S`) and
 any text member are read and scanned like a text file (the members' names are reported as `file.npz[member]`); numeric
 members are not read past their header. Images and other binaries are skipped.
 A legitimate mention (a licence notice that must name its source) is listed in ALLOW with its reason. The egress
-allowlist is what stops a download; this check keeps the address out of the task. Board 0072: RoboTangle's
-`reference_scene.json` carried `source_url` of the upstream demonstration, and one trial downloaded and replayed it.
-That file was in the simulator image, which this check cannot read: an image's own files are reviewed when the image
-is built (docs/LEAKAGE.md).
+allowlist is what stops a download; this check keeps the address out of the task. (In an earlier release a scene file
+carried `source_url` of the upstream demonstration, and one trial downloaded and replayed it.) Files inside the
+simulator image are out of this check's reach: an image's own files are reviewed when the image is built
+(docs/LEAKAGE.md).
 
 Usage: check-agent-pointers.py [task dirs...]   (default: all of tasks/*)
 """
@@ -41,10 +41,7 @@ IDS = re.compile(r"""["']((?:source_|reference_)?(?:demo|demo_id|demo_name|demon
                              episode_name|trajectory_id|recording|recording_id))["']\s*:\s*["']""", re.I | re.X)
 FILES = re.compile(r"""(?<![\w.-])(?:[\w.-]+\.(?:hdf5|h5|mcap|parquet|rlds|tfrecord)\b|datasets/[\w.-]+/[\w.-]+)""", re.I)
 # (task-name regex, path regex, matched-text regex, reason)
-ALLOW = [
-    (r"^maniguard-", r"^environment/instance/NOTICE$", r"datasets/IDEAS-Lab-Northwestern/ManiGuard-Bench|github\.com/NU-IDEAS-Lab/ManiGuard",
-     "CC BY-NC 4.0 attribution the licence requires, of the scene files' dataset (its demonstrations are other datasets, not named)"),
-]
+ALLOW: list[tuple[str, str, str, str]] = []   # none today
 
 
 def agent_files(task: pathlib.Path):

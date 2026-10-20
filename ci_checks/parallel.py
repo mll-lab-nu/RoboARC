@@ -9,7 +9,7 @@ and all N ran to completion with exit 0 -- an incomplete run fails, never passes
 --advisory (the CI job `advisories`): a command that exits non-zero is a warning, not a failure (exit 3 is the
 convention for "warnings only"; an advisory check that exits 1 is reported the same way); its `FAIL` lines are printed
 as `WARN`, as GitHub annotations (`::warning ::`, when GITHUB_ACTIONS is set) and appended to the file
-$RCB_ADVISORIES_OUT if set (ci_checks/pr_overview.py --advisories puts them in the pull request's overview). Exit 3
+$RCB_ADVISORIES_OUT if set. Exit 3
 when there was any warning, else 0.
 
 A line `@lane:<name> <command>` puts the command in a lane: the commands of one lane run one after another (in their

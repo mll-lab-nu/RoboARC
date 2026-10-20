@@ -16,7 +16,7 @@ if git -C "$root" ls-files --error-unmatch tasks/dataset.toml >/dev/null 2>&1; t
   echo "FAIL tasks/dataset.toml is tracked: it is generated for a release (scripts/dataset_manifest.py write), not committed (git rm --cached tasks/dataset.toml)"; exit 1
 fi
 # Every directory under tasks/ that holds a tracked file is a task: it has its task.toml. Every other check skips a
-# directory without one, so a half-deleted task (36 DIGEST-only dirs were left on main by a merge, board 0121 m3) would pass
+# directory without one, so a half-deleted task (a DIGEST-only directory left behind by a merge) would pass
 # them all. Always over the whole of tasks/ (git's index: cheap).
 orphans=$(git -C "$root" ls-files -- tasks | python3 -c 'import sys
 files = {l.rstrip("\n") for l in sys.stdin}
