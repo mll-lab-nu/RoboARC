@@ -14,6 +14,7 @@ not carried over: this repository starts with a fresh history.
 | `dev/robotangle_mujoco` (same commit): IKEA MuJoCo | `5cb4114f109d229963df1c95e7750fab7527e452` | 2026-10-19 05:23 -0500 | `ikea/tasks/ikea-*` (24), `ikea/scripts/ikea_mujoco/`, `ikea/images/ikea-mujoco/`, `ikea/docs/benchmarks/ikea_mujoco.md`, and the shared layer they render with: `ikea/scripts/task_conventions.py`, `ikea/scripts/set_agent_egress.py`, `ikea/scripts/eai_standard/`, `ikea/ci_checks/topogym_tooling_versions.json` |
 | the release commit named in `scripts/roboarc/release.json` (`release_commit`) | `67ed48da8514eb3cb95c2d5b64cc8639125d6b7a` | 2026-10-18 12:49 -0500 | an ancestor of 5cb4114f10. Its simulator source, robot assets and image helpers are byte-identical to `source/` (the only later change in those paths is orbits-02's `dynamics` line in `source/scripts/robotangle/package_text/`). The task READMEs name it as "simulator source `67ed48da8`" |
 | main before the rewrite | `19dcad58b5691b93d95646dd26a6115e69b2925f` | 2026-10-19 00:59 -0700 | the release history in CHANGELOG.md (0.1.0: #186 / #187, 0.2.0: #301) |
+| TopoGym's `dev/robotangle_mujoco` (the development line), synced on branch `dev/jianwen` on 2026-10-20 | `497a9e9d7f630c40bc315a01795a8a4beec5e7f7` | 2026-10-20 01:45 -0500 | the five new task settings and what they need in `source/topogym/`, `source/scripts/robotangle/` and `source/scripts/topogym_rules.py`; five new docs in `docs/families/`; `source/docs/MUJOCO_CORE.md`'s task mechanisms. Merged per file onto 1.0.0: "Sync of 2026-10-20" below |
 
 ## External inputs (pinned)
 
@@ -81,3 +82,30 @@ not carried over: this repository starts with a fresh history.
   41a17481d67a (`sha256:3810470b…`, `sha256:5f70bf18…`), so the filesystem is identical. The config differs only in
   the new labels.
 - Strict fresh-process replays and Harbor oracle / nop runs on the new tag: see CHANGELOG.md, 1.0.0, Evidence.
+
+## Sync of 2026-10-20 (branch `dev/jianwen`)
+
+TopoGym's development line `dev/robotangle_mujoco` at `497a9e9d7f` carried onto 1.0.0 in the layout above (the same
+path map as the 1.0.0 assembly), for a later merge into main.
+
+- **Base:** `a3cce97cf304f4b6d297ec3243974e1f8777791c` (2026-10-16), the newest commit that line shares with the shared
+  repository's `dev/robotangle_mujoco` as last fetched there (`7bdb86da29`, 2026-10-17). 5cb4114f10 itself is not in
+  the TopoGym repository. Mapped onto this layout, the base's files differ from 1.0.0's only where 1.0.0 changed them
+  after the base: 33 files in `source/topogym/planning/` (V3 and hygiene), 75 in `source/scripts/robotangle/`, 10 in
+  `docs/families/`, 9 in `source/docs/`, 6 in `source/images/robotangle/`, `source/.dockerignore`. `source/assets/robots/`,
+  `prune.py`, `topogym_rules.py` and the rest of `source/topogym/` are byte-identical to the base.
+- **Rule, per file:** a file only the development line changed since the base takes its bytes; a file only 1.0.0 changed
+  keeps 1.0.0's; a file both changed is merged three-way (six files: `mujoco_release.json`, `release_rebuild.py`,
+  `shared/nyx_direct.py`, `package_text/interlocked_claws/README.md`, `stress/corpus/SHA256SUMS`,
+  `source/docs/MUJOCO_CORE.md`; none conflicted). The development line changed nothing under `ikea/` since the base:
+  IKEA stays as released.
+- **Kept 1.0.0's** where the development line only carried an older parallel edit of a released task's text:
+  `package_text/cast_coil/cast-coil-06-i01-standard/instruction.md` (the released 0.047 s per control step).
+- **Not carried:** `docs/rcb/handover/` (as in 1.0.0); `images/topogym/uipc-sm86/` (the prebuilt pyuipc wheel and its
+  build record; the recipe is `source/images/robotangle/uipc-sm86-build/`); `tests/` of the TopoGym repository.
+- **Hygiene** as in item 8 on the added documents and records (a lab RTX 4090 host, a cloud host, `<host work dir>`). Code
+  keeps its text.
+- **No task directories** for the new bases yet: they come with a release rebuild (`release_rebuild.py`, instances in the
+  image, `scripts/roboarc/release.json`, `mk_tasks.py`).
+- Checks: the 72 added or changed Python files compile (Python 3.12); the changed JSON files parse;
+  `scripts/roboarc/mk_tasks.py --check`: 202 task dirs match a fresh render.
