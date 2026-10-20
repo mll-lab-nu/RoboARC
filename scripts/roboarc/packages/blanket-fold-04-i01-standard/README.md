@@ -1,18 +1,18 @@
-# topogym-blanket-fold-04-i01-standard
+# roboarc-blanket-fold-04-i01-standard
 
 | | |
 |---|---|
-| Benchmark | TopoGym |
-| Mode | standard (`eai-standard/2.3`) |
-| Twin | `topogym-blanket-fold-04-i01-privileged` |
+| Benchmark | RoboARC |
+| Mode | standard (`eai-standard/2.4`) |
+| Twin | `roboarc-blanket-fold-04-i01-privileged` |
 | Simulator / robot | `topogym` / `aloha` |
 | Family / instance | `blanket_fold` / seed 0 |
 | Oracle | `none` — No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol §2.7). |
 | Agent time budget | 21600 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `labv19/rcb-topogym:0.2.17-dev-cu128` |
+| Base image | `{{IMAGE}}` |
 
 ## Task
-Standard-mode twin of `topogym-blanket-fold-04-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.3` client
+Standard-mode twin of `roboarc-blanket-fold-04-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.4` client
 (docs/rcb/STANDARD_MODE_2_2.md); the simulator runs in the `sim` sidecar (`environment/docker-compose.yaml`, GPU on the
 sidecar), which owns the scene and records the episode as a (T, 14) trajectory; its collect hook
 (`environment/sim/finalize.sh`) replays the trajectory once in a fresh process for success, rendering the video during
@@ -20,13 +20,15 @@ that replay. The verifier runs in a separate sandbox (`tests/Dockerfile`) over t
 the privileged task to measure the cost of losing resets, privileged state and the tooling's primitives.
 
 ## Difficulty
-Same scene, instance and success rule as `topogym-blanket-fold-04-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
+Same scene, instance and success rule as `roboarc-blanket-fold-04-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-See `solution/`.
+{{REFERENCE_SOLUTION}}
 
 ## Verification
 See `tests/grade.py`.
+
+{{NOP}}
 
 ## Details
 
@@ -55,12 +57,18 @@ The target images: `/app/goal/target_cam_high.png` (seen from the overhead camer
 - The blanket is 0.6 m x 0.48 m. Heights are measured at the cloth particles' centres.
 - The release clearance is measured from one box around all cloth particles, grown by 8 mm: every robot collision box must stay at least 5 mm from it, i.e. at least 13 mm outside the cloth's bounding box, above its highest point too.
 - Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region.
-- Grading: success needs the live episode to succeed (with the thresholds above) AND one fresh-process replay of its rows to succeed; a live failure is final whatever the replay shows. This family's physics runs on the GPU, which is not bit-deterministic, so that replay can differ slightly from the live episode: it runs the rows with the thresholds above and, if the episode has not ended after the last row, holds the final targets for up to 2 s (80 control steps), stopping at the first success or failure, so a confirmation that starts a few physics ticks later than in the live episode can still complete; during that hold it accepts a blanket coverage of 92% instead of 95% and cloth speeds up to 80 mm/s instead of 30 mm/s (the displacement limit during the confirmation stays). Nothing else is relaxed: every other condition, the failure conditions and the confirmation time are the same.
+- Grading: success needs the live episode to succeed (with the thresholds above) AND one fresh-process replay of its rows to succeed; a live failure is final whatever the replay shows. Its cloth step runs on the GPU on a deterministic solver and the rest on the CPU (MuJoCo, float64), so that replay reproduces the live episode on the same host; the rule is kept as a margin: it runs the rows with the thresholds above and, if the episode has not ended after the last row, holds the final targets for up to 2 s (80 control steps), stopping at the first success or failure, so a confirmation that starts a few physics ticks later than in the live episode can still complete; during that hold it accepts a blanket coverage of 92% instead of 95% and cloth speeds up to 80 mm/s instead of 30 mm/s (the displacement limit during the confirmation stays). Nothing else is relaxed: every other condition, the failure conditions and the confirmation time are the same.
 
 | | |
 |---|---|
 | mode | standard (RGB, optional depth, proprioception, calibrated cameras, no reset) |
-| action space | `eai-standard/2.3`: `submit` chunks of `joint_position` (14, streamed at the 40 Hz control rate with the agent's `dt`) or `ee_pose` (16, IK per row); `observe` frames or a watch window; binary RCB1 responses |
-| oracle | none yet (`oracle = "none"`, no `solution/`) |
-| verification | `success` = live success ∧ replay success: the live episode, then one fresh-process replay in the sidecar's collect hook, after the live service has exited; the state hashes are reported, not required (GPU physics is not bit-deterministic; the CPU rigid families' is, on one host); `/logs/verifier/replay.mp4` is rendered during that replay; after a live success it is a grading replay (tooling v19): if this GPU family's episode has not ended after the last live row, the final targets are held for up to 2 s with the replay tolerances of the grader details; a live failure is final |
-| crash recovery | `eai-standard/2.3` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
+| action space | `eai-standard/2.4`: `submit` chunks of `joint_position` (14, streamed at the 40 Hz control rate with the agent's `dt`) or `ee_pose` (16, IK per row); `observe` frames or a watch window; binary RCB1 responses |
+| oracle | `full` (`solution/`) |
+| verification | `success` = live success ∧ replay success: the live episode, then one fresh-process replay in the sidecar's collect hook, after the live service has exited; the state hashes are reported, not required (the deterministic GPU cloth step and MuJoCo replay bit for bit on one host; the rule does not rely on it); `/logs/verifier/replay.mp4` is rendered during that replay; after a live success it is a grading replay (tooling v19): if this family's episode has not ended after the last live row, the final targets are held for up to 2 s with the replay tolerances of the grader details; a live failure is final |
+| crash recovery | `eai-standard/2.4` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
+
+### Provenance
+{{PROVENANCE}}
+
+### Change Log
+{{CHANGE_LOG}}

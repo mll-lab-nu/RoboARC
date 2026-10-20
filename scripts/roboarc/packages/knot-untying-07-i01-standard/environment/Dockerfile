@@ -5,5 +5,6 @@ COPY client-requirements.txt /tmp/client-requirements.txt
 RUN pip install --no-cache-dir -r /tmp/client-requirements.txt
 COPY rcb_client.py rcb1.py /opt/tools/
 ENV PYTHONPATH=/opt/tools
+COPY goal/ /app/goal/
 RUN mkdir -p /app/output
 WORKDIR /app

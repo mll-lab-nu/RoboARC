@@ -1,32 +1,35 @@
-# topogym-fiber-bundling-10-i01-privileged
+# roboarc-fiber-bundling-10-i01-privileged
 
 | | |
 |---|---|
-| Benchmark | TopoGym |
+| Benchmark | RoboARC |
 | Mode | privileged |
-| Twin | `topogym-fiber-bundling-10-i01-standard` |
+| Twin | `roboarc-fiber-bundling-10-i01-standard` |
 | Simulator / robot | `topogym` / `panda_robotiq` |
 | Family / instance | `fiber_bundling` / seed 0 |
 | Oracle | `none` — No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol §2.7). |
 | Agent time budget | 21600 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `labv18b/rcb-topogym:0.2.16-dev-cu128` |
+| Base image | `{{IMAGE}}` |
 
 ## Task
-TopoGym fiber_bundling (panda_robotiq, Genesis): produce one replayable trajectory. Pass every fine fiber and the front sheath through the fixed copper ring; keep the rear terminal anchored. Frozen scene instance (variation fiber_bundling_rd_hard, seed 0).
+RoboARC fiber_bundling (Franka Panda + Robotiq 2F-85, MuJoCo): produce one replayable trajectory. Pass every fine fiber and the front sheath through the fixed copper ring; keep the rear terminal anchored. Frozen scene instance (variation fiber_bundling_rd_hard, seed 0).
 
 ## Difficulty
 A 7-dof franka panda arm with a robotiq 2f-85 parallel gripper on a fixed base with a 8-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (contact_weld_v1).
 
 ## Reference solution
-None yet (`oracle = "none"`, no `solution/`). A reference solution must be written for this instance (assisted
-grasping, if the family enables it, is the same for the oracle and the agent).
+{{REFERENCE_SOLUTION}}
 
 ## Verification
-Open-loop replay of `/app/output/trajectory.npz` from `tests/instance.json` in a fresh process, twice; pass iff the
+Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
 task's predicate holds after every replay (`tests/grade.py`). `/logs/verifier/replay.mp4` is rendered during the second
 replay (two passes, no separate video replay). The physics runs on the CPU and is bit-deterministic on one host; the final-state hashes
 (`deterministic`) are still diagnostic, as for the GPU families; the rebuilt frozen scene must match (`instance_ok`)
 (robot_coding_bench's GPU-backend rule).
+A trajectory may have at most {{ROW_CAP}} rows (`RCB_MAX_STEPS`: two replays must fit the verifier's timeout; a longer one is
+`bad_trajectory`).
+
+{{NOP}}
 
 ## Details
 | | |
@@ -60,3 +63,9 @@ Pass every fine fiber and the front sheath through the fixed copper ring; keep t
 - The failure counts contact between a fine fiber and the gripper (fingers and hand, housing included); arm links touching a fiber do not count. Contact is sampled at all 4 solver substeps of every tick; if any tick since the start had incomplete contact coverage (a simulator-side condition), the episode can no longer succeed.
 - Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): fiber_bundle: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.
 - A failure is reported in `s.status()["episode_end"]` as "fiber_gripper_contact", "Fiber below table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
+
+### Provenance
+{{PROVENANCE}}
+
+### Change Log
+{{CHANGE_LOG}}

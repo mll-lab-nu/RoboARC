@@ -1,6 +1,6 @@
-# TopoGym · blanket_flatten — frozen instance
+# RoboARC (simulator package `topogym`) · blanket_flatten — frozen instance
 
-You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; TopoGym on Genesis 1.2.1 physics, Nyx rendering) via Python.
+You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
 **Task:** Unfold and spread the blanket flat on the table without overlaps or excessive stretching, then release it and withdraw.
 
 ## Success requirements
@@ -24,7 +24,7 @@ You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw
 - The blanket is 0.6 m x 0.48 m (0.288 m^2), so the coverage needs at least 0.2736 m^2 of its area in the top view. Heights are measured at the cloth particles' centres.
 - The release clearance is measured from one box around all cloth particles, grown by 8 mm: every robot collision box must stay at least 5 mm from it, i.e. at least 13 mm outside the cloth's bounding box, above its highest point too.
 - Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region.
-- Grading: the verifier replays your trajectory twice in a fresh process. This family's physics runs on the GPU, which is not bit-deterministic, so a replay can differ slightly from your own run: each replay runs the rows with the thresholds above and, if the episode has not ended after the last row, holds the final targets for up to 2 s (80 control steps), stopping at the first success or failure, so a confirmation that starts a few physics ticks later than in your own run can still complete; during that hold it accepts a blanket coverage of 92% instead of 95% and cloth speeds up to 80 mm/s instead of 30 mm/s (the displacement limit during the confirmation stays). Success needs both replays to succeed AND at least one of them to reach the goal with the thresholds above within your own rows (not only in the hold). Nothing else is relaxed: every other condition, the failure conditions and the confirmation time are the same. A recording stops at your own success, so a replay whose confirmation ends a few ticks later needs more rows: you may append copies of the final row (holding still) before saving. `s.replay(actions, grading=True)` replays as the verifier does.
+- Grading: the verifier replays your trajectory twice in a fresh process. Its cloth step runs on the GPU on a deterministic solver and the rest on the CPU (MuJoCo, float64), so a replay reproduces your own run on the same host; the rule is kept as a margin: each replay runs the rows with the thresholds above and, if the episode has not ended after the last row, holds the final targets for up to 2 s (80 control steps), stopping at the first success or failure, so a confirmation that starts a few physics ticks later than in your own run can still complete; during that hold it accepts a blanket coverage of 92% instead of 95% and cloth speeds up to 80 mm/s instead of 30 mm/s (the displacement limit during the confirmation stays). Success needs both replays to succeed AND at least one of them to reach the goal with the thresholds above within your own rows (not only in the hold; `s.replay(actions, grading=True)` reports it as `["grading"]["strict_success"]`). Nothing else is relaxed: every other condition, the failure conditions and the confirmation time are the same. A recording stops at your own success, so a replay whose confirmation ends a few ticks later needs more rows: you may append copies of the final row (holding still) before saving. `s.replay(actions, grading=True)` replays as the verifier does.
 - A failure is reported in `s.status()["episode_end"]` as "Cloth fell below the table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
 
 The scene objects are the task's entities (`s.objects()`: `blanket` (deformable, particle), `fence` (fixed)).
@@ -63,8 +63,7 @@ checks also apply. The complete public goal requirements are stated above.
         # The footprint union is ~88 % of a control step at every 2.5 ms tick. It only decides the goal when every cheap
         # gate holds, so it is computed only then (identical predicate: on the other ticks the goal is false either way).
         # A tick whose cheap gates fail reports coverage_ratio None (not computed), the control step's last tick included
-        # (user 2026-10-12: that read-out-only union, ~150-190 ms per control step, is dropped; until then the last tick
-        # always computed it, complete_metrics). The birth (physics step 0) still reports it: the frozen instances'
+        # The birth (physics step 0) still reports it: the frozen instances'
         # birth state hashes include it.
         coverage = None
         complete = getattr(self, "complete_metrics", True)
@@ -153,12 +152,14 @@ CLI equivalent of the grader:
 - World frame: +z up. Quaternions are **WXYZ**. The ee_pose action and the proprio TCP pose are given in this world frame.
 - Action (14): arm `left`: 6 joint targets (rad), then `left_native_gripper` = native drive target (m, limits 0.002 .. 0.037; open/closed targets in robot_spec); arm `right`: 6 joint targets (rad), then `right_native_gripper` = native drive target (m, limits 0.002 .. 0.037; open/closed targets in robot_spec); absolute position targets tracked by PD controllers, out-of-limit
   values clipped. `s.hold_action()` is the no-op.
-- Control runs at 40 Hz (10 physics step(s) per control step). There is no step budget; your
-  wall-clock budget is 360 min (21600 s). One control step takes about 0.38 s of wall clock here, so budget your experiments.
+- Control runs at 40 Hz (10 physics step(s) per control step). There is no step budget, but a trajectory may have at most
+  {{ROW_CAP}} rows ({{ROW_CAP_MIN}} min of simulated time): the verifier has to replay it twice within its own time limit, so `s.step` stops
+  after that many control steps since the last reset, and a longer trajectory is rejected as invalid (reward 0). The time limit
+  (`## Time limit`) is your only budget. One control step takes about 0.38 s of wall clock here, so budget your experiments.
 - Grippers: assisted grasping (pbd_local_patch_v1): closing intent and bilateral finger proximity to a material patch of blanket must persist for 0.03 s, with penetration at most 2 mm and the TCP within 6 cm. The admitted patch follows through a local kinematic PBD attachment; the rest remains deformable. Opening by more than 0.2 % of gripper travel releases it. A hold is lost on excessive opening, material strain, invalid volume or follow error above 10 mm; a lost hand must open before reacquiring. Two hands may hold disjoint material patches of the same object; overlapping patches are rejected. Patch radii, strain limits and the exposed-patch requirement are declared in grasp_assist.targets.
 - Tool frame (TCP, the ee pose and IK frame): a fixed point near the closed finger pads; approach axis (hand -> fingertips) = local [1.0, 0.0, -0.023], finger-closing axis = local [0.0, 1.0, 0.008]. The ee_pose action, the proprio tcp pose and the IK use this frame.
   `p["top_down_quat"](yaw)` builds a vertical approach whose fingers close along `yaw`; `p["gripper_quat"](yaw, approach)` any other.
 - The task succeeds once its predicate has held continuously for 0.5 s; that, or one of its failure predicates,
   ends the simulated episode: later steps do not change the execution record or move the scene (`s.status()["episode_end"]`), and
   `s.reset()` starts over.
-- One `Session` per process (Genesis initialises once). Do not call `s.close()` before writing every output.
+- One `Session` per process (one simulator per process). Do not call `s.close()` before writing every output.

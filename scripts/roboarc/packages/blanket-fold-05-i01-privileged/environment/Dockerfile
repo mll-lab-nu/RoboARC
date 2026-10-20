@@ -1,9 +1,15 @@
 # Base image = TopoGym's simulator (see images/topogym/). Everything task-specific is copied here.
-FROM labv19/rcb-topogym:0.2.17-dev-cu128
-COPY instance.json /app/instance.json
+FROM {{IMAGE}}
+# MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes
+ENV NPY_DISABLE_CPU_FEATURES=AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR OPENBLAS_CORETYPE=Haswell
 COPY runtime_binding.json /app/runtime_binding.json
-COPY instance_assets/ /app/instance_assets/
+RUN python /opt/robotangle/stage_instance.py blanket-fold-05-i01 /app --purge   # the frozen instance, from the image (scripts/roboarc/assets.json), checked against runtime_binding.json
 COPY rcb_topogym.py /opt/tools/rcb_topogym.py
+COPY render_bridge.py /opt/tools/render_bridge.py
+COPY nyx_direct.py /opt/tools/nyx_direct.py
 ENV PYTHONPATH=/opt/tools:/opt/topogym
+# the longest trajectory the verifier replays within its timeout (scripts/roboarc/mk_tasks.py row_cap)
+ENV RCB_MAX_STEPS={{ROW_CAP}}
+COPY goal/ /app/goal/
 RUN mkdir -p /app/output
 WORKDIR /app

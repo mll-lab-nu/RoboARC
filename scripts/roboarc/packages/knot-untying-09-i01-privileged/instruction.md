@@ -1,21 +1,16 @@
-# TopoGym · knot_untying — frozen instance
+# RoboARC (simulator package `topogym`) · knot_untying — frozen instance
 
-You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; TopoGym on Genesis 1.2.1 physics, Nyx rendering) via Python.
+You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
 **Task:** Untie and spread the rope on the tabletop until its top-down projection has no crossings or overlaps, then release it. One end of every rope is clamped to the table under a staple and stays clamped. Lay the rope inside the green dashed goal region. The goal region is not drawn in the scene: the region images `/app/goal/region_cam_high.png` (from the overhead camera cam_high) and `/app/goal/region_cam_low.png` (from the low oblique camera cam_low) show the start scene with the region's dashed line drawn in.
 
 ## Success requirements
 
 - Remove projected crossings, overlaps, collapsed projected segments and exact foldbacks. Nonlocal rope segments must be separated by at least one rope diameter in the top-down view; merely changing over/under order is insufficient.
 - Keep the entire rope close to the tabletop: no point more than 1 mm below it, and no point higher than one rope diameter plus 3 mm above it.
-- Keep the rope volume intact; do not invert or collapse it to bypass the knot.
 - Release all target parts and disengage any assisted grasp. Keep at least 1 mm of verified clearance between the rope and grippers or other robot links that can move. World-fixed bases may touch the rope normally. Interior overlap with any robot part is forbidden; ambiguous bounding-volume overlaps require a native-solid geometry check.
 - During confirmation, every target point or rigid body's linear speed must be at most 1 mm/s and its displacement from the start of confirmation at most 1 mm.
 - Put the whole centre line of the rope inside the green dashed goal region: the inner edge of the 2 mm wide dashed green line is the containment limit; it encloses a rectangle 460 mm wide (left to right in cam_high's image) and 330 mm deep. Every point of the centre line counts; the rope's own thickness may reach over the line.
 - Keep all final conditions satisfied together for at least 0.5 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.
-
-## Task failure conditions
-
-- Invalid rope volume ends the episode in failure.
 
 ## Grader details (in addition to the requirements above)
 
@@ -27,8 +22,8 @@ You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw
 - "Nonlocal" means at least 16 mm apart along the rope: such parts of the rope's centreline must be at least 8 mm apart in the top view. Closer parts are exempt, but an actual crossing always counts.
 - The release check bounds the rope's volume mesh (carried rigidly by its capsule links), element by element, against the robot's collision geometries and decides the close ones with the exact solids: every robot part that can move (grippers, arm links) needs at least 1 mm of clearance from the rope; a world-fixed base may touch it. An overlap with the interior of any robot part means the release is not certified: no success while it lasts, never a failure.
 - Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): rope: 318 spheres of radius 8 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.
-- Grading: the verifier replays your trajectory twice in a fresh process. This family's physics runs on the GPU, which is not bit-deterministic, so a replay can differ slightly from your own run: each replay runs the rows with the thresholds above and, if the episode has not ended after the last row, holds the final targets for up to 2 s (80 control steps), stopping at the first success or failure, so a confirmation that starts a few physics ticks later than in your own run can still complete; during that hold it accepts rope speeds up to 1.25 mm/s instead of 1 mm/s. Success needs both replays to succeed AND at least one of them to reach the goal with the thresholds above within your own rows (not only in the hold). Nothing else is relaxed: every other condition, the failure conditions and the confirmation time are the same. A recording stops at your own success, so a replay whose confirmation ends a few ticks later needs more rows: you may append copies of the final row (holding still) before saving. `s.replay(actions, grading=True)` replays as the verifier does.
-- A failure is reported in `s.status()["episode_end"]` as "rope_volume_invalid: <what>" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
+- Grading: the verifier replays your trajectory twice in a fresh process. This family's physics runs on the CPU (MuJoCo, float64), so a replay reproduces your own run on the same host; the rule is kept as a margin: each replay runs the rows with the thresholds above and, if the episode has not ended after the last row, holds the final targets for up to 2 s (80 control steps), stopping at the first success or failure, so a confirmation that starts a few physics ticks later than in your own run can still complete; during that hold it accepts rope speeds up to 1.25 mm/s instead of 1 mm/s. Success needs both replays to succeed AND at least one of them to reach the goal with the thresholds above within your own rows (not only in the hold; `s.replay(actions, grading=True)` reports it as `["grading"]["strict_success"]`). Nothing else is relaxed: every other condition, the failure conditions and the confirmation time are the same. A recording stops at your own success, so a replay whose confirmation ends a few ticks later needs more rows: you may append copies of the final row (holding still) before saving. `s.replay(actions, grading=True)` replays as the verifier does.
+- A failure is reported in `s.status()["episode_end"]` as "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
 
 The scene objects are the task's entities (`s.objects()`: `clamp_rope_leg0` (fixed), `clamp_rope_leg1` (fixed), `clamp_rope_plate` (fixed), `curb` (fixed), `post_back` (fixed), `post_eye` (fixed), `rope` (a chain of rigid capsule links)).
 Implementation reference: `KnotUntyingRdMediumTask.evaluate_state` (module `topogym.tasks.knot_untying.redesign.task_rd`).
@@ -142,12 +137,14 @@ CLI equivalent of the grader:
 - World frame: +z up. Quaternions are **WXYZ**. The ee_pose action and the proprio TCP pose are given in this world frame.
 - Action (14): arm `left`: 6 joint targets (rad), then `left_gripper` = opening width (m, 0 closed .. 0.057385 open); arm `right`: 6 joint targets (rad), then `right_gripper` = opening width (m, 0 closed .. 0.057385 open); absolute position targets tracked by PD controllers, out-of-limit
   values clipped. `s.hold_action()` is the no-op.
-- Control runs at 40 Hz (5 physics step(s) per control step). There is no step budget; your
-  wall-clock budget is 360 min (21600 s). One control step takes about 1.1 s of wall clock here, so budget your experiments.
+- Control runs at 40 Hz (5 physics step(s) per control step). There is no step budget, but a trajectory may have at most
+  {{ROW_CAP}} rows ({{ROW_CAP_MIN}} min of simulated time): the verifier has to replay it twice within its own time limit, so `s.step` stops
+  after that many control steps since the last reset, and a longer trajectory is rejected as invalid (reward 0). The time limit
+  (`## Time limit`) is your only budget. One control step takes about 0.32 s of wall clock here, so budget your experiments.
 - Grippers: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (rope) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 6 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 2.5 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction).
 - Tool frame (TCP, the ee pose and IK frame): a fixed point near the closed finger pads; approach axis (hand -> fingertips) = local [1.0, 0.0, -0.023], finger-closing axis = local [0.0, 1.0, 0.008]. The ee_pose action, the proprio tcp pose and the IK use this frame.
   `p["top_down_quat"](yaw)` builds a vertical approach whose fingers close along `yaw`; `p["gripper_quat"](yaw, approach)` any other.
 - The task succeeds once its predicate has held continuously for 0.5 s; that, or one of its failure predicates,
   ends the simulated episode: later steps do not change the execution record or move the scene (`s.status()["episode_end"]`), and
   `s.reset()` starts over.
-- One `Session` per process (Genesis initialises once). Do not call `s.close()` before writing every output.
+- One `Session` per process (one simulator per process). Do not call `s.close()` before writing every output.

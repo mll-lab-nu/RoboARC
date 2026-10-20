@@ -1,6 +1,6 @@
-# TopoGym · fiber_bundling — frozen instance
+# RoboARC (simulator package `topogym`) · fiber_bundling — frozen instance
 
-You control a simulated robot (**a 7-DoF Franka Panda arm with a Robotiq 2F-85 parallel gripper on a fixed base**; TopoGym on Genesis 1.2.1 physics, Nyx rendering) via Python.
+You control a simulated robot (**a 7-DoF Franka Panda arm with a Robotiq 2F-85 parallel gripper on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
 **Task:** Pass every fine fiber and the front sheath through the fixed copper ring; keep the rear terminal anchored.
 
 ## Success requirements
@@ -18,7 +18,7 @@ You control a simulated robot (**a 7-DoF Franka Panda arm with a Robotiq 2F-85 p
 
 ## Grader details (in addition to the requirements above)
 
-- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 6 mm beyond the tool frame (TCP) along its approach axis when open and about 19 mm when closed (the Robotiq fingertips move forward as they close). Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque.
+- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 6 mm beyond the tool frame (TCP) along its approach axis when open and about 19 mm when closed (the Robotiq fingertips move forward as they close). Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque. An arm with any part more than 5 mm deep in a fixed object (a fixture, the table) is stopped where it is: its joint targets become its measured joints for that control step, so it stops pushing (the safety readings report these stops as static_guard).
 - Forcing is recorded, not judged: an arm drive (not a gripper drive) at 95% of its torque cap or more while that arm's gripper, or a part it holds, presses on anything else with 20 N or more in total is forcing; 0.5 s of it on every physics tick is a forcing event in the evidence (`s.safety()`, `s.status()["forcing"]`), shown to the reviewer when a success is reviewed. Forcing does not end the episode and does not change the grade by itself.
 - Sizes: ring inner radius 13.5 mm, ring tube radius 4 mm; 3 fibers of radius 1.2 mm; sheath radius 12 mm.
 - Each fiber is tracked at 11 points from tip to root. A point counts when it crosses the ring's plane less than 17.48 mm from the ring's axis, in tip-to-root order; a crossing out of order or outside that radius resets that point and every point behind it, and crossing back loses the credit.
@@ -96,15 +96,17 @@ CLI equivalent of the grader:
 `python /opt/tools/rcb_topogym.py replay --task fiber_bundling --instance /app/instance.json --traj /app/output/trajectory.npz`
 
 ## Conventions
-- World frame: robot base at (-0.570, 0.000, 0.920), table top at z = 0.920, +z up. Quaternions are **WXYZ**.
-- Action (8): arm `arm`: 7 joint targets (rad), then `arm_native_gripper` = native drive target (m, limits 0 .. 0.8; open/closed targets in robot_spec); absolute position targets tracked by PD controllers, out-of-limit
+- World frame: +z up. Quaternions are **WXYZ**. The ee_pose action and the proprio TCP pose are given in this world frame.
+- Action (8): arm `arm`: 7 joint targets (rad), then `arm_native_gripper` = native drive target (rad, limits 0 .. 0.8: 0 = open, 0.8 = closed, the Robotiq 2F-85's driver joint; open/closed targets in robot_spec); absolute position targets tracked by PD controllers, out-of-limit
   values clipped. `s.hold_action()` is the no-op.
-- Control runs at 40 Hz (10 physics step(s) per control step). There is no step budget; your
-  wall-clock budget is 360 min (21600 s). One control step takes about 0.086 s of wall clock here, so budget your experiments.
-- Grippers: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (fiber_bundle) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, or the part drifts 1 cm / 0.15 rad from its held pose) is lost, and the gripper must open before it can take hold again. Two grippers never hold the same part; other objects are grasped physically (friction).
+- Control runs at 40 Hz (10 physics step(s) per control step). There is no step budget, but a trajectory may have at most
+  {{ROW_CAP}} rows ({{ROW_CAP_MIN}} min of simulated time): the verifier has to replay it twice within its own time limit, so `s.step` stops
+  after that many control steps since the last reset, and a longer trajectory is rejected as invalid (reward 0). The time limit
+  (`## Time limit`) is your only budget. One control step takes about 0.086 s of wall clock here, so budget your experiments.
+- Grippers: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (fiber_bundle) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull its part with more than 65 N averaged over 20 ms, or no finger has touched the part for 0.2 s) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction).
 - Tool frame (TCP, the ee pose and IK frame): a fixed point near the closed finger pads; approach axis (hand -> fingertips) = local [0.0, 0.0, 1.0], finger-closing axis = local [-0.0, -1.0, 0.0]. The ee_pose action, the proprio tcp pose and the IK use this frame.
   `p["top_down_quat"](yaw)` builds a vertical approach whose fingers close along `yaw`; `p["gripper_quat"](yaw, approach)` any other.
 - The task succeeds once its predicate has held continuously for 0.5 s; that, or one of its failure predicates,
   ends the simulated episode: later steps do not change the execution record or move the scene (`s.status()["episode_end"]`), and
   `s.reset()` starts over.
-- One `Session` per process (Genesis initialises once). Do not call `s.close()` before writing every output.
+- One `Session` per process (one simulator per process). Do not call `s.close()` before writing every output.

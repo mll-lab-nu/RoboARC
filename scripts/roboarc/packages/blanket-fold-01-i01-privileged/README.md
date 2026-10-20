@@ -1,33 +1,36 @@
-# topogym-blanket-fold-01-i01-privileged
+# roboarc-blanket-fold-01-i01-privileged
 
 | | |
 |---|---|
-| Benchmark | TopoGym |
+| Benchmark | RoboARC |
 | Mode | privileged |
-| Twin | `topogym-blanket-fold-01-i01-standard` |
+| Twin | `roboarc-blanket-fold-01-i01-standard` |
 | Simulator / robot | `topogym` / `aloha` |
 | Family / instance | `blanket_fold` / seed 0 |
 | Oracle | `none` — No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol §2.7). |
 | Agent time budget | 21600 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `labv19/rcb-topogym:0.2.17-dev-cu128` |
+| Base image | `{{IMAGE}}` |
 
 ## Task
-TopoGym blanket_fold (aloha, Genesis): produce one replayable trajectory. Fold the blanket into the target shape on the table, then release it and withdraw. The blanket (600 mm x 480 mm) starts lying flat on the table. Fold it in half: turn the far half (the 240 mm of material along the far long edge) over onto the near half about the middle line parallel to the long edges, so that the far edge lies on the near edge and the far corners on the near corners. The folded stack is 600 mm x 240 mm, two layers, the far half upside down on top. The target images show the required final state: this is how the folded cloth must look and where it must lie; fold it like this. Near, far, left and right are as seen in the overhead camera cam_high (near = the lower side of its image). Frozen scene instance (variation blanket_fold_very_easy, seed 0).
+RoboARC blanket_fold (ALOHA 2, MuJoCo): produce one replayable trajectory. Fold the blanket into the target shape on the table, then release it and withdraw. The blanket (600 mm x 480 mm) starts lying flat on the table. Fold it in half: turn the far half (the 240 mm of material along the far long edge) over onto the near half about the middle line parallel to the long edges, so that the far edge lies on the near edge and the far corners on the near corners. The folded stack is 600 mm x 240 mm, two layers, the far half upside down on top. The target images show the required final state: this is how the folded cloth must look and where it must lie; fold it like this. Near, far, left and right are as seen in the overhead camera cam_high (near = the lower side of its image). Frozen scene instance (variation blanket_fold_very_easy, seed 0).
 The target images: `/app/goal/target_cam_high.png` (seen from the overhead camera cam_high) and `/app/goal/target_cam_low.png` (from the low oblique camera cam_low).
 
 ## Difficulty
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (pbd_local_patch_v1).
 
 ## Reference solution
-None yet (`oracle = "none"`, no `solution/`). A reference solution must be written for this instance (assisted
-grasping, if the family enables it, is the same for the oracle and the agent).
+{{REFERENCE_SOLUTION}}
 
 ## Verification
-Open-loop replay of `/app/output/trajectory.npz` from `tests/instance.json` in a fresh process, twice; pass iff the
+Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
 task's predicate holds after every replay (`tests/grade.py`). `/logs/verifier/replay.mp4` is rendered during the second
-replay (two passes, no separate video replay). The physics runs on the GPU, which is not bit-deterministic: the
-final-state hashes (`deterministic`) are diagnostic; the rebuilt frozen scene must match (`instance_ok`)
+replay (two passes, no separate video replay). The physics (a deterministic GPU cloth step, the rest on the CPU) replays bit for bit on one host; the
+final-state hashes (`deterministic`) are still diagnostic; the rebuilt frozen scene must match (`instance_ok`)
 (robot_coding_bench's GPU-backend rule).
+A trajectory may have at most {{ROW_CAP}} rows (`RCB_MAX_STEPS`: two replays must fit the verifier's timeout; a longer one is
+`bad_trajectory`).
+
+{{NOP}}
 
 ## Details
 | | |
@@ -60,3 +63,9 @@ Fold the blanket into the target shape on the table, then release it and withdra
 - The release clearance is measured from one box around all cloth particles, grown by 8 mm: every robot collision box must stay at least 5 mm from it, i.e. at least 13 mm outside the cloth's bounding box, above its highest point too.
 - Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region.
 - A failure is reported in `s.status()["episode_end"]` as "Cloth fell below the table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
+
+### Provenance
+{{PROVENANCE}}
+
+### Change Log
+{{CHANGE_LOG}}

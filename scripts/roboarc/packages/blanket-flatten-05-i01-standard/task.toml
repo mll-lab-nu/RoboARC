@@ -19,25 +19,24 @@ artifacts = [
 ]
 
 [task]
-name = "robot-coding-bench/topogym-blanket-flatten-05-i01-standard"
-description = "STANDARD MODE (robot as a service, eai-standard/2.3): TopoGym blanket_flatten on the same frozen instance as the privileged task. Unfold and spread the blanket flat on the table without overlaps or excessive stretching, then release it and withdraw. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
-authors = [{ name = "jianwen" }]
-keywords = ["robotics", "topogym", "genesis", "aloha", "standard-mode", "trajectory", "blanket_flatten"]
+name = "robot-coding-bench/roboarc-blanket-flatten-05-i01-standard"
+description = "STANDARD MODE (robot as a service, eai-standard/2.4): RoboARC blanket_flatten on the same frozen instance as the privileged task. Unfold and spread the blanket flat on the table without overlaps or excessive stretching, then release it and withdraw. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
+authors = [{ name = "Jianwen Lyu" }]
+keywords = ["robotics", "roboarc", "mujoco", "aloha", "standard-mode", "trajectory", "blanket_flatten"]
 
 [metadata]
-author_name = "jianwen"
+author_name = "Jianwen Lyu"
 task_type = "trajectory"
-simulator = "topogym"
-robot = "aloha"
+simulator = "roboarc"
+robot = "aloha-2"
 family = "blanket_flatten"
 mode = "standard"                  # RGB + proprioception only; no object poses, no success predicate, no reset
-protocol = "eai-standard/2.3"
-oracle = "none"
-oracle_evidence = "No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol \u00a72.7)."
-difficulty = "very_easy"
-grasp = "assisted (his pbd_local_patch_v1 grasp regions on blanket)"
+protocol = "eai-standard/2.4"
+{{ORACLE}}
+difficulty = "medium"
+grasp = "assisted (the pbd_local_patch_v1 grasp regions on blanket)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision release_settling_v1)"
-tooling_version = "19"
+tooling_version = "{{TOOLING_VERSION}}"
 instance_seed = 0
 expert_time_estimate_hours = 3
 
@@ -52,8 +51,8 @@ command = "sh /srv/finalize.sh"   # end + dump + exit the service, one fresh-pro
 timeout_sec = 27000              # the end (a resume replay included) <= 1 h, the replay <= the agent's budget
 
 [agent]
-timeout_sec = 21600.0             # Agent wall-clock budget
-# egress: Harbor default (public). `scripts/set_agent_egress.py allowlist` closes it to the model APIs.
+timeout_sec = 10800.0             # Agent wall-clock budget
+{{AGENT_EGRESS}}
 
 [environment]
 build_timeout_sec = 1800.0
