@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Unit tests of the benchmark's tooling and the shared layer, in two tiers.
 #  1. Standard library and a shell only (no numpy, no simulator, no image): the Harbor runner's helpers (retry rule,
-#     account-failure rule, Codex config, build stamps) and the simulator source hash (tools/release/source_hash.py). Run by run_all.sh and the CI job `unit-tests` (not required; the
+#     account-failure rule, Codex config, build stamps), the simulator source hash (tools/release/source_hash.py), and
+#     RoboARC's generator and asset pins (scripts/roboarc/tests/: the packages' fields and checks, assets.py pin /
+#     check / check-instances on a fake dataset). Run by run_all.sh and the CI job `unit-tests` (not required; the
 #     test that enforces PROTOCOL Appendix H.5 also runs in the required job `invariants`, run_invariants.sh).
 #  2. numpy + requests (no simulator, no image, no GPU): the eai-standard/2.4 service layer on a stub simulator (its
 #     in-trial crash recovery, request checks), RoboARC's sim-service tests with stubs, and Nyx's start-up retry
@@ -32,7 +34,8 @@ run() {   # run <timeout s> <test path from the repository root> [arguments of t
   cmds+="$(lane "$2")bash $self --one $*"$'\n'
 }
 # the standard-library tests
-for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_retry_policy.py scripts/tests/test_stamp_mtimes.py; do
+for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_retry_policy.py scripts/tests/test_stamp_mtimes.py \
+         scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py; do
   run 300 "$t"
 done
 run 120 scripts/harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials

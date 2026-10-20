@@ -5,6 +5,7 @@ the full proof is `mk_tasks.py --check`, which renders all 202 task dirs):
   2. every package's task.toml states a difficulty of TIERS, the one roboarc_names.json gives where it names the base;
   3. fill() refuses an unknown field;
   4. the pinned tooling is the release's (tooling_check), and the families that render with nyx_direct.py are read;
+     the interface tools/release/release_rebuild.py drives the generator through (PACKAGE_FORMAT, PORT_PACKAGE) holds;
   5. two bases (a rigid one, a cloth one with goal images) render to exactly their task dirs in tasks/.
 usage: python3 scripts/roboarc/tests/test_generator.py"""
 import pathlib, re, subprocess, sys, tempfile
@@ -45,6 +46,7 @@ def main() -> int:
     except AssertionError as e:
         assert "unknown fields" in str(e), e
     assert M.tooling_check() == [], M.tooling_check()
+    assert M.PACKAGE_FORMAT == "final-texts/1" and M.PORT_PACKAGE.is_file(), "the interface release_rebuild.py relies on"
     assert M.DIRECT and set(M.DIRECT) <= {r["family"] for r in M.REL["bases"].values()}, M.DIRECT
     with tempfile.TemporaryDirectory() as tmp:
         for b in ("orbits-01-i01", "blanket-fold-02-i01"):
