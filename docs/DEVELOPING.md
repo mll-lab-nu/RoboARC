@@ -8,7 +8,7 @@ running tasks see [RUNNING.md](RUNNING.md); the task contract is [PROTOCOL.md](P
 | path | what |
 |---|---|
 | `tasks/roboarc-*` | the 226 task directories: 202 puzzle tasks (`scripts/roboarc/mk_tasks.py`) and 24 IKEA tasks, `roboarc-ikea-*` (`ikea/scripts/ikea_mujoco/mk_tasks.py`, `mk_standard_tasks.py`). Generated: never edit them by hand |
-| `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json` (one record per base), `packages/` (each task's texts as they ship, with `{{FIELD}}`s the generator fills), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `port_package.py` (a new base's Genesis-era texts to a final package); `regrade.py`; `tests/` |
+| `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json` (one record per base), `packages/` (each task's texts as they ship, with `{{FIELD}}`s the generator fills), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`; `tests/` |
 | `scripts/` | the task layer the tasks cite and the generator renders with: `task_conventions.py` (`normalize`, the mode registry, the effective configuration), `set_agent_egress.py` (the egress allowlist), `task_resources.toml` (resource rules), `eai_standard/` (the eai-standard/2.4 client and service layer, copied into every standard task), `rcb_monitor/` (the resource-limits sidecar, copied into every task); `stamp_mtimes.py`, `check_image_files.py` (image builds) |
 | `scripts/harbor/` | the Harbor runner and its helpers (RUNNING.md) |
 | `ci_checks/` | the repository checks |
@@ -41,7 +41,7 @@ The generator ends every task with `scripts/task_conventions.py` `normalize` (RE
 (file modes are compared). A change to a task is a change to the generator's inputs, never to `tasks/`; it gets a new
 `DIGEST` and a README Change Log entry (PROTOCOL §1, H.8). A task's texts are `scripts/roboarc/packages/<base>-<mode>/`:
 final texts with `{{FIELD}}`s for the values from other sources (`mk_tasks.py` `fields()`; the Generator section of
-[benchmarks/roboarc.md](benchmarks/roboarc.md)); a new base's packages come from `scripts/roboarc/port_package.py`.
+[benchmarks/roboarc.md](benchmarks/roboarc.md)); a new base's packages start as a copy of a sibling base's.
 
 ## Checks
 
@@ -84,9 +84,11 @@ images/roboarc/build.sh --instances <dir>    # or from a local copy (instances/<
 ikea/images/ikea-mujoco/build.sh             # the two IKEA images
 ```
 
-`images/roboarc/build.sh` builds `source/images/robotangle/Dockerfile.mujoco` from `source/` with the frozen instances
-as a named build context, checks every instance file against `scripts/roboarc/assets.json`, and checks that the image
-installs the runtime every task is bound to (`scripts/roboarc/release.json` `runtime`). It needs about 25 GB of disk
+`images/roboarc/build.sh` builds `source/images/roboarc/Dockerfile` from `source/` with the frozen instances as a
+named build context, checks every instance file against `scripts/roboarc/assets.json`, and checks that the image
+installs the runtime every task is bound to (`scripts/roboarc/release.json` `runtime`). Every input of the recipe is
+pinned (the base image by digest, Debian packages by version from a snapshot, wheels by sha256), so two builds install
+the same files. It needs about 25 GB of disk
 ([images/roboarc/README.md](../images/roboarc/README.md)). `images/roboarc/push.sh` pushes a verified
 build (each local tag must be its expected image id; the registry token on stdin only). The monitor sidecar's image
 is built reproducibly by `images/monitor/build.sh` (an OCI archive whose manifest digest every task pins,
@@ -104,7 +106,8 @@ is built reproducibly by `images/monitor/build.sh` (an OCI archive whose manifes
    references it changes no task file and builds the same image.
 2. In a fresh clone (umask 022): every check above green.
 3. Build the image from that clone. A release that keeps the simulator must give an image whose installed filesystem is
-   file-for-file identical to the previous one (path, mode, size, sha256), apart from the files the release changes.
+   file-for-file identical to the previous one (path, mode, size, sha256; the `.pyc` files aside, whose bytes hold
+   source times), apart from the files the release changes.
 4. On a GPU host with the new image: strict replays of one base per family (and of every new or changed base), end
    hashes equal to the recorded ones; Harbor oracle (reward 1) and nop (reward 0) on a sample of bases in both modes,
    deterministic, without infra or grader errors.

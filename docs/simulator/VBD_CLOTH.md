@@ -1,8 +1,8 @@
 # VBD cloth in the release image
 
-The release image (`source/images/robotangle/Dockerfile.mujoco`) carries the cloth solver of the VBD cloth backend: Newton's
+The release image (`source/images/roboarc/Dockerfile`) carries the cloth solver of the VBD cloth backend: Newton's
 `SolverVBD` on NVIDIA Warp's CPU backend.
-- **Packages:** `newton` 1.6.1 and `warp-lang` 1.18.0. `source/images/robotangle/vbd-requirements.txt` gives the exact versions and wheel sha256s;
+- **Packages:** `newton` 1.6.1 and `warp-lang` 1.18.0. `source/images/roboarc/vbd-requirements.txt` gives the exact versions and wheel sha256s;
   they are installed with `--no-deps --require-hashes` (newton needs only warp-lang, warp-lang only the image's numpy).
   The runtime binding records both versions (`installed_runtime`).
 - **Licences:**
@@ -21,7 +21,7 @@ The release image (`source/images/robotangle/Dockerfile.mujoco`) carries the clo
     AVX-512 on Zen 4.
 - **Kernel cache:** the build compiles the kernels once into `/opt/warp-cache` (`WARP_CACHE_PATH`), and it is read-only
   for everyone. A cold compile takes about 30 s per process.
-  - `source/images/robotangle/warp_precompile.py` steps a blanket-sized cloth through every path the cloth uses. A new Warp
+  - `source/images/roboarc/warp_precompile.py` steps a blanket-sized cloth through every path the cloth uses. A new Warp
     module, such as a faster VBD step, must be stepped there too.
   - Code that uses the cloth calls `warp_cpu.init()` before `import newton`. When the image cache is not writable for
     the user, `init()` gives Warp a per-user cache in the temp dir whose module directories link to the image's, so a

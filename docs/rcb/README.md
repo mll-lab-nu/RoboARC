@@ -30,11 +30,11 @@ that holds it in this repository.
 
 | cited path | in this repository |
 |---|---|
-| `images/roboarc/Dockerfile`, `images/topogym/` | the release image's recipe: [`source/images/robotangle/Dockerfile.mujoco`](../../source/images/robotangle/Dockerfile.mujoco), built from `source/` by `images/roboarc/build.sh`; the Vulkan ICD and EGL vendor files come from its base image, whose recipe is `images/roboarc/Dockerfile.genesis-0.2.22` |
-| `images/robotangle/Dockerfile` | the base image's recipe, `images/roboarc/Dockerfile.genesis-0.2.22` (the libuipc builds: `images/roboarc/README.md`) |
-| `images/roboarc/stage_instance.py` | `/opt/robotangle/stage_instance.py` in the base image; `images/roboarc/stage_instance.py` holds the same bytes |
+| `images/roboarc/Dockerfile`, `images/topogym/`, `images/robotangle/Dockerfile`, `images/roboarc/Dockerfile.genesis-0.2.22` | the release image's recipe: [`source/images/roboarc/Dockerfile`](../../source/images/roboarc/Dockerfile), built from `source/` by `images/roboarc/build.sh`; it writes the Vulkan ICD and EGL vendor files. Up to 1.0.x the image was a delta on the RoboTangle 0.2.22 (Genesis) image, whose recipe (`images/roboarc/Dockerfile.genesis-0.2.22`) is in RoboARC 1.0.0 |
+| `images/roboarc/stage_instance.py`, `images/robotangle/stage_instance.py` | [`source/images/roboarc/stage_instance.py`](../../source/images/roboarc/stage_instance.py), installed as `/opt/robotangle/stage_instance.py` |
 | `images/topogym/prune.py` | [`source/images/topogym/prune.py`](../../source/images/topogym/prune.py) |
-| `images/robotangle/mujoco-3.14.0-epa/` | [`source/images/robotangle/mujoco-3.14.0-epa/`](../../source/images/robotangle/mujoco-3.14.0-epa/), notes in [`docs/simulator/MUJOCO_EPA_PATCH.md`](../simulator/MUJOCO_EPA_PATCH.md) |
+| `images/robotangle/mujoco-3.14.0-epa/`, `source/images/robotangle/mujoco-3.14.0-epa/` | [`source/images/roboarc/mujoco-3.14.0-epa/`](../../source/images/roboarc/mujoco-3.14.0-epa/), notes in [`docs/simulator/MUJOCO_EPA_PATCH.md`](../simulator/MUJOCO_EPA_PATCH.md) |
+| `source/images/robotangle/Dockerfile.mujoco`, `source/images/robotangle/{vbd-requirements.txt,warp_precompile.py}` | [`source/images/roboarc/`](../../source/images/roboarc/) (`Dockerfile` replaces `Dockerfile.mujoco` in 1.1.0) |
 
 ## Scripts and records
 
@@ -42,18 +42,33 @@ that holds it in this repository.
 |---|---|
 | `scripts/roboarc/harbor_check.py` | [`scripts/roboarc/harbor_check.py`](../../scripts/roboarc/harbor_check.py) |
 | `scripts/robotangle/release_rebuild.py` | [`tools/release/release_rebuild.py`](../../tools/release/release_rebuild.py) |
-| `scripts/robotangle/release.json` (runtime, `uipc_builds`) | [`scripts/roboarc/release.json`](../../scripts/roboarc/release.json); the Genesis RoboTangle release record is [`records/genesis_release/release.json`](../../records/genesis_release/release.json) |
+| `scripts/robotangle/release.json` (runtime, `uipc_builds`) | [`scripts/roboarc/release.json`](../../scripts/roboarc/release.json) (no libuipc builds since 1.1.0); the Genesis RoboTangle release record (`records/genesis_release/`) is in RoboARC 1.0.0 |
 | `scripts/robotangle/shared/` | [`scripts/roboarc/shared/`](../../scripts/roboarc/shared/) (the one copy of the pinned tooling) |
-| `scripts/robotangle/oracles/<base>/` | [`scripts/roboarc/oracles/<base>/`](../../scripts/roboarc/oracles/) (released references); the Genesis `-i00` references the MuJoCo ones were ported from: [`tools/references/oracles_genesis/`](../../tools/references/oracles_genesis/) |
+| `scripts/robotangle/oracles/<base>/` | [`scripts/roboarc/oracles/<base>/`](../../scripts/roboarc/oracles/) (released references); the Genesis `-i00` references the MuJoCo ones were ported from (`tools/references/oracles_genesis/`) are in RoboARC 1.0.0 |
 | `scripts/robotangle/{references,redesign,stress}/`, `scripts/robotangle/test_*.py` | [`tools/references/`](../../tools/references/), [`tools/redesign/`](../../tools/redesign/), [`tools/stress/`](../../tools/stress/), [`tools/tests/`](../../tools/tests/) |
-| `scripts/robotangle/{mujoco_release.json,package_text/,package_text_tool.py}`, `scripts/topogym_rules.py` | [`tools/release/`](../../tools/release/) |
+| `scripts/robotangle/mujoco_release.json`, `scripts/topogym_rules.py` | [`tools/release/`](../../tools/release/) |
 | `scripts/robotangle/freeze_manifest.*.json` | [`records/freeze_manifests/`](../../records/freeze_manifests/) |
 | `scripts/oracle_runners/*_session_oracle.py` | [`tools/references/oracle_runners/`](../../tools/references/oracle_runners/) |
 | `scripts/robowits/shared/oracle_replay.py`, `scripts/robowits/oracles/<family>/oracle_qpos.npy` (the standard solution player's header) | the player is [`scripts/roboarc/shared/standard/solution/oracle_replay.py`](../../scripts/roboarc/shared/standard/solution/oracle_replay.py); its rows are each task's `solution/oracle_qpos.npy`, from `scripts/roboarc/oracles/<base>/standard.npz` |
 | `scripts/task_dynamics.toml` | not carried; the `dynamics` field is defined in [`docs/PROTOCOL.md`](../PROTOCOL.md) §2.14 |
 | `tasks/<family>/common.py` (the tooling's comments: a path inside the simulator package) | [`source/topogym/tasks/`](../../source/topogym/tasks/) |
-| `source/dependencies/libuipc` (an error message of the tooling) | the libuipc builds installed in the base image ([`images/roboarc/README.md`](../../images/roboarc/README.md); recipe `images/roboarc/uipc-sm86-build/`) |
+| `source/dependencies/libuipc` (an error message of the tooling) | not carried: libuipc was part of the Genesis base image until 1.0.x (its builds' recipe `images/roboarc/uipc-sm86-build/` is in RoboARC 1.0.0) |
 | `scripts/check_knot_clearance.py`, `scripts/prepare_blanket_initial_states.py`, `scripts/check_*fast_paths.py` and the other one-off checks named in comments | not carried (development checks; their results are quoted where they are cited) |
+
+## Removed in 1.1.0
+
+The Genesis-era parts that only served porting the Genesis release to MuJoCo were removed in 1.1.0
+([docs/history/GENESIS_REMOVAL.md](../history/GENESIS_REMOVAL.md)). The development notes under `docs/simulator/` cite
+them as they were; they are in RoboARC 1.0.0 (main 153eb8cf01).
+
+| cited path | in RoboARC 1.0.0 |
+|---|---|
+| `tools/release/templates/`, `tools/release/package_text/`, `tools/release/package_text_tool.py`, `scripts/robotangle/package_text/`, `scripts/robotangle/package_text_tool.py`, `scripts/roboarc/port_package.py` | the Genesis-era task texts new bases started from, and the tools that drafted and ported them |
+| `tools/references/oracles_genesis/` | the 52 Genesis `-i00` references the MuJoCo references were re-recorded from |
+| `records/genesis_release/` | the Genesis RoboTangle release generator |
+| `tools/tests/test_mujoco_kinematics.py` | MuJoCo's FK / IK against Genesis' on the same robot |
+| `images/roboarc/{Dockerfile.genesis-0.2.22,install_uipc_prefix.py,verify_uipc_wheel.py,uipc-sm86-build}` | the Genesis base image's recipe and its libuipc builds |
+| `topogym/world/{genesis_world,tabletop}.py`, `topogym/world/physics/{fem,ipc,grasp_ipc,grasp_pbd,grasp_rigid,pbd_table_friction,release_geometry,rigid_contacts}.py`, `topogym/world/visuals/`, `topogym/sensors/renderers/nyx.py` | the Genesis world, its physics backends and its renderer (`source/topogym/` in 1.0.0) |
 
 ## IKEA MuJoCo
 

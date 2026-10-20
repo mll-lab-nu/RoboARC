@@ -113,7 +113,7 @@ def _patch(a) -> int:
         print("mujoco is not installed", file=sys.stderr)
         return 2
     lib = Path(list(spec.submodule_search_locations)[0]) / "libmujoco.so.3.14.0"
-    script = R.repo_root() / "source" / "images" / "robotangle" / "mujoco-3.14.0-epa" / "bytepatch_libmujoco.py"
+    script = R.repo_root() / "source" / "images" / "roboarc" / "mujoco-3.14.0-epa" / "bytepatch_libmujoco.py"
     return subprocess.call([sys.executable, str(script), str(lib)])
 
 

@@ -13,15 +13,15 @@ from pathlib import Path
 SIMD_MASK = "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"
 GRADED_ENV = {"NPY_DISABLE_CPU_FEATURES": SIMD_MASK, "OPENBLAS_CORETYPE": "Haswell"}
 
-# MuJoCo 3.14.0's wheel libmujoco.so with the EPA horizon fix (source/images/robotangle/mujoco-3.14.0-epa/): every image
+# MuJoCo 3.14.0's wheel libmujoco.so with the EPA horizon fix (source/images/roboarc/mujoco-3.14.0-epa/): every image
 # ships the patched file; the stock wheel's file has the first hash.
 LIBMUJOCO_STOCK_SHA256 = "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b"
 LIBMUJOCO_EPA_SHA256 = "52e2a24e927ccac047b13576ff9fcbe455bc9a12b0d2e0bf1868bb7ca5be2e4d"
 
 # Paths inside the published images
-IMAGE_TOPOGYM = Path("/opt/topogym")                     # roboarc:1.0.0: the simulator package (PYTHONPATH)
-IMAGE_INSTANCES = Path("/opt/robotangle/instances")      # roboarc:1.0.0: every base's frozen instance
-IMAGE_STAGE = Path("/opt/robotangle/stage_instance.py")  # roboarc:1.0.0: stages and checks one instance
+IMAGE_TOPOGYM = Path("/opt/topogym")                     # roboarc: the simulator package (PYTHONPATH)
+IMAGE_INSTANCES = Path("/opt/robotangle/instances")      # roboarc: every base's frozen instance
+IMAGE_STAGE = Path("/opt/robotangle/stage_instance.py")  # roboarc: stages and checks one instance
 IMAGE_IKEA_SCENES = Path("/opt/ikea/scenes")             # roboarc-ikea(-sim):1.0.0: the scenes
 IMAGE_NYX_PYTHON = Path("/opt/nyx/bin/python")           # roboarc-ikea-sim:1.0.0: the Nyx render process
 

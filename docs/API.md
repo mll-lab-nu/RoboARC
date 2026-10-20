@@ -45,7 +45,7 @@ libmujoco and the exact dependency versions the runtime bindings require.
 
 | suite | image (physics) | images with Nyx RGB |
 |---|---|---|
-| puzzles | `ghcr.io/embodied-first-exam/roboarc:1.0.0` (Python 3.11) | the same image |
+| puzzles | `ghcr.io/embodied-first-exam/roboarc:1.1.0` (Python 3.11) | the same image |
 | IKEA | `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0` (Python 3.12) | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.0.0` |
 
 Mount the repository (read-only is fine) and put it on `PYTHONPATH` (or `pip install --no-deps -e /repo` in a derived
@@ -55,11 +55,11 @@ image). Run from the repository root of the checkout:
 # a puzzle task, physics only (CPU; rendering off): its reference replayed and checked against the recorded end
 # hash (about 30 s; orbits-02's 7918 rows take about 30 min on one core)
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/embodied-first-exam/roboarc:1.0.0 python -m roboarc replay roboarc-interlocked-claws-03-i01
+  ghcr.io/embodied-first-exam/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01
 
 # with Nyx images (one GPU, Vulkan through the NVIDIA container toolkit)
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc:1.0.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
 
 # an IKEA task with Nyx images
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo -e HOME=/tmp \
@@ -77,9 +77,9 @@ compiles them at every start (a few seconds); the frames are not affected.
   images' versions: `.[puzzles]` (numpy 2.3.5, scipy 1.17.1, mujoco 3.14.0, warp-lang 1.18.0, newton 1.6.1, pillow 11.3.0),
   `.[ikea]` (numpy 2.5.4, mujoco 3.14.0), `.[gym]` (Gymnasium), `.[test]` (pytest). Outside the images two more things
   are needed: the EPA patch of the mujoco wheel (`python -m roboarc patch-mujoco`, the same 14-byte patch the images
-  apply; `source/images/robotangle/mujoco-3.14.0-epa/`) and, for the puzzles, the frozen instances
+  apply; `source/images/roboarc/mujoco-3.14.0-epa/`) and, for the puzzles, the frozen instances
   (`ROBOARC_INSTANCES=<dir>` with `<dir>/<base>/instance.json` + `instance_assets/`) and the image's own runtime (its
-  libuipc build among them: the runtime binding checks it). `make(..., strict=False)` runs without these checks; the
+  simulator source and package versions: the runtime binding checks them). `make(..., strict=False)` runs without these checks; the
   results are then not the graded ones.
 - Hardware: the MuJoCo physics runs on the CPU (one core per environment). A GPU is needed for Nyx rendering (RT cores;
   NVIDIA driver 570 worked) and, for **blanket-flatten and blanket-fold, for the physics too**: their cloth runs on a
@@ -258,8 +258,7 @@ Every limit clamps the command and the episode goes on; none fails it. The API a
   `standard/`), which are byte-identical to the task directories' copies.
 - `make()` (with `strict=True`) refuses a runtime the graded tasks would refuse:
   - the puzzles: the task's `runtime_binding.json` staged next to the frozen instance makes the Session check the
-    instance, the tooling, the render bridge and the installed runtime (source tree, dependency versions, libuipc
-    build), and the environment requires the verifier's start condition (`instance_matches`, exact or realized, a
+    instance, the tooling, the render bridge and the installed runtime (source tree, dependency versions), and the environment requires the verifier's start condition (`instance_matches`, exact or realized, a
     checked binding);
   - IKEA: the scene's files against the binding, the runtime (MuJoCo, numpy and Python versions) and the initial state
     hash, as the verifier does;

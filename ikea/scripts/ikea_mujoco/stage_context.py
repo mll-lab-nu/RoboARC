@@ -22,7 +22,7 @@ PINS = HERE / "assets.json"
 TOP = ("scene.py", "scene.xml", "task.json", "layout.json", "sw_cutover.json")
 IMAGE_KEYS = ("note", "tasks")   # the part of assets.json the image carries; the dataset pin (repo, revision) stays out
 # The EPA fix (README next to it): RoboARC's one copy of the 14-byte libmujoco.so patch, staged into the context
-EPA_PATCH = ROOT.parent / "source/images/robotangle/mujoco-3.14.0-epa/bytepatch_libmujoco.py"
+EPA_PATCH = ROOT.parent / "source/images/roboarc/mujoco-3.14.0-epa/bytepatch_libmujoco.py"
 
 
 def sha(p: pathlib.Path) -> str:

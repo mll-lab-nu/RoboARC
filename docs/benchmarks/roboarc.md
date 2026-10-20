@@ -24,7 +24,7 @@ the family pages list each family's robot and success rule.
 
 - **Physics**: MuJoCo 3.14.0 on the CPU in float64; the blanket families' cloth on a deterministic CUDA step
   (`blanket_vbd_gpu`). The image's `libmujoco.so` carries a fix of the EPA horizon overflow (a 14-byte patch of the
-  wheel's library, `source/images/robotangle/mujoco-3.14.0-epa/`); every released reference reaches its recorded end
+  wheel's library, `source/images/roboarc/mujoco-3.14.0-epa/`); every released reference reaches its recorded end
   state with it, on AMD Zen 4 and Intel CPUs.
 - **Determinism**: numpy / OpenBLAS SIMD paths are masked in every container that runs a session, so every CPU class
   builds the same frozen bytes; a replay of the same actions from the frozen state gives the same state hash.
@@ -50,16 +50,15 @@ the family pages list each family's robot and success rule.
   generator checks the filled texts against the facts they must state (the tooling's contact rule and breakdown depth,
   `release.json`'s grasping rule and step time, the difficulty, the family the grader runs). A text change is an edit
   of the package, then a re-render.
-- A new base starts from the Genesis-era texts of an earlier task (`tools/release/templates/`, with its design's own
-  texts from `tools/release/package_text/`); `scripts/roboarc/port_package.py <base>` turns them into a final package
-  (the rewrites that made the released texts, then the fields put back and checked to fill back to the same text).
-  `tools/release/release_rebuild.py` runs it for the bases whose packages it writes; `port_package.py --check` lists
-  bases still in Genesis-era form.
+- A new base starts from the final packages of its template, a sibling base (`tools/release/release_rebuild.py`
+  copies them under the new name when the base has none); its texts are then edited in `scripts/roboarc/packages/`.
+  Until 1.0.x new bases started from Genesis-era texts (`tools/release/templates/`, `package_text/` and
+  `scripts/roboarc/port_package.py`, in RoboARC 1.0.0).
 - The frozen instances (about 700 MB) are not in git: they are in a Hugging Face dataset, pinned file by file in
   `scripts/roboarc/assets.json`. The image carries them, so running tasks needs no dataset access.
 - Image: `ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>`, built by `images/roboarc/build.sh` from
-  `source/` (recipe `source/images/robotangle/Dockerfile.mujoco`, the instances as a named build context) on a
-  published base image pinned by digest. Every task is bound to the runtime the image installs (`release.json`
+  `source/` (recipe `source/images/roboarc/Dockerfile`, the instances as a named build context) on the Python base
+  image pinned by digest, with Debian packages and wheels pinned by version and hash (images/roboarc/README.md). Every task is bound to the runtime the image installs (`release.json`
   `runtime`; the build checks it).
 
 ## Time budget

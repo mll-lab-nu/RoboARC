@@ -23,7 +23,8 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 | input | pin |
 |---|---|
 | frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `9f34f894a454d4f39ebaed5dcf8c8c9d40f828b9`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
-| Genesis base image (`eai-robotangle` 0.2.22) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
+| puzzle image base (1.1.0) | `python:3.11.15-slim-bookworm@sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3` (the 0.2.22 image's own base); Debian packages from `snapshot.debian.org` 20260930T230000Z at the versions in `source/images/roboarc/Dockerfile`; wheels by sha256 in `source/images/roboarc/runtime.lock` and `vbd-requirements.txt` |
+| Genesis base image (`eai-robotangle` 0.2.22; 1.0.x only) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
 | monitor sidecar (`eai-monitor` 0.1.0) | `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f53f79c2bfa4a71298b10c78383cae3afc40720ca562cc845b8d20fb0c`, the same digest as the published `eai-monitor:0.1.0` |
 | standard agent base | `docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f` |
 | MuJoCo EPA fix | upstream google-deepmind/mujoco `6d662aedda693a1225a03a26c6b3ddd5e3cc4fbe`, backported as a byte patch |
@@ -126,3 +127,16 @@ instances, the references, the IKEA scenes and the images are those of 1.0.0, ex
 `ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0@sha256:ea1b0d4b859998d6a47e2cb7a72c3a9ae85870b32c75de1bc1448e387da07093`, built by RoboARC from
 `images/monitor/` (reproducibly; its five layers have the diff ids of the 1.0.0 pin `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f5…`,
 whose package RoboARC does not control; the config adds three OCI labels).
+
+## 1.1.0: no Genesis
+
+1.1.0 builds the release image from the Python base image instead of the RoboTangle 0.2.22 (Genesis) image
+(`source/images/roboarc/Dockerfile`; every input pinned: base image digest, Debian package versions from
+snapshot.debian.org, wheels by sha256), removes Genesis and libuipc from the image and the Genesis-only modules from the
+simulator source (SOURCE.json 443 -> 426 files), and moves the tooling to v20 (no libuipc build choice). Every library
+the graded runtime loads is the same file as in 1.0.0, and every reference replays to the end state it reaches in 1.0.0
+([docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md)). Removed from the repository (in 1.0.0 at main
+153eb8cf01): `records/genesis_release/`, `tools/references/oracles_genesis/`, `tools/release/{templates,package_text}/`,
+`tools/release/package_text_tool.py`, `scripts/roboarc/port_package.py`, `tools/tests/test_mujoco_kinematics.py`,
+`images/roboarc/{Dockerfile.genesis-0.2.22,install_uipc_prefix.py,verify_uipc_wheel.py,uipc-sm86-build/}`. The
+row "Genesis base image" above is the input of 1.0.x only.

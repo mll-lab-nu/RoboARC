@@ -12,7 +12,7 @@ The tasks serve two kinds of solvers through the same simulator code:
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.0.1** (see [CHANGELOG.md](CHANGELOG.md); the images are still `1.0.0`), 226 Harbor task directories
+Version **1.1.0** (see [CHANGELOG.md](CHANGELOG.md); the puzzle image is `1.1.0`, the IKEA images are still `1.0.0`), 226 Harbor task directories
 under `tasks/`:
 - the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories;
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
@@ -63,7 +63,7 @@ Requirements:
 - Docker with the NVIDIA Container Toolkit; [Harbor](https://github.com/laude-institute/harbor) 0.23 or newer;
   Python >= 3.11 for the repository tools.
 
-The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.0.0`; the IKEA tasks run
+The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.1.0`; the IKEA tasks run
 `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.0.0`. Pull them,
 or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 
@@ -97,9 +97,9 @@ Run it inside the task's image with the repository mounted:
 
 ```bash
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc:1.0.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/embodied-first-exam/roboarc:1.0.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
+  ghcr.io/embodied-first-exam/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
 ```
 
 IKEA runs in `roboarc-ikea:1.0.0` (physics only) or `roboarc-ikea-sim:1.0.0` (with Nyx images). `pip install -e .`
@@ -118,15 +118,17 @@ never fail), rendering and GPU needs, the wrappers and the tests: [docs/API.md](
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
 | `scripts/` | the task layer the tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`) and build helpers (`stamp_mtimes.py`, `check_image_files.py`) |
 | `scripts/harbor/` | the Harbor batch runner and its helpers ([docs/RUNNING.md](docs/RUNNING.md)) |
-| `source/` | the image build context: the simulator package `topogym/` (with `planning/`, the planners that made the references), `assets/robots/`, the recipe `source/images/robotangle/Dockerfile.mujoco` with the MuJoCo EPA patch |
-| `images/roboarc/`, `images/monitor/` | the release image's `build.sh` / `push.sh` and the recipe of its Genesis base; the monitor sidecar's recipe |
+| `source/` | the image build context: the simulator package `topogym/` (with `planning/`, the planners that made the references), `assets/robots/`, the recipe `source/images/roboarc/Dockerfile` with its pinned inputs and the MuJoCo EPA patch |
+| `images/roboarc/`, `images/monitor/` | the release image's `build.sh` / `push.sh` and its README (what it holds, how it is pinned); the monitor sidecar's recipe |
 | `tools/` | development tools: the release rebuild, reference recording, redesign and stress tests ([tools/README.md](tools/README.md)) |
 | `records/` | freeze manifests and archived release records |
 | `ci_checks/`, `.github/` | the repository checks and the CI workflow |
 | `docs/` | protocol, running guide, developer guide, API, benchmark and family pages; `docs/simulator/` the simulator's internals; `docs/rcb/` a map of older paths that task texts cite |
 
 The simulator keeps its historical names: the package `topogym`, the tooling `rcb_topogym.py` and the image path
-`/opt/robotangle/`. RoboARC was developed as TopoGym, then RoboTangle; renaming them would change the pinned bytes every
+`/opt/robotangle/`. RoboARC was developed as TopoGym, then RoboTangle, on the Genesis simulator; its tasks moved to
+MuJoCo before 1.0.0, and since 1.1.0 the image and the simulator source contain no Genesis
+([docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md)). Renaming them would change the pinned bytes every
 task is bound to. [PROVENANCE.md](PROVENANCE.md) says where every part comes from.
 
 ## Checks

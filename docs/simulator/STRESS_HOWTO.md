@@ -8,7 +8,7 @@ coordinator.
 ## 0. What you need
 
 - **Code:** the head of the development branch. Pull it before every round, and run the whole round on one commit.
-- **Python:** the RoboARC release image (built from `source/images/robotangle/Dockerfile.mujoco` by
+- **Python:** the RoboARC release image (built from `source/images/roboarc/Dockerfile` by
   `images/roboarc/build.sh`) with the checkout mounted, or any Python with `mujoco==3.14.0` and the image's packages.
   Run the commands below from the repository root.
   - The tools import `tools/stress/_env.py` first. It puts this checkout's `topogym` and

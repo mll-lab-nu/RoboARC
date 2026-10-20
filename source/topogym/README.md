@@ -9,7 +9,7 @@ keep their names.
 | folder | content |
 |---|---|
 | `simulator/` | `make` / `env_list`, `SimulatorConfig`, the managed `Env` and its interaction handles, history, `frozen_binding.py` (the installed runtime every task binding names) |
-| `world/` | the worlds: `mujoco/` (the MuJoCo core: scenes, contact policy, profiles, rope and cloth backends, energy books, guards; [docs/simulator/MUJOCO_CORE.md](../../docs/simulator/MUJOCO_CORE.md)), `physics/` and `genesis_world.py` (the Genesis paths: render host, birth states), `visuals/` |
+| `world/` | the worlds: `mujoco/` (the MuJoCo core: scenes, contact policy, profiles, rope and cloth backends, energy books, guards; [docs/simulator/MUJOCO_CORE.md](../../docs/simulator/MUJOCO_CORE.md)), `physics/` (birth-state codecs and helpers the MuJoCo core reads; the Genesis world, its backends and visuals were removed in 1.1.0) |
 | `tasks/` | the 14 families (`<family>/`: task, variations, success predicates, redesigned tiers), placement, goal descriptions |
 | `assets/` | task geometry (`geometry/`), frozen resources and variation records (`resources/`), robot loading |
 | `robot/`, `sensors/`, `solvers/` | robot descriptions and control modes; observations and cameras; kinematics and collision queries |
@@ -27,7 +27,7 @@ notes: `docs/simulator/families/`).
 
 | family | released bases | planning | tools |
 |---|---|---|---|
-| blanket_flatten | 01-09 | `blanket_flatten/` (routes, robot oracle, hard port, `redesign/`; run-oracle entry `public_session.py`) | the Genesis-era routes: `tools/references/oracles_genesis/` |
+| blanket_flatten | 01-09 | `blanket_flatten/` (routes, robot oracle, hard port, `redesign/`; run-oracle entry `public_session.py`) | the Genesis-era routes: `tools/references/oracles_genesis/` of RoboARC 1.0.0 |
 | blanket_fold | 01-05 | `blanket_fold/redesign/oracle.py` (through `blanket_flatten/`'s route runner) | |
 | buzz_wire_3d | 01-10 | `buzz_wire_3d/` (`redesign/` for the rd tiers) | `tools/references/buzz_wire_3d/` (`make_ref.py`, `ported/`), `tools/redesign/buzz_wire_3d/` |
 | cast_coil | 01-08 | `cast_coil/` | `tools/references/cast_coil/` |

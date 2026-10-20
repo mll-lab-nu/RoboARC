@@ -13,8 +13,8 @@ GraspManager, the Session and its rules (`rcb_topogym.py`), the standard service
 
 | Layer | Genesis | MuJoCo |
 |---|---|---|
-| World | `topogym/world/genesis_world.py` | `topogym/world/mujoco/world.py` |
-| Scene | `topogym/world/tabletop.py` + `World.add_entities` | `topogym/world/mujoco/scene.py`: MJCF from the same declarations |
+| World | `topogym/world/genesis_world.py` (removed in 1.1.0) | `topogym/world/mujoco/world.py` |
+| Scene | `topogym/world/tabletop.py` (removed in 1.1.0) + `World.add_entities` | `topogym/world/mujoco/scene.py`: MJCF from the same declarations |
 | Robot | `topogym/robot/joint_position.py` | `topogym/world/mujoco/robot.py`: the same class, on the scene's PD drives |
 | Assisted grasp (`contact_weld_v1`) | `world/physics/grasp_rigid.py` | `topogym/world/mujoco/grasp.py`: one inactive weld per hand and target link |
 | Family settings | the task's `physics_options` | `topogym/world/mujoco/profiles.py` |
@@ -60,7 +60,7 @@ The tooling and the tasks use this subset of the Genesis entity API, and the vie
     private `MjData`, so `topogym.solvers.genesis_kinematics` (GenesisFKSolver, GenesisIKSolver) and EE_ABS actions
     work on MuJoCo. The IK is Genesis 1.2.1's kernel (damped least squares, per-dof step clamp, joint ranges, float32
     parameters), one sample (no random restarts): on the ALOHA and the Panda it reproduces Genesis' solutions to
-    1e-9 rad and picks the same branch (`tools/tests/test_mujoco_kinematics.py`).
+    1e-9 rad and picks the same branch (checked against Genesis by `tools/tests/test_mujoco_kinematics.py`, in RoboARC 1.0.0).
 - **Link:** `name`, `idx` (the MuJoCo body id; contacts use it), `parent_idx`, `is_fixed`, `geoms` (collision),
   `vgeoms`, `get_pos` / `get_quat` / `get_vel` / `get_ang`.
 - **Joint:** `name`, `qs_idx_local`, `dofs_idx_local`.
@@ -121,7 +121,7 @@ It writes:
   - the robot's meshes referenced through a token, never an absolute path: `@robot-assets@/` (TOPOGYM_ASSET_ROOT) or,
     for the Panda's meshes, `@genesis-assets@/` (the genesis package's asset layout). At load the Panda's paths resolve to
     its vendored copy, `robots/franka_emika_panda/` in the robot asset root (the same bytes; the genesis package only
-    where that copy is absent), so frozen scenes keep their bytes;
+    where that copy is absent; the image has no genesis package since 1.1.0), so frozen scenes keep their bytes;
   - where the profile's `robot.maxhullvert` asks for it, the robot's collision meshes capped at that many convex-hull
     vertices (below);
 - task entities: `urdf` (any tree of fixed, revolute and prismatic joints), `mesh`, `box`, `sphere`, `cylinder`, and
@@ -466,7 +466,7 @@ Evidence: the validate agent's 95 claws reproducers (its S1 / S2 searches and co
 observer (energy balance, per-substep depth, causality): shipped 61 breakdowns, this policy 0; the deepest task contact
 under abuse 21.5 -> 3.9 mm; per-control time unchanged.
 
-The MuJoCo version is pinned to the image's own, **mujoco 3.14.0** (a genesis-world dependency): every instance,
+The MuJoCo version is pinned to the image's own, **mujoco 3.14.0** (pinned in `source/images/roboarc/runtime.lock`): every instance,
 reference, grade and sweep runs it. A frozen scene records the version it was built with (`scene.json`).
 
 ## Robot limits (clamp, never fail)

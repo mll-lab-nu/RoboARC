@@ -4,6 +4,57 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 1.1.0 (2026-10-20)
+
+The puzzle image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` (8.7 GB; 1.0.0 was 12.2 GB). The task
+set's version is 1.1.0. Every puzzle task binds the new image's runtime; the instructions, the graders' logic, the
+frozen instances, the references and the IKEA tasks and images (still `roboarc-ikea:1.0.0`, `roboarc-ikea-sim:1.0.0`)
+are unchanged. Results graded under 1.0.x stand: every reference replays in the new image to the end state it reaches in 1.0.0.
+Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md).
+
+### The image
+- Built from the Python base image (`source/images/roboarc/Dockerfile`) instead of the RoboTangle 0.2.22 (Genesis)
+  image. Everything is pinned: the base image by digest, the Debian packages by version from snapshot.debian.org, the
+  wheels by sha256 (`source/images/roboarc/runtime.lock`, `vbd-requirements.txt`).
+- The same files as 1.0.0 for everything it keeps: every library the graded runtime loads (the Python interpreter,
+  glibc / libm, libstdc++, numpy's and scipy's OpenBLAS, MuJoCo 3.14.0 with the EPA patch, Warp, Newton, torch and its
+  CUDA libraries, gs-nyx, the graphics loaders, ffmpeg) is byte-identical, and so is every file of the 49 Python
+  packages it keeps.
+- Removed as unused (traced on every family, both modes, rendering on, and on the agent's API): genesis-world, libuipc
+  (pyuipc, both builds), quadrants, gs-madrona, gs-nyx-plugin, torchvision, triton, opencv, vtk, matplotlib,
+  scikit-image, numba and the other packages only these needed; build-essential, git, vulkan-tools; the uv download
+  cache the 0.2.22 image kept (9.3 GB); documentation pages and apt/dpkg logs. curl, ca-certificates and ripgrep stay
+  for the agent harness.
+
+### The simulator, the tooling and the bindings
+- `source/topogym/`: the Genesis world, scene builder, physics backends (FEM, IPC, the Genesis grasp models), visuals
+  and renderer are removed (SOURCE.json: 443 -> 426 files); the runtime identity no longer names genesis-world, pyuipc
+  or a libuipc build. The ground plane's checker texture, which the renderer read from the genesis package, ships with
+  the image; a Panda + Robotiq robot given in genesis-world's layout resolves to the vendored Panda (the same bytes).
+- Tooling v20 (`rcb_topogym.py`): no libuipc build choice by GPU, no Genesis kernel replacements; `nyx_direct.py` finds
+  the checker texture in the image.
+- All 202 puzzle task dirs: new `runtime_binding.json`, tooling copies, image reference, a 1.1.0 Change Log entry and
+  DIGEST; the compose files cite the new recipe.
+
+### Repository
+- Removed (they only served porting from Genesis; RoboARC 1.0.0 at main 153eb8cf01 keeps them): the Genesis-era task
+  texts and tools (`tools/release/templates/`, `package_text/`, `package_text_tool.py`, `scripts/roboarc/port_package.py`),
+  the Genesis `-i00` references (`tools/references/oracles_genesis/`), the Genesis release generator
+  (`records/genesis_release/`), the Genesis base image's recipe and libuipc build files, and the Genesis kinematics
+  comparison test. `release_rebuild.py` gives a new base its template's final packages.
+
+### Validation of 1.1.0
+- The 99 references, replayed strictly in fresh processes as the privileged verifier does (two replays, rendering
+  off): all succeed, both replays agree, every birth is the frozen instance's; 97 end on the freeze manifest's hash, and
+  knot-untying-06-i01 and -09-i01 on the hashes 1.0.0 and the released 0.2.0 image reach (the manifest holds an earlier
+  dry run's values for these two). The two bases without a reference build their frozen birth.
+- Every library the traced runtime loads and every file of the kept Python packages is byte-identical to 1.0.0's; two
+  builds of the recipe on different hosts give the same file contents.
+- The agent API's Nyx frames, depth and camera data equal 1.0.0's (five families); the standard service with Nyx
+  rendering reaches the recorded end states; `tests/api`: 29 simulator tests and 17 bit-identity tests pass in 1.1.0.
+- `release_rebuild.py --onto 1.1.0` with its own instances builds the same image id and changes no file; the
+  generators' `--check`, the invariants, unit tests and advisories pass.
+
 ## 1.0.1 (2026-10-19)
 
 The task set's version 1.0.1 (`scripts/roboarc/release.json` `version`; the README Release line of every puzzle task).

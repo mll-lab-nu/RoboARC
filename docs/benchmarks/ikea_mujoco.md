@@ -126,7 +126,7 @@ One rule for all scenes, clamp rather than fail:
 - **MuJoCo 3.14.0 with the EPA fix byte-patched in.** 3.14.0's EPA writes past two fixed 24-entry horizon arrays (fixed
   upstream after 3.14.0). A dowel pressed deep into a thin convex piece of eket's side panel overflowed them (SIGSEGV
   or silent memory corruption, about 1 in 400 random eket episodes). The image patches 14 bytes of the wheel's own
-  `libmujoco.so` (`source/images/robotangle/mujoco-3.14.0-epa/`, shared with RoboARC's image); it is bit-identical to
+  `libmujoco.so` (`source/images/roboarc/mujoco-3.14.0-epa/`, shared with RoboARC's image); it is bit-identical to
   the stock wheel on every reference and stress episode checked.
 - **Cylinder -> prism:** every cylinder a robot geom can touch is a 32-facet convex prism at scene build (RoboARC's
   rule); it removed every cylinder-caused breakdown in the stress test. **kyrre is the one exception:** its six screws

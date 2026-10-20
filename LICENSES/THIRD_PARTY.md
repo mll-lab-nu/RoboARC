@@ -5,9 +5,10 @@ from others and keeps its own licence; the licence texts that must travel with i
 the material itself. Items whose use rests on a permission the RoboARC owners confirmed, rather than on a licence file, say so; the MIT
 licence does not extend to them.
 
-The task images also contain third-party packages installed at build time (MuJoCo, Genesis, gs-nyx, Newton, NVIDIA
-Warp, PyTorch, libuipc and their dependencies, pinned by the recipes under `source/images/` and `ikea/images/`). They
-are not part of this repository and keep their own licences, shipped inside the packages.
+The task images also contain third-party packages installed at build time (MuJoCo, gs-nyx, Newton, NVIDIA Warp,
+PyTorch, Debian packages and their dependencies, pinned by the recipes under `source/images/` and `ikea/images/`; until
+1.0.x the puzzle image also held Genesis and libuipc). They are not part of this repository and keep their own
+licences, shipped inside the packages.
 
 ## Robot models
 
@@ -30,7 +31,7 @@ the same sha256).
 | The shared task layer (task conventions, egress tool, `eai-standard` service layer, resource monitor, CI checks, Harbor runner) | `scripts/`, `ci_checks/`, copies in every task directory | robot_coding_bench | MIT, Copyright (c) 2026 Kangrui Wang and robot_coding_bench contributors: [robot_coding_bench-MIT.txt](robot_coding_bench-MIT.txt) |
 | VBD cloth kernels adapted from Newton (`newton/_src/solvers/vbd/particle_vbd_kernels.py`, newton 1.6.1) and a kernel that evaluates Newton's contact and elasticity functions | `source/topogym/world/mujoco/vbd_fast.py`, `vbd_gpu.py`, `cloth_coupling.py` (each carries an SPDX header) | Newton, https://github.com/newton-physics/newton | Apache-2.0, Copyright (c) 2025 The Newton Developers: [Apache-2.0.txt](Apache-2.0.txt) |
 | Two camera kernels of Genesis (`_tc_R_to_quat`, `_tc_z_up_to_R` from `genesis/utils/geom.py`), copied unchanged | `scripts/roboarc/shared/nyx_direct.py`, `ikea/scripts/ikea_mujoco/standard/nyx_direct.py` (and their copies in the task directories) | Genesis, https://github.com/Genesis-Embodied-AI/Genesis | Apache-2.0: [Apache-2.0.txt](Apache-2.0.txt) |
-| MuJoCo EPA fix: a byte patch applied to the PyPI `mujoco==3.14.0` wheel's `libmujoco.so.3.14.0` at image build, backporting upstream commit `6d662aedda693a1225a03a26c6b3ddd5e3cc4fbe` (MuJoCo 3.15+) | `source/images/robotangle/mujoco-3.14.0-epa/bytepatch_libmujoco.py` | MuJoCo, https://github.com/google-deepmind/mujoco | MuJoCo is Apache-2.0 ([Apache-2.0.txt](Apache-2.0.txt)). The patch script is RoboARC's; the library it modifies is not in this repository. Images built with it ship a modified `libmujoco.so.3.14.0`: this entry and the script's docstring state the change (14 bytes at 5 sites, input and output sha256 asserted) |
+| MuJoCo EPA fix: a byte patch applied to the PyPI `mujoco==3.14.0` wheel's `libmujoco.so.3.14.0` at image build, backporting upstream commit `6d662aedda693a1225a03a26c6b3ddd5e3cc4fbe` (MuJoCo 3.15+) | `source/images/roboarc/mujoco-3.14.0-epa/bytepatch_libmujoco.py` | MuJoCo, https://github.com/google-deepmind/mujoco | MuJoCo is Apache-2.0 ([Apache-2.0.txt](Apache-2.0.txt)). The patch script is RoboARC's; the library it modifies is not in this repository. Images built with it ship a modified `libmujoco.so.3.14.0`: this entry and the script's docstring state the change (14 bytes at 5 sites, input and output sha256 asserted) |
 
 ## Scenes, textures and lighting
 
@@ -38,6 +39,7 @@ the same sha256).
 |---|---|---|---|
 | IKEA furniture-assembly scenes: scene models, mechanisms, success checks and the robot demos the references start from | `ikea/images/ikea-mujoco/scenes/`, `ikea/scripts/ikea_mujoco/`; meshes in a pinned asset dataset (`ikea/scripts/ikea_mujoco/assets.json`) | authored by Xiaoyu and Zhen Wu's team, co-authors of RoboARC; parts ported from their assembly code base (`ikea/scripts/ikea_mujoco/provenance.json`) | contributed under this repository's MIT licence ([LICENSE](../LICENSE)), scene code and meshes alike |
 | Studio lighting HDRI "Studio Small 09" by Sergej Majboroda | not in this repository: the IKEA sim image downloads it at build (`ikea/images/ikea-mujoco/sim/Dockerfile`, sha256 asserted, with a CREDITS.txt); RoboARC's renderer reads it from its base image (`source/topogym/config/profiles/presentation_configs/compact_lab.yaml`, `env_map`) | Poly Haven, https://polyhaven.com/a/studio_small_09 | CC0 |
+| Ground plane checker texture (`genesis/assets/textures/checker.png` of genesis-world 1.2.1, unchanged) | `source/assets/textures/genesis/textures/checker.png` (installed in the puzzle image at `/opt/topogym-visuals/genesis/`) | Genesis, https://github.com/Genesis-Embodied-AI/Genesis | Apache-2.0: [Apache-2.0.txt](Apache-2.0.txt) |
 | Dark wood texture (hedgehog-in-cage) | `source/topogym/assets/resources/textures/hedgehog_in_cage_materials_dark_wood.png` | Poly Haven `wood_table_001`, https://polyhaven.com/a/wood_table_001 (recorded in `source/topogym/assets/resources/templates/hedgehog_in_cage_materials_sources.json`) | CC0 |
 | Light wood texture (hedgehog-in-cage) | `source/topogym/assets/resources/textures/hedgehog_in_cage_materials_light_wood.png` | LIBERO's `table_light_wood.png` (same record) | permission confirmed by the RoboARC owners (2026-10-20) |
 | Interlocked claws reference meshes | `source/topogym/assets/resources/meshes/interlocked_claws_piece-{0,1}.obj`, `templates/interlocked_claws_reference_scene.json` | an upstream claw-pair geometry (`asset_id` `cspace_claw_wang_v1`, retrieved 2026-09-17) | permission confirmed by the RoboARC owners (2026-10-20); the asset record notes that these meshes do not fall under the code licence |
@@ -53,4 +55,4 @@ the same sha256).
 
 | what | note |
 |---|---|
-| gs-nyx 0.1.3 / gs-nyx-plugin 0.1.4 (the Nyx renderer, installed in the images) | the wheels carry no licence file or metadata; their documentation repository (Genesis-Embodied-AI/nyx-for-genesis) is Apache-2.0. No plugin code is copied into this repository (`scripts/roboarc/shared/nyx_direct.py` calls its public API). Use in the images: permission confirmed by the RoboARC owners (2026-10-20) |
+| gs-nyx 0.1.3 (the Nyx renderer, installed in the images; gs-nyx-plugin 0.1.4 too until 1.0.x) | the wheels carry no licence file or metadata; their documentation repository (Genesis-Embodied-AI/nyx-for-genesis) is Apache-2.0. No plugin code is copied into this repository (`scripts/roboarc/shared/nyx_direct.py` calls its public API). Use in the images: permission confirmed by the RoboARC owners (2026-10-20) |
