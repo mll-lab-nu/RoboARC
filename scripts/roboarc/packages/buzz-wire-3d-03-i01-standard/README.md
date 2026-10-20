@@ -1,18 +1,18 @@
-# topogym-buzz-wire-3d-03-i01-standard
+# roboarc-buzz-wire-3d-03-i01-standard
 
 | | |
 |---|---|
-| Benchmark | TopoGym |
-| Mode | standard (`eai-standard/2.3`) |
-| Twin | `topogym-buzz-wire-3d-03-i01-privileged` |
+| Benchmark | RoboARC |
+| Mode | standard (`eai-standard/2.4`) |
+| Twin | `roboarc-buzz-wire-3d-03-i01-privileged` |
 | Simulator / robot | `topogym` / `panda_robotiq` |
 | Family / instance | `buzz_wire_3d` / seed 0 |
 | Oracle | `none` — No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol §2.7). |
 | Agent time budget | 21600 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `labv18b/rcb-topogym:0.2.16-dev-cu128` |
+| Base image | `{{IMAGE}}` |
 
 ## Task
-Standard-mode twin of `topogym-buzz-wire-3d-03-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.3` client
+Standard-mode twin of `roboarc-buzz-wire-3d-03-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.4` client
 (docs/STANDARD_MODE.md); the simulator runs in the `sim` sidecar (`environment/docker-compose.yaml`, GPU on the
 sidecar), which owns the scene and records the episode as a (T, 8) trajectory; its collect hook
 (`environment/sim/finalize.sh`) replays the trajectory once in a fresh process for success, rendering the video during
@@ -20,13 +20,15 @@ that replay. The verifier runs in a separate sandbox (`tests/Dockerfile`) over t
 the privileged task to measure the cost of losing resets, privileged state and the tooling's primitives.
 
 ## Difficulty
-Same scene, instance and success rule as `topogym-buzz-wire-3d-03-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
+Same scene, instance and success rule as `roboarc-buzz-wire-3d-03-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-See `solution/`.
+{{REFERENCE_SOLUTION}}
 
 ## Verification
 See `tests/grade.py`.
+
+{{NOP}}
 
 ## Details
 
@@ -47,7 +49,7 @@ Guide the metal loop along the entire wire from start to finish without touching
 - The tool falling more than 100 mm below the tabletop ends the episode in failure.
 
 ### Grader details (in addition to the requirements above)
-- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 6 mm beyond the tool frame (TCP) along its approach axis when open and about 19 mm when closed (the Robotiq fingertips move forward as they close). Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque.
+- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 6 mm beyond the tool frame (TCP) along its approach axis when open and about 19 mm when closed (the Robotiq fingertips move forward as they close). Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque. An arm with any part more than 5 mm deep in a fixed object (a fixture, the table) is stopped where it is: its joint targets become its measured joints for that control step, so it stops pushing (the response does not report these stops).
 - Forcing is recorded, not judged: an arm drive (not a gripper drive) at 95% of its torque cap or more while that arm's gripper, or a part it holds, presses on anything else with 20 N or more in total is forcing; 0.5 s of it on every physics tick is a forcing event in the evidence (`meta["safety"]`), shown to the reviewer when a success is reviewed. Forcing does not end the episode and does not change the grade by itself.
 - The release clearance is measured between axis-aligned bounding boxes: one around each collision geometry of the whole robot (every link of both arms) and one around each collision geometry of the tool, so the true gap usually has to be larger than 5 mm.
 - The loop's usable opening: the wire's centreline must cross the loop's disk less than 12.67 mm from the loop's centre (loop inner radius 14.14 mm minus the 1.47 mm wire radius).
@@ -59,7 +61,13 @@ Guide the metal loop along the entire wire from start to finish without touching
 | | |
 |---|---|
 | mode | standard (RGB, optional depth, proprioception, calibrated cameras, no reset) |
-| action space | `eai-standard/2.3`: `submit` chunks of `joint_position` (8, streamed at the 40 Hz control rate with the agent's `dt`) or `ee_pose` (8, IK per row); `observe` frames or a watch window; binary RCB1 responses |
-| oracle | none yet (`oracle = "none"`, no `solution/`) |
-| verification | `success` = live success ∧ replay success: the live episode, then one fresh-process replay in the sidecar's collect hook, after the live service has exited; the state hashes are reported, not required (GPU physics is not bit-deterministic; the CPU rigid families' is, on one host); `/logs/verifier/replay.mp4` is rendered during that replay |
-| crash recovery | `eai-standard/2.3` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
+| action space | `eai-standard/2.4`: `submit` chunks of `joint_position` (8, streamed at the 40 Hz control rate with the agent's `dt`) or `ee_pose` (8, IK per row); `observe` frames or a watch window; binary RCB1 responses |
+| oracle | `full` (`solution/`) |
+| verification | `success` = live success ∧ replay success: the live episode, then one fresh-process replay in the sidecar's collect hook, after the live service has exited; the state hashes are reported, not required (MuJoCo on the CPU replays bit for bit on one host; the rule does not rely on it); `/logs/verifier/replay.mp4` is rendered during that replay |
+| crash recovery | `eai-standard/2.4` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
+
+### Provenance
+{{PROVENANCE}}
+
+### Change Log
+{{CHANGE_LOG}}

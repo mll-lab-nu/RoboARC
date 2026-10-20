@@ -1,4 +1,4 @@
-# TopoGym · hedgehog_in_cage — STANDARD MODE (robot as a service, eai-standard/2.3)
+# RoboARC (simulator package `topogym`) · hedgehog_in_cage — STANDARD MODE (robot as a service, eai-standard/2.4)
 
 You control a robot (**a 7-DoF Franka Panda arm with a Robotiq 2F-85 parallel gripper on a fixed base**) **as if it were real hardware**: the simulator runs in a service you cannot open. You get one
 client and one episode. **Task:** Separate and place the whole star, including every spike inside the green dashed goal region. Keep all cage components on the puzzle/system side. A thin rod with a box handle lies on the table; you may use it as a tool. It is a task piece: if it falls off the table (more than 100 mm below the tabletop), the episode ends in failure.
@@ -21,21 +21,26 @@ client and one episode. **Task:** Separate and place the whole star, including e
 - The separator is an invisible, fixed vertical plane parallel to the goal square's near edge, 5 mm beyond the point of all remaining components that was closest to the goal square at the start; the square's near edge is at least 30 mm beyond it. The remaining components here are fixed.
 - Contact penetration as this benchmark grades it (it replaces the "at most 1 mm / 2 mm" wording above): penetration is recorded, it never ends the episode by itself. A success with deep interpenetration (a task contact deeper than 3 mm, or deeper than 2 mm for at least 0.25 s: 100 consecutive physics ticks; for a finger contact with a held piece 4 mm, or 2 mm for 0.25 s) is not credited automatically but reviewed, with the recorded evidence and frames; a clean success is credited automatically. A task contact deeper than 10 mm is a simulator breakdown (below).
 - Contact penetration is read from the contacts at the end of every physics tick (2.5 ms; 10 ticks per control step). "Held" is decided anew at every tick: a zero-force touch counts, and if one finger loses contact (with no active assisted grasp), the other finger is back at the non-held limits in the same tick. The cage is fixed, so finger contact with it is never held (always the non-held limits).
-- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 6 mm beyond the tool frame (TCP) along its approach axis when open and about 19 mm when closed (the Robotiq fingertips move forward as they close). Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque.
+- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 6 mm beyond the tool frame (TCP) along its approach axis when open and about 19 mm when closed (the Robotiq fingertips move forward as they close). Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque. An arm with any part more than 5 mm deep in a fixed object (a fixture, the table) is stopped where it is: its joint targets become its measured joints for that control step, so it stops pushing (the response does not report these stops).
 - Forcing is recorded, not judged: an arm drive (not a gripper drive) at 95% of its torque cap or more while that arm's gripper, or a part it holds, presses on anything else with 20 N or more in total is forcing; 0.5 s of it on every physics tick is a forcing event in the evidence (`meta["safety"]`), shown to the reviewer when a success is reviewed. Forcing does not end the episode and does not change the grade by itself.
 - Simulator breakdown (a non-finite state or a task contact deeper than 10 mm): the episode ends as an infrastructure error, not your failure, unless an arm was forcing (even for one tick) within the 0.25 s before it: then it is your failure (forced_breakdown: what broke and what forced it).
 - Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 90.1 mm, enclosing the whole part; push_rod: radius 37.1 mm, around the rod's box handle. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically.
 
 ## Rules (real-robot rules)
-- **No reset.** The episode starts when the service comes up and ends on success (all final conditions satisfied for
+- **No reset.** The episode ends on success (all final conditions satisfied for
   2 s), when your time is up, on a simulator error, or when the task's own failure predicate fires (then `meta["reason"]` is `task_failed`). Knocked-over objects stay
   knocked over.
 - **No privileged state.** You see what the cameras see (RGB, and depth when you ask for it) plus the robot's own state:
   joint positions, velocities and drive efforts, gripper openings, end-effector poses. Nothing tells you where the
-  objects are (no object poses or positions). The success implementation and internal measurements are not exposed;
-  the task requirements above still apply in full.
-- **Your wall-clock budget is 360 min (21600 s)** (`meta["time_left_s"]` counts it down); steps are unlimited. Actions and
-  simulated time are reported as cost. One control step takes about 0.041 s of wall clock here.
+  objects are (no object poses or positions). The success implementation is not exposed, and of the simulator's internal
+  measurements only the safety readings of `meta["safety"]` are (listed under Action types, below); the task
+  requirements above still apply in full.
+- **Your only budget is the time limit (`## Time limit`)**; there is no step budget, but the
+  episode ends after 200000 control steps, watches included (83 min of simulated time; a technical cap,
+  `spec["max_control_steps"]`: `meta["reason"]` is `step_guard`, and the episode is graded as it stands). Actions and simulated time are reported as cost.
+  This service also ends the episode itself (`meta["reason"]` is `timeout`; it is graded as it stands) when its own
+  count of that limit, `meta["time_left_s"]`, reaches 0. That count starts at your first request to the service, so it
+  never reaches 0 before your time is up.
 - There is nothing to hand in: the service records your episode as the trajectory and grades it. Leave your script
   at `/app/output/gen.py` for the record.
 - **Nothing is put into your context automatically.** Images and videos come back as arrays/bytes in a Python object;
@@ -54,19 +59,16 @@ client and one episode. **Task:** Separate and place the whole star, including e
 - Do not rerun a command just because its first wait returned partial logs. Confirm the original process has exited
   before starting a replacement; if cancellation is necessary, stop only your own identified process and confirm exit.
 - Keep the task's simulator and sensor configuration. Waiting does not extend the actual agent wall-clock budget.
-- Connect with `Robot()` and let its retry loop wait for the existing service (default connection budget: 600 seconds,
+- Connect with `Robot()` and let its retry loop wait for the existing service (default connection budget: 3600 seconds,
   still subject to the actual agent deadline). Do not try to start or rebuild a simulator yourself.
 - Reconnecting a client accesses the same episode; it does not reset the world. While an action request is still
   running, wait for its original command rather than resubmitting the same actions, which could execute them twice.
 
-## Time per call
-- One control step takes about 0.041 s of wall clock here. A request returns only when all of its steps have run, and the client gives up waiting after 1800 s for `submit` and 600 s for `get_obs`: a `submit` of the maximum 10 s chunk fits; any watch up to 30 s fits (both with a 2x margin).
-- If a request times out in the client anyway, the service still runs it to the end: do NOT send it again (it would run twice). Call `r.get_obs()` (repeat it if it also times out): it answers once the earlier request has finished and shows the state after it.
-
-## Client (`/opt/tools/rcb_client.py`, protocol `eai-standard/2.3`)
+{{TIME_PER_CALL}}
+## Client (`/opt/tools/rcb_client.py`, protocol `eai-standard/2.4`)
 ```python
 from rcb_client import Robot
-r = Robot()                                   # connects to the existing service; retries until ready (default timeout 600 s)
+r = Robot()                                   # connects to the existing service; retries until ready (default timeout 3600 s)
 spec = r.spec()                               # actions, cameras (intrinsics, mounting), robot_spec, world, kinematics, budget
 
 obs = r.get_obs()                             # current frames from 3 cameras: obs.last[cam] -> uint8 (480,848,3)
@@ -93,7 +95,7 @@ Cameras: `agentview` (static); `front_oblique` (static); `wrist` (on the robot l
 intrinsics and the mounting: a static pose, or the parent link and the fixed offset (world_T_cam = FK(link) · `link_T_cam_cv`).
 A point (X, Y, Z) in a camera's OpenCV frame (x right, y down, z forward) appears at u = fx·X/Z + cx, v = fy·Y/Z + cy;
 depth is that Z. `spec["robot_spec"]` lists the joints with their position, velocity and effort limits, the grippers,
-the PD gains and the tool frames; `spec["world"]` the frame conventions.
+the PD gains and the tool frames; `spec["world"]` the frame conventions (the world frame: origin at the robot's root link on its mounting, +z up; no positions of the scene are given).
 
 ### Action types
 - `joint_position` (8): `joint1`, `joint2`, `joint3`, `joint4`, `joint5`, `joint6`, `joint7`, `arm_gripper`. arm `arm`: 7 joint targets (rad), then `arm_gripper` = opening width (m, 0 closed .. 0.0854 open). Absolute targets tracked by PD controllers.
@@ -102,19 +104,24 @@ the PD gains and the tool frames; `spec["world"]` the frame conventions.
   row. Use `obs.meta["proprio"]["now"][:8]` as the starting row to move smoothly. An arm joint target moves at most
   0.04 rad per control step (1.6 rad/s, the same speed as `ee_pose` rows): a row that asks for more takes
   the control steps it needs, and `meta["clipped"]` says so.
-- `ee_pose` (8): per arm (in the order ['arm']) `x y z qw qx qy qz gripper`; world frame (robot base at (-0.570, 0.000, 0.920),
-  +z up); quaternions wxyz. Each row is solved by inverse kinematics (no collision checking) and driven to in joint
+  The proprio group `gripper_opening` (`res.group("gripper_opening")`) is the measured gap between each gripper's finger
+  pads in metres (0 = the pads touch); the gripper entries of `joint_pos` are in the unit of the gripper command above.
+- `ee_pose` (8): per arm (in the order ['arm']) `x y z qw qx qy qz gripper`; world frame (origin at the robot's root link on its mounting, +z up; the frame of the proprio TCP pose and the camera extrinsics); quaternions wxyz. Each row is solved by inverse kinematics (no collision checking) and driven to in joint
   space; an arm whose IK fails holds and is reported in `meta["plan"]`. The pose is each gripper's **tool frame** (TCP;
   its approach and finger-closing axes are in `spec["robot_spec"]["tcp"]`), the same convention as the proprio TCP
   poses, so an observed pose is a valid target. At most 50 rows per submit. A row whose IK solution lies more than
   0.5 rad from the current joints on any joint is refused the same way as a failed IK (for a small pose change that is
   another IK branch, which would swing the arm): split long moves into rows a few cm and degrees apart.
+- One call returns at most 2000 images (`spec["max_frames_per_call"]`: cameras x frames; a frame with
+  `depth="frames"` counts 4). A request that would exceed it is answered 400 before anything moves: ask for
+  fewer cameras, a lower `video_fps` or a shorter call. Rows that take longer than planned (the speed limit, `ee_pose`)
+  stop adding frames at that number; the motion is executed in full and `meta["frames_skipped"]` counts them.
 - Both action types: no gripper target goes lower than 15 mm below the tabletop; a target that would bring any part of
   a gripper lower is stopped there and listed in `meta["clipped"]`. Every response's `meta["safety"]` reports, since the
   previous call, forcing (the arms' pressing loads and forcing events), the deepest task contact, the longest time above
   its sustained limit and the review events (rigid families), the lowest rope / cord volume ratio (soft families) and the
   table-guard stops, against the limits above.
 
-Grasping: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (hedgehog_ball, push_rod) once both fingers touch the same part inside its grasp region, the tool frame within 12.0066 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, or the part drifts 1 cm / 0.15 rad from its held pose) is lost, and the gripper must open before it can take hold again. Two grippers never hold the same part; other objects are grasped physically (friction).
+Grasping: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (hedgehog_ball, push_rod) once both fingers touch the same part inside its grasp region, the tool frame within 12.0066 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull its part with more than 65 N averaged over 20 ms, or no finger has touched the part for 0.2 s) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction).
 
 Objects here: `hedgehog_mount`, `hedgehog_cage`, `hedgehog_ball`, `push_rod`, `goal_region`.

@@ -19,24 +19,24 @@ artifacts = [
 ]
 
 [task]
-name = "robot-coding-bench/topogym-hedgehog-in-cage-07-i01-standard"
-description = "STANDARD MODE (robot as a service, eai-standard/2.3): TopoGym hedgehog_in_cage on the same frozen instance as the privileged task. Separate and place the whole owl, including both wings, the tail, the legs and the beak inside the green dashed goal region. Keep the cage and its mount on the puzzle/system side. A thin rod with a box handle lies on the table; you may use it as a tool. It is a task piece: if it falls off the table (more than 100 mm below the tabletop), the episode ends in failure. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
-authors = [{ name = "jianwen" }]
-keywords = ["robotics", "topogym", "genesis", "panda_robotiq", "standard-mode", "trajectory", "hedgehog_in_cage"]
+name = "robot-coding-bench/roboarc-hedgehog-in-cage-07-i01-standard"
+description = "STANDARD MODE (robot as a service, eai-standard/2.4): RoboARC hedgehog_in_cage on the same frozen instance as the privileged task. Separate and place the whole owl, including both wings, the tail, the legs and the beak inside the green dashed goal region. Keep the cage and its mount on the puzzle/system side. A thin rod with a box handle lies on the table; you may use it as a tool. It is a task piece: if it falls off the table (more than 100 mm below the tabletop), the episode ends in failure. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
+authors = [{ name = "Jianwen Lyu" }]
+keywords = ["robotics", "roboarc", "mujoco", "panda_robotiq", "standard-mode", "trajectory", "hedgehog_in_cage"]
 
 [metadata]
-author_name = "jianwen"
+author_name = "Jianwen Lyu"
 task_type = "trajectory"
-simulator = "topogym"
-robot = "panda_robotiq"
+simulator = "roboarc"
+robot = "franka-robotiq-2f85"
 family = "hedgehog_in_cage"
+difficulty = "easy"
 mode = "standard"                  # RGB + proprioception only; no object poses, no success predicate, no reset
-protocol = "eai-standard/2.3"
-oracle = "none"
-oracle_evidence = "No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol \u00a72.7)."
-grasp = "assisted (his contact_weld_v1 grasp regions on owl, rod)"
+protocol = "eai-standard/2.4"
+{{ORACLE}}
+grasp = "assisted (the contact_weld_v1 grasp regions on owl, rod)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision hedgehog_placement_v4_grasp_contact_2mm)"
-tooling_version = "18"
+tooling_version = "{{TOOLING_VERSION}}"
 instance_seed = 0
 expert_time_estimate_hours = 3
 
@@ -51,8 +51,8 @@ command = "sh /srv/finalize.sh"   # end + dump + exit the service, one fresh-pro
 timeout_sec = 27000              # the end (a resume replay included) <= 1 h, the replay <= the agent's budget
 
 [agent]
-timeout_sec = 21600.0             # Agent wall-clock budget
-# egress: Harbor default (public). `scripts/set_agent_egress.py allowlist` closes it to the model APIs.
+timeout_sec = 10800.0             # Agent wall-clock budget
+{{AGENT_EGRESS}}
 
 [environment]
 build_timeout_sec = 1800.0

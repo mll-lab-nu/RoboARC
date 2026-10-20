@@ -19,25 +19,24 @@ artifacts = [
 ]
 
 [task]
-name = "robot-coding-bench/topogym-buzz-wire-3d-06-i01-standard"
-description = "STANDARD MODE (robot as a service, eai-standard/2.3): TopoGym buzz_wire_3d on the same frozen instance as the privileged task. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
-authors = [{ name = "jianwen" }]
-keywords = ["robotics", "topogym", "genesis", "panda_robotiq", "standard-mode", "trajectory", "buzz_wire_3d"]
+name = "robot-coding-bench/roboarc-buzz-wire-3d-06-i01-standard"
+description = "STANDARD MODE (robot as a service, eai-standard/2.4): RoboARC buzz_wire_3d on the same frozen instance as the privileged task. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
+authors = [{ name = "Jianwen Lyu" }]
+keywords = ["robotics", "roboarc", "mujoco", "panda_robotiq", "standard-mode", "trajectory", "buzz_wire_3d"]
 
 [metadata]
-author_name = "jianwen"
+author_name = "Jianwen Lyu"
 task_type = "trajectory"
-simulator = "topogym"
-robot = "panda_robotiq"
+simulator = "roboarc"
+robot = "franka-robotiq-2f85"
 family = "buzz_wire_3d"
 mode = "standard"                  # RGB + proprioception only; no object poses, no success predicate, no reset
-protocol = "eai-standard/2.3"
-oracle = "none"
-oracle_evidence = "No reference solution (no solution/). The frozen instance was validated by the build: it builds in a fresh process (seed < 2^31) and holds still under hold checks in a fresh container, and a verifier replay grades without a grader error. No graded positive yet. Human review per family (protocol \u00a72.7)."
+protocol = "eai-standard/2.4"
+{{ORACLE}}
 difficulty = "very_easy"
-grasp = "assisted (his contact_weld_v1 grasp regions on wand)"
+grasp = "assisted (the contact_weld_v1 grasp regions on wand)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision terminal_v4_traversal_then_deck_release)"
-tooling_version = "18"
+tooling_version = "{{TOOLING_VERSION}}"
 instance_seed = 0
 expert_time_estimate_hours = 3
 
@@ -52,8 +51,8 @@ command = "sh /srv/finalize.sh"   # end + dump + exit the service, one fresh-pro
 timeout_sec = 27000              # the end (a resume replay included) <= 1 h, the replay <= the agent's budget
 
 [agent]
-timeout_sec = 21600.0             # Agent wall-clock budget
-# egress: Harbor default (public). `scripts/set_agent_egress.py allowlist` closes it to the model APIs.
+timeout_sec = 10800.0             # Agent wall-clock budget
+{{AGENT_EGRESS}}
 
 [environment]
 build_timeout_sec = 1800.0
