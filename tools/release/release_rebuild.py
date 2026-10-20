@@ -979,6 +979,8 @@ def report_md(r: dict, a, bases: list[dict]) -> str:
     out += ["", "## Gated, not done here", ""]
     if a.hf_revision:
         out += [f"- HF: the instances are the dataset's commit `{a.hf_revision}`, which assets.json pins."]
+    elif len(r.get("unchanged_bases") or {}) == len(r["instances"]):
+        out += ["- HF: nothing to upload: every instance is the one assets.json already pins (every base unchanged)."]
     else:
         out += ["- HF upload of the instances (the user's OK first; upload only, nothing deleted). NOT UPLOADED: "
                 "assets.json's new pins name files that are not in the dataset at its revision.",
