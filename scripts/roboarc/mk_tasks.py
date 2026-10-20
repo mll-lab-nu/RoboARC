@@ -223,7 +223,7 @@ def run_words(e: dict) -> str:
     return f"{e['image']} ({e['date']}; simulator source {e['source']}, tooling {e['tooling']})"
 
 
-NO_REFERENCE = ("No oracle; human review in PR #N (PROTOCOL §2.7). No reference solution and no positive example yet: nothing "
+NO_REFERENCE = ("No oracle; human review (PROTOCOL §2.7). No reference solution and no positive example yet: nothing "
                 "is known to solve this task. Its physics was accepted on the family's acceptance rounds and a smoke stress "
                 "round on this instance.")   # release.json oracle "none" (user 2026-10-13); main's wording for the first clause
 
@@ -317,12 +317,12 @@ PORT_TASK = ("- {date}: new task of {bench} (RoboARC on MuJoCo 3.14.0, docs/benc
 NEW_TASK = ("- {date}: new task of {bench} (RoboARC on MuJoCo 3.14.0, docs/benchmarks/{bench}.md): a new "
             "design of {family}{design}. Its task files start from the Genesis 1.2.1 task `{template}` ({mode} mode), with this design's "
             "own task text, rules and goal, its own frozen instance and its own reference.")
-# The privileged grading rule (2026-10-14, failure analysis item 12): success needs both grading replays to succeed AND at
+# The privileged grading rule (2026-10-14): success needs both grading replays to succeed AND at
 # least one of them to reach the goal with the instance's own thresholds within the agent's own rows (shared/privileged/
 # grade.py, `strict_replay_required` 1). The families with a grading hold state it in their instruction (HOLD_STRICT).
 HOLD_STRICT = ("Success needs both replays to succeed AND at least one of them to reach the goal with the thresholds above "
                "within your own rows (not only in the hold")
-FIX_STRICT_GOAL = ("- 2026-10-14: the grading rule (tests/grade.py; failure analysis 2026-10-14, item 12). Success needs both replays to "
+FIX_STRICT_GOAL = ("- 2026-10-14: the grading rule (tests/grade.py). Success needs both replays to "
                    "succeed AND at least one of them to reach the goal with the instance's own thresholds within the trajectory's rows "
                    "(`strict_replay_required` 1; `success_in_hold_only` 1 marks a trajectory whose replays succeeded only in the hold, "
                    "not credited). From 2026-10-05 (R-hold) to this change a replay could also confirm within the hold, with its "
@@ -331,8 +331,8 @@ FIX_STRICT_GOAL = ("- 2026-10-14: the grading rule (tests/grade.py; failure anal
                    "graded before this change are re-graded from their recorded trajectories, nothing is re-run "
                    "(scripts/roboarc/regrade.py). Runs: docs/benchmarks/roboarc.md (Grading replays).")
 FIX_STRICT_GOAL_NO_HOLD = ("- 2026-10-14: tests/grade.py, the same file in every privileged task, requires again that one grading replay "
-                           "reach the goal with the instance's own thresholds within the trajectory's rows (failure analysis "
-                           "2026-10-14, item 12; docs/benchmarks/roboarc.md, Grading replays). This family has no grading hold: a "
+                           "reach the goal with the instance's own thresholds within the trajectory's rows (docs/benchmarks/roboarc.md, "
+                           "Grading replays). This family has no grading hold: a "
                            "replay succeeds only within the rows, so every verdict is unchanged. reward.json gains "
                            "`success_in_hold_only` (always 0 here), and `strict_replay_required` is 1.")
 

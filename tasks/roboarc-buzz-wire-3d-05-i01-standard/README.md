@@ -7,7 +7,7 @@
 | Twin | `roboarc-buzz-wire-3d-05-i01-privileged` |
 | Simulator / robot | `roboarc` / `franka-robotiq-2f85` |
 | Family / instance | `buzz_wire_3d` / seed 0 |
-| Oracle | `none` — No oracle; human review in PR #N (PROTOCOL §2.7). No reference solution and no positive example yet: nothing is known to solve this task. Its physics was accepted on the family's acceptance rounds and a smoke stress round on this instance. |
+| Oracle | `none` — No oracle; human review (PROTOCOL §2.7). No reference solution and no positive example yet: nothing is known to solve this task. Its physics was accepted on the family's acceptance rounds and a smoke stress round on this instance. |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
 | Base image | `ghcr.io/embodied-first-exam/roboarc:1.0.0` |
 
@@ -23,7 +23,7 @@ the privileged task to measure the cost of losing resets, privileged state and t
 Same scene, instance and success rule as `roboarc-buzz-wire-3d-05-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-No oracle; human review in PR #N (PROTOCOL §2.7). No reference solution and no positive example yet: nothing is known to solve this task. Its physics was accepted on the family's acceptance rounds and a smoke stress round on this instance. `oracle = "none"`: there is no `solution/`, and Harbor checks the nop agent only.
+No oracle; human review (PROTOCOL §2.7). No reference solution and no positive example yet: nothing is known to solve this task. Its physics was accepted on the family's acceptance rounds and a smoke stress round on this instance. `oracle = "none"`: there is no `solution/`, and Harbor checks the nop agent only.
 
 ## Verification
 See `tests/grade.py`.
@@ -40,7 +40,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 | GPU memory | 2 GB | 2 GB |
 
 - GPU: required, any NVIDIA GPU; recommended: L40S 48GB / RTX 4090 24GB / L4 24GB (sm_86 or newer).
-- Measured: partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: owner 10-17, board 0150 (batch_eval_live trial peak 1.1 GB on 24 GB cards)
+- Measured: partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards
 - Limits in the agent phase (docs/PROTOCOL.md §2.10; `[metadata.resources.limits]`, shown to the agent in `instruction.md`; always measured and reported, and exceeding one fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`), the agent's container: no GPU, 8 GiB memory, 512 processes, 20 GiB of new files under `/app`, `/tmp`, `/root`; 60 s within 120 s. Expected peak of the whole trial: 12 GiB GPU memory, 16 GiB memory. Limits measured: partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending.
 
 ## Details

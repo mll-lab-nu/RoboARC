@@ -24,8 +24,7 @@ A 7-dof franka panda arm with a robotiq 2f-85 parallel gripper on a fixed base w
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
 task's predicate holds after every replay (`tests/grade.py`). `/logs/verifier/replay.mp4` is rendered during the second
 replay (two passes, no separate video replay). The physics runs on the CPU and is bit-deterministic on one host; the
-final-state hashes (`deterministic`) are still diagnostic; the rebuilt frozen scene must match (`instance_ok`)
-(robot_coding_bench's GPU-backend rule).
+final-state hashes (`deterministic`) are still diagnostic; the rebuilt frozen scene must match (`instance_ok`).
 The replays are grading replays (tooling v18): if this family's episode has not ended after the last row, the
 final targets are held for up to 2 s with the replay tolerances of the grader details; at least one replay must
 reach the goal with the instance's own thresholds within the trajectory's rows.
