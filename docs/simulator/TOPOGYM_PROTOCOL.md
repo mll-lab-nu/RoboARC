@@ -6,9 +6,13 @@
 > rules. Scripts and paths named here belong to the earlier development repository unless this repository has them;
 > "host L" is the workstation most measurements ran on (RTX PRO 6000 Max-Q, EPYC 9534). The current simulator is
 > described in MUJOCO_CORE.md and RENDER_BRIDGE.md, the current task protocol in docs/PROTOCOL.md.
+>
+> Credit: TopoGym, its task families and its original release pipeline are the work of its original author, Jianwen.
+> Below, "the original implementation" (or "the TopoGym original") is that code base, as opposed to the protocol
+> layer and tooling this record describes.
 
 39 frozen instances (13 families × easy / medium / hard) in both modes: 78 task packages. The published ones (v14) are
-the dirs `tasks/topogym-<family>-<tier>-i00-{privileged,standard}`. Since Jianwen's release mechanism
+the dirs `tasks/topogym-<family>-<tier>-i00-{privileged,standard}`. Since the original implementation's release mechanism
 (`ci_checks/topogym_active_release.json`, `scripts/topogym_versions.py`) the active release's packages are built by
 `scripts/topogym_merge_candidate.py` + `scripts/topogym_candidate_pipeline.py` into a frozen candidate tree outside `tasks/`
 (source snapshot, its own image, runtime bindings, exact restores and Harbor nop checks, then activation); new experiments
@@ -20,8 +24,8 @@ GPU when the instance's `describe.json` is kept (`--reuse-describe`).
 ## Versions (2026-10-04)
 Active: **merged-v19** (tooling v19, `eai-standard/2.3`, image `rcb-topogym:0.2.17-dev-cu128`), a source candidate until
 its packages are built and qualified. Published: v14 (the 78 dirs under `tasks/`, `rcb-topogym:0.2.12-cu128`).
-Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 on 0.2.10.
-- v19 (2026-10-06) = merged-v18 with Jianwen's below-easy tiers and oracle fixes up to 2026-10-06 + the blanket settle
+The original implementation's simpler variants (interlocked_claws easier / very_easy): tooling v10 on 0.2.10.
+- v19 (2026-10-06) = merged-v18 with the TopoGym original's below-easy tiers and oracle fixes up to 2026-10-06 + the blanket settle
   speed: a cloth particle's speed is its end-of-tick displacement over the 2.5 ms tick instead of PBD's last-substep
   velocity, thresholds unchanged (the user's decision, 2026-10-06; Cloth settle speed below). The world's readout
   (`topogym/world/genesis_world.py`) is public source, so the image changes (0.2.17-dev); the physics, the packaged
@@ -48,7 +52,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   parameter `initial_state_sha256`) enters `task.instance_id` and with it the task state that `Session.state_sha` hashes,
   so the blanket instances get new state hashes for the same restored physics. The frozen "v17" tooling hashes are those
   of the built merged-v17 packages (`ci_checks/topogym_tooling_versions.json`, BOUND_FROZEN 15-17).
-  Below-easy tiers (Jianwen's knot_untying very_easy / easier and orbits below_easy, made with `--tooling` the current
+  Below-easy tiers (the TopoGym original's knot_untying very_easy / easier and orbits below_easy, made with `--tooling` the current
   `rcb_topogym.py`): knot inherits K2 from `TASKS["knot_untying"]`, and both families need the v18 image for their
   settled IPC states (the settled-state identity includes the pyuipc version, now 0.0.25+topogym.det1). Their simplified
   oracles were developed under v17's 2.5 ms full Newton solve, so they should be re-validated under K2 when built.
@@ -65,7 +69,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   the blanket re-key records, so it changes only when the environment does.
   The built merged-v16 packages (7293af9d6's templates) keep their tooling hashes as frozen "v16"
   (`ci_checks/topogym_tooling_versions.json`); v16 trials are graded with their own packages, not mixed with v17 results.
-- v16 (2026-10-04) = Jianwen's merged-v15 source candidate (4aac2a4e6: release selection, runtime bindings, the candidate
+- v16 (2026-10-04) = the original implementation's merged-v15 source candidate (4aac2a4e6: release selection, runtime bindings, the candidate
   pipeline and the environment profile `topogym/tasks/release_profile.py`; ba01d029c: oracle portability, knot_untying
   terminal v5) + our grading rules, developed as the local "tooling v15" below and never published (live-strict,
   replay-tolerant grading; the physical-validity policy) + blanket_flatten's live coverage 0.95 in the environment profile
@@ -73,7 +77,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   identity, so no blanket candidate restored exactly). Image 0.2.14-dev: the public source differs from 0.2.13-dev's, and
   a new tag leaves the packages bound to 0.2.13-dev untouched. How the two sides' rules fit: One policy across both sides
   (below).
-  - The environment profile (Jianwen's, merged-v16): rope_threading `contact_relaxed_v16` (his name for that profile, not a
+  - The environment profile (the original implementation's, merged-v16): rope_threading `contact_relaxed_v16` (its name for that profile, not a
     release number): explicit ring geometry, a softer finer rope (E 5e6, 5.5 mm mesh), the fingers as the robot's only
     contact with the rope and rings, a 1 mm aperture compression allowance with a round-ring passage test, a rope still-speed
     of 10 mm/s (was 1), one 40 ms tick per control step (25 Hz), soft-band grasp assistance; blanket_flatten two-hand patch
@@ -83,7 +87,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   - Every instance is made again by the candidate pipeline (no inherited success). v14 trials can be re-graded with
     `scripts/topogym_regrade_v16.py` only where the v16 instance's state hash equals the trial's (families whose task code,
     profile and terminal revision did not change; known once the candidate is built); the others are rerun.
-- v15 (2026-10-04, Jianwen, not published) = the merged-v15 source candidate on image 0.2.13-dev. Its tooling hashes are frozen
+- v15 (2026-10-04, the original implementation, not published) = the merged-v15 source candidate on image 0.2.13-dev. Its tooling hashes are frozen
   in `ci_checks/topogym_tooling_versions.json` (`v15`); packages built from it (the host L oracle sweep's) keep their own
   runtime binding.
 - Local tooling v15 (2026-10-03 / 04, ours, not published; its rules ship in v16) = v14 + live-strict, replay-tolerant grading for the six families whose physics runs on the GPU
@@ -107,7 +111,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
     v14: `soft_state`, `objects`, `asset_identity` identical; `effective_task_parameters` and `public_goal` differ only in
     the threshold (95 %); strict fresh-process smokes pass (`instance_matches`; `instance_exact` 0, as for the v14 blanket
     instances). The other 36 instances were v14's. (These local instances are superseded by the v16 candidate's.)
-- v14 (2026-10-03) = Jianwen's v13 (e49b116e3) + the rules of the 2026-10-03 rules audit + a PBD cloth-contact fix, on image
+- v14 (2026-10-03) = the original implementation's v13 (e49b116e3) + the rules of the 2026-10-03 rules audit + a PBD cloth-contact fix, on image
   0.2.12 (0.2.11's stack with v13's `topogym/`: the IPC articulation-reference fix and v13's task changes). The 10 instances
   those task changes touch were made again (knot_untying and rope_threading with a stored IPC settled state,
   interlocked_claws' separation goal, buzz_wire_3d medium's F2_terminal_xy40_20 layout; strict smokes instance_exact); the
@@ -139,7 +143,7 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   (knot_untying, cast_coil, buzz_wire_3d, blanket_flatten) run it only on ticks where their goal predicate is reached
   (`_settle_only_when_reached`): elsewhere its result cannot change the outcome, so success / failures / episode ends are
   the same and only those ticks' `final_settling` metrics are left out; knot's task cost 1.84 -> 0.04 s per control step.
-- v11 = Jianwen's v10 + the IPC families' settled scene frozen with the instance (`export-ipc-state`, then `make-instance
+- v11 = the original implementation's v10 + the IPC families' settled scene frozen with the instance (`export-ipc-state`, then `make-instance
   --ipc-settled-state`; `SimulatorConfig.ipc_settled_state`, `topogym/world/physics/ipc_settled_state.py`): every build
   restores the same bits instead of settling (settling on the GPU started builds ~0.04 um apart, enough for a
   near-threshold squeeze to take another contact branch in a grader's replay; rope_threading hard showed it), so
@@ -152,8 +156,8 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
   `CUDA_CACHE_PATH` = /opt/rcb-cache), filled on a host L GPU by `images/topogym/warm_cache.sh` and committed into the tag:
   a fresh container's first build + first frame 88-239 s + 20-24 s -> 27-62 s + < 1 s (physics unchanged: claws easy
   replays to the same state hash).
-- v10 (Jianwen, f0d233115) = v9 + his A01 ZIP/NPZ error classification, A03 evidence export and the owner-only
-  `Env.sensor_factory`; new packages only (his simpler variants); notes below.
+- v10 (the original implementation, f0d233115) = v9 + its A01 ZIP/NPZ error classification, A03 evidence export and the owner-only
+  `Env.sensor_factory`; new packages only (its simpler variants); notes below.
 - New packages use tooling v13: upstream v12 plus the local Fiber Bundling and Lock Picking variant-aware recommended
   grasps. The local IPC articulation-reference initialization repair, task variants, A01/A03 and calibration extensions
   remain in source. Existing packages are not regenerated or relabelled by this merge.
@@ -190,12 +194,12 @@ Jianwen's simpler variants (interlocked_claws easier / very_easy): tooling v10 o
 - v6 = v5 + float32 physics for the 8 rigid families (`TASKS` in `harbor_templates/topogym/common/rcb_topogym.py`; their 24
   instances made again on host L with v6). 0.2.8 = 0.2.7 + blanket's coverage skip + the exact cheaper IPC diagnostics. Evidence:
   the precision / speed study's report (not in this repository) and the check scripts below.
-- v5 / 2.3 = Jianwen's post-merge repairs B04–B13 (the 2.3 standard-mode notes of that release): invalid submissions graded as such, scores persisted
+- v5 / 2.3 = the original implementation's post-merge repairs B04–B13 (the 2.3 standard-mode notes of that release): invalid submissions graded as such, scores persisted
   before the video, only executed actions recorded with their actual ticks, non-integer `dt` refused, instance mismatch
   never a success, operation ids and request deadlines (a retried request is not executed twice).
 - `eai-standard/2.3` is a TopoGym-local extension of robot_coding_bench main's 2.2 (`ci_checks/rcb_vendor.json`
   `local_adaptations`), to be proposed for main.
-- 0.2.7 = Jianwen's 0.2.6 simulator changes + the batched rigid readback (Step time below).
+- 0.2.7 = the original implementation's 0.2.6 simulator changes + the batched rigid readback (Step time below).
 - The 15 soft-body instances (blanket_flatten and the four IPC families) were made again with the v5 tooling on host L's
   RTX PRO 6000 (`make-instance --variation <family>_<tier> --scene-seed 0`, image 0.2.7): `instance_contract_version` 2
   with complete soft-body node references, which v5 requires (B08). blanket_flatten's initial states were prepared again in
@@ -213,10 +217,10 @@ trial (the protocol's default is 100M / 10M, D10), applied after the run.
 ## Tooling
 Thin wrappers of the low-level action only (IK and joint moves, gripper, hold) plus state, recording, replay and
 rendering; no task-level skills. New packages use the active release's tooling (v16, `[metadata].tooling_version = "16"`,
-bound to their image by `runtime_binding.json`); v14 (the published `tasks/`, image 0.2.12) and Jianwen's v15 candidate are
+bound to their image by `runtime_binding.json`); v14 (the published `tasks/`, image 0.2.12) and the original implementation's v15 candidate are
 frozen in the inventory:
 `harbor_templates/topogym/common/rcb_topogym.py`, byte-identical in every copy (`ci_checks/check-topogym-tooling.py`, run
-by `check-tooling-identity.sh`). v4 (Jianwen, 6a7c755b) folded the two family variants of the earlier render into it:
+by `check-tooling-identity.sh`). v4 (the original implementation, 6a7c755b) folded the two family variants of the earlier render into it:
 - a gripper hold keeps the native target when the commanded width round-trips (the width table drops the closed-end
   plateau): interlocked_claws' contact-weld pre-weld then survives the first step; no other family has an off-table
   gripper target, so their commands are unchanged;
@@ -250,7 +254,7 @@ why host L's server CPU made it twice as slow and the GPU sat mostly idle. NUMA 
 Since 0.2.7 `GenesisWorld.read_state` reads the rigid solver once per field (`_RigidReadout`, six copies per tick);
 `scripts/check_read_state_batch.py` compares it with the per-link getters at every tick: bit-identical.
 On host L with 0.2.7 (one sim alone, GPU 4): buzz_wire_3d easy 0.26 s per control step (readback 0.055), cast_keyhole hard
-0.25 (readback 0.046): 4x and 2.3x faster. At that speed one reference-length solution (Jianwen's solvability proofs: cast_coil
+0.25 (readback 0.046): 4x and 2.3x faster. At that speed one reference-length solution (the TopoGym original's solvability proofs: cast_coil
 6.5-7.3k control steps, cast_keyhole 18-21k, hedgehog_in_cage 2.3-9.6k) executes in about 0.5 h, 1.4 h and 0.2-0.7 h.
 
 ### Precision / speed study (2026-10-02)
@@ -290,7 +294,7 @@ outcome of replayed agent trajectories, deviation against the baseline's own 1e-
   run starts from the same settled state (a transplant of libuipc's native state, exact to 60 nm), the reference at four
   substeps. Settling: N = first capture after which the 25 ms peak speed stays < 5 mm/s and the 0.25 s drift < 1 mm (knot
   60, rope_threading 30, slotted 80 control steps); the ropes then creep quasi-statically (IPC's smoothed friction), the
-  same at every dt (hold-only tests: 0.013-0.13 mm). A closed-loop pinch-lift-release (Jianwen's validated pinch), per
+  same at every dt (hold-only tests: 0.013-0.13 mm). A closed-loop pinch-lift-release (the original implementation's validated pinch), per
   control step: knot_untying 5.9x (IPC alone 9.5x; lift / slip / drop within 0.1 mm of the reference, centerline 0.44 mm
   at the end, worst 1.47 mm at the release, the same minimum tet volume ratio), rope_threading 8.1x (end 0.81 mm),
   slotted_post_ring 9.2x (end 0.30 mm; the reference inverts a cord tet at step 58 and this setting at step 61 on its own
@@ -520,7 +524,7 @@ The user's decision (2026-10-06, "option 1"): a cloth particle's speed is its en
 (x(t) - x(t - dt)) / dt with dt the 2.5 ms physics tick. It is no longer the velocity Genesis' PBD solver stores, which
 is the last solver substep's (pos - ipos) / substep_dt (0.625 ms; 4 substeps per tick). The thresholds are unchanged: live
 0.03 m/s, grading hold 0.08 m/s, displacement from the start of the confirmation 3 mm (`maximum_drift_m`), window 0.5 s.
-- Why. Blanket very_easy (Jianwen's oracle; host L probe 2026-10-06): after the release, particle 7458 sits in a PBD
+- Why. Blanket very_easy (the TopoGym original's oracle; host L probe 2026-10-06): after the release, particle 7458 sits in a PBD
   self-collision 2-cycle with three neighbours at the 8 mm particle-size threshold. Stretch and bending move it about
   50 um, the self-collision puts it back, so it alternates between two points 20.65 um apart every substep. Its end-of-tick
   position is constant to 1 um, but the stored velocity reads 33.04 mm/s, above the 30 mm/s gate, for as long as the
@@ -584,7 +588,7 @@ is the last solver substep's (pos - ipos) / substep_dt (0.625 ms; 4 substeps per
   - Visual. very_easy's verifier video around the chatter onset (tick ~6041) and after the release: the sheet lies flat
     and still from the release on; mid-lay frames show the carried corner moving.
 - v19 re-grades (host L, 2026-10-06). The five blanket instances of the release (candidate built and preflighted with
-  Jianwen's pipeline, exact restores; image `rcb-topogym:0.2.17-dev-cu128` = sha256:06554307), graded with his launcher
+  the original implementation's pipeline, exact restores; image `rcb-topogym:0.2.17-dev-cu128` = sha256:06554307), graded with its launcher
   (`scripts/oracle_runners/test_harbor_oracles.py --candidate --no-nop --execute`, both modes) on host L GPUs 4 / 7, at most
   two blanket simulations per GPU. Times in minutes, under host L load: privileged = the oracle's live run (the reference
   execution) and the verifier's two replays; standard = the live episode and the collect hook's replay. No pass needed
@@ -720,31 +724,31 @@ the claws easy oracle end with v14's verifier state hashes, and QKSrtdL / diFXNt
 v14 tooling's own replays with R1's verdicts off: the policy reads, it never changes the physics.
 
 ## One policy across both sides (merged-v16)
-Jianwen's merged-v15 candidate and ba01d029c change rules too: knot_untying's release (terminal v5) and the environment
-profile, whose rope_threading part he calls `contact_relaxed_v16`. Checked against the layers above, rule by rule, so that
+The original implementation's merged-v15 candidate and ba01d029c change rules too: knot_untying's release (terminal v5) and the environment
+profile, whose rope_threading part it calls `contact_relaxed_v16`. Checked against the layers above, rule by rule, so that
 nothing is relaxed twice and no rule contradicts another (2026-10-04):
 
 | rule | layer, owner | live episode | grading replay (rows / hold) |
 |---|---|---|---|
-| materials, timing, grasp assistance, contact sets (rope: fingers only), geometry | 0, Jianwen (profile, task code) | frozen in the instance | identical |
+| materials, timing, grasp assistance, contact sets (rope: fingers only), geometry | 0, the original implementation (profile, task code) | frozen in the instance | identical |
 | torque caps, table guard, standard joint-speed limit and IK-jump refusal | 1, tooling | enforced | the recorded rows (as executed) |
-| success thresholds and windows, release checks (knot v5), aperture allowance (rope) | 2, Jianwen | strict | strict on the rows; in the hold only `REPLAY_TOLERANCES` (blanket coverage and cloth speed, knot rope speed) |
-| failure predicates; R2 (crushed volume, stretched attachment, 0.25 s) | 2, Jianwen; R2 tooling | end the episode | unchanged |
+| success thresholds and windows, release checks (knot v5), aperture allowance (rope) | 2, the original implementation | strict | strict on the rows; in the hold only `REPLAY_TOLERANCES` (blanket coverage and cloth speed, knot rope speed) |
+| failure predicates; R2 (crushed volume, stretched attachment, 0.25 s) | 2, the original implementation; R2 tooling | end the episode | unchanged |
 | breakdowns (non-finite, cloth > 20 m/s, invalid IPC state, rigid contact > 10 mm) | 3, tooling | infrastructure error unless forced | the same |
 | forcing; deep rigid task contacts | 4, tooling | evidence; a deep one holds a success for review | the same |
 
-| quantity | Jianwen | ours | merged-v16 |
+| quantity | the original implementation | this protocol's tooling | merged-v16 |
 |---|---|---|---|
-| knot release clearance | v5: 1 mm from parts that can move; fixed bases may touch (v4: 5 mm from every part, bounding boxes) | the hold leaves it unchanged | v5, live and replay; one relaxation (his, geometric), never loosened in the hold |
+| knot release clearance | v5: 1 mm from parts that can move; fixed bases may touch (v4: 5 mm from every part, bounding boxes) | the hold leaves it unchanged | v5, live and replay; one relaxation (the original's, geometric), never loosened in the hold |
 | knot rope inside a robot part | v5: any interior overlap withholds success | penetration depth is evidence (rigid task contacts only; the rope is FEM) | consistent: a certification of the release, not a failure. All robot links collide with the knot rope in IPC, so an overlap means an IPC failure (layer 3) or a mismatch between IPC's collision geometry and the solids the check uses |
-| knot rope speed | 1 mm/s | hold 1.25 mm/s | one relaxation (ours, hold) |
-| rope still speed | 10 mm/s (was 1) | no slack (hold only) | one relaxation (his, live) |
-| rope rim | 1 mm compression allowance, round-ring passage test | none | his; the texts give the passage radii and the allowance |
-| rope and robot | fingers only (the IPC contact set, for rope and rings) | not measured (FEM) | his environment model; the texts now say so |
-| blanket coverage | task default 0.90 | live 0.95 (the owner), hold 0.92 | 0.95 in his profile (re-keyed states), hold 0.92 |
-| keyhole standard oracle | his privileged references move a joint up to 0.10 rad per control step; his bridge refuses rows the service slows | the 0.04 rad per step limit exists only in the standard service | open (below) |
+| knot rope speed | 1 mm/s | hold 1.25 mm/s | one relaxation (this tooling's, hold) |
+| rope still speed | 10 mm/s (was 1) | no slack (hold only) | one relaxation (the original's, live) |
+| rope rim | 1 mm compression allowance, round-ring passage test | none | the original's; the texts give the passage radii and the allowance |
+| rope and robot | fingers only (the IPC contact set, for rope and rings) | not measured (FEM) | the original's environment model; the texts now say so |
+| blanket coverage | task default 0.90 | live 0.95 (the owner), hold 0.92 | 0.95 in the original's profile (re-keyed states), hold 0.92 |
+| keyhole standard oracle | the original's privileged references move a joint up to 0.10 rad per control step; its bridge refuses rows the service slows | the 0.04 rad per step limit exists only in the standard service | open (below) |
 
-Results: a success held for review (`success_pending_review` 1) is `pending_review` in Jianwen's result pipeline
+Results: a success held for review (`success_pending_review` 1) is `pending_review` in the original implementation's result pipeline
 (`scripts/collect_batch_results.py`, the difficulty runner, the HF export, helper assignments): complete, neither solved nor
 unsolved, out of the success rate until a reviewer decides; `scripts/write_task_results.py` says so on the result page.
 
@@ -752,10 +756,10 @@ Open points at the time:
 1. knot v5's overlap check: IPC and the release check see the same robot geometry (else a rope resting on a base could read
    as an overlap and withhold success), and `unresolved` geometry is rare (it also withholds success).
 2. The rope profile's contact set: only the fingers touch the rope and the rings; now stated in the texts.
-3. blanket coverage 0.95 in his profile, with the packaged states re-keyed (arrays unchanged) rather than prepared again.
+3. blanket coverage 0.95 in the original's profile, with the packaged states re-keyed (arrays unchanged) rather than prepared again.
 4. The blanket identity fix (host L BUG 2) in `topogym/tasks/blanket_flatten/common.py`.
-5. Release labels: v16 = merged-v16, image 0.2.14-dev; his v15 frozen; the name `contact_relaxed_v16` stays his profile's.
-6. `pending_review` as a result status of his pipeline (above).
+5. Release labels: v16 = merged-v16, image 0.2.14-dev; the original's v15 frozen; the name `contact_relaxed_v16` stays the original profile's.
+6. `pending_review` as a result status of the original implementation's pipeline (above).
 7. Open: the standard joint-speed limit (0.04 rad per control step) against privileged references that move faster
    (keyhole). Options: references that respect the limit, a bridge that accepts slowed rows, or the same limit in both
    modes.
@@ -802,7 +806,7 @@ on the previous version of these dirs).
   of the simulator settings is under way (2026-10-02).
 
 ## Legacy: the original frozen instances
-Jianwen's first frozen instances `tasks/topogym-<family>-i00[-limited]` (seed 0) keep their pre-v1.0 names, layer and
+The original implementation's first frozen instances `tasks/topogym-<family>-i00[-limited]` (seed 0) keep their pre-v1.0 names, layer and
 READMEs; the tier dirs supersede them and our sweeps do not run them. CI checks their tooling against its frozen inventory
 (`ci_checks/topogym_tooling_versions.json`) and exempts them from the v1.0 naming and README layout
 (`ci_checks/check-task-fields.sh`, `check-task-structure.sh`, both adapted). Their agent and verifier containers use the shared client image (a v1.0 MUST for every 2.2 task).
