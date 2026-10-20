@@ -138,6 +138,122 @@ class GraspAssistConfig:
             raise ValueError("max_finger_opening_fraction must be at most one")
 
 
+# -- Opt-in contact_weld_v1 rules (2026-10-14), MuJoCo backend only (topogym/world/mujoco/grasp.py). They are subclasses
+# with their own fields, not new fields of GraspTarget / GraspAssistConfig: every existing configuration keeps its
+# dataclass fields, so its asdict (the grasp state in every tick record, hence each frozen instance's state_sha) and its
+# grasp decisions stay exactly as before. SimulatorConfig reads either back from a mapping by its own field name.
+@dataclass(frozen=True)
+class ForceClosureGraspTarget(GraspTarget):
+    """A GraspTarget that contact_weld_v1 welds only on a force-closure pinch (controller battery design D2,
+    runs/controller_battery_design_20261014: two fingers touching the top of a cell seated in its slot must not pull it
+    out). Besides the usual bilateral contact, some contact of one finger and some contact of the other must lie on a
+    line inside both friction cones: the line between the two contact points (in the plane of the two normals) makes
+    at most atan(friction_coefficient) with each contact's normal into the target (two-finger force closure, Nguyen
+    1988, force_closure_pair). Across a cylinder that is a central angle between the two contacts of at least
+    180 - 2 atan(mu) degrees (90 at mu 1). Checked at acquisition only; a weld once made is not re-checked.
+    friction_coefficient: the finger-target contacts' mu (MuJoCo takes the larger of the two geoms'; the ALOHA's
+    fingers: 1)."""
+    friction_coefficient: float = 1.
+
+    def __post_init__(self):
+        super().__post_init__()
+        mu = self.friction_coefficient
+        if isinstance(mu, bool) or not isinstance(mu, (int, float)) or not math.isfinite(mu) or mu <= 0:
+            raise ValueError("Grasp friction coefficient must be finite and positive")
+        object.__setattr__(self, "friction_coefficient", float(mu))
+
+
+@dataclass(frozen=True)
+class WeakHoldGraspTarget(ForceClosureGraspTarget):
+    """A ForceClosureGraspTarget whose weak holds may only lift it a short way (controller battery, rule C of
+    runs/controller_battery_design_20261014/GRASP_PROPOSAL.md, the user's choice of 2026-10-18: an old cell may be
+    plucked out of its slot by the fingertips but must be held from both sides to be carried). A hold is firm when its
+    acquisition pinch also closes force at firm_friction_coefficient (across a cylinder: a central angle between the two
+    contacts of at least 180 - 2 atan(firm mu) degrees, 150 at 0.268), else weak; a weak hold is lost (reason
+    "weak_hold_travel", as any lost grasp: the hand opens before it takes hold again) once the target link's origin is
+    more than weak_hold_travel_m from where it was taken. A firm hold has no such limit. Both decided at acquisition."""
+    firm_friction_coefficient: float = .268
+    weak_hold_travel_m: float = .06
+
+    def __post_init__(self):
+        super().__post_init__()
+        firm, travel = self.firm_friction_coefficient, self.weak_hold_travel_m
+        if isinstance(firm, bool) or not isinstance(firm, (int, float)) or not math.isfinite(firm) or firm <= 0:
+            raise ValueError("Grasp firm friction coefficient must be finite and positive")
+        if firm >= self.friction_coefficient:
+            raise ValueError("Grasp firm friction coefficient must be below the friction coefficient")
+        if isinstance(travel, bool) or not isinstance(travel, (int, float)) or not math.isfinite(travel) or travel <= 0:
+            raise ValueError("Grasp weak-hold travel must be finite and positive")
+        object.__setattr__(self, "firm_friction_coefficient", float(firm))
+        object.__setattr__(self, "weak_hold_travel_m", float(travel))
+
+
+@dataclass(frozen=True)
+class MultiRopeGraspAssistConfig(GraspAssistConfig):
+    """contact_weld_v1 where one hand may weld several ropes at once (wire splice design, question 5,
+    runs/wire_splice_design_20261014: each hand pinches two wires one behind the other, so each finger touches only one
+    of them, and the right hand twists the two tips together).
+
+    weld_each_rope names entities (rope chains or MJCF link chains) whose grasp targets are their links. A finger
+    touches a named rope when a contact row joins it to one of the rope's target links inside that target's region,
+    with the plain filters (penetration 0..max_penetration_m, target centre within max_tcp_distance_m of the TCP).
+    A rope pinch: each finger touches a named rope, the two fingers' ropes include two different ones, and every
+    touched rope is touched by both fingers (side by side) or touches another touched rope (a contact row between their
+    links inside the region of a touched link: the wires pressed together between the fingers). Then the hand welds,
+    for every touched rope, its touched link nearest the TCP, all to that hand, as one grasp (one binding, acquired
+    after the usual stable_time_s, lost and released together). Without a rope pinch a named rope is a candidate as a
+    rope chain is: its bilaterally touched link nearest the TCP. Candidates of other entities follow the plain rule.
+
+    rope_max_rotation_error_rad: the relative rotation a rope pinch's welds may drift before the grasp is lost
+    (relative_pose_error); None keeps max_rotation_error_rad. Twisting the wires turns each welded tip link up to
+    0.41 rad off its weld (the design's v4 measurement), past the plain 0.15 rad."""
+    weld_each_rope: tuple[str, ...] = ()
+    rope_max_rotation_error_rad: float | None = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        ropes = tuple(self.weld_each_rope)
+        if self.model != "contact_weld_v1":
+            raise ValueError("weld_each_rope is a contact_weld_v1 rule")
+        if not ropes or not all(isinstance(r, str) and r for r in ropes) or len(set(ropes)) != len(ropes):
+            raise ValueError("weld_each_rope must name distinct entities")
+        if not set(ropes) <= {t.entity for t in self.targets}:
+            raise ValueError("weld_each_rope names an entity without grasp targets")
+        object.__setattr__(self, "weld_each_rope", ropes)
+        limit = self.rope_max_rotation_error_rad
+        if limit is not None and (isinstance(limit, bool) or not isinstance(limit, (int, float))
+                                  or not math.isfinite(limit) or limit <= 0):
+            raise ValueError("rope_max_rotation_error_rad must be finite and positive")
+        if limit is not None:
+            object.__setattr__(self, "rope_max_rotation_error_rad", float(limit))
+
+
+def force_closure_pair(position_a, normal_a, position_b, normal_b, friction_coefficient):
+    """Whether two frictional contacts close force (Nguyen 1988): the line between them lies inside both friction
+    cones, i.e. the direction from each contact to the other makes at most atan(mu) with that contact's unit normal
+    (pointing into the held body).
+
+    The line is taken in the plane of the two normals (its component along normal_a x normal_b dropped; along the
+    normal when the normals are parallel): a fingertip pressed on a cylinder touches it along a line in that direction,
+    and MuJoCo reports one point anywhere on that line (two fingers on the lifted AA cell: points 9.8 mm apart along
+    its axis), so the best pair of points of the two lines is the one across. For a circular section this is the
+    central-angle rule: the two contacts subtend at least 180 - 2 atan(mu) degrees. Coincident points never close."""
+    line = np.asarray(position_b, dtype=float) - np.asarray(position_a, dtype=float)
+    normal_a, normal_b = np.asarray(normal_a, dtype=float), np.asarray(normal_b, dtype=float)
+    axis = np.cross(normal_a, normal_b)
+    if np.linalg.norm(axis) > 1e-9:
+        axis /= np.linalg.norm(axis)
+        line -= np.dot(line, axis) * axis
+    else:
+        line = np.dot(line, normal_a) * normal_a
+    length = float(np.linalg.norm(line))
+    if not length > 0:
+        return False
+    line /= length
+    cos_cone = 1. / math.sqrt(1. + float(friction_coefficient) ** 2)
+    return bool(np.dot(line, normal_a) >= cos_cone and np.dot(-line, normal_b) >= cos_cone)
+
+
 def closed_fraction(value, open_value, closed_value):
     values = np.asarray([value, open_value, closed_value], dtype=float)
     if not np.isfinite(values).all() or open_value == closed_value:

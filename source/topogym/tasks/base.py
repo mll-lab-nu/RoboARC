@@ -324,6 +324,11 @@ class TaskDefinition:
         """Optional task measurements; SensorSuite already provides world/robot state."""
         return {}
 
+    def mujoco_mechanism(self, world):
+        """Optional: a mechanism of the task's own that the MuJoCo world steps with the physics (MujocoWorld.set_mechanism),
+        built on the bound world; None (the default) for every task without one."""
+        return None
+
     def get_state(self) -> dict:
         saved = dict(schema_version=2, task_id=self.task_id, instance_id=self.instance_id,
                              task_state=self.task_state,

@@ -424,6 +424,11 @@ class Env:
                 self._robot.apply_action(spec.initial_robot_targets)
             self._task.bind(self._world.entities)
             self._task.bind_robot(self._robot.description)
+            if self.config.physics_engine == "mujoco":
+                # a task's own mechanism stepped with the physics (bed_bolt's thread), before any tick
+                mechanism = self._task.mujoco_mechanism(self._world)
+                if mechanism is not None:
+                    self._world.set_mechanism(mechanism)
             if spec.initial_state is not None:
                 from topogym.world.initial_state import scene_identity, restore_declared_initial_state
                 self._initial_state_report = restore_declared_initial_state(

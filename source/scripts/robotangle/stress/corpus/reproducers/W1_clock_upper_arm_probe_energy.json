@@ -1,0 +1,12 @@
+{
+ "name": "W1_clock_upper_arm_probe_energy",
+ "base": "clock-assembling-01-i01",
+ "family": "clock_assembling",
+ "mechanism": "the left arm swings its upper arm over the probe's stand and squeezes the probe (a 20 g rod, radius 3 mm) against its supports: the soft robot x probe contact (the probe on the clock's task class, mixed with the robot's) sinks 4.3 mm at 200 N while the supports push back, and that pair creates energy: its net work 1.59 J, X up 0.30 J in 0.1 s, X + S 0.96 J, energy_created(local) (the acceptance round clock_r2 on d4b3287848, cem_e155 from the birth, 163 controls, shrunk to 51 + 40 hold). BREAKDOWN on d4b3287848 (final b7a5444217a86ba7, two fresh processes). The fix (user, 2026-10-18): the probe's collision geoms at priority 1 with the hard impedance (solimp 0.99 0.999); on it the stream is CLEAN, the pair's net work 0, the deepest robot contact 0.51 mm (final 8d54d632d21b19af, two fresh processes); runs/watch_assembly_design_20261014/out/stress_clock_r2/.",
+ "found_on_commit": "d4b3287848 (clock_assembling, the probe on the task contact class)",
+ "configuration": null,
+ "rows": 91,
+ "core_rows": 51,
+ "sha256": "b9e82fd114b14181c1c3a1cc4d75842087b3f34c4b7d4457a5c42a23ecb572d6",
+ "expected": "BREAKDOWN on the build it was found on; a fixed build must replay it without BREAKDOWN"
+}

@@ -8,7 +8,9 @@ Importing the renderer does not import NumPy or initialize a simulator.
 TASK_IDS = frozenset({
     "interlocked_claws", "rope_threading", "lock_picking", "hedgehog_in_cage",
     "fiber_bundling", "horseshoe_ring", "knot_untying", "cast_coil",
-    "cast_keyhole", "buzz_wire_3d", "blanket_flatten", "slotted_post_ring", "orbits", "blanket_fold",
+    "cast_keyhole", "buzz_wire_3d", "blanket_flatten", "slotted_post_ring", "orbits", "blanket_fold", "bed_bolt",
+    "clock_assembling", "battery_replacement",
+    "caliper_sorting",
 })
 
 PLACEMENT = {
@@ -92,12 +94,12 @@ def describe_goal(task):
     rules, failures = [], []
     if name == "interlocked_claws" and getattr(task, "separation_only", False):
         summary = getattr(task, "separation_summary", "Completely separate the two claw pieces and briefly hold both still.")
-        rules += [
+        rules += list(getattr(task, "separation_rules", None) or [     # a setting with more pieces states its own rules
             f"Leave at least {mm(cfg.get('minimum_separation_m', .01))} between the complete pieces, "
             "with a plane separating all of their geometry; a gap inside the interlock is insufficient.",
             "Keep both pieces' linear speed at most 1 mm/s and angular speed at most 0.02 rad/s. "
             "Holding both pieces is allowed; release and transport into the green region are not required.",
-        ]
+        ])
         failures.append(_rigid_contact_failure())
     elif name in PLACEMENT:
         target, remainder = PLACEMENT[name]
@@ -240,6 +242,41 @@ def describe_goal(task):
             "Keep both pieces' linear speeds below 1 mm/s and angular speeds below 0.02 rad/s. Merely touching or gripping them is not completion.",
         ]
         failures.append(_rigid_contact_failure())
+    elif name == "caliper_sorting":
+        summary = ("Measure the sleeves with the caliper and put every sleeve into the bin whose label gives its two caliper "
+                   "readings, then briefly hold everything still.")
+        rules += [
+            "Four sleeves stand in the rack. They look alike and differ only in their inside and outside diameters. Each of "
+            "the four bins carries a label 'ID r1 / OD r2' with two readings of this caliper: r1 with its knife-edge inside "
+            "jaws spread in a sleeve's bore, r2 with its outside jaws closed on the sleeve's outside. A sleeve belongs in the "
+            "bin whose two readings both match its own (within 0.1). A bin may stay empty; each bin holds two sleeves "
+            "standing.",
+            "The caliper is fixed face up on a stand, its jaws out over the table: it cannot be picked up. Bring each "
+            "sleeve to its jaws, set the jaws with the slider and read the vernier.",
+            "The caliper is not graduated in millimetres. Its scale is in its own unit (one main-scale division; the vernier "
+            "reads tenths of it); the size of that unit and the reading with the jaws closed differ from scene to scene and "
+            "are not given, so a size measured in millimetres any other way cannot be matched to a label: the readings must "
+            "come from the scale.",
+            "The slider is locked at the start. Its locking screw is the knurled knob on the slider's front face, left of "
+            "the vernier on the jaws' side; a white line on its top shows its angle. It turns between two stops 45 degrees "
+            "apart, and clockwise (seen from the scale side) tightens. Within 10 degrees of the loose stop the slider moves "
+            "freely (about 1.5 N of friction); from 20 degrees on it is locked where it stands and does not move however "
+            "hard it is pushed. Turn the knob by pinching it and rotating the gripper about its axis: it turns by friction "
+            "only and is not a grasp target.",
+            f"Every sleeve's centre must end inside the bin of its class: within {mm(terminal['bin_half_extent_m'])} "
+            f"of the bin's centre in both horizontal directions (the bin's 80 mm x 80 mm cavity) and "
+            f"{mm(terminal['min_height_m'])} to {mm(terminal['max_height_m'])} above the tabletop.",
+            "Every sleeve must be released: no sleeve may still be held by an assisted grasp, and no part of the robot (arm, "
+            "gripper or finger) may press on a sleeve with more than 0.05 N. Whether the caliper is locked at the end does "
+            "not matter.",
+            f"Keep every sleeve's linear speed at most {mm(terminal['max_linear_speed_m_s'])}/s and angular speed at most "
+            f"{terminal['max_angular_speed_rad_s']:g} rad/s.",
+        ]
+        failures.append(_rigid_contact_failure())
+        failures.append(
+            f"A sleeve left in a bin that is not its own (its centre inside that bin as above, released as above and still at "
+            f"the speeds above) for {float(task.config.get('stable_duration_s', .5)):g} s ends the episode in failure. When "
+            "you set a sleeve down to take it again, set it on the table, not in another bin.")
     elif name == "buzz_wire_3d":
         summary = "Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support."
         rules += [
@@ -270,6 +307,21 @@ def describe_goal(task):
         summary, fold_rules = task.fold_goal_words()
         rules += fold_rules
         failures.append("Any cloth point falling more than 100 mm below the tabletop ends the episode in failure.")
+
+    elif name == "bed_bolt":
+        summary, bolt_rules = task.goal_words()
+        rules += bolt_rules
+        failures.append(_rigid_contact_failure())
+
+    elif name == "clock_assembling":
+        summary, clock_rules = task.goal_words()
+        rules += clock_rules
+        failures.append(_rigid_contact_failure())
+
+    elif name == "battery_replacement":
+        summary, swap_rules = task.goal_words()
+        rules += swap_rules
+        failures.append(_rigid_contact_failure())
 
     settling = task.final_settling_spec()
     if settling is not None:

@@ -57,7 +57,9 @@ Steps:
      a family whose mujoco_release.json entry names package_text, a directory of the tree, takes the files of its
      <package_text>/<released base>-<mode>/ over the released ones: the task texts of a changed design; a family's
      new_bases are tasks of a new design: each takes its template's released texts, renamed, with the files of its
-     <package_text>/<new base>-<mode>/ over them, and leaves the template as it is);
+     <package_text>/<new base>-<mode>/ over them, and leaves the template as it is; a template of another family: its
+     family (task.toml) replaced by the new base's task where the grader and the sidecar are started (tests/test.sh
+     --family, the standard compose's RCB_TASK), and refused while any other text still names it);
      oracles/<new>/ (the reference; standard.npz is the same file: a MuJoCo standard oracle streams the reference's
      rows and mk_tasks.py reads only its actions; unless the tree's oracles/<new>/standard.npz is a reference re-timed
      to the standard service's joint-speed rule, meta "speed_rule": then that file, standard_reference()); release.json (runtime, tooling, the MuJoCo base records with their
@@ -93,6 +95,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import tomllib
 import zipfile
 
 BENCH = "robotangle-new"   # the default --bench: RoboTangle on MuJoCo, its own benchmark (rename: here and on main)
@@ -534,6 +537,19 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
                 if not own.is_dir():
                     raise SystemExit(f"{new}: package_text has no {own}")
                 texts.update(texts_of(own, old or b["template"], new))
+            if b["template"]:             # a template of another family: its grader and sidecar start the new task
+                tf = tomllib.loads(template_texts[new, mode][pathlib.Path("task.toml")][0])["metadata"]["family"]
+                if tf != b["task"]:
+                    for rel_path, line in ((pathlib.Path("tests/test.sh"), "--family {} "),
+                                           (pathlib.Path("environment/docker-compose.yaml"), "RCB_TASK: {}\n")):
+                        if rel_path in texts:
+                            s, st_mode = texts[rel_path]
+                            texts[rel_path] = (s.replace(line.format(tf), line.format(b["task"])), st_mode)
+                    left = sorted(str(p) for p, (s, _) in texts.items()
+                                  if isinstance(s, str) and tf in s.replace(b["task"], ""))
+                    if left:
+                        raise SystemExit(f"{new}-{mode}: its template's family {tf} is still named in {left} (a new base "
+                                         f"of {b['task']}: its package_text replaces every task line of the template)")
             shutil.rmtree(dst, ignore_errors=True)
             for rel_path, (s, st_mode) in texts.items():
                 (dst / rel_path).parent.mkdir(parents=True, exist_ok=True)

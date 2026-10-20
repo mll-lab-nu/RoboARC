@@ -419,7 +419,8 @@ MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_C
               ("OPENBLAS_CORETYPE", "Haswell"))   # docs/rcb/MUJOCO_CORE.md: the containers of a MuJoCo task
 NYX_DIRECT = ("blanket_flatten", "blanket_fold", "buzz_wire_3d", "cast_coil", "cast_keyhole", "fiber_bundling",
               "hedgehog_in_cage", "horseshoe_ring", "interlocked_claws", "knot_untying", "lock_picking", "orbits",
-              "rope_threading", "slotted_post_ring")   # rcb_topogym.TASKS renderer "direct"
+              "rope_threading", "slotted_post_ring", "bed_bolt", "clock_assembling",
+              "battery_replacement", "caliper_sorting")   # rcb_topogym.TASKS renderer "direct"
 
 
 def nyx_direct(rec: dict) -> bool:

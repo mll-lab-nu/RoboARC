@@ -169,3 +169,65 @@ the released `interlocked-claws-easy-i00` as its template, as Cast ABC's is.
   60 N rule. Under the new base's name, with these texts, it was graded later on 2026-10-12: test-only commit d2abf8f9d
   (dev 1ee40ae14 plus the entry above), `release_rebuild.py --families interlocked_claws` PASS, oracle 1 and nop 0 in
   both modes, the same final states (`docs/rcb/families/interlocked_claws_rotor.md`).
+
+## interlocked-claws-13-i01 (Cast Trinity, `interlocked_claws_cast_trinity`)
+
+Hanayama's Cast Trinity (`interlocked_claws_cast_trinity`, an experimental variation without a tier;
+`docs/rcb/families/interlocked_claws_cast_trinity.md`): three Lambda-shaped pieces, two held from the start (T in the left
+hand, B in the right) and the third (H) hanging, separated pair by pair in the official order. It has no released base; its
+own base, `interlocked-claws-13-i01`, is made from the released `interlocked-claws-easy-i00` as its template, as
+Cast ABC's and Rotor's are.
+
+- Release list: the user's rule of 2026-10-13 (every setting with all four items done goes on the list). The entry, for
+  `mujoco_release.json`'s interlocked_claws `new_bases` once the acceptance round and Harbor under this base have passed:
+
+  ```json
+  "interlocked-claws-13-i01": {"template": "interlocked-claws-easy-i00",
+    "variation": "interlocked_claws_cast_trinity", "package_text": "scripts/robotangle/package_text/interlocked_claws",
+    "design": "Hanayama's Cast Trinity: three interlocked Lambda-shaped pieces, two held from the start and the third hanging, separated pair by pair in the official order (B from T, then T from H, then B from H); each piece's band neck is the only part thinner than a head gap"}
+  ```
+
+- Each file is Cast ABC's (the template's released -i00 file with that setting's lines replaced) with Cast ABC's lines
+  replaced, each value taken from the Trinity instance (birth 195513489176c313) or from what the tooling gives for it:
+  - the names: `topogym-interlocked-claws-13-i01-<mode>` (the task name, the README title, the twin);
+  - the task sentence (the instruction's, the description, the README's task line and goal): the instance's
+    `public_goal.summary`, "Completely separate all three pieces from one another and briefly hold them still.";
+  - the two success lines: the instance's `public_goal.success_conditions` (the setting's `separation_rules`: every two of
+    the three pieces separated by a plane, all three still), not the family's two-piece lines;
+  - the variation id in the privileged `task.toml` and README, and the success rule's terminal revision
+    `trinity_pairwise_separation_v1` (the instance's `success_rule`);
+  - the grasp regions, `trinity_t`, `trinity_h` and `trinity_b`, 90 mm each, in the order of
+    `simulator.grasp_assist.targets`: each is centred on its piece's bounding box and covers it whole (the farthest point,
+    a corner of B, is 85.8 mm from its centre); `task.toml`'s grasp line names the two pieces the grippers start closed on
+    (`trinity_t`, `trinity_b`);
+  - the scene objects in `s.objects()` order on MuJoCo (`goal_region`, `trinity_b`, `trinity_h`, `trinity_t`) and the
+    standard "Objects here";
+  - the privileged instruction's implementation reference: `InterlockedClawsCastTrinityTask` and its module. Its
+    `evaluate_state` is `InterlockedClawsTask`'s, so the excerpt is unchanged; the pairwise goal is its
+    `evaluate_goal_region` (`trinity_terminal.pairwise_separation_candidate`);
+  - the grasping rule (privileged "- Grippers:", standard "Grasping:"): `Session.grasp_rules()` for the Trinity instance:
+    the tool frame within 12 cm of the grasp region's centre (the task's `grasp_max_tcp_distance_m`) and the 60 N rule;
+  - the grader details' goal line (2026-10-19, metric review T1): `scripts/topogym_rules.py`
+    (`claws_separation` now takes the terminal revision `trinity_pairwise_separation_*`, `claws_separation_words(three=True)`):
+    for every two of the three pieces, the gap measured along ten directions only (the world axes, the two pieces' body
+    axes, the line between their centres), at least 10 mm along one of them; the green square and a separator are not
+    checked. Until then these texts carried the placement families' two lines instead, the goal square (219.1 mm) and a
+    separator naming `trinity_h` and `trinity_b` as "free to move (their speed is not checked)"; the separation predicate
+    checks neither, and it does check all three pieces' speed;
+  - the contact review line keeps the released wording ("it replaces the "at most 1 mm / 2 mm" wording above") with the
+    2 mm rule, as Cast ABC's and Rotor's do;
+  - `task.toml`: no difficulty line (the variation record has no tier); the oracle_evidence line reads "No graded positive
+    yet."; `mk_tasks.py` replaces it for a base with a reference (`oracle = "full"`);
+  - the per-step wall clock, in both modes (the standard "Time per call" line keeps its wording): 0.072 s, MuJoCo, from
+    Harbor's run of the -i01 reference under this base on the trial host (2026-10-13, AMD Ryzen 9 7950X, 16 cores /
+    32 threads, load average 50-70): the standard live episode 692 s for 9 596 control steps. The same reference on
+    a cloud host (AMD EPYC, loaded): 0.033 s (two fresh strict replays, 315 s each; three hold steps in the session 0.032 s).
+  - Every other line is the released one, so `mk_tasks.py` rewrites it as for every family.
+- Checks (2026-10-13, on this branch; `describe`'s fields computed in-process for the instance): against
+  `topogym_mk_task.instruction()` the privileged instruction differs in three lines: the separator (above); the contact
+  review line (above); the tool-frame line, which keeps the released axes (finger-closing axis local [0.0, 1.0, 0.004];
+  MuJoCo's robot spec gives [-0.0, 1.0, -0.002]). No word of Cast ABC's or easy's scene remains (ab_plate, c_ring, AB plate,
+  C ring, both pieces, 198.0 mm, 0.053 s, within 6 cm, claws_separation_v1). Making the base with `release_rebuild.py` and
+  rendering it with `mk_tasks.py --check` comes with Harbor under this base.
+- The reference: `scripts/robotangle/oracles/interlocked-claws-13-i01/` (b3f0341f3; 9 596 rows, final state
+  66be99300a3ceebd).
