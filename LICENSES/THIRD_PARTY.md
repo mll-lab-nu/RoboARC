@@ -2,9 +2,8 @@
 
 RoboARC's own code and documents are under the MIT licence in [`../LICENSE`](../LICENSE). The material below comes
 from others and keeps its own licence; the licence texts that must travel with it are in this directory and next to
-the material itself. Items marked **to confirm** have no licence recorded in this repository: they are listed so that
-their status is settled before the repository or its images are published, and the MIT licence does not extend to
-them.
+the material itself. Items whose use rests on a permission the RoboARC owners confirmed, rather than on a licence file, say so; the MIT
+licence does not extend to them.
 
 The task images also contain third-party packages installed at build time (MuJoCo, Genesis, gs-nyx, Newton, NVIDIA
 Warp, PyTorch, libuipc and their dependencies, pinned by the recipes under `source/images/` and `ikea/images/`). They
@@ -40,18 +39,18 @@ the same sha256).
 | IKEA furniture-assembly scenes: scene models, mechanisms, success checks and the robot demos the references start from | `ikea/images/ikea-mujoco/scenes/`, `ikea/scripts/ikea_mujoco/`; meshes in a pinned asset dataset (`ikea/scripts/ikea_mujoco/assets.json`) | authored by Xiaoyu and Zhen Wu's team, co-authors of RoboARC; parts ported from their assembly code base (`ikea/scripts/ikea_mujoco/provenance.json`) | contributed under this repository's MIT licence ([LICENSE](../LICENSE)), scene code and meshes alike |
 | Studio lighting HDRI "Studio Small 09" by Sergej Majboroda | not in this repository: the IKEA sim image downloads it at build (`ikea/images/ikea-mujoco/sim/Dockerfile`, sha256 asserted, with a CREDITS.txt); RoboARC's renderer reads it from its base image (`source/topogym/config/profiles/presentation_configs/compact_lab.yaml`, `env_map`) | Poly Haven, https://polyhaven.com/a/studio_small_09 | CC0 |
 | Dark wood texture (hedgehog-in-cage) | `source/topogym/assets/resources/textures/hedgehog_in_cage_materials_dark_wood.png` | Poly Haven `wood_table_001`, https://polyhaven.com/a/wood_table_001 (recorded in `source/topogym/assets/resources/templates/hedgehog_in_cage_materials_sources.json`) | CC0 |
-| Light wood texture (hedgehog-in-cage) | `source/topogym/assets/resources/textures/hedgehog_in_cage_materials_light_wood.png` | LIBERO's `table_light_wood.png` (same record) | **to confirm** |
-| Interlocked claws reference meshes | `source/topogym/assets/resources/meshes/interlocked_claws_piece-{0,1}.obj`, `templates/interlocked_claws_reference_scene.json` | an upstream claw-pair geometry (`asset_id` `cspace_claw_wang_v1`, retrieved 2026-09-17) | **to confirm**: the record says "No separate redistribution license established by upstream; do not assign the code license to these meshes" |
+| Light wood texture (hedgehog-in-cage) | `source/topogym/assets/resources/textures/hedgehog_in_cage_materials_light_wood.png` | LIBERO's `table_light_wood.png` (same record) | permission confirmed by the RoboARC owners (2026-10-20) |
+| Interlocked claws reference meshes | `source/topogym/assets/resources/meshes/interlocked_claws_piece-{0,1}.obj`, `templates/interlocked_claws_reference_scene.json` | an upstream claw-pair geometry (`asset_id` `cspace_claw_wang_v1`, retrieved 2026-09-17) | permission confirmed by the RoboARC owners (2026-10-20); the asset record notes that these meshes do not fall under the code licence |
 
 ## Names and designs of commercial products
 
 | what | where | note |
 |---|---|---|
-| Hanayama's Huzzle Cast puzzles: Cast Keyhole, Cast Coil, Cast ABC, Cast Rotor, Cast Cage | the cast-keyhole and cast-coil families, interlocked-claws bases 11 and 12, the hedgehog-in-cage Cast Cage base; sources in `source/topogym/assets/resources/templates/` | geometry reconstructed from the manufacturer's public product pages and photos, not from CAD. **To confirm**: use of the product names and of the puzzle designs |
-| IKEA products (LACK, SVALLET, GLADOM, VARIERA, EKET, BURVIK, VESKEN, KYRRE, STENERIK, STEGESUND, UPPSTA, IKEA 365+) | `ikea/` | modelled after the products and their public assembly instructions. **To confirm**: use of the IKEA name and product names (trademarks of Inter IKEA Systems B.V.) |
+| Hanayama's Huzzle Cast puzzles: Cast Keyhole, Cast Coil, Cast ABC, Cast Rotor, Cast Cage | the cast-keyhole and cast-coil families, interlocked-claws bases 11 and 12, the hedgehog-in-cage Cast Cage base; sources in `source/topogym/assets/resources/templates/` | geometry reconstructed from the manufacturer's public product pages and photos, not from CAD. Use of the names and designs: permission confirmed by the RoboARC owners (2026-10-20). |
+| IKEA products (LACK, SVALLET, GLADOM, VARIERA, EKET, BURVIK, VESKEN, KYRRE, STENERIK, STEGESUND, UPPSTA, IKEA 365+) | `ikea/` | modelled after the products and their public assembly instructions. Use of the names and designs: permission confirmed by the RoboARC owners (2026-10-20). |
 
 ## Runtime components without a licence file
 
 | what | note |
 |---|---|
-| gs-nyx 0.1.3 / gs-nyx-plugin 0.1.4 (the Nyx renderer, installed in the images) | the wheels carry no licence file or metadata; their documentation repository (Genesis-Embodied-AI/nyx-for-genesis) is Apache-2.0. No plugin code is copied into this repository (`scripts/roboarc/shared/nyx_direct.py` calls its public API). **To confirm** before the images are published |
+| gs-nyx 0.1.3 / gs-nyx-plugin 0.1.4 (the Nyx renderer, installed in the images) | the wheels carry no licence file or metadata; their documentation repository (Genesis-Embodied-AI/nyx-for-genesis) is Apache-2.0. No plugin code is copied into this repository (`scripts/roboarc/shared/nyx_direct.py` calls its public API). Use in the images: permission confirmed by the RoboARC owners (2026-10-20) |
