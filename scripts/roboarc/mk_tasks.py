@@ -42,7 +42,8 @@ Inputs, all in this directory, written by scripts/robotangle/release_rebuild.py 
                  the RoboARC base's texts it ports, renamed, with the family's own texts over them for a changed or
                  new design; and the instance's lock (runtime_binding.upstream.json)
   oracles/       the references (privileged.npz; standard.npz is the same file, or, where release.json's standard evidence
-                 has "speed_rule", the reference re-timed to the standard service's joint-speed rule)
+                 has "speed_rule", the reference re-timed to the standard service's joint-speed rule; privileged.s<S>.npz
+                 for an appearance seed S, below)
   assets.json    the frozen instances, not in git: the private HF dataset eai-v2-internal/robotangle-assets (the same
                  dataset as RoboARC's, instances/<base>/), pinned by commit and sha256. The image carries them; a task
                  keeps its runtime_binding.json and stages its instance from the image (/opt/robotangle/stage_instance.py).
@@ -50,9 +51,11 @@ Inputs, all in this directory, written by scripts/robotangle/release_rebuild.py 
                  its `seeds`; its tasks allow seeds 0 and those (`[metadata.seeds]`, build = "runtime"), carry
                  runtime_binding.s<S>.json beside each runtime_binding.json (its lock:
                  packages/<base>-privileged/runtime_binding.s<S>.upstream.json), and stage the seed a runner's copy names
-                 in its `seed` file (scripts/task_seed.py materialize). A seeded base with goal pictures commits each
-                 seed's in both twins (packages/<base>-<mode>/tests/seeds/<S>/goal/, pinned under the seed's `goal`;
-                 goal_images()).
+                 in its `seed` file (scripts/task_seed.py materialize). Its privileged reference is one file per seed
+                 (oracles/<base>/privileged.s<S>.npz: the same rows re-stamped with that seed's birth; solution/
+                 trajectory.s<S>.npz, which solve.sh picks by the staged instance), and a seeded base with goal pictures
+                 commits each seed's in both twins (packages/<base>-<mode>/tests/seeds/<S>/goal/, pinned under the seed's
+                 `goal`; goal_images()).
 Nothing at run time imports repository code: the tooling and the sim layer are copies (PROTOCOL D9).
 """
 from __future__ import annotations
@@ -1136,6 +1139,61 @@ def seeded(name: str, s: str, base: str) -> str:
     return s
 
 
+def npz_text(path: pathlib.Path, name: str) -> str:
+    """A text scalar of an .npz (a reference's instance_sha.npy: the birth it was recorded on), read without numpy."""
+    with zipfile.ZipFile(path) as z:
+        raw = z.read(name)
+    size = 4 if raw[6] >= 2 else 2                      # .npy: magic, version, header length, header, data
+    return raw[8 + size + int.from_bytes(raw[8:8 + size], "little"):].decode("utf-32-le").rstrip("\0")
+
+
+def seed_references(base: str, ref: pathlib.Path, seeds: list[int], inst_dir: pathlib.Path | None) -> list[tuple[str, bytes, str]]:
+    """A seeded base's privileged references, (file name in solution/, bytes, birth) per seed: seed 0's and, for each
+    appearance seed S, oracles/<base>/privileged.s<S>.npz (scripts/robotangle/release_rebuild.py restamp): seed 0's
+    reference with only instance_sha.npy changed, to seed S's birth. Every seed's stamp differs; with inst_dir (--assets),
+    each is the birth (state_sha) of that seed's frozen instance."""
+    with zipfile.ZipFile(ref) as z:
+        names, rows = z.namelist(), {n: z.read(n) for n in z.namelist() if n != "instance_sha.npy"}
+    out = []
+    for sd in seeds:
+        p = ref if sd == 0 else ORC / base / f"privileged.s{sd}.npz"
+        assert p.is_file(), f"{base} seed {sd}: no re-stamped reference {p}"
+        with zipfile.ZipFile(p) as z:
+            assert z.namelist() == names and all(z.read(n) == b for n, b in rows.items()), \
+                f"{base} seed {sd}: {p.name} is not seed 0's reference re-stamped (other entries differ)"
+        birth = npz_text(p, "instance_sha.npy")
+        assert re.fullmatch(r"[0-9a-f]+", birth), f"{base} seed {sd}: {p.name} names the birth {birth!r}"
+        if inst_dir is not None:
+            got = json.loads(((inst_dir / "seeds" / str(sd) if sd else inst_dir) / "instance.json").read_text())["state_sha"]
+            assert birth == got, f"{base} seed {sd}: {p.name} is stamped {birth}, the frozen instance's birth is {got}"
+        out.append(("trajectory.npz" if sd == 0 else f"trajectory.s{sd}.npz", p.read_bytes(), birth))
+    assert len({b for _, _, b in out}) == len(out), f"{base}: two seeds' references name the same birth"
+    return out
+
+
+SEED_SOLVE = ("#!/bin/bash\n# Reference solution (privileged): the trajectory the author's oracle produced (README.md, Reference solution),\n"
+              "# one file per appearance seed: the same rows, stamped with that seed's birth (instance_sha). This copies the file\n"
+              "# whose stamp is the birth (state_sha) of the instance staged in /app (the runner's seed; no seed file: seed 0).\n"
+              "# Uses nothing but the recorded files and that birth.\n"
+              "set -euo pipefail\nmkdir -p /app/output\n"
+              "birth=$(python -c 'import json; print(json.load(open(\"/app/instance.json\"))[\"state_sha\"])')\n"
+              "case \"$birth\" in\n{cases}"
+              "  *) echo \"solve.sh: no reference for the staged instance (birth $birth)\" >&2; exit 1 ;;\nesac\n"
+              "cp \"/solution/$f\" /app/output/trajectory.npz\n")
+
+
+def seed_words(s: str, mode: str, seeds: list[int]) -> str:
+    """A seeded task's README: the Reference solution paragraph says which file serves which seed."""
+    m = re.search(r"(?ms)^## Reference solution\n(`solution/solve\.sh` .*?)\n\n(?=^## )", s)
+    if not m:
+        return s
+    more = (f" For an appearance seed S ({', '.join(map(str, seeds[1:]))}) it copies `solution/trajectory.s<S>.npz` instead: "
+            "the same rows with `instance_sha` set to that seed's birth (`solve.sh` picks the file whose stamp is the staged "
+            "instance's `state_sha`)." if mode == "privileged" else
+            " The same rows serve every appearance seed: a seed changes only the looks.")
+    return s[:m.end(1)] + more + s[m.end(1):]
+
+
 MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"),
               ("OPENBLAS_CORETYPE", "Haswell"))   # the containers of a MuJoCo task (dev/robotangle_mujoco docs/rcb/MUJOCO_CORE.md)
 
@@ -1232,7 +1290,8 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                     'build = "runtime"\n')
         put(t / "task.toml", toml.encode())
         fence = "`fence`" in rd("instruction.md")
-        put(t / "README.md", audit_words(r5_words(frame_words(flat_words(rewrite_readme(separation_words(rd("README.md"), f"{t.name}/README.md"), base, mode, rec), fence), f"{t.name}/README.md", mode), mode), rec, mode, True).encode())
+        readme = audit_words(r5_words(frame_words(flat_words(rewrite_readme(separation_words(rd("README.md"), f"{t.name}/README.md"), base, mode, rec), fence), f"{t.name}/README.md", mode), mode), rec, mode, True)
+        put(t / "README.md", (seed_words(readme, mode, seeds) if len(seeds) > 1 else readme).encode())
         ins = grasp_text(contact_text(chain_text(mujoco_text(text(instance_facts(separation_words(rd("instruction.md"), f"{t.name}/instruction.md"), rec, mode)), rec), rec), rec), rec).replace("RoboARC", "RoboARC (simulator package `topogym`)", 1)
         ins = flat_words(review_fixes_r2(review_fixes(ins, "instruction.md", base, mode), base, mode), fence)
         ins = clock_words(r5_words(frame_words(safety_text(ins) if mode == "standard" else ins, f"{t.name}/instruction.md", mode), mode), mode)
@@ -1262,7 +1321,13 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                     put(t / d / n, b)
             put(t / "tests/grade.py", (SHARED / "privileged/grade.py").read_bytes())
             traj = reference or ORC / base / "privileged.npz"
-            if traj.is_file():
+            if traj.is_file() and len(seeds) > 1:     # appearance seeds: a reference per seed, picked by the staged birth
+                refs = seed_references(base, traj, seeds, inst_src)
+                for n, data, _ in refs:
+                    put(t / "solution" / n, data)
+                put(t / "solution/solve.sh", SEED_SOLVE.format(cases="".join(f"  {birth}) f={n} ;;\n" for n, _, birth in refs))
+                    .encode(), exe=True)
+            elif traj.is_file():
                 put(t / "solution/trajectory.npz", traj.read_bytes())
                 put(t / "solution/solve.sh", (
                     "#!/bin/bash\n# Reference solution (privileged): the trajectory the author's oracle produced and the verifier scored 1\n"

@@ -7,17 +7,23 @@
   instance hash): [metadata.seeds] allowed = oracle = [0, 1, 2], build = "runtime" in both twins (ci_checks/check-seeds.py
   and check-twins.py pass), runtime_binding.s<S>.json beside every runtime_binding.json, the Dockerfiles and the sim
   entrypoint read the `seed` file scripts/task_seed.py materialize writes (check_image_files' COPY mapping of a seed-1
-  copy holds it; a seed-0 copy has none), and the standard verifier's shell step picks the seed's binding.
+  copy holds it; a seed-0 copy has none), and the standard verifier's shell step picks the seed's binding;
+- the seeds' privileged references (oracles/<base>/privileged.s<S>.npz, the reference re-stamped with each seed's birth):
+  solution/trajectory.s<S>.npz beside trajectory.npz, and a solve.sh that copies the file whose stamp is the staged
+  instance's state_sha (run here on fake /app/instance.json files) and fails on any other; the standard solution is the
+  same rows for every seed; a re-stamped file with other rows, or two seeds with one birth, stops the render.
 Standard library only (python >= 3.11); no docker, no image."""
 import copy
 import hashlib
 import importlib.util
+import io
 import json
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -43,6 +49,19 @@ def load(name, path):
 
 def canon(v) -> str:
     return hashlib.sha256(json.dumps(v, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+
+
+def restamp(data: bytes, birth: str) -> bytes:
+    """A reference with instance_sha.npy's text replaced (release_rebuild.restamp's result), every other entry as it is."""
+    zin = zipfile.ZipFile(io.BytesIO(data))
+    raw = zin.read("instance_sha.npy")
+    head = 10 + int.from_bytes(raw[8:10], "little")
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w") as z:
+        for n in zin.namelist():
+            z.writestr(n, raw[:head] + birth.encode("utf-32-le").ljust(len(raw) - head, b"\0") if n == "instance_sha.npy"
+                       else zin.read(n))
+    return out.getvalue()
 
 
 def instance(d: Path, tag: int) -> dict:
@@ -119,9 +138,38 @@ def test_render():
             pre = f"instances/{BASE}/"
             assets["files"].update({f"{pre}seeds/{s}/{k[len(pre):]}": v for k, v in mk.ASSETS["files"].items()
                                     if k.startswith(pre + "instance_assets/")})
-        mk.PKG, mk.ASSETS = pkg, assets
+        orc = td / "oracles"                   # each seed's reference: the released one re-stamped with a fake birth
+        shutil.copytree(mk.ORC / BASE, orc / BASE)
+        ref = (orc / BASE / "privileged.npz").read_bytes()
+        births = {0: mk.npz_text(orc / BASE / "privileged.npz", "instance_sha.npy")}
+        for s in (1, 2):
+            births[s] = hashlib.sha256(f"birth {s}".encode()).hexdigest()[:16]
+            (orc / BASE / f"privileged.s{s}.npz").write_bytes(restamp(ref, births[s]))
+        mk.PKG, mk.ASSETS, mk.ORC = pkg, assets, orc
         check(mk.seeds_of_base(BASE) == [0, 1, 2], f"seeds from assets.json: {mk.seeds_of_base(BASE)}")
         priv, std = mk.render(BASE, td / "out")
+        sol = {p.name for p in (priv / "solution").iterdir()}
+        check(sol == {"solve.sh", "trajectory.npz", "trajectory.s1.npz", "trajectory.s2.npz"}, f"{priv.name}/solution: {sol}")
+        check((priv / "solution/trajectory.npz").read_bytes() == ref and all(
+            (priv / f"solution/trajectory.s{s}.npz").read_bytes() == (orc / BASE / f"privileged.s{s}.npz").read_bytes()
+            for s in (1, 2)), "the solution's references are the release files")
+        solve = (priv / "solution/solve.sh").read_text()
+        for seed, want in ((0, "trajectory.npz"), (1, "trajectory.s1.npz"), (2, "trajectory.s2.npz"), (None, None)):
+            w = td / f"solve{seed}"
+            (w / "app").mkdir(parents=True)
+            (w / "app/instance.json").write_text(json.dumps({"state_sha": births[seed] if seed is not None else "0" * 16}))
+            script = solve.replace("/app/", f"{w}/app/").replace("/solution/", f"{priv}/solution/").replace(
+                "python -c", f"{sys.executable} -c").replace("open(\"/app", f"open(\"{w}/app")
+            r = subprocess.run(["bash", "-c", script], capture_output=True, text=True)
+            got = (w / "app/output/trajectory.npz").read_bytes() if (w / "app/output/trajectory.npz").is_file() else None
+            ok = (r.returncode != 0 and got is None) if want is None else \
+                (r.returncode == 0 and got == (priv / "solution" / want).read_bytes())
+            check(ok, f"solve.sh on the birth of seed {seed}: rc {r.returncode} {r.stderr.strip()}")
+        check("it copies `solution/trajectory.s<S>.npz` instead" in (priv / "README.md").read_text(),
+              f"{priv.name}/README.md does not name the seeds' references")
+        check((std / "solution/oracle_qpos.npy").read_bytes() == zipfile.ZipFile(io.BytesIO(ref)).read("actions.npy")
+              and "trajectory" not in " ".join(p.name for p in (std / "solution").iterdir()),
+              f"{std.name}/solution: the same rows for every seed")
         cs = load("check_seeds", ROOT / "ci_checks" / "check-seeds.py")
         ct = load("check_twins", ROOT / "ci_checks" / "check-twins.py")
         for t in (priv, std):
@@ -170,6 +218,21 @@ def test_render():
             ok = r.returncode != 0 and got is None if want is None else \
                 r.returncode == 0 and got == (std / "tests" / want).read_bytes() and not (w / "ctx").exists()
             check(ok, f"standard verifier binding step, seed file {seed_text!r}: rc {r.returncode} {r.stderr.strip()}")
+        # a re-stamped reference with other rows, and two seeds with one birth, stop the render
+        with zipfile.ZipFile(io.BytesIO(ref)) as z:
+            other = io.BytesIO()
+            with zipfile.ZipFile(other, "w") as zo:
+                for n in z.namelist():
+                    zo.writestr(n, z.read(n) + (b"\0" if n == "actions.npy" else b""))
+        (orc / BASE / "privileged.s2.npz").write_bytes(restamp(other.getvalue(), births[2]))
+        for name, want in (("rows", "is not seed 0's reference re-stamped"), ("birth", "the same birth")):
+            if name == "birth":
+                (orc / BASE / "privileged.s2.npz").write_bytes(restamp(ref, births[1]))
+            try:
+                mk.render(BASE, td / f"bad_{name}")
+                check(False, f"seed 2's reference with other {name} must stop the render")
+            except AssertionError as e:
+                check(want in str(e), f"seed 2's reference with other {name}: wrong failure {e}")
 
 
 if __name__ == "__main__":
@@ -181,4 +244,5 @@ if __name__ == "__main__":
         sys.exit(1)
     print("ok seed staging: stage_instance --seed-file (default unchanged, seed S from seeds/<S>/ with its binding, failures "
           "closed); mk_tasks on fake seed pins: seeds block in both twins, per-seed bindings, Dockerfiles and the sim "
-          "entrypoint read the runner's seed file, the standard verifier picks the seed's binding")
+          "entrypoint read the runner's seed file, the standard verifier picks the seed's binding; per-seed references "
+          "and a solve.sh that picks the staged instance's")
