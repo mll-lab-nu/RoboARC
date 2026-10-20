@@ -46,6 +46,11 @@ Inputs, all in this directory, written by scripts/robotangle/release_rebuild.py 
   assets.json    the frozen instances, not in git: the private HF dataset eai-v2-internal/robotangle-assets (the same
                  dataset as RoboARC's, instances/<base>/), pinned by commit and sha256. The image carries them; a task
                  keeps its runtime_binding.json and stages its instance from the image (/opt/robotangle/stage_instance.py).
+                 A base with appearance seeds (owner, 2026-10-20) also has instances/<base>/seeds/<S>/, pinned under
+                 its `seeds`; its tasks allow seeds 0 and those (`[metadata.seeds]`, build = "runtime"), carry
+                 runtime_binding.s<S>.json beside each runtime_binding.json (its lock:
+                 packages/<base>-privileged/runtime_binding.s<S>.upstream.json), and stage the seed a runner's copy names
+                 in its `seed` file (scripts/task_seed.py materialize).
 Nothing at run time imports repository code: the tooling and the sim layer are copies (PROTOCOL D9).
 """
 from __future__ import annotations
@@ -969,13 +974,22 @@ def review_fixes_r2(s: str, base: str, mode: str) -> str:
     return s
 
 
-def binding(base: str, inst_dir: pathlib.Path | None = None, bridge: bool = False, direct: bool = False) -> bytes:
+def seeds_of_base(base: str) -> list[int]:
+    """The seeds a base's tasks allow: 0 (its frozen instance) and every appearance seed assets.json pins for it."""
+    return [0] + sorted(int(s) for s in ASSETS["instances"].get(base, {}).get("seeds", {}))
+
+
+def binding(base: str, inst_dir: pathlib.Path | None = None, bridge: bool = False, direct: bool = False, seed: int = 0) -> bytes:
     """The task's runtime binding: the upstream lock (instance and asset hashes) with this release's tooling and runtime.
-    The frozen instance must be the pinned one in assets.json; with inst_dir (a local copy), its bytes are checked too."""
-    lock = json.loads((PKG / f"{base}-privileged" / "runtime_binding.upstream.json").read_text())
-    pinned = ASSETS["instances"].get(base, {}).get("instance_sha256")
-    assert lock["instance_sha256"] == pinned, f"{base}: the bound instance is not the one pinned in assets.json"
-    prefix = f"instances/{base}/"
+    The frozen instance must be the pinned one in assets.json; with inst_dir (a local copy), its bytes are checked too.
+    For a seed other than 0, that seed's instance (instances/<base>/seeds/<seed>/; its lock and pins)."""
+    lock = json.loads((PKG / f"{base}-privileged" / (f"runtime_binding.s{seed}.upstream.json" if seed else "runtime_binding.upstream.json")).read_text())
+    pins = ASSETS["instances"].get(base, {})
+    pinned = (pins.get("seeds", {}).get(str(seed), {}) if seed else pins).get("instance_sha256")
+    assert lock["instance_sha256"] == pinned, f"{base} seed {seed}: the bound instance is not the one pinned in assets.json"
+    prefix = f"instances/{base}/seeds/{seed}/" if seed else f"instances/{base}/"
+    if inst_dir is not None and seed:
+        inst_dir = inst_dir / "seeds" / str(seed)
     pinned_assets = {k[len(prefix):]: v for k, v in ASSETS["files"].items() if k.startswith(prefix + "instance_assets/")}
     # Frozen generated assets (image 0.2.22: knot_untying's rope volume meshes, rcb_topogym._install_frozen_assets), added to
     # the instance after the upstream lock: each is a generated file whose sha256 the instance's asset_identity records.
@@ -1069,6 +1083,42 @@ def staged(name: str, s: str, base: str) -> str:
     return s
 
 
+SEED_COPY = ("# the task's runtime bindings, one per seed, and in a runner's copy for one seed its `seed` file (scripts/task_seed.py\n"
+             "# materialize; `see[d]` matches that file or nothing)\n"
+             "COPY runtime_binding*.json see[d] {tmp}/\n")
+SEED_STAGE = ("RUN python /opt/robotangle/stage_instance.py {base} {dest} --binding {tmp}/runtime_binding.json --seed-file {tmp}/seed "
+              "--purge && rm -rf {tmp}   # the frozen instance of the task's seed (no seed file: the default one), from the image "
+              "(scripts/roboarc/assets.json), checked against that seed's runtime binding")
+SEED_PICK = ("RUN s=$(cat {tmp}/seed 2>/dev/null || echo 0) && case \"$s\" in 0) b=runtime_binding.json ;; *[!0-9]*|\"\") exit 1 ;; "
+             "*) b=\"runtime_binding.s$s.json\" ;; esac && cp \"{tmp}/$b\" /tests/runtime_binding.json && rm -rf {tmp}   # the "
+             "runtime binding of the task's seed (no seed file: runtime_binding.json), as images/roboarc/stage_instance.py picks it\n")
+
+
+def seeded(name: str, s: str, base: str) -> str:
+    """Task files of a base with appearance seeds: the instance and the runtime binding of the seed in the runner's `seed`
+    file (none: the default), staged from a directory the stage removes again, so no file a COPY placed is rewritten."""
+    def sub(a: str, b: str) -> str:
+        assert s.count(a) == 1, f"{base} {name}: expected one {a!r}"
+        return s.replace(a, b)
+    if name == "environment/Dockerfile" and "stage_instance.py" in s:
+        tmp = "/opt/robotangle/task"
+        s = sub("COPY runtime_binding.json /app/runtime_binding.json\n", SEED_COPY.format(tmp=tmp))
+        s = sub(STAGE.format(base=base, dest="/app"), SEED_STAGE.format(base=base, dest="/app", tmp=tmp))
+    elif name == "tests/Dockerfile" and "stage_instance.py" in s:
+        tmp = "/opt/robotangle/task"
+        s = sub("COPY runtime_binding.json /tests/runtime_binding.json\n", SEED_COPY.format(tmp=tmp))
+        s = sub(STAGE.format(base=base, dest="/tests"), SEED_STAGE.format(base=base, dest="/tests", tmp=tmp))
+    elif name == "tests/Dockerfile":          # the standard verifier (python image, no stage_instance.py): the binding only
+        tmp = "/tmp/rcb-binding"
+        s = sub("COPY runtime_binding.json /tests/runtime_binding.json\n", SEED_COPY.format(tmp=tmp) + SEED_PICK.format(tmp=tmp))
+    elif name == "environment/docker-compose.yaml" and "stage_instance.py" in s:
+        s = sub("--binding /srv/runtime_binding.json && exec", "--binding /srv/runtime_binding.json --seed-file /srv/seed && exec")
+        s = sub("    # runtime_binding.json and checks it (images/roboarc/stage_instance.py), then runs the command.\n",
+                "    # runtime_binding.json and checks it (images/roboarc/stage_instance.py; for the seed in a runner's /srv/seed, that\n"
+                "    # seed's instance and runtime_binding.s<S>.json), then runs the command.\n")
+    return s
+
+
 MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"),
               ("OPENBLAS_CORETYPE", "Haswell"))   # the containers of a MuJoCo task (dev/robotangle_mujoco docs/rcb/MUJOCO_CORE.md)
 
@@ -1155,10 +1205,15 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
     assert not mujoco or (SHARED / "render_bridge.py").is_file() and (not direct or (SHARED / "nyx_direct.py").is_file()), \
         f"{base}: a MuJoCo base needs shared/render_bridge.py (and nyx_direct.py) from the MuJoCo release's tooling"
     reference = pathlib.Path(dev["bases"][base]["reference"]) if dev else None
+    seeds = seeds_of_base(base) if dev is None else [0]   # appearance seeds (assets.json); a dev render has its one instance
     for mode in ("privileged", "standard"):
         t = out / f"{BENCH}-{base}-{mode}"; up = PKG / f"{base}-{mode}"; dirs.append(t)
         rd = lambda n: (up / n).read_text()  # noqa: E731
-        put(t / "task.toml", difficulty_words(rewrite_toml(rd("task.toml"), base, rec), rec, base).encode())
+        toml = difficulty_words(rewrite_toml(rd("task.toml"), base, rec), rec, base)
+        if len(seeds) > 1:   # normalize moves the block into place; oracle: the reference is for every seed (appearance only)
+            toml = (toml.rstrip("\n") + f"\n\n[metadata.seeds]\ndefault = 0\nallowed = {seeds}\noracle = {seeds}\n"
+                    'build = "runtime"\n')
+        put(t / "task.toml", toml.encode())
         fence = "`fence`" in rd("instruction.md")
         put(t / "README.md", audit_words(r5_words(frame_words(flat_words(rewrite_readme(separation_words(rd("README.md"), f"{t.name}/README.md"), base, mode, rec), fence), f"{t.name}/README.md", mode), mode), rec, mode, True).encode())
         ins = grasp_text(contact_text(chain_text(mujoco_text(text(instance_facts(separation_words(rd("instruction.md"), f"{t.name}/instruction.md"), rec, mode)), rec), rec), rec), rec).replace("RoboARC", "RoboARC (simulator package `topogym`)", 1)
@@ -1169,17 +1224,22 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
             if (up / n).is_file():
                 assert "RCB_MAX_CALL_WALL_S" not in rd(n) and "RCB_MAX_STEPS" not in rd(n), f"{base} {n}: the texts assume the defaults"
                 text_n = limits_env(n, staged(n, gpu_lines(n, image_lines(rd(n))), base), base, mode)
+                if len(seeds) > 1:
+                    text_n = seeded(n, text_n, base)
                 text_n = text_n.replace("docs/benchmarks/robotangle.md", f"docs/benchmarks/{BENCH}.md")   # the benchmark's page
                 put(t / n, family_words(n, mujoco_lines(n, text_n, rec) if mujoco else text_n, rec).encode())
         goal_images(up, t, (t / "instruction.md").read_text())
         put(t / "tests/test.sh", family_words("tests/test.sh", (up / "tests/test.sh").read_text(), rec).encode(), exe=True)
         lock = binding(base, inst_src, mujoco, direct) if dev is None else dev_binding(inst_src, dev, mujoco, direct)
+        locks = [(f"runtime_binding.s{sd}.json", binding(base, inst_src, mujoco, direct, sd)) for sd in seeds[1:]]
         tool = (SHARED / "rcb_topogym.py").read_bytes()
         extra = ([("render_bridge.py", (SHARED / "render_bridge.py").read_bytes())] if mujoco else []) + \
                 ([("nyx_direct.py", (SHARED / "nyx_direct.py").read_bytes())] if direct else [])
         if mode == "privileged":
             for d in ("environment", "tests"):
                 put(t / d / "runtime_binding.json", lock)
+                for n, b in locks:
+                    put(t / d / n, b)
                 put(t / d / "rcb_topogym.py", tool)
                 for n, b in extra:
                     put(t / d / n, b)
@@ -1197,6 +1257,9 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
             for n in ("server.py", "replay.py", "finalize.sh"):
                 put(t / "environment/sim" / n, (SHARED / "standard/sim" / n).read_bytes())
             put(t / "environment/sim/runtime_binding.json", lock)
+            for n, b in locks:
+                put(t / "environment/sim" / n, b)
+                put(t / "tests" / n, b)
             put(t / "environment/sim/rcb_topogym.py", tool)
             for n, b in extra:
                 put(t / "environment/sim" / n, b)

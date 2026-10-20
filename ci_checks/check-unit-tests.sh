@@ -43,6 +43,7 @@ run() {   # run <timeout s> <test path under scripts/> [arguments of the test]: 
 for t in tests/test_codex_tools_off.py tests/test_retry_policy.py tests/test_stamp_mtimes.py tests/test_runner_seeds.py; do
   run 300 "$t"
 done
+run 300 roboarc/tests/test_seed_staging.py   # appearance seeds: stage_instance.py --seed-file, mk_tasks.py on fake seed pins
 run 120 account_failure_check.py --selftest   # the runner's lane stop and infra rules (account, usage gateway) on synthetic trials
 
 if python3 -c "import numpy, requests" 2>/dev/null; then

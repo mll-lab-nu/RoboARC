@@ -2,14 +2,20 @@
 """Stage one RoboARC task's frozen instance from the image into a task directory, and check it against the task's
 runtime binding. Standard library only.
 
-usage: python /opt/robotangle/stage_instance.py <base> <dest> [--binding <runtime_binding.json>] [--purge]
+usage: python /opt/robotangle/stage_instance.py <base> <dest> [--binding <runtime_binding.json>] [--seed-file <seed>] [--purge]
 
 The image (images/roboarc/Dockerfile) carries every task's frozen instance, instance.json + instance_assets/, under
 /opt/robotangle/instances/<base>/. The files come from the private Hugging Face dataset eai-v2-internal/robotangle-assets
 at the revision pinned in scripts/roboarc/assets.json, and the image build checks each file's sha256 there. A task
 directory holds only runtime_binding.json, which names the instance's canonical sha256 and the sha256 of every asset.
+A task that allows more than its default seed (`[metadata.seeds] build = "runtime"`, scripts/task_seed.py) has each other
+seed's instance in the image too, under /opt/robotangle/instances/<base>/seeds/<seed>/, and next to every copy of its
+runtime_binding.json that seed's binding, runtime_binding.s<seed>.json. The runner's copy of the task for seed S carries a
+file `seed` (the integer S) in every place the task runs and grades from; --seed-file names it. No such file, or seed 0:
+the default instance and runtime_binding.json, as before.
 This script:
-  - copies the instance into <dest>, next to <dest>/runtime_binding.json (--binding copies that file there first);
+  - copies the instance into <dest>, next to <dest>/runtime_binding.json (--binding copies that file there first; for a
+    seed S other than 0, runtime_binding.s<S>.json from the same directory as that file, or from <dest>);
   - checks both against the binding, by the rule of topogym.simulator.frozen_binding.check_inputs, which every session
     applies again at start;
   - with --purge, removes /opt/robotangle/instances afterwards, so a task image keeps only its own instance.
@@ -37,19 +43,36 @@ def file_sha(p: pathlib.Path) -> str:
 def main(argv: list[str]) -> int:
     purge = "--purge" in argv
     argv = [a for a in argv if a != "--purge"]
-    binding = None
+    binding = seed_file = None
     if "--binding" in argv:
         i = argv.index("--binding")
         binding = pathlib.Path(argv[i + 1])
+        del argv[i:i + 2]
+    if "--seed-file" in argv:
+        i = argv.index("--seed-file")
+        seed_file = pathlib.Path(argv[i + 1])
         del argv[i:i + 2]
     if len(argv) != 2:
         print(__doc__, file=sys.stderr)
         return 2
     base, dest = argv[0], pathlib.Path(argv[1])
-    src = SRC / base
+    seed = 0
+    if seed_file is not None and seed_file.is_file():
+        text = seed_file.read_text().strip()
+        if not text.isdigit():
+            print(f"FAIL stage_instance {base}: the seed file {seed_file} holds {text!r}, not a seed", file=sys.stderr)
+            return 1
+        seed = int(text)
+    src = SRC / base if seed == 0 else SRC / base / "seeds" / str(seed)
     if not (src / "instance.json").is_file():
-        print(f"FAIL stage_instance: no frozen instance for {base} in this image ({src})", file=sys.stderr)
+        print(f"FAIL stage_instance: no frozen instance for {base}{f' seed {seed}' if seed else ''} in this image ({src})",
+              file=sys.stderr)
         return 1
+    if seed:                                  # that seed's binding, next to the task's runtime_binding.json
+        binding = (binding.parent if binding is not None else dest) / f"runtime_binding.s{seed}.json"
+        if not binding.is_file():
+            print(f"FAIL stage_instance {base}: seed {seed} has no runtime binding ({binding})", file=sys.stderr)
+            return 1
     dest.mkdir(parents=True, exist_ok=True)
     if binding is not None:
         shutil.copyfile(binding, dest / "runtime_binding.json")
@@ -82,7 +105,7 @@ def main(argv: list[str]) -> int:
         return 1
     if purge:
         shutil.rmtree(SRC)
-    print(f"ok stage_instance {base}: instance {canon[:12]}, {len(assets)} asset files -> {dest}")
+    print(f"ok stage_instance {base}{f' seed {seed}' if seed else ''}: instance {canon[:12]}, {len(assets)} asset files -> {dest}")
     return 0
 
 

@@ -11,6 +11,8 @@ The dataset holds:
   instances/<base>/instance.json, instance_assets/**   the frozen instance of each task base. Task directories keep only
                                                        runtime_binding.json, which pins the same hashes; the image stages
                                                        the instance (images/roboarc/stage_instance.py)
+  instances/<base>/seeds/<S>/instance.json, instance_assets/**   an appearance seed S of the base (its tasks'
+                                                       runtime_binding.s<S>.json; pinned under the base's `seeds`)
   image/release-<commit9>.tar.gz                       git archive of the release commit (release.json), the paths the
                                                        image copies
   image/uipc-prebuilt/                                 the audited libuipc wheel and its uipc-build.json
@@ -56,6 +58,10 @@ def check(d: pathlib.Path, pin: dict) -> list[str]:
         p = d / "instances" / base / "instance.json"
         if p.is_file() and canonical_sha(p) != rec["instance_sha256"]:
             bad.append(f"instances/{base}/instance.json: canonical sha256 differs")
+        for s, srec in sorted(rec.get("seeds", {}).items()):
+            p = d / "instances" / base / "seeds" / s / "instance.json"
+            if p.is_file() and canonical_sha(p) != srec["instance_sha256"]:
+                bad.append(f"instances/{base}/seeds/{s}/instance.json: canonical sha256 differs")
     return bad
 
 
@@ -77,6 +83,8 @@ def pin_from(d: pathlib.Path, rev: str) -> dict:
     files = {p.relative_to(d).as_posix(): file_sha(p) for p in sorted(d.rglob("*"))
              if p.is_file() and p.relative_to(d).parts[0] in ("instances", "image") and ".cache" not in p.parts}
     inst = {p.parent.name: {"instance_sha256": canonical_sha(p)} for p in sorted((d / "instances").glob("*/instance.json"))}
+    for p in sorted((d / "instances").glob("*/seeds/*/instance.json")):    # appearance seeds: instances/<base>/seeds/<S>/
+        inst[p.parents[2].name].setdefault("seeds", {})[p.parent.name] = {"instance_sha256": canonical_sha(p)}
     old = json.loads(PIN.read_text()) if PIN.is_file() else {}
     return {"repo": old.get("repo", "eai-v2-internal/robotangle-assets"), "repo_type": "dataset", "private": True,
             "revision": rev, "release_archive": next(k for k in files if k.startswith("image/release-")),
