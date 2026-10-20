@@ -1,16 +1,16 @@
-# eai-ikea-mujoco-sim: the `sim` sidecar image of the IKEA MuJoCo STANDARD-mode tasks (tasks/ikea-<task>-i00-standard).
-# = eai-ikea-mujoco (plain MuJoCo 3.14.0 CPU float64 with the EPA-patched libmujoco.so + numpy 2.5.4 + the frozen scenes,
+# roboarc-ikea-sim: the `sim` sidecar image of the IKEA MuJoCo STANDARD-mode tasks (tasks/roboarc-ikea-<task>-i00-standard).
+# = roboarc-ikea (plain MuJoCo 3.14.0 CPU float64 with the EPA-patched libmujoco.so + numpy 2.5.4 + the frozen scenes,
 # unchanged: the physics process) + what the robot-as-a-service layer needs to render and encode:
 #   - Nyx, RoboARC's renderer, in its OWN interpreter environment, the venv /opt/nyx (python 3.12 of the base, separate
 #     site-packages): gs-nyx 0.1.3 needs numpy < 2.4, the physics keeps numpy 2.5.4, so the sim service renders every RGB
 #     image in a separate render process (scripts/ikea_mujoco/standard/ikea_nyx.py) fed the scene once and per-frame poses
 #     over a pipe. The venv's packages are RoboARC's exact versions and wheel hashes (nyx-requirements.txt, from
-#     requirements/difficulty-eval-runtime.lock): gs-nyx 0.1.3, numpy 2.3.5, scipy 1.17.1, trimesh 5.1.0, mujoco 3.14.0 (stock wheel,
+#     RoboARC's runtime lock file): gs-nyx 0.1.3, numpy 2.3.5, scipy 1.17.1, trimesh 5.1.0, mujoco 3.14.0 (stock wheel,
 #     only to read the compiled scene's visual geometry; it never steps physics), nvidia-cuda-nvrtc-cu12 12.8.93;
-#   - RoboARC's studio HDRI (Poly Haven studio_small_09, CC0; scripts/prepare_nyx_studio.py's URL and sha256);
-#   - the Vulkan loader and RoboARC's NVIDIA Vulkan ICD / EGL vendor files (images/robotangle/Dockerfile): Nyx renders
+#   - RoboARC's studio HDRI (Poly Haven studio_small_09, CC0; the URL and sha256 RoboARC's image uses);
+#   - the Vulkan loader and RoboARC's NVIDIA Vulkan ICD / EGL vendor files (as RoboARC's simulator image): Nyx renders
 #     through Vulkan; MuJoCo's EGL raster still draws the depth images, as RoboARC's MuJoCo raster depth;
-#   - imageio + ffmpeg (mp4), Pillow (jpeg), PyOpenGL for the physics process (unchanged from 0.3.0).
+#   - imageio + ffmpeg (mp4), Pillow (jpeg), PyOpenGL for the physics process.
 # Build (context = this directory):
 #   docker build -t ghcr.io/embodied-first-exam/roboarc-ikea-sim:$(cat images/ikea-mujoco/sim/VERSION) images/ikea-mujoco/sim   (RoboARC: ikea/images/ikea-mujoco/build.sh)
 FROM ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0
@@ -28,7 +28,7 @@ RUN mkdir -p /opt/nyx-assets && curl -fsSL -o /opt/nyx-assets/studio_small_09_2k
     && printf 'Studio Small 09 by Sergej Majboroda / Poly Haven\nhttps://polyhaven.com/a/studio_small_09\nLicense: CC0\n' > /opt/nyx-assets/CREDITS.txt \
     && chmod -R a+rX /opt/nyx-assets
 # NVIDIA_DRIVER_CAPABILITIES=all (compose) makes the container toolkit mount the driver's graphics libraries; these files
-# point the Vulkan and EGL loaders at them (as images/robotangle/Dockerfile). The toolkit's CDI mode also mounts the host's
+# point the Vulkan and EGL loaders at them (as RoboARC's simulator image does). The toolkit's CDI mode also mounts the host's
 # ICD json, which would list the GPU twice: VK_ICD_FILENAMES names ours only.
 RUN mkdir -p /usr/share/vulkan/icd.d /usr/share/glvnd/egl_vendor.d && \
     printf '{"file_format_version":"1.0.0","ICD":{"library_path":"libGLX_nvidia.so.0","api_version":"1.3.0"}}\n' > /usr/share/vulkan/icd.d/nvidia_icd.json && \

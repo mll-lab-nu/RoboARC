@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage the build context of the eai-ikea-mujoco image (images/ikea-mujoco/) from an IKEA MuJoCo source tree.
+"""Stage the build context of the roboarc-ikea image (images/ikea-mujoco/) from an IKEA MuJoCo source tree.
 
 usage: python3 scripts/ikea_mujoco/stage_context.py <source tree> [--out images/ikea-mujoco/context] [--pin]
   <source tree>  a tree with scenes/<task>/: the scene code of images/ikea-mujoco/scenes/<task>/ plus its meshes,
@@ -21,6 +21,8 @@ ROOT = HERE.parents[1]
 PINS = HERE / "assets.json"
 TOP = ("scene.py", "scene.xml", "task.json", "layout.json", "sw_cutover.json")
 IMAGE_KEYS = ("note", "tasks")   # the part of assets.json the image carries; the dataset pin (repo, revision) stays out
+# The EPA fix (README next to it): RoboARC's one copy of the 14-byte libmujoco.so patch, staged into the context
+EPA_PATCH = ROOT.parent / "source/images/robotangle/mujoco-3.14.0-epa/bytepatch_libmujoco.py"
 
 
 def sha(p: pathlib.Path) -> str:
@@ -96,7 +98,7 @@ def main() -> int:
         shutil.rmtree(a.out, ignore_errors=True)
         return 1
     (a.out / "assets.json").write_text(json.dumps({k: pins[k] for k in IMAGE_KEYS}, indent=1, sort_keys=True) + "\n")
-    shutil.copyfile(ROOT / "images/ikea-mujoco/mujoco-3.14.0-epa/bytepatch_libmujoco.py", a.out / "bytepatch_libmujoco.py")
+    shutil.copyfile(EPA_PATCH, a.out / "bytepatch_libmujoco.py")
     print(f"staged {len(tasks)} scenes in {a.out}")
     return 0
 
