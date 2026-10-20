@@ -479,9 +479,6 @@ def goal_images(up: pathlib.Path, t: pathlib.Path, instruction: str, dockerfile:
 
 
 def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None) -> list[pathlib.Path]:
-    if "{{AGENT_EGRESS}}" not in (PKG / f"{base}-privileged" / "task.toml").read_text():   # TRANSITIONAL: a package not yet final
-        import _legacy_mk_tasks
-        return _legacy_mk_tasks.render(base, out, inst_src)
     rec = REL["bases"][base]
     assert rec.get("physics_engine") == "mujoco", f"{base}: every base of {BENCH} is a MuJoCo base (release.json physics_engine)"
     direct = rec["family"] in DIRECT
