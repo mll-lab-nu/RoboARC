@@ -16,6 +16,17 @@ verifier's replay. Design, conventions and test results: [docs/API.md](docs/API.
 hash (one base per puzzle family and two IKEA scenes; with Nyx rendering on as well). No task, image or graded file
 changed.
 
+### Repository clean-up
+The repository now holds RoboARC only and is laid out for its two audiences: `source/` is the image build context,
+development tools are in `tools/`, records in `records/`, the simulator's internals in `docs/simulator/`, the Harbor
+runner in `scripts/harbor/`; new `docs/RUNNING.md` (a Harbor guide), `docs/DEVELOPING.md`, one public page per family
+in `docs/families/`, and a rewritten README. The generator's packages are the shipped texts (`mk_tasks.py` halved); the
+asset tools check every instance source against its pin; CI runs on `dev/**` too, checks the docs' paths and links, and
+runs the simulator source hash. Leftovers of the shared repository (other benchmarks, the eai-standard 2.2 layer,
+lab-side runner defaults, internal notes) and duplicate copies (references, tooling, image recipes) are gone; the
+session oracles of the orbits and slotted-post-ring references are restored. No task byte changed; the images rebuilt
+from the cleaned tree have the 1.0.0 ids. Path moves: [PROVENANCE.md](PROVENANCE.md#after-100-the-clean-up).
+
 ## 1.0.0 (2026-10-19)
 
 The topological puzzles: 101 bases (202 task directories) in 14 families, image
@@ -83,7 +94,7 @@ Its earlier releases were inside the shared repository: 8 tasks (16 dirs) with i
 
 ### New bases (reviewed and approved by the benchmark owner, 2026-10-18)
 - **orbits-02-i01** (orbits, easier): runs on a 0.3125 ms MuJoCo step (solver_substeps 8), see
-  [docs/families/orbits.md](docs/families/orbits.md). Reference end state b9c68d6502105df4.
+  [docs/simulator/families/orbits.md](docs/simulator/families/orbits.md). Reference end state b9c68d6502105df4.
 - **knot-untying-07-i01** (knot_untying rd, easier): a re-timed route. The reference replays in 28.1 % of the 3 h budget
   (3037 s on a Ryzen 9 7950X), under the knot family's 30 % bar. End state 8ae062ea4c733dbc.
 - **blanket-flatten-09-i01** (blanket_flatten, hard): the Genesis release's hard tier, ported to the deterministic GPU

@@ -5,6 +5,9 @@ This repository was assembled on 2026-10-19 from the RoboARC branches of the sha
 rewritten and its branches deleted. The commits below were kept from a local copy made before that. Its history is
 not carried over: this repository starts with a fresh history.
 
+The tables and items below describe the tree of release 1.0.0 (commit `153eb8cf01`). The clean-up after 1.0.0 moved
+several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
+
 ## Source commits
 
 | source | commit | date | what came from it |
@@ -82,3 +85,33 @@ not carried over: this repository starts with a fresh history.
   41a17481d67a (`sha256:3810470b…`, `sha256:5f70bf18…`), so the filesystem is identical. The config differs only in
   the new labels.
 - Strict fresh-process replays and Harbor oracle / nop runs on the new tag: see CHANGELOG.md, 1.0.0, Evidence.
+
+## After 1.0.0: the clean-up
+
+The repository was cleaned up after 1.0.0 without changing what any task grades: every task directory, the pinned
+tooling (`scripts/roboarc/shared/`), the 443 hashed simulator files (`SOURCE.json`) and the image inputs kept their
+bytes. Where things went:
+
+| 1.0.0 path | now |
+|---|---|
+| `source/scripts/robotangle/` (release, reference, redesign and stress tooling, tests) | `tools/` (`release/`, `references/`, `redesign/`, `stress/`, `tests/`) |
+| `source/scripts/robotangle/oracles/` (copies of `scripts/roboarc/oracles/`), `source/scripts/robotangle/shared/` (an older copy of the tooling and graders) | removed; `scripts/roboarc/` holds the only copies |
+| `source/scripts/robotangle/freeze_manifest*.json`, the Genesis-era release generator | `records/` |
+| `source/scripts/robotangle/harbor_check.py` | `scripts/roboarc/harbor_check.py` (the path the task READMEs cite) |
+| the session oracles the orbits and slotted-post-ring references were recorded with (not carried in 1.0.0) | `tools/references/oracle_runners/`, from 5cb4114f10 |
+| `source/docs/`, `docs/families/` (development notes) | `docs/simulator/`, `docs/simulator/families/`, `docs/history/`; `docs/families/` holds one public page per family; `docs/rcb/README.md` maps the older paths task texts cite |
+| the runner tools in `scripts/` (`run_agent_batch.sh`, `write_task_results.py`, ...) | `scripts/harbor/` |
+| `ikea/docs/benchmarks/ikea_mujoco.md` | `docs/benchmarks/ikea_mujoco.md` |
+| `ikea/images/ikea-mujoco/mujoco-3.14.0-epa/` (a copy) | removed; both images use `source/images/robotangle/mujoco-3.14.0-epa/` |
+| `ikea/scripts/eai_standard/v2_4/` (IKEA's live-grading service and client) | `ikea/scripts/eai_standard/v2_4_live/`; IKEA's other shared files come from `scripts/eai_standard/` |
+| `PLAN.md`, `docs/PROTOCOL_HISTORY.md`, `docs/CUTOFFS.md`, `docs/REVIEWING.md` | removed; what still applies is in `docs/DEVELOPING.md`, `docs/RUNNING.md` and `docs/benchmarks/roboarc.md` |
+
+Removed as unused by the release: the other benchmarks' entries of the shared layer and their CI checks, the
+eai-standard 2.2 layer, the dead parts of the simulator package that never reached the image, IKEA's work-in-progress
+material and one-off diagnostics. The generator's packages became the shipped texts (`scripts/roboarc/port_package.py`
+turns Genesis-era texts of a new base into a package).
+
+Verified on the cleaned tree: both generators' `--check` (no task byte changes), the invariants, unit tests and
+advisory checks; `tools/release/source_hash.py --check` (SOURCE.json `c9171f79…`); `images/roboarc/build.sh` from a fresh
+clone gives the image id of 1.0.0 (18a821a18d2b, all 153,404 filesystem entries equal), and `ikea/images/ikea-mujoco/build.sh`
+the ids 5d5090ea1910 and 050cd45d70f6.

@@ -1,9 +1,14 @@
 # RoboARC
 
-RoboARC is a benchmark of physical manipulation for coding agents, simulated on MuJoCo 3.14.0: topological
-puzzles (wire and ring puzzles, interlocked cast puzzles, knots, ropes, cords and cloth) and IKEA furniture assembly. In every task a coding agent writes the code
-that drives a simulated robot (two ALOHA 2 arms, a Franka Panda with a Robotiq 2F-85, or two Franka Pandas) and delivers one replayable
-trajectory for a frozen scene instance. A separate verifier replays and grades it.
+RoboARC is a benchmark of physical manipulation simulated on MuJoCo 3.14.0: topological puzzles (wire and ring puzzles,
+interlocked cast puzzles, knots, ropes, cords and cloth) and IKEA furniture assembly. Each task is one frozen scene
+instance and a robot (two ALOHA 2 arms, a Franka Panda with a Robotiq 2F-85, or two Franka Pandas) that has to solve it.
+
+The tasks serve two kinds of solvers through the same simulator code:
+- **coding agents**, through Harbor tasks: the agent writes the code that drives the robot, and a separate verifier
+  grades the result ([For coding agents](#for-coding-agents-harbor));
+- **policies** (VLA, reinforcement learning, imitation, scripted control), through the Python package `roboarc`:
+  `roboarc.make(task_id)` returns a Gymnasium-compatible environment ([For policies](#for-policies-python)).
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
@@ -11,9 +16,9 @@ Version **1.0.0** (see [CHANGELOG.md](CHANGELOG.md)):
 - the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 Harbor task directories under
   `tasks/`;
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
-  directories under `ikea/tasks/`. The scenes are by Xiaoyu's team (Xiaoyu, Zhen Wu). See [ikea/README.md](ikea/README.md).
+  directories under `ikea/tasks/`. The scenes are by Xiaoyu's team (Xiaoyu, Zhen Wu).
 
-## Families
+## Tasks
 
 | family | bases | robot | difficulty tiers |
 |---|---:|---|---|
@@ -32,117 +37,118 @@ Version **1.0.0** (see [CHANGELOG.md](CHANGELOG.md)):
 | rope-threading | 8 | ALOHA 2 | very_easy 1, easier 1, easy 2, medium 2, hard 2 |
 | slotted-post-ring | 5 | ALOHA 2 | 1 per tier |
 
-Task names are `roboarc-<family>-<NN>-i01-<mode>`. `<NN>` is the base's number in its family. Its difficulty is
-`[metadata].difficulty` in `task.toml`. One page per family is in [docs/families/](docs/families/), and the benchmark's
-rules (grading replays, safety readings, the standard service) are in [docs/benchmarks/roboarc.md](docs/benchmarks/roboarc.md).
+Puzzle task directories are `tasks/roboarc-<family>-<NN>-i01-<mode>`; `<NN>` numbers the bases of a family and the
+difficulty is `[metadata].difficulty` in `task.toml`. One page per family: [docs/families/](docs/families/). The
+benchmark's rules (grading replays, safety readings, the standard service): [docs/benchmarks/roboarc.md](docs/benchmarks/roboarc.md).
 
-IKEA MuJoCo (`ikea/tasks/roboarc-ikea-<scene>-i00-<mode>`): lack, svallet, gladom, variera, eket, ikea365, vesken, stegesund,
-stenerik, burvik, uppsta and kyrre. Each is an IKEA product assembled by two Franka Panda arms (svallet: ALOHA 2) in
-plain MuJoCo 3.14.0. Its page is [ikea/docs/benchmarks/ikea_mujoco.md](ikea/docs/benchmarks/ikea_mujoco.md).
+IKEA MuJoCo (`ikea/tasks/roboarc-ikea-<scene>-i00-<mode>`): lack, svallet, gladom, variera, eket, ikea365, vesken,
+stegesund, stenerik, burvik, uppsta and kyrre, each an IKEA product assembled by two Franka Panda arms (svallet: two
+ALOHA 2 arms). Its page: [docs/benchmarks/ikea_mujoco.md](docs/benchmarks/ikea_mujoco.md).
 
-## Modes
+## For coding agents (Harbor)
 
-- **privileged** (`-privileged`): the agent's container holds the simulator (the `topogym` package and the tooling
-  `rcb_topogym.py`). The agent may reset, read the full state and replay as often as it likes. It delivers
-  `/app/output/trajectory.npz`. The verifier replays it twice in a fresh process.
-- **standard** (`-standard`, protocol eai-standard/2.4): the agent's container has only Python and a client. The
+Each task exists in two modes, on the same frozen instance, with the same 3 h agent budget (`[agent] timeout_sec` =
+10800 s):
+- **privileged** (`-privileged`): the agent's container holds the simulator. The agent may reset, read the full state
+  and replay as often as it likes, and delivers `/app/output/trajectory.npz`. The verifier replays it in a fresh
+  process.
+- **standard** (`-standard`, protocol eai-standard/2.4): the agent's container has only Python and a client; the
   simulator runs in a `sim` sidecar the agent cannot open. The agent gets RGB (optional depth), proprioception and
-  calibrated cameras, and submits joint or end-effector chunks. There is no reset and no privileged state. The service
-  records and grades the live episode, and a fresh-process replay confirms it.
-
-Both modes run on the same frozen instance, with the same 3 h agent budget (`[agent] timeout_sec` = 10800 s).
-
-## Quick start
+  calibrated cameras, and submits joint or end-effector chunks; no reset, no privileged state. The service grades the
+  live episode; for the puzzles a fresh-process replay must confirm it.
 
 Requirements:
-- Linux x86_64 with an NVIDIA GPU that has RT cores (driver >= 580; Nyx renders through Vulkan);
-- Docker with the NVIDIA Container Toolkit;
-- [Harbor](https://github.com/laude-institute/harbor) 0.23 or newer;
-- Python >= 3.11 for the repository tools.
+- Linux x86_64 and an NVIDIA GPU with RT cores (driver >= 580; Nyx renders through Vulkan). Each puzzle task declares
+  one GPU with 2 GB; IKEA's standard tasks reserve one GPU for rendering and its privileged tasks run on CPU only. See each task's resources in its `task.toml`.
+- Docker with the NVIDIA Container Toolkit; [Harbor](https://github.com/laude-institute/harbor) 0.23 or newer;
+  Python >= 3.11 for the repository tools.
 
-The image's hardware notes are in [images/roboarc/README.md](images/roboarc/README.md).
+The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.0.0`; the IKEA tasks run
+`ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.0.0`. Pull them,
+or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 
-1. **Get the images.** The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.0.0`. The IKEA tasks run
-   `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0`, and their standard `sim` sidecar runs `roboarc-ikea-sim:1.0.0`.
-   Pull them, or build them from this repository (step 3).
-2. **Run a task with Harbor:**
+```bash
+python3 scripts/stamp_mtimes.py tasks ikea/tasks   # once per checkout: fixed file times, so Harbor's build cache hits
+harbor run -p tasks -i roboarc-interlocked-claws-03-i01-privileged -a oracle   # the reference solution: reward 1
+harbor run -p tasks -i roboarc-interlocked-claws-03-i01-standard -a nop        # does nothing: reward 0
+harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>   # a coding agent
+harbor run -p ikea/tasks -i roboarc-ikea-lack-i00-privileged -a oracle         # an IKEA task
+```
 
-   ```bash
-   harbor run -p tasks/roboarc-interlocked-claws-03-i01-privileged -a oracle      # the reference solution: reward 1
-   harbor run -p tasks/roboarc-interlocked-claws-03-i01-standard  -a nop         # does nothing: reward 0
-   harbor run -p tasks/roboarc-orbits-02-i01-standard -a codex -m openai/<model> # a coding agent
-   harbor run -p ikea/tasks/roboarc-ikea-lack-i00-privileged -a oracle           # an IKEA task
-   ```
+Batch runs, agent configuration, network egress, result files and re-grading: [docs/RUNNING.md](docs/RUNNING.md). The
+task contract and scoring: [docs/PROTOCOL.md](docs/PROTOCOL.md) and [docs/STANDARD_MODE.md](docs/STANDARD_MODE.md).
 
-   Every trial needs one GPU. The knot-untying and rope-threading families need a 24 GB GPU each. Batch runs, agent
-   configuration, egress and result files are described in [docs/RUNNING.md](docs/RUNNING.md). The task contract and
-   scoring are in [docs/PROTOCOL.md](docs/PROTOCOL.md).
-3. **Build the image** (optional, ~25 GB of disk):
+## For policies (Python)
 
-   ```bash
-   images/roboarc/build.sh                      # frozen instances from the pinned HF dataset (read access needed)
-   images/roboarc/build.sh --instances <dir>    # or from a local copy (instances/<base>/ per base)
-   ikea/images/ikea-mujoco/build.sh             # the two IKEA images (scene meshes from their pinned HF dataset)
-   ```
+The package `roboarc` exposes every task (the 101 puzzle bases and the 12 IKEA scenes) as a Gymnasium-compatible
+environment, without Harbor. It runs the graded tooling itself (`rcb_topogym.Session` for the puzzles, `rcb_ikea.Session`
+for IKEA), so physics, limits and success are the graded tasks' own: `reset()` loads the task's frozen instance,
+`step()` is one control step, and a reference trajectory stepped through it ends on exactly the state hash the release
+recorded. Harbor stays the evaluation path for agents.
 
-   The build checks every instance file against `scripts/roboarc/assets.json`. It also checks that the image installs
-   the runtime every task is bound to.
+```python
+import roboarc                                        # before numpy: it sets the graded numpy settings
+env = roboarc.make("roboarc-cast-keyhole-01-i01")     # renderer="nyx" (GPU) | "mujoco" (quick look) | "none"
+obs, info = env.reset()                               # obs: {"rgb": {camera: (480, 848, 3) uint8}, "proprio": (P,)}
+obs, reward, terminated, truncated, info = env.step(action)   # absolute joint targets per arm + gripper
+```
 
-## Use the simulator directly
+Run it inside the task's image with the repository mounted:
 
-*Placeholder: a Python package `roboarc` (top-level `roboarc/`, reserved) will expose the tasks as Gymnasium-style
-environments for VLA and RL use, next to Harbor (which stays the evaluation path).* It will import the same code the
-graded tasks run, not a copy:
-- the puzzles: the simulator package `source/topogym/` (`PYTHONPATH=source`) and the tooling
-  `source/scripts/robotangle/shared/rcb_topogym.py` (`Session`), with each base's frozen instance from the image
-  (`/opt/robotangle/instances/`) or the pinned dataset;
-- IKEA: `ikea/scripts/ikea_mujoco/shared/rcb_ikea.py` (`Session`) on the scenes in `ikea/images/ikea-mujoco/scenes/`.
+```bash
+docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc:1.0.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
+  ghcr.io/embodied-first-exam/roboarc:1.0.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
+```
+
+IKEA runs in `roboarc-ikea:1.0.0` (physics only) or `roboarc-ikea-sim:1.0.0` (with Nyx images). `pip install -e .`
+installs the package (the extras `.[puzzles]` and `.[ikea]` pin the images' versions); the frozen instances and scenes
+come with the images. The interface and its conventions (actions, observations, frames, the speed rules, which clamp and
+never fail), rendering and GPU needs, the wrappers and the tests: [docs/API.md](docs/API.md); examples in
+[examples/](examples/).
 
 ## Repository layout
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the 202 Harbor task directories. They are generated: never edit them by hand |
-| `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins) |
-| `scripts/` | the shared task layer the tasks use: `task_conventions.py`, `eai_standard/` (the standard client and service layer), `rcb_monitor/` (the resource-limits sidecar), the runner (`run_agent_batch.sh`, `write_task_results.py`, `retry_policy.py`) |
-| `ci_checks/` | the repository checks (invariants, advisories, unit tests) |
-| `images/roboarc/` | the image: `build.sh`, `push.sh`, `stage_instance.py`, `VERSION`, and the recipe of the Genesis base image |
-| `images/monitor/` | the recipe of the monitor sidecar image |
-| `roboarc/` | reserved for the Python package (see "Use the simulator directly") |
-| `source/` | the simulator and release source: `topogym/` (physics, tasks and the planners that made the references), `assets/robots/`, `images/robotangle/Dockerfile.mujoco` (the image recipe, with the MuJoCo EPA patch), `scripts/robotangle/` (release tooling, references, stress tests) |
-| `docs/` | the protocol, running guide, benchmark page and family pages |
-| `ikea/` | IKEA MuJoCo: `tasks/` (24), `scripts/ikea_mujoco/` (generators, references, evidence, review), `images/ikea-mujoco/` (scenes and the two image recipes), `ci/check.sh`, `docs/benchmarks/ikea_mujoco.md`, and the shared task layer it renders with (`scripts/task_conventions.py`, `eai_standard/`, which are the dev branch's versions) |
+| `tasks/roboarc-*` | the 202 puzzle task directories (generated: never edit them by hand) |
+| `ikea/` | IKEA MuJoCo: `tasks/` (24, generated), the generators, references and evidence (`ikea/scripts/ikea_mujoco/`), the scenes and the two image recipes (`ikea/images/ikea-mujoco/`); see [ikea/README.md](ikea/README.md) |
+| `roboarc/`, `pyproject.toml` | the Python package `roboarc` ([docs/API.md](docs/API.md)); `examples/`, `tests/api/` its examples and tests |
+| `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
+| `scripts/` | the task layer the tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`) and build helpers (`stamp_mtimes.py`, `check_image_files.py`) |
+| `scripts/harbor/` | the Harbor batch runner and its helpers ([docs/RUNNING.md](docs/RUNNING.md)) |
+| `source/` | the image build context: the simulator package `topogym/` (with `planning/`, the planners that made the references), `assets/robots/`, the recipe `source/images/robotangle/Dockerfile.mujoco` with the MuJoCo EPA patch |
+| `images/roboarc/`, `images/monitor/` | the release image's `build.sh` / `push.sh` and the recipe of its Genesis base; the monitor sidecar's recipe |
+| `tools/` | development tools: the release rebuild, reference recording, redesign and stress tests ([tools/README.md](tools/README.md)) |
+| `records/` | freeze manifests and archived release records |
+| `ci_checks/`, `.github/` | the repository checks and the CI workflow |
+| `docs/` | protocol, running guide, developer guide, API, benchmark and family pages; `docs/simulator/` the simulator's internals; `docs/rcb/` a map of older paths that task texts cite |
 
-The code keeps the simulator's historical names: the package `topogym`, the tooling `rcb_topogym.py` and the paths
-`source/scripts/robotangle/`, `/opt/robotangle/`. RoboARC was developed as TopoGym, then RoboTangle.
-[PROVENANCE.md](PROVENANCE.md) says where every part comes from.
+The simulator keeps its historical names: the package `topogym`, the tooling `rcb_topogym.py` and the image path
+`/opt/robotangle/`. RoboARC was developed as TopoGym, then RoboTangle; renaming them would change the pinned bytes every
+task is bound to. [PROVENANCE.md](PROVENANCE.md) says where every part comes from.
 
 ## Checks
 
 ```bash
-python3 scripts/roboarc/mk_tasks.py --check           # every task dir equals a fresh render (0 differences)
+python3 scripts/roboarc/mk_tasks.py --check           # every puzzle task dir equals a fresh render
+bash ikea/ci/check.sh                                 # the same for IKEA's two generators
 bash ci_checks/run_invariants.sh                      # the protocol's invariants (PROTOCOL Appendix H)
-bash ci_checks/check-unit-tests.sh                    # unit tests (numpy + requests for the service tests)
-python3 ci_checks/check-video.py tasks/roboarc-*      # every task collects its video
-python3 ci_checks/check-resources.py tasks/roboarc-*  # declared resources and caps
+bash ci_checks/check-unit-tests.sh --all              # unit tests (numpy, scipy, requests)
 bash ci_checks/run_all.sh                             # all of the above plus the advisory checks
-bash ikea/ci/check.sh [--image-tests]                 # IKEA: both generators' check modes (+ unit tests in its image)
+python3 -m pytest tests/api -m "not sim and not heavy"   # the Python package's fast tests
 ```
 
-`.github/workflows/checks.yml` runs these checks on every push and pull request. They need no GPU and no image. Strict
-replays and Harbor trials need the image and a GPU.
+`.github/workflows/checks.yml` runs them on pushes to `main` and `dev/**` and on pull requests; they need no GPU and no
+image. Strict replays, the package's simulator tests and Harbor trials need the images and a GPU
+([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 
 ## Assets
 
-The frozen scene instances (about 700 MB) are not in git. They are in the private Hugging Face dataset
-`eai-v2-internal/robotangle-assets`, pinned by commit and per-file sha256 in `scripts/roboarc/assets.json`. The image
-carries them, so running tasks needs no dataset access. Only building the image does. The IKEA scenes' meshes are in
-the private dataset `eai-v2-internal/ikea-mujoco-assets`, pinned in `ikea/scripts/ikea_mujoco/assets.json`.
-
-## IKEA's task layer
-
-IKEA's tasks follow the development branch's task layer: no monitor sidecar and no DIGEST. So the RoboARC invariants
-above do not cover them; `ikea/ci/check.sh` and the Harbor checks do.
+The frozen scene instances (about 700 MB) and the IKEA scenes' meshes are not in git. The images carry them, so running
+tasks and the Python package inside the images needs nothing else. Building the images reads them from Hugging Face
+datasets pinned by commit and per-file sha256 (`scripts/roboarc/assets.json`, `ikea/scripts/ikea_mujoco/assets.json`).
 
 ## Citation and licence
 
