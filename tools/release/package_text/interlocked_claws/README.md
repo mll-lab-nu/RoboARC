@@ -1,7 +1,7 @@
 # interlocked_claws: task texts of the family's new bases
 
 New designs of the family that have no released base each get their own base, made from a released base of the family as
-its template (`scripts/robotangle/release_rebuild.py` new_bases); one section per new base.
+its template (`tools/release/release_rebuild.py` new_bases); one section per new base.
 
 ## interlocked-claws-11-i01 (Cast ABC, `interlocked_claws_cast_abc`)
 
@@ -20,7 +20,7 @@ the template's, and the rebuild writes `runtime_binding.upstream.json`.
   ```json
   "interlocked_claws": {"tiers": [], "note": "core, claws_v6: no overrides",
     "new_bases": {"interlocked-claws-11-i01": {"template": "interlocked-claws-easy-i00",
-      "variation": "interlocked_claws_cast_abc", "package_text": "scripts/robotangle/package_text/interlocked_claws",
+      "variation": "interlocked_claws_cast_abc", "package_text": "tools/release/package_text/interlocked_claws",
       "design": "Hanayama's Cast ABC: an AB plate and a C ring, both held from the start, separated along the official route (eight groove crossings and one flip; the C ring's width and one groove's position set so that this route is the shortest)",
       "note": "..."}}}
   ```
@@ -29,7 +29,7 @@ the template's, and the rebuild writes `runtime_binding.upstream.json`.
   the same pregrasp opening and robot, and its package (Dockerfiles, compose files, `tests/test.sh`) is the one Harbor
   graded Cast ABC with on 2026-10-11 (oracle 1, nop 0, both modes). medium's and hard's package files are the same;
   very_easy's and easier's differ (their goal is a placement).
-- Each file is the template's released -i00 file (`scripts/robotangle/packages/interlocked-claws-easy-i00-<mode>/`) with only
+- Each file is the template's released -i00 file (`tools/release/templates/interlocked-claws-easy-i00-<mode>/`) with only
   Cast ABC's lines replaced, each value taken from the Cast ABC instance (birth e6f9667c9f67c760) or from what the tooling
   generates for it:
   - the names: `topogym-interlocked-claws-easy-i00-<mode>` becomes `topogym-interlocked-claws-11-i01-<mode>` (the task
@@ -77,7 +77,7 @@ the template's, and the rebuild writes `runtime_binding.upstream.json`.
     the rendered tasks are named `robotangle-interlocked-claws-11-i01-<mode>`, keep no word of easy's scene, carry
     no difficulty line and `oracle = "full"`, state the 60 N rule in the grasping line, and their change log is the one
     new-task line with the design above (it names the template, `robotangle-interlocked-claws-easy-i00-<mode>`).
-- The reference: `scripts/robotangle/oracles/interlocked-claws-11-i01/` (6d7ee21e4; 5 979 rows, final state
+- The reference: `scripts/roboarc/oracles/interlocked-claws-11-i01/` (6d7ee21e4; 5 979 rows, final state
   4701f99e7860e8c9). Harbor graded it on 2026-10-11 under the template's name with an earlier version of these texts
   (before the 60 N rule entered `grasp_rules()`), and on 2026-10-12 under the new base's name with these texts: test-only
   commit 21b3e083d (dev 62d8d0d5c plus the entry above), `release_rebuild.py --families interlocked_claws` PASS, oracle 1
@@ -100,7 +100,7 @@ the released `interlocked-claws-easy-i00` as its template, as Cast ABC's is.
   "interlocked_claws": {"tiers": [], "note": "core, claws_v6: no overrides",
     "new_bases": {"interlocked-claws-12-i01": {"template": "interlocked-claws-easy-i00",
       "variation": "interlocked_claws_rotor", "tier": "very_hard",
-      "package_text": "scripts/robotangle/package_text/interlocked_claws",
+      "package_text": "tools/release/package_text/interlocked_claws",
       "design": "Hanayama's Cast Rotor: two identical interlocked rotor pieces (100 mm outer radius, 0.5 mm clearance), both held from the start, separated along the official 13-move route, the shortest one",
       "note": "..."}}}
   ```
@@ -108,7 +108,7 @@ the released `interlocked-claws-easy-i00` as its template, as Cast ABC's is.
 - The template is easy, as for Cast ABC: the same goal (whole-piece separation, terminal revision
   `claws_separation_v1_grasp_contact_2mm`), the same pregrasp opening and robot, and its package is the one Harbor graded
   Rotor with on 2026-10-12 (below).
-- Each file is the template's released -i00 file (`scripts/robotangle/packages/interlocked-claws-easy-i00-<mode>/`) with only
+- Each file is the template's released -i00 file (`tools/release/templates/interlocked-claws-easy-i00-<mode>/`) with only
   Rotor's lines replaced, each value taken from the Rotor instance (birth 28cecf9c01aadf5e) or from what the tooling
   generates for it:
   - the names: `topogym-interlocked-claws-easy-i00-<mode>` becomes `topogym-interlocked-claws-12-i01-<mode>` (the task
@@ -159,7 +159,7 @@ the released `interlocked-claws-easy-i00` as its template, as Cast ABC's is.
     `mk_tasks.py --check` passes; the rendered tasks are named `robotangle-interlocked-claws-12-i01-<mode>`, keep no
     word of easy's scene, carry `difficulty = "very_hard"` and `oracle = "full"`, state the 15 cm gate and the 60 N rule
     in the grasping line and the 2 mm review rule, and their change log is the one new-task line with the design above.
-- The reference: `scripts/robotangle/oracles/interlocked-claws-12-i01/` (0e35ed038; 21 116 rows, final state
+- The reference: `scripts/roboarc/oracles/interlocked-claws-12-i01/` (0e35ed038; 21 116 rows, final state
   87c1e785d178acfc). Harbor graded it on 2026-10-12 under the template's name (image `eai-robotangle:0.3.0-dev-rotor` from
   d27c622d7, rendering off): oracle 1 and nop 0 in both modes. The privileged oracle's two replays end in
   87c1e785d178acfc, the state of the recording on the other host. The standard oracle's live episode and replay both end

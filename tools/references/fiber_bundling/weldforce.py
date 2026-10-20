@@ -4,7 +4,7 @@ maximum, percentiles, the slip rule's reading (grasp.WELD_SLIP_FORCE_N on the me
 substeps) with the control rows where it peaks, and the time spent above given levels. Also the episode end, the
 final state hash and each strand's final largest radius from the sheath axis (mm).
 
-Run it with the RoboTangle image's Python, as the stress tools (scripts/robotangle/stress/_env.py).
+Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_env.py).
 
 usage: weldforce.py <instance.json> <actions.npz> <out.json>"""
 import sys

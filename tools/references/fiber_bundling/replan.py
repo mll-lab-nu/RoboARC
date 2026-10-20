@@ -12,7 +12,7 @@ fiber agent's re-planner; docs/rcb/families/fiber_bundling.md, "References"):
    the task succeeds.
 Planner references become joint-target rows by time (25 ms), open loop; each guide is followed by the planner's pause.
 
-Run it with the RoboTangle image's Python, as the stress tools (scripts/robotangle/stress/_env.py: this checkout's
+Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_env.py: this checkout's
 topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIMD masking, one thread per library).
 
 usage: replan.py <tier> <out_dir> --instance <instance.json> [--from-rows <npz> --prefix-rows N] [feed gates]
@@ -56,7 +56,7 @@ a = ap.parse_args()
 out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
 base = f"fiber-bundling-{a.tier.replace('_', '-')}-i00"
 inst = str(Path(a.instance).resolve())
-released = HERE.parents[1] / "oracles" / base / "privileged.npz"          # the released (Genesis) rows: the pickup
+released = HERE.parent / "oracles_genesis" / base / "privileged.npz"          # the released (Genesis) rows: the pickup
 sel = json.loads((Path(topogym.__file__).resolve().parent / "planning/harbor_bridge/reference_data/fiber_bundling" / a.tier
                   / "selection.json").read_text())
 s = Session("fiber_bundling", instance=inst, strict=True)

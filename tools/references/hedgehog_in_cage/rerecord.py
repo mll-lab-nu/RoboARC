@@ -2,12 +2,12 @@
 fresh Session until the episode ends; record every executed row and its tick ledger and save them as the new
 privileged reference trajectory (interlocked_claws/rerecord.py, with this family's record).
 
-Run it with the RoboTangle image's Python, as the stress tools (scripts/robotangle/stress/_env.py: this checkout's
+Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_env.py: this checkout's
 topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIMD masking, one thread per library).
 
 usage: rerecord.py <instance.json> <reference.npz> <out.npz> [--tail N] [--note TEXT]
 The hedgehog_in_cage -i01 references (docs/rcb/families/hedgehog_in_cage.md): very_easy, easier, medium and hard from
-the released oracle scripts/robotangle/oracles/hedgehog-in-cage-<tier>-i00/privileged.npz directly, on an instance in
+the released oracle tools/references/oracles_genesis/hedgehog-in-cage-<tier>-i00/privileged.npz directly, on an instance in
 its released gripper space (native)."""
 import sys
 from pathlib import Path

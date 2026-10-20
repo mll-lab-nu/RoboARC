@@ -10,8 +10,8 @@ GenesisIKSolver.solve, as every EE_ABS oracle calls them).
            every query run twice (bit-identical); --expect: a previous mujoco output, which this fresh process must
            reproduce bit for bit.
 
-  python scripts/robotangle/test_mujoco_kinematics.py genesis --task cast_keyhole --instance G/instance.json --out G.json
-  python scripts/robotangle/test_mujoco_kinematics.py mujoco --task cast_keyhole --instance M/instance.json --cases G.json \
+  python tools/tests/test_mujoco_kinematics.py genesis --task cast_keyhole --instance G/instance.json --out G.json
+  python tools/tests/test_mujoco_kinematics.py mujoco --task cast_keyhole --instance M/instance.json --cases G.json \
       --out M.json [--expect M0.json]
 (ALOHA: any ALOHA family, e.g. cast_keyhole; Panda + Robotiq: fiber_bundling. Both instances of one task: the same mount.)
 """
@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "shared"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/roboarc/shared"))
 
 # ALOHA (6 arm joints): offsets from home
 OFFSETS = ([0., 0., 0., 0., 0., 0.], [.3, -.2, .25, .4, -.3, .5], [-.4, .3, -.35, -.6, .45, -.8],

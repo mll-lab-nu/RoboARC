@@ -3,25 +3,27 @@
 # RoboTangle image's Python):
 #   1. make-instance (seed 0; the settling is frozen with it: mujoco_settled_state) in the gripper space the oracle
 #      commands (slotted very_easy / easier and #108: native; orbits: width);
-#   2. the family's oracle through rcb_topogym run-oracle (scripts/oracle_runners/*_session_oracle.py), which records
+#   2. the family's oracle through rcb_topogym run-oracle (tools/references/oracle_runners/*_session_oracle.py), which records
 #      privileged.npz;
 #   3. if it succeeded, two replays, each in a fresh process (rcb_topogym replay --repeat 1), which must end at the
 #      recording's hash; then OUT/standard.npz = OUT/privileged.npz.
 # usage: record_reference.sh <task> <variation> <width|native> <oracle code> <out dir> <work dir>
+# The oracles live in the checkout's topogym.planning (not in the image): source/ goes first on PYTHONPATH.
 set -u
+export PYTHONPATH="$PWD/source${PYTHONPATH:+:$PYTHONPATH}"
 task=$1; var=$2; space=$3; code=$4; out=$5; work=$6
 mkdir -p "$out" "$work"
 if [ ! -f "$work/instance.json" ]; then
-  python scripts/robotangle/shared/rcb_topogym.py make-instance --task "$task" --variation "$var" --scene-seed 0 \
+  python scripts/roboarc/shared/rcb_topogym.py make-instance --task "$task" --variation "$var" --scene-seed 0 \
     --gripper-space "$space" --out "$work/instance.json" > "$work/make.log" 2>&1 || { tail -20 "$work/make.log"; exit 1; }
 fi
 TOPOGYM_ROOT=$PWD SLOTTED_ORACLE_OUTPUT="$work/oracle_out" ORBITS_ORACLE_OUTPUT="$work/oracle_out" RCB_RENDER=off \
-  python scripts/robotangle/shared/rcb_topogym.py run-oracle --task "$task" --instance "$work/instance.json" --code "$code" \
+  python scripts/roboarc/shared/rcb_topogym.py run-oracle --task "$task" --instance "$work/instance.json" --code "$code" \
   --out "$out/privileged.npz" > "$work/oracle.log" 2>&1
 grep -h '^{"traj' "$work/oracle.log" | tail -1 > "$work/oracle.json"
 grep -q '"success": true' "$work/oracle.json" || { echo "oracle failed: $(cut -c1-300 "$work/oracle.json")"; exit 2; }
 for k in 1 2; do
-  RCB_RENDER=off python scripts/robotangle/shared/rcb_topogym.py replay --task "$task" --instance "$work/instance.json" \
+  RCB_RENDER=off python scripts/roboarc/shared/rcb_topogym.py replay --task "$task" --instance "$work/instance.json" \
     --traj "$out/privileged.npz" --repeat 1 > "$work/replay$k.log" 2>&1
   grep -h '^{' "$work/replay$k.log" | tail -1 > "$work/replay$k.json"
 done

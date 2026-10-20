@@ -2,13 +2,13 @@
 FileExistsError at the cache symlink when they started together). Eight processes link the same 200 module directories
 into the same per-user cache at once, released by a barrier; every process must finish without an error and every link
 must point at its module. Without the atomic rename (a plain `link.symlink_to` after an exists check) this fails within
-a few runs. Needs no Warp:  python scripts/robotangle/test_warp_cache_race.py"""
+a few runs. Needs no Warp:  python tools/tests/test_warp_cache_race.py"""
 import multiprocessing as mp
 import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "source"))
 from topogym.world.mujoco.warp_cpu import link_image_cache  # noqa: E402
 
 N_PROC, N_MODULES, ROUNDS = 8, 200, 5

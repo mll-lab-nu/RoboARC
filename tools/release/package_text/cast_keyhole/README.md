@@ -14,14 +14,14 @@ Dockerfiles, the compose files, `tests/test.sh`) is the template's, and the rebu
   ```json
   "cast_keyhole": {"tiers": [], "note": "...",
     "new_bases": {"cast-keyhole-06-i01": {"template": "cast-keyhole-easy-i00",
-      "variation": "cast_keyhole_double_maze", "package_text": "scripts/robotangle/package_text/cast_keyhole",
+      "variation": "cast_keyhole_double_maze", "package_text": "tools/release/package_text/cast_keyhole",
       "design": "...", "note": "..."}}}
   ```
 
 - The template is easy: the same goal (the family's placement: the whole silver piece in the fixed goal volume, the gold
   piece behind the separator, terminal revision `cast_keyhole_placement_v4_grasp_contact_2mm`), the same robot and the
   same package files; every tier's goal is the same placement.
-- Each file is the template's released -i00 file (`scripts/robotangle/packages/cast-keyhole-easy-i00-<mode>/`) with only
+- Each file is the template's released -i00 file (`tools/release/templates/cast-keyhole-easy-i00-<mode>/`) with only
   the double maze's lines replaced, each value taken from the double-maze instance or from what the tooling generates for
   it (generator and its check: `runs/cast_keyhole_v3_double_maze_20261011/r4/harbor/keyhole_package_text.py`,
   `check.json` beside the generated texts):
@@ -50,7 +50,7 @@ Dockerfiles, the compose files, `tests/test.sh`) is the template's, and the rebu
     The held-piece half (4 mm, or 2 mm for 0.25 s) is the released one.
   - Every other line is the released one (base image, tooling version, protocol name, oracle evidence wording, the
     tool-frame axes), so `mk_tasks.py` rewrites it as for every family.
-- The reference: `scripts/robotangle/oracles/cast-keyhole-06-i01/` (profile keyhole_double_maze_v2: 8082 rows,
+- The reference: `scripts/roboarc/oracles/cast-keyhole-06-i01/` (profile keyhole_double_maze_v2: 8082 rows,
   birth c15ba78d2bfda87e, final state 5bc8f1e7136b3f59).
   Harbor graded the texts of 167f4bbd8 (0.036 s per step) on profile keyhole_double_maze_v1 (birth a804367eaf3bfdd3, the
   reference then ending on c18098f933020b0f) under the new base's name on 2026-10-12, from the test-only commit

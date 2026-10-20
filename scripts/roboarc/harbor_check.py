@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
-"""Harbor oracle / nop checks of MuJoCo tasks with rendering off (step 5 of docs/rcb/ROBOTANGLE_TRACKER.md): a docker host,
-no GPU. Python >= 3.11, standard library only; docker and harbor on the host.
+"""Harbor oracle / nop checks of RoboARC tasks with rendering off (also step 5 of tools/release/release_rebuild.py): a
+docker host, no GPU. Python >= 3.11, standard library only; docker and harbor on the host.
 
-usage: python3 scripts/robotangle/harbor_check.py --instances <dir> --references <dir> --run <dir> [options] base ...
-       python3 scripts/robotangle/harbor_check.py --tasks <dir> --image <image> --run <dir> [options] base ...
-  base          task bases under their current names, e.g. interlocked-claws-easy-i00 (scripts/robotangle/release.json)
+usage: python3 scripts/roboarc/harbor_check.py --instances <dir> --references <dir> --run <dir> [options] base ...
+       python3 scripts/roboarc/harbor_check.py --tasks <dir> --image <image> --run <dir> [options] base ...
+  base          task bases under their current names, e.g. interlocked-claws-03-i01 (scripts/roboarc/release.json)
   --instances   one directory per base: a frozen MuJoCo instance (instance.json + instance_assets/)
   --references  one directory per base holding privileged.npz, the reference trajectory (the standard oracle streams
-                its rows, scripts/robotangle/mk_tasks.py)
+                its rows, scripts/roboarc/mk_tasks.py)
   --run         the run directory (created): dev.json, tasks/ (the dev task dirs, as mk_tasks.py --dev renders them),
                 tasks_off/ (their rendering-off copies), jobs/ (Harbor), logs/, results.json, results.md
-  --image       the image the tasks use (default eai-robotangle:0.3.0-dev); --build builds it first from this checkout
-                (images/robotangle/Dockerfile.mujoco, with --instances as its instances)
+  --image       the image the tasks use (default ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>); --build
+                builds it first from this checkout (source/images/robotangle/Dockerfile.mujoco in source/, with
+                --instances as its instances; images/roboarc/build.sh is the release build)
   --lanes       concurrent Harbor trials (default 3; a MuJoCo Session uses about one core)
   --agents, --modes   default oracle,nop and privileged,standard
   --harbor      the harbor command (default: harbor)
-  --tasks       run on task dirs that exist already (<dir>/robotangle-<base>-<mode>, e.g. the repo's tasks/ as
-                scripts/robotangle/mk_tasks.py renders them from release.json) instead of rendering dev task dirs; --image
+  --tasks       run on task dirs that exist already (<dir>/<bench>-<base>-<mode>, e.g. the repo's tasks/ as
+                scripts/roboarc/mk_tasks.py renders them from release.json) instead of rendering dev task dirs; --image
                 names the image they are built FROM, for the record
   --report      only (re)write results.md of an existing run directory
-  --bench       the benchmark whose task dirs these are: <bench>-<base>-<mode> (default robotangle; the MuJoCo release's
-                own benchmark is robotangle-new)
+  --bench       the benchmark whose task dirs these are: <bench>-<base>-<mode> (default roboarc)
   --gpu-bases   bases whose physics needs the GPU (a GPU physics profile, e.g. the blanket's blanket_vbd_gpu): their
                 rendering-off copies keep the device reservation (one GPU; rendering is still off)
 
-Rendering off (docs/rcb/RENDER_BRIDGE.md, "Rendering off"): in tasks_off/ every compose service that held the GPU
+Rendering off (docs/simulator/RENDER_BRIDGE.md, "Rendering off"): in tasks_off/ every compose service that held the GPU
 (privileged agent and verifier, the standard sim) has RCB_RENDER=off instead, and no device reservation (a --gpu-bases
 base keeps the reservation and NVIDIA_DRIVER_CAPABILITIES, and gets RCB_RENDER=off too). The tasks are
 otherwise the generated ones: graders, videos (black), runtime bindings and frozen instances included. Each trial is
@@ -63,7 +63,7 @@ def sh(cmd: list[str], **kw) -> str:
 def dev_json(a, bases: list[str]) -> pathlib.Path:
     """The image's identity and installed runtime (what each Session checks), and the bases' instances and references."""
     image_id = sh(["docker", "image", "inspect", a.image, "--format", "{{.Id}}"]).strip()
-    out = sh(["docker", "run", "--rm", "--network", "none", "-v", f"{ROOT / 'scripts/robotangle/shared'}:/tooling:ro",
+    out = sh(["docker", "run", "--rm", "--network", "none", "-v", f"{ROOT / 'scripts/roboarc/shared'}:/tooling:ro",
               a.image, "python", "-c", RUNTIME])
     runtime = json.loads(out.strip().splitlines()[-1])
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
@@ -173,14 +173,14 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--references", type=pathlib.Path)
     ap.add_argument("--tasks", type=pathlib.Path, help="existing task dirs (see usage)")
     ap.add_argument("--run", type=pathlib.Path, required=True)
-    ap.add_argument("--image", default="eai-robotangle:0.3.0-dev")
+    ap.add_argument("--image", default="ghcr.io/embodied-first-exam/roboarc:" + (ROOT / "images/roboarc/VERSION").read_text().strip())
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--lanes", type=int, default=3)
     ap.add_argument("--agents", default="oracle,nop")
     ap.add_argument("--modes", default="privileged,standard")
     ap.add_argument("--harbor", default="harbor")
     ap.add_argument("--report", action="store_true", help="only write results.md from the run's results.json")
-    ap.add_argument("--bench", default="robotangle")
+    ap.add_argument("--bench", default="roboarc")
     ap.add_argument("--gpu-bases", default="", help="comma-separated bases whose physics needs the GPU (see usage)")
     ap.add_argument("bases", nargs="*")
     a = ap.parse_args(argv)
@@ -193,11 +193,11 @@ def main(argv: list[str]) -> int:
         (a.run / d).mkdir(parents=True, exist_ok=True)
     if a.build:
         subprocess.run(["docker", "buildx", "build", "-f", "images/robotangle/Dockerfile.mujoco", "--build-context",
-                        f"instances={a.instances.resolve()}", "-t", a.image, "."], cwd=ROOT, check=True,
+                        f"instances={a.instances.resolve()}", "-t", a.image, "."], cwd=ROOT / "source", check=True,
                        stdout=open(a.run / "logs/build.log", "w"), stderr=subprocess.STDOUT)
     if a.tasks is None:
         dev = dev_json(a, a.bases)
-        subprocess.run([sys.executable, str(ROOT / "scripts/robotangle/mk_tasks.py"), "--dev", str(dev), "--out",
+        subprocess.run([sys.executable, str(ROOT / "scripts/roboarc/mk_tasks.py"), "--dev", str(dev), "--out",
                         str(a.run / "tasks"), *a.bases], check=True)
         tasks = a.run / "tasks"
     else:       # the record report() reads: the checkout (with its local changes, if any) and the image

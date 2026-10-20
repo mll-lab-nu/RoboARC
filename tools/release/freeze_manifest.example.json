@@ -1,0 +1,25 @@
+{
+ "note": "Post-freeze inputs of tools/release/release_rebuild.py --manifest. Copy this file next to the references, fill it in, run. head: the frozen commit of this repository (simulator source, release inputs, tooling); version: the image version (images/<bench>/VERSION); bench: the benchmark (default roboarc; release_rebuild.py --bench); onto: the commit whose scripts/<bench>/mk_tasks.py renders the task dirs (required; often the same as head); families: the subset of tools/release/mujoco_release.json to rebuild (all when absent); hf_revision: the dataset commit holding this run's uploaded instances (second run only); gpu: the device index for GPU-profile bases. bases: one entry per new base name that mujoco_release.json lists: reference = the recorded privileged.npz (relative to this file), sha256 = its sha256 (checked), expect = the end state_sha prefix the Harbor oracle must reach, instance = a made instance directory (optional), step_s = the measured wall time per control step (optional). records/freeze_manifests/ holds the manifests of the released freezes.",
+ "head": "<frozen commit>",
+ "version": "0.1.0",
+ "bench": "roboarc",
+ "onto": "<commit>",
+ "families": [
+  "interlocked_claws",
+  "buzz_wire_3d",
+  "fiber_bundling",
+  "knot_untying",
+  "rope_threading",
+  "blanket_flatten"
+ ],
+ "gpu": "0",
+ "lanes": 3,
+ "jobs": 4,
+ "bases": {
+  "interlocked-claws-01-i01": {
+   "reference": "refs/interlocked-claws-01-i01/privileged.npz",
+   "sha256": "<sha256 of that file>",
+   "expect": "<end state_sha prefix>"
+  }
+ }
+}

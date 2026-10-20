@@ -4,8 +4,8 @@
   the same state hash (checked 2026-10-09: Zen 4 vs i9-14900HX, 5 of 5 replays identical).
 - One thread per library: MuJoCo is single-threaded, so parallelise across processes, never inside one.
 - Headless: no GPU, software GL. The stress tools never render.
-- The repository root and the RoboTangle tooling directory go first on sys.path, so `topogym` and `rcb_topogym` come from
-  this checkout. A variable that is already set wins; that is how to run against an installed image instead."""
+- The checkout's simulator source (source/) and the pinned tooling (scripts/roboarc/shared/) go first on sys.path, so
+  `topogym` and `rcb_topogym` come from this checkout. A variable that is already set wins; that is how to run against an installed image instead."""
 import os
 import sys
 from pathlib import Path
@@ -18,9 +18,9 @@ for key, value in {
     os.environ.setdefault(key, value)
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
+REPO = HERE.parents[1]
 if os.environ.get("STRESS_USE_INSTALLED") != "1":        # 1: import topogym / rcb_topogym from the environment instead
-    for p in (REPO / "scripts/robotangle/shared", REPO):
+    for p in (REPO / "scripts/roboarc/shared", REPO / "source"):
         if str(p) not in sys.path:
             sys.path.insert(0, str(p))
 if str(HERE) not in sys.path:

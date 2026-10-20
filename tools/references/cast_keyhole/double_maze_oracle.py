@@ -25,7 +25,7 @@ import json, os, sys, time
 import mujoco
 from scipy.spatial.transform import Rotation as R
 
-PLAN = os.environ.get("DM_PLAN", "scripts/robotangle/references/cast_keyhole/double_maze_plan.npz")
+PLAN = os.environ.get("DM_PLAN", "tools/references/cast_keyhole/double_maze_plan.npz")
 DIAG = os.environ.get("DM_DIAG")
 BIND, SETTLE, RAMP, HOLD, GRIP = 8, 72, 3, 240, .002
 G_LEFT, K_SERVO, LIM_L, LIM_R, RATE = .10, .10, .05, .08, .003   # integral gain, servo gain, offset limits (rad), offset rate (rad/step)

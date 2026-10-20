@@ -1,7 +1,7 @@
 # RoboTangle on MuJoCo: the shared core
 
 RoboTangle's physics moves from Genesis to MuJoCo family by family. A family runs on MuJoCo when its instances say
-`simulator.physics_engine = "mujoco"`. `scripts/robotangle/shared/rcb_topogym.py` (`TASKS`) chooses the engine
+`simulator.physics_engine = "mujoco"`. `scripts/roboarc/shared/rcb_topogym.py` (`TASKS`) chooses the engine
 for new instances. Released Genesis instances keep their own frozen configuration and still load on Genesis.
 Rendering does not change: agents keep seeing Nyx images (the render bridge, below).
 
@@ -60,7 +60,7 @@ The tooling and the tasks use this subset of the Genesis entity API, and the vie
     private `MjData`, so `topogym.solvers.genesis_kinematics` (GenesisFKSolver, GenesisIKSolver) and EE_ABS actions
     work on MuJoCo. The IK is Genesis 1.2.1's kernel (damped least squares, per-dof step clamp, joint ranges, float32
     parameters), one sample (no random restarts): on the ALOHA and the Panda it reproduces Genesis' solutions to
-    1e-9 rad and picks the same branch (`scripts/robotangle/test_mujoco_kinematics.py`).
+    1e-9 rad and picks the same branch (`tools/tests/test_mujoco_kinematics.py`).
 - **Link:** `name`, `idx` (the MuJoCo body id; contacts use it), `parent_idx`, `is_fixed`, `geoms` (collision),
   `vgeoms`, `get_pos` / `get_quat` / `get_vel` / `get_ang`.
 - **Joint:** `name`, `qs_idx_local`, `dofs_idx_local`.
@@ -667,9 +667,9 @@ their released environment (the masking changes their frozen asset hashes).
 
 Rendering keeps today's Nyx look ([RENDER_BRIDGE.md](RENDER_BRIDGE.md)). blanket_flatten, buzz_wire_3d, cast_coil,
 cast_keyhole, fiber_bundling, hedgehog_in_cage, horseshoe_ring, interlocked_claws, knot_untying, lock_picking, orbits,
-rope_threading and slotted_post_ring render with nyx_direct (`scripts/robotangle/shared/nyx_direct.py`, their TASKS `renderer` "direct"),
+rope_threading and slotted_post_ring render with nyx_direct (`scripts/roboarc/shared/nyx_direct.py`, their TASKS `renderer` "direct"),
 which feeds Nyx from the MuJoCo world without a Genesis host. The other MuJoCo families render through the Nyx render bridge
-(`scripts/robotangle/shared/render_bridge.py`). It builds today's Genesis scene of the instance as a Nyx host, never
+(`scripts/roboarc/shared/render_bridge.py`). It builds today's Genesis scene of the instance as a Nyx host, never
 steps it, and copies the MuJoCo state into it on every frame. Either renderer attaches on the first frame; until then
 `MujocoWorld.cameras` is empty: the session is headless. `RCB_RENDER=off` attaches the same camera rig without pixels
 instead (black frames, no GPU; RENDER_BRIDGE.md, "Rendering off"), for the Harbor oracle / nop checks.

@@ -21,7 +21,7 @@ import json, os, sys, time
 import mujoco
 from scipy.spatial.transform import Rotation as R
 
-PLAN = os.environ.get("ROTOR_PLAN", "scripts/robotangle/references/interlocked_claws/rotor_plan.npz")
+PLAN = os.environ.get("ROTOR_PLAN", "tools/references/interlocked_claws/rotor_plan.npz")
 SETTLE, SETTLE_RELEASE, GRASP, BLEND, HOLD = 80, 60, 24, 40, 240
 STEP_MAX = .02                                               # rad per control step for run-time inverse kinematics targets
 LOG = os.environ.get("ROTOR_LOG", "1") == "1"

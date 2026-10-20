@@ -168,7 +168,7 @@ def main():
         shutil.copy2(vol, frozen / vol.name)
         if inst["asset_identity"].get(vol.name) != sha256(vol):
             raise RuntimeError(f"the generated volume {vol.name} differs from the one the task declared")
-    inst["redesign_build"] = dict(tool="scripts/robotangle/redesign/knot_untying/robot/build_instance.py",
+    inst["redesign_build"] = dict(tool="tools/redesign/knot_untying/robot/build_instance.py",
                                   lab_start=rd["source"]["lab_start"], patch="knot_redesign_rope_attachments")
     (out / "instance.json").write_text(json.dumps(inst, indent=1))
     shutil.rmtree(work)

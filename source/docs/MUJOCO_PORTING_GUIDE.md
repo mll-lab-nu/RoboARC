@@ -26,7 +26,7 @@ Read this together with [MUJOCO_CORE.md](MUJOCO_CORE.md) ("Porting a family"), t
 - URDF collision geoms named by contact role.
 - MuJoCo release geometry for the final settling.
 
-**In the repo now:** the stress-validation harness, `scripts/robotangle/stress/` with [STRESS_VALIDATION.md](STRESS_VALIDATION.md). It holds the per-substep observer with an energy balance, the self-play search, the shrinker, the acceptance-round runner and criteria v2.3. Run its self-check for step 2 before asking for the formal round.
+**In the repo now:** the stress-validation harness, `tools/stress/` with [STRESS_VALIDATION.md](STRESS_VALIDATION.md). It holds the per-substep observer with an energy balance, the self-play search, the shrinker, the acceptance-round runner and criteria v2.3. Run its self-check for step 2 before asking for the formal round.
 
 ## How to start
 

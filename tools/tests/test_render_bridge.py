@@ -13,11 +13,11 @@ Exact checks: qpos round trip, Nyx inputs, depth and calibration bit for bit; Mu
 RGB: Nyx's path tracer is not bit-reproducible between runs (temporal history, GPU nondeterminism), so bridge-vs-
 reference RGB is judged against reference-vs-reference; --render-mode Forward (test only, both stages) is nearly exact.
 
-  run.sh BASE scripts/robotangle/test_render_bridge.py reference --traj T --out R1 [--steps 0-200,210-99999:10]
-  run.sh BASE scripts/robotangle/test_render_bridge.py bridge --ref R1 --ref R2 --out B1 [--mjcf X --alias piece_0=claw_0]
-  run.sh BASE scripts/robotangle/test_render_bridge.py noise --ref R1 --ref R2 --out N
-  run.sh BASE scripts/robotangle/test_render_bridge.py ghost --traj T --out G [--ref G_reference: bridge side]
-  python scripts/robotangle/test_render_bridge.py selftest --out S     (CPU only: numpy + mujoco)
+  run.sh BASE tools/tests/test_render_bridge.py reference --traj T --out R1 [--steps 0-200,210-99999:10]
+  run.sh BASE tools/tests/test_render_bridge.py bridge --ref R1 --ref R2 --out B1 [--mjcf X --alias piece_0=claw_0]
+  run.sh BASE tools/tests/test_render_bridge.py noise --ref R1 --ref R2 --out N
+  run.sh BASE tools/tests/test_render_bridge.py ghost --traj T --out G [--ref G_reference: bridge side]
+  python tools/tests/test_render_bridge.py selftest --out S     (CPU only: numpy + mujoco)
 (INSTANCE in the environment names the frozen instance.json.) Every output directory must be new.
 """
 import argparse
@@ -30,7 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "shared"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/roboarc/shared"))
 
 
 def sha(x) -> str:

@@ -5,7 +5,7 @@
 #   - the frozen MuJoCo instances of the ported families (the named build context `instances`, one directory per task
 #     base: instance.json + instance_assets/), each replacing the Genesis instance of the same base in
 #     /opt/robotangle/instances/ (images/robotangle/stage_instance.py stages it into the task). An empty context builds
-#     the image without them: scripts/robotangle/release_rebuild.py makes the release's instances inside that image,
+#     the image without them: tools/release/release_rebuild.py makes the release's instances inside that image,
 #     then builds it again with them (every layer but the last is shared, so both have the same runtime).
 #   - the VBD cloth: newton 1.6.1 and warp-lang 1.18.0 (images/robotangle/vbd-requirements.txt, exact versions and wheel
 #     hashes) and their Warp CPU kernels, compiled at build into the read-only cache /opt/warp-cache (WARP_CACHE_PATH) with

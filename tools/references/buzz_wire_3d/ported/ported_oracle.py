@@ -282,7 +282,7 @@ class PortedOracle(O.TierOracle):
         """Closed-finger pushes about the finish post chosen by trial: each candidate push (turn, pad height) is executed,
         the result scored (graspable from above, then the remaining heading error), and rewound; the best is executed
         again (deterministic), up to `levels` pushes or until the wand is graspable within 25 deg of the heading."""
-        sys.path.insert(0, str(Path(O.__file__).resolve().parents[4] / "scripts/robotangle/references/buzz_wire_3d"))
+        sys.path.insert(0, str(Path(O.__file__).resolve().parents[5] / "tools/references/buzz_wire_3d"))
         import buzz_finish as bf
         tp_, tr_ = endpoint_pose(self.route, 1)
         target_p = tp_ + self.origin
@@ -360,7 +360,7 @@ class PortedOracle(O.TierOracle):
         return qs
 
     def landing_sweep(self, ups, turns, band):
-        sys.path.insert(0, str(Path(O.__file__).resolve().parents[4] / "scripts/robotangle/references/buzz_wire_3d"))
+        sys.path.insert(0, str(Path(O.__file__).resolve().parents[5] / "tools/references/buzz_wire_3d"))
         import buzz_finish as bf
         tp_, tr_ = endpoint_pose(self.route, 1)
         hy_t = self._yaw(tr_.apply([1, 0, 0]))
@@ -565,7 +565,7 @@ class PortedOracle(O.TierOracle):
         rad per control step, `tight_cap` where the kinematic wand-wire clearance (commanded joints, the measured grasp)
         is under tight_mm; stops once the commanded ring is s_stop m before the wire's end."""
         import mujoco
-        sys.path.insert(0, str(Path(O.__file__).resolve().parents[4] / "scripts/robotangle/references/buzz_wire_3d"))
+        sys.path.insert(0, str(Path(O.__file__).resolve().parents[5] / "tools/references/buzz_wire_3d"))
         import buzzlib
         from topogym.planning.buzz_wire_3d.redesign.wandpath import wand_from_tcp
         w = self.io.w
@@ -758,9 +758,9 @@ class PortedOracle(O.TierOracle):
 
 
 def finish_adaptive():
-    """The ported very_easy / easier references' finish (scripts/robotangle/references/buzz_wire_3d/buzz_finish.py,
+    """The ported very_easy / easier references' finish (tools/references/buzz_wire_3d/buzz_finish.py,
     run_finish: grasp-turn rounds from the measured pose, the staged slow final release), on the same Session."""
-    sys.path.insert(0, str(Path(O.__file__).resolve().parents[4] / "scripts/robotangle/references/buzz_wire_3d"))
+    sys.path.insert(0, str(Path(O.__file__).resolve().parents[5] / "tools/references/buzz_wire_3d"))
     import buzz_finish
     from topogym.planning.standard_rate import rate_limited_runner
     runner = rate_limited_runner(s)

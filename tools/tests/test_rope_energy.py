@@ -14,7 +14,7 @@ Also checked:
   - rope_link_energy counts each joint for both its links, so it sums to twice rope_energy;
   - mujoco's data.energy books none of the rod's energy.
 
-  python scripts/robotangle/test_rope_energy.py
+  python tools/tests/test_rope_energy.py
 """
 import sys
 import tempfile
@@ -23,7 +23,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "source"))
 
 N, L, RADIUS = 12, .0045, .004
 

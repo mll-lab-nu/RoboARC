@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
-"""The RoboTangle release rebuild in one command (docs/rcb/MUJOCO_MIGRATION.md, Release): on a docker host with harbor,
+"""The RoboARC release rebuild in one command (docs/history/MUJOCO_MIGRATION.md, Release): on a docker host with harbor,
 from a commit of this repository, without a GPU.
 
-usage: scripts/robotangle/release_rebuild.sh <head> --version <v> [options]
-       scripts/robotangle/release_rebuild.sh --manifest <freeze.json> [options]
-  <head>          the commit to rebuild the release on; scripts/robotangle/mujoco_release.json there names the MuJoCo
+usage: tools/release/release_rebuild.sh <head> --version <v> --onto <commit> [options]
+       tools/release/release_rebuild.sh --manifest <freeze.json> [options]
+Run it from a clone of this repository (the worktrees are made from it). Both <head> and --onto are commits of this
+repository: <head> gives the simulator source (source/), the release inputs (tools/release/) and the pinned tooling
+(scripts/roboarc/shared/); --onto is the tree the release files and task dirs are written to (often the same commit).
+  <head>          the commit to rebuild the release on; tools/release/mujoco_release.json there names the MuJoCo
                   bases and how their instances are made
-  --manifest      the post-freeze inputs in one file (scripts/robotangle/freeze_manifest.example.json): head (the
+  --manifest      the post-freeze inputs in one file (records/freeze_manifests/freeze_manifest.example.json): head (the
                   frozen commit), version, onto, families, hf_revision, gpu, lanes, jobs, and per base (new name):
                   reference (privileged.npz; relative paths are relative to the manifest), its sha256, expect (end
                   state prefix), instance (a made instance directory to use instead of making it), step_s (the wall
                   time per control step the texts state, measured on MuJoCo). Options on the command line win.
-  --bench         the benchmark the MuJoCo tasks belong to (default robotangle-new, user decision 2026-10-12: RoboTangle on
-                  MuJoCo is a benchmark of its own; one parameter, here and BENCH in scripts/<bench>/mk_tasks.py on main):
-                  with --onto, its files are scripts/<bench>/ (release.json, assets.json, packages/, oracles/, shared/),
+  --bench         the benchmark the MuJoCo tasks belong to (default roboarc; BENCH in scripts/<bench>/mk_tasks.py): its
+                  files are scripts/<bench>/ (release.json, assets.json, packages/, oracles/, shared/),
                   images/<bench>/VERSION, the image ghcr.io/embodied-first-exam/<bench>:<version> and the task dirs
-                  tasks/<bench>-<base>-<mode>; RoboTangle's own files and tasks (scripts/robotangle/, robotangle-*) are
-                  read (the released texts each new base ports), never changed. --bench robotangle: the earlier in-place
-                  release (an -i01 base replaces its -i00 in RoboTangle)
-  --onto          render the task dirs on this commit (main, or a main-based branch whose mk_tasks.py renders MuJoCo
-                  bases) instead of on <head>: the release files are written there, with <head>'s tooling
+                  tasks/<bench>-<base>-<mode>. The Genesis-era task texts a new base starts from (its template) are
+                  tools/release/templates/ (read, never changed)
+  --onto          required: render the task dirs on this commit (one whose scripts/<bench>/mk_tasks.py renders MuJoCo
+                  bases): the release files are written there, with <head>'s tooling
                   (shared/rcb_topogym.py, render_bridge.py, nyx_direct.py) laid over it; then the repository checks
                   of the changed tasks and `harbor add --scan` (tasks/dataset.toml, where the tree still has one)
   --instances     made instance directories, <dir>/<new base>/ (instance.json + instance_assets/): used instead of
@@ -46,8 +47,8 @@ usage: scripts/robotangle/release_rebuild.sh <head> --version <v> [options]
 A manifest base with "reference": null has no reference solution (user 2026-10-13): no oracles/ copy, release.json
 evidence {} and oracle "none" (its texts say so), no birth comparison, and Harbor runs nop only for it (harbor_nop/).
 Steps:
-  1. a worktree of <head>; the image without MuJoCo instances (images/robotangle/Dockerfile.mujoco, an empty
-     `instances` context): eai-<bench>:<v>-noinst
+  1. a worktree of <head>; the image without MuJoCo instances (source/images/robotangle/Dockerfile.mujoco built from
+     source/, as images/roboarc/build.sh does, with an empty `instances` context): <bench>:<v>-noinst
   2. every MuJoCo base's instance made inside it (rcb_topogym.py make-instance, the MuJoCo tasks' SIMD masking, no
      network), then the release image with them: ghcr.io/embodied-first-exam/<bench>:<v>; the runtime of both must be
      the same (installed_runtime)
@@ -68,7 +69,7 @@ Steps:
 Facts the texts state are read in the release image, per base, from its instance and the tooling (release.json):
 grasp_rules (Session.grasp_rules() of the instance's configuration), physics_dt_s (the contact-review window in
 ticks), gpu_physics (a GPU profile), grasp ([metadata] grasp) and grasp_regions (the grader-details line per mode, the
-head's scripts/topogym_rules.py): the texts state the instance's grasp, not the released Genesis one; step_s comes from
+head's tools/release/topogym_rules.py): the texts state the instance's grasp, not the released Genesis one; step_s comes from
 the manifest.
   6. REPORT.md: PASS when every check and trial is as expected (oracle 1, nop 0, the evidence's claims hold)
 Instance bytes are only reproducible from the same make: CoACD's hulls differ between hosts in their last bits and
@@ -95,7 +96,7 @@ import subprocess
 import sys
 import zipfile
 
-BENCH = "robotangle-new"   # the default --bench: RoboTangle on MuJoCo, its own benchmark (rename: here and on main)
+BENCH = "roboarc"          # the default --bench
 TOOLING = ("rcb_topogym.py", "render_bridge.py", "nyx_direct.py")   # <head>'s shared/ tooling, laid over the --onto tree
 MAKE_ONE = '''import json, shutil, sys
 from pathlib import Path
@@ -314,7 +315,7 @@ def reference(b: dict, refs: pathlib.Path | None, repo: pathlib.Path, named: dic
             raise SystemExit(f"{b['new']}: the manifest's reference {named[b['new']]} is missing")
         return named[b["new"]]
     cands = ([refs / n / "privileged.npz" for n in (b["new"], b["old"]) if n] if refs else []) + \
-            [repo / "scripts/robotangle/oracles" / b["new"] / "privileged.npz"]
+            [repo / "scripts/roboarc/oracles" / b["new"] / "privileged.npz"]
     for c in cands:
         if c.is_file():
             return c
@@ -323,11 +324,11 @@ def reference(b: dict, refs: pathlib.Path | None, repo: pathlib.Path, named: dic
 
 def standard_reference(repo: pathlib.Path, base: str, privileged: bytes) -> bytes:
     """The standard oracle's rows: the reference itself, unless the tree holds a standard reference re-timed to the
-    standard service's joint-speed rule (scripts/robotangle/oracles/<base>/standard.npz whose meta has "speed_rule":
+    standard service's joint-speed rule (scripts/roboarc/oracles/<base>/standard.npz whose meta has "speed_rule":
     the reference's rows with every arm-joint step within JOINT_STEP_LIMIT_RAD, 2026-10-14) on the reference's birth:
     a tree file recorded on another birth (its instance_sha is not the reference's, e.g. a copy from before a
     re-freeze) is not the standard oracle of this reference. The privileged reference is never replaced by it."""
-    p = repo / "scripts/robotangle/oracles" / base / "standard.npz"
+    p = repo / "scripts/roboarc/oracles" / base / "standard.npz"
     if not p.is_file() or p.read_bytes() == privileged:
         return privileged
     with zipfile.ZipFile(p) as z:
@@ -343,13 +344,13 @@ def standard_reference(repo: pathlib.Path, base: str, privileged: bytes) -> byte
 
 
 def speed_rule_record(repo: pathlib.Path, base: str) -> dict:
-    """A speed-rule standard reference's record (scripts/robotangle/standard_speed_rule.json): `words`, the sentence the
+    """A speed-rule standard reference's record (tools/release/standard_speed_rule.json): `words`, the sentence the
     standard evidence states (release.json `speed_rule`, which mk_tasks.py renders into the standard README's Reference
     solution), and `end_state`, the end it reaches (the evidence's, and the end the Harbor standard oracle must reach:
     not the privileged reference's)."""
-    recs = json.loads((repo / "scripts/robotangle/standard_speed_rule.json").read_text())["bases"]
+    recs = json.loads((repo / "tools/release/standard_speed_rule.json").read_text())["bases"]
     if base not in recs:
-        raise SystemExit(f"{base}: its standard oracle is a speed-rule reference, but scripts/robotangle/"
+        raise SystemExit(f"{base}: its standard oracle is a speed-rule reference, but tools/release/"
                          "standard_speed_rule.json has no record of it (words, end_state)")
     return recs[base]
 
@@ -446,7 +447,7 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
     (mk / "make_one.py").write_text(MAKE_ONE)
     env = [*(f"{k}={v}" for k, v in mujoco_env), "OMP_NUM_THREADS=1", "MKL_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
            "RCB_TORCH_THREADS=1", "HOME=/tmp", "XDG_CACHE_HOME=/work/cache"]
-    tooling = a.repo / "scripts/robotangle/shared"
+    tooling = a.repo / "scripts/roboarc/shared"
 
     def one(b: dict) -> tuple[str, float]:
         job = {k: b[k] for k in ("variation", "released_simulator_keys", "simulator_overrides", "scene_seed",
@@ -456,8 +457,12 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
                    overrides_file=f"/work/mk/{b['new']}.overrides.json",
                    task_parameters_file=f"/work/mk/{b['new']}.task_parameters.json")
         if b["render_host"]:     # the released task's binding goes with the released instance into the render host
-            shutil.copyfile(a.repo / "tasks" / f"robotangle-{b['old']}-privileged/environment/runtime_binding.json",
-                            mk / f"{b['new']}.released_binding.json")
+            released_binding = a.repo / "tasks" / f"robotangle-{b['old']}-privileged/environment/runtime_binding.json"
+            if not released_binding.is_file():   # the Genesis RoboTangle task dirs are not carried in this repository
+                raise SystemExit(f"{b['new']}: render_host needs {released_binding} (the released Genesis task's binding), "
+                                 "which this repository does not carry: pass the made instance with --instances or the "
+                                 "manifest's instance")
+            shutil.copyfile(released_binding, mk / f"{b['new']}.released_binding.json")
             job["released_binding"] = f"/work/mk/{b['new']}.released_binding.json"
         (inst / b["new"]).mkdir()
         (mk / f"{b['new']}.json").write_text(json.dumps(job, indent=1) + "\n")
@@ -478,15 +483,13 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     --onto worktree, else <head>'s); the old task dirs removed. Task texts of a changed or new design come from <head>
     (package_text)."""
     rb = a.out / "scripts" / a.bench                        # this benchmark's release files
-    released = a.out / "scripts/robotangle/packages"         # RoboTangle's released texts (a new benchmark reads them)
-    new_bench = a.bench != "robotangle"
-    if new_bench and not released.is_dir():   # main without the Genesis RoboTangle tasks (deleted 2026-10-13, #187): the
-        released = a.repo / "scripts/robotangle/packages"   # head keeps their released texts (a new or newly ported base's template)
+    released = a.repo / "tools/release/templates"   # the Genesis-era released texts (a new or newly ported base's template)
+    new_bench = True                                # always a benchmark of its own (the Genesis in-place release is gone)
     (a.out / "images" / a.bench / "VERSION").write_text(a.version + "\n")
     rel = json.loads((rb / "release.json").read_text())
     assets = json.loads((rb / "assets.json").read_text())
     tooling = sha((rb / "shared/rcb_topogym.py").read_bytes())
-    ev_file = a.repo / "scripts/robotangle/release_evidence.json"
+    ev_file = a.repo / "tools/release/release_evidence.json"
     shipped = json.loads(ev_file.read_text()) if ev_file.is_file() else {}
     src8, tool8 = runtime["source"]["sha256"][:8], tooling[:8]
     host = f"{a.host_label}, {cpu_model()}, no GPU"
@@ -559,19 +562,14 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
             for mode in ("privileged", "standard"):
                 if (rb / "oracles" / new / f"{mode}.npz") != ref:
                     (rb / "oracles" / new / f"{mode}.npz").write_bytes(per_mode[mode])
-            ev = dict(deterministic=1, release=f"{a.version} (dev/robotangle_mujoco {head[:9]})", source=src8, success=1,
-                      tooling=tool8)
-        if new_bench:   # main's record form (the 0.1.0 rename step): the image and the date, never a host or a job name.
-            # A new or changed reference's record is the Harbor trial that passed it (scripts/robotangle/
-            # release_evidence.json, its provenance not copied); without one it is not_run: no score is claimed
-            given = (shipped.get("bases") or {}).get(new) or {}
-            evidence = {} if no_ref else {
-                m: dict({k: v for k, v in given[m].items() if k != "provenance"}, trajectory_sha256=sha(per_mode[m]))
-                if m in given else dict(status="not_run", trajectory_sha256=sha(per_mode[m]))
-                for m in ("privileged", "standard")}
-        else:
-            evidence = {} if no_ref else {m: dict(attempt=f"{a.host_label}:{a.work}/harbor/jobs/{a.bench}-{new}-{m}__oracle",
-                                                  **ev, trajectory_sha256=sha(per_mode[m])) for m in ("privileged", "standard")}
+        # The record form: the image and the date, never a host or a job name. A new or changed reference's record is
+        # the Harbor trial that passed it (tools/release/release_evidence.json, its provenance not copied); without one
+        # it is not_run: no score is claimed
+        given = (shipped.get("bases") or {}).get(new) or {}
+        evidence = {} if no_ref else {
+            m: dict({k: v for k, v in given[m].items() if k != "provenance"}, trajectory_sha256=sha(per_mode[m]))
+            if m in given else dict(status="not_run", trajectory_sha256=sha(per_mode[m]))
+            for m in ("privileged", "standard")}
         if not no_ref and per_mode["standard"] != per_mode["privileged"]:   # a standard reference within the speed rule
             rec = speed_rule_record(a.repo, new)
             evidence["standard"].update(speed_rule=rec["words"], end_state=rec["end_state"])
@@ -588,15 +586,15 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
             family=b["family"], instance_package=(
                 f"MuJoCo instance made before this image was built (TopoGym source {inst['topogym_source']['sha256'][:8]}; "
                 f"its bytes are bound into the release image eai-{a.bench}:{a.version}, "
-                "scripts/robotangle/release_rebuild.py --instances)" if new in a.premade else
+                "tools/release/release_rebuild.py --instances)" if new in a.premade else
                 f"MuJoCo instance made in the release image (eai-{a.bench}:{a.version}, "
-                f"scripts/robotangle/release_rebuild.py; make-instance {b['variation']}, scene seed {b['scene_seed']})"),
+                f"tools/release/release_rebuild.py; make-instance {b['variation']}, scene seed {b['scene_seed']})"),
             tier=b["tier"], physics_engine="mujoco", release_commit=head,
             # a released base keeps its nop record; a new one takes release_evidence.json's, else not_run
             nop=(((rel["bases"].get(new) or {}).get("nop") or {k: v for k, v in (shipped.get("bases") or {}).get(new, {})
                                                                  .get("nop", {"status": "not_run"}).items() if k != "provenance"})
                  if new_bench else   # main's record form (the 0.1.0 rename step), no host
-                 dict(run=f"{a.version}, harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+                 dict(run=f"{a.version}, harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
                       date=datetime.date.today().isoformat(), host=host)),
             **(dict(template=b["template"], variation=b["variation"]) if b["template"] else
                dict(ported_from=old) if new_bench else
@@ -623,10 +621,7 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     rel["bases"] = {**bases_out, **{n: r for n, r in by_new.items() if n not in bases_out}}
     rel["runtime"].update(runtime)
     rel["tooling_sha256"] = tooling
-    if new_bench:                         # the benchmark's own release: the dev/robotangle_mujoco commit it is built from
-        rel["release_commit"] = rel["template_commit"] = head
-        (a.out / "images" / a.bench / "Dockerfile").write_text(
-            main_dockerfile((a.repo / "images/robotangle/Dockerfile.mujoco").read_text(), a.bench))
+    rel["release_commit"] = rel["template_commit"] = head   # the commit the release is built from
     assert {n: b["uipc_build_sha256"] for n, b in rel["uipc_builds"].items()} == uipc_builds, "uipc builds changed"
     (rb / "release.json").write_text(json.dumps(rel, indent=1, ensure_ascii=False) + "\n")
     assets["files"] = dict(sorted(assets["files"].items()))
@@ -685,23 +680,6 @@ def drop_missing(tasks: pathlib.Path) -> list[str]:
         (keep if (tasks / name).is_dir() else dropped).append(b if (tasks / name).is_dir() else name)
     path.write_text("\n[[tasks]]\n".join([head, *keep]))
     return dropped
-
-
-DOCKERFILE_HEAD = """# {bench} base image: generated by scripts/robotangle/release_rebuild.py on dev/robotangle_mujoco from that branch's
-# images/robotangle/Dockerfile.mujoco at the release commit (scripts/{bench}/release.json release_commit); do not edit.
-# Build context: images/{bench}/context/, prepared by scripts/{bench}/fetch_image_context.sh (BUILD_CONTEXT; the release
-# commit's simulator source, robot assets and image helpers, and the frozen instances from the HF dataset pinned in
-# scripts/{bench}/assets.json); then scripts/build_images.sh. The only change from Dockerfile.mujoco: the instances
-# are the context's instances/ directory instead of a named build context.
-"""
-
-
-def main_dockerfile(head_dockerfile: str, bench: str) -> str:
-    """images/<bench>/Dockerfile on main: the head's Dockerfile.mujoco with the instances in the build context."""
-    a = "RUN --mount=type=bind,from=instances,target=/tmp/mj-instances"
-    assert head_dockerfile.count(a) == 1, "Dockerfile.mujoco: the instances mount changed"
-    return DOCKERFILE_HEAD.format(bench=bench) + head_dockerfile.replace(
-        a, "RUN --mount=type=bind,source=instances,target=/tmp/mj-instances")
 
 
 def cpu_model() -> str:
@@ -776,8 +754,10 @@ def main(argv: list[str]) -> int:
             setattr(a, k, ",".join(v) if k in ("families", "only") and isinstance(v, list) else v)
     if not a.head or not a.version:
         ap.error("the head and --version are needed (on the command line or in the manifest)")
-    if a.bench != "robotangle" and not a.onto and not a.harbor_only:
-        ap.error(f"--bench {a.bench}: its files live on main (scripts/{a.bench}/): pass --onto <main-based commit>")
+    if a.bench == "robotangle":
+        ap.error("--bench robotangle (the Genesis in-place release) is not supported here")
+    if not a.onto and not a.harbor_only:
+        ap.error("--onto <commit> is required: the tree the release files and the task dirs are rendered on")
     path = lambda v: (mdir / v).resolve()  # noqa: E731
     per = m.get("bases", {})
     a.ref_paths = {b: path(r["reference"]) for b, r in per.items() if r.get("reference")}
@@ -801,7 +781,7 @@ def main(argv: list[str]) -> int:
         a.repo, a.out = pathlib.Path(report.get("repo") or a.work / "repo"), a.work / ("render" if report.get("onto") else "repo")
         bases = [dict(new=n, old=i["replaces"]) for n, i in report["instances"].items()]
         return harbor_step(a, here, report, bases, report.get("gpu_bases", []), report["images"]["release"]["reference"],
-                           module(here / "scripts/robotangle/harbor_check.py"))
+                           module(here / "scripts/roboarc/harbor_check.py"))
     a.repo = a.work / "repo"
     image = f"ghcr.io/embodied-first-exam/{a.bench}:{a.version}"
     noinst_tag = f"{a.bench}:{a.version}-noinst"
@@ -815,12 +795,13 @@ def main(argv: list[str]) -> int:
         run(["git", "-C", str(here), "worktree", "remove", "--force", str(a.repo)])
     branch = f"release-rebuild/{head[:9]}-{a.work.name}"   # one per work dir: worktrees cannot share a branch
     run(["git", "-C", str(here), "worktree", "add", "-B", branch, str(a.repo), head])
-    if (a.repo / "source/scripts/robotangle").is_dir():   # the RoboARC repository: the dev source lives under source/
-        a.repo = a.repo / "source"
-    spec = json.loads((a.repo / "scripts/robotangle/mujoco_release.json").read_text())
+    if not (a.repo / "tools/release/mujoco_release.json").is_file() or not (a.repo / "source/topogym").is_dir():
+        raise SystemExit(f"{a.head}: not a commit of this repository's layout (source/topogym, tools/release/)")
+    ctx = a.repo / "source"                 # the image build context, as images/roboarc/build.sh uses it
+    spec = json.loads((a.repo / "tools/release/mujoco_release.json").read_text())
     # GPU profiles: the head's list and this checkout's (a head from before the list names none)
     a.gpu_profiles = set(spec.get("gpu_profiles", [])) | set(json.loads(
-        (here / "scripts/robotangle/mujoco_release.json").read_text()).get("gpu_profiles", []))
+        (here / "tools/release/mujoco_release.json").read_text()).get("gpu_profiles", []))
     bases = bases_of(spec, a.families.split(",") if a.families else None)
     unknown = (set(a.premade) | set(a.ref_paths) | set(a.step_s)) - {b["new"] for b in bases}
     if unknown:
@@ -848,7 +829,7 @@ def main(argv: list[str]) -> int:
         if not gen.is_file() or "def mujoco_lines" not in gen.read_text():
             raise SystemExit(f"--onto {a.onto}: no scripts/{a.bench}/mk_tasks.py that renders MuJoCo bases")
         for n in TOOLING:
-            shutil.copy2(a.repo / "scripts/robotangle/shared" / n, a.out / "scripts" / a.bench / "shared" / n)
+            shutil.copy2(a.repo / "scripts/roboarc/shared" / n, a.out / "scripts" / a.bench / "shared" / n)
         report.update(onto=onto, speed_rule_wording_added=speed_rule_wording(gen),
                       empty_failures_rule_added=empty_failures_rule(gen), history_rule_added=history_rule(gen))
     for b in bases:
@@ -856,7 +837,7 @@ def main(argv: list[str]) -> int:
             reference(b, a.references, a.repo, a.ref_paths)        # every reference exists before anything is built
         if b["template"]:                             # and every new base's texts
             for mode in ("privileged", "standard"):
-                need = [a.repo / "scripts/robotangle/packages" / f"{b['template']}-{mode}"] + \
+                need = [a.repo / "tools/release/templates" / f"{b['template']}-{mode}"] + \
                        ([a.repo / b["package_text"] / f"{b['new']}-{mode}"] if b["package_text"] else [])
                 if not b["package_text"] or not all(p.is_dir() for p in need):
                     raise SystemExit(f"{b['new']}: needs its template's texts and its own (package_text): "
@@ -864,18 +845,18 @@ def main(argv: list[str]) -> int:
         if a.hf_revision and not (a.work / "instances" / b["new"] / "instance.json").is_file():
             raise SystemExit(f"--hf-revision uses the instances of a previous run in {a.work}: {b['new']} has none")
     # harbor_check.py is this checkout's (the runner), mk_tasks.py the render tree's; MUJOCO_ENV is the same in both
-    gen = f"scripts/{a.bench if a.onto else 'robotangle'}/mk_tasks.py"     # the render tree's generator
-    mk, hc = module(a.out / gen), module(here / "scripts/robotangle/harbor_check.py")
+    gen = f"scripts/{a.bench}/mk_tasks.py"     # the render tree's generator
+    mk, hc = module(a.out / gen), module(here / "scripts/roboarc/harbor_check.py")
     empty = a.work / "empty"
     empty.mkdir(exist_ok=True)
     build = ["docker", "buildx", "build", "-f", "images/robotangle/Dockerfile.mujoco"]
     run([*build, "--build-context", f"instances={empty}", "-t", noinst_tag, "."], log=a.work / "logs/build_noinst.log",
-        cwd=a.repo)
+        cwd=ctx)
     noinst = dict(reference=noinst_tag, id=image_id(noinst_tag), repo_digests=[])
 
     def installed(ref: str) -> dict:
         out = run(["docker", "run", "--rm", "--network", "none", "-v",
-                   f"{a.repo / 'scripts/robotangle/shared'}:/tooling:ro", ref, "python", "-c", hc.RUNTIME])
+                   f"{a.repo / 'scripts/roboarc/shared'}:/tooling:ro", ref, "python", "-c", hc.RUNTIME])
         return json.loads(out.strip().splitlines()[-1])
 
     rt = installed(noinst_tag)
@@ -903,11 +884,11 @@ def main(argv: list[str]) -> int:
                                            if b["new"] in a.premade else round(walls[b["new"]], 1) if walls
                                            else "uploaded, used again"))
     run([*build, "--build-context", f"instances={a.work / 'instances'}", "-t", image, "-t", f"{a.bench}:{a.version}",
-         "."], log=a.work / "logs/build_release.log", cwd=a.repo)
+         "."], log=a.work / "logs/build_release.log", cwd=ctx)
     rel_rt = installed(image)
     assert rel_rt == rt, "the release image's runtime differs from the one the instances were made on"
     facts = json.loads(run(["docker", "run", "--rm", "--network", "none", "-e", "CUDA_VISIBLE_DEVICES=", "-v",
-                            f"{a.repo / 'scripts/robotangle/shared'}:/tooling:ro", "-v", f"{a.repo / 'scripts'}:/scripts:ro",
+                            f"{a.repo / 'scripts/roboarc/shared'}:/tooling:ro", "-v", f"{a.repo / 'tools/release'}:/scripts:ro",
                             "-v", f"{a.work}:/work", image, "python",
                             "-c", FACTS, json.dumps(sorted(a.gpu_profiles)), *(b["new"] for b in bases)]).strip().splitlines()[-1])
     gpu_bases = [b["new"] for b in bases if facts[b["new"]]["gpu_physics"]]
@@ -947,7 +928,7 @@ def main(argv: list[str]) -> int:
             (a.work / "logs" / f"check_{name.replace('/', '_').replace(' ', '_')}.log").write_text(r.stdout + r.stderr)
             if name == "ci_checks/run_all.sh":   # its repo-wide part also re-renders other benchmarks (their deps, not ours)
                 fails = [x for x in (r.stdout + r.stderr).splitlines() if x.startswith("FAIL")]
-                ours = [x for x in fails if "robotangle" in x or "dataset" in x or "tooling" in x or "Traceback" in x]
+                ours = [x for x in fails if a.bench in x or "dataset" in x or "tooling" in x or "Traceback" in x]
                 checks[name] = dict(ok=not ours, output=ours[-5:] or [f"{len(fails)} FAIL lines, none about RoboTangle, "
                                                                      "the dataset manifest or the tooling (see the log)"])
                 continue
@@ -959,7 +940,7 @@ def main(argv: list[str]) -> int:
     msg = (f"RoboTangle release rebuild on {head[:9]} (image {a.version}): "
            + "; ".join(([f"MuJoCo instances made in the release image, {', '.join(made)}"] if made else [])
                        + ([f"premade MuJoCo instances (--instances) bound into it, {', '.join(pre)}"] if pre else []))
-           + f"\n\nscripts/robotangle/release_rebuild.py; report: {a.work}/REPORT.md\n")
+           + f"\n\ntools/release/release_rebuild.py; report: {a.work}/REPORT.md\n")
     run(["git", "-C", str(a.out), "commit", "-q", "-m", msg])
     commit = run(["git", "-C", str(a.out), "rev-parse", "HEAD"]).strip()
     report.update(commit=commit, branch=out_branch,
@@ -979,7 +960,7 @@ def harbor_step(a, here: pathlib.Path, report: dict, bases: list[dict], gpu_base
                                      ("harbor_nop", "nop", [b for b in bases if b["new"] in a.no_oracle])):
             if not sel:                  # bases without a reference solution: nop only, in their own run directory
                 continue
-            r = subprocess.run([sys.executable, str(here / "scripts/robotangle/harbor_check.py"), "--tasks", str(a.out / "tasks"),
+            r = subprocess.run([sys.executable, str(here / "scripts/roboarc/harbor_check.py"), "--tasks", str(a.out / "tasks"),
                                 "--image", image, "--run", str(a.work / run_dir), "--harbor", a.harbor, "--lanes", str(a.lanes),
                                 "--agents", agents, "--gpu-bases", ",".join(gpu_bases), "--bench", a.bench,
                                 *(b["new"] for b in sel)], cwd=here,

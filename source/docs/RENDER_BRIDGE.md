@@ -1,7 +1,7 @@
 # Render bridge: Nyx frames for MuJoCo states
 
 RoboTangle's physics moves from Genesis to MuJoCo; the images agents see do not change.
-`scripts/robotangle/shared/render_bridge.py` renders MuJoCo states with today's (0.2.22) Nyx pipeline.
+`scripts/roboarc/shared/render_bridge.py` renders MuJoCo states with today's (0.2.22) Nyx pipeline.
 
 ## How it works (route A)
 
@@ -21,7 +21,7 @@ RoboTangle's physics moves from Genesis to MuJoCo; the images agents see do not 
   tick or `scene.reset()` does. Without that, a pose push renders the old pose (depth was 1.8 m off in a probe).
 
 ```python
-import render_bridge                          # scripts/robotangle/shared/
+import render_bridge                          # scripts/roboarc/shared/
 bridge = render_bridge.build(instance_json)   # 21-26 s warm Genesis cache, ~60 s cold (as today's startup)
 bridge.update(mj_model, mj_data)              # ~1 ms
 rgb = bridge.render()                         # {camera: (H, W, 3) uint8}
@@ -60,7 +60,7 @@ active Env; the bridge restores both, so the MuJoCo Env stays the active one and
 
 ## Parity evidence (2026-10-09, a cloud host RTX PRO 6000, image 0.2.22 runtime)
 
-Harness: `scripts/robotangle/test_render_bridge.py`. **Today** = `rcb_topogym.Session` (release tooling, Genesis
+Harness: `tools/tests/test_render_bridge.py`. **Today** = `rcb_topogym.Session` (release tooling, Genesis
 physics on CPU float64) replaying the release reference trajectory and rendering through `env.sensor_frame()`.
 **Bridge** = a fresh process that builds the host, never steps it, turns each recorded state into MuJoCo `qpos`,
 runs `mj_kinematics`, and calls `bridge.update`, `render`, `depth` and `camera_metadata`. Every state is rendered
@@ -271,7 +271,7 @@ renderer applies ("In the Session" below): the bridge (`nyx`) or nyx_direct (`di
 chooses one of them for any task; any other value is refused.
 
 Who sets it:
-- only infrastructure runs: Harbor oracle / nop checks (`scripts/robotangle/harbor_check.py`) and CI;
+- only infrastructure runs: Harbor oracle / nop checks (`scripts/roboarc/harbor_check.py`) and CI;
 - standard mode: the agent cannot reach the `sim` service's environment, so it cannot turn rendering off there;
 - privileged mode: an agent that sets it in its own container only blinds its own Sessions; the verifier's container
   sets its own environment, and grading never uses pixels.
@@ -283,11 +283,11 @@ refuses different tooling.
 ## Nyx without Genesis (`nyx_direct.py`)
 
 Step 2 of the no-Genesis road map (MUJOCO_MIGRATION.md): gs-nyx itself needs only numpy, so
-`scripts/robotangle/shared/nyx_direct.py` feeds it straight from the MuJoCo world. It imports no genesis-world and
+`scripts/roboarc/shared/nyx_direct.py` feeds it straight from the MuJoCo world. It imports no genesis-world and
 builds no Genesis host scene.
 
 ```python
-import nyx_direct                                            # scripts/robotangle/shared/
+import nyx_direct                                            # scripts/roboarc/shared/
 nyx = nyx_direct.NyxDirect.from_world(world, instance=path)  # the Session's MujocoWorld and its instance.json; ~3.5 s
                                                              # (Genesis host: 24-25 s); rope chains bound at birth
 nyx.update(model, data)                                      # this state's rigid-slot, camera poses, rope vertices
@@ -367,7 +367,7 @@ Three details decide the last bit.
 ### Acceptance: claws easy
 
 Claws easy, 8 states along the reference, a cloud host RTX PRO 6000 with the GPU shared with other jobs. Reproduce with
-`scripts/robotangle/test_nyx_direct.py` (stages host, direct, spread, bench, ab).
+`tools/tests/test_nyx_direct.py` (stages host, direct, spread, bench, ab).
 
 Three host recordings (H1–H3) and two adapter runs (D1, D2), on the same MuJoCo states.
 
@@ -668,7 +668,7 @@ Genesis instance (built by the same code, physics_engine genesis) against nyx_di
 
 ## Reference videos
 
-`scripts/robotangle/render_reference_video.py` renders a reference run for review (the step-6 videos):
+`tools/release/render_reference_video.py` renders a reference run for review (the step-6 videos):
 - A Session replays the recorded actions with their recorded ticks.
 - Every stride-th control step, the state is rendered with the family's renderer: `--renderer direct` (nyx_direct)
   or `host` (the bridge).

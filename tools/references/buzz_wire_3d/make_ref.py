@@ -6,13 +6,13 @@ within the standard per-step joint limit (standard_rate.rate_limited_runner), th
 also after a finish that reports a failure, since the wand may already rest within tolerance and need only its
 stability window (buzz hard). An episode that ends without success is never saved.
 
-Run it with the RoboTangle image's Python, as the stress tools (scripts/robotangle/stress/_env.py: this checkout's
+Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_env.py: this checkout's
 topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIMD masking, one thread per library).
 
 usage: make_ref.py <instance.json> <route.npz> --cut N --finish {simplified,easy,adaptive,...} --out ref.npz [--tail 400]
        [--log x] [--output-dir d]
 buzz_finish.py reads its knobs from the environment (BUZZ_REACH_DEG, BUZZ_ROUNDS, BUZZ_GRASP_BUDGET, BUZZ_PARTIAL, ...).
-The -i01 references (docs/rcb/families/buzz_wire_3d.md): the route scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/
+The -i01 references (docs/rcb/families/buzz_wire_3d.md): the route tools/references/oracles_genesis/buzz-wire-3d-<tier>-i00/
 privileged.npz, --finish adaptive, --cut 7000 (very_easy), 7850 (easier); on the Robotiq's springref 2.62 with the
 finish's staged grasps and slow releases (buzz_finish.STAGED, the default)."""
 import sys

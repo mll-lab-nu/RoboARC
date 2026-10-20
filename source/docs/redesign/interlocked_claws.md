@@ -112,7 +112,7 @@ its composite COM (all links' geometry shifted, the grip links welded at the ide
 pose @ trans(com); the oracle, previews and IK convert measured poses back to design frames. All oracles and evidence
 were re-recorded after it (instances on the bound tree rt3).
 
-## The oracle (`scripts/robotangle/redesign/interlocked_claws/oracle.py`)
+## The oracle (`tools/redesign/interlocked_claws/oracle.py`)
 
 A program of phases planned from measured states and recorded as rows (an open-loop replay reproduces them):
 acquire (the welds form) -> for each designed move: hand changes first (open, back off, over the lock at a safe

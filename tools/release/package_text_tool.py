@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Draft the task texts of a new MuJoCo base (release_rebuild.py package_text / new_bases) from a released template.
 
-usage: scripts/robotangle/package_text_tool.py --template <released base> --template-describe <d0.json> --template-instance <i0.json>
+usage: tools/release/package_text_tool.py --template <released base> --template-describe <d0.json> --template-instance <i0.json>
                                               --new <new base> --describe <d1.json> --instance <i1.json> --out <package_text dir>
                                               [--difficulty <tier>] [--public-instructions <file.json>] [--task-note <text>]
                                               [--report <file.md>]
-  --template           a released base of scripts/robotangle/packages/ (e.g. interlocked-claws-very-easy-i00): its task.toml,
+  --template           a released base of tools/release/templates/ (e.g. interlocked-claws-very-easy-i00): its task.toml,
                        README.md and instruction.md (both modes) are the starting point, as every new base's texts so far
   --template-describe  `rcb_topogym.py describe` of the template's scene on MuJoCo (its -i01 instance), with
   --template-instance  that instance.json; --describe / --instance the same for the new base's instance (made as the release
@@ -21,6 +21,8 @@ usage: scripts/robotangle/package_text_tool.py --template <released base> --temp
                        a redesigned tier set; default: the variation record's tier, and no line when it has none (as the
                        experimental new bases)
 
+Needs the Genesis-era generator scripts/topogym_mk_task.py (with its helpers cuda_profiles.py and topogym_versions.py),
+which this repository does not carry: put them in scripts/ from the Genesis-era history before running this tool.
 How: the generator of the released texts (scripts/topogym_mk_task.py: instruction, readme, task_toml) renders the
 template's scene and the new scene from their describe records, in privileged mode. Every hunk between the two renders
 is a line the scene changes (names, variation, task sentence, success requirements, goal volume and square, grader
@@ -36,7 +38,7 @@ in --out records the method (one section per new base). The user reviews new tex
 import argparse, difflib, json, pathlib, re, sys
 
 root = pathlib.Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(root / "scripts"), str(root)]
+sys.path[:0] = [str(root / "scripts"), str(root / "source")]   # topogym_mk_task: see the note above
 sys.dont_write_bytecode = True
 import topogym_mk_task as G  # noqa: E402
 
@@ -200,7 +202,7 @@ def main(argv=None) -> int:
             d1.pop(k, None)
     lvl0 = G.tier_of(i0)
     lvl1 = a.difficulty or G.tier_of(i1)
-    released = (root / "scripts/robotangle/packages" / f"{a.template}-privileged/task.toml").read_text()
+    released = (root / "tools/release/templates" / f"{a.template}-privileged/task.toml").read_text()
     m = re.search(r"\(variation ([a-z0-9_]+), seed", released)
     r0 = render(d0, i0, f"topogym-{a.template}", lvl0)
     tvar = m.group(1) if m else i0["variation_id"]
@@ -242,7 +244,7 @@ def main(argv=None) -> int:
            f"(state {i1.get('state_sha', '')[:16]}); difficulty {lvl0!r} -> {lvl1!r}", ""]
     unresolved = 0
     for mode in ("privileged", "standard"):
-        src = root / "scripts/robotangle/packages" / f"{a.template}-{mode}"
+        src = root / "tools/release/templates" / f"{a.template}-{mode}"
         dst = pathlib.Path(a.out) / f"{a.new}-{mode}"
         dst.mkdir(parents=True, exist_ok=True)
         for f in FILES:

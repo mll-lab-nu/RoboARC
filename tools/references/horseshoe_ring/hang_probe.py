@@ -18,12 +18,12 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
-sys.path[:0] = [str(HERE.parents[2] / "stress"), str(HERE.parents[2] / "shared")]
+sys.path[:0] = [str(HERE.parents[2] / "stress"), str(HERE.parents[3] / "scripts/roboarc/shared")]
 import _env  # noqa: F401,E402
 import numpy as np  # noqa: E402
 from scipy.spatial.transform import Rotation  # noqa: E402
 
-DATA = HERE.parents[4] / "topogym/planning/harbor_bridge/reference_data/horseshoe_ring"
+DATA = HERE.parents[3] / "source/topogym/planning/harbor_bridge/reference_data/horseshoe_ring"
 
 
 def pose(body):

@@ -9,11 +9,11 @@ from topogym.tasks.release_profile import PROFILE, environment_inputs
 
 
 def tooling():
-    """The RoboTangle task tooling (scripts/robotangle/shared/rcb_topogym.py; 2026-10-10, the MuJoCo port): its Session
+    """The RoboTangle task tooling (scripts/roboarc/shared/rcb_topogym.py; 2026-10-10, the MuJoCo port): its Session
     builds the MuJoCo instances of every slotted setting. A copy already imported (a task package's own) is used."""
     import sys
     if "rcb_topogym" not in sys.modules:
-        shared = str(Path(__file__).resolve().parents[3] / "scripts" / "robotangle" / "shared")
+        shared = str(Path(__file__).resolve().parents[4] / "scripts" / "roboarc" / "shared")
         if shared not in sys.path:
             sys.path.insert(0, shared)
     import rcb_topogym

@@ -1,14 +1,14 @@
 # hedgehog_in_cage: task texts of the family's new bases
 
 New designs of the family that have no released base each get their own base, made from a released base of the family as
-its template (`scripts/robotangle/release_rebuild.py` new_bases). These directories hold each new base's `task.toml`,
+its template (`tools/release/release_rebuild.py` new_bases). These directories hold each new base's `task.toml`,
 `README.md` and `instruction.md` for both modes; every other file of a package (the Dockerfiles, the compose files,
 `tests/test.sh`) is the template's.
 
 ## hedgehog-in-cage-07-i01 (Bird in Cage, `hedgehog_in_cage_owl`)
 
 Template: `hedgehog-in-cage-very-easy-i00`. Each file is the template's released -i00 file
-(`scripts/robotangle/packages/hedgehog-in-cage-very-easy-i00-<mode>/`) with only the owl scene's lines replaced:
+(`tools/release/templates/hedgehog-in-cage-very-easy-i00-<mode>/`) with only the owl scene's lines replaced:
 - the names: `topogym-hedgehog-in-cage-very-easy-i00-<mode>` becomes `topogym-hedgehog-in-cage-07-i01-<mode>` (the task
   name, the README title, the twin);
 - the task sentence (the instruction's, the description, the README's task line and goal): the owl instance's
@@ -35,8 +35,8 @@ Template: `hedgehog-in-cage-very-easy-i00`. Each file is the template's released
 - Checks: the instance's `public_goal` summary, success and failure lines are in each instruction word for word; no
   word of very_easy's scene is left. Made by `runs/bird_in_cage_harbor_20261012/make_package_text.py` (not in the
   repository) from the instance made on 7faff8308 (birth e22fac98a9c3807a).
-- The reference: `scripts/robotangle/oracles/hedgehog-in-cage-07-i01/` (79bd4c7af; run-oracle code
-  `scripts/robotangle/references/hedgehog_in_cage/owl_code.py`). Acceptance round bird_owl_r1 on d27c622d7, PASS.
+- The reference: `scripts/roboarc/oracles/hedgehog-in-cage-07-i01/` (79bd4c7af; run-oracle code
+  `tools/references/hedgehog_in_cage/owl_code.py`). Acceptance round bird_owl_r1 on d27c622d7, PASS.
   Harbor under this base's name with these texts (release_rebuild dry run on 3d8436413, 2026-10-12): oracle 1 and nop 0
   in both modes. Listed in `mujoco_release.json`'s hedgehog_in_cage new_bases (the user's decision, 2026-10-12): template
   `hedgehog-in-cage-very-easy-i00`, the family's gripper space (native).
@@ -46,7 +46,7 @@ Template: `hedgehog-in-cage-very-easy-i00`. Each file is the template's released
 
 Template: `hedgehog-in-cage-very-easy-i00`, which stays as it is (window change is a harder design of the very_easy cage,
 registered as its own variation). Each file is the template's released -i00 file
-(`scripts/robotangle/packages/hedgehog-in-cage-very-easy-i00-<mode>/`) with only the window change scene's lines
+(`tools/release/templates/hedgehog-in-cage-very-easy-i00-<mode>/`) with only the window change scene's lines
 replaced:
 - the names: `topogym-hedgehog-in-cage-very-easy-i00-<mode>` becomes `topogym-hedgehog-in-cage-08-i01-<mode>`
   (the task name, the README title, the twin);
@@ -70,10 +70,10 @@ replaced:
 - Checks: the instance's `public_goal` summary and success lines are in each instruction and README word for word; no
   word of very_easy's scene is left. The values are those of the instance Harbor graded on 2026-10-11 (oracle 1 and nop
   0 in both modes, under the template's name with its released texts; image `eai-robotangle:0.3.0-dev-hedgehog-v4` from
-  04e084ce6), from `rcb_topogym.py describe` in that image and `scripts/topogym_rules.py`. Made by
+  04e084ce6), from `rcb_topogym.py describe` in that image and `tools/release/topogym_rules.py`. Made by
   `runs/hedgehog_release_texts_20261012/make_texts.py` (not in the repository).
-- The reference: `scripts/robotangle/oracles/hedgehog-in-cage-08-i01/` (bb481d502; birth 2ecb7e00fc766fb8,
-  2 961 rows; run-oracle code `scripts/robotangle/references/hedgehog_in_cage/window_change_code.py`). Acceptance round:
+- The reference: `scripts/roboarc/oracles/hedgehog-in-cage-08-i01/` (bb481d502; birth 2ecb7e00fc766fb8,
+  2 961 rows; run-oracle code `tools/references/hedgehog_in_cage/window_change_code.py`). Acceptance round:
   hedgehog_v4 on 3297f29cb, PASS.
 - Design, oracle and evidence: `docs/rcb/families/hedgehog_in_cage.md` (window_change) and
   `docs/develop/tasks/hedgehog_in_cage_window_change_zh.md`.
@@ -81,7 +81,7 @@ replaced:
 ## hedgehog-in-cage-06-i01 (Cast Cage, `hedgehog_in_cage_cast_cage`)
 
 Template: `hedgehog-in-cage-hard-i00`. Each file is the template's released -i00 file
-(`scripts/robotangle/packages/hedgehog-in-cage-hard-i00-<mode>/`) with only the Cast Cage scene's lines replaced:
+(`tools/release/templates/hedgehog-in-cage-hard-i00-<mode>/`) with only the Cast Cage scene's lines replaced:
 - the names: `topogym-hedgehog-in-cage-hard-i00-<mode>` becomes `topogym-hedgehog-in-cage-06-i01-<mode>`;
 - the task sentence (the instruction's, the description, the README's task line and goal) and the first success
   requirement: the target is "the whole star, including every spike" (`HedgehogCastCageTask.placement_target_description`),
@@ -109,8 +109,8 @@ Template: `hedgehog-in-cage-hard-i00`. Each file is the template's released -i00
   reference's, ad1fcefad2565341 (the sentence is not part of the birth). Harbor graded the instance made before the
   sentence on 2026-10-12 (oracle 1 and nop 0 in both modes, under the template's name with its released texts; image
   `eai-robotangle:0.3.0-dev-hedgehog-cc` from 94874eee3). The other values are from `rcb_topogym.py describe` in that
-  image and `scripts/topogym_rules.py`; made by `runs/hedgehog_release_texts_20261012/make_texts.py`.
-- The reference: `scripts/robotangle/oracles/hedgehog-in-cage-06-i01/` (94874eee3; birth ad1fcefad2565341,
-  2 864 rows; run-oracle code `scripts/robotangle/references/hedgehog_in_cage/cast_cage_code.py`). Acceptance round on
+  image and `tools/release/topogym_rules.py`; made by `runs/hedgehog_release_texts_20261012/make_texts.py`.
+- The reference: `scripts/roboarc/oracles/hedgehog-in-cage-06-i01/` (94874eee3; birth ad1fcefad2565341,
+  2 864 rows; run-oracle code `tools/references/hedgehog_in_cage/cast_cage_code.py`). Acceptance round on
   d1b764ddc, PASS.
 - Design, oracle and evidence: `docs/rcb/families/hedgehog_in_cage.md` (cast_cage).

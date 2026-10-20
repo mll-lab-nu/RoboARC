@@ -1,5 +1,5 @@
 """Build MuJoCo instances of the redesigned rope_threading tiers (rcb_topogym make-instance in-process; rcb_topogym =
-scripts/robotangle/shared on PYTHONPATH).
+scripts/roboarc/shared on PYTHONPATH).
 
   register(tier)        the variation id (the records and profiles are registered by topogym.config.variation_records /
                         topogym.world.mujoco.profiles through topogym.tasks.rope_threading.redesign.registration)

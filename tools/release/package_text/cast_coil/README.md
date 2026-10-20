@@ -7,10 +7,10 @@ from the released base of the same tier as its template (`cast-coil-very-easy-i0
 `cast-coil-easy-i00`; the user's decision, 2026-10-12; `release_rebuild.py` new_bases). These directories hold each new
 base's `task.toml`, `README.md` and `instruction.md` for both modes; every other file of a package (the Dockerfiles, the
 compose files, `tests/test.sh`) is the template's. Each new base's `mujoco_release.json` new_bases entry names this
-directory (`"package_text": "scripts/robotangle/package_text/cast_coil"`), not the family's entry: there it would send
+directory (`"package_text": "tools/release/package_text/cast_coil"`), not the family's entry: there it would send
 the family's released tiers, once listed, to look for texts of their own.
 
-- Each file is the template's released -i00 file (`scripts/robotangle/packages/cast-coil-<tier>-i00-<mode>/`) with only
+- Each file is the template's released -i00 file (`tools/release/templates/cast-coil-<tier>-i00-<mode>/`) with only
   these lines replaced:
   - the names: `topogym-cast-coil-<tier>-i00-<mode>` becomes `topogym-cast-coil-<tier>-i02-<mode>` (the task name,
     the README title, the twin);
@@ -45,7 +45,7 @@ the family's released tiers, once listed, to look for texts of their own.
   - every grader line is `topogym_rules.details_section`'s for the v2 instances, apart from the contact-penetration
     line's kept note;
   - the `evaluate_state` excerpt is the described predicate, line for line (24 lines).
-- The references are in `scripts/robotangle/oracles/cast-coil-<tier>-i02/`, recorded on the 32-facet prism instances
+- The references are in `scripts/roboarc/oracles/cast-coil-<tier>-i02/`, recorded on the 32-facet prism instances
   (a cylinder the robot can touch is built as a convex prism, 64820cfbf): very_easy born 22e9a1e035809358, 8 688 rows,
   final state be32137b76dbae53; easier 6432913b260aaf8c, 28 037 rows, 60441db184274e4a; easy faad5b880e67eb06, 32 967
   rows, 625e699dc0e01560. The very_easy and easier oracles chose the same actions as on the cylinders. Each: a

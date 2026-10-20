@@ -10,13 +10,14 @@ the flex 3 mm; one layer 3 mm above the table, bends semicircles of radius gap /
       letter fold fail the VBD rule; the top of each passes;
   (d) the flex rule is unchanged: remote_from_patch=False equals the previous code on every probe here and on random
       sheets.
-  python test_exposure_rule.py"""
+  python tools/tests/test_exposure_rule.py"""
 import math
 import sys
+from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, ".")
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "source"))
 from topogym.utils.grasp import exposed_patch  # noqa: E402
 
 R, CLEAR, TABLE = .018, .006, .003

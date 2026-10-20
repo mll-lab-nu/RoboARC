@@ -6,7 +6,7 @@ import json, sys, itertools
 from pathlib import Path
 import numpy as np
 import topogym
-sys.path.insert(0, str(Path(topogym.__file__).resolve().parents[1] / "scripts/robotangle/redesign/buzz_wire_3d"))
+sys.path.insert(0, str(Path(topogym.__file__).resolve().parents[2] / "tools/redesign/buzz_wire_3d"))
 import rdreg
 vids = rdreg.register()
 from rcb_topogym import Session

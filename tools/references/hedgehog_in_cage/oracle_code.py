@@ -2,8 +2,8 @@
 # public_session.py: free-hand route, approach, contact-weld grasp, test lift, measured held route, regrasp where the tier
 # has one, the unchanged Task goal), closed loop on the frozen instance, then hold rows until the episode ends (at most
 # 400). The variation comes from the instance. docs/rcb/families/hedgehog_in_cage.md.
-#   python scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
-#       --code scripts/robotangle/references/hedgehog_in_cage/oracle_code.py --out <tier>.npz
+#   python scripts/roboarc/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
+#       --code tools/references/hedgehog_in_cage/oracle_code.py --out <tier>.npz
 import json
 import tempfile
 from topogym.planning.hedgehog_in_cage.public_session import run_feedback_policy

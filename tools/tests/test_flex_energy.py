@@ -9,14 +9,14 @@ that path (the trapezoid of qfrc_spring . dq); flex_energy at the end state must
 Also: the elastic forces are in qfrc_spring (not qfrc_damper), mujoco's data.energy[0] does not book them, and
 data.energy[1] is 1/2 v^T M v of every dof (the flex vertices included).
 
-  python scripts/robotangle/test_flex_energy.py
+  python tools/tests/test_flex_energy.py
 """
 import sys
 from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "source"))
 
 
 def grid(elastic2d):

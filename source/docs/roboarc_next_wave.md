@@ -82,7 +82,7 @@ Two notes on the table:
 evaluate_state goes from 56.0 to 36.3 ms per control step. The cuts change the topogym source, so the v2 image has a
 new source sha.
 
-## Release tooling (scripts/robotangle/release_rebuild.py)
+## Release tooling (tools/release/release_rebuild.py)
 
 - `standard_reference()` (from dev/speedrule-refs) keeps a tree `standard.npz` whose meta has `"speed_rule"`; the
   rebuild no longer overwrites it with the privileged reference.
@@ -90,9 +90,9 @@ new source sha.
   births f11ed465 / 4babdba8. The released references use births 0a4dab04 / e0d93b1e. Without the guard, the rebuild
   would have shipped those stale files. A speed-rule file is now kept only on its reference's birth.
 - **rope rd files moved and tagged (c757f39d58).** rope_rd_speedlimit wrote its five files to `scripts/roboarc/oracles/`,
-  which the tool does not read. They now live in `scripts/robotangle/oracles/<base>/standard.npz` and carry
+  which the tool does not read. They now live in `scripts/roboarc/oracles/<base>/standard.npz` and carry
   `meta.speed_rule`. Their arrays are byte-identical.
-- **Template texts from the head (a13dd0f854).** Main no longer has `scripts/robotangle/packages` (#187). So
+- **Template texts from the head (a13dd0f854).** Main no longer has `tools/release/templates` (#187). So
   `--onto main` found no template texts for a new base, or for a tier ported now. They are now read from the head.
 - **--onto checks (cd872d8459).** The changed tasks are now found by the `<bench>-` prefix. `harbor add --scan` runs
   only where `tasks/dataset.toml` still exists; main dropped it in #215.
@@ -188,7 +188,7 @@ the work notes, host B `<host work dir>`, INDEX.md in
 both).
 
 **Step time of knot-untying-09-i01 (and 06).** The texts now state the measured step time (`step_s` in
-`scripts/robotangle/freeze_manifest.v2.json`; main's mk_tasks.py states it and sizes the row cap from it). How the
+`records/freeze_manifests/freeze_manifest.v2.json`; main's mk_tasks.py states it and sizes the row cap from it). How the
 released bases derive theirs: none of main's 94 has `step_s`; each states the sentence of the released Genesis text it
 ports (knot 01-05: 1.1-1.3 s), and a template base states its template's. That Genesis 1.1 s gave 09 a cap of 13000
 rows, under 1.5 x 10559. Measured the way the trials run (eai-roboarc:0.1.0, host B Ryzen 9 7950X, one physical core per
@@ -207,7 +207,7 @@ released sentence. **qp7 is at the knot bar, not under it:**
 trials and dry runs loaded host B (load 10-23), took 3586 s = 33.2 % (0.340 s per step; fv81az 0.494 s, 22.0 %); the
 speed cuts did not show through that load. Whether qp7 stands or 09 is re-planned shorter is the owner's call.
 
-**Speed-rule wording.** `scripts/robotangle/standard_speed_rule.json` holds, per speed-rule standard reference, the
+**Speed-rule wording.** `tools/release/standard_speed_rule.json` holds, per speed-rule standard reference, the
 sentence and the end state; release_rebuild puts both into the standard evidence (`speed_rule`, `end_state`) and lays
 dev/speedrule-refs-main's mk_tasks.py wording over the --onto generator (its anchors asserted). Harbor's standard oracle
 of such a base is compared with that end. Gate B again (main b62fb383e5, the tree's oracles, the 11 bases' standard
@@ -276,7 +276,7 @@ What the build found and changed on this branch:
   - A premade instance is worded as main's 0.1.0 rename step did (audit S7, da1f100c4).
   - Evidence and nop records are in main's form (the image and the date, never a host or a job name). A mode whose
     reference main already releases keeps main's record; so does every released base's nop record.
-  - A new or changed reference takes its record from `scripts/robotangle/release_evidence.json`: the Harbor trial that
+  - A new or changed reference takes its record from `tools/release/release_evidence.json`: the Harbor trial that
     passed it. Those are the 11 speed-rule standard references and buzz-wire-3d-03 / 04, all passed on
     eai-roboarc:0.1.0 on 2026-10-14. Without a record a reference is `not_run`, which is the case for the four new bases
     until their Harbor runs on the 0.2.0 image.
@@ -307,7 +307,7 @@ What the build found and changed on this branch:
 ## V3 release build (2026-10-18): eai-roboarc 0.2.1, 101 bases
 
 The release build onto dev/robotangle (host B `<host work dir>`, workstation
-the work notes), `release_rebuild.py` with `scripts/robotangle/freeze_manifest.v3.json`.
+the work notes), `release_rebuild.py` with `records/freeze_manifests/freeze_manifest.v3.json`.
 - **Image 0.2.1** = 0.2.0's runtime plus MuJoCo 3.14.0's EPA horizon-overflow fix, IKEA's 14-byte patch of the wheel's
   libmujoco.so (images/ikea-mujoco/mujoco-3.14.0-epa/; `images/robotangle/Dockerfile.mujoco`, the last step of the
   unsquashed stage, so every layer above it is the released one). The gate (the work notes):
@@ -385,11 +385,11 @@ The owner asked that T3 (b2a9fc8233, Jianwen's local 1cbd0283d: `Session.grasp_r
 ALOHA 60 N / Robotiq 65 N over 20 ms, and the Robotiq 0.2 s contact loss) reach all 94 released bases, not only the new
 ones. It already does, so no task text changes:
 - T3 predates 0.1.0, and main's task-dir `rcb_topogym.py` (environment/, environment/sim/, tests/) is byte-identical to
-  this branch's `scripts/robotangle/shared/rcb_topogym.py`: `/spec`'s `robot_spec()["grippers"][...]["command"]` and
+  this branch's `scripts/roboarc/shared/rcb_topogym.py`: `/spec`'s `robot_spec()["grippers"][...]["command"]` and
   describe's `grasp_rules` state T3 at runtime.
 - main's `scripts/roboarc/mk_tasks.py` rewrites each MuJoCo base's `Grasping:` / `- Grippers:` line from release.json
   `grasp_rules`, which release_rebuild reads in the release image, whatever the package texts say. So the 2-rule text
-  left in the packages (`scripts/roboarc/packages/`, 32 of `scripts/robotangle/package_text/`) is never rendered, and
+  left in the packages (`scripts/roboarc/packages/`, 32 of `tools/release/package_text/`) is never rendered, and
   the 10-15 keep-texts rule does not affect it.
 - On main, all 156 weld instruction.md (78 bases) state T3: 66 Robotiq (four conditions), 90 ALOHA (three: ALOHA has no
   contact-loss rule, `WELD_CONTACT_LOST_S`). The other 32 are knot (`grasp_assist none`) and blanket (pbd_local_patch_v1),

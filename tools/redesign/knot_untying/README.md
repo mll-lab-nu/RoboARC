@@ -40,5 +40,5 @@ Design note: `docs/rcb/redesign/knot_untying.md`. Routes per instance (flags, ro
   cam_high / cam_low with each goal region's dashed line drawn in (the scene does not draw it); the task's texts name
   them (task_rd.REGION_IMAGES), package_text/<base>-<mode>/environment/goal/ ships them.
 
-Environment: `PYTHONPATH=<repo>:<repo>/scripts/robotangle/shared:<repo>/scripts/robotangle/redesign`; MuJoCo 3.14, CPU
+Environment: `PYTHONPATH=<repo>:<repo>/scripts/roboarc/shared:<repo>/tools/redesign`; MuJoCo 3.14, CPU
 float64.

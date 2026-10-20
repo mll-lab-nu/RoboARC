@@ -1,13 +1,13 @@
 {
  "about": "knot_untying redesign: the robot-level routes per instance on the current head (10-13). Routes, not frozen references: every reference is recorded once after the physics freeze (oracle on the frozen head, fresh replays on two hosts, acceptance, videos). Rows are 40 per simulated second. 'chain': stage 1 ends with --stop-after-decisions N (its rows are saved), stage 2 resumes them (--resume <stage 1>/privileged.npz); every chain below was re-made from its flags on this code with rows and tick ledger byte-equal to the original. Hashes: 'actions' = sha256[:16] of the action rows, 'state' = the Session's state hash at the end.",
- "environment": "PYTHONPATH=<repo>:<repo>/scripts/robotangle/shared:<repo>/scripts/robotangle/redesign (rcb_topogym, session_kit); MuJoCo 3.14, CPU float64",
+ "environment": "PYTHONPATH=<repo>:<repo>/scripts/roboarc/shared:<repo>/tools/redesign (rcb_topogym, session_kit); MuJoCo 3.14, CPU float64",
  "commands": {
-  "instance": "python scripts/robotangle/redesign/knot_untying/robot/build_instance.py scripts/robotangle/redesign/knot_untying/births/<name> <tier> <out>/<name>",
-  "checks": "python scripts/robotangle/redesign/knot_untying/robot/check_instance.py <out>/<name>/instance.json <out>/<name>/checks --part goal|nop|grasp|summary",
-  "oracle": "python scripts/robotangle/redesign/knot_untying/robot/run_robot_oracle.py <out>/<name>/instance.json <tier> <run> <flags>",
-  "chain_stage_2": "python scripts/robotangle/redesign/knot_untying/robot/run_robot_oracle.py <instance.json> <tier> <run2> --resume <run1>/privileged.npz <flags>",
-  "replay": "python scripts/robotangle/redesign/knot_untying/robot/replay_check.py <run>",
-  "placement": "python scripts/robotangle/redesign/knot_untying/robot/place_lab.py <instance.json> <tier> <lab> --resume <untie rows> --resume-rows N --settle-s 2 --once  (tries: <lab>/queue/<name>.json)"
+  "instance": "python tools/redesign/knot_untying/robot/build_instance.py tools/redesign/knot_untying/births/<name> <tier> <out>/<name>",
+  "checks": "python tools/redesign/knot_untying/robot/check_instance.py <out>/<name>/instance.json <out>/<name>/checks --part goal|nop|grasp|summary",
+  "oracle": "python tools/redesign/knot_untying/robot/run_robot_oracle.py <out>/<name>/instance.json <tier> <run> <flags>",
+  "chain_stage_2": "python tools/redesign/knot_untying/robot/run_robot_oracle.py <instance.json> <tier> <run2> --resume <run1>/privileged.npz <flags>",
+  "replay": "python tools/redesign/knot_untying/robot/replay_check.py <run>",
+  "placement": "python tools/redesign/knot_untying/robot/place_lab.py <instance.json> <tier> <lab> --resume <untie rows> --resume-rows N --settle-s 2 --once  (tries: <lab>/queue/<name>.json)"
  },
  "instances": {
   "very_easy": {

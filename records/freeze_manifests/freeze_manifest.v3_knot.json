@@ -7,7 +7,7 @@
  ],
  "bases": {
   "knot-untying-07-i01": {
-   "reference": "oracles/knot-untying-07-i01/privileged.npz",
+   "reference": "../../scripts/roboarc/oracles/knot-untying-07-i01/privileged.npz",
    "sha256": "82c65a96cbaca655473d10a00be618a5c30871277db1574175fc63c1cf8041ac",
    "expect": "8ae062ea4c733dbc",
    "step_s": 0.41

@@ -17,7 +17,7 @@ from pathlib import Path
 import mujoco
 from scipy.spatial.transform import Rotation as R
 
-PLAN = os.environ.get("ABC_PLAN", "scripts/robotangle/references/interlocked_claws/cast_abc_plan.npz")
+PLAN = os.environ.get("ABC_PLAN", "tools/references/interlocked_claws/cast_abc_plan.npz")
 SETTLE, HOLD, GRIP = 80, 240, .002
 G_LEFT, K_SERVO, LIM, RATE = .10, .10, .05, .003   # integral gain, servo gain, offset limit (rad), offset rate (rad/step)
 s = session

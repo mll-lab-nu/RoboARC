@@ -1,7 +1,7 @@
 # Stress validation for RoboTangle on MuJoCo
 
 This is step 2 of porting a family to MuJoCo (`MUJOCO_PORTING_GUIDE.md`): **show that no input an agent can send makes
-the simulator break.** The tools are in `scripts/robotangle/stress/`.
+the simulator break.** The tools are in `tools/stress/`.
 
 - They need only the standard library, numpy and mujoco, plus the repository's own `topogym` and `rcb_topogym`.
 - They judge the *simulator*, not the agent. They add no episode-ending rule; the protocol stays as it is.
@@ -96,10 +96,10 @@ A run with the observer ends on the same state hash as a run without it.
 - **The energy balance.**
   - E is kinetic + potential energy. W is the work of drives, gravity compensation, damping, fluid and applied forces.
     The potential includes a 2D flex's membrane and bending energy, which MuJoCo's own energy leaves out
-    (`topogym/world/mujoco/energy.py`, `flex_energy`; checked by `scripts/robotangle/test_flex_energy.py`).
+    (`topogym/world/mujoco/energy.py`, `flex_energy`; checked by `tools/tests/test_flex_energy.py`).
     A rope chain's rod is stored energy: its elastic energy ½θᵀKθ is in E, and its elastic couples (applied forces)
     are left out of W (`topogym/world/mujoco/rope_chain.py`, `rope_energy` / `rope_elastic_qfrc`; checked by
-    `scripts/robotangle/test_rope_energy.py`).
+    `tools/tests/test_rope_energy.py`).
     X = E − E0 − W.
   - A passive scene has X ≤ 0. In every run X equals the work of all constraint forces to within 0.1 J, so the books
     balance.
@@ -590,7 +590,7 @@ those above 2 kN finger-finger, with a finger-finger or finger-joint row below A
 The tools need the RoboTangle image's Python, with mujoco 3.14.0, Genesis and the asset roots, because the frozen
 instances are read through `rcb_topogym`.
 
-- `_env.py` puts this checkout's `topogym` and `scripts/robotangle/shared` first on `sys.path`.
+- `_env.py` puts this checkout's `topogym` and `scripts/roboarc/shared` first on `sys.path`.
 - It also sets the task containers' numpy / OpenBLAS SIMD masking, so AVX-512 and AVX2 hosts give the same state hash,
   and one thread per library.
 - MuJoCo is single-threaded, so parallelise across processes: `--procs` search workers and `--replay-workers` replays.
@@ -600,7 +600,7 @@ instances are read through `rcb_topogym`.
   process. After a faulted episode the worker also builds a new Session.
 
 ```bash
-S=scripts/robotangle/stress
+S=tools/stress
 # one stream (a reference, a corpus input, a candidate), with the observer:
 python $S/replay.py --instance <instance.json> --actions <stream.npz | nop:400> --out out/one.json --hold 40 --trace out/one.trace.json.gz
 
@@ -687,7 +687,7 @@ episodes per tier, a mechanism with p = 0.3 % is missed with ~5 % probability.
 - Episodes are not exactly independent: CEM concentrates on what it has found, and mutate re-uses the corpus. Read
   the numbers as the power of the random-like share. Every report quotes N per instance and per strategy.
 
-## The corpus (`scripts/robotangle/stress/corpus/`, about 2.0 MB, `SHA256SUMS`)
+## The corpus (`tools/stress/corpus/`, about 2.0 MB, `SHA256SUMS`)
 
 - `manifest.json`: 56 streams for interlocked_claws (all 5 tiers) and fiber_bundling (very_easy to medium).
   - Sources: L1, L8, the 10-08 incidents and L12.

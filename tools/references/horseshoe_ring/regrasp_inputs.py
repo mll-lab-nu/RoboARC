@@ -15,7 +15,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts/roboarc/shared"))
 import numpy as np
 from scipy.spatial.transform import Rotation
 

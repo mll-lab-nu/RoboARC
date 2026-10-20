@@ -1,7 +1,7 @@
 """cast_coil legacy tiers on MuJoCo: collision geometry and rest checks of one frozen instance (evidence for
 docs/rcb/families/cast_coil.md).
 
-usage (in the image; PYTHONPATH also has scripts/robotangle/shared): python geom_check.py <instance.json> <out.json>
+usage (in the image; PYTHONPATH also has scripts/roboarc/shared): python geom_check.py <instance.json> <out.json>
 
 1. Collision geometry of the built model: every task collision geom's type and thinnest extent (a box: its smallest
    edge), how many are thinner than 0.5 mm.
@@ -16,7 +16,7 @@ usage (in the image; PYTHONPATH also has scripts/robotangle/shared): python geom
 import json, sys, time
 from pathlib import Path
 
-sys.path.insert(0, "/work/topogym/scripts/robotangle/stress")
+sys.path.insert(0, "/work/topogym/tools/stress")
 import _env  # noqa: F401
 import mujoco
 import numpy as np

@@ -15,7 +15,7 @@ import numpy as np
 from topogym.planning.rope_threading.redesign import scenes as S
 
 OUT = Path(os.environ.get("ROPE_EXPORT_DIR") or
-           Path(__file__).resolve().parents[4] / "topogym/assets/resources/variations/rope_threading")
+           Path(__file__).resolve().parents[3] / "source/topogym/assets/resources/variations/rope_threading")
 
 
 def plain(x):

@@ -19,12 +19,12 @@ ab       the per-frame cost of both paths in one process, alternating frame by f
          (the same GPU contention for both); the median ratio direct / host.
 selftest CPU only: the camera arithmetic replica against torch, pose helpers against MuJoCo, URDF visual parsing.
 
-  python scripts/robotangle/test_nyx_direct.py host --instance I --traj T --out H1 [--states 8]
-  python scripts/robotangle/test_nyx_direct.py direct --instance I --traj T --host H1 --host H2 --out D
-  python scripts/robotangle/test_nyx_direct.py spread --host H1 --host H2 --direct D1 --direct D2 [--out S.json]
-  python scripts/robotangle/test_nyx_direct.py bench --path direct --instance I --host H1 --out B.json
-  python scripts/robotangle/test_nyx_direct.py ab --instance I --host H1 --out AB.json
-  python scripts/robotangle/test_nyx_direct.py selftest
+  python tools/tests/test_nyx_direct.py host --instance I --traj T --out H1 [--states 8]
+  python tools/tests/test_nyx_direct.py direct --instance I --traj T --host H1 --host H2 --out D
+  python tools/tests/test_nyx_direct.py spread --host H1 --host H2 --direct D1 --direct D2 [--out S.json]
+  python tools/tests/test_nyx_direct.py bench --path direct --instance I --host H1 --out B.json
+  python tools/tests/test_nyx_direct.py ab --instance I --host H1 --out AB.json
+  python tools/tests/test_nyx_direct.py selftest
 Every output directory must be new.
 """
 import argparse
@@ -37,7 +37,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "shared"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/roboarc/shared"))
 
 
 def _session(instance):

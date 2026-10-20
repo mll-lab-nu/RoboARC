@@ -63,7 +63,7 @@ for f in sorted((src / "instance_assets" / "frozen_assets").iterdir()):
 build = {k: v for k, v in (inst.get("redesign_build") or {}).items() if k != "lab_start"}   # no host path
 canon = lambda o: hashlib.sha256(json.dumps(o, sort_keys=True).encode()).hexdigest()  # noqa: E731
 new["redesign_build"] = dict(build, premade=dict(
-    tool="scripts/robotangle/redesign/knot_untying/premade/make_premade.py (inside the release image)",
+    tool="tools/redesign/knot_untying/premade/make_premade.py (inside the release image)",
     source_state_sha=inst["state_sha"], source_instance_sha256=sha(src / "instance.json"), task_parameters_sha256=sha(tp),
     dropped=dict(task_parameters_redesign_source_sha256=canon(dropped_source) if dropped_source else None,
                  lab_start_sha256={f.name: sha(f) for f in sorted((src / "instance_assets" / "lab_start").iterdir())}

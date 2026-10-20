@@ -16,11 +16,11 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts/roboarc/shared"))
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-DATA = Path(__file__).resolve().parents[4] / "topogym/planning/harbor_bridge/reference_data/horseshoe_ring"
+DATA = Path(__file__).resolve().parents[3] / "source/topogym/planning/harbor_bridge/reference_data/horseshoe_ring"
 
 
 class StopAfterConfirm:

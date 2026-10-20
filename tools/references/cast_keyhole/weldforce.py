@@ -4,7 +4,7 @@ percentiles and the slip rule's reading (grasp.WELD_SLIP_FORCE_N["aloha"] on the
 substeps) with the control rows where it peaks; the episode end and the final state hash. With --phases (the oracle's
 keyhole_monitor.jsonl: control step -> phase), the largest 20 ms mean per phase.
 
-Run it with the RoboTangle image's Python, as the stress tools (scripts/robotangle/stress/_env.py).
+Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_env.py).
 
 usage: weldforce.py <instance.json> <privileged.npz> <out.json> [--phases <keyhole_monitor.jsonl>]"""
 import sys

@@ -61,7 +61,7 @@ The goal:
    - regenerate the task dirs, with new instance ids per PROTOCOL §2.8, because changed physics makes a new task;
    - open a PR to main listing the changed and re-run tasks.
 
-   One command does the first three, once every family has landed: `scripts/robotangle/release_rebuild.sh <head>
-   --version <v>`. `scripts/robotangle/mujoco_release.json` lists the MuJoCo bases and how their instances are made;
+   One command does the first three, once every family has landed: `tools/release/release_rebuild.sh <head>
+   --version <v>`. `tools/release/mujoco_release.json` lists the MuJoCo bases and how their instances are made;
    the instances are made inside the release image. The HF upload of the instances, the image push and the PR stay
    separate steps that need the user's OK.

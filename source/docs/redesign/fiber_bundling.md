@@ -217,7 +217,7 @@ Oracle fixes that came out of the labs:
 
 ## Anti-hack against the strict references
 - **Strict references:** the previous successful oracle of each tier, that is the fiber -i01 references
-  (`scripts/robotangle/oracles/fiber-bundling-<tier>-i01/`). very_easy … medium have their own. Hard has none, so it
+  (`scripts/roboarc/oracles/fiber-bundling-<tier>-i01/`). very_easy … medium have their own. Hard has none, so it
   uses medium's.
 - **Metrics:** the redesign tooling's (`antihack.trajectory`), computed by `metrics.py` from the Panda's commanded TCP
   path (forward kinematics of each row; one arm; holding from the commanded closure):

@@ -10,8 +10,8 @@ coordinator.
 - **Code:** the head of `dev/robotangle_mujoco`. Pull it before every round, and run the whole round on one commit.
 - **Python:** the RoboTangle MuJoCo image (built from `images/robotangle/Dockerfile.mujoco`), or any Python with
   `mujoco==3.14.0` and the repo's requirements.
-  - The tools import `scripts/robotangle/stress/_env.py` first. It puts this checkout's `topogym` and
-    `scripts/robotangle/shared` on `sys.path`, sets the numpy / OpenBLAS SIMD masking (so AVX2 and AVX-512 hosts give
+  - The tools import `tools/stress/_env.py` first. It puts this checkout's `topogym` and
+    `scripts/roboarc/shared` on `sys.path`, sets the numpy / OpenBLAS SIMD masking (so AVX2 and AVX-512 hosts give
     the same hashes), and pins every library to one thread.
 - **CPU:** MuJoCo is single-threaded. Every worker is one process using one core. Size `--procs` to the free cores
   minus a margin, and run with `nice -n 10` on a shared host.
@@ -28,11 +28,11 @@ work/
 
 - **Make each instance on the commit you test**, so the birth is from the current physics:
   ```bash
-  python scripts/robotangle/shared/rcb_topogym.py make-instance --task <task_id> --variation <variation> \
+  python scripts/roboarc/shared/rcb_topogym.py make-instance --task <task_id> --variation <variation> \
       --scene-seed 0 --out work/instances/<base>/instance.json
   ```
   For example, base `cast-keyhole-easy-i01` holds the -i01 instance of `cast_keyhole` easy.
-- **References:** copy or symlink your oracle's recording, `scripts/robotangle/oracles/<base>/privileged.npz`, to
+- **References:** copy or symlink your oracle's recording, `scripts/roboarc/oracles/<base>/privileged.npz`, to
   `work/refs/<base>/privileged.npz`.
   - It must succeed on that instance, and two fresh processes must end on the same state hash (step 1).
   - Record it with a hold tail, so the success window closes inside the stream.
@@ -40,7 +40,7 @@ work/
 ## 2. Three commands
 
 ```bash
-S=scripts/robotangle/stress
+S=tools/stress
 I="work/instances/*/instance.json"          # your tiers
 
 # (a) one stream, with the observer: a reference, a nop, or a candidate someone sent you

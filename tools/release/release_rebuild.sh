@@ -1,6 +1,6 @@
 #!/bin/bash
-# The RoboTangle release rebuild in one command: scripts/robotangle/release_rebuild.py (usage and steps there).
-#   scripts/robotangle/release_rebuild.sh <head> --version <v> [options]
+# The RoboTangle release rebuild in one command: tools/release/release_rebuild.py (usage and steps there).
+#   tools/release/release_rebuild.sh <head> --version <v> [options]
 # Needs docker (where needed: sg docker -c "..."), harbor and a Python >= 3.11 (mk_tasks.py): $PYTHON, or the first of
 # python3.12 / python3.11 / python3 that is one.
 set -euo pipefail

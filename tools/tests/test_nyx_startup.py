@@ -1,14 +1,14 @@
-"""Unit test of the Nyx renderer's start-up retry (scripts/robotangle/shared/nyx_direct.py: rig, NyxDirect._release), with a
+"""Unit test of the Nyx renderer's start-up retry (scripts/roboarc/shared/nyx_direct.py: rig, NyxDirect._release), with a
 stub build instead of gs-nyx (numpy only; no GPU; under a second): the first start; two failed builds, then ready; three
 failed builds, which raise the last error with no 4th attempt; and a build that fails half way, which frees this
 module's CUDA buffers and keeps the half-built native renderer untouched (shutting it down made the next build crash).
 Standard library and numpy only.
-usage: python3 scripts/robotangle/test_nyx_startup.py [repo root]"""
+usage: python3 tools/tests/test_nyx_startup.py [repo root]"""
 import os, sys, types
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.dont_write_bytecode = True
-sys.path.insert(0, os.path.join(ROOT, "scripts/robotangle/shared"))
+sys.path.insert(0, os.path.join(ROOT, "scripts/roboarc/shared"))
 import nyx_direct as N  # noqa: E402
 
 N.STARTUP_BACKOFF_S = (0.0, 0.0)

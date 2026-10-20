@@ -8,7 +8,7 @@ import sys
 
 import numpy as np
 
-sys.path.insert(0, "scripts/robotangle/shared")
+sys.path.insert(0, "scripts/roboarc/shared")
 from rcb_topogym import Session, load_trajectory  # noqa: E402
 from topogym.utils.grasp import relative_error  # noqa: E402
 

@@ -2,12 +2,12 @@
 in a fresh Session until the episode ends; record every executed row and its tick ledger and save them as the new
 privileged reference trajectory (make_reference.py's recording, for any instance).
 
-Run it with the RoboTangle image's Python, as the stress tools (scripts/robotangle/stress/_env.py: this checkout's
+Run it with the RoboTangle image's Python, as the stress tools (tools/stress/_env.py: this checkout's
 topogym and tooling first on sys.path, the task containers' numpy / OpenBLAS SIMD masking, one thread per library).
 
 usage: rerecord.py <instance.json> <reference.npz> <out.npz> [--tail N] [--note TEXT]
 The interlocked_claws -i01 references (docs/rcb/families/interlocked_claws.md): very_easy and easier from the released
-oracle scripts/robotangle/oracles/interlocked-claws-<tier>-i00/privileged.npz directly; easy, medium and hard from that
+oracle tools/references/oracles_genesis/interlocked-claws-<tier>-i00/privileged.npz directly; easy, medium and hard from that
 oracle with its wrist dither notched out (notch_ref.py --length <v5 rows>)."""
 import sys
 from pathlib import Path

@@ -2,7 +2,7 @@
  "about": "rope_threading redesign: the route recipe per tier for the final round on the frozen head (main 10-12: references are recorded once, after the physics freeze). Per tier: build the instance (session_build), plan (plan_tier.py; relay_plan's LAY_WALL_CLEAR_M default 0.08 = plan8), run the closed-loop oracle (robot_relay) with the settings below, then fresh replays (robot_replay) on 2 hosts; forcing is read from the fresh replays only (the Session's live summary can lose events across the executor's rewinds). A run with 0 rewinds has its live forcing summary equal to a fresh replay's (deterministic); with rewinds, read a fresh replay.",
  "commands": {
   "instance": "python -m topogym.planning.rope_threading.redesign.session_build <tier> <out>/inst/<tier>",
-  "plan": "python scripts/robotangle/redesign/rope_threading/plan_tier.py <tier> <out>/plan",
+  "plan": "python tools/redesign/rope_threading/plan_tier.py <tier> <out>/plan",
   "oracle": "python -m topogym.planning.rope_threading.redesign.robot_relay <tier> <out>/inst/<tier>/instance.json <out>/plan/timeline_<tier>.json <out>/oracle/<tier> --hold-s 20 <settings>",
   "replay": "python -m topogym.planning.rope_threading.redesign.robot_replay <tier> <out>/inst/<tier>/instance.json <out>/oracle/<tier>/rows.npz <out>/oracle/<tier>/replay_<host>.json --hold 0"
  },

@@ -14,7 +14,7 @@ import numpy as np
 from topogym.planning.interlocked_claws.redesign import tiers
 
 OUT = Path(os.environ.get("CLAWS_EXPORT_DIR") or
-           Path(__file__).resolve().parents[4] / "topogym/assets/resources/variations/interlocked_claws")
+           Path(__file__).resolve().parents[3] / "source/topogym/assets/resources/variations/interlocked_claws")
 
 
 def scalar(x):

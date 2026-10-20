@@ -1,7 +1,7 @@
 """Freeze a redesigned claws tier as a frozen instance (rcb_topogym make-instance in-process, after registering the
 tier's variation): python freeze.py <tier> <out_dir>  ->  <out_dir>/instance.json + instance_assets/ (the frozen MuJoCo
 scene). Tools that load the instance in other processes need the variation registered there too: put
-`scripts/robotangle/redesign/interlocked_claws/overlay` first on PYTHONPATH (its sitecustomize registers all five)."""
+`tools/redesign/interlocked_claws/overlay` first on PYTHONPATH (its sitecustomize registers all five)."""
 from __future__ import annotations
 
 import argparse

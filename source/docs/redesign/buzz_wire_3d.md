@@ -8,7 +8,7 @@ Status: DRAFT for the user's review. Code in the sandbox clone the work notes, b
 - `topogym/planning/buzz_wire_3d/redesign/`: `kin.py` (Panda + Robotiq kinematics on the Session's own model),
   `wandpath.py` (the wand on the wire, the grasp family), `feasibility.py` (single-grasp explorer), `oracle.py` (the
   feedback oracle), `io.py`;
-- `scripts/robotangle/redesign/buzz_wire_3d/`: `segplan.py` (one held segment, one grasp), `run_oracle.py`,
+- `tools/redesign/buzz_wire_3d/`: `segplan.py` (one held segment, one grasp), `run_oracle.py`,
   `record.py`, `replay_probe.py`, `preview.py`, `kinpath.py`, `antihack/metrics.py`.
 
 The predicate, the tolerances (5 mm / 10 deg, quiet 1 s), the contact rule (wand metal on wire metal ends the episode)
@@ -198,7 +198,7 @@ seconds), re-planned grasps when the wand moved, collision-checked free moves th
 with fallbacks, re-picks at the start, grasp-turn-release rounds about the finish post.
 
 ## 4. Breakers (all must fail)
-- **the old route retargeted**: each old oracle's rows (`scripts/robotangle/oracles/buzz-wire-3d-<tier>-i01`) replayed on
+- **the old route retargeted**: each old oracle's rows (`scripts/roboarc/oracles/buzz-wire-3d-<tier>-i01`) replayed on
   the new instance of the same tier (medium: old easy's rows; old medium has no reference) -> a cloud host `out/brk/<tier>/`;
 - **nop** (2000 hold rows);
 - **one grip for the whole route / for skipped rests**: the all-pairs analysis (every infeasible pair is a breaker
@@ -207,7 +207,7 @@ with fallbacks, re-picks at the start, grasp-turn-release rounds about the finis
 
 ## 5. Anti-hack: the strict references (old oracles) and the new tiers
 
-Old oracles (`scripts/robotangle/oracles/buzz-wire-3d-<tier>-i01/privileged.npz`), replayed in a fresh Session on
+Old oracles (`scripts/roboarc/oracles/buzz-wire-3d-<tier>-i01/privileged.npz`), replayed in a fresh Session on
 their own instances (a cloud host `out/old/<tier>/rec.npz`), metrics by `antihack/metrics.py` (soft-body definitions v2, one
 arm):
 

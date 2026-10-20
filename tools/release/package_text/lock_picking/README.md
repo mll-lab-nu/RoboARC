@@ -1,7 +1,7 @@
 # lock_picking: the chain lock's task texts
 
 The chain lock replaced the released lock_picking tiers under their variation ids on 2026-10-10 (the user's decision),
-so the released -i00 texts (`scripts/robotangle/packages/lock-picking-<tier>-i00-<mode>/`) describe a lock that is no
+so the released -i00 texts (`tools/release/templates/lock-picking-<tier>-i00-<mode>/`) describe a lock that is no
 longer registered. These directories hold the chain lock's own `task.toml`, `README.md` and `instruction.md` for each
 released base and mode. `release_rebuild.py` lays them over the released texts when the family's `mujoco_release.json`
 entry names this directory; every other file (the Dockerfiles, the compose files, `tests/test.sh`) stays the released
@@ -15,17 +15,17 @@ one, and the rebuild writes `runtime_binding.upstream.json`.
   base image, the tooling version, the protocol name and every other line are the released ones, so `mk_tasks.py`
   rewrites them as for every family.
 - Checks:
-  - the rule lines are those `scripts/topogym_rules.py` generates from the chain lock's instances;
+  - the rule lines are those `tools/release/topogym_rules.py` generates from the chain lock's instances;
   - the `evaluate_state` excerpt is the current source, line for line (81 lines);
   - laid over the released texts, they give byte for byte the texts Harbor graded on 2026-10-10 (`mk_tasks.py --dev`
     render, both modes, oracle 1 and nop 0 on every tier, before the Robotiq's springref 2.62;
     `runs/test_results/lock_chain_harbor_mujoco_20261010/`, local).
-- The references are in `scripts/robotangle/oracles/lock-picking-<tier>-i01/`. The family's `mujoco_release.json`
+- The references are in `scripts/roboarc/oracles/lock-picking-<tier>-i01/`. The family's `mujoco_release.json`
   entry is not listed yet: entries are listed once the family's acceptance rounds pass. Then:
 
   ```json
   "lock_picking": {"tiers": ["very_easy", "easier", "easy", "medium", "hard"],
-                   "package_text": "scripts/robotangle/package_text/lock_picking",
+                   "package_text": "tools/release/package_text/lock_picking",
                    "note": "lock_chain_v2: the chain lock under the released variation ids; its own task texts"}
   ```
 

@@ -5,7 +5,7 @@ head for very_easy (solved) and for the untying of easier, easy and hard (placem
 medium not untied. Nothing here is a frozen reference: every reference is recorded once after the physics freeze
 (oracle on the frozen head, fresh replays on two hosts, acceptance, videos). Agent "knot" (from the soft-body redesign
 session, 10-10 21:15), then knot-robot. Code: `topogym/tasks/knot_untying/redesign/`,
-`topogym/planning/knot_untying/redesign/`, `scripts/robotangle/redesign/knot_untying/`.
+`topogym/planning/knot_untying/redesign/`, `tools/redesign/knot_untying/`.
 
 ## 1. Why the released tiers were too easy
 The released tiers are loose single knots (1-4 crossings) on an empty table with both ends free, 0.18 m tails and
@@ -43,7 +43,7 @@ tails, lifted to a non-intersecting centre line). Clutter from the oracle's path
 >= 3 cm off the oracle's strokes; the curb between knot and region; the clamp in one arm's exclusive zone). Births on the
 chain in the object-level lab (`mjlab.py`, `birth.py`: settle, weld the clamp, release, settle), loose rather than
 cinched (a cinched knot on this chain is a ball no parallel gripper can work). The lab starts are kept with the code
-(`scripts/robotangle/redesign/knot_untying/births/<name>/`); `robot/build_instance.py` freezes a robot-level MuJoCo
+(`tools/redesign/knot_untying/births/<name>/`); `robot/build_instance.py` freezes a robot-level MuJoCo
 instance from one.
 
 ## 4. Physics and grasp
@@ -87,7 +87,7 @@ and every leg stays inside the arms' vertical-pinch reach (the oracle's IK reach
 8.5 cm carry height). The `_r3` strip contains the `_r2` strip, so a route placed in `_r2` also meets `_r3`.
 
 ## 7. Routes on the current head (10-13)
-`scripts/robotangle/redesign/knot_untying/routes.json` (commands, flags, rows, hashes):
+`tools/redesign/knot_untying/routes.json` (commands, flags, rows, hashes):
 - very_easy: **solved**, route b45fast, 7701 rows (192.5 s); two hosts byte-identical, fresh replay = live, success;
   nop, the old -i01 oracle and five breakers fail.
 - easier_v8 (chain e9b, row 13344), easier_loose (one stage, row 23768 / 19800), easy_v8 (one stage, row 28002),
