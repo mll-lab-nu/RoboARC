@@ -90,3 +90,15 @@ The benchmark's terminal rules, the same in every IKEA MuJoCo task, come on top 
 
 ### Mechanism
 One retention weld per operation, switched on with the current relative pose once its gates hold for 0.15 s: the previous operation latched, gap, lateral and tilt near the seat, at least 4 mm of travel, contact with the counterpart, slow, and for a screw more than a quarter turn of tightening. The screw threads (0.5 mm pitch, right-hand) are contact geometry: a screw advances only by being turned. Once a part's weld latches, it stops colliding with the seat and with the other parts welded to it (it still collides with the robot, the table and every unwelded part), and a latched screw and its insert's thread stop colliding altogether (sw_cutover.json: from the first operation on). Each leg still carries the idle spring jaw of its removed press-in pin.
+
+### Change Log
+- 2026-10-19: RoboARC 1.0.1: the task is on the repository's task layer and under `tasks/` (in 1.0.0 it was under `ikea/`),
+  and its `[task].name` is `roboarc/<dir>` (it was `robot-coding-bench/<dir>`). For the agent: the instruction's closing
+  sections are the shared ones (`## External material`, `## Resource limits`, `## Time limit`); the network allowlist
+  adds the package registries (PyPI, the Debian / Ubuntu archives) that `## External material` already named (the
+  repository's one list, `scripts/set_agent_egress.py` `HOSTS`); a resource-monitor sidecar records the trial's
+  resources (a limit fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`); the agent's container gets the
+  declared caps. The task declares its compute resources, limits and seeds, and has a `DIGEST`; its texts cite this
+  repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
+  runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
+  comparable: the instruction and the egress changed.

@@ -64,7 +64,8 @@ CUTOFF_SEC = 10800
 REL = json.loads((HERE / "release.json").read_text())
 ASSETS = json.loads((HERE / "assets.json").read_text())        # the pinned HF dataset (scripts/roboarc/assets.py)
 NAMES = json.loads((HERE / "roboarc_names.json").read_text())   # owner's mapping: old base -> new base, family, number, difficulty
-VERSION = (ROOT / "images" / BENCH / "VERSION").read_text().strip()
+VERSION = (ROOT / "images" / BENCH / "VERSION").read_text().strip()   # the image's version
+TASKSET_VERSION = REL["version"]   # the task set's version (README Release line); 1.0.1 = texts only, image 1.0.0
 IMAGE = f"ghcr.io/embodied-first-exam/{BENCH}:{VERSION}"
 EAI = ROOT / "scripts/eai_standard"
 LAYER = {"environment/rcb_client.py": EAI / "v2_4/rcb_client.py", "environment/rcb1.py": EAI / "rcb1.py",
@@ -304,7 +305,7 @@ def provenance(base: str, rec: dict) -> str:
             "`/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, "
             "which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at "
             "every session start.",
-            f"- Release: RoboARC {VERSION}, image `{IMAGE}` (images/{BENCH}/); simulator source `{rec['release_commit'][:9]}` (PROVENANCE.md).",
+            f"- Release: RoboARC {TASKSET_VERSION}, image `{IMAGE}` (images/{BENCH}/); simulator source `{rec['release_commit'][:9]}` (PROVENANCE.md).",
             "- Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the "
             "simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables."]
     return "\n".join(rows)
@@ -339,7 +340,7 @@ FIX_STRICT_GOAL_NO_HOLD = ("- 2026-10-14: tests/grade.py, the same file in every
 
 def change_log(base: str, mode: str, rec: dict) -> str:
     """README's Change Log (PROTOCOL §2.8): the entry that made the task, the 2026-10-14 grading fix (privileged: every
-    tests/grade.py changed), then release.json's later changes."""
+    tests/grade.py changed), then release.json's later changes: the base's own, then those of every base."""
     date = rec.get("released") or rec["nop"]["date"]   # a base released before keeps its date
     if rec.get("template"):
         log = [NEW_TASK.format(date=date, bench=BENCH, family=rec["family"], template=rec["template"], mode=mode,
@@ -350,6 +351,7 @@ def change_log(base: str, mode: str, rec: dict) -> str:
         hold = HOLD_STRICT in (PKG / f"{base}-privileged" / "instruction.md").read_text()
         log.append(FIX_STRICT_GOAL if hold else FIX_STRICT_GOAL_NO_HOLD)
     log += [f"- {c['date']}: {c['text']}" for c in rec.get("changes", ()) if c["mode"] in (mode, "both")]
+    log += [f"- {c['date']}: {c['text']}" for c in REL.get("changes", ()) if c["mode"] in (mode, "both")]   # every base's
     return "\n".join(log)
 
 

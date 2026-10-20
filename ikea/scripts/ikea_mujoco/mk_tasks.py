@@ -41,6 +41,20 @@ _HOSTS = re.findall(r'"([^"]+)"', re.search(r"(?ms)^HOSTS = \[(.*?)\]", (ROOT.pa
 EGRESS = ('network_mode = "allowlist"      # model APIs and package registries (scripts/set_agent_egress.py); PROTOCOL §2.11\n'
           "allowed_hosts = [" + ", ".join(f'"{h}"' for h in _HOSTS) + "]\n")
 
+# The README's Change Log (PROTOCOL §1, H.8: a changed task gets a new DIGEST and an entry), both modes.
+CHANGE_LOG = """### Change Log
+- 2026-10-19: RoboARC 1.0.1: the task is on the repository's task layer and under `tasks/` (in 1.0.0 it was under `ikea/`),
+  and its `[task].name` is `roboarc/<dir>` (it was `robot-coding-bench/<dir>`). For the agent: the instruction's closing
+  sections are the shared ones (`## External material`, `## Resource limits`, `## Time limit`); the network allowlist
+  adds the package registries (PyPI, the Debian / Ubuntu archives) that `## External material` already named (the
+  repository's one list, `scripts/set_agent_egress.py` `HOSTS`); a resource-monitor sidecar records the trial's
+  resources (a limit fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`); the agent's container gets the
+  declared caps. The task declares its compute resources, limits and seeds, and has a `DIGEST`; its texts cite this
+  repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
+  runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
+  comparable: the instruction and the egress changed.
+"""
+
 
 def default_tasks() -> list[str]:
     """Every task in bindings.json."""
@@ -488,7 +502,8 @@ initial-state hash (`instance_ok`). Replay video (evidence only, never the verdi
   (timestep {1e3 * b['timestep']:g} ms, Newton, 100 iterations, elliptic cones).
 - The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
   context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).
-'''
+
+{CHANGE_LOG}'''
 
 
 SOLVE = '''#!/bin/bash

@@ -516,7 +516,8 @@ episode with reason `timeout` when it runs out; that count never runs out before
 
 ### Mechanism
 {x['mechanism']}
-'''
+
+{P.CHANGE_LOG}'''
 
 
 def render(t: str, out: pathlib.Path, refs: pathlib.Path | None) -> None:

@@ -90,3 +90,15 @@ The benchmark's terminal rules, the same in every IKEA MuJoCo task, come on top 
 
 ### Mechanism
 The M4 x 0.5 right-hand threads are exact convex pieces: a screw advances only by being turned. Retention welds switch on with the measured relative pose once the scene's gates hold: a screw seated in its insert (contact with the crossbar and the support, at least 0.4 turns and some tightening work, held 0.15 s); each support joins the crossbar with the third screw of its side; a pad on its site (0.30 s). The pads start bonded to the backing and come free once pulled off it with at least 1.5 N for 0.25 s.
+
+### Change Log
+- 2026-10-19: RoboARC 1.0.1: the task is on the repository's task layer and under `tasks/` (in 1.0.0 it was under `ikea/`),
+  and its `[task].name` is `roboarc/<dir>` (it was `robot-coding-bench/<dir>`). For the agent: the instruction's closing
+  sections are the shared ones (`## External material`, `## Resource limits`, `## Time limit`); the network allowlist
+  adds the package registries (PyPI, the Debian / Ubuntu archives) that `## External material` already named (the
+  repository's one list, `scripts/set_agent_egress.py` `HOSTS`); a resource-monitor sidecar records the trial's
+  resources (a limit fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`); the agent's container gets the
+  declared caps. The task declares its compute resources, limits and seeds, and has a `DIGEST`; its texts cite this
+  repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
+  runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
+  comparable: the instruction and the egress changed.
