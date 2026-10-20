@@ -1,5 +1,11 @@
 # Standard-mode wire protocol `eai-standard/2.x` (robot as a service)
 
+**In this repository.** Every RoboARC standard task (and every IKEA MuJoCo standard task) serves
+`eai-standard/2.4`, Part 4, on top of Parts 1 and 2. Part 3 (the realtime capability, `eai-standard/2.3`) is kept
+for completeness; no RoboARC task uses it. RoboARC's own service details (its actions, cameras, `meta["safety"]`
+telemetry, world frame) are in [benchmarks/roboarc.md](benchmarks/roboarc.md). The section numbers below are cited by
+the task files and do not change.
+
 **Version: `eai-standard/2.4`** (2026-10-08) is the current version. This document is the interoperability
 specification of every 2.x version a task declares today: what a service answers and a client may send. Minor
 versions only add, so each part holds for the versions after it unless a later part says otherwise, and the shipped
@@ -14,8 +20,8 @@ types, cameras, proprioception columns, resume class, measured start-up times, k
 | Version | Content | Part | Implementation |
 |---|---|---|---|
 | `eai-standard/2.1` | the base: `/submit` and `/observe`, RCB1 responses, measured proprioception, optional depth noise; the optional reset capability | Part 1 | each benchmark's own service |
-| `eai-standard/2.2` | 2.1 + optional capabilities: depth `last` / `frames`, per-frame steps, times and extrinsics, camera intrinsics and mounting, `robot_spec`, `world`, `POST /kinematics`, a per-call wall-clock bound; one shared service layer | Part 2 (§1–§18) | [`scripts/eai_standard/`](../scripts/eai_standard/) |
-| `eai-standard/2.3` | 2.2 + the realtime capability: a clock that does not stop | Part 3 | `scripts/humanoidbench/shared/realtime/rcb_realtime.py` |
+| `eai-standard/2.2` | 2.1 + optional capabilities: depth `last` / `frames`, per-frame steps, times and extrinsics, camera intrinsics and mounting, `robot_spec`, `world`, `POST /kinematics`, a per-call wall-clock bound; one shared service layer | Part 2 (§1–§18) | the 2.2 layer is not shipped here; its `rcb1.py`, `run.sh` and client pins, which 2.4 keeps, are in [`scripts/eai_standard/`](../scripts/eai_standard/) |
+| `eai-standard/2.3` | 2.2 + the realtime capability: a clock that does not stop | Part 3 | not used by RoboARC; not shipped here |
 | `eai-standard/2.4` | 2.3 + the operations capability: operation ids, request deadlines, `GET /operations/<id>`, a call watchdog, a physics-tick ledger | Part 4 (§19–§25) | [`scripts/eai_standard/v2_4/`](../scripts/eai_standard/v2_4/) |
 
 Which version a task serves is its `[metadata] protocol` (= `/spec.protocol`); which benchmarks serve which version is
@@ -119,7 +125,7 @@ when the scene is ready, or with a probe that only connects to the port; the fir
 full. `GET /status` `elapsed_s` and the `elapsed_s` of `final.json` are the episode's own time, from the service's
 start of the episode. Why: Harbor counts the agent's cutoff around the agent's run only, and the sidecar starts with
 the environment, before the harness is installed; a clock started with the service ran ahead of the agent's (a median
-of 79 s over 2,322 recorded trials, board 0085). With this rule `time_left_s` never runs out before the agent is
+of 79 s over 2,322 recorded trials). With this rule `time_left_s` never runs out before the agent is
 stopped, and the agent's real time left is `time_left_s` minus what it spent before its first request. A service that
 ends an episode on its own clock says so in its benchmark's doc. A readiness probe added to a compose file or a runner
 must not send a request to the service before the agent runs: connecting to the port is enough.
@@ -146,8 +152,7 @@ agent: `final.json` is missing or unreadable, the replay's verdict is not in it,
 
 ### Live recording (optional, sidecar only; the agent sees none of it)
 `live.mp4`, `live_timeline.jsonl`, `live_segments.jsonl`, `trajectory_live.f64`, `startups.jsonl`: rendered from the
-replay by default, frames stamped with the call, never affecting the verdict. The reference recording is RoboTwin's
-(docs/benchmarks/robotwin.md).
+replay by default, frames stamped with the call, never affecting the verdict.
 
 ### Proprioception (2.1)
 A benchmark's 2.0 columns stay where they were; 2.1 appends what a real robot reports (measured joint positions and
@@ -159,11 +164,9 @@ Depth (`include_depth`) is exact by default. `RCB_DEPTH_NOISE=realsense` (task e
 σ = 2 mm + 2.5 mm·z² (z in m), and 1 % dropouts (0 = no reading), seeded by `RCB_DEPTH_NOISE_SEED`; it never affects
 physics.
 
-### Per-benchmark 2.1 services
-The MuJoCo service (`images/mujoco/limited/server_mj.py`: DexToolBench, MuJoCo Playground manipulation),
-the shared KinDER / HumanoidBench service (`rcb_service.py`), the MetaWorld+ and RoboCasa services serve the same
-endpoints and frames with their own action layouts, control rates and cameras: docs/benchmarks/dextoolbench.md,
-mujoco-playground.md, kinder.md, humanoidbench.md, metaworldplus.md, robocasa.md.
+### Per-benchmark services
+A benchmark's service serves the same endpoints and frames with its own action layouts, control rates and cameras,
+described in its benchmark doc (RoboARC: [benchmarks/roboarc.md](benchmarks/roboarc.md)).
 
 ### Optional reset capability
 Each task declares its own budget N (PROTOCOL §2): the `RCB_RESET_BUDGET` default of its `sim` service, served as
@@ -181,7 +184,9 @@ budget is part of a result's configuration: results with different budgets are n
 > this part says otherwise, every 2.2 addition is an optional capability, and a request written for 2.0 or 2.1 gets
 > the same answer as before (plus parts and keys an old client ignores).
 
-**One implementation.** The source is [`scripts/eai_standard/`](../scripts/eai_standard/): the service layer
+**One implementation.** (In this repository only the parts 2.4 keeps are shipped: `rcb1.py`, `run.sh`, `client.env`
+and `client-requirements.txt` in [`scripts/eai_standard/`](../scripts/eai_standard/); the 2.4 service layer and client
+replace the rest, Part 4.) The 2.2 source is the service layer
 `rcb_limited.py` (HTTP, RCB1 responses, the protocol helpers, the `/spec` self-check, crash recovery), the client
 `rcb_client.py` + `rcb1.py`, the sidecar entrypoint `run.sh`, and the client image: `client.env` (the one client base,
 pinned by digest) and `client-requirements.txt` (exact pins). The generators copy the code unchanged into every 2.2
@@ -329,7 +334,7 @@ predicate, segmentation; physical parameters of the scene other than the robot's
 either). Provided: the robot and its tool, camera calibration, world conventions, the budget, and what the task's
 texts give. Whether a task's texts state world coordinates of workspace items is its benchmark's decision (its doc,
 "World-frame information"). `rcb_limited.check_spec` refuses to start a service whose `/spec` names a forbidden field or
-puts a position into `static`; `ci_checks/check-standard-protocol.py` checks every response of a live service by hand.
+puts a position into `static`.
 Accepted consequence: a calibrated camera aimed at the workspace tells roughly where the workspace is.
 
 ### 11. Errors (no physics executed)
@@ -432,7 +437,7 @@ Moved to the benchmarks' docs (2026-10-14): each records its own build times nex
 
 #### 13.5 Cost and tests
 One state hash per call (not per step). A resume replays the episode so far without rendering, on the agent's wall
-clock (the benchmarks' docs give their replay rates). `python3 scripts/eai_standard/selftest.py` (CPU only, ~2 min) runs
+clock (the benchmarks' docs give their replay rates). The 2.2 layer's self-test (CPU only, ~2 min; not shipped here) runs
 `toy_server.py` under `run.sh` with a stand-in for compose's restart policy and checks: resume between and inside calls,
 both classes, the third crash, the watchdog and back-off, client hang-up, the wall bound, both collect-hook outcomes,
 SIGUSR1 during a resume, a simulator error, the client's protocol names, malformed requests, a port that is taken, a
@@ -464,9 +469,9 @@ for `include_depth` and ignore the new parts and keys).
 
 ## Part 3 — Standard-realtime mode: `eai-standard/2.3`
 
-Time does not stop. The wire protocol of the standard-realtime mode (protocol-change issue #86), served by
+Time does not stop. The wire protocol of the standard-realtime mode, served by
 standard-realtime tasks only (`mode = "standard-realtime"`, `protocol = "eai-standard/2.3"`); the shared implementation
-is `scripts/humanoidbench/shared/realtime/rcb_realtime.py`, which other benchmarks' realtime services use unchanged. 2.3
+is a shared realtime layer (not shipped in this repository: no RoboARC task serves 2.3). 2.3
 is 2.2 plus the realtime capability below; every 2.2 addition stays optional, so a 2.1 service with this capability is a
 2.3 service. Same endpoints, RCB1 frames and grading as 2.1. `/spec.timing` declares it: `realtime: true`, `slowdown` S
 (`RCB_SLOWDOWN`; each task declares its default, `[metadata] slowdown`), `control_dt`, `wall_s_per_control_step`,
@@ -533,7 +538,7 @@ agent latency counts, the agent's own program may act) and uses its `slowdown` n
 
 ## Part 4 — `eai-standard/2.4`: the operations capability
 
-Status: accepted 2026-10-08 (owner), protocol-change issue #89. Reference implementation:
+Status: accepted 2026-10-08. Reference implementation:
 [`scripts/eai_standard/v2_4/`](../scripts/eai_standard/v2_4/), with `rcb_limited.py` and `rcb_client.py`. `rcb1.py`,
 `run.sh`, the client image and the client pins are the 2.2 ones in `scripts/eai_standard/`. In the tables below, MUST
 means "required of a service that reports 2.4" (what a 2.4 client may rely on).

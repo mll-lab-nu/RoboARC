@@ -1,4 +1,11 @@
-# Robot Coding Bench — Task Protocol v2.0
+# RoboARC task protocol (Robot Coding Bench task protocol v2.0)
+
+**In this repository.** RoboARC's tasks follow the task protocol of Robot Coding Bench, the multi-benchmark
+repository RoboARC's task layer comes from (v2.0, unchanged here). RoboARC ships two modes, privileged and standard
+(`eai-standard/2.4`); the parts about standard-realtime mode and exported tasks are kept for completeness, and no
+RoboARC task uses them. RoboARC's own choices (grading replays, safety telemetry, world frame, time budget) are in
+[benchmarks/roboarc.md](benchmarks/roboarc.md). Task files cite this document by section number: the numbers do not
+change.
 
 **Recommended conventions, and eight invariants that bind.** Sections 1–7 describe how a task is usually built, so that
 tasks from different benchmarks can be run, compared and reviewed the same way. They recommend; a task or a benchmark
@@ -10,11 +17,11 @@ benchmark document can override them, and the required CI job `invariants` fails
 the runner refuses a run that would. The only setting Appendix H leaves to the task's author is the agent's network:
 the allowlist unless the task declares open egress (H.6).
 
-Documents: [`RUNNING.md`](RUNNING.md) (official-run configuration, seeds, retries, gateway, resource enforcement,
-results; enforced by the runner and scheduler), [`STANDARD_MODE.md`](STANDARD_MODE.md) (the `eai-standard/2.x` wire
-format), [`LEAKAGE.md`](LEAKAGE.md) (how answers leak), `docs/benchmarks/<bench>.md` (each benchmark's own choices),
-[`PROTOCOL_HISTORY.md`](PROTOCOL_HISTORY.md) (versions, owner decisions, migrations). Tasks written before v2.0 cite
-v1 section numbers (`PROTOCOL.md §2.10`); the table at the end says where each one went.
+Documents: [`RUNNING.md`](RUNNING.md) (running tasks with Harbor: official-run configuration, seeds, retries, resource
+enforcement, results; enforced by the runner), [`STANDARD_MODE.md`](STANDARD_MODE.md) (the `eai-standard/2.x` wire
+format), [`LEAKAGE.md`](LEAKAGE.md) (how answers leak), [`benchmarks/roboarc.md`](benchmarks/roboarc.md) (the
+benchmark's own choices), [`DEVELOPING.md`](DEVELOPING.md) (regenerating and checking tasks). Tasks written before
+v2.0 cite v1 section numbers (`PROTOCOL.md §2.10`); the table at the end says where each one went.
 
 ## 1. What a task is
 
@@ -28,8 +35,8 @@ verifier decides internally) is the task's own business.
 | `[task].name = "robot-coding-bench/<folder>"`; `[metadata]` `author_name`, `task_type` (`trajectory` / `policy`), `simulator`, `robot` ([`TAXONOMY.md`](TAXONOMY.md)), `family`, `mode`, `expert_time_estimate_hours`, `oracle` (+ `oracle_evidence`), `protocol` (sidecar modes), the settings of §2 | `check-task-fields.sh`, `check-protocol.py` |
 | The directory name `<base>-<mode>`, `<base>` = `<benchmark>-<family>-i<NN>` or the upstream name; no versions or durations in names | the mode is the whole suffix |
 | All task code in the directory, copied in by its Dockerfiles; base images hold the simulator and its assets; nothing imports repository code at run time | a task's identity is its directory (H.8) |
-| Generated tasks come with their generator (`scripts/<bench>/`), which ends with `scripts/task_conventions.py` `normalize`; re-running it reproduces the committed tasks | `check-generated-tasks.sh` |
-| Base images `ghcr.io/mll-lab-nu/eai-<name>:<images/<name>/VERSION>`, public unless `images/<name>/BUILD_ONLY`; every `FROM` / `image:` pinned to a tag or digest | `check-dockerfile.sh` |
+| Generated tasks come with their generator (RoboARC: `scripts/roboarc/mk_tasks.py`), which ends with `scripts/task_conventions.py` `normalize`; re-running it reproduces the committed tasks | `mk_tasks.py --check` (CI job `generator`) |
+| Base images from one registry, every `FROM` / `image:` pinned to a tag or digest. RoboARC's tasks use `ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>` (the simulator image), the client base `docker.io/library/python:3.12.14-slim@sha256:…` (`scripts/eai_standard/client.env`) for the standard agent and every verifier, and the resource monitor `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:…` (`scripts/rcb_monitor/inject.py`); IKEA's `ghcr.io/embodied-first-exam/roboarc-ikea:<VERSION>` and `roboarc-ikea-sim:<VERSION>` | `check-dockerfile.sh`, `check-protocol.py` |
 | README in the standard layout (`# <dir>`, key table, Task, Difficulty, Reference solution, Verification, Compute resources, Details); no `results/` | rendered by `normalize` |
 | A published task's `environment/` and `tests/` do not change; a fix changes the task in place only with a new DIGEST and a README Change Log entry | H.8 |
 
@@ -71,9 +78,9 @@ infrastructure, a reference implementation, one benchmark using it, CI support t
 - **standard-realtime** (`-standard-realtime`; `eai-standard/2.3`): standard mode on a clock that does not stop: once
   an episode starts the robot runs at 1/S of real speed whatever the agent does, holds its last targets while the agent
   thinks, and is driven by a program in the agent's own container.
-- A benchmark with its own runtime may export tasks that keep it (`metadata.protocol` = its own, listed in
-  `scripts/<bench>/exported.toml`); they are plain Harbor tasks, Appendix H applies to them unchanged, and their results
-  are reported apart.
+- A benchmark with its own runtime may export tasks that keep it (`metadata.protocol` = its own, listed in a manifest of
+  the benchmark); they are plain Harbor tasks, Appendix H applies to them unchanged, and their results are reported
+  apart. (RoboARC exports none, and this repository's CI has no support for them.)
 
 ## 4. Grading and results
 
@@ -82,8 +89,8 @@ infrastructure, a reference implementation, one benchmark using it, CI support t
 | `/logs/verifier/reward.txt` `1` or `0`; `reward.json` numbers only: `success`, `deterministic` (trajectory tasks), `infra_error`, `sim_error`, `grader_error`, `progress`, the resource fields, cost fields (`n_actions`, `sim_steps`) | the same names wherever the concept applies |
 | Every graded trial leaves a playable replay video (`replay.mp4` in `/logs/verifier/` or the sim sidecar's collected directory) and the replayable trajectory it was graded on (privileged: the deliverable; standard: the sidecar's journal or `trajectory.npz`). The one expected exception: a privileged trial whose agent submitted no trajectory, or none that replays (`missing_trajectory`, `bad_trajectory`, no actions). The verdict is written before the video is rendered and never depends on it; the video's time bound covers the longest episode the cutoff allows | `check-video.py`; the runner flags a graded trial without a video and renders it from the trajectory (RUNNING.md "Recordings") |
 | Success judged on the end state of the replay; ≥ 2 replays with matching final-state hashes (`deterministic`), or one by the task's declared choice | within H.4 |
-| An infrastructure failure is `infra_error = 1`: not a result, neither a success nor the agent's 0 (H.5) | `scripts/write_task_results.py` |
-| `nop` scores 0; with `oracle = "full"` the oracle scores 1 on every seed in `seeds.oracle` (`/validate`); a task without an oracle gets a human review (a positive example, the predicate, `nop` 0, determinism; recorded in the PR) | the `validated` marker (§2) |
+| An infrastructure failure is `infra_error = 1`: not a result, neither a success nor the agent's 0 (H.5) | `scripts/harbor/write_task_results.py` |
+| `nop` scores 0; with `oracle = "full"` the oracle scores 1 on every seed in `seeds.oracle` (Harbor `-a oracle`, DEVELOPING.md); a task without an oracle gets a human review (a positive example, the predicate, `nop` 0, determinism; recorded in the PR) | the `validated` marker (§2) |
 | Results report success with cost (tokens, money, turns, wall clock, simulation steps) per mode and per comparable configuration; run id `<harness>-<model>-<effort>`; not committed to the repository | RUNNING.md |
 | The easy set: task bases listed in [`easy_set.toml`](easy_set.toml) (solved through a shortcut, judged too easy by the benchmark owner, or solved in every mode by the screening runs) stay in the repository and are run, but are reported apart from the main table and left out of the headline statistics; each result records `set` (`core` / `easy`) as a marker, never part of the configuration. Listing a task changes none of its files | `task_conventions.py easy-set --check` |
 
@@ -92,7 +99,7 @@ infrastructure, a reference implementation, one benchmark using it, CI support t
 | Recommended | Notes |
 |---|---|
 | The instruction names the deliverable under `/app/output/` and never mentions `/tests/` | `check-instruction.sh` |
-| It states every convention the agent cannot infer: frames, quaternion order, units, action layout, client usage, the reset budget and S; world-frame quantities are decided per benchmark and consistent within it | benchmark hooks `scripts/<bench>/ci/advisory-*` |
+| It states every convention the agent cannot infer: frames, quaternion order, units, action layout, client usage, the reset budget and S; world-frame quantities are decided per benchmark and consistent within it | `check-world-frame-texts.sh` (RoboARC: no world coordinates in standard texts) |
 | It ends with three sections `normalize` renders: `## External material` (the honour rule: install packages and read what is installed, do not fetch a ready-made solution; the open-network paragraph for an open task), `## Resource limits`, `## Time limit` (`You have N seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.`, then what the cutoff means in the mode); no second statement of the limit | `check-cutoffs.py`, `check-resources.py` |
 | Everything a task needs at run time is in its image or directory; nothing tells the agent to download something | |
 | A trial that fetched a solution is flagged and judged case by case by the owner; installing a general-purpose package never is | RUNNING.md |
@@ -112,8 +119,8 @@ v1.0 (2026-09-30: the modes' names), v1.1 (2026-10-08: standard-realtime), v1.1.
 v1.2-rc (2026-10-10: limits judged in the trial), **v2.0** (2026-10-14: conventions are advisory, Appendix H binds,
 runner configuration in RUNNING.md, task-declared settings recorded with every result). The wire protocol's versions:
 `eai-standard/2.1` (the base: `/spec`, `/status`, `/observe`, `/submit`, RCB1 frames), 2.2 (depth, kinematics, per-call
-bounds; shared layer `scripts/eai_standard/`), 2.3 (2.2 + realtime), 2.4 (2.3 + operation ids and deadlines; layer
-`scripts/eai_standard/v2_4/`). Minor versions only add; `/spec.protocol` equals `metadata.protocol`. A protocol change is
+bounds), 2.3 (2.2 + realtime), 2.4 (2.3 + operation ids and deadlines; layer `scripts/eai_standard/v2_4/` with 2.2's
+`rcb1.py` and `run.sh` in `scripts/eai_standard/`). Minor versions only add; `/spec.protocol` equals `metadata.protocol`. A protocol change is
 an issue, then one pull request updating STANDARD_MODE.md, the reference implementation and an example task.
 
 ## Appendix H. Invariants (binding)
@@ -138,15 +145,15 @@ the agent (a `policy` deliverable) runs as an unprivileged user in its own proce
 simulator, the evaluator or the requests, under a process limit; every process it started ends before anything is
 graded, and it cannot write the logs or the report the grade is read from. A new benchmark merges only after one
 adversarial trial (an agent told to obtain reward without solving the task) scored 0 on its tasks.
-*CI:* `check-verifier-isolation.sh`, `check-monitor.py --tier invariants`, the benchmarks' `invariant-*` hooks (a skill sandbox's test); review.
+*CI:* `check-verifier-isolation.sh`, `check-monitor.py --tier invariants`; review.
 
 **H.2 No answer in reach.** Reference solutions exist only under `solution/`, mounted for the oracle agent only.
 Nothing the agent's container can read (the task's `environment/` files, the task and base images, the tooling, the
 frozen instance, installed documentation) contains a solution of the task or a pointer to one: a URL, a dataset or
 file name, a demonstration or episode id, the name of the upstream expert or policy for this task. Upstream experts,
-recorded demonstrations and policies trained for the task are scrubbed from images; provenance lives in
-`scripts/<bench>/` and the README. *CI:* `check-agent-pointers.py`, each benchmark's `scripts/<bench>/ci/invariant-*`
-hooks; images are reviewed when built ([LEAKAGE.md](LEAKAGE.md)).
+recorded demonstrations and policies trained for the task are scrubbed from images; provenance lives in the
+benchmark's generator directory (`scripts/roboarc/`) and the README. *CI:* `check-agent-pointers.py`; images are
+reviewed when built ([LEAKAGE.md](LEAKAGE.md)).
 
 **H.3 Standard trust boundary** (standard and standard-realtime). The simulator, the scene, the frozen instance, the
 seed and the success predicate run in the `sim` sidecar; the agent's image holds no simulator or simulation code
@@ -168,8 +175,8 @@ rewritten. The frozen instance the verifier grades against and the one the trial
 **H.5 Infrastructure retry.** Infrastructure failures allow at most one full retry with the same instance, seed, and
 configuration, clearing all agent and environment state. If that retry also fails, follow the default failure-handling
 behavior; no further retries. Normal task failures do not qualify. (At most two runs of a task under one run id; the
-voided attempt is moved aside and never counted. The rule is the runner's: `scripts/retry_policy.py`, RUNNING.md.)
-*CI:* `scripts/tests/test_retry_policy.py`, `scripts/tests/test_runner_results.py`.
+voided attempt is moved aside and never counted. The rule is the runner's: `scripts/harbor/retry_policy.py`, RUNNING.md.)
+*CI:* `scripts/harbor/tests/test_retry_policy.py`.
 
 **H.6 Egress.** During the agent phase the agent's container, and every service in its network namespace, reaches only
 the allowlist `scripts/set_agent_egress.py` `HOSTS` (the model APIs and the package registries; `[agent] network_mode =
@@ -192,7 +199,7 @@ to a task by its digest; a changed file is a changed task. *CI:* `check-dataset-
 
 | v1 | Now |
 |---|---|
-| §0, D1–D12 | §2 (settings), §3 (modes), §7; D3/D4 §4; D5 §1; D8 §2, H.7; D10/D11 RUNNING.md; history: PROTOCOL_HISTORY.md |
+| §0, D1–D12 | §2 (settings), §3 (modes), §7; D3/D4 §4; D5 §1; D8 §2, H.7; D10/D11 RUNNING.md |
 | §1 checklist, §2.1–2.5 | §1, §5 |
 | §2.6 verifier | H.1 (isolation), §4 (fields) |
 | §2.7 solutions, oracle, nop | H.2, §4 |
@@ -204,4 +211,4 @@ to a task by its digest; a changed file is a changed task. *CI:* `check-dataset-
 | §2.14 dynamics, §2.15 modes shipped, §2.16 adding a mode | §2, §3, H.7 |
 | §3 privileged; §4, §4.1–4.9 standard; §4b realtime; §4c exported | §3, H.3, H.4, §4; wire details STANDARD_MODE.md |
 | §4.7 crash recovery | H.5 (retry); in-trial resume is an implementation detail of the shared layers (STANDARD_MODE.md) |
-| §5 results, token budget; §6 versioning; §7 migration | §4, RUNNING.md; §7; PROTOCOL_HISTORY.md |
+| §5 results, token budget; §6 versioning; §7 migration | §4, RUNNING.md; §7 |
