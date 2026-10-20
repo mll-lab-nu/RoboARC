@@ -2,8 +2,7 @@
 """Stage one RoboARC task's frozen instance from the image into a task directory, and check it against the task's
 runtime binding. Standard library only.
 
-usage: python /opt/robotangle/stage_instance.py <base> <dest> [--binding <runtime_binding.json>] [--seed-file <seed>]
-                                                [--goal <task goal dir> <goal dest>] [--purge]
+usage: python /opt/robotangle/stage_instance.py <base> <dest> [--binding <runtime_binding.json>] [--seed-file <seed>] [--purge]
 
 The image (images/roboarc/Dockerfile) carries every task's frozen instance, instance.json + instance_assets/, under
 /opt/robotangle/instances/<base>/. The files come from the private Hugging Face dataset eai-v2-internal/robotangle-assets
@@ -14,21 +13,14 @@ seed's instance in the image too, under /opt/robotangle/instances/<base>/seeds/<
 runtime_binding.json that seed's binding, runtime_binding.s<seed>.json. The runner's copy of the task for seed S carries a
 file `seed` (the integer S) in every place the task runs and grades from; --seed-file names it. No such file, or seed 0:
 the default instance and runtime_binding.json, as before.
-A task whose instruction shows goal pictures (environment/goal/*.png, at /app/goal/ in the agent's container) has them
-rendered in each seed's looks: seed 0's ship in the task directory, seed S's in the image beside that seed's instance,
-/opt/robotangle/instances/<base>/seeds/<S>/goal/ (pinned in scripts/roboarc/assets.json like every image file).
 This script:
   - copies the instance into <dest>, next to <dest>/runtime_binding.json (--binding copies that file there first; for a
     seed S other than 0, runtime_binding.s<S>.json from the same directory as that file, or from <dest>);
   - checks both against the binding, by the rule of topogym.simulator.frozen_binding.check_inputs, which every session
     applies again at start;
-  - with --goal, puts the goal pictures of the task's seed into <goal dest>: seed 0's from <task goal dir> (the task's
-    own, which the Dockerfile copies there), seed S's from the image; seed S must have exactly the task's file names;
   - with --purge, removes /opt/robotangle/instances afterwards, so a task image keeps only its own instance.
-Privileged tasks run it in environment/Dockerfile (with --goal when they have goal pictures) and tests/Dockerfile.
-Standard tasks run it in the sim service's entrypoint, before `sh /srv/run.sh`, and RCB_INSTANCE points into <dest>;
-their agent's container takes nothing from the sim service or its image (PROTOCOL H.1, H.3), so a seed's goal pictures
-reach it in the runner's copy of the task instead (scripts/task_seed.py materialize, from tests/seeds/<S>/goal/).
+Privileged tasks run it in environment/Dockerfile and tests/Dockerfile. Standard tasks run it in the sim service's
+entrypoint, before `sh /srv/run.sh`, and RCB_INSTANCE points into <dest>.
 """
 import hashlib
 import json
@@ -60,11 +52,6 @@ def main(argv: list[str]) -> int:
         i = argv.index("--seed-file")
         seed_file = pathlib.Path(argv[i + 1])
         del argv[i:i + 2]
-    goal = None
-    if "--goal" in argv:
-        i = argv.index("--goal")
-        goal = pathlib.Path(argv[i + 1]), pathlib.Path(argv[i + 2])
-        del argv[i:i + 3]
     if len(argv) != 2:
         print(__doc__, file=sys.stderr)
         return 2
@@ -112,29 +99,13 @@ def main(argv: list[str]) -> int:
         bad.append(f"instance_assets differ from the binding ({len(diff)} entries, e.g. {diff[:2]})")
     for p in [dest / "instance.json", *(dest / "instance_assets").rglob("*")]:
         os.chmod(p, 0o755 if p.is_dir() else 0o644)
-    if goal is not None and not bad:          # the goal pictures of the task's seed, by the task's own file names
-        own, out = goal
-        names = sorted(p.name for p in own.iterdir() if p.is_file()) if own.is_dir() else []
-        pics = own if seed == 0 else src / "goal"
-        have = sorted(p.name for p in pics.iterdir() if p.is_file()) if pics.is_dir() else []
-        if not names:
-            bad.append(f"no goal pictures in {own}")
-        elif have != names:
-            bad.append(f"seed {seed}'s goal pictures in {pics} are {have}, not the task's {names}")
-        else:
-            out.mkdir(parents=True, exist_ok=True)
-            for n in names:
-                shutil.copyfile(pics / n, out / n)
-                os.chmod(out / n, 0o644)
     for b in bad:
         print(f"FAIL stage_instance {base}: {b}", file=sys.stderr)
     if bad:
         return 1
     if purge:
         shutil.rmtree(SRC)
-    pictures = f", {len(names)} goal pictures -> {goal[1]}" if goal is not None else ""
-    print(f"ok stage_instance {base}{f' seed {seed}' if seed else ''}: instance {canon[:12]}, {len(assets)} asset files "
-          f"-> {dest}{pictures}")
+    print(f"ok stage_instance {base}{f' seed {seed}' if seed else ''}: instance {canon[:12]}, {len(assets)} asset files -> {dest}")
     return 0
 
 

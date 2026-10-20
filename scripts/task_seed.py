@@ -15,8 +15,9 @@ binding there); RoboPaint's `environment/scorer/`. The copy's `[metadata.seeds]`
 is removed, and every file gets its content-derived mtime (scripts/stamp_mtimes.py, issue #258). A seed without a
 committed instance, of a task with `build = "runtime"`, is written instead as a file `seed` (the integer) in each of
 those places, from which the task builds the seed's instance itself. A task whose agent is shown goal pictures
-(`environment/goal/`) and that commits a seed's own (`tests/seeds/<S>/goal/` of the task itself: RoboARC's standard
-tasks, whose agent image takes nothing from the simulator's) gets them in place of the default's, same names only.
+(`environment/goal/`) and that commits a seed's own (`tests/seeds/<S>/goal/` of the task itself: RoboARC's tasks with
+appearance seeds, both modes; a standard agent image takes nothing from the simulator's) gets them in place of the
+default's in the copy's `environment/goal/`, same names only.
 A seed that is not allowed (a list, a range `{ from, to }` or "any") is refused. `--seed draw` draws one uniformly
 (with `--rng`; "any" draws from 0 to 2**31 - 1). `assign` gives a batch's K trials of one base their seeds: drawn without
 replacement (every seed once before any seed twice), each trial's seed still uniform over `allowed`, the same for
