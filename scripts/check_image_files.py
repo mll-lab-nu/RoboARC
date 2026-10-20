@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Check that an image built from a build context holds that context's files, byte for byte (issue #258).
+"""Check that an image built from a build context holds that context's files, byte for byte (a stale BuildKit
+context file would differ).
 
     python3 scripts/check_image_files.py <image> <context dir> [--dockerfile F] [--json]
 

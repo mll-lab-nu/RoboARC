@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Give every file of a task a mtime derived from its content, before any image is built from it (issue #258).
+"""Give every file of a task a mtime derived from its content, before any image is built from it (BuildKit can otherwise
+reuse another build's same-name context file of equal size and mtime).
 
     python3 scripts/stamp_mtimes.py [--full] [--check] <tasks dir | task dir> ...   # stamp in place
     python3 scripts/stamp_mtimes.py stage <task dir> <out dir>                      # -> <out dir>/<task>, a stamped copy

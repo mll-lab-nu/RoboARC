@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Advisory (issue #258): every repository script or workflow that builds images (`harbor run`, `harbor trial`,
+"""Advisory: every repository script or workflow that builds images (`harbor run`, `harbor trial`,
 `docker build`, `docker compose ... build`, or the same as a Python argument list) mentions scripts/stamp_mtimes.py:
 it builds from a stamped copy of the task (`stamp_mtimes.py stage`, `stamp_tree`), or says in a comment why it needs
 none (a base image under images/, not a task). Docker's BuildKit can otherwise put another task's equal-size,
@@ -47,7 +47,7 @@ def main() -> int:
         if hits and "stamp_mtimes" not in p.read_text(errors="replace"):
             bad.append(f"{p.relative_to(ROOT)}:{hits[0]}")
     if bad:
-        print(f"FAIL {len(bad)} file(s) build images without scripts/stamp_mtimes.py (issue #258; build from "
+        print(f"FAIL {len(bad)} file(s) build images without scripts/stamp_mtimes.py (build from "
               f"`stamp_mtimes.py stage <task> <dir>`, or say in a comment naming stamp_mtimes why no task is built):")
         for b in bad:
             print(f"  {b}")

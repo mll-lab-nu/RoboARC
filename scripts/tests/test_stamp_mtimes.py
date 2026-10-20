@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""scripts/stamp_mtimes.py (issue #258: BuildKit reuses another build's same-name context file when size and mtime match)
+"""scripts/stamp_mtimes.py (BuildKit reuses another build's same-name context file when size and mtime match)
 and the Dockerfile mapping of scripts/check_image_files.py. Standard library only, no docker:
 
 - the stamp is the evaluation pool's function exactly (reference values from batch_eval_live/exec/stamp_mtimes.py);

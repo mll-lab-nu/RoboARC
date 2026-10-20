@@ -1,10 +1,10 @@
 name: checks
-# The cheap checks (no GPU, no image, no dataset access): the generator's check mode, the protocol invariants, the unit
-# tests, and the advisory checks (warnings only). Strict replays and Harbor trials need the image and a GPU
-# (README.md, Checks).
+# The cheap checks (no GPU, no image, no dataset access): the generators' check modes, the protocol invariants, the unit
+# tests, the Python API's fast tests, and the advisory checks (warnings only). Strict replays and Harbor trials need the
+# image and a GPU (docs/DEVELOPING.md).
 on:
   push:
-    branches: [main]
+    branches: [main, "dev/**"]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -56,6 +56,21 @@ jobs:
           python3 ci_checks/check-video.py tasks/roboarc-*
           python3 ci_checks/check-resources.py tasks/roboarc-*
           python3 ci_checks/check-cutoffs.py tasks/roboarc-*
+  api-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Python API tests (no simulator)
+        if: hashFiles('tests/api/**') != ''
+        run: |
+          python3 -m pip install --quiet numpy pytest
+          python3 -m pytest tests/api -m "not sim and not heavy"
+      - name: No API tests yet
+        if: hashFiles('tests/api/**') == ''
+        run: echo "tests/api/ does not exist; nothing to run"
   advisories:
     runs-on: ubuntu-latest
     timeout-minutes: 60
