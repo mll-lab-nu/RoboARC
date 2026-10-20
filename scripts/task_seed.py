@@ -4,17 +4,21 @@
     python3 scripts/task_seed.py list tasks/<task>                      # default, allowed, oracle
     python3 scripts/task_seed.py pick tasks/<task> [--rng N]            # a seed drawn uniformly from `allowed`
     python3 scripts/task_seed.py materialize tasks/<task> --seed S --out DIR   # -> DIR/<task>, run that with Harbor
+    python3 scripts/task_seed.py assign tasks/<task> --k K --key <batch>/<base>  # K seeds without replacement
 
 `materialize` copies the task directory and, for a seed other than the default, puts that seed's frozen instance
 (`tests/seeds/<S>/instance.{json,npz}` of the task that holds the pair's instances: the privileged twin of a standard
 task, else the task itself) in every place the task runs and grades from: privileged `environment/` and `tests/`;
-standard and standard-realtime `environment/sim/`; RoboPaint's `environment/scorer/`. The copy's `[metadata.seeds]`
+standard and standard-realtime `environment/sim/` and `tests/` (RoboARC's standard verifier checks the seed's runtime
+binding there); RoboPaint's `environment/scorer/`. The copy's `[metadata.seeds]`
 `default` (and `instance_seed`, where present) say the seed it runs from, so a result records it; its `tests/seeds/`
 is removed, and every file gets its content-derived mtime (scripts/stamp_mtimes.py, issue #258). A seed without a
 committed instance, of a task with `build = "runtime"`, is written instead as a file `seed` (the integer) in each of
 those places, from which the task builds the seed's instance itself. A seed that is
 not allowed (a list, a range `{ from, to }` or "any") is refused. `--seed draw` draws one uniformly (with `--rng`;
-"any" draws from 0 to 2**31 - 1). Standard library only.
+"any" draws from 0 to 2**31 - 1). `assign` gives a batch's K trials of one base their seeds: drawn without
+replacement (every seed once before any seed twice), each trial's seed still uniform over `allowed`, the same for
+every lane and rerun of the batch (scripts/run_agent_batch.sh). Standard library only.
 """
 from __future__ import annotations
 
@@ -41,9 +45,10 @@ def holder(task: Path) -> Path:
 
 
 def places(task: Path) -> list[str]:
-    """Where a task's instance copies are (the same mapping as ci_checks/check-instance-copies.sh)."""
+    """Where a task runs and grades from its instance: the copies of ci_checks/check-instance-copies.sh, and a sidecar
+    task's tests/ (a twin-less one's verifier copy; RoboARC's standard verifier checks the runtime binding there)."""
     if tc.mode_of(task) in tc.SIDECAR_MODES:
-        return ["environment/sim"]
+        return ["environment/sim", "tests"]
     if task.name.startswith("robopaint-"):
         return ["environment/scorer", "tests"]
     return ["environment", "tests"]
@@ -59,6 +64,19 @@ def pick(task: Path, rng: int | None) -> int:
     if isinstance(a, dict):
         return r.randint(a["from"], a["to"])
     return r.choice(a)
+
+
+def assign(allowed, k: int, key: str) -> list[int]:
+    """K seeds for the K trials of one base: a shuffle of `allowed` (a list, a range or "any") keyed by `key` (the batch
+    name and the base), taken in order, so the K trials run on K different seeds; past len(allowed), another shuffled
+    pass. random.Random hashes a str key with SHA-512 (not Python's per-process hash): every lane and every rerun of the
+    batch gets the same seeds, so an infrastructure retry reruns its trial's seed."""
+    pool = range(ANY) if allowed == "any" else range(allowed["from"], allowed["to"] + 1) if isinstance(allowed, dict) \
+        else list(allowed)
+    rng, out = random.Random(key), []
+    while len(out) < k:
+        out += rng.sample(pool, min(len(pool), k - len(out)))
+    return out
 
 
 def materialize(task: Path, seed: int, out: Path) -> Path:
@@ -108,12 +126,18 @@ def main() -> int:
     a_mat.add_argument("--seed", required=True, help="an allowed seed, or `draw`")
     a_mat.add_argument("--rng", type=int)
     a_mat.add_argument("--out", type=Path, required=True)
+    a_as = sub.add_parser("assign")
+    a_as.add_argument("task", type=Path)
+    a_as.add_argument("--k", type=int, required=True)
+    a_as.add_argument("--key", required=True, help="<batch>/<base>")
     a = ap.parse_args()
     task = a.task.resolve()
     if a.cmd == "list":
         print(seeds(task))
     elif a.cmd == "pick":
         print(pick(task, a.rng))
+    elif a.cmd == "assign":
+        print(" ".join(map(str, assign(seeds(task)["allowed"], a.k, a.key))))
     else:
         seed = pick(task, a.rng) if a.seed == "draw" else int(a.seed)
         print(materialize(task, seed, a.out.resolve()), seed)

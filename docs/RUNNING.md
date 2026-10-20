@@ -27,7 +27,8 @@ PROTOCOL_HISTORY.md):
 
 ## Seeds: the runner chooses
 The seed is the runner's, never the agent's: it is one of the task's `[metadata.seeds] allowed` (a list, `{from, to}`,
-`"any"`), official batches draw one uniformly per trial, and a run on the default seed only records `default-only`.
+`"any"`), official batches draw one uniformly per trial (a base's K trials without replacement, so K = 3 on three
+allowed seeds runs each seed once; owner, 2026-10-20), and a run on the default seed only records `default-only`.
 The verifier grades the drawn seed's instance from its own copy (`build = "runtime"`: from its own seed file). How to
 run a seed: "Seeds (which frozen instance a trial runs from)" below.
 
@@ -215,10 +216,16 @@ harbor run -p /tmp/run1/<task> -a <agent> ...
 ```
 
 The agent never chooses or sees the list: another seed's instance lives under the privileged task's `tests/seeds/`,
-and the copy carries only the drawn one. As of 2026-10-13 every task allows its default seed only, so
-`scripts/run_agent_batch.sh` runs each job from a stamped copy of the task as it is (with the gateway, the copy's
-egress is the gateway; with a CPU cap above the host's count, `HOST_CPUS`, the copy has that cap clamped, Resources
-above); it materializes a seed per trial once a benchmark allows more than one.
+and the copy carries only the drawn one. `scripts/run_agent_batch.sh` runs each job from a stamped copy of the task
+(with the gateway, the copy's egress is the gateway; with a CPU cap above the host's count, `HOST_CPUS`, the copy has
+that cap clamped, Resources above). For a base whose tasks allow one seed that copy is the task as it is, one job per
+task and mode with `K` attempts. For a base that allows more, `scripts/task_seed.py assign` gives its `K` trials `K`
+seeds drawn without replacement (a shuffle of `allowed` keyed by the batch name and the base, another shuffled pass
+when `K` exceeds them; each trial's seed is still uniform), the same seeds in every mode; each (task, mode, seed) is one
+job, `<batch>-<mode>-<task>-s<S>`, one attempt, from the copy `task_seed.py materialize --seed <S>` writes. The
+assignment is in `.plan/<batch>.json` and the batch log, `<job>/seed.json` records it for the results (one folder per
+seed under the task's result folder, whose README gives the task's success over its seeds), and a rerun of a job (an
+infrastructure retry) gets the same seed.
 
 ## The agent's time (the cutoff)
 A trial's agent gets the task's `[agent] timeout_sec` and nothing else: Harbor counts it around the agent's run only

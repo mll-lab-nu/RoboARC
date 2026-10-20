@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Write per-task agent results for the results site (not into the repository, PROTOCOL D3): <out>/<task>/<run id>/README.md
 (+ replay.mp4, replay.last.png, config.json, attempts.json). One folder per agent+model; the privileged and standard twins
-each get their own.
+each get their own. A job of one seed (scripts/run_agent_batch.sh: <job>/seed.json, a base with more than one allowed
+seed) writes those files into <out>/<task>/<run id>/<slot>/ (s<S>, a later pass s<S>-p<n>), and <out>/<task>/<run id>/
+README.md lists the task's seeds with its success over them.
 usage: write_task_results.py <jobs_dir> <job_name> <run-id> "<agent label>" --out <dir> [--analysis <a Python file with ANALYSIS = {family: {"U": text, "L": text}}>]
 
 config.json (RUNNING.md "Results", PROTOCOL v2.0): the trial's effective configuration (scripts/task_conventions.py
@@ -95,7 +97,8 @@ def classify(trial, r, rw):
 def trial_config(trial, task, r):
     """The trial's effective configuration (task_conventions.effective_config) with how its seed is known. The seed: the
     runner's copy of the task the trial ran from (scripts/task_seed.py materialize writes the chosen seed as its
-    `[metadata.seeds] default`), else the task's default seed (`seed_source = "default"`). Run-time overrides: the trial's
+    `[metadata.seeds] default`; scripts/run_agent_batch.sh records it in <job>/seed.json, since it removes the copy after
+    the job), else the task's default seed (`seed_source = "default"`). Run-time overrides: the trial's
     recorded environment. A trial of another version of the task (its `task_checksum` is not the task's DIGEST now) keeps
     only what its name says; the rest is "legacy"."""
     tdir = ROOT / "tasks" / task
@@ -106,7 +109,10 @@ def trial_config(trial, task, r):
             env.update({k: str(v) for k, v in src.items() if k in OVERRIDES})
     seed, source = None, "default"
     p = ((hc.get("task") or {}).get("path") or "")
-    if p:
+    rec = load_json(trial.parent / "seed.json")
+    if isinstance(rec.get("seed"), int) and not isinstance(rec.get("seed"), bool):
+        seed, source = rec["seed"], "runner copy"
+    elif p:
         copy = pathlib.Path(p) if pathlib.Path(p).is_absolute() else ROOT / p
         if copy.resolve() != tdir.resolve() and (copy / "task.toml").is_file():
             try:
@@ -143,6 +149,33 @@ def record_attempt(out, trial, r, status):
     return led
 
 
+SLOT_RE = re.compile(r"s-?\d+(-p\d+)?")
+
+
+def slot_of(job_dir):
+    """The job's seed slot (s<S>, s<S>-p<n>) from <job>/seed.json, or None: a job of a task as it is."""
+    slot = load_json(job_dir / "seed.json").get("slot")
+    return slot if isinstance(slot, str) and SLOT_RE.fullmatch(slot) else None
+
+
+def seeds_readme(d, task, label):
+    """<out>/<task>/<run id>/README.md of a task run on several seeds: one row per seed slot (its config.json), and the
+    task's success over them (results only: a voided trial is not counted)."""
+    rows = []
+    for c in sorted(d.glob("*/config.json"), key=lambda c: c.parent.name):
+        if SLOT_RE.fullmatch(c.parent.name):
+            cfg = load_json(c)
+            rows.append((c.parent.name, cfg.get("seed"), cfg.get("result"), cfg.get("attempts")))
+    counted = [r for r in rows if r[2] in ("success", "fail")]
+    lines = [f"# {label} — {task}\n",
+             "One trial per seed the runner assigned (docs/RUNNING.md \"Seeds\"); each seed's record is in its folder.\n",
+             f"Success over its seeds (results only): {sum(r[2] == 'success' for r in counted)} / {len(counted)}"
+             f"; {sum(r[2] == 'not_a_result' for r in rows)} voided.\n",
+             "| seed | result | attempts | record |", "|---|---|---|---|"]
+    lines += [f"| {sd} | {res} | {n} | [{sl}/README.md]({sl}/README.md) |" for sl, sd, res, n in rows]
+    (d / "README.md").write_text("\n".join(lines) + "\n")
+
+
 def main(argv):
     jobs, job, slug, label = pathlib.Path(argv[1]), argv[2], argv[3], argv[4]
     if "--out" not in argv: sys.exit("--out <dir> is required: results are published on the results site, not committed (PROTOCOL D3)")
@@ -164,7 +197,8 @@ def main(argv):
         if not tdir.is_dir(): continue
         rw = load_reward(trial)
         ar = r.get("agent_result") or {}; mode = mode_of(task); limited = mode != "privileged"; fam = base(task).replace("robotwin_2_0_", "")
-        out = out_root / task / slug; out.mkdir(parents=True, exist_ok=True)
+        slot = slot_of(trial.parent)
+        out = out_root / task / slug / (slot or ""); out.mkdir(parents=True, exist_ok=True)
         status, why, over = classify(trial, r, rw)
         led = record_attempt(out, trial, r, status)
         rule = rp.check_attempts([{"outcome": OUTCOME.get(a["status"], "agent_failure")} for a in led])
@@ -208,6 +242,8 @@ def main(argv):
         if msgs:
             lines += ["## Agent's last messages\n"] + [f"- {m[:600]}" for m in msgs] + [""]
         (out / "README.md").write_text("\n".join(lines)); n += 1
+        if slot:
+            seeds_readme(out.parent, task, label)
     print(f"{job}: wrote {n} result folders for {slug}")
 
 
