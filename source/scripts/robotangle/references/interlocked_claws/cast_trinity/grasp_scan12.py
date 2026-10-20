@@ -13,7 +13,7 @@ import mujoco, trimesh, fcl
 import puzzle as pz
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ALOHA = os.environ.get('ALOHA_XML', '/home/jianwen/topogym/assets/robots/aloha/aloha.xml')
+ALOHA = os.environ.get('ALOHA_XML', os.path.join(HERE, '..', '..', '..', '..', '..', 'assets', 'robots', 'aloha', 'aloha.xml'))
 MM = 1e-3
 FINGER_OFFSET = 0.0157        # 两指指垫间距 = 2 x 指关节值 - FINGER_OFFSET（rotor_oracle.py 的同名常数）
 OPEN_MARGIN = 0.001           # 扫描时每边多张开 1 mm

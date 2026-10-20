@@ -14,7 +14,7 @@ import mujoco, fcl, trimesh
 from scipy.spatial.transform import Rotation as Rot
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-for _p in (os.path.join(HERE, '..', 'scripts'), os.path.join(HERE, '..', '..', 'scripts')):   # vast 上 rerun/ 深一层
+for _p in (os.path.join(HERE, '..', 'scripts'), os.path.join(HERE, '..', '..', 'scripts')):   # a rerun/ copy sits one level deeper
     if os.path.isfile(os.path.join(_p, 'rrt.py')):
         sys.path.insert(0, _p)
         break
