@@ -44,6 +44,7 @@ for t in tests/test_codex_tools_off.py tests/test_retry_policy.py tests/test_sta
   run 300 "$t"
 done
 run 300 roboarc/tests/test_seed_staging.py   # appearance seeds: stage_instance.py --seed-file, mk_tasks.py on fake seed pins
+run 300 roboarc/tests/test_seed_goal_images.py   # appearance seeds' goal pictures: stage_instance.py --goal, mk_tasks.py, materialize
 run 120 account_failure_check.py --selftest   # the runner's lane stop and infra rules (account, usage gateway) on synthetic trials
 
 if python3 -c "import numpy, requests" 2>/dev/null; then

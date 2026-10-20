@@ -14,9 +14,11 @@ binding there); RoboPaint's `environment/scorer/`. The copy's `[metadata.seeds]`
 `default` (and `instance_seed`, where present) say the seed it runs from, so a result records it; its `tests/seeds/`
 is removed, and every file gets its content-derived mtime (scripts/stamp_mtimes.py, issue #258). A seed without a
 committed instance, of a task with `build = "runtime"`, is written instead as a file `seed` (the integer) in each of
-those places, from which the task builds the seed's instance itself. A seed that is
-not allowed (a list, a range `{ from, to }` or "any") is refused. `--seed draw` draws one uniformly (with `--rng`;
-"any" draws from 0 to 2**31 - 1). `assign` gives a batch's K trials of one base their seeds: drawn without
+those places, from which the task builds the seed's instance itself. A task whose agent is shown goal pictures
+(`environment/goal/`) and that commits a seed's own (`tests/seeds/<S>/goal/` of the task itself: RoboARC's standard
+tasks, whose agent image takes nothing from the simulator's) gets them in place of the default's, same names only.
+A seed that is not allowed (a list, a range `{ from, to }` or "any") is refused. `--seed draw` draws one uniformly
+(with `--rng`; "any" draws from 0 to 2**31 - 1). `assign` gives a batch's K trials of one base their seeds: drawn without
 replacement (every seed once before any seed twice), each trial's seed still uniform over `allowed`, the same for
 every lane and rerun of the batch (scripts/run_agent_batch.sh). Standard library only.
 """
@@ -102,6 +104,15 @@ def materialize(task: Path, seed: int, out: Path) -> Path:
         for place in places(task):                 # the task builds that seed's instance itself from this file
             if (dst / place).is_dir():
                 (dst / place / "seed").write_text(f"{seed}\n")
+    goal = task / "tests" / "seeds" / str(seed) / "goal"
+    if seed != sd["default"] and goal.is_dir():    # that seed's goal pictures, where the agent's image takes them from
+        names = sorted(p.name for p in goal.iterdir() if p.is_file())
+        have = sorted(p.name for p in (dst / "environment" / "goal").glob("*") if p.is_file())
+        if names != have:
+            raise SystemExit(f"{task.name}: seed {seed}'s goal pictures {names} are not those of environment/goal/: "
+                             f"{have}")
+        for n in names:
+            shutil.copyfile(goal / n, dst / "environment" / "goal" / n)
     shutil.rmtree(dst / "tests" / "seeds", ignore_errors=True)
     p = dst / "task.toml"
     s = p.read_text()

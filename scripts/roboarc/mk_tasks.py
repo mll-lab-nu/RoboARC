@@ -50,7 +50,8 @@ Inputs, all in this directory, written by scripts/robotangle/release_rebuild.py 
                  its `seeds`; its tasks allow seeds 0 and those (`[metadata.seeds]`, build = "runtime"), carry
                  runtime_binding.s<S>.json beside each runtime_binding.json (its lock:
                  packages/<base>-privileged/runtime_binding.s<S>.upstream.json), and stage the seed a runner's copy names
-                 in its `seed` file (scripts/task_seed.py materialize).
+                 in its `seed` file (scripts/task_seed.py materialize). A seeded base with goal pictures has each seed's
+                 too, instances/<base>/seeds/<S>/goal/ (goal_images()).
 Nothing at run time imports repository code: the tooling and the sim layer are copies (PROTOCOL D9).
 """
 from __future__ import annotations
@@ -531,9 +532,16 @@ def flat_words(s: str, fence: bool) -> str:
     return s.replace(FLAT_OLD, new).replace(FOLD_FLAT_OLD, FOLD_FLAT_NEW)
 
 
-def goal_images(up: pathlib.Path, t: pathlib.Path, instruction: str) -> None:
+def goal_images(up: pathlib.Path, t: pathlib.Path, instruction: str, base: str, mode: str, seeds: list[int]) -> None:
     """A package's goal-state images: copied into the agent container at /app/goal/ (both modes); the instruction must
-    name each one (an image nobody points to is a mistake)."""
+    name each one (an image nobody points to is a mistake).
+    A base with appearance seeds shows each seed's pictures, rendered in its looks (owner, 2026-10-20): seed S's are
+    image files beside its instance, instances/<base>/seeds/<S>/goal/<name>, pinned in assets.json. The privileged
+    environment copies the task's own pictures (seed 0's) next to the runtime bindings, and stage_instance.py --goal puts
+    the pictures of the copy's seed in /app/goal/. The standard agent image takes nothing from the sim image (PROTOCOL
+    H.1, H.3; FROM the client image only, §2.4): the standard task's tests/seeds/<S>/goal/ carries the same bytes
+    (packages/<base>-standard/tests/seeds/<S>/goal/, checked against the pins), and scripts/task_seed.py materialize puts
+    them in the runner's copy's environment/goal/."""
     goal = up / GOAL_DIR
     if not goal.is_dir():
         return
@@ -542,10 +550,23 @@ def goal_images(up: pathlib.Path, t: pathlib.Path, instruction: str) -> None:
     for p in files:
         assert f"/app/goal/{p.name}" in instruction, f"{up.name}: instruction.md does not name /app/goal/{p.name}"
         put(t / GOAL_DIR / p.name, p.read_bytes())
+        for sd in seeds[1:]:
+            key = f"instances/{base}/seeds/{sd}/goal/{p.name}"
+            assert key in ASSETS["files"], f"{base} seed {sd}: assets.json pins no goal picture {key}"
+            if mode == "standard":
+                b = (up / "tests" / "seeds" / str(sd) / "goal" / p.name).read_bytes()
+                assert sha(b) == ASSETS["files"][key], f"{up.name}: tests/seeds/{sd}/goal/{p.name} is not {key}"
+                put(t / "tests" / "seeds" / str(sd) / "goal" / p.name, b)
     df = t / "environment/Dockerfile"
     s, anchor = df.read_text(), "RUN mkdir -p /app/output\n"
     assert s.count(anchor) == 1, f"{t.name}: environment/Dockerfile has no single {anchor!r}"
-    if "COPY goal/ /app/goal/" not in s:
+    tmp = "/opt/robotangle/task"
+    stage, copy = f" --seed-file {tmp}/seed --purge", SEED_COPY.format(tmp=tmp).splitlines(keepends=True)[-1]
+    if stage in s:      # a seeded privileged environment: the pictures of the copy's seed, placed by the staging step
+        assert s.count(stage) == 1 and s.count(copy) == 1, f"{t.name}: environment/Dockerfile: no single seeded stage"
+        s = s.replace(copy, copy + f"COPY goal/ {tmp}/goal/\n").replace(
+            stage, f" --seed-file {tmp}/seed --goal {tmp}/goal /app/goal --purge")
+    elif "COPY goal/ /app/goal/" not in s:
         s = s.replace(anchor, "COPY goal/ /app/goal/\n" + anchor)
     df.write_text(s)
 
@@ -1228,7 +1249,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                     text_n = seeded(n, text_n, base)
                 text_n = text_n.replace("docs/benchmarks/robotangle.md", f"docs/benchmarks/{BENCH}.md")   # the benchmark's page
                 put(t / n, family_words(n, mujoco_lines(n, text_n, rec) if mujoco else text_n, rec).encode())
-        goal_images(up, t, (t / "instruction.md").read_text())
+        goal_images(up, t, (t / "instruction.md").read_text(), base, mode, seeds)
         put(t / "tests/test.sh", family_words("tests/test.sh", (up / "tests/test.sh").read_text(), rec).encode(), exe=True)
         lock = binding(base, inst_src, mujoco, direct) if dev is None else dev_binding(inst_src, dev, mujoco, direct)
         locks = [(f"runtime_binding.s{sd}.json", binding(base, inst_src, mujoco, direct, sd)) for sd in seeds[1:]]

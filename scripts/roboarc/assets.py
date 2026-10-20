@@ -13,6 +13,8 @@ The dataset holds:
                                                        the instance (images/roboarc/stage_instance.py)
   instances/<base>/seeds/<S>/instance.json, instance_assets/**   an appearance seed S of the base (its tasks'
                                                        runtime_binding.s<S>.json; pinned under the base's `seeds`)
+  instances/<base>/seeds/<S>/goal/*.png                seed S's goal pictures, for a base whose instruction shows some
+                                                       (rendered in the seed's looks; mk_tasks.py goal_images())
   image/release-<commit9>.tar.gz                       git archive of the release commit (release.json), the paths the
                                                        image copies
   image/uipc-prebuilt/                                 the audited libuipc wheel and its uipc-build.json

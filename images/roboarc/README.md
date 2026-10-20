@@ -25,7 +25,9 @@ it. Maintainers push it with `images/roboarc/push.sh` after validating a build.
     `runtime_binding.json` and checks it (privileged `environment/` and `tests/` images; the standard `sim` entrypoint).
     A base's appearance seeds are `instances/<base>/seeds/<S>/` (pinned under the base's `seeds` in `assets.json`): for
     the seed in a runner's `seed` file (`scripts/task_seed.py materialize`) `stage_instance.py --seed-file` stages that
-    instance with the task's `runtime_binding.s<S>.json`; no seed file stages the default instance.
+    instance with the task's `runtime_binding.s<S>.json`; no seed file stages the default instance. A seeded base whose
+    instruction shows goal pictures has each seed's in `instances/<base>/seeds/<S>/goal/`; the privileged environment
+    puts the copy's seed's pictures in `/app/goal/` (`stage_instance.py --goal`).
 
   Access: a member of `eai-v2-internal`, logged in with `hf auth login`, or `HF_TOKEN` in the environment (never printed).
 
