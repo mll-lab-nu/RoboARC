@@ -5,11 +5,12 @@
 #
 # The recipe is source/images/robotangle/Dockerfile.mujoco, built from source/ (its .dockerignore keeps the context to
 # the paths the recipe copies), with the frozen instances as the named build context `instances`. This is the build
-# step of source/scripts/robotangle/release_rebuild.py, which made the 0.2.1 release image that 1.0.0 carries forward
+# step of tools/release/release_rebuild.py, which made the 0.2.1 release image that 1.0.0 carries forward
 # file for file:
 #   1. the frozen instances: --instances <dir> (one directory per base, instance.json + instance_assets/), or, by default,
 #      the private HF dataset pinned in scripts/roboarc/assets.json, downloaded into --download <dir> (default
-#      $RCB_ROBOTANGLE_ASSETS or ~/.cache/robotangle-assets) and checked file by file (scripts/roboarc/assets.py);
+#      $RCB_ROBOTANGLE_ASSETS or ~/.cache/robotangle-assets). Either way the context must hold exactly the pinned bases
+#      and files, each with its sha256 (scripts/roboarc/assets.py check-instances);
 #   2. `docker buildx build` of Dockerfile.mujoco FROM the published Genesis base image (pinned by digest);
 #   3. the installed-runtime check: the image must install exactly the runtime every task is bound to
 #      (scripts/roboarc/release.json `runtime`), or the tag is removed again.
@@ -49,6 +50,8 @@ PY
     || cp -a "$(readlink -f "$d")" "$WORK/ctx/$(basename "$d")"; done
   INST="$WORK/ctx"
 fi
+[ $NOINST -eq 1 ] || python3 "$ROOT/scripts/roboarc/assets.py" check-instances "$INST" \
+  || { echo "the instances are not the ones pinned in scripts/roboarc/assets.json: nothing built" >&2; exit 1; }
 n=$(find "$INST" -mindepth 2 -maxdepth 2 -name instance.json | wc -l)
 echo "build $TAG from source/ with $n instances"
 (cd "$ROOT/source" && docker buildx build --load -f images/robotangle/Dockerfile.mujoco --build-arg "RELEASE_VERSION=$VERSION" \
