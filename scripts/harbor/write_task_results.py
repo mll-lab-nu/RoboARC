@@ -163,7 +163,7 @@ def main(argv):
         tdir = ROOT / "tasks" / task
         if not tdir.is_dir(): continue
         rw = load_reward(trial)
-        ar = r.get("agent_result") or {}; mode = mode_of(task); limited = mode != "privileged"; fam = base(task).replace("robotwin_2_0_", "")
+        ar = r.get("agent_result") or {}; mode = mode_of(task); limited = mode != "privileged"; fam = base(task)
         out = out_root / task / slug; out.mkdir(parents=True, exist_ok=True)
         status, why, over = classify(trial, r, rw)
         led = record_attempt(out, trial, r, status)

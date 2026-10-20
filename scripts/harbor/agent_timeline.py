@@ -60,7 +60,7 @@ def codex_events(trial: str, n: int) -> list[dict]:
 
 def service_events(trial: str, n: int) -> list[dict]:
     ev = []
-    for f in glob.glob(os.path.join(trial, "artifacts/data/episode.jsonl")):          # limited mode (sidecar)
+    for f in glob.glob(os.path.join(trial, "artifacts/data/episode.jsonl")):          # standard mode (sidecar)
         for line in open(f, errors="replace"):
             try: e = json.loads(line)
             except Exception: continue
