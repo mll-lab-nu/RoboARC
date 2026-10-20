@@ -1,54 +1,61 @@
 # roboarc (the release image)
 
-> **2026-10-13: the MuJoCo release.** `Dockerfile` here now builds RoboARC's MuJoCo release image
-> (`eai-roboarc:<VERSION>`, 0.3.1 and later), FROM the published Genesis image `eai-robotangle:0.2.22` pinned by
-> digest. The recipe of that base image is kept as `Dockerfile.genesis-0.2.22`; everything below this note describes
-> it (the simulator source, libuipc builds and instance staging the MuJoCo image inherits).
+`ghcr.io/embodied-first-exam/roboarc:<VERSION>` (this directory's `VERSION`; 1.0.0 is image id `sha256:18a821a18d2b…`)
+is the image every RoboARC task runs in: the privileged agent and verifier containers are built `FROM` it, and the
+standard mode's `sim` service runs it. It holds:
 
-`ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>` is the release image: RoboARC's simulator (the pruned
-`topogym` package of the release commit), Genesis 1.2.1, libuipc (the audited determinism-patched wheel, plus an sm_86 build
-of the same recipe), PyTorch, Nyx and every task's frozen instance. The tasks `FROM` it, and the standard `sim` service runs
-it. Maintainers push it with `images/roboarc/push.sh` after validating a build.
+- the simulator source (`/opt/topogym/topogym`, the pruned `topogym` package with its MuJoCo core) and its hash
+  `/opt/topogym/SOURCE.json`, which every task's runtime binding names;
+- the robot assets (`/opt/topogym-assets/robots`);
+- the VBD cloth packages (newton 1.6.1, warp-lang 1.18.0) and their Warp CPU kernels, compiled at build into
+  `/opt/warp-cache`;
+- every task's frozen MuJoCo instance (`/opt/robotangle/instances/<base>/`), staged into a task by
+  `/opt/robotangle/stage_instance.py` and checked against the task's `runtime_binding.json`;
+- MuJoCo 3.14.0 with the EPA fix (a 14-byte patch of its `libmujoco.so`; `docs/simulator/MUJOCO_EPA_PATCH.md`);
+- everything else from the Genesis base image, below.
 
-- **Nyx.** The image contains Genesis AI's Nyx renderer (the `gs-nyx` wheels on PyPI). The benchmark owner has permission to
-  redistribute it in this image.
-- **Build source.** The build context comes from the private Hugging Face dataset `eai-v2-internal/robotangle-assets`. It is
-  internal and is never made public; only the built image is public. It holds, at the revision and sha256s pinned in
-  `scripts/roboarc/assets.json`:
-  - `image/release-<commit>.tar.gz`: the release tree (`scripts/roboarc/release.json` `release_commit`), the paths
-    `images/topogym/Dockerfile` copies;
-  - `image/uipc-prebuilt/`: the audited libuipc wheel and its `uipc-build.json` (sha256 `39781d19…`), which every task's
-    runtime binding names. nvcc output is not bit-reproducible, so a wheel compiled elsewhere never matches the binding;
-  - `image/uipc-sm86/`: the sm_86 build of the same recipe and its `uipc-build.json` (sha256 `712470d2…`; "The libuipc
-    builds", below). The image installs it in `/opt/uipc_sm86` (`install_uipc_prefix.py`);
-  - `instances/`: every task's frozen instance. `stage_instance.py` copies a task's instance next to its
-    `runtime_binding.json` and checks it (privileged `environment/` and `tests/` images; the standard `sim` entrypoint).
+The task tooling (`rcb_topogym.py`, `nyx_direct.py`, `render_bridge.py`) is not in the image: each task dir carries
+its own pinned copy.
 
-  Access: a member of `eai-v2-internal`, logged in with `hf auth login`, or `HF_TOKEN` in the environment (never printed).
+## The Genesis base image
+
+The release image is a delta on top of the published RoboTangle image 0.2.22, pinned by digest in the recipe:
+`ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3…` (the same image was first published as
+`ghcr.io/mll-lab-nu/eai-robotangle:0.2.22`). The base provides Python 3.11.15, numpy 2.3.5 and scipy 1.17.1 (their
+OpenBLAS kernels decide the bytes of the frozen assets, hence the SIMD masking every task container sets), mujoco
+3.14.0 (installed as a genesis-world dependency), coacd, torch 2.11.0+cu128, the Nyx renderer (`gs-nyx`, which
+`nyx_direct.py` drives), the Vulkan ICD and EGL vendor files, the Nyx studio HDRI, Genesis 1.2.1 and two builds of
+libuipc.
+
+In RoboARC 1.0.0 every base runs on MuJoCo and every family renders with `nyx_direct.py`: no task steps Genesis or
+imports libuipc. They stay because the runtime identity pins them. `topogym.simulator.frozen_binding.installed_runtime()`
+records the versions of genesis-world, pyuipc, torch, numpy, scipy, mujoco, newton and warp-lang and the hash of
+`/opt/uipc-build.json`; every task's `runtime_binding.json` holds that runtime (`scripts/roboarc/release.json`
+`runtime`, and both libuipc build records in `uipc_builds`), and a Session refuses any other one. A base without
+Genesis and libuipc is a new runtime: new bindings for all 202 task dirs and every reference replayed again (a 2.0
+change, not a 1.x one).
+
+The base's recipe is kept here for the record, `Dockerfile.genesis-0.2.22`, with the files it copies from this
+directory: `stage_instance.py`, `install_uipc_prefix.py` and `verify_uipc_wheel.py` are the bytes the base image
+holds (their comments use the paths of the repository they were written in), and `uipc-sm86-build/` is the recipe of
+the sm_86 libuipc build. It cannot be built from this repository: its context was a release tree archive and the
+libuipc wheels, kept in the private HF dataset (`image/`), not here. 0.2.22 itself was published as a delta of 0.2.21
+(`ghcr.io/mll-lab-nu/eai-robotangle:0.2.21@sha256:4fd681598e07…`) plus one `COPY` layer with the eight IPC instances'
+`instance_assets/frozen_assets/rope_volume.npz`.
 
 ## Host
 
-- Linux x86_64. Not WSL: Nyx needs the NVIDIA Vulkan driver inside the container.
-- An NVIDIA GPU with driver >= 580, and Docker with the NVIDIA Container Toolkit. Docker's default runtime stays `runc`.
-- Exactly one GPU per container: Nyx crashes when two GPUs are visible. The task compose files reserve one GPU with a
-  device reservation (`count: 1`, `capabilities: [gpu]`), without `runtime: nvidia`. NVIDIA_DRIVER_CAPABILITIES=all makes
-  the toolkit mount the driver's graphics libraries, and the image's Vulkan ICD and EGL vendor files point the loaders at
-  them, as in `images/robopaint/`. `VK_ICD_FILENAMES` names the image's ICD file: a toolkit in CDI mode also mounts the
-  host's `/etc/vulkan/icd.d/nvidia_icd.json`, which would list the GPU twice.
-- `count: 1` is host GPU 0 unless the runner pins GPUs; IPC sims (knot_untying, rope_threading) run alone on a 24 GB GPU
-  (`docs/benchmarks/roboarc.md`, Image).
-- GPU architecture (`docs/benchmarks/roboarc.md`, Image, has the table):
-  - knot_untying and rope_threading run libuipc: the audited wheel on compute capability 8.9 and 12.x, the sm_86 build on
-    any other GPU (native on 8.6, e.g. RTX A6000; untested elsewhere). 7.5 (T4, RTX 20xx) can run neither;
-  - GPUs without RT cores (e.g. A100, H100) cannot run Nyx, so they run no RoboARC task;
-  - the driver must include its graphics (GL/Vulkan) user-space libraries.
-- blanket_flatten: on a GPU other than the one its frozen PBD states were prepared on (an RTX PRO 6000 Blackwell), the task
-  generates the birth state from the recipe frozen in the instance (`docs/benchmarks/roboarc.md`, GPU portability).
-- Build:
-  - about 25 GB of free disk: the 11.3 GB image plus BuildKit cache;
-  - BuildKit with the default `docker` driver;
-  - network access to docker.io, pypi.org, download.pytorch.org and dl.polyhaven.org (the CC0 studio HDRI).
-- Running needs no network.
+- Linux x86_64 (not WSL: Nyx needs the NVIDIA Vulkan driver inside the container).
+- An NVIDIA GPU with RT cores (GPUs without them, e.g. A100 and H100, cannot run Nyx) and driver >= 580 with its
+  graphics (GL/Vulkan) user-space libraries; Docker with the NVIDIA Container Toolkit, the default runtime left at `runc`.
+- Exactly one GPU per container: Nyx crashes when two are visible. The task compose files reserve one GPU with a
+  device reservation (`count: 1`, `capabilities: [gpu]`) and no `runtime: nvidia`. `NVIDIA_DRIVER_CAPABILITIES=all`
+  makes the toolkit mount the driver's graphics libraries, and the image's Vulkan ICD and EGL vendor files point the
+  loaders at them. `VK_ICD_FILENAMES` names the image's ICD file: a toolkit in CDI mode also mounts the host's
+  `/etc/vulkan/icd.d/nvidia_icd.json`, which would list the GPU twice.
+- Physics runs on the CPU (MuJoCo, float64), except the blanket families' cloth step, which runs on the GPU on a
+  deterministic solver.
+- Running needs no network. The image is not cache-warmed: every container compiles its kernels on first use.
 
 ## Build (from the repository root)
 
@@ -58,68 +65,71 @@ images/roboarc/build.sh --instances <dir>     # or a local copy: <dir>/<base>/in
 images/roboarc/build.sh --noinst              # the image without instances (to make new instances in it)
 ```
 
-`build.sh` runs the build step of `source/scripts/robotangle/release_rebuild.py`: `docker buildx build` of
-`source/images/robotangle/Dockerfile.mujoco` from `source/` (its `.dockerignore` keeps the context to the paths the
-recipe copies), with the frozen instances as the named build context `instances`. The recipe is FROM the published
-Genesis image 0.2.22, pinned by digest. It adds the simulator source, the robot assets, the VBD cloth wheels and their
-Warp CPU kernels, the instances and the EPA-patched `libmujoco.so`, and squashes the result into one layer. The script
-checks every instance file against its pin, and the image's installed runtime against `scripts/roboarc/release.json`
-(see below). It removes the tag when the runtime differs. 1.0.0 built this way has the same layers as the 0.2.1
-release image.
+`build.sh` is the build step of `tools/release/release_rebuild.py`:
 
-The Genesis base image 0.2.22 was published as a delta of the published 0.2.21: `FROM
-ghcr.io/mll-lab-nu/eai-robotangle:0.2.21@sha256:4fd681598e07a7a29201b8f30ccbee9944baaa856a5b05b045e48522c138f7ab` plus
-one `COPY` layer with the eight IPC instances' `instance_assets/frozen_assets/rope_volume.npz` (mode 0644). Its
-recipe is `Dockerfile.genesis-0.2.22` (it needs the release archive and libuipc builds of the HF dataset, `image/`).
-Both images are in the consolidated public package `ghcr.io/mll-lab-nu/efe` (`robotangle-0.2.21`,
-`robotangle-0.2.22`) with their original digests.
+1. the frozen instances: by default the pinned revision of the private HF dataset `eai-v2-internal/robotangle-assets`
+   (`instances/` only; read access needed: `hf auth login` or `HF_TOKEN`, never printed), downloaded by
+   `scripts/roboarc/assets.py fetch`; or `--instances <dir>`. Either way `assets.py check-instances` requires exactly
+   the pinned bases and files, each with its sha256, before anything is built;
+2. `docker buildx build` of `source/images/robotangle/Dockerfile.mujoco` with `source/` as the context
+   (`source/.dockerignore` keeps it to the paths the recipe copies) and the instances as the named build context
+   `instances`, FROM the base image above;
+3. the runtime check below; the tag is removed when the installed runtime differs from `scripts/roboarc/release.json`.
 
-The image is not cache-warmed: every container compiles its kernels on first use. Scene ready took 67-296 s for the
-rigid families on a shared 4090, against the 1800 s startup watchdog.
+It needs Docker with BuildKit (the default `docker` driver), about 25 GB of free disk (the 11.3 GB image plus the
+BuildKit cache) and network access to ghcr.io (the base image) and pypi.org (the VBD wheels, hash-pinned).
 
-## Push
-
-`images/roboarc/push.sh <image id>` pushes the local tag after a verified build. The registry token is read from
-stdin, and the GitHub user comes from `GHCR_USER`. The token lives in a temporary Docker config that is removed on
-exit. The script refuses a tag whose image id is not the given one. After the push it checks that the pushed digest
-equals the remote manifest's and that the remote config digest is the image id. New packages start private.
+Keep the bytes of every file the recipe copies (under `source/`): a changed input misses the build cache, and a
+cache-cold build writes `.pyc` files whose source-mtime field differs from the released image's, so the image is no
+longer file-for-file the release. A rebuild is checked against the release by comparing file manifests.
 
 ## Check a build
 
-The image must install exactly the runtime every task is bound to:
+The image must install exactly the runtime every task is bound to (`build.sh` runs this):
 
 ```bash
 docker run --rm ghcr.io/embodied-first-exam/roboarc:$(cat images/roboarc/VERSION) python -c 'import json; from topogym.simulator.frozen_binding import installed_runtime; print(json.dumps(installed_runtime(), sort_keys=True))' > /tmp/roboarc_runtime.json
 python3 -c 'import json, sys; sys.exit(0 if json.load(open("/tmp/roboarc_runtime.json")) == json.load(open("scripts/roboarc/release.json"))["runtime"] else "image differs from the tasks runtime binding: do not run")'
 ```
 
-Every session checks it again at start (`runtime_binding_ok` in reward.json) and refuses a different runtime. The two
-libuipc builds must be the ones `scripts/roboarc/release.json` `uipc_builds` names, and the image build already checked
-both wheels against their build records:
+Every Session checks it again at start (`runtime_binding_ok` in reward.json) and refuses a different runtime, including
+the two libuipc build records `scripts/roboarc/release.json` `uipc_builds` names:
 
 ```bash
 docker run --rm ghcr.io/embodied-first-exam/roboarc:$(cat images/roboarc/VERSION) sh -c 'sha256sum /opt/uipc-build.json /opt/uipc_sm86/uipc-build.json; cat /opt/uipc-check.json'
 ```
 
-## The libuipc builds
+## Push
 
-The image holds two builds of one libuipc recipe (libuipc 292c98c3 with the determinism patches of the release's
-`images/topogym/uipc-patches`, the pinned CUDA 12.8 builder image, pyuipc `0.0.25+topogym.det1.cuda128`):
-- the audited wheel (`89-real;120-real;120-virtual`) in site-packages, `/opt/uipc-build.json`: every evidence run used it,
-  and GPUs of compute capability 8.9 and 12.x always load it;
-- the sm_86 build (`86-real;86-virtual`) in `/opt/uipc_sm86`: any other GPU loads it. The task tooling chooses at Session
-  start, before uipc is imported (`rcb_topogym.py` `select_uipc_build`).
+```bash
+<token source> | GHCR_USER=<github user> images/roboarc/push.sh [--log <dir>] <ref>=<expected image id> ...
+```
 
-Both keep the pyuipc version and libuipc commit, which the frozen IPC settled states record; that is why the sm_86 build
-restores them. Do not give a rebuild another local version label.
+`push.sh` pushes local tags after a verified build. Each tag must be its expected image id, or nothing is pushed. The
+registry token (write:packages) is read from stdin only and lives in a temporary Docker config that is removed on
+exit. After each push the pushed digest must equal the remote manifest's, and the remote config digest the image id.
+New packages start private.
 
-The sm_86 recipe is `images/roboarc/uipc-sm86-build/`: the release Dockerfile's compile stages verbatim, its config
-`uipc-build-sm86.json` (the release config with the architecture list changed, plus a `recipe` record), and the release's
-`verify_uipc_wheel.py` with one change: the audit requires the PTX of the config's `-virtual` architectures instead of a
-fixed compute_120. A rebuild follows the same recipe but need not give the same bytes or even the same machine code (two
-sm_86 builds of 2026-10-08 differ in 10 of 1230 functions), so a rebuilt wheel needs new bindings. A single wheel for
-sm_86, sm_89 and sm_120 was tried and not used: its sm_89 code differed from the audited wheel's in 8 of 1230 functions
-(`docs/benchmarks/roboarc.md`, Image).
+## Files
+
+| file | what | pinned |
+|---|---|---|
+| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/embodied-first-exam/roboarc:<VERSION>` into every task's Dockerfiles, compose files and README | changing it re-renders all 202 task dirs (new DIGESTs) |
+| `build.sh`, `push.sh` | the build (above) and the push | no (tools; not image inputs) |
+| `Dockerfile.genesis-0.2.22`, `stage_instance.py`, `install_uipc_prefix.py`, `verify_uipc_wheel.py`, `uipc-sm86-build/` | the record of the Genesis base image's recipe (above) | the base image itself is pinned by digest in `source/images/robotangle/Dockerfile.mujoco` |
+
+The release recipe and its inputs are under `source/` (`source/README.md`).
+
+## The libuipc builds (part of the bound runtime; unused by 1.0.0's tasks)
+
+The base holds two builds of one libuipc recipe (libuipc 292c98c3 with determinism patches, the pinned CUDA 12.8
+builder image, pyuipc `0.0.25+topogym.det1.cuda128`): the audited wheel (`89-real;120-real;120-virtual`) in
+site-packages with `/opt/uipc-build.json`, and an sm_86 build (`86-real;86-virtual`) in `/opt/uipc_sm86`. The tooling
+chooses one by the GPU's compute capability (`rcb_topogym.py` `select_uipc_build`) and records it in the Session's
+runtime. Both keep the pyuipc version and libuipc commit. The sm_86 recipe is `uipc-sm86-build/`: the release
+Dockerfile's compile stages verbatim, the config `uipc-build-sm86.json` and the audit script with one change (it
+requires the PTX of the config's `-virtual` architectures instead of a fixed compute_120). nvcc output is not
+bit-reproducible, so a rebuilt wheel would need new bindings.
 
 ```bash
 cd images/roboarc/uipc-sm86-build
