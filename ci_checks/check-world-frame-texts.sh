@@ -18,7 +18,7 @@ import os, re, sys
 t = sys.argv[1]; name = os.path.basename(t)
 NUM = r"-?\d+(?:\.\d+)?"
 PATTERNS = [
-    ("workspace height", re.compile(r"table[ _-]?top[ _-]?z|table[ _-]?top\s+(?:is\s+)?at\b|table surface is the plane|plane z\b", re.I)),
+    ("workspace height", re.compile(r"table[ _-]?top[ _-]?z|table[ _-]?top\s+(?:is\s+)?at\s+(?:z\s*=?\s*)?[-+]?[0-9.]|table surface is the plane|plane z\b", re.I)),
     ("height / plane", re.compile(r"\bz\s*=\s*\**" + NUM)),
     ("coordinates", re.compile(r"\(\s*" + NUM + r"\s*,\s*" + NUM + r"\s*(?:,\s*" + NUM + r"\s*)?\)")),
     ("world formula", re.compile(r"\bworld\s+[xyz]\s*=", re.I)),
