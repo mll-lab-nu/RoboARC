@@ -1,27 +1,15 @@
 #!/usr/bin/env python3
-"""Render the tasks of RoboARC (BENCH below; docs/benchmarks/<BENCH>.md): the MuJoCo release, which replaces the
-Genesis release (user decision 2026-10-13: the previous Genesis -i00 tasks are deleted; until then this generator
-lived in its own directory as a benchmark of its own):
-tasks/<BENCH>-<family>-<NN>-i01-privileged and its standard twin -standard (eai-standard/2.4); NN is the base's number in
-its family and the difficulty is task.toml's `difficulty` (roboarc_names.json: old base -> new base, family, number,
-difficulty; owner, 2026-10-13).
+"""Render the RoboARC task dirs: tasks/roboarc-<family>-<NN>-i01-privileged and its standard twin -standard
+(eai-standard/2.4), one pair per base in release.json. NN is the base's number in its family; the difficulty is
+task.toml's `difficulty`.
 
-The benchmark's name is one parameter, BENCH: the task prefix, the image (ghcr.io/embodied-first-exam/<BENCH>,
-images/<BENCH>/VERSION) and this directory (scripts/<BENCH>/). Renaming it: BENCH here and in
-scripts/robotangle/release_rebuild.py on dev/robotangle_mujoco (--bench), `git mv` of scripts/<BENCH>/,
-images/<BENCH>/ and docs/benchmarks/<BENCH>.md, and the registration lines listed in docs/benchmarks/<BENCH>.md
-("Registration").
-
-usage: python3 scripts/<BENCH>/mk_tasks.py [--check] [--list] [--assets <dir>] [base ...]
-       python3 scripts/<BENCH>/mk_tasks.py --dev <dev.json> --out <dir> base ...
+usage: python3 scripts/roboarc/mk_tasks.py [--check] [--list] [--assets <dir>] [base ...]
   no base   every base in release.json
   --check   write nothing; exit 1 if a task would change, or if an identity check fails
   --list    print the bases with their evidence
-  --assets  a local copy of the pinned HF dataset (the instances/<base>/ layout): also check the frozen instances' bytes
-            against the runtime bindings (without it, the pins in assets.json are compared)
-  --dev     local dev task dirs, written to --out (never tasks/): dev.json names a locally built image ("image":
-            reference, id; "runtime" and "uipc_builds" as its installed_runtime() reports them) and, per base, a local
-            frozen instance directory ("instance") and the reference trajectory both modes replay ("reference")
+  --assets  a local copy of the pinned HF dataset (the instances/<base>/ layout, scripts/roboarc/assets.py fetch): also
+            check the frozen instances' bytes against the runtime bindings (without it, the pins in assets.json are
+            compared)
 
 Every base is a MuJoCo base (release.json physics_engine "mujoco"): the numpy / OpenBLAS SIMD masking in every container
 that runs a Session, render_bridge.py next to every copy of the tooling and its sha256 in the binding
@@ -29,27 +17,25 @@ that runs a Session, render_bridge.py next to every copy of the tooling and its 
 (nyx_direct_sha256). A base on a GPU physics profile (release.json gpu_physics: the blanket's CUDA cloth step) keeps
 the GPU for its physics as well as for Nyx.
 
-Inputs, all in this directory, written by scripts/robotangle/release_rebuild.py --onto on dev/robotangle_mujoco
-(Python standard library only, plus scripts/task_conventions.normalize):
-  release.json   the release (dev/robotangle_mujoco commit, simulator source, runtime, tooling) and, per base, where its
-                 frozen instance comes from (ported_from: the RoboARC Genesis base whose scene it ports; template:
-                 the base whose texts a new variation starts from), its texts' facts (grasp_rules, physics_dt_s) and
-                 the oracle runs that are its evidence
-  shared/        the tooling rcb_topogym.py with render_bridge.py and nyx_direct.py (dev/robotangle_mujoco's), the
-                 graders, the sim service adapter (server.py, replay.py, finalize.sh), the standard oracle player
+Inputs (Python standard library only, plus scripts/task_conventions.normalize):
+  release.json   the release (simulator source, runtime, tooling) and, per base, where its frozen instance comes from
+                 (ported_from: the Genesis-era base whose scene it ports; template: the base whose texts a new variation
+                 starts from), its texts' facts (grasp_rules, physics_dt_s, step_s, chain) and the oracle runs that are
+                 its evidence
+  shared/        the pinned tooling rcb_topogym.py with render_bridge.py and nyx_direct.py, the graders, the sim service
+                 adapter (server.py, replay.py, finalize.sh), the standard oracle player
   scripts/eai_standard/v2_4/ + scripts/eai_standard/   the eai-standard/2.4 layer, copied unchanged
-  packages/      per task, the upstream texts (task.toml, README.md, instruction.md, Dockerfiles, compose files, test.sh):
-                 the RoboARC base's texts it ports, renamed, with the family's own texts over them for a changed or
-                 new design; and the instance's lock (runtime_binding.upstream.json)
+  packages/      per task, the source texts (task.toml, README.md, instruction.md, Dockerfiles, compose files, test.sh,
+                 goal images) and the instance's lock (runtime_binding.upstream.json)
   oracles/       the references (privileged.npz; standard.npz is the same file, or, where release.json's standard evidence
                  has "speed_rule", the reference re-timed to the standard service's joint-speed rule)
-  assets.json    the frozen instances, not in git: the private HF dataset eai-v2-internal/robotangle-assets (the same
-                 dataset as RoboARC's, instances/<base>/), pinned by commit and sha256. The image carries them; a task
-                 keeps its runtime_binding.json and stages its instance from the image (/opt/robotangle/stage_instance.py).
+  assets.json    the frozen instances, not in git: the private HF dataset eai-v2-internal/robotangle-assets
+                 (instances/<base>/), pinned by commit and sha256. The image carries them; a task keeps its
+                 runtime_binding.json and stages its instance from the image (/opt/robotangle/stage_instance.py).
 Nothing at run time imports repository code: the tooling and the sim layer are copies (PROTOCOL D9).
 """
 from __future__ import annotations
-import argparse, filecmp, hashlib, json, math, os, pathlib, re, shutil, sys, tempfile, tomllib, zipfile
+import argparse, hashlib, json, math, os, pathlib, re, shutil, sys, tempfile, tomllib, zipfile
 
 BENCH = "roboarc"   # the benchmark's name: task prefix, image <BENCH>, scripts/<BENCH>/, docs/benchmarks/<BENCH>.md
 HERE = pathlib.Path(__file__).resolve().parent
@@ -92,7 +78,7 @@ _HOSTS = re.search(r"(?ms)^HOSTS = \[(.*?)\]", (ROOT / "scripts/set_agent_egress
 EGRESS_NEW = ('network_mode = "allowlist"      # model APIs and package registries (scripts/set_agent_egress.py); PROTOCOL §2.11\n'
               "allowed_hosts = [" + ", ".join(f'"{h}"' for h in re.findall(r'"([^"]+)"', _HOSTS)) + "]\n")
 ASSETS = json.loads((HERE / "assets.json").read_text())        # the pinned HF dataset (scripts/roboarc/assets.py)
-STAGED = "/tmp/robotangle-instance"                             # where the standard sim stages its instance   # nop runs on this release's build (very_easy / easier)
+STAGED = "/tmp/robotangle-instance"                             # where the standard sim stages its instance
 VERSION = (ROOT / "images" / BENCH / "VERSION").read_text().strip()
 IMAGE = f"ghcr.io/embodied-first-exam/{BENCH}:{VERSION}"
 ROBOT = {"aloha": "aloha-2", "panda_robotiq": "franka-robotiq-2f85"}
@@ -107,10 +93,6 @@ PROTO = ("eai-standard/2.3", "eai-standard/2.4")   # the release's name of the l
 sha = lambda b: hashlib.sha256(b).hexdigest()  # noqa: E731
 
 
-def dash(s: str) -> str:
-    return s.replace("_", "-")
-
-
 def text(s: str) -> str:
     """User-facing rename (README, instruction, task.toml); code identifiers (topogym, rcb_topogym) stay."""
     s = re.sub(r"\btopogym-([a-z0-9-]+-i\d\d-(?:privileged|standard))\b", BENCH + r"-\1", s)
@@ -123,7 +105,7 @@ def text(s: str) -> str:
     return s.replace("his qualification record", "the author's qualification record")
 
 
-# ---------------------------------------------------------------- MuJoCo bases (dev/robotangle_mujoco, the MuJoCo release)
+# ---------------------------------------------------------------- MuJoCo bases
 MUJOCO_WORDS = (("(ALOHA 2, Genesis)", "(ALOHA 2, MuJoCo)"),
                 ("(Franka Panda + Robotiq 2F-85, Genesis)", "(Franka Panda + Robotiq 2F-85, MuJoCo)"),
                 ("RoboARC on Genesis 1.2.1", "RoboARC on MuJoCo 3.14.0"),
@@ -199,7 +181,7 @@ def grasp_text(s: str, rec: dict) -> str:
     """A MuJoCo base's grasping rule in the words the tooling's Session.grasp_rules() emits for its instance (release.json
     grasp_rules, read in the release image by release_rebuild.py): on MuJoCo the weld also lets go above the robot's
     slip force averaged over its window, and the Robotiq after losing finger contact (owner decision 2026-10-12)."""
-    if not (is_mujoco(rec) and rec.get("grasp_rules")):
+    if not rec.get("grasp_rules"):
         return s
     s, n = GRASP_RX.subn(lambda m: m[1] + rec["grasp_rules"] + ".", s)
     assert n <= 2, f"{n} grasping sentences"
@@ -226,8 +208,6 @@ def instance_facts(s: str, rec: dict, mode: str) -> str:
     release_rebuild.py: grasp = the [metadata] grasp words, grasp_regions = the grader-details line per mode, grasp_rules):
     a port whose grasp model changed on MuJoCo (rope_threading: the released IPC soft band -> contact_weld_v1) must not keep
     the released line. Records without these facts keep the released lines."""
-    if not is_mujoco(rec):
-        return s
     if rec.get("grasp"):
         s = re.sub(r'(?m)^grasp = ".*"$', lambda m: f"grasp = {json.dumps(rec['grasp'])}", s)
     new = rec.get("grasp_regions", {}).get(mode)
@@ -287,7 +267,7 @@ def chain_words(c: dict, name: str, young_kpa: float | None) -> str:
 def chain_text(s: str, rec: dict) -> str:
     """The released FEM sentence of a chain family replaced by its chain's own (chain_words), or the sentence added
     before the robot-safety line of a text that has none (a new design drafted without it)."""
-    c = rec.get("chain") if is_mujoco(rec) else None
+    c = rec.get("chain")
     if not c:
         return s
     s = (s.replace("Simulator breakdown (an invalid soft-body solver state)",
@@ -317,16 +297,9 @@ def safety_text(s: str) -> str:
     return s.replace(SAFETY_NEW, SAFETY_OLD)
 
 
-def is_mujoco(rec: dict) -> bool:
-    """A base whose frozen instance runs on MuJoCo (release.json physics_engine)."""
-    return rec.get("physics_engine") == "mujoco"
-
-
 def mujoco_text(s: str, rec: dict) -> str:
     """A MuJoCo base's texts name the engine it runs on, and the wall time per control step measured on MuJoCo
     (release.json step_s: its reference's oracle run) where the released text stated Genesis'."""
-    if not is_mujoco(rec):
-        return s
     for a, b in MUJOCO_WORDS + determinism_words(bool(rec.get("gpu_physics"))):
         s = s.replace(a, b)
     s = README_GPU_RX.sub(lambda m: ("The physics (a deterministic GPU cloth step, the rest on the CPU) replays bit for bit on "
@@ -341,8 +314,8 @@ def mujoco_text(s: str, rec: dict) -> str:
 
 
 # ---------------------------------------------------------------- fixes of the 2026-10-10 review (board 0067)
-# Applied here, on top of the release's texts and Dockerfiles, until dev/jianwen carries them (docs/benchmarks/roboarc.md,
-# "Fixes applied on main"). Every replacement asserts that its source text is still there: a new release that rewords
+# Applied here, on top of the release's texts and Dockerfiles (docs/benchmarks/roboarc.md, "Fixes applied on main").
+# Every replacement asserts that its source text is still there: a new release that rewords
 # it fails the render instead of silently losing the fix.
 MAX_STEPS = 200000        # rcb_topogym.MAX_STEPS (RCB_MAX_STEPS): the runaway guard on an episode's / a trajectory's length
 MAX_CALL_WALL_S = 900     # v2_4/rcb_limited.MAX_CALL_WALL_S (RCB_MAX_CALL_WALL_S): no compose file overrides it
@@ -434,8 +407,7 @@ def difficulty_words(s: str, rec: dict, base: str = "") -> str:
     carry no difficulty), else the variation's tier: a text templated on another tier kept the template's value, and
     some packages had no key (audits S2 / S3)."""
     tier = DIFFICULTY.get(base) or re.sub(r"^(rd|v2)_|_chain$", "", rec.get("tier") or "")
-    if tier not in TIERS:
-        return s
+    assert tier in TIERS, f"{base}: no difficulty (not in roboarc_names.json, and its tier {rec.get('tier')!r} names none)"
     line = f'difficulty = "{tier}"'
     if re.search(r'(?m)^difficulty = ', s):
         return re.sub(r'(?m)^difficulty = "[^"]*"', line, s, count=1)
@@ -558,7 +530,7 @@ def base_step(base: str) -> float:
     """The wall time per control step the base's texts state: a MuJoCo base's measured one (release.json step_s, see
     mujoco_text), else the released instruction's."""
     rec = REL["bases"][base]
-    if is_mujoco(rec) and rec.get("step_s"):
+    if rec.get("step_s"):
         return float(rec["step_s"])
     return step_time((PKG / f"{base}-privileged" / "instruction.md").read_text())
 
@@ -698,10 +670,7 @@ def toml_str(s: str) -> str:
 def run_words(e: dict) -> str:
     """Where the evidence episode ran: the image build and the date, never a host or a job name (2026-10-13). A record of
     an earlier build of this release says so; that build holds the same frozen instance (the release notes have the hashes)."""
-    if "attempt" not in e:
-        return f"{e['image']} ({e['date']}; simulator source {e['source']}, tooling {e['tooling']})"
-    run = pathlib.Path(e["attempt"]).name.removeprefix("attempt-")
-    return f"{e['release']} (source {e['source']}, tooling {e['tooling']}; lab run {run})"
+    return f"{e['image']} ({e['date']}; simulator source {e['source']}, tooling {e['tooling']})"
 
 
 NO_REFERENCE = ("No oracle; human review in PR #N (PROTOCOL §2.7). No reference solution and no positive example yet: nothing "
@@ -710,29 +679,9 @@ NO_REFERENCE = ("No oracle; human review in PR #N (PROTOCOL §2.7). No reference
 
 
 def evidence_text(base: str, rec: dict) -> str:
-    ev = rec["evidence"]
-    if rec.get("oracle") == "none":
-        return NO_REFERENCE
-    if not ev:
-        return ("Oracle pending: the author is fixing this tier's oracle; it follows in a later pull request. "
-                "Human review (PROTOCOL §2.7); nop pending.")
-    runs = "; ".join(f"{m}: {run_words(ev[m])}" for m in ("privileged", "standard") if m in ev)
-    note = rec.get("note")
-    return (f"Human review (PROTOCOL §2.7). No oracle run on this build (dev/jianwen {REL['release_commit'][:9]}, source "
-            f"{REL['runtime']['source']['sha256'][:8]}, tooling {REL['tooling_sha256'][:8]}). Positive examples: the "
-            f"author's oracle scored 1 in both modes on {runs}" + (f"; {note}" if note else "") +
-            ". solution/ replays the recorded trajectories.")
-
-
-def since_evidence(rec: dict) -> str:
-    """What changed between the evidence build and this release (release.json; docs/benchmarks/roboarc.md, Evidence)."""
-    end = " The oracle was not re-run on this build (docs/benchmarks/roboarc.md, Evidence)."
-    if rec["family"] == "blanket_flatten" and REL.get("blanket_change"):
-        return REL["blanket_change"] + end
-    shared = REL.get("release_change", "")
-    if rec.get("note"):          # graded on an earlier build than merged-v18 / its equivalent (the documented equivalence)
-        return f"Between that build and merged-v18: {rec['note']}. After merged-v18, {shared}." + end
-    return f"This family's task, geometry and asset files are unchanged from that build to this release; {shared}." + end
+    """task.toml oracle_evidence of a base without a passing oracle run in both modes: only release.json oracle "none"."""
+    assert rec.get("oracle") == "none", f"{base}: no oracle evidence in both modes and not oracle \"none\""
+    return NO_REFERENCE
 
 
 NOT_CONFIRMED = {"speed_rule": "It is faster than the standard service's joint-speed rule",
@@ -743,7 +692,7 @@ NOT_CONFIRMED = {"speed_rule": "It is faster than the standard service's joint-s
 
 def ref_solution(mode: str, rec: dict) -> str:
     ev = rec["evidence"].get(mode)
-    if is_mujoco(rec) and ev and ev.get("status", "passed") != "passed":     # a reference without a passing Harbor record
+    if ev and ev.get("status", "passed") != "passed":     # a reference without a passing Harbor record
         why = NOT_CONFIRMED[ev["status"]]
         if mode == "privileged":
             return (f"`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `{ev['trajectory_sha256'][:16]}…`) to "
@@ -761,7 +710,7 @@ def ref_solution(mode: str, rec: dict) -> str:
         return ("`solution/solve.sh` streams the recorded rows of the reference (`solution/oracle_qpos.npy`, one "
                 "`joint_position` row per control step, `hold`; the same rows as the privileged reference) through the "
                 f"client (`solution/oracle_replay.py`). {why} on this standard service, so no score is claimed here.{over}")
-    if is_mujoco(rec) and ev:
+    if ev:
         if mode == "privileged":
             route = ("this design's oracle, recorded on MuJoCo" if rec.get("template") or rec.get("design") else
                      "the released route re-recorded on MuJoCo with a held tail")
@@ -777,19 +726,8 @@ def ref_solution(mode: str, rec: dict) -> str:
                 "(`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the "
                 "privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and "
                 f"fresh replay) on {run_words(ev)}.")
-    if rec.get("oracle") == "none":
-        return NO_REFERENCE + " `oracle = \"none\"`: there is no `solution/`, and Harbor checks the nop agent only."
-    if not ev:
-        return ("None in this release: the author is fixing this tier's oracle (it follows in a later pull request). "
-                "`oracle = \"none\"`, human review (PROTOCOL §2.7).")
-    same = since_evidence(rec)
-    if mode == "privileged":
-        return (f"`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `{ev['trajectory_sha256'][:16]}…`) to "
-                f"`/app/output/`: the trajectory the author's oracle (the RoboARC planner on dev/jianwen) produced on "
-                f"{run_words(ev)}, where the verifier scored it 1 in two fresh-process replays. " + same)
-    return ("`solution/solve.sh` streams the recorded rows of the author's standard-mode oracle episode "
-            "(`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`) through the client "
-            f"(`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on {run_words(ev)}. " + same)
+    assert rec.get("oracle") == "none" and not ev, "every base has its evidence, or release.json oracle \"none\""
+    return NO_REFERENCE + " `oracle = \"none\"`: there is no `solution/`, and Harbor checks the nop agent only."
 
 
 def nop_words(base: str, mode: str, rec: dict) -> str:
@@ -802,26 +740,6 @@ def nop_words(base: str, mode: str, rec: dict) -> str:
 
 
 def provenance(base: str, rec: dict) -> str:
-    if is_mujoco(rec):
-        return mujoco_provenance(base, rec)
-    rows = [f"- Frozen instance: built by TopoGym source `{rec['creation_source']}` (graded package "
-            f"`{rec['instance_package']}/topogym-{base}-privileged` on the lab host); bound to this release's runtime "
-            f"(source `{REL['runtime']['source']['sha256'][:8]}`, tooling `{REL['tooling_sha256'][:8]}`). An exact-restore "
-            "preflight on this build is pending (docs/benchmarks/roboarc.md, Pending)."]
-    rows.append(f"- Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF "
-                f"dataset `{ASSETS['repo']}` at `{ASSETS['revision'][:12]}`, under `instances/{base}/` "
-                "(scripts/roboarc/assets.json pins each file's sha256). The image carries them, and "
-                "`/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, "
-                "which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at "
-                "every session start.")
-    rows.append(f"- Release: dev/jianwen `{REL['release_commit'][:9]}` (task templates `{REL['template_commit'][:9]}`), "
-                f"image `{IMAGE}` (images/roboarc/).")
-    rows.append("- Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the "
-                "simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.")
-    return "\n".join(rows)
-
-
-def mujoco_provenance(base: str, rec: dict) -> str:
     rows = [f"- Frozen instance: a MuJoCo instance (`simulator.physics_engine` \"mujoco\", its scene frozen under "
             f"`instance_assets/mujoco/`), built by TopoGym source `{rec['creation_source']}` ({rec['instance_package']}); "
             f"bound to this release's runtime (source `{REL['runtime']['source']['sha256'][:8]}`, tooling "
@@ -859,10 +777,6 @@ PORT_TASK = ("- {date}: new task of {bench} (RoboARC on MuJoCo 3.14.0, docs/benc
              "and rules of the Genesis 1.2.1 task `{old}` ({mode} mode), ported to MuJoCo: its own frozen "
              "instance and reference, the numpy / OpenBLAS SIMD masking in every container that runs a Session, and the "
              "render bridge next to the tooling (Nyx frames).")
-DESIGN_TASK = ("- {date}: new task of {bench} (RoboARC on MuJoCo 3.14.0, docs/benchmarks/{bench}.md): a new design of "
-               "the Genesis 1.2.1 task `{old}` ({mode} mode): {design}. Its own frozen instance, task text, rules, "
-               "goal and reference, the numpy / OpenBLAS SIMD masking in every container that runs a Session, and the "
-               "render bridge next to the tooling.")
 NEW_TASK = ("- {date}: new task of {bench} (RoboARC on MuJoCo 3.14.0, docs/benchmarks/{bench}.md): a new "
             "design of {family}{design}. Its task files start from the Genesis 1.2.1 task `{template}` ({mode} mode), with this design's "
             "own task text, rules and goal, its own frozen instance and its own reference.")
@@ -874,8 +788,6 @@ def mujoco_changes(mode: str, rec: dict) -> list[str]:
     if rec.get("template"):
         return [NEW_TASK.format(date=date, bench=BENCH, variation=rec["variation"], family=rec["family"],
                                 template=rec["template"], design=f": {rec['design']}" if rec.get("design") else "", mode=mode)]
-    if rec.get("design"):
-        return [DESIGN_TASK.format(date=date, bench=BENCH, design=rec["design"], old=rec["ported_from"], mode=mode)]
     return [PORT_TASK.format(date=date, bench=BENCH, old=rec["ported_from"], mode=mode)]
 
 
@@ -1015,14 +927,6 @@ def put(dst: pathlib.Path, data: bytes, exe: bool = False) -> None:
     os.chmod(dst, 0o755 if exe else 0o644)
 
 
-def copy_tree(src: pathlib.Path, dst: pathlib.Path) -> None:
-    for p in sorted(src.rglob("*")):
-        if p.is_file():
-            put(dst / p.relative_to(src), p.read_bytes())
-        elif p.is_dir():
-            (dst / p.relative_to(src)).mkdir(parents=True, exist_ok=True)
-
-
 GPU_OLD = ("# Nyx renders through Vulkan, so the container needs the NVIDIA graphics libraries as well as compute: `runtime: nvidia`\n"
            "# with NVIDIA_DRIVER_CAPABILITIES=all (`capabilities: [gpu]` alone injects compute only).\n")
 GPU_NEW = ("# Nyx renders through Vulkan: the device reservation below passes exactly one GPU (Nyx needs exactly one), and\n"
@@ -1032,7 +936,7 @@ GPU_NEW = ("# Nyx renders through Vulkan: the device reservation below passes ex
 
 
 def gpu_lines(name: str, s: str) -> str:
-    """Compose files: one GPU through the device reservation only, as images/robopaint/ (no `runtime: nvidia`)."""
+    """Compose files: one GPU through the device reservation only (no `runtime: nvidia`)."""
     if not name.endswith("docker-compose.yaml"):
         return s
     assert s.count(GPU_OLD) == 1 and len(re.findall(r"(?m)^\s*runtime: nvidia\n", s)) == 1, f"{name}: unexpected GPU block"
@@ -1070,7 +974,7 @@ def staged(name: str, s: str, base: str) -> str:
 
 
 MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"),
-              ("OPENBLAS_CORETYPE", "Haswell"))   # the containers of a MuJoCo task (dev/robotangle_mujoco docs/rcb/MUJOCO_CORE.md)
+              ("OPENBLAS_CORETYPE", "Haswell"))   # the containers of a MuJoCo task (source/docs/rcb/MUJOCO_CORE.md)
 
 
 def direct_families() -> tuple[str, ...]:
@@ -1133,28 +1037,11 @@ def mujoco_lines(name: str, s: str, rec: dict) -> str:
     return s
 
 
-def dev_binding(inst_dir: pathlib.Path, dev: dict, bridge: bool = False, direct: bool = False) -> bytes:
-    """--dev: the binding of a local frozen instance (canonical sha256, every asset's sha256) to the dev image's runtime
-    and identity, with the same keys as binding()."""
-    inst = json.loads((inst_dir / "instance.json").read_text())
-    canon = json.dumps(inst, sort_keys=True, separators=(",", ":"), allow_nan=False)
-    assets = {p.relative_to(inst_dir).as_posix(): sha(p.read_bytes()) for p in sorted((inst_dir / "instance_assets").rglob("*"))
-              if p.is_file() and "__pycache__" not in p.parts}
-    lock = dict(schema_version=1, instance_sha256=sha(canon.encode()), asset_files=assets,
-                tooling_sha256=sha((SHARED / "rcb_topogym.py").read_bytes()), creation_source=inst["topogym_source"],
-                runtime=dev["runtime"], image=dev["image"], uipc_builds=dev["uipc_builds"])
-    return companions(lock, bridge, direct)
-
-
-def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, dev: dict | None = None) -> list[pathlib.Path]:
+def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None) -> list[pathlib.Path]:
     rec = REL["bases"][base]
     dirs = []
-    mujoco = is_mujoco(rec)
-    assert mujoco, f"{base}: every base of {BENCH} is a MuJoCo base (release.json physics_engine)"
-    direct = mujoco and nyx_direct(rec)
-    assert not mujoco or (SHARED / "render_bridge.py").is_file() and (not direct or (SHARED / "nyx_direct.py").is_file()), \
-        f"{base}: a MuJoCo base needs shared/render_bridge.py (and nyx_direct.py) from the MuJoCo release's tooling"
-    reference = pathlib.Path(dev["bases"][base]["reference"]) if dev else None
+    assert rec.get("physics_engine") == "mujoco", f"{base}: every base of {BENCH} is a MuJoCo base (release.json physics_engine)"
+    direct = nyx_direct(rec)
     for mode in ("privileged", "standard"):
         t = out / f"{BENCH}-{base}-{mode}"; up = PKG / f"{base}-{mode}"; dirs.append(t)
         rd = lambda n: (up / n).read_text()  # noqa: E731
@@ -1170,12 +1057,12 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                 assert "RCB_MAX_CALL_WALL_S" not in rd(n) and "RCB_MAX_STEPS" not in rd(n), f"{base} {n}: the texts assume the defaults"
                 text_n = limits_env(n, staged(n, gpu_lines(n, image_lines(rd(n))), base), base, mode)
                 text_n = text_n.replace("docs/benchmarks/robotangle.md", f"docs/benchmarks/{BENCH}.md")   # the benchmark's page
-                put(t / n, family_words(n, mujoco_lines(n, text_n, rec) if mujoco else text_n, rec).encode())
+                put(t / n, family_words(n, mujoco_lines(n, text_n, rec), rec).encode())
         goal_images(up, t, (t / "instruction.md").read_text())
         put(t / "tests/test.sh", family_words("tests/test.sh", (up / "tests/test.sh").read_text(), rec).encode(), exe=True)
-        lock = binding(base, inst_src, mujoco, direct) if dev is None else dev_binding(inst_src, dev, mujoco, direct)
+        lock = binding(base, inst_src, True, direct)
         tool = (SHARED / "rcb_topogym.py").read_bytes()
-        extra = ([("render_bridge.py", (SHARED / "render_bridge.py").read_bytes())] if mujoco else []) + \
+        extra = [("render_bridge.py", (SHARED / "render_bridge.py").read_bytes())] + \
                 ([("nyx_direct.py", (SHARED / "nyx_direct.py").read_bytes())] if direct else [])
         if mode == "privileged":
             for d in ("environment", "tests"):
@@ -1184,7 +1071,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                 for n, b in extra:
                     put(t / d / n, b)
             put(t / "tests/grade.py", (SHARED / "privileged/grade.py").read_bytes())
-            traj = reference or ORC / base / "privileged.npz"
+            traj = ORC / base / "privileged.npz"
             if traj.is_file():
                 put(t / "solution/trajectory.npz", traj.read_bytes())
                 put(t / "solution/solve.sh", (
@@ -1202,7 +1089,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                 put(t / "environment/sim" / n, b)
             put(t / "tests/grade.py", (SHARED / "standard/grade.py").read_bytes())
             put(t / "tests/runtime_binding.json", lock)
-            traj = reference or ORC / base / "standard.npz"
+            traj = ORC / base / "standard.npz"
             if traj.is_file():
                 with zipfile.ZipFile(traj) as z:
                     put(t / "solution/oracle_qpos.npy", z.read("actions.npy"))
@@ -1237,40 +1124,18 @@ def snapshot(d: pathlib.Path) -> dict:
             for p in sorted(d.rglob("*")) if p.is_file()}
 
 
-def dev_main(a) -> int:
-    """--dev: render the named bases from dev.json into --out (local only; never tasks/, nothing checked against
-    release.json's instance pins)."""
-    global IMAGE
-    if a.out is None or not a.bases or a.check or a.assets:
-        raise SystemExit("--dev needs --out and the bases, and takes neither --check nor --assets")
-    dev = json.loads(a.dev.read_text())
-    resolve = lambda v: (a.dev.parent / v).resolve()  # noqa: E731  (dev.json paths: absolute, or relative to dev.json)
-    dev["bases"] = {b: {k: str(resolve(v)) for k, v in r.items()} for b, r in dev["bases"].items()}
-    IMAGE = dev["image"]["reference"]
-    a.out.mkdir(parents=True, exist_ok=True)
-    for b in a.bases:
-        for m in ("privileged", "standard"):
-            shutil.rmtree(a.out / f"{BENCH}-{b}-{m}", ignore_errors=True)
-        for t in render(b, a.out, pathlib.Path(dev["bases"][b]["instance"]), dev):
-            print(f"dev task {t}")
-    return 0
-
-
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true"); ap.add_argument("--list", action="store_true")
     ap.add_argument("--assets", type=pathlib.Path, help="a local copy of the pinned HF dataset (assets.py fetch)")
-    ap.add_argument("--dev", type=pathlib.Path, help="dev.json: local dev task dirs (see usage)")
-    ap.add_argument("--out", type=pathlib.Path, help="with --dev: where the dev task dirs go")
     ap.add_argument("bases", nargs="*")
     a = ap.parse_args(argv)
-    if a.dev is not None:
-        return dev_main(a)
     bases = a.bases or sorted(REL["bases"])
     if a.list:
         for b in bases:
             r = REL["bases"][b]
-            print(f"{b:34s} instance {r['creation_source']}  " + "  ".join(f"{m}: {e['release']}:{e['source']}" for m, e in r["evidence"].items()) or "oracle pending")
+            ev = "  ".join(f"{m}: {e.get('status', 'passed')}" + (f" ({e['date']}, source {e['source']})" if "date" in e else "") for m, e in r["evidence"].items())
+            print(f"{b:34s} instance {r['creation_source']}  " + (ev or "no oracle"))
         return 0
     bad = tooling_check()
     if bad and not a.check:
