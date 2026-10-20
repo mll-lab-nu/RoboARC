@@ -8,7 +8,8 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 The task set's version 1.0.1 (`scripts/roboarc/release.json` `version`; the README Release line of every puzzle task).
 The images stay `ghcr.io/embodied-first-exam/roboarc:1.0.0`, `roboarc-ikea:1.0.0` and `roboarc-ikea-sim:1.0.0` (the same
-ids). The graders' and the sim services' logic, the pinned tooling (`rcb_topogym.py`, `render_bridge.py`,
+ids); the resource monitor's image is now RoboARC's own build of the same files (below). The graders' and the sim
+services' logic, the pinned tooling (`rcb_topogym.py`, `render_bridge.py`,
 `nyx_direct.py`, `rcb_ikea.py`), the runtime bindings, the frozen instances, the IKEA scenes and the references are
 unchanged. Every task has a new DIGEST and a Change Log entry in its README.
 
@@ -29,6 +30,10 @@ A re-render from the cleaned generator inputs; text only for the puzzles:
   unchanged (it matches the directory name). The Python API accepts both forms.
 - For the puzzles, `instruction.md` is unchanged and every changed `.py` file has the same docstring-free AST as in
   1.0.0 (the audit below); puzzle results graded under 1.0.0 stand.
+- **IKEA's verification prose** names machine classes ("a Ryzen 9 7950X workstation", "a dedicated Xeon Gold 6230R
+  core", "one process at a time") where the clean-up had left host labels and broken phrases ("host B", "a dedicated
+  the cluster Xeon ..."): the rendered prose fields of `ikea/scripts/ikea_mujoco/evidence.json` and
+  `standard_evidence.json`; every number, hash, image id, date and run name is unchanged (21 IKEA READMEs).
 
 ### IKEA MuJoCo on the repository's task layer, under `tasks/`
 The 24 IKEA task dirs moved from `ikea/tasks/` to `tasks/` (same directory names) and are rendered with the
@@ -42,6 +47,22 @@ APIs only). `ikea/scripts/task_conventions.py` and `ikea/scripts/set_agent_egres
 2.4 pair is `scripts/eai_standard/v2_4_live/` (bytes unchanged), its own variant in `check-tooling-identity.sh`. Every
 `ci_checks/` check covers the IKEA tasks. **IKEA results before and after 1.0.1 are not comparable**: the instruction
 and the egress changed (the graders, scenes, references and images did not).
+
+### The resource monitor's image: RoboARC's own
+Every task's `rcb_monitor` service pinned `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f5…`, a package of
+another group that RoboARC does not control. It now pins
+`ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0@sha256:ea1b0d4b859998d6a47e2cb7a72c3a9ae85870b32c75de1bc1448e387da07093`
+(`scripts/rcb_monitor/inject.py` `IMAGE`), built from `images/monitor/`:
+- **The same image contents**: the base is pinned by digest (`python:3.12-slim-bookworm`, Python 3.12.15), and the
+  five layers have the earlier image's diff ids (the filesystems are equal file for file); the environment, working
+  directory and command are the same; the config adds three OCI labels (title, version, source).
+- **Reproducible**: `images/monitor/build.sh` builds an OCI archive with a pinned BuildKit, no attestations and a fixed
+  `SOURCE_DATE_EPOCH`; two builds are byte-identical, so the digest the tasks pin is known before the push.
+  `images/monitor/push.sh` copies that archive unchanged (skopeo `--preserve-digests`) and checks the registry's
+  digest. [images/monitor/README.md](images/monitor/README.md).
+- The tasks change only in that `image:` line, their 1.0.1 Change Log entry and DIGEST. `check-protocol.py` accepts
+  base images from `ghcr.io/embodied-first-exam/` only. The Genesis base image (a build-time input of
+  `roboarc:1.0.0`, `source/images/robotangle/Dockerfile.mujoco`) stays in the `efe` package: no task runs it.
 
 ### Usage recording is optional; licence
 Usage recording is optional: an official run no longer needs the usage gateway (PROTOCOL.md 'Changes from the shared
@@ -86,6 +107,13 @@ On a fresh clone (2026-10-20, a shared Ryzen 9 7950X / RTX 4090 host, load 25-60
   most 26 % of their timeouts under the new caps (stenerik 5036 s of 19440 s, kyrre 4365 s of 25440 s).
 - The `roboarc` package's simulator tests against the re-rendered tasks: 29 passed in `roboarc:1.0.0`, 27 passed and 2
   skipped (puzzle-only) in `roboarc-ikea-sim:1.0.0`.
+- The monitor image and the prose fix (2026-10-20, the same host): `images/monitor/build.sh` run four times (three times
+  on one checkout, once on a fresh clone) gave byte-identical archives, manifest `sha256:ea1b0d4b…`; its filesystem equals
+  the earlier image's file for file (paths, modes, owners, sizes, contents, link targets); `push.sh` into a local test
+  registry stored exactly that digest. Every CI job in its own `python:3.12` container on a fresh clone passes,
+  as do the gates listed above. Harbor oracle and nop, both modes, on interlocked-claws-03, blanket-fold-01 and IKEA
+  lack with that image (12 trials): all scored as expected, every oracle ended on the same state hashes as above, and
+  the monitor wrote the same record files and summary fields as before, no violation.
 
 ## 1.0.0 (2026-10-19)
 
