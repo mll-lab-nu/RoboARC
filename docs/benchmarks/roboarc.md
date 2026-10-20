@@ -55,6 +55,8 @@ layer as RoboARC; docs/benchmarks/roboarc.md, "Grading and determinism", "Standa
   `eai-robotangle:0.2.22` with the release commit's simulator source, the frozen MuJoCo instances and (0.2.1 on) the
   EPA-patched libmujoco.so
   (`images/roboarc/build.sh`: `source/images/robotangle/Dockerfile.mujoco`, the instances as a named build context).
+- Appearance seeds (three scenes per base, owner 2026-10-20): the release steps are in
+  [`roboarc_seeds_release.md`](roboarc_seeds_release.md).
 
 ## Time budget (D8)
 

@@ -23,6 +23,9 @@ it. Maintainers push it with `images/roboarc/push.sh` after validating a build.
     builds", below). The image installs it in `/opt/uipc_sm86` (`install_uipc_prefix.py`);
   - `instances/`: every task's frozen instance. `stage_instance.py` copies a task's instance next to its
     `runtime_binding.json` and checks it (privileged `environment/` and `tests/` images; the standard `sim` entrypoint).
+    A base's appearance seeds are `instances/<base>/seeds/<S>/` (pinned under the base's `seeds` in `assets.json`): for
+    the seed in a runner's `seed` file (`scripts/task_seed.py materialize`) `stage_instance.py --seed-file` stages that
+    instance with the task's `runtime_binding.s<S>.json`; no seed file stages the default instance.
 
   Access: a member of `eai-v2-internal`, logged in with `hf auth login`, or `HF_TOKEN` in the environment (never printed).
 
