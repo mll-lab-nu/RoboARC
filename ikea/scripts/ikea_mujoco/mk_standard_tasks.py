@@ -38,8 +38,9 @@ IMAGE = P.IMAGE
 SIM_IMAGE = f"ghcr.io/embodied-first-exam/roboarc-ikea-sim:{(ROOT / 'images/ikea-mujoco/sim/VERSION').read_text().strip()}"
 CLIENT_IMAGE = dict(l.split("=", 1) for l in (EAI / "client.env").read_text().splitlines() if "=" in l and not l.startswith("#"))["CLIENT_IMAGE"]
 RIGS = json.loads((STD / "rigs.json").read_text())
-# RoboARC's Nyx driver (its shared/nyx_direct.py, sha256 4809c45a7a5c...), a byte-identical copy kept here so that this
-# benchmark builds from its own paths; copied unchanged into every task (ikea_nyx.py uses it)
+# The Nyx driver ikea_nyx.py uses (sha256 4809c45a7a5c...), copied unchanged into every task: an earlier version of RoboARC's
+# scripts/roboarc/shared/nyx_direct.py (now 52bb406ff58e, which adds a renderer start-up retry; ikea_nyx.py has its own),
+# kept here so that the IKEA tasks build from their own paths
 NYX_DIRECT = STD / "nyx_direct.py"
 AGENT_S = P.AGENT_S               # the privileged twin's wall-clock cutoff (PROTOCOL v2.0 H.7): the only hard budget
 # The speed rule's numbers, for the texts: THE table is rcb_ikea.JOINT_SPEED_LIMITS_RAD_S / GRIPPER_WIDTH_SPEED_M_S (the
@@ -136,7 +137,7 @@ def task_text(t: str) -> dict:
                           + " ".join(x["requirements"]) + f" {P.TEXTS['terminal']} Mechanism: {x['mechanism']}")}
 
 
-# The verifier transcribes the sidecar's final.json and copies the live video: no replay (board 0151), seconds of work.
+# The verifier transcribes the sidecar's final.json and copies the live video: no replay, seconds of work.
 VERIFIER_S = 600
 
 

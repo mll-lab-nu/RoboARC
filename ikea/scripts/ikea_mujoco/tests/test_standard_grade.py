@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit test of the IKEA MuJoCo standard-mode grading (board 0151: graded by the live episode, no grading replay), without
+"""Unit test of the IKEA MuJoCo standard-mode grading (graded by the live episode, no grading replay), without
 MuJoCo or a simulator: scripts/ikea_mujoco/standard/finalize.sh runs with a stub `python /srv/rcb_limited.py end` (its
 exit code chosen per case) on a synthetic /data, then scripts/ikea_mujoco/standard/grade.py on the result. A
 sitecustomize records any subprocess the grader starts (it must start none: no replay).
