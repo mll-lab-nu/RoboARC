@@ -4,7 +4,49 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
-## Unreleased
+## 1.0.1 (2026-10-19)
+
+The task set's version 1.0.1 (`scripts/roboarc/release.json` `version`; the README Release line of every puzzle task).
+The images stay `ghcr.io/embodied-first-exam/roboarc:1.0.0`, `roboarc-ikea:1.0.0` and `roboarc-ikea-sim:1.0.0` (the same
+ids). The graders' and the sim services' logic, the pinned tooling (`rcb_topogym.py`, `render_bridge.py`,
+`nyx_direct.py`, `rcb_ikea.py`), the runtime bindings, the frozen instances, the IKEA scenes and the references are
+unchanged. Every task has a new DIGEST and a Change Log entry in its README.
+
+### The task texts (all 226 tasks)
+A re-render from the cleaned generator inputs; text only for the puzzles:
+- **Citations of this repository's paths**: `docs/PROTOCOL.md`, `docs/STANDARD_MODE.md`, `docs/TAXONOMY.md`,
+  `docs/simulator/TOPOGYM_PROTOCOL.md`, `tools/release/release_rebuild.py`, `images/roboarc/` and the base image's
+  recipe, instead of the development tree's `docs/rcb/...`, `images/topogym/`, `scripts/robotangle/...`,
+  `scripts/task_dynamics.toml`. No task text cites a missing path any more except inside files whose bytes stay as
+  released (the pinned tooling, the shared eai-standard and monitor layers, IKEA's `rcb_ikea.py` / `ikea_nyx.py`);
+  [docs/rcb/README.md](docs/rcb/README.md) maps those.
+- **No internal notes**: the resources' `measured` strings, the no-oracle bases' unfilled "PR #N", the Change Log
+  entries citing internal documents, the graders', sim service's and oracle player's docstrings naming the earlier
+  repository's RoboWits files, issue numbers and GPU-physics claims, IKEA's owner / board / pull-request notes, an
+  internal runner script and a branch name.
+- **`[task].name` = `roboarc/<task dir>`** (Harbor's `org/name`; it was `robot-coding-bench/<task dir>`); the Harbor
+  dataset name is `roboarc/roboarc` (`scripts/harbor/dataset_manifest.py`). `harbor run -p tasks -i <dir>` is
+  unchanged (it matches the directory name). The Python API accepts both forms.
+- For the puzzles, `instruction.md` is unchanged and every changed `.py` file has the same docstring-free AST as in
+  1.0.0 (the audit below); puzzle results graded under 1.0.0 stand.
+
+### IKEA MuJoCo on the repository's task layer, under `tasks/`
+The 24 IKEA task dirs moved from `ikea/tasks/` to `tasks/` (same directory names) and are rendered with the
+repository's task layer (`scripts/task_conventions.py`), like the puzzles: the instruction's shared closing sections
+(`## External material`, `## Resource limits`, `## Time limit`), the resource-monitor sidecar, declared resources,
+limits, caps (`scripts/task_resources.toml`, rules `^roboarc-ikea-`: privileged CPU only, the standard sim one GPU; the
+agent's container 4 CPUs / 10 GB, the standard sim 4 CPUs / 8 GB; the privileged verifier keeps 4 CPUs / 8 GB for its
+two replays and the video replay) and seeds, a `DIGEST`, and the one egress allowlist (`scripts/set_agent_egress.py`:
+the model APIs and the package registries, which the instruction already named; IKEA's 1.0.0 allowlist had the model
+APIs only). `ikea/scripts/task_conventions.py` and `ikea/scripts/set_agent_egress.py` are gone; IKEA's live-grading
+2.4 pair is `scripts/eai_standard/v2_4_live/` (bytes unchanged), its own variant in `check-tooling-identity.sh`. Every
+`ci_checks/` check covers the IKEA tasks. **IKEA results before and after 1.0.1 are not comparable**: the instruction
+and the egress changed (the graders, scenes, references and images did not).
+
+### Usage recording is optional; licence
+Usage recording is optional: an official run no longer needs the usage gateway (PROTOCOL.md 'Changes from the shared
+protocol', H.6). The runner's `GATEWAY=1` is replaced by `USAGE_GATEWAY=<dir>`; results record `usage_gateway`,
+`usage_source`, `usage_recorded`, `token_budget`. Licence: MIT (LICENSE, LICENSES/THIRD_PARTY.md).
 
 ### The raw simulator interface: the Python package `roboarc`
 `roboarc.make(task_id)` returns a Gymnasium-compatible environment for every task (the 101 puzzle bases and the 12 IKEA
@@ -13,8 +55,8 @@ one control step of the tooling per `step()`, the tasks' own limits (clamp, neve
 MuJoCo-raster camera images, proprioception in the standard mode's robot frame, state snapshots, and the privileged
 verifier's replay. Design, conventions and test results: [docs/API.md](docs/API.md); examples in `examples/`, tests in
 `tests/api/` (the cheap ones run in CI, job `api-tests`). Each tested reference stepped through it ends on its recorded state
-hash (one base per puzzle family and two IKEA scenes; with Nyx rendering on as well). No task, image or graded file
-changed.
+hash (one base per puzzle family and two IKEA scenes; with Nyx rendering on as well). The package changes no task,
+image or graded file.
 
 ### Repository clean-up
 The repository now holds RoboARC only and is laid out for its two audiences: `source/` is the image build context,
@@ -24,8 +66,26 @@ in `docs/families/`, and a rewritten README. The generator's packages are the sh
 asset tools check every instance source against its pin; CI runs on `dev/**` too, checks the docs' paths and links, and
 runs the simulator source hash. Leftovers of the shared repository (other benchmarks, the eai-standard 2.2 layer,
 lab-side runner defaults, internal notes) and duplicate copies (references, tooling, image recipes) are gone; the
-session oracles of the orbits and slotted-post-ring references are restored. No task byte changed; the images rebuilt
-from the cleaned tree have the 1.0.0 ids. Path moves: [PROVENANCE.md](PROVENANCE.md#after-100-the-clean-up).
+session oracles of the orbits and slotted-post-ring references are restored. The clean-up itself changed no task byte
+(the re-render above did); the images rebuilt from the cleaned tree have the 1.0.0 ids. Path moves: [PROVENANCE.md](PROVENANCE.md#after-100-the-clean-up).
+
+### Validation of 1.0.1
+On a fresh clone (2026-10-20, a shared Ryzen 9 7950X / RTX 4090 host, load 25-60):
+- Both generators' `--check` (0 differences), `run_invariants.sh` (226 tasks), `check-unit-tests.sh --all`,
+  `run_all.sh` ("all checks passed"), `check-tooling-identity.sh` (226 task dirs, 26 shared files, the 2.4 layer in
+  113 standard dirs), `check-doc-paths.py`, `tools/release/source_hash.py --check` (SOURCE.json `c9171f79…`), and every
+  job of `.github/workflows/checks.yml` run literally in its own `python:3.12` container, `api-tests` included.
+- A diff audit of every changed task file against 1.0.0: every changed `.py` file of the 202 puzzle and 24 IKEA task
+  dirs (474 files) has the docstring-free AST it had in 1.0.0; the puzzle `task.toml`s differ only in `measured`,
+  `oracle_evidence` and `[task].name`, their shell scripts, Dockerfiles and compose files only in comments; no puzzle
+  `instruction.md` changed; the IKEA runtime bindings and other JSON data are unchanged apart from text fields.
+- Harbor oracle and nop, both modes: one base per puzzle family (14 bases, 56 trials, rendering off; the blanket bases
+  with their CUDA cloth on the GPU) and all 12 IKEA scenes (48 trials, rendering on). All 104 scored as expected
+  (oracle 1, nop 0, no infrastructure error), and every oracle ended on its recorded state hash (the puzzles' freeze
+  manifest; IKEA's privileged end and settled hashes and standard live hashes). The IKEA privileged verifiers used at
+  most 26 % of their timeouts under the new caps (stenerik 5036 s of 19440 s, kyrre 4365 s of 25440 s).
+- The `roboarc` package's simulator tests against the re-rendered tasks: 29 passed in `roboarc:1.0.0`, 27 passed and 2
+  skipped (puzzle-only) in `roboarc-ikea-sim:1.0.0`.
 
 ## 1.0.0 (2026-10-19)
 
