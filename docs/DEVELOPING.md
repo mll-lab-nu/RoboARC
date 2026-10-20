@@ -8,7 +8,7 @@ running tasks see [RUNNING.md](RUNNING.md); the task contract is [PROTOCOL.md](P
 | path | what |
 |---|---|
 | `tasks/roboarc-*` | the 202 puzzle task directories. Generated: never edit them by hand |
-| `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json` (one record per base), `packages/` (per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`; `tests/` |
+| `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json` (one record per base), `packages/` (each task's texts as they ship, with `{{FIELD}}`s the generator fills), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `port_package.py` (a new base's Genesis-era texts to a final package); `regrade.py`; `tests/` |
 | `scripts/` | the task layer the tasks cite and the generator renders with: `task_conventions.py` (`normalize`, the mode registry, the effective configuration), `set_agent_egress.py` (the egress allowlist), `task_resources.toml` (resource rules), `eai_standard/` (the eai-standard/2.4 client and service layer, copied into every standard task), `rcb_monitor/` (the resource-limits sidecar, copied into every task); `stamp_mtimes.py`, `check_image_files.py` (image builds) |
 | `scripts/harbor/` | the Harbor runner and its helpers (RUNNING.md) |
 | `ci_checks/` | the repository checks |
@@ -39,7 +39,9 @@ The generator ends every task with `scripts/task_conventions.py` `normalize` (RE
 `## External material` / `## Resource limits` / `## Time limit` sections, the monitor sidecar, last the `DIGEST`).
 `python3 scripts/task_conventions.py --check tasks/<task> ...` checks one task's normal form. Run both with umask 022
 (file modes are compared). A change to a task is a change to the generator's inputs, never to `tasks/`; it gets a new
-`DIGEST` and a README Change Log entry (PROTOCOL §1, H.8).
+`DIGEST` and a README Change Log entry (PROTOCOL §1, H.8). A task's texts are `scripts/roboarc/packages/<base>-<mode>/`:
+final texts with `{{FIELD}}`s for the values from other sources (`mk_tasks.py` `fields()`; the Generator section of
+[benchmarks/roboarc.md](benchmarks/roboarc.md)); a new base's packages come from `scripts/roboarc/port_package.py`.
 
 ## Checks
 
@@ -93,6 +95,9 @@ verified build (each local tag must be its expected image id; the registry token
 
 1. Change the generator's inputs (`scripts/roboarc/`; new references and instances come from the release tooling,
    `tools/release/release_rebuild.py`), bump `images/roboarc/VERSION` if the image changes, re-render, and add the release to `CHANGELOG.md`.
+   `release_rebuild.py` renders on a commit of this repository (`--onto`); with premade instances (`--instances`) and a
+   local tag (`--tag`) it re-makes a released version next to its image: with that release's own instances and
+   references it changes no task file and builds the same image.
 2. In a fresh clone (umask 022): every check above green.
 3. Build the image from that clone. A release that keeps the simulator must give an image whose installed filesystem is
    file-for-file identical to the previous one (path, mode, size, sha256), apart from the files the release changes.

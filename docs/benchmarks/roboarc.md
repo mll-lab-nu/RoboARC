@@ -39,9 +39,22 @@ the family pages list each family's robot and success rule.
 ## Generator, instances and image
 
 - `scripts/roboarc/mk_tasks.py` (`--check` in CI) renders the task dirs from `scripts/roboarc/`: `release.json` (one
-  record per base: family, tier, instance, the facts the texts state, the validation evidence), `packages/` (the texts
-  of each task), `oracles/` (the reference trajectories), `assets.json`, `shared/` (the tooling and the graders).
+  record per base: family, tier, instance, the facts the texts state, the validation evidence), `packages/`,
+  `oracles/` (the reference trajectories), `assets.json`, `shared/` (the tooling and the graders).
   Generated tasks end with `scripts/task_conventions.py` normalize ([../DEVELOPING.md](../DEVELOPING.md)).
+- `packages/<base>-<mode>/` holds each task's texts as they ship (task.toml, README.md, instruction.md, the Dockerfiles
+  and compose files, tests/test.sh, goal images). A value that comes from another source is a field, `{{NAME}}`, which
+  the generator fills: the image tag (`images/roboarc/VERSION`), the agent egress (`scripts/set_agent_egress.py`), the
+  tooling version, the oracle level and the `release.json` records (reference solution, nop run, provenance, Change
+  Log), the privileged row cap and verifier budget, and the standard service's time per call. Before writing, the
+  generator checks the filled texts against the facts they must state (the tooling's contact rule and breakdown depth,
+  `release.json`'s grasping rule and step time, the difficulty, the family the grader runs). A text change is an edit
+  of the package, then a re-render.
+- A new base starts from the Genesis-era texts of an earlier task (`tools/release/templates/`, with its design's own
+  texts from `tools/release/package_text/`); `scripts/roboarc/port_package.py <base>` turns them into a final package
+  (the rewrites that made the released texts, then the fields put back and checked to fill back to the same text).
+  `tools/release/release_rebuild.py` runs it for the bases whose packages it writes; `port_package.py --check` lists
+  bases still in Genesis-era form.
 - The frozen instances (about 700 MB) are not in git: they are in a Hugging Face dataset, pinned file by file in
   `scripts/roboarc/assets.json`. The image carries them, so running tasks needs no dataset access.
 - Image: `ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>`, built by `images/roboarc/build.sh` from
