@@ -12,8 +12,8 @@ usage: python3 scripts/roboarc/mk_tasks.py [--check] [--list] [--assets <dir>] [
             check the frozen instances' bytes against the runtime bindings (without it, the pins in assets.json are
             compared)
   --dev     task dirs of a locally built image, written to --out (never tasks/; scripts/roboarc/harbor_check.py
-            --instances): dev.json names the image ("image": reference, id; "runtime" and "uipc_builds" as its
-            installed_runtime() reports them) and, per base, a local frozen instance directory ("instance") and the
+            --instances): dev.json names the image ("image": reference, id; "runtime" as its installed_runtime()
+            reports it) and, per base, a local frozen instance directory ("instance") and the
             reference trajectory both modes replay ("reference")
 
 A task dir is: the package's texts with their fields filled in, the pinned tooling and graders, the runtime binding,
@@ -469,9 +469,6 @@ def binding(base: str, inst_dir: pathlib.Path | None, direct: bool) -> bytes:
         assert lock["asset_files"] == assets, f"{base}: instance_assets differ from the binding"
     lock["tooling_sha256"] = sha((SHARED / "rcb_topogym.py").read_bytes())
     lock["runtime"] = REL["runtime"]
-    # both libuipc builds the tooling chooses from by the GPU's compute capability (rcb_topogym.select_uipc_build), by their
-    # uipc-build.json sha256; the runtime's own uipc_build_sha256 stays the audited build, the image's default
-    lock["uipc_builds"] = {name: b["uipc_build_sha256"] for name, b in sorted(REL["uipc_builds"].items())}
     lock["render_bridge_sha256"] = sha((SHARED / "render_bridge.py").read_bytes())
     if direct:
         lock["nyx_direct_sha256"] = sha((SHARED / "nyx_direct.py").read_bytes())
@@ -487,7 +484,7 @@ def dev_binding(inst_dir: pathlib.Path, dev: dict, direct: bool) -> bytes:
               if p.is_file() and "__pycache__" not in p.parts}
     lock = dict(schema_version=1, instance_sha256=sha(canon.encode()), asset_files=assets,
                 tooling_sha256=sha((SHARED / "rcb_topogym.py").read_bytes()), creation_source=inst["topogym_source"],
-                runtime=dev["runtime"], image=dev["image"], uipc_builds=dev["uipc_builds"],
+                runtime=dev["runtime"], image=dev["image"],
                 render_bridge_sha256=sha((SHARED / "render_bridge.py").read_bytes()))
     if direct:
         lock["nyx_direct_sha256"] = sha((SHARED / "nyx_direct.py").read_bytes())
