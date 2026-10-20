@@ -7,7 +7,7 @@
 #   run_all.sh [task dirs]       the per-task checks (check-task.sh, scripts/task_conventions.py --check) on the given
 #                                tasks (default: all), and every repo-level check
 # The generator's check mode (python3 scripts/roboarc/mk_tasks.py --check) is a CI job of its own (`generator`), and so
-# is IKEA's (ikea/ci/check.sh); neither runs here.
+# is IKEA's (ikea/ci/check.sh); neither runs here. Every other check covers the IKEA task dirs (tasks/roboarc-ikea-*) too.
 # Everything runs concurrently (ci_checks/parallel.py; RCB_CI_JOBS=N caps it, default: the CPUs), each command's output
 # printed in one piece when it ends. RCB_SKIP_UNIT_TESTS=1: leave out check-unit-tests.sh (the CI workflow runs it, with
 # --all, in a job of its own).

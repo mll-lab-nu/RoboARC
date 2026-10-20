@@ -103,7 +103,7 @@ bytes. Where things went:
 | the runner tools in `scripts/` (`run_agent_batch.sh`, `write_task_results.py`, ...) | `scripts/harbor/` |
 | `ikea/docs/benchmarks/ikea_mujoco.md` | `docs/benchmarks/ikea_mujoco.md` |
 | `ikea/images/ikea-mujoco/mujoco-3.14.0-epa/` (a copy) | removed; both images use `source/images/robotangle/mujoco-3.14.0-epa/` |
-| `ikea/scripts/eai_standard/v2_4/` (IKEA's live-grading service and client) | `ikea/scripts/eai_standard/v2_4_live/`; IKEA's other shared files come from `scripts/eai_standard/` |
+| `ikea/scripts/eai_standard/v2_4/` (IKEA's live-grading service and client) | `scripts/eai_standard/v2_4_live/` (in 1.0.1; first `ikea/scripts/eai_standard/v2_4_live/`); IKEA's other shared files come from `scripts/eai_standard/` |
 | `PLAN.md`, `docs/PROTOCOL_HISTORY.md`, `docs/CUTOFFS.md`, `docs/REVIEWING.md` | removed; what still applies is in `docs/DEVELOPING.md`, `docs/RUNNING.md` and `docs/benchmarks/roboarc.md` |
 
 Removed as unused by the release: the other benchmarks' entries of the shared layer and their CI checks, the
@@ -115,3 +115,11 @@ Verified on the cleaned tree: both generators' `--check` (no task byte changes),
 advisory checks; `tools/release/source_hash.py --check` (SOURCE.json `c9171f79…`); `images/roboarc/build.sh` from a fresh
 clone gives the image id of 1.0.0 (18a821a18d2b, all 153,404 filesystem entries equal), and `ikea/images/ikea-mujoco/build.sh`
 the ids 5d5090ea1910 and 050cd45d70f6.
+
+## 1.0.1: the text re-render
+
+1.0.1 re-renders the task directories with the clean-up's generator inputs (CHANGELOG.md, 1.0.1): the texts cite this
+repository's paths and carry no internal notes, `[task].name` is `roboarc/<dir>`, and the IKEA tasks moved from
+`ikea/tasks/` to `tasks/` onto the repository's task layer (`ikea/scripts/task_conventions.py` and
+`ikea/scripts/set_agent_egress.py` removed). The pinned tooling, the graders' and the sim services' logic, the frozen
+instances, the references, the IKEA scenes and the images are those of 1.0.0.

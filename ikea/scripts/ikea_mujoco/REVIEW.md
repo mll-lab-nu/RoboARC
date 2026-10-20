@@ -80,6 +80,10 @@ the kyrre task texts cite it.)
   on a slow Xeon Gold 6230R core; they ship, with the slow-CPU times reported on the benchmark page.
 - **RoboARC 1.0.0 (2026-10-19).** The tasks were renamed `roboarc-ikea-<scene>-i00-<mode>` (from `ikea-…`) and the two
   images republished under RoboARC's names with the same ids. Evidence records keep the names their runs had.
+- **RoboARC 1.0.1 (2026-10-19).** The tasks moved onto the repository's task layer and into `tasks/`: the shared
+  closing sections of the instruction, the resource monitor, declared resources and seeds, a DIGEST, and the one
+  egress list, which adds the package registries the instruction already named (1.0.0's allowlist had the model APIs
+  only). `[task].name` is `roboarc/<dir>`. Graders, scenes, references and images are unchanged.
 
 ## Known issues and suggestions to the scene authors
 

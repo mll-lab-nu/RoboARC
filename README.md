@@ -12,11 +12,11 @@ The tasks serve two kinds of solvers through the same simulator code:
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.0.0** (see [CHANGELOG.md](CHANGELOG.md)):
-- the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 Harbor task directories under
-  `tasks/`;
+Version **1.0.1** (see [CHANGELOG.md](CHANGELOG.md); the images are still `1.0.0`), 226 Harbor task directories
+under `tasks/`:
+- the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories;
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
-  directories under `ikea/tasks/`. The scenes are by Xiaoyu's team (Xiaoyu, Zhen Wu).
+  directories. The scenes are by Xiaoyu's team (Xiaoyu, Zhen Wu).
 
 ## Tasks
 
@@ -41,7 +41,7 @@ Puzzle task directories are `tasks/roboarc-<family>-<NN>-i01-<mode>`; `<NN>` num
 difficulty is `[metadata].difficulty` in `task.toml`. One page per family: [docs/families/](docs/families/). The
 benchmark's rules (grading replays, safety readings, the standard service): [docs/benchmarks/roboarc.md](docs/benchmarks/roboarc.md).
 
-IKEA MuJoCo (`ikea/tasks/roboarc-ikea-<scene>-i00-<mode>`): lack, svallet, gladom, variera, eket, ikea365, vesken,
+IKEA MuJoCo (`tasks/roboarc-ikea-<scene>-i00-<mode>`): lack, svallet, gladom, variera, eket, ikea365, vesken,
 stegesund, stenerik, burvik, uppsta and kyrre, each an IKEA product assembled by two Franka Panda arms (svallet: two
 ALOHA 2 arms). Its page: [docs/benchmarks/ikea_mujoco.md](docs/benchmarks/ikea_mujoco.md).
 
@@ -68,11 +68,11 @@ The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.0.0`; the IKEA tasks
 or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 
 ```bash
-python3 scripts/stamp_mtimes.py tasks ikea/tasks   # once per checkout: fixed file times, so Harbor's build cache hits
+python3 scripts/stamp_mtimes.py tasks   # once per checkout: fixed file times, so Harbor's build cache hits
 harbor run -p tasks -i roboarc-interlocked-claws-03-i01-privileged -a oracle   # the reference solution: reward 1
 harbor run -p tasks -i roboarc-interlocked-claws-03-i01-standard -a nop        # does nothing: reward 0
 harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>   # a coding agent
-harbor run -p ikea/tasks -i roboarc-ikea-lack-i00-privileged -a oracle         # an IKEA task
+harbor run -p tasks -i roboarc-ikea-lack-i00-privileged -a oracle             # an IKEA task
 ```
 
 Batch runs, agent configuration, network egress, result files and re-grading: [docs/RUNNING.md](docs/RUNNING.md). The
@@ -112,8 +112,8 @@ never fail), rendering and GPU needs, the wrappers and the tests: [docs/API.md](
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the 202 puzzle task directories (generated: never edit them by hand) |
-| `ikea/` | IKEA MuJoCo: `tasks/` (24, generated), the generators, references and evidence (`ikea/scripts/ikea_mujoco/`), the scenes and the two image recipes (`ikea/images/ikea-mujoco/`); see [ikea/README.md](ikea/README.md) |
+| `tasks/roboarc-*` | the 226 task directories: 202 puzzle tasks and 24 IKEA tasks (`roboarc-ikea-*`); generated, never edit them by hand |
+| `ikea/` | IKEA MuJoCo: the generators, references and evidence (`ikea/scripts/ikea_mujoco/`), the scenes and the two image recipes (`ikea/images/ikea-mujoco/`); see [ikea/README.md](ikea/README.md) |
 | `roboarc/`, `pyproject.toml` | the Python package `roboarc` ([docs/API.md](docs/API.md)); `examples/`, `tests/api/` its examples and tests |
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
 | `scripts/` | the task layer the tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`) and build helpers (`stamp_mtimes.py`, `check_image_files.py`) |
@@ -152,6 +152,8 @@ datasets pinned by commit and per-file sha256 (`scripts/roboarc/assets.json`, `i
 
 ## Citation and licence
 
-See [CITATION.cff](CITATION.cff) (a placeholder until the paper). The shared task layer derives from the MIT-licensed
-robot_coding_bench ([LICENSES/robot_coding_bench-MIT.txt](LICENSES/robot_coding_bench-MIT.txt)). The licence of
-RoboARC itself is to be decided.
+See [CITATION.cff](CITATION.cff) (a placeholder until the paper). RoboARC is released under the MIT licence
+([LICENSE](LICENSE)). Third-party material (robot models, adapted kernels, textures, lighting) keeps its own licence;
+see [LICENSES/THIRD_PARTY.md](LICENSES/THIRD_PARTY.md), which also lists the items whose licence is still to be
+confirmed. The shared task layer derives from the MIT-licensed robot_coding_bench
+([LICENSES/robot_coding_bench-MIT.txt](LICENSES/robot_coding_bench-MIT.txt)).

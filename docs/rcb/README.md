@@ -1,9 +1,12 @@
 # Paths cited by the frozen task files
 
-The task directories (`tasks/`, `ikea/tasks/`), the pinned tooling copied into them (`scripts/roboarc/shared/`:
-`rcb_topogym.py`, `render_bridge.py`, `nyx_direct.py`) and the hashed simulator source (`source/topogym/`, outside
-`planning/`) were written in the shared development repository the benchmark came from. Their bytes are pinned (task
-DIGESTs, `tooling_sha256`, SOURCE.json), so the paths they cite stay as written. This page maps each one to the file
+The pinned tooling copied into the task directories (`scripts/roboarc/shared/`: `rcb_topogym.py`, `render_bridge.py`,
+`nyx_direct.py`; IKEA's `rcb_ikea.py`, `ikea_nyx.py` and its `nyx_direct.py`), the eai-standard 2.4 layer and IKEA's
+live-grading pair, and the hashed simulator source (`source/topogym/`, outside `planning/`) were written in the shared
+development repository the benchmark came from. Their bytes are pinned (`tooling_sha256`, the runtime bindings,
+SOURCE.json, the shared layers' byte identity), so the paths they cite stay as written. Since 1.0.1 every other task
+file (READMEs, `task.toml`, compose files, Dockerfiles, `test.sh`, the graders' and sim services' docstrings) cites
+this repository's paths; the 1.0.0 task files cited the older paths below too. This page maps each one to the file
 that holds it in this repository.
 
 ## Documents
@@ -14,7 +17,7 @@ that holds it in this repository.
 | `docs/rcb/RENDER_BRIDGE.md` | [`docs/simulator/RENDER_BRIDGE.md`](../simulator/RENDER_BRIDGE.md) |
 | `docs/rcb/benchmarks/topogym.md` | [`docs/simulator/TOPOGYM_PROTOCOL.md`](../simulator/TOPOGYM_PROTOCOL.md) (section names unchanged) |
 | `docs/rcb/PROTOCOL.md`, `docs/protocol/README.md` (IKEA) | [`docs/PROTOCOL.md`](../PROTOCOL.md) |
-| `docs/rcb/STANDARD_MODE_2_2.md`, `docs/protocol/standard_mode.md` (IKEA) | [`docs/STANDARD_MODE.md`](../STANDARD_MODE.md): the standard mode the tasks serve (eai-standard 2.4; IKEA ships its own copy of the layer, `ikea/scripts/eai_standard/`) |
+| `docs/rcb/STANDARD_MODE_2_2.md`, `docs/protocol/standard_mode.md` (IKEA) | [`docs/STANDARD_MODE.md`](../STANDARD_MODE.md): the standard mode the tasks serve (eai-standard 2.4; IKEA's live-grading variant of the layer is `scripts/eai_standard/v2_4_live/`) |
 | `docs/rcb/TAXONOMY.md` | [`docs/TAXONOMY.md`](../TAXONOMY.md) |
 | `docs/rcb/STRESS_VALIDATION.md`, `docs/rcb/STRESS_HOWTO.md` | [`docs/simulator/STRESS_VALIDATION.md`](../simulator/STRESS_VALIDATION.md), [`docs/simulator/STRESS_HOWTO.md`](../simulator/STRESS_HOWTO.md) |
 | `docs/rcb/redesign/<family>.md` | [`docs/simulator/redesign/`](../simulator/redesign/) (buzz_wire_3d, fiber_bundling, interlocked_claws, knot_untying, rope_threading; the blanket_flatten and blanket_fold notes were not carried) |
@@ -48,4 +51,19 @@ that holds it in this repository.
 | `scripts/oracle_runners/*_session_oracle.py` | [`tools/references/oracle_runners/`](../../tools/references/oracle_runners/) |
 | `scripts/robowits/shared/oracle_replay.py`, `scripts/robowits/oracles/<family>/oracle_qpos.npy` (the standard solution player's header) | the player is [`scripts/roboarc/shared/standard/solution/oracle_replay.py`](../../scripts/roboarc/shared/standard/solution/oracle_replay.py); its rows are each task's `solution/oracle_qpos.npy`, from `scripts/roboarc/oracles/<base>/standard.npz` |
 | `scripts/task_dynamics.toml` | not carried; the `dynamics` field is defined in [`docs/PROTOCOL.md`](../PROTOCOL.md) §2.14 |
+| `tasks/<family>/common.py` (the tooling's comments: a path inside the simulator package) | [`source/topogym/tasks/`](../../source/topogym/tasks/) |
+| `source/dependencies/libuipc` (an error message of the tooling) | the libuipc builds installed in the base image ([`images/roboarc/README.md`](../../images/roboarc/README.md); recipe `images/roboarc/uipc-sm86-build/`) |
 | `scripts/check_knot_clearance.py`, `scripts/prepare_blanket_initial_states.py`, `scripts/check_*fast_paths.py` and the other one-off checks named in comments | not carried (development checks; their results are quoted where they are cited) |
+
+## IKEA MuJoCo
+
+The IKEA files cite paths of their development tree, where the IKEA suite was the repository's root.
+
+| cited path | in this repository |
+|---|---|
+| `scripts/ikea_mujoco/…` (`rcb_ikea.py`, `ikea_nyx.py`; 1.0.0's texts) | [`ikea/scripts/ikea_mujoco/`](../../ikea/scripts/ikea_mujoco/) |
+| `images/ikea-mujoco/…` (`ikea_nyx.py`; 1.0.0's texts) | [`ikea/images/ikea-mujoco/`](../../ikea/images/ikea-mujoco/) |
+| `scripts/robotangle/shared/` (`ikea_nyx.py`: where its `nyx_direct.py` came from) | [`scripts/roboarc/shared/`](../../scripts/roboarc/shared/) (a later version of the file) |
+| `scripts/eai_standard/v2_4/` (1.0.0's IKEA texts: the 2.4 service and client) | [`scripts/eai_standard/v2_4_live/`](../../scripts/eai_standard/v2_4_live/) |
+| `docs/protocol/README.md` (1.0.0's IKEA texts) | [`docs/PROTOCOL.md`](../PROTOCOL.md) |
+| `ikea/tasks/` (1.0.0) | `tasks/roboarc-ikea-*` |

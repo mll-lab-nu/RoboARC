@@ -7,7 +7,7 @@ running tasks see [RUNNING.md](RUNNING.md); the task contract is [PROTOCOL.md](P
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the 202 puzzle task directories. Generated: never edit them by hand |
+| `tasks/roboarc-*` | the 226 task directories: 202 puzzle tasks (`scripts/roboarc/mk_tasks.py`) and 24 IKEA tasks, `roboarc-ikea-*` (`ikea/scripts/ikea_mujoco/mk_tasks.py`, `mk_standard_tasks.py`). Generated: never edit them by hand |
 | `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json` (one record per base), `packages/` (each task's texts as they ship, with `{{FIELD}}`s the generator fills), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `port_package.py` (a new base's Genesis-era texts to a final package); `regrade.py`; `tests/` |
 | `scripts/` | the task layer the tasks cite and the generator renders with: `task_conventions.py` (`normalize`, the mode registry, the effective configuration), `set_agent_egress.py` (the egress allowlist), `task_resources.toml` (resource rules), `eai_standard/` (the eai-standard/2.4 client and service layer, copied into every standard task), `rcb_monitor/` (the resource-limits sidecar, copied into every task); `stamp_mtimes.py`, `check_image_files.py` (image builds) |
 | `scripts/harbor/` | the Harbor runner and its helpers (RUNNING.md) |
@@ -17,7 +17,7 @@ running tasks see [RUNNING.md](RUNNING.md); the task contract is [PROTOCOL.md](P
 | `tools/` | maintainer tooling: the release rebuild (`tools/release/`), how the references were made (`tools/references/`), the redesigned tiers' generators, the stress rounds, the simulator's tests ([tools/README.md](../tools/README.md)) |
 | `records/` | inputs and archives of earlier releases, kept for provenance ([records/README.md](../records/README.md)) |
 | `docs/simulator/` | the simulator's documentation and the per-family development notes; `docs/rcb/README.md` maps the paths the frozen task files cite to where they are now |
-| `ikea/` | IKEA MuJoCo: its own generators, task layer, images and checks (`ikea/README.md`) |
+| `ikea/` | IKEA MuJoCo: its generators (rendering into `tasks/` with the repository's task layer), scenes, images, evidence and checks (`ikea/README.md`) |
 
 Files under `scripts/eai_standard/` and `scripts/rcb_monitor/` that the generator copies into tasks
 (`rcb1.py`, `run.sh`, `client-requirements.txt`, `v2_4/rcb_client.py`, `v2_4/rcb_limited.py`, `monitor.py`,
@@ -94,7 +94,9 @@ verified build (each local tag must be its expected image id; the registry token
 ## Cutting a release
 
 1. Change the generator's inputs (`scripts/roboarc/`; new references and instances come from the release tooling,
-   `tools/release/release_rebuild.py`), bump `images/roboarc/VERSION` if the image changes, re-render, and add the release to `CHANGELOG.md`.
+   `tools/release/release_rebuild.py`), bump `images/roboarc/VERSION` if the image changes and the task set's version
+   (`scripts/roboarc/release.json` `version`, the README Release line; with a Change Log entry for every task that
+   changes, release.json `changes`), re-render, and add the release to `CHANGELOG.md`.
    `release_rebuild.py` renders on a commit of this repository (`--onto`); with premade instances (`--instances`) and a
    local tag (`--tag`) it re-makes a released version next to its image: with that release's own instances and
    references it changes no task file and builds the same image.

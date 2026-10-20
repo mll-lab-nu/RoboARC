@@ -2,7 +2,7 @@
 
 Twelve IKEA furniture-assembly tasks in plain MuJoCo 3.14.0 on the CPU (float64). Two robot arms assemble each piece
 with physical grasps: friction from the finger contacts, nothing attaches a part to a gripper, no assist. Every task
-ships in both modes, so there are 24 Harbor task directories, `ikea/tasks/roboarc-ikea-<scene>-i00-{privileged,standard}`.
+ships in both modes, so there are 24 Harbor task directories, `tasks/roboarc-ikea-<scene>-i00-{privileged,standard}`.
 
 **Credits.** The scenes, their mechanisms and success checks, and the robot demos the references start from were
 authored by Xiaoyu and Zhen Wu's team. The robot models are MuJoCo Menagerie's (Franka Emika Panda with the Franka
@@ -66,8 +66,8 @@ moved), at a breakdown, or when the wall clock runs out (then it is judged as it
 `final.json` (`graded_by "live"`, `replays 0`) and the verifier (`tests/grade.py`, no simulator) transcribes it. The
 recorded trajectory (`/data/trajectory.npz`) stays a replayable record, but **no grading replay runs**. This is a
 deliberate difference from RoboARC's puzzle tasks, whose standard verdict needs the live success **and** a fresh-process
-replay verdict: both suites speak `eai-standard/2.4`, but IKEA's tasks carry their own copy of the service layer
-(`ikea/scripts/eai_standard/v2_4_live/`), in which the live verdict stands. MuJoCo on the CPU is bit-deterministic, and
+replay verdict: both suites speak `eai-standard/2.4`, but IKEA's tasks carry their own variant of the service layer
+(`scripts/eai_standard/v2_4_live/`), in which the live verdict stands. MuJoCo on the CPU is bit-deterministic, and
 the IKEA references' end states were reproduced by fresh replays during validation (below).
 
 **Agent failures and infrastructure failures.** The agent's 0: a breakdown, a replay that crashes or in which the
@@ -186,32 +186,32 @@ the images; rebuilding them needs the meshes (`ikea/images/ikea-mujoco/README.md
 
 ## Files and checks
 
-| path (under `ikea/`) | what |
+| path (under `ikea/`; the task dirs are `tasks/roboarc-ikea-*`) | what |
 |---|---|
-| `tasks/` | the 24 task directories (generated: never edit them by hand) |
 | `scripts/ikea_mujoco/mk_tasks.py`, `mk_standard_tasks.py` | the generators (privileged first: the standard twins share its reference) |
 | `scripts/ikea_mujoco/{tasks,assets,bindings,evidence,standard_evidence}.json` | the generators' inputs: texts, scene pins, what each scene builds to, the Harbor checks and timings |
 | `scripts/ikea_mujoco/shared/`, `standard/` | the tooling and privileged grader; the sim service, Nyx render process, standard grader, oracle client |
 | `scripts/ikea_mujoco/oracles/` | the references and how they were built |
 | `scripts/ikea_mujoco/REVIEW.md` | the decision log |
-| `scripts/task_conventions.py`, `set_agent_egress.py`, `eai_standard/v2_4_live/` | IKEA's own task layer (the one these tasks were rendered with) |
 | `images/ikea-mujoco/` | the scenes and the two image recipes, `build.sh` |
 
 ```bash
 bash ikea/ci/check.sh [--image-tests]     # both generators' --check (+ the grader unit tests inside roboarc-ikea)
-harbor run -p ikea/tasks/roboarc-ikea-svallet-i00-standard -a oracle
+harbor run -p tasks/roboarc-ikea-svallet-i00-standard -a oracle
 ```
 
-The IKEA tasks are not on the puzzles' task layer: they have no resource-monitor sidecar and no `DIGEST` file, and the
-RoboARC invariants in `ci_checks/` do not run on them. Their egress allowlist reaches the model APIs only: the package
-registries are not on it, although the privileged instruction's "External material" paragraph says they are (a known
-text inconsistency, to be fixed with the next re-render of the IKEA tasks).
+Since 1.0.1 the IKEA tasks are rendered with the repository's task layer (`scripts/task_conventions.py`), like the
+puzzles: the shared closing sections of the instruction, the resource-monitor sidecar, declared resources, limits,
+caps and seeds (`scripts/task_resources.toml`, the `^roboarc-ikea-` rules: privileged CPU only, the standard sim one
+GPU), a `DIGEST`, and the one egress list (`scripts/set_agent_egress.py`: the model APIs and the package registries,
+which the instruction's "External material" names; 1.0.0's IKEA allowlist had the model APIs only). Every check in
+`ci_checks/` covers them. Their standard layer is the live-grading variant `scripts/eai_standard/v2_4_live/`. Results
+before and after 1.0.1 are not comparable (instruction and egress changed; graders, scenes and references did not).
 
-**Paths cited inside the task files.** The task texts were rendered with paths of the development tree. Relative to
-this repository they are: `scripts/ikea_mujoco/…` and `images/ikea-mujoco/…` = `ikea/scripts/ikea_mujoco/…` and
-`ikea/images/ikea-mujoco/…`; `scripts/eai_standard/v2_4/` (the 2.4 service and client) =
-`ikea/scripts/eai_standard/v2_4_live/`; `scripts/eai_standard/{client.env,run.sh,…}` = `scripts/eai_standard/`;
-`docs/protocol/README.md` = `docs/PROTOCOL.md`; `docs/protocol/standard_mode.md` = `docs/STANDARD_MODE.md`;
-`docs/rcb/RENDER_BRIDGE.md` and `scripts/roboarc/shared/` (the Nyx driver's origin) = RoboARC's simulator
-documentation and `scripts/roboarc/shared/`. The privileged READMEs' Harbor-check lines name the image by its pre-1.0
+**Paths cited inside the task files.** Since 1.0.1 the generated texts cite this repository's paths. Files copied
+unchanged whose bytes stay as released (the tooling `rcb_ikea.py`, the Nyx render process `ikea_nyx.py` and its
+`nyx_direct.py`, the live-grading pair) still cite the development tree: `scripts/ikea_mujoco/…` and
+`images/ikea-mujoco/…` = `ikea/scripts/ikea_mujoco/…` and `ikea/images/ikea-mujoco/…`; `docs/protocol/standard_mode.md`
+= `docs/STANDARD_MODE.md`; `docs/rcb/RENDER_BRIDGE.md` = `docs/simulator/RENDER_BRIDGE.md`;
+`scripts/robotangle/shared/` (the Nyx driver's origin) = `scripts/roboarc/shared/` ([docs/rcb/README.md](../rcb/README.md)). The privileged READMEs' Harbor-check lines name the image by its pre-1.0
 name `eai-ikea-mujoco` (the same ids).

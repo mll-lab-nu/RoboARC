@@ -1,6 +1,6 @@
 # Taxonomy (`task.toml` `[metadata]`)
 
-The values RoboARC's tasks use (`tasks/` and `ikea/tasks/`). See [PROTOCOL.md](PROTOCOL.md) §1, §2 for the
+The values RoboARC's tasks use (`tasks/`). See [PROTOCOL.md](PROTOCOL.md) §1, §2 for the
 recommended fields and the settings a task declares. A new value is added by pull request.
 
 | Field | Values |
@@ -33,7 +33,7 @@ RoboARC's own fields:
   the base's two-digit number within its family (never reused: a removed task leaves a gap), `i01` the MuJoCo
   instance. `[metadata].family` is the family (`cast_coil`), `difficulty` its rating.
 - IKEA MuJoCo: `<base>` is `roboarc-ikea-<product>-i00`.
-- `[task].name = "robot-coding-bench/<folder>"` (the Harbor namespace the tasks were published under).
+- `[task].name = "roboarc/<folder>"` (Harbor's `org/name`; until 1.0.0 `robot-coding-bench/<folder>`).
 - No versions or durations in names; a task's version is its digest (`tasks/<task>/DIGEST`).
 
 ## Run ids

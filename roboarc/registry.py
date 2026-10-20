@@ -3,7 +3,7 @@ simulator needed). Standard library only.
 
 Canonical ids: `roboarc-<family>-<NN>-i01` (puzzles, e.g. roboarc-orbits-02-i01) and `roboarc-ikea-<name>-i00` (IKEA,
 e.g. roboarc-ikea-lack-i00). resolve() also accepts the Harbor names (`...-privileged`, `...-standard`, with or without
-the `robot-coding-bench/` prefix), the bases without `roboarc-` (orbits-02-i01, orbits-02) and the IKEA names (ikea-lack,
+the `roboarc/` prefix, or 1.0.0's `robot-coding-bench/`), the bases without `roboarc-` (orbits-02-i01, orbits-02) and the IKEA names (ikea-lack,
 lack).
 """
 from __future__ import annotations

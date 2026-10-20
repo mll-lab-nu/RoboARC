@@ -101,8 +101,8 @@ roboarc.task_info("orbits-02")        # aliases: see below
 ```
 
 Canonical ids: `roboarc-<family>-<NN>-i01` (e.g. `roboarc-orbits-02-i01`) and `roboarc-ikea-<name>-i00` (e.g.
-`roboarc-ikea-lack-i00`). Also accepted: the Harbor task names (`roboarc-orbits-02-i01-standard`,
-`robot-coding-bench/roboarc-orbits-02-i01-privileged`), the bases without the prefix (`orbits-02-i01`, `orbits-02`) and
+`roboarc-ikea-lack-i00`). Also accepted: the Harbor task names (`roboarc-orbits-02-i01-standard`, also with
+the namespace of their `[task].name`, `roboarc` or 1.0.0's `robot-coding-bench`), the bases without the prefix (`orbits-02-i01`, `orbits-02`) and
 the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment: the frozen instance is the same.
 
 `TaskInfo` (no simulator needed): `id`, `suite` (`puzzles` | `ikea`), `family`, `name` (the tooling's task key),

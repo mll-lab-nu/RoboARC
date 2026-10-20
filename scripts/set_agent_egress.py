@@ -29,7 +29,7 @@ there), and run that copy (docs/RUNNING.md).
 `only <hosts>`: Harbor can add hosts to a task's allowlist at run time (`--allow-agent-host`) but not take any off, and
 the model APIs' hosts also serve what a trial does not get (account connectors, files, web tools). A run through the
 usage gateway therefore runs from a copy of the task whose allowlist is the gateway's address and PACKAGE_HOSTS
-(scripts/harbor/run_agent_batch.sh, GATEWAY=1; plus chatgpt.com for Codex with a ChatGPT login, whose start-up lookup needs
+(scripts/harbor/run_agent_batch.sh, USAGE_GATEWAY=<dir>; plus chatgpt.com for Codex with a ChatGPT login, whose start-up lookup needs
 it); the gateway forwards the model-API paths and refuses the rest. `only` and
 `public` take explicit directories and refuse one inside this repository's tasks/."""
 import pathlib, re, sys

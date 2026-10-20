@@ -20,7 +20,7 @@ if "numpy" not in _sys.modules:
 if not _rt.SETTINGS_AT_NUMPY_IMPORT:
     _rt.record_numpy_settings()
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 from ._runtime import RuntimeMismatch  # noqa: E402
 from .registry import TaskInfo, list_tasks, resolve, task_info  # noqa: E402
