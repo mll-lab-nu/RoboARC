@@ -47,15 +47,15 @@ The demo is the phase guide; its rows run through the clamp plus a per-arm joint
 - **rod:** the carried rod is steered onto its guide pose relative to half_A (gain 0.01) before it is dropped.
 - offsets are ramped out after each release, 600 ticks after the hand has opened (stages after bolt 2).
 Each stage ends with a checkpoint; the chain of resumed runs and their settings is `recipe/rebuild.sh`. Rebuilt from
-scratch with it on Quest (Xeon, SIF 0.3.0, 2026-10-18): bit-identical to `stegesund.npz` (sha256 `0bfcaf1c...`).
+scratch with it on the cluster (Xeon, SIF 0.3.0, 2026-10-18): bit-identical to `stegesund.npz` (sha256 `0bfcaf1c...`).
 
 ## Gates (2026-10-18)
 1. Speed: 0 rows over the arm or hand limits, 0 clamped ticks on replay (`probe.py`).
 2. Frozen birth: every replay builds to `917b2bc6...` (bindings.json).
 3. Fresh replays (`probe.py`: rcb_ikea Session, clamp in, `final_check()`), all success with the hashes above:
-   AMD Zen 4 host B Ryzen 9 7950X (image 0.3.0) x2 (1546 / 1554 s, host load ~22); Intel AVX-512 Quest Xeon Gold 6338
-   (SIF 0.3.0) x2 (2450 / 2473 s); Intel AVX2 i9-14900HX laptop (PyPI mujoco 3.14.0 + EPA patch) x1, 1164 s quiet.
-   The builder's own end state (Quest Xeon) is the same.
+   AMD Zen 4 host B Ryzen 9 7950X (image 0.3.0) x2 (1546 / 1554 s, host load ~22); Intel AVX-512 the cluster Xeon Gold 6338
+   (SIF 0.3.0) x2 (2450 / 2473 s); Intel AVX2 i9-14900HX host (PyPI mujoco 3.14.0 + EPA patch) x1, 1164 s quiet.
+   The builder's own end state (the cluster Xeon) is the same.
 4. Harbor on host B (Harbor 0.23.0, image 0.3.0, -sim 0.4.0, `harbor_run_safe.sh`): privileged oracle 1 (deterministic 1,
    instance_exact 1, both replays `71688676...` / `a7da23fa...`, replay_wall 1553 s, video 751 frames whose end state is the
    verdict's) / nop 0; standard oracle 1 (graded live, #305: live settled success at control step 376,000 in 94 calls,

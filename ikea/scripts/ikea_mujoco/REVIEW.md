@@ -78,7 +78,7 @@ are unchanged; ours are separate commits on top. The meshes (HF `eai-v2-internal
   the hex key set down 12 mm along its rest. Note for you: the scene's own rest pose of the key is a knife edge (one
   contact, the arm hanging in the slot), where the key vibrates at 0.099 rad/s from the birth on, with prisms or not, so
   a key returned exactly there never meets the rest rule; a flat-down rest pose would be cleaner. Same hashes on AMD
-  Zen 4, Intel AVX2 and Intel AVX-512; 2,740 s on an i9-14900HX core (63 % of the bar), 8,283 s on a Quest Xeon 6230R
+  Zen 4, Intel AVX2 and Intel AVX-512; 2,740 s on an i9-14900HX core (63 % of the bar), 8,283 s on a cluster Xeon 6230R
   core. Harbor privileged oracle 1 / nop 0, standard oracle 1 (live settled success) / nop 0 on 0.3.2 / -sim 0.4.2.
 - **stenerik ships, both modes (2026-10-17).** The demo commands up to 55x the joint-speed limit, and on our scene it
   seats only the first screw (the screwdriver arrives 0.5-2.5 mm off the screw axis on the prisms). Our closed-loop
@@ -96,10 +96,10 @@ are unchanged; ours are separate commits on top. The meshes (HF `eai-v2-internal
   per scene, on in uppsta, off in stegesund): a clamped part welded to its host stops colliding with it, every other
   contact stays exactly as before; (2) the reference follows the demo at every 4th row away from the grasps and releases
   (every 2nd or the demo's pace where a segment's gate needs it), every row within the arm limits and the pending
-  Franka Hand slew. One replay: 3,199 s on the quiet i9 laptop (74 % of the bar), 3,519 s on a Ryzen 7950X, 8,425 s on
+  Franka Hand slew. One replay: 3,199 s on the quiet i9 workstation (74 % of the bar), 3,519 s on a Ryzen 7950X, 8,425 s on
   a Xeon core (over the bar on that slow CPU, as gladom / variera / stenerik). Same hashes on Zen 4, Intel AVX-512 and
   AVX2. **What would help from you (optional, uppsta ships without it):** a coarser end-block collision model (15-30
-  convex pieces). Measured at screw b's drive (3000 rows from one state, laptop): 23-26 ms per row as is; 15.5 with
+  convex pieces). Measured at screw b's drive (3000 rows from one state, workstation): 23-26 ms per row as is; 15.5 with
   every 2nd end-block piece; 10.5 with every 4th; 8.2 with the block's board contacts off. A coarser hole thread saves
   almost nothing (25.1 with every 2nd thread piece; 25.5 with the screw's thread contacts off). The board's 640 pieces
   (336 contacts lying on the table) are the next largest cost.
@@ -197,7 +197,7 @@ pointer. Physics is unchanged: every scene builds to its bound initial-state has
 - That variera tail is superseded: the shipped references are the ones under "References." below.
 
 **Cross-CPU**
-The reference end hashes are identical on Intel AVX2 (i9-14900HX), Intel AVX-512 (Xeon Gold 6230R, Quest) and AMD
+The reference end hashes are identical on Intel AVX2 (i9-14900HX), Intel AVX-512 (Xeon Gold 6230R, the cluster) and AMD
 Zen 4 (Ryzen 9 7950X, EPYC 9354), all with the masking.
 
 **MuJoCo 3.14.0 EPA crash**
@@ -220,13 +220,13 @@ Zen 4 (Ryzen 9 7950X, EPYC 9354), all with the masking.
 
 | task | one replay, by host | standard live episode, host B (loaded) |
 |---|---|---|
-| eket | 518 s Quest Xeon 6230R (3.6 %) | 289 s |
-| svallet | 394 s Quest (old reference); Harbor verifier 355 s for 2 replays | 293 s |
-| ikea365 | 293 s a cloud host EPYC, 690 s Quest (4.8 %) | 341 s |
+| eket | 518 s the cluster Xeon 6230R (3.6 %) | 289 s |
+| svallet | 394 s the cluster (old reference); Harbor verifier 355 s for 2 replays | 293 s |
+| ikea365 | 293 s a cloud host EPYC, 690 s the cluster (4.8 %) | 341 s |
 | lack | Harbor verifier 619 s for 2 replays | 474 s |
 | vesken | 630 s a cloud host (4.4 %), 1135 s loaded host C | 810 s |
-| gladom | 2882 s quiet i9-14900HX laptop (20.0 %) | 3361 s (23.3 %); 4567 s (31.7 %) in an earlier, more loaded run |
-| variera | 3413 s quiet i9-14900HX laptop (23.7 %) | 4160 s (28.9 %); 5689 s (39.5 %) in an earlier, more loaded run |
+| gladom | 2882 s quiet i9-14900HX host (20.0 %) | 3361 s (23.3 %); 4567 s (31.7 %) in an earlier, more loaded run |
+| variera | 3413 s quiet i9-14900HX host (23.7 %) | 4160 s (28.9 %); 5689 s (39.5 %) in an earlier, more loaded run |
 
 - MuJoCo's own step is ~95 % of the time after the bit-identical speed-up (SDF threads).
 - gladom is at the bar and variera is above it on a quiet host. On loaded host B (load 50-85) both are well above.

@@ -51,7 +51,8 @@ not carried over: this repository starts with a fresh history.
    `check-unit-tests.sh`, `check-generated-tasks.sh` and `check-ci-selftest.py`. The self-test keeps 78 mutations of
    RoboARC tasks; the ones written for other benchmarks' features stay in the shared repository. Removed tests whose
    fixtures are other benchmarks' tasks: `scripts/tests/test_runner_results.py` and `test_task_seed.py`. Also removed
-   from `run_invariants.sh` (H.5 keeps `test_retry_policy.py`). No protocol rule changed.
+   from `run_invariants.sh` (H.5 keeps `test_retry_policy.py`). `scripts/eai_standard/selftest.py` is not run: it covers
+   the eai-standard/2.2 layer and needs 2.2 task adapters, while RoboARC's tasks use 2.4. No protocol rule changed.
 7. **Shared tables:** `scripts/task_resources.toml` keeps the 8 rules that match RoboARC tasks (with their
    `[[limit]]` and `[[cap]]` tables), and
    `docs/easy_set.toml` keeps RoboARC's 31 entries.
@@ -64,8 +65,8 @@ not carried over: this repository starts with a fresh history.
    (`images/ikea-mujoco/VERSION` and `sim/VERSION` 1.0.0, `bindings.json` `reference`, `mk_tasks.py`'s registry
    assert, `mk_standard_tasks.py` `SIM_IMAGE`, `sim/Dockerfile` `FROM`) -> `ghcr.io/embodied-first-exam/roboarc-ikea`
    and `roboarc-ikea-sim`. Host names in the evidence records, the review and the oracle notes were replaced as in 8,
-   and the task READMEs re-rendered from them. Pinned files keep their text: `rcb_ikea.py`, `ikea_nyx.py` and the
-   scenes. Renamed (user, 2026-10-19) by the generators' `name()`: `ikea-<scene>-i00-<mode>` ->
+   and the task READMEs re-rendered from them. Pinned files keep their text: `rcb_ikea.py` and the scenes
+   (`ikea_nyx.py` lost a host name from a comment in 1.0.0: sha256 37a773230f41 in every standard task). Renamed (user, 2026-10-19) by the generators' `name()`: `ikea-<scene>-i00-<mode>` ->
    `roboarc-ikea-<scene>-i00-<mode>` (the full map is in CHANGELOG.md). That changes `task.toml`'s `name`, the
    README's title and twin rows, and a path in the docstrings of `ikea_nyx.py`, `ikea_rig.py` and `server.py`. The
    evidence records keep the names the runs had. Apart from these lines, the task dirs equal 5cb4114f10's. New: `images/ikea-mujoco/build.sh`,

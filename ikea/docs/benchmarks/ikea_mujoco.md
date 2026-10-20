@@ -184,7 +184,7 @@ request field are the agent's 0, never a free retry. Harbor checks: `evidence.js
 
 ## Timing
 One reference execution against the 4320 s bar (40 % of 10800 s). A Xeon Gold 6230R core (2.1 GHz) is a slow
-trial-class CPU; the quiet i9-14900HX laptop a fast one; the standard live episodes ran on shared, loaded RTX 4090
+trial-class CPU; the quiet i9-14900HX host a fast one; the standard live episodes ran on shared, loaded RTX 4090
 workstations (Ryzen 9 7950X).
 
 | task | rows | one replay, dedicated Xeon Gold 6230R core | one replay, quiet i9-14900HX | standard live episode, loaded host |

@@ -63,8 +63,8 @@ Rebuild (the 0.3.0 image, `rcb_ikea.py` on `PYTHONPATH` with this directory):
    `95134e1fbd5cf0f9…` / settled `327c16c5f0071724…`:
    - AMD Zen 4: host B Ryzen 9 7950X in image 0.3.0 x2 (3646 / 3688 s, host load 50-60), the Harbor verifier's two replays
      (3709 / 3731 s);
-   - Intel AVX-512: Quest Xeon Gold 6230R in the 0.3.0 SIF x2 (8024 / 8696 s);
-   - Intel AVX2: the i9-14900HX laptop (MuJoCo 3.14.0 from PyPI with the EPA byte patch, numpy 2.5.4), 2664 s.
+   - Intel AVX-512: the cluster Xeon Gold 6230R in the 0.3.0 SIF x2 (8024 / 8696 s);
+   - Intel AVX2: the i9-14900HX host (MuJoCo 3.14.0 from PyPI with the EPA byte patch, numpy 2.5.4), 2664 s.
 4. Harbor on host B (image 0.3.0 / -sim 0.4.0 Nyx, harbor_run_safe.sh):
    - privileged: oracle reward 1 (deterministic 1, instance_exact 1, both replays `95134e1f…` / `327c16c5…`, replay
      wall 3731 s, video 751 frames ending in the verdict's state), nop reward 0 (missing trajectory);
@@ -73,6 +73,6 @@ Rebuild (the 0.3.0 image, `rcb_ikea.py` on `PYTHONPATH` with this directory):
    The runs used the dirs rendered before this evidence was recorded; the re-render changes only the row cap (463,000
    -> 486,000) and the privileged verifier timeout (21,120 -> 26,700 s), both derived from these measurements.
 5. `check-video` (main's `ci_checks/check-video.py`): both dirs render and collect a replay video.
-6. Timing (one reference execution against the 4320 s bar, 40 % of 10800 s): 2664 s on the quiet i9-14900HX laptop
-   (61.7 % of the bar, 24.7 % of the budget); 3646-3688 s on loaded host B Zen 4 (85 %); 8024-8696 s on a dedicated Quest
+6. Timing (one reference execution against the 4320 s bar, 40 % of 10800 s): 2664 s on the quiet i9-14900HX host
+   (61.7 % of the bar, 24.7 % of the budget); 3646-3688 s on loaded host B Zen 4 (85 %); 8024-8696 s on a dedicated the cluster
    Xeon Gold 6230R core (over the bar on that slow CPU, as the old reference's 6839 s was).

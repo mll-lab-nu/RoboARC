@@ -8,7 +8,7 @@ TCP here is the Session's TCP (gripper_link + (0.13, 0, -0.003), topogym/robot/a
 Gripper frame (= gripper_link frame): x = approach (fingers point along +x), y = closing axis (the two finger pads are
 separated along y), z = the finger-plane normal. A rope held between the pads runs perpendicular to y.
 
-No MuJoCo here (laptop-safe): FK is a product of exponentials of the MJCF chain; `verify_against_mujoco` (the cloud host) checks it
+No MuJoCo here (workstation-safe): FK is a product of exponentials of the MJCF chain; `verify_against_mujoco` (the cloud host) checks it
 against mj_kinematics on the real model. Collision checks use conservative capsules for the arm links (`arm_capsules`).
 """
 from __future__ import annotations

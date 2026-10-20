@@ -312,16 +312,16 @@ the state hash covers them. The plastic dissipation (`solver.plastic.loss_j`) is
 **Birth.** make-instance's settle on VBD: every grid vertex under 5 cm/s for 0.1 s, and every rest angle moving less than
 1e-3 rad per control (`quiet_rest_angle_rad`). Without the second rule a very_easy birth settled in 0.15 s while its rest
 angles still moved .62 rad in the next second (1.2 mm of motion). very_easy -i01 on the frozen step (f3bf61560):
-settle 1.3 s (52 controls), coverage 0.8593 -> 0.8625, state_sha ed36dbbfece3ca48, the same on Quest (Intel Xeon
+settle 1.3 s (52 controls), coverage 0.8593 -> 0.8625, state_sha ed36dbbfece3ca48, the same on the cluster (Intel Xeon
 6230R) and a cloud host (AMD Zen 4).
 
-**very_easy reference on VBD (f3bf61560, Quest CPU).** The route oracle unchanged succeeds in 1341 rows (the flex's:
+**very_easy reference on VBD (f3bf61560, the cluster CPU).** The route oracle unchanged succeeds in 1341 rows (the flex's:
 1897): coverage 0.99995, height 3.9 mm, the stretch peak 1.02 at the second corner's lay (1.24 on the step without the
-coarse correction); final state_sha 8e3cb95c197621ee; 53 min at 2.4 s per control on a busy Quest node.
+coarse correction); final state_sha 8e3cb95c197621ee; 53 min at 2.4 s per control on a busy the cluster node.
 privileged.npz sha256 a20e39aba5519453bdf3f56be8bd0de88c2c9522d78a9d15bd179a1f5c3baf86.
 - Energy books (the stress observer, ve_F1 rows 1-260): the same end state with and without the observer; the cloth's
   X -35 mJ (dissipative), its largest rise 4.3 uJ; the pins' work +0.67 J; plastic loss 2.2 uJ; observer errors 0.
-- Determinism: fresh-process replays of the recorded rows end on 8e3cb95c197621ee on Quest (Intel Xeon 6230R) and on
+- Determinism: fresh-process replays of the recorded rows end on 8e3cb95c197621ee on the cluster (Intel Xeon 6230R) and on
   a cloud host (AMD Zen 4), with every 200-row hash equal (row 600 7edfab8a3bb05851, row 1200 2aa8418e5b658a5a).
 - Restore: rewind at row 260 of ve_F1 with the right hand's pins active, 40 rows again: every hash equal. A restore test
   must also reset the Session's previous targets (`Session._targets`, from which the speed limits and the table guard
@@ -416,7 +416,7 @@ Measured (validator easier4 directed_e0; `cloth_floor` off so the coupling acts 
 | force on the gripper base | - | impact 52 N, then F = G 8.0 +- 0.3 N (steps 700-769), step-to-step change p99 0.065 N |
 | determinism | | GPU: f389e44046e5c633 x2 on RTX PRO 6000 (sm_120) = RTX 4090 (sm_89); CPU: Intel 6230R = AMD Zen 4; rewinds at rows 54 / 62 / 70 exact on both (wrenches pending) |
 | cost per cloth step | | GPU 3.5-24 ms (shared GPUs; the cloth step 160-520 ms), CPU 0.6-1.3 ms (308 ms) |
-Routes, two-way vs one-way (Quest CPU, blanket_vbd, the route oracles closed-loop):
+Routes, two-way vs one-way (the cluster CPU, blanket_vbd, the route oracles closed-loop):
 | route | one-way | two-way |
 |---|---|---|
 | flatten very_easy -i01 | success, 1279 rows, 7274ae93 (= lane A's reference), pins p50 / p95 / max 0.51 / 1.05 / 1.12 N | success, 1294 rows, coverage 0.99993, pins 0.50 / 1.04 / 1.14 N |
@@ -469,7 +469,7 @@ The blanket redesign (its coordinator's clone, `qineng-rt-softbody-robot`) repla
   - The archive's acceptance comes from the flatten tier's own Task (the hard archive is `scene_layout`).
 - **GPU search** (exploration only; records are CPU): host C the work notes, in the record
   image with the bound tree. Its `cloth_vbd.py` is patched to lane S's `GpuDetSolverVBD` (`VBD_DEVICE=cuda:0`).
-  It runs at about 0.6-1 s per control on an RTX 4090; the CPU step on Quest takes about 2.7-7 s, depending on the
+  It runs at about 0.6-1 s per control on an RTX 4090; the CPU step on the cluster takes about 2.7-7 s, depending on the
   node's load.
 - **Fingertip footing (3975f4c68).** A lab hand is a point; a robot pinch is two fingers.
   - medium4e and hard4b's first grasp (`far_half_back`) sits 12 mm inside the turned-over layer's edge. At yaw 0/180 the
@@ -500,7 +500,7 @@ each tier's route is checked on the current head by one closed-loop run, below.
 
 - Runs: host C RTX 4090, the record image plus the bound tree, with the masks. The births are the rec1 instances
   (the CPU `blanket_vbd` births) re-pointed to `mujoco_profile: blanket_vbd_gpu` (same states).
-- Tools: host C the work notes, a cloud host `/workspace/mj/blanket/rec_gpu/run_gpu.sh`, Quest
+- Tools: host C the work notes, a cloud host `/workspace/mj/blanket/rec_gpu/run_gpu.sh`, the cluster
   `work/quest_gpu.sbatch`.
 
 | tier | route | head | rows | end | coverage |
@@ -598,7 +598,7 @@ What did not work (branching lab on host C, the work notes, INDEX.md):
 - Harbor oracle 1 / nop 0 in both modes (rendering off, the GPU kept) on a local test image (eai-roboarc:0.2.0 plus this
   instance): privileged success x2 deterministic, standard live = replay, end 6a9c4796da46cf47;
 - leak probe (the V2 audit): no finding (the generic `keyframes` runtime hit, as 07 / 08);
-- stress (plan B, CPU 300): Quest, the CPU twin (blanket_vbd_cpu_twin; the twin instance's scene re-pointed to the CPU
+- stress (plan B, CPU 300): the cluster, the CPU twin (blanket_vbd_cpu_twin; the twin instance's scene re-pointed to the CPU
   solver), stress tools of 11371a74f1, eai-roboarc:0.2.0 SIF, seeds 91901-91934: 300 episodes (random, directed,
   mutate, cem, periodic, 60 each; 71,070 controls; prefix left out: a twin prefix episode replays ~1,400 GPU rows at
   ~9 s per control), nop CLEAN, 0 confirmed BREAKDOWN under v2.13b (and every earlier reading), 0 pops: PASS.
@@ -623,7 +623,7 @@ the released Genesis references, untouched.
 | tier | birth (state_sha) | reference | status |
 |---|---|---|---|
 | very_easy | 21441c0569cfbef9 | `oracles/blanket-flatten-very-easy-i01` (refs/ve_F1): 1897 rows, 47.4 s | success: coverage 0.975, height 18.3 mm, stretch 1.015, robot clearance 10 mm; final 2f3ed0fa25ffd525. The corner route, two measured fold layouts, the base clearance slide (the sheet had come to rest 5.5 mm inside the right base's cover). Validator: 2 fresh replays CLEAN, equal; X - Wc -4.2 mJ; 2.0-2.1 s per control on a host loaded to 150/128 (65-67 min per observed run, near the 72 min limit) |
-| easy | f146812a31afc5c5 | `oracles/blanket-flatten-easy-i01` (refs/easy_F1): 753 rows, 18.8 s | success: coverage 0.960, height 15.7 mm, stretch 1.013, robot clearance 43 mm; final 3ad1a55ce1dbc26a. The easy route unchanged. Validator: 2 fresh replays CLEAN, equal; X - Wc +3.0 mJ. Cross-CPU: laptop i9 = a cloud host Zen 4 (76 checkpoints) |
+| easy | f146812a31afc5c5 | `oracles/blanket-flatten-easy-i01` (refs/easy_F1): 753 rows, 18.8 s | success: coverage 0.960, height 15.7 mm, stretch 1.013, robot clearance 43 mm; final 3ad1a55ce1dbc26a. The easy route unchanged. Validator: 2 fresh replays CLEAN, equal; X - Wc +3.0 mJ. Cross-CPU: workstation i9 = a cloud host Zen 4 (76 checkpoints) |
 | medium | 68c784b1288dc881 | `oracles/blanket-flatten-medium-i01` (refs/medium_F2): 1511 rows, 37.8 s | success: coverage 0.964, height 23.7 mm, stretch 1.015, robot clearance 40 mm; final b39cd3f0fb5ee97c. The route unchanged (coverage 0.871, the far strip tucked at y 0.45-0.52), then the measured slide (11.6 cm toward the robot: the tucked strip rolls out, 0.964); the measured crease finds nothing left. Validator: 2 fresh replays CLEAN, equal; X - Wc +0.4 mJ |
 | hard | 3aacbcd368c4d449 | none: BLOCKED, flagged for step 3 | best measured re-plan 0.79 (below); the redesign's hard4b replaces this tier |
 
@@ -640,9 +640,9 @@ equal each. On the new physics ve_short2's rows still succeed when replayed (fin
    rule 6, a per-vertex tunnel check); the cost at 2-4k contacts per substep.
 4. Cross-CPU on the other final references. easy on b1ec43997 passed: the standalone replay of its export (the compiled
    model with the exact diagonal, the start state, every step's controls and pin changes; `work/xcpu_export.py`,
-   `work/xcpu_play.py`, mujoco 3.14.0 + numpy only) ends on the same state on the laptop's Intel i9 (AVX2) as the
+   `work/xcpu_play.py`, mujoco 3.14.0 + numpy only) ends on the same state on the workstation's Intel i9 (AVX2) as the
    Session run on a cloud host's Zen 4: 76 checkpoints equal, final 4edcdf9f410da15c. very_easy's full Session replay on the
-   laptop (no observer) also ends on its recorded state: 52.7 min.
+   workstation (no observer) also ends on its recorded state: 52.7 min.
 5. The flex's interlocking collision surface and limp bending (above): not fixed; the replacing cloth solver should not
    inherit them.
 

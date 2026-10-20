@@ -465,9 +465,9 @@ def readme(t: str, traj: pathlib.Path) -> str:
         ver += f" Reference timing against the {AGENT_S} s budget: {tm['text']}"
     elif tm:
         ver += (f" Reference timing against the {AGENT_S} s budget, by host: one unobserved replay "
-                f"{tm['laptop_i9_14900HX_quiet_s']:.0f} s ({100 * tm['laptop_i9_14900HX_quiet_s'] / AGENT_S:.1f} %) on a quiet "
-                f"i9-14900HX laptop; the standard twin's live episode {tm['ws2_loaded_standard_live_s']:.0f} s "
-                f"({100 * tm['ws2_loaded_standard_live_s'] / AGENT_S:.1f} %) on host B, a shared and loaded Ryzen 9 7950X (load 25-85 over the day; an earlier run on the same host took 4567 s / 5689 s for gladom / variera).")
+                f"{tm['quiet_i9_14900HX_s']:.0f} s ({100 * tm['quiet_i9_14900HX_s'] / AGENT_S:.1f} %) on a quiet "
+                f"i9-14900HX host; the standard twin's live episode {tm['loaded_standard_live_s']:.0f} s "
+                f"({100 * tm['loaded_standard_live_s'] / AGENT_S:.1f} %) on host B, a shared and loaded Ryzen 9 7950X (load 25-85 over the day; an earlier run on the same host took 4567 s / 5689 s for gladom / variera).")
     return f'''# {name(t)}
 
 | | |

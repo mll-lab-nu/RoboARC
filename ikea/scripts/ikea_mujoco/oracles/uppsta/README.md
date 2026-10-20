@@ -23,7 +23,7 @@ two bodies already welded together.
 The previous reference (549,754 rows) took 12,680 s on a Xeon 6230R core and about 6,000 s on a fast host. A profile
 from its segment checkpoints showed that the thread is not the cost:
 - each end block has 114 convex collision pieces. Seated on the board it makes ~900 contacts with it, before its screw
-  is welded and, until now, for the rest of the episode after it. At screw b's drive (laptop, 3000 rows from one state):
+  is welded and, until now, for the rest of the episode after it. At screw b's drive (workstation, 3000 rows from one state):
   23-26 ms per row as is, 8.2 with the end block's board contacts off, 25.5 with the screw's thread contacts off;
 - the Python hooks (mechanism, monitor, validity) are under 1 % of a row; all the time is `mj_step`.
 
@@ -43,7 +43,7 @@ Two changes:
 
 Rows and time (one replay):
 
-| reference | rows | i9-14900HX laptop | Ryzen 9 7950X (host B) | Xeon Gold 6230R core |
+| reference | rows | i9-14900HX host | Ryzen 9 7950X (host B) | Xeon Gold 6230R core |
 |---|---|---|---|---|
 | 2026-10-16 (no switch-off, demo pace) | 549,754 | ~6,000 (est.) | 7,900 (loaded) | 12,680 |
 | switch-off + every 2nd row (intermediate) | 458,709 | 4,856 (load 8-10) | 7,954 (load ~50) | 10,461 / 10,525 |
@@ -118,7 +118,7 @@ in segment 10 (the key is aligned to the true screw's spin), so the build ran se
 **Build.** Every segment from the birth, chained through checkpoints, with the hand-slew `rcb_ikea.py` (branch
 dev/qineng-ikea-hand-slew: the Franka Hand at 0.1 m/s of finger width, 182.14 command units/s here) so that the rows
 also satisfy that rule; `finish.py` writes the file and checks the step rule and the verdict. The same build on an
-Intel Xeon (Quest) and on Zen 4 (host B) wrote bit-identical rows (checked on the intermediate build).
+Intel Xeon (the cluster) and on Zen 4 (host B) wrote bit-identical rows (checked on the intermediate build).
 
 ## Gates (2026-10-18)
 1. **Frozen birth.** Every replay builds to the bound `initial_state_sha256` (`3b69cfd5…`, bindings.json), loaded
@@ -127,11 +127,11 @@ Intel Xeon (Quest) and on Zen 4 (host B) wrote bit-identical rows (checked on th
    client and the sim service); neither the rows nor their sha appear in `environment/`, `tests/` or the instructions;
    `stage_context.pointers()` finds nothing in the scene; the texts give no world coordinates, table height or base pose.
 3. **Fresh replays** (`rcb_ikea.py replay`, the grader's path, from the birth), all success with the hashes above:
-   - Intel AVX2: the i9-14900HX laptop (PyPI MuJoCo 3.14.0 + the EPA byte patch, numpy 2.5.4, the 0.3.1 scene files, the
-     hand-slew `rcb_ikea.py`), 3,199 s, one process under the shared laptop lock;
+   - Intel AVX2: the i9-14900HX host (PyPI MuJoCo 3.14.0 + the EPA byte patch, numpy 2.5.4, the 0.3.1 scene files, the
+     hand-slew `rcb_ikea.py`), 3,199 s, one process under the shared workstation lock;
    - AMD Zen 4: host B Ryzen 9 7950X in image 0.3.1 (the current `rcb_ikea.py`, no hand slew), 3,519 s at host load 12-17;
      the Harbor verifiers (two replays each, below);
-   - Intel AVX-512: Quest Xeon Gold 6230R, two dedicated cores (SIF 0.3.0 with the 0.3.1 uppsta scene files, the
+   - Intel AVX-512: the cluster Xeon Gold 6230R, two dedicated cores (SIF 0.3.0 with the 0.3.1 uppsta scene files, the
      hand-slew `rcb_ikea.py`), 8,414 / 8,425 s; the stress checkpoint run (9,405 s).
    So the rows give the same states with and without the hand slew (no row is ever clamped by either rule).
 4. **Harbor** (host B, Harbor 0.23.0, image 0.3.1 `b9552184c2de` / -sim 0.4.1 `54694704aa75`):
@@ -141,7 +141,7 @@ Intel Xeon (Quest) and on Zen 4 (host B) wrote bit-identical rows (checked on th
    - standard (PR #305 grading, the live episode), final dir: oracle reward 1 (live settled success at control step
      430,225 in 54 calls, live end hash `a748a42d…` = the reference's, settle_failed 0, video), nop reward 0; the first
      run gave the same.
-5. **Stress** (Quest, SIF 0.3.0 + the 0.3.1 uppsta scene files, RoboARC's observer v2.13b): 203 episodes, 29 per
+5. **Stress** (the cluster, SIF 0.3.0 + the 0.3.1 uppsta scene files, RoboARC's observer v2.13b): 203 episodes, 29 per
    strategy, seeds 990000-990202, 3-10 s each, from 22 checkpoints of this reference (every 5 % of its rows).
 
    | strategy | n | CLEAN | VIOLENT | BREAKDOWN |
@@ -167,7 +167,7 @@ Intel Xeon (Quest) and on Zen 4 (host B) wrote bit-identical rows (checked on th
    verifier's video and the standard live video were rendered in the Harbor runs.
 
 ## Timing
-One reference execution against the 4320 s bar (40 % of 10800 s): 3,199 s on the quiet i9-14900HX laptop (74 % of the
+One reference execution against the 4320 s bar (40 % of 10800 s): 3,199 s on the quiet i9-14900HX host (74 % of the
 bar, 29.6 % of the budget), 3,519 s on host B's Ryzen 9 7950X (81 %); 8,414-8,425 s on a dedicated Xeon Gold 6230R core
 (78.0 % of the budget: over the bar on that slow CPU, as gladom, variera and stenerik). The standard live episode took 4,291 s and 4,685 s of service time on host B at load 15-30 (39.7 / 43.4 % of the
 budget), the privileged verifier's two replays running alongside.

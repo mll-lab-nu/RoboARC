@@ -62,7 +62,7 @@ The redesign's FlexSim lab reproduces these rules with mocap hands: R:`topogym/t
 | `cloth.py:191-199` | `instance_assets/mujoco/cloth_blanket.npz` (`rest`, `faces`, `birth`, `node`, `particle_rest`, `particle_faces`, `corners`, `weights`); the cloth record in `scene.json` (`cloth.py:193`: format, mesh, counts, masses, sphere radius, settings, pins, asset sha256, birth {source / archive sha256, state_sha, settle evidence, particles sha256, off_surface_max_m}) | a frozen, versioned cloth description inside `instance_assets` (solver parameters, mesh, particle map, birth) from which the instance rebuilds bit for bit |
 | `world.py:224-227` (load) | the frozen scene is loaded as it is; only the exact diagonal and the pad rule are set at load | the backend's frozen description is loaded unchanged |
 | `world.py:327` `restore_cloth_births` | after the task's `bind`: every cloth at its frozen birth, at rest (`cloth.py:241` `apply_birth`). Refuses a birth made from another PBD archive (sha256) | apply the birth after `bind`; check the archive identity |
-| `rcb_topogym.py:3312` `state_sha` (over `topogym/simulator/env.py:120` `tick_record`) | sha256 of the tick record (the world readout incl. the 8181 particle positions and velocities, the robot, the task) at 12 decimals; contacts sorted | the particle view is deterministic. Two fresh-process replays of a reference end on the recorded hash, also across CPU classes (the flex: laptop i9 AVX2 = a cloud host Zen 4) |
+| `rcb_topogym.py:3312` `state_sha` (over `topogym/simulator/env.py:120` `tick_record`) | sha256 of the tick record (the world readout incl. the 8181 particle positions and velocities, the robot, the task) at 12 decimals; contacts sorted | the particle view is deterministic. Two fresh-process replays of a reference end on the recorded hash, also across CPU classes (the flex: workstation i9 AVX2 = a cloud host Zen 4) |
 | `rcb_topogym.py:3268` `_poses_match` | an instance reopens only if its `soft_state` matches within 2 mm | the readout at birth equals the stored soft state |
 
 ## 4. What the predicates read
@@ -119,7 +119,7 @@ The redesign's FlexSim lab reproduces these rules with mocap hands: R:`topogym/t
 - `robot_oracle.py:618` records the birth's deviation from the frozen archive when `physics_engine == "mujoco"`, instead
   of checking it bitwise. A new engine needs the same switch.
 - Cost today: about 1.7-2.0 s per control step on a loaded a cloud host. very_easy's 1897-row reference took 52.7 min on the
-  laptop. The limit is 72 min per observed run.
+  workstation. The limit is 72 min per observed run.
 
 ## 10. The VBD backend's answers (profile `blanket_vbd`, 2026-10-11)
 `topogym/world/mujoco/cloth_vbd.py` (+ `vbd_fast.py`, `grasp_cloth.MujocoVBDClothGraspBackend`). Material and

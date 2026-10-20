@@ -183,7 +183,7 @@ The local `0.2.0-nwdry` tags were removed afterwards; the image `eai-roboarc:0.1
 
 ## v2 finishing (2026-10-15)
 
-The owner's decisions of 2026-10-15, done on this branch (work notes: laptop
+The owner's decisions of 2026-10-15, done on this branch (work notes: workstation
 the work notes, host B `<host work dir>`, INDEX.md in
 both).
 
@@ -285,7 +285,7 @@ What the build found and changed on this branch:
     wording is).
 - **knot-06 / 09 re-frozen: provenance out of the instance.**
   - The leak probe of the V2 image found the lab start's provenance in instance.json (`task_parameters.redesign.source`):
-    the oracle plan (kind, order, pin, a world-coordinate layout path), notes and a Quest path. A privileged agent reads
+    the oracle plan (kind, order, pin, a world-coordinate layout path), notes and a cluster path. A privileged agent reads
     instance.json in /app, and the Session holds it. `lab_start/scene_start.json` repeated the plan.
   - `make_premade.py` now drops `redesign.source`, `lab_start/`, `redesign_build.lab_start` and the birth manifest's path
     note; it records their hashes in `redesign_build.premade.dropped`. task_rd.py never reads them. It does read
@@ -298,7 +298,7 @@ What the build found and changed on this branch:
     byte for byte the same.
   - The leak probe of the re-frozen bases (files and Session memory) finds no plan word.
   - HF eai-v2-internal/robotangle-assets cb43201c28: the two re-made dirs, and the six stale `lab_start/` files deleted.
-- **Reference meta hygiene.** The meta of fiber-bundling-07..10's `standard.npz` and of knot-09's reference named Quest
+- **Reference meta hygiene.** The meta of fiber-bundling-07..10's `standard.npz` and of knot-09's reference named the cluster
   paths. Each path is now its file name; every other member is byte for byte the same (the freeze manifest's sha256
   follows).
 - **Harbor.** Only the four new bases run on the 0.2.0 image (oracle and nop, both modes). The 94 released bases rely on
@@ -306,14 +306,14 @@ What the build found and changed on this branch:
 
 ## V3 release build (2026-10-18): eai-roboarc 0.2.1, 101 bases
 
-The release build onto dev/robotangle (host B `<host work dir>`, laptop
+The release build onto dev/robotangle (host B `<host work dir>`, workstation
 the work notes), `release_rebuild.py` with `scripts/robotangle/freeze_manifest.v3.json`.
 - **Image 0.2.1** = 0.2.0's runtime plus MuJoCo 3.14.0's EPA horizon-overflow fix, IKEA's 14-byte patch of the wheel's
   libmujoco.so (images/ikea-mujoco/mujoco-3.14.0-epa/; `images/robotangle/Dockerfile.mujoco`, the last step of the
   unsquashed stage, so every layer above it is the released one). The gate (the work notes):
   every one of the 98 released bases reaches its reference end state on the patched library (Zen 4; Intel stock =
   patched on the 85 CPU bases; the 13 blanket bases stock = patched on the same RTX 4090 hosts, their Intel replays on
-  Quest's GPUs gate the image push), stress A/B 1150 / 1150 episodes identical.
+  the cluster's GPUs gate the image push), stress A/B 1150 / 1150 episodes identical.
   The built image's filesystem equals that gated candidate (0.2.0 + the patched .so) file for file, apart from the three
   new instance dirs and directory mtimes.
 - **New bases** (the user approved their reviews on 2026-10-18), premade instances (`--instances`), HF

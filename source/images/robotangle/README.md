@@ -145,7 +145,7 @@ The MuJoCo images (`images/robotangle/Dockerfile.mujoco`) carry the cloth solver
   must NOT be pinned to cores (`--cpuset-cpus`). The host must not be oversubscribed: start a trial only while the
   1-min load plus 4 is at most the number of logical CPUs.
   - The thread count and the quota change only speed. Results are bit-identical at 1 and 4 threads and under every
-    limit below (the cross-CPU gate: laptop i9-14900HX, host A Ryzen 9 7950X, a cloud host EPYC 9354).
+    limit below (the cross-CPU gate: workstation i9-14900HX, host A Ryzen 9 7950X, a cloud host EPYC 9354).
   - Measured on the 7950X (32 logical CPUs) at load 20-35, `fast/test_fast.py`, 20 controls, 3 repeats:
 
     | Condition | Seconds per control |

@@ -34,9 +34,9 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 VISIBLE_GROUPS = (0, 1, 2)          # mjvOption.geomgroup's default: what MuJoCo's renderer drew
 # Start-up retry: a render process that dies or sends no ready line while it starts is killed and started again, after
-# a back-off (x 1-1.5, so sidecars that failed together do not retry together), at most STARTUP_ATTEMPTS times. On ws
+# a back-off (x 1-1.5, so sidecars that failed together do not retry together), at most STARTUP_ATTEMPTS times. On host A
 # (2026-10-17) 3 of 4 sidecars that started at the same moment lost it while the shared GPU was full (24478 of 24564 MiB:
-# other users' jobs plus the four render processes' scene uploads), with no output; on ws2 the same pressure gave a
+# other users' jobs plus the four render processes' scene uploads), with no output; on host B the same pressure gave a
 # SIGSEGV in the render process's build. The next start succeeded. Only the start-up is retried:
 # a render process lost in the middle of an episode stays an infrastructure error (server.py, crash recovery).
 STARTUP_ATTEMPTS = 3

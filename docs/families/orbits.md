@@ -83,7 +83,7 @@ smaller one.
 easier's acceptance round FZ3 (v2.13b, 300 episodes, on the 0.625 ms step) failed on one confirmed BREAKDOWN,
 `prefix12_e2` (reproducer `O2_orbits_easier_handle_landing_step_residual`): 8 uncaused jumps at tick 59647. The stream
 reproduces from the frozen birth a3659d4f47244929 to 69a97615d604cc65 on eai-roboarc 0.1.0 (ef4df961a2) and 0.2.0
-(docker on host B, the 0.2.0 SIF on Quest); a fresh make-instance on 0.2.0 gives the same birth.
+(docker on host B, the 0.2.0 SIF on the cluster); a fresh make-instance on 0.2.0 gives the same birth.
 
 What happens (the integrator's books, chains2's `energy_probe.py` on the saved states of ticks 59500-59700): the cord,
 flung at up to 3.17 m/s (the speed clamp holds it at 3 m/s), falls; its handle (14.7 g, the chain's free root, spinning
@@ -98,7 +98,7 @@ and the control period unchanged): residual 2.31 / 1.05 / 0.54 / 0.27 mJ (first 
 jump by more than 0.5 m/s. The stream's own continuation (rows 0-5949 replayed in-process, then the step changed, the
 observer attached; the 0.625 ms control of it reads BREAKDOWN x8 as the full run): 0.3125 ms VIOLENT (whip
 redistribution), 0.156 / 0.078 ms VIOLENT; the implicit integrator at 0.625 ms (residual 1.06 mJ, as dt/2) VIOLENT too.
-Per control step (Quest, the reference's first 1500 rows): 0.625 ms 0.266 s, 0.3125 ms 0.457 s (1.72x), implicit
+Per control step (the cluster, the reference's first 1500 rows): 0.625 ms 0.266 s, 0.3125 ms 0.457 s (1.72x), implicit
 0.351 s (1.32x).
 
 The fix: easier's MuJoCo step is 0.3125 ms (solver_substeps 8 in 2.5 ms ticks), frozen with its instance
@@ -112,9 +112,9 @@ measured no-go before (2026-10-14, excluded tiers: +13-29 %).
 |---|---|
 | instance | orbits-02-i01 (variation orbits_easier, seed 0, width gripper space), birth d2f6fa837d367f5b, made in eai-roboarc:0.2.0 |
 | reference | `oracles/orbits-02-i01/privileged.npz` (= standard.npz): the unchanged easier oracle (`orbits_session_oracle.py`), 7918 rows, 197.9 s, end b9c68d6502105df4, sha256 a87ba3fc4e37f523; largest arm-joint target step 0.039 rad (0 rows over the 0.04 rad joint-speed rule) |
-| fresh replays | b9c68d6502105df4, success, strict success, in three fresh processes (host B x2, host A) plus the recording (Quest) |
+| fresh replays | b9c68d6502105df4, success, strict success, in three fresh processes (host B x2, host A) plus the recording (the cluster) |
 | timing | host A (Ryzen 9 7950X, `--cpus 1`, load 11-17): 1754 s = 16.2 % of 3 h (0.222 s per control; texts state 0.23 s); the same window: orbits-01-i01 260 s, the 0.625 ms easier reference 1035 s. On host B at load 50-60: 3802 / 3897 s (orbits-01-i01 551 s there) |
-| stress round FZ4 | v2.13b, Quest (the eai-roboarc 0.2.0 SIF), 1000 episodes (seeds 126001-126046, FZ3's strategy mix twice: 46 workers, equal share per strategy), 493,068 controls: **PASS**, 0 confirmed BREAKDOWN (16 candidates confirmed in fresh processes: degenerate-row signatures and fast whips, VIOLENT or CLEAN); reference success CLEAN deterministic (96.8 min with the observer on a loaded node), nop CLEAN no success; 0 grasp slips; P(miss) at a 0.5 % rate 0.0067 |
+| stress round FZ4 | v2.13b, the cluster (the eai-roboarc 0.2.0 SIF), 1000 episodes (seeds 126001-126046, FZ3's strategy mix twice: 46 workers, equal share per strategy), 493,068 controls: **PASS**, 0 confirmed BREAKDOWN (16 candidates confirmed in fresh processes: degenerate-row signatures and fast whips, VIOLENT or CLEAN); reference success CLEAN deterministic (96.8 min with the observer on a loaded node), nop CLEAN no success; 0 grasp slips; P(miss) at a 0.5 % rate 0.0067 |
 | visual | the reference video (oblique + top, 3x) and the fastest stress episode (prefix6_e4: the cord flung at 4.3 m/s, falling back over the fixture) look physical: no kink, no tunnelling, the loop lies flat |
 | Harbor | oracle 1 / nop 0 in both modes on the 0.2.0 runtime (a local image = eai-roboarc:0.2.0 + this instance; rendering off; host A): oracle trials 3992 / 3991 s, end b9c68d6502105df4 in every replay |
 

@@ -121,7 +121,7 @@ low-friction sleeve and may hang yawed on it; the regrasp plans on the measured 
 `BuzzWireRedesignTask.finalize_spec` before the scene is built (the existing scene mechanism; the frozen instance keeps
 it, so record, replay and the agent's task share it). Legal: link0's footprint inside the table with the scene's 1 cm
 edge margin, 2 cm from the deck, the home pose collision-free (5 mm). Stage A (`basescreen.py`, 124 legal mounts x 4
-tiers on Quest): every held segment, the rest regrasps with their approach lines, the deck pick, the drop heading and
+tiers on the cluster): every held segment, the rest regrasps with their approach lines, the deck pick, the drop heading and
 depth, finish-grasp coverage in 20 deg steps. Stage B: the all-pairs analysis at the candidates (`segplan.py --mount`):
 the forced count must not drop (it stayed 3 everywhere). Result: passing mounts cluster at the default; hard needs
 (-0.54, 0, 0) (its rest-3 sideb approach); easier v3 had no deck pick at any legal mount (-> v9). 4 noise: the oracle's
@@ -130,7 +130,7 @@ IK seed and release variants (below); arm-orientation variety and inspection tur
 ### Final placement
 After the drop the wand lies flipped around the finish post. Grasps from above reach it only when its handle is
 0..140 deg from the finish heading (dyaw); on the other side the finish run arches over the handle (no grasp, and a
-push collides with the wire or the spiral's post). Measured landings (checkpoint fan-outs on Quest): easy 113..120 deg
+push collides with the wire or the spiral's post). Measured landings (checkpoint fan-outs on the cluster): easy 113..120 deg
 (24/24 in reach), hard 104..121 (18/18), medium 132, very_easy 26; easier 175..177 with the release aimed 90 deg off the
 finish heading (in reach after one closed-finger push of 60 deg about the post; 7/7 successes), -91..-119 without.
 The oracle's place: grasp-turn-release rounds, a closed-finger push about the post when no grasp reaches, free moves
@@ -139,7 +139,7 @@ arm on the wire).
 
 **The -100 deg landing basin (prism instances, 2026-10-12): partly a dead end.** On the head-built medium instance about
 90 closed-loop runs landed the dropped wand at dyaw -88..-115: the wand's natural rest when the ring slides down the
-post, so an agent will land there too. A planning-only probe at two such landings (Quest
+post, so an agent will land there too. A planning-only probe at two such landings (the cluster
 `rigid_integrate_20261012/runs/q1/outb`, `probe_place.py`) searched:
 - 720 top-face grasps (top / topb x roll 0/90/180/270 x fraction 0.55-1.0 x pitch -40..40 x depth 0 / 2 mm);
 - turns of +-20..140 deg about the post with each grasp found;
@@ -167,11 +167,11 @@ releasing higher up the post (medium: `--drop-backs 0.16`, landing +136). Two po
 ### Oracle status (head ccd4ba7fa; references re-frozen and fresh-replayed there, hashes unchanged since c64294012)
 | tier | rows | final state | plan | made |
 |---|---|---|---|---|
-| very_easy | 10424 | a28ee3880f00a88a | `plans/very_easy.json` | a cloud host traversal + Quest final place from the drop checkpoint |
-| easier | 14874 | 822041b44f971c30 | `plans/easier.json` (drop_offset_deg -90) | Quest, full run |
-| easy | 14309 | 3c0936b332b53fa6 | `plans/easy.json` | a cloud host traversal + Quest from the last-segment checkpoint |
-| medium | 15019 | 38c3c3fa8ce1bb1b | `plans/medium.json` | a cloud host traversal + Quest from the last-segment checkpoint |
-| hard | 21462 | 1f21175b0e8c9dbd | `plans/hard.json`, mount (-0.54, 0, 0) | Quest, full run + last-segment checkpoint |
+| very_easy | 10424 | a28ee3880f00a88a | `plans/very_easy.json` | a cloud host traversal + the cluster final place from the drop checkpoint |
+| easier | 14874 | 822041b44f971c30 | `plans/easier.json` (drop_offset_deg -90) | the cluster, full run |
+| easy | 14309 | 3c0936b332b53fa6 | `plans/easy.json` | a cloud host traversal + the cluster from the last-segment checkpoint |
+| medium | 15019 | 38c3c3fa8ce1bb1b | `plans/medium.json` | a cloud host traversal + the cluster from the last-segment checkpoint |
+| hard | 21462 | 1f21175b0e8c9dbd | `plans/hard.json`, mount (-0.54, 0, 0) | the cluster, full run + last-segment checkpoint |
 Rows are one continuous recording from birth (the checkpoint's rows are part of it); every reference was replayed open
 loop from birth in a freshly frozen instance with the same final hash.
 

@@ -267,18 +267,18 @@ HARD4_B = [HARD4[0], _FAR_EDGE_SPREAD] + [dict(st, search_m=.05) if st.get("name
 # pulling 1 cm outward; D: the spreads pull 1.2 cm outward instead of 0.4 cm (one round)
 VERY_EASY4_C = VERY_EASY4_B + final_spread(prefix="spread2", out=.010)
 VERY_EASY4_D = [st for st in VERY_EASY4_B if not st.get("name", "").startswith("spread")] + final_spread(out=.012)
-# easy4c (laptop, 12:30): 0.824 (the half came back with a ~4 cm Z-fold at its crease, far edge at y 0.25 instead of
+# easy4c (workstation, 12:30): 0.824 (the half came back with a ~4 cm Z-fold at its crease, far edge at y 0.25 instead of
 # 0.29). E / F: the half turned by its edge at u = +-0.22 / +-0.26 (easier4's +-0.22 worked there), a 5 cm patch
 # search, then the double folds and two rounds of finishing spreads
 EASY4_E = [EASY4[0], far_half_back(.22, .05)] + EASY4[2:] + final_spread(prefix="spread2", out=.010)
 EASY4_F = [EASY4[0], far_half_back(.26, .05)] + EASY4[2:] + final_spread(prefix="spread2", out=.010)
-# easy4e (laptop, 12:58): 0.944, the half back in place (far edge at y 0.288) but small_NL missed its patch (occluded):
+# easy4e (workstation, 12:58): 0.944, the half back in place (far edge at y 0.288) but small_NL missed its patch (occluded):
 # H = E with a 5 cm patch search at the near double folds (hard4b's fix at the far ones)
 EASY4_H = [dict(st, search_m=.05) if st.get("name", "").startswith(("big_N", "small_N")) else st for st in EASY4_E]
-# medium4c (laptop, 13:15): 0.929, the sheet dragged 6 cm towards +y (the 3 cm far pull ran, the near pull missed an
+# medium4c (workstation, 13:15): 0.929, the sheet dragged 6 cm towards +y (the 3 cm far pull ran, the near pull missed an
 # occluded patch). D: the second round pulls 1.5 cm outward, near and far, each with a 5 cm patch search
 MEDIUM4_D = MEDIUM4_B + [dict(st, search_m=.05) for st in final_spread(prefix="spread2", out=.015, sides=False)]
-# medium4d (laptop, 13:55): 0.920, the sheet flat but skewed (~5 deg) and 4-10 cm too far towards +y after the
+# medium4d (workstation, 13:55): 0.920, the sheet flat but skewed (~5 deg) and 4-10 cm too far towards +y after the
 # finishing pulls. A measured re-centring: the four corners' displacement from their flat places; while the mean
 # exceeds 1.2 cm, the two corners on the side the sheet must come back from are dragged to their flat places (a low
 # two-hand drag, 5 cm patch search), up to two rounds, then the family's measured fold layout

@@ -16,7 +16,7 @@
     "--set",
     "PLAN_SEED=1"
    ],
-   "validated": "inst5 / the 5d1a04625e instance: 3778 rows, 0 rewinds, 3dfc613f3e1ed146 (fresh replay on Quest identical), no Session forcing event; forcing_kept 5 ticks, max 93 N. Without PLAN_SEED (wave-1 reference eba08cae9c538b75): the re-aimed receive beyond G1 ended in the other wrist family and the plan's draw turned the wrist ~3 rad with the rope in hand (cap ticks up to 426 N, no Session event)"
+   "validated": "inst5 / the 5d1a04625e instance: 3778 rows, 0 rewinds, 3dfc613f3e1ed146 (fresh replay on the cluster identical), no Session forcing event; forcing_kept 5 ticks, max 93 N. Without PLAN_SEED (wave-1 reference eba08cae9c538b75): the re-aimed receive beyond G1 ended in the other wrist family and the plan's draw turned the wrist ~3 rad with the rope in hand (cap ticks up to 426 N, no Session event)"
   },
   "easy": {
    "settings": [

@@ -9,7 +9,7 @@ gpu_class = "none"
 verifier_min_cpus = 3.0
 verifier_min_memory_gb = 3.0
 verifier_min_gpu_memory_gb = 0.0
-measured = "peak RSS of one Session 0.27-0.45 GB per scene (3000 reference rows + final_check, laptop, 2026-10-15); the verifier runs two replays and the video replay at once; x 1.2 and rounded up"
+measured = "peak RSS of one Session 0.27-0.45 GB per scene (3000 reference rows + final_check, workstation, 2026-10-15); the verifier runs two replays and the video replay at once; x 1.2 and rounded up"
 
 # IKEA MuJoCo, standard: 8 task(s). Physics on the CPU; the sim sidecar renders RGB with Nyx (path tracer, Vulkan) and
 # depth with MuJoCo's EGL raster on one GPU.

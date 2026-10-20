@@ -61,16 +61,16 @@ relay. All three replay to the same state in two fresh processes.
 
 - **On ccd4ba7fa** (the soft contact class at a constant impedance; the rings keep the task's contact against the
   robot; rope_chain_v3), the same rows on the same births (re-bound to the rope agent's tree kn13), two fresh processes
-  each (validate, Quest, 2026-10-11): easy 5ba000a6bd8b327b @2675 and medium 740d4048045ab81d @3366 succeed; hard no
+  each (validate, the cluster, 2026-10-11): easy 5ba000a6bd8b327b @2675 and medium 740d4048045ab81d @3366 succeed; hard no
   longer succeeded with its rows (ends 5c06d5cc4bf31e89 after its 3345 rows) and is re-planned:
   - **hard, re-planned on ccd4ba7fa** (core, 2026-10-11): the same recipe, the plain contact_relaxed_v16 relay through
     the rope agent's wrapper (`rt_relay.py <instance> <out> rope_threading_hard`: fingers closed fully, the quiet wait
-    before measured keepers), run live on the hard birth on kn12 + ccd4ba7fa's three files (Quest). 3345 rows, success
+    before measured keepers), run live on the hard birth on kn12 + ccd4ba7fa's three files (the cluster). 3345 rows, success
     at row 3345; `scripts/robotangle/oracles/rope-threading-hard-i01/privileged.npz` (= `standard.npz`), file sha256
     6c429cfd38608b63. Two fresh replays on kn13 + rtinst14 hard (the canonical tree at ccd4ba7fa): success at row
     3345, 41632c4dace19971 both; the stress observer (criteria v2.10) CLEAN (144 causal whips <= 3 m/s, robot depth
     0.33 mm, task speed 2.64 m/s). The --station-shift .02 variant gives the same rows; --keeper-deeper .006 fails
-    (no collision-checked measured keeper path). Validate's step-2 round on it (RT4 hard, Quest, kn13, 300 episodes)
+    (no collision-checked measured keeper path). Validate's step-2 round on it (RT4 hard, the cluster, kn13, 300 episodes)
     replays it twice more to 41632c4dace19971 @3345, CLEAN, and PASSes (0 confirmed BREAKDOWN, criteria v2.10).
 - Quiet waits before the measured keepers: easy 3.0 s and 10 s (the cap; the rope still moved at 1.4 cm/s); hard
   4.4, 10 (6.2 cm/s), 2.9 and 1.0 s; medium 3.0, 10 (1.4 cm/s), 2.4 and 2.2 s.

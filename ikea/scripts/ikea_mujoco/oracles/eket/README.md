@@ -64,9 +64,9 @@ The servo ticks are inserted rows, so the reference is 1304 rows longer than the
   of simulated time). 0 rows over the limit + 1e-9; the largest step is 1.000000000000038 x the limit (a clamped step).
   Rebuilt twice from `build_ref.py`, bit-identical.
 - **Fresh replays.** `final_check()` passes. End state `0a38212b16dc6143…`, settled `fe1fe33a3ad667c0…`. The hashes match
-  in 2 processes on a cloud host (EPYC, patched venv, masking) and on Quest (Xeon Gold 6230R, SIF 98fa2d3). Max part depth
+  in 2 processes on a cloud host (EPYC, patched venv, masking) and on the cluster (Xeon Gold 6230R, SIF 98fa2d3). Max part depth
   4.949 mm, no breakdown.
-- **Timing.** One unobserved replay takes 518 s on Quest (3.6 % of the 14400 s budget) and ~250 s on a cloud host.
+- **Timing.** One unobserved replay takes 518 s on the cluster (3.6 % of the 14400 s budget) and ~250 s on a cloud host.
 - **Harbor on host B** (image 0.2.0 98fa2d354818):
   - h1_priv_oracle: 1, deterministic, replays 323 s. h1_priv_nop: 0.
   - h1_std_oracle: 1, live_success, live_matches_replay, rows_match, n_clipped 0 on all 18 calls. h1_std_nop: 0.

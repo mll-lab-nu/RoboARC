@@ -137,10 +137,10 @@ over anchors (`robot_plan.solve_path`), wrist_angle in [-1.6, 1.9] rad, |wrist_r
 | hard | **success** | 6221 | ff4b68725467157f / 2fb8e555a4e4f8d3 | 2 / 2 same hash | fails | all fail |
 
 Frozen instances: a cloud host `out/instances2/claws-rd-<tier>/` on the bound tree `rt3` (SOURCE 1d53ef50).
-**Stress (criteria v2.9, protocol 3): PASS on all five** (Quest job 9478819, `runs/claws_stress_q1/out/<tier>`): the 35
+**Stress (criteria v2.9, protocol 3): PASS on all five** (the cluster job 9478819, `runs/claws_stress_q1/out/<tier>`): the 35
 claws corpus streams remapped onto each instance 0 BREAKDOWN, the reference twice CLEAN with the same hash, nop CLEAN,
 ~21-22.6k self-play controls per tier with 0 confirmed BREAKDOWN. GPU screens (gpusearch `runs/kd_<tier>`, 4,096
-episodes per tier) calm; all 400 exported candidates replayed on CPU with the observer (Quest job 9481187): **0
+episodes per tier) calm; all 400 exported candidates replayed on CPU with the observer (the cluster job 9481187): **0
 BREAKDOWN** (228 violent but causal, 172 clean).
 
 ## Anti-hack summary (post-fix references vs the strict references, both recorded in fresh Sessions)

@@ -107,8 +107,8 @@ contact is 0.14 N instead of 0.29 N (the gate is 0.1 N).
   Rebuilt twice from `build_ref.py`, bit-identical.
 - **Fresh replays.** `final_check()` passes, with 0 slewed ticks. End state `bc2108ab48d7ebd9…`, settled
   `3f561d45c8053fe3…`. The hashes match in 2 processes on a cloud host (EPYC, patched venv, masking) and in 2 Slurm jobs on
-  Quest (Xeon Gold 6230R, SIF 98fa2d3, patched .so 52e2a24e). Max part depth 1.027 mm, no breakdown.
-- **Timing.** One unobserved replay takes 293 s on a cloud host (2.0 % of the 14400 s budget), 674-690 s on Quest (4.8 %), and
+  the cluster (Xeon Gold 6230R, SIF 98fa2d3, patched .so 52e2a24e). Max part depth 1.027 mm, no breakdown.
+- **Timing.** One unobserved replay takes 293 s on a cloud host (2.0 % of the 14400 s budget), 674-690 s on the cluster (4.8 %), and
   357 s in the Harbor verifier on host B.
 - **Harbor on host B.** Image 0.2.0 98fa2d354818; jobs on the run host.
   - h1_priv_oracle: 1, deterministic, all_success. h1_priv_nop: 0.

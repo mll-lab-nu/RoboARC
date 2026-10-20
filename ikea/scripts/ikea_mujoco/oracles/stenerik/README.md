@@ -75,7 +75,7 @@ seats only the first screw (`trace.py`, `scan.py`; the history is below). The re
 
 Resuming is exact: a checkpoint's state hash equals a fresh replay of its rows (`t_resume.py`), each checkpoint carries
 all its rows from the birth, and the builder is deterministic across CPUs (the end-of-cycle-2 checkpoints of the same
-run on Zen 4 (host B) and Intel (Quest) are byte-identical). The reference is `build.py --upto 206220` from the birth, then
+run on Zen 4 (host B) and Intel (the cluster) are byte-identical). The reference is `build.py --upto 206220` from the birth, then
 `pads.py --ck ck_0206220.pkl` with their defaults. It was made as `build.py` resumed from the end of cycle 2 plus
 `pads.py`; the same two commands from the birth reproduce it byte for byte (`7a1e6e50…`). The fresh replays below are the
 proof of the rows.
@@ -92,8 +92,8 @@ proof of the rows.
    above, 0 rows over the arm or hand limits, `slewed_ticks` 0:
    - AMD Zen 4: host B Ryzen 9 7950X in image 0.3.0 x2 (3292 / 3313 s, two at once, host load ~15) and the Harbor
      verifier's two replays (host B);
-   - Intel AVX-512: Quest Xeon Gold 6230R in the 0.3.0 SIF x2 (6944 / 7082 s) and the stress checkpoint run (7881 s);
-   - Intel AVX2: the i9-14900HX laptop (MuJoCo 3.14.0 from PyPI with the EPA byte patch, numpy 2.5.4), 2649 s.
+   - Intel AVX-512: the cluster Xeon Gold 6230R in the 0.3.0 SIF x2 (6944 / 7082 s) and the stress checkpoint run (7881 s);
+   - Intel AVX2: the i9-14900HX host (MuJoCo 3.14.0 from PyPI with the EPA byte patch, numpy 2.5.4), 2649 s.
    - The builder itself is deterministic across Zen 4 and Intel (byte-identical checkpoints), and the final `build.py` +
      `pads.py` from the birth reproduce the reference's sha.
 4. Harbor (host B, Harbor 0.23.0, image 0.3.0 / -sim 0.4.0 Nyx; the task dirs of this commit):
@@ -102,7 +102,7 @@ proof of the rows.
    - standard, graded on the live episode (#305): oracle reward 1 (live settled success at control step 222,600 in 56
      calls, live end hash `a690aa1b…` = the reference's, settle 1.0 s success, no resume, live service time 3672 s =
      34.0 % of the budget, video 5566 frames), nop reward 0.
-5. Stress: 203 episodes on Quest (Xeon Gold 6230R, SIF 0.3.0; our stress harness with RoboARC's observer v2.13b), 29
+5. Stress: 203 episodes on the cluster (Xeon Gold 6230R, SIF 0.3.0; our stress harness with RoboARC's observer v2.13b), 29
    per strategy, seeds 970000-970202, 3-10 s each, from 21 checkpoints of THIS reference (every 5 % of its rows; the
    checkpoint run itself ended on `a690aa1b…`, success).
 
@@ -125,14 +125,14 @@ proof of the rows.
      changed.
    - VIOLENT: force triggers of the random / jerk / mutated targets (arm or finger contact forces), some surface speeds
      over 3 m/s; no breakdown follows.
-6. Timing (one reference execution against the 4320 s bar, 40 % of 10800 s): 2649 s on the quiet i9-14900HX laptop
+6. Timing (one reference execution against the 4320 s bar, 40 % of 10800 s): 2649 s on the quiet i9-14900HX host
    (61.3 % of the bar, 24.5 % of the budget); 3292-3313 s on host B's Ryzen 9 7950X (two at once, load ~15; 76.2-76.7 % of
-   the bar); 6944-7082 s on a dedicated Quest Xeon Gold 6230R core (64.3-65.6 % of the budget: over the bar on that slow
+   the bar); 6944-7082 s on a dedicated the cluster Xeon Gold 6230R core (64.3-65.6 % of the budget: over the bar on that slow
    CPU, as before the hand rule (6253-6286 s) and as gladom and variera); 3672 s for the standard live episode on host B.
 7. `check-video` (main's `ci_checks/check-video.py`): both dirs render and collect a replay video.
 
 The gates of the reference before the hand rule (215,782 rows, `e0097d66…`, end `a02c9a18…` / settled `1a8e27ec…`):
-the same set, passed on 2026-10-17 (a cloud host EPYC 9354, host A / host B Ryzen 9 7950X, Quest Xeon 6230R / 6338, the i9 laptop;
+the same set, passed on 2026-10-17 (a cloud host EPYC 9354, host A / host B Ryzen 9 7950X, the cluster Xeon 6230R / 6338, the i9 workstation;
 Harbor oracle 1 / nop 0 in both modes; stress 203 episodes, non-jerk BREAKDOWN 1 / 174), in this file's history.
 
 ## Files

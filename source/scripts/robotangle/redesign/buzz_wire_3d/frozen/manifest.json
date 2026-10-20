@@ -21,9 +21,9 @@
    "final_sha": "bf8ba514b135e730",
    "head_final_sha": "bf8ba514b135e730",
    "head_built": "this instance",
-   "instance_made_on": "2ce1dd2451 (Quest, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})",
+   "instance_made_on": "2ce1dd2451 (the cluster, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})",
    "reference_recipe": "full closed-loop run on this instance: run_oracle.py easier --plan plans/easier.json (drop_offset -90) --rng 0 --noise-branch --noise-branch-n 1 --inspect-deg 10",
-   "fresh_replays": "2 fresh processes, same final bf8ba514b135e730 @ 17314 rows, success (Quest run 9618764, replays 9628224)"
+   "fresh_replays": "2 fresh processes, same final bf8ba514b135e730 @ 17314 rows, success (the cluster run 9618764, replays 9628224)"
   },
   "easy": {
    "instance": "easy/instance.json",
@@ -33,8 +33,8 @@
    "rows": 14794,
    "final_sha": "343dcc0702337d3a",
    "head_final_sha": "343dcc0702337d3a",
-   "head_built": "this instance; the reference reproduces 343dcc0702337d3a @14794 in a fresh process (Quest job 9618167)",
-   "instance_made_on": "2ce1dd2451 (Quest, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})"
+   "head_built": "this instance; the reference reproduces 343dcc0702337d3a @14794 in a fresh process (the cluster job 9618167)",
+   "instance_made_on": "2ce1dd2451 (the cluster, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})"
   },
   "medium": {
    "instance": "medium/instance.json",
@@ -45,9 +45,9 @@
    "final_sha": "d575dd5f3281e3d6",
    "head_final_sha": "d575dd5f3281e3d6",
    "head_built": "this instance",
-   "instance_made_on": "2ce1dd2451 (Quest, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})",
+   "instance_made_on": "2ce1dd2451 (the cluster, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})",
    "reference_recipe": "the previous medium reference's first 2986 rows (to the park on rest 1, before the first cylinder-vs-prism divergence at row 7097) replayed on this instance; run_oracle.py --from-stage parked --rest 1,1 --rng 4 (rest graph closed loop: rest 1 -> 3 side:180:0.55, 3 -> drop sideb:0:0.55) to the rest-3 lift-off at row 11521; then run_oracle.py --from-stage segment --segment 2,3,6,sideb:0:0.55 --drop-backs 0.16 (the ring released 16 cm of wire above the insulated post's foot: the wand lands at +136 deg, the graspable side) and the grasp-turn-release final place; one continuous recording from this instance's birth",
-   "fresh_replays": "2 fresh processes, same final d575dd5f3281e3d6 @ 18024 rows, success (Quest runs p3 9620258 + p7 9634898, replays 9642174)"
+   "fresh_replays": "2 fresh processes, same final d575dd5f3281e3d6 @ 18024 rows, success (the cluster runs p3 9620258 + p7 9634898, replays 9642174)"
   },
   "hard": {
    "instance": "hard/instance.json",
@@ -58,10 +58,10 @@
    "final_sha": "bbbcc8c5d6462d80",
    "head_final_sha": "bbbcc8c5d6462d80",
    "head_built": "this instance",
-   "instance_made_on": "2ce1dd2451 (Quest, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})",
+   "instance_made_on": "2ce1dd2451 (the cluster, make-instance via freeze.py): the spiral post (wire_base::terminal__wood_stop__6, r 12 mm) a 32-facet prism (b2b751580); unbound dev instance (topogym_source {})",
    "reference_recipe": "the previous hard reference's first 12159 rows replayed on this instance (they diverge from the cylinder run at row 8367, where the Robotiq coupler / follower brushed the post), then closed loop from the measured state: run_oracle.py hard --plan plans/hard.json --from-stage segment --segment 3,4,7,sideb:0:0.8 --rng 1 --noise-branch --noise-branch-at 1 --inspect-deg 10 (mount -0.54, 0, 0 from the tier); the whole row stream is one continuous recording from this instance's birth",
-   "fresh_replays": "2 fresh processes, same final bbbcc8c5d6462d80 @ 18315 rows, success (Quest run 9618764, replays 9628224)"
+   "fresh_replays": "2 fresh processes, same final bbbcc8c5d6462d80 @ 18315 rows, success (the cluster run 9618764, replays 9628224)"
   }
  },
- "checked_on_head": "6bb17729df + this branch, Quest 2026-10-12 (rigid_integrate_20261012, jobs 9616197 / 9616936 / 9617135): head_final = the reference's final state replayed open loop on this frozen instance in a fresh process; head_built = the same tier made again on the head (make-instance) and the reference replayed on it"
+ "checked_on_head": "6bb17729df + this branch, the cluster 2026-10-12 (rigid_integrate_20261012, jobs 9616197 / 9616936 / 9617135): head_final = the reference's final state replayed open loop on this frozen instance in a fresh process; head_built = the same tier made again on the head (make-instance) and the reference replayed on it"
 }

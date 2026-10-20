@@ -31,7 +31,8 @@ ids. Its V3 content (development branch dev/robotangle_mujoco 5cb4114f10):
   A/B showed 1.15 % non-jerk breakdowns with native cylinders against 2.3 % with the prisms, and no breakdown involved
   a screw. The verifier limit is set by the slow-class replay (a Xeon Gold 6230R core, 8283 s): 25,440 s.
 - **Nyx start-up retry** in the standard sidecar's render process (`ikea_nyx.py`, the same file in every standard task;
-  sha256 036be49c38e6 in V3, 74c9c84318c4 after the rename changed a path in its docstring).
+  sha256 036be49c38e6 in V3; 37a773230f41 in 1.0.0, after the rename changed a path in its docstring and
+  a host name left a comment).
 - **EPA-patched libmujoco.so**, the same 14-byte patch as the puzzles' image.
 - Timing is gated on the i9 / Zen 4 host class. Slow-Xeon times are reported only: gladom, variera, stenerik, uppsta
   and kyrre are over the 40 % bar only there.

@@ -46,12 +46,12 @@ and the ring joined, the tray on the ring (2.45 N).
 | rows | 186,611 (466.5 s of simulated time), sha256 `35190e106aeb5c08bd3af3e0875def267ae020531343e33b416442540e8af54c` |
 | limits | 0 rows over any arm or hand limit (largest step 1.0000000000016 x the limit, within the 1e-9 tolerance); `slewed_ticks` 0 |
 | birth | `700c53dd5fd9fe2b...` = bindings.json, in every replay and in the standard sidecar's startup binding (instance_exact) |
-| end / settled | `88048a4ff7757b51...` / `5c2edffa330cf6a3...` in every replay: host B Ryzen 9 7950X (Zen 4) x2, Quest Xeon Gold 6230R (Intel AVX-512, SIF 0.3.0) x2, the i9-14900HX laptop (Intel AVX2, PyPI MuJoCo 3.14.0 + EPA byte patch), both Harbor verifier replays |
+| end / settled | `88048a4ff7757b51...` / `5c2edffa330cf6a3...` in every replay: host B Ryzen 9 7950X (Zen 4) x2, the cluster Xeon Gold 6230R (Intel AVX-512, SIF 0.3.0) x2, the i9-14900HX host (Intel AVX2, PyPI MuJoCo 3.14.0 + EPA byte patch), both Harbor verifier replays |
 | verdict | success: four screws latched, frame B and the ring joined, the tray on the ring (2.45 N); released, at rest, no breakdown (max part depth 0.82 mm); the same after the 1.0 s hold |
 | Harbor privileged | oracle 1 (deterministic, instance_exact, replay_wall 5091 s, video 750 frames), nop 0 (host B, image 0.3.0) |
 | Harbor standard | oracle 1 (live settled success at control step 184,000 in 46 calls, graded by the live episode, video), nop 0 (host B, -sim 0.4.0 Nyx) |
 | check-video | origin/main baf9e716b1 `ci_checks/check-video.py`: both dirs render and collect a video |
-| timing | 2630 s on the quiet i9-14900HX laptop (61 % of the 4320 s bar, 24.3 % of 10800 s); 8069 / 8082 s on Xeon 6230R cores (74.8 %, over the bar on that slow CPU, as before: the 0.3.0 reference took 5636 s there); 4550 s on the loaded host B |
+| timing | 2630 s on the quiet i9-14900HX host (61 % of the 4320 s bar, 24.3 % of 10800 s); 8069 / 8082 s on Xeon 6230R cores (74.8 %, over the bar on that slow CPU, as before: the 0.3.0 reference took 5636 s there); 4550 s on the loaded host B |
 
 ## Files
 - `gl_lib.py`: the rig (executed rows, driver / screw / hand measurements, TCP Jacobian).

@@ -373,7 +373,7 @@ deep contacts with wrong depths or normals, each injecting energy. The settings 
     The rope meets them exactly as before: kept geoms win with `solmix` 2^60 (`scene.KEEP_SOLMIX`), whose weight against
     the rope's `solmix` 1 rounds to exactly 1, and the rings' own parameters are the rope's (rope_threading easy and hard
     -i01 end on the same states with and without the rule).
-  - Candidates, each on every soft geom from row 0 (a cloud host `/workspace/mj/core/results/softsw*`, Quest runs `core_sw_*`,
+  - Candidates, each on every soft geom from row 0 (a cloud host `/workspace/mj/core/results/softsw*`, the cluster runs `core_sw_*`,
     `core_s_*`; tools `core/work/springref/sr_replay.py --soft`, `core/work/softsw/soft_wrap.py`):
 
     | stream | as built | constant impedance (.95 .95) | 2.5 ms | constant + rings kept |

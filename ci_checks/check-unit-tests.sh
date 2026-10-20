@@ -47,7 +47,8 @@ run 120 account_failure_check.py --selftest   # the runner's lane stop and infra
 
 if python3 -c "import numpy, requests" 2>/dev/null; then
   export PATH="$(dirname "$(command -v python3)"):$PATH"   # run.sh starts `python`: the same interpreter
-  for t in eai_standard/selftest.py eai_standard/v2_4/selftest.py roboarc/tests/test_server_requests.py; do
+  # (eai_standard/selftest.py: the 2.2 layer, which needs eai-standard/2.2 task adapters; RoboARC tasks serve 2.4)
+  for t in eai_standard/v2_4/selftest.py roboarc/tests/test_server_requests.py; do
     run 900 "$t"
   done
 elif [ $all -eq 1 ]; then

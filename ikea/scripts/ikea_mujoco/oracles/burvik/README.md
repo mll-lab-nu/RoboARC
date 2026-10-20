@@ -92,17 +92,17 @@ times), base `burvik_p2cl.npz`:
 2. Fresh replays (`check_ref.py`: `rcb_ikea` Session with the hand slew, clamp in, `final_check()`), all success with the
    hashes above, 0 rows over any arm or hand limit, `slewed_ticks` 0:
    - AMD Zen 4: host A (Ryzen 9 7950X, image 0.3.0, Docker) x2: 1684 / 1679 s;
-   - Intel AVX2: the quiet i9-14900HX laptop (MuJoCo 3.14.0 from PyPI with the EPA byte patch, under the laptop lock): 1694 s;
-   - Intel AVX-512: Quest Xeon Gold 6230R (SIF 0.3.0) x2: 3781 / 3783 s, and the stress checkpoint run.
+   - Intel AVX2: the quiet i9-14900HX host (MuJoCo 3.14.0 from PyPI with the EPA byte patch, under the workstation lock): 1694 s;
+   - Intel AVX-512: the cluster Xeon Gold 6230R (SIF 0.3.0) x2: 3781 / 3783 s, and the stress checkpoint run.
    A from-scratch rebuild (the command above) gives the same file (`6445eb0f…`).
 3. Harbor on the final dirs (host A, image 0.3.0 / -sim 0.4.0 Nyx): privileged oracle 1 (deterministic, both replays
    `60878a5e…`, replay_wall 1646 s, video), nop 0; standard oracle 1 (live settled success at control step 160,001 of
    162,534, 40 calls, live end `ebe8cde2…` on both runs, service time 1824-1986 s, video), nop 0.
-4. Timing (one execution against the 4320 s bar): 3781-3783 s on a dedicated Quest Xeon Gold 6230R core (87.6 % of the
+4. Timing (one execution against the 4320 s bar): 3781-3783 s on a dedicated the cluster Xeon Gold 6230R core (87.6 % of the
    bar, 35 % of the budget); 1694 s (15.7 %) on the quiet i9-14900HX; 1679-1684 s on host A.
 5. Leak check: `environment/` and `tests/` hold only the tooling; neither the rows nor their sha appear in them or in the
    instructions; no upstream pointer in the scene texts. `check-video`: both dirs pass.
-6. Stress: 203 episodes on Quest (Xeon Gold 6230R, SIF 0.3.0, the IKEA harness with RoboARC's observer v2.13b, the
+6. Stress: 203 episodes on the cluster (Xeon Gold 6230R, SIF 0.3.0, the IKEA harness with RoboARC's observer v2.13b, the
    hand-slew rcb_ikea), 29 per strategy, seeds 990000-990202, 3-10 s each, from 21 checkpoints of THIS reference (every
    5 %; the checkpoint run itself ended on `60878a5e…`, success).
 

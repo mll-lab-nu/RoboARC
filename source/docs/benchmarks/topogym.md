@@ -226,7 +226,7 @@ by `check-tooling-identity.sh`). v4 (Jianwen, 6a7c755b) folded the two family va
 `common/rcb_topogym_interlocked.py` and `rcb_topogym_ipc.py` are kept for the historical packages
 (`ci_checks/topogym_tooling_versions.json`); the generators no longer pick them.
 
-The FEM fix was checked on knot hard (laptop, 14 control steps): free GPU memory −0.9 MiB per step (unpatched −121.7),
+The FEM fix was checked on knot hard (workstation, 14 control steps): free GPU memory −0.9 MiB per step (unpatched −121.7),
 the rope's vertex positions within the GPU's run-to-run noise (max 1.2e-7 m vs 9.4e-8 m between two unpatched runs), the
 step time unchanged.
 
@@ -240,9 +240,9 @@ need it) and renders every camera once (Nyx). Profiles of one sim alone (2026-10
 | scene | host | step | physics | state readback | render |
 |---|---|---|---|---|---|
 | buzz_wire_3d easy | lab (RTX PRO 6000 Max-Q, EPYC 9534) | 1.01-1.10 | 0.17 | 0.85 | 0.02 |
-| buzz_wire_3d easy | laptop (RTX 4090 Laptop, i9-14900HX) | 0.56-0.62 | 0.11 | 0.43 | 0.03 |
+| buzz_wire_3d easy | workstation (RTX 4090 Laptop, i9-14900HX) | 0.56-0.62 | 0.11 | 0.43 | 0.03 |
 | cast_keyhole hard | lab | 0.56-0.60 | 0.19 | 0.35 | 0.02 |
-| cast_keyhole hard | laptop | 0.34-0.38 | 0.14 | 0.18 | 0.03 |
+| cast_keyhole hard | workstation | 0.34-0.38 | 0.14 | 0.18 | 0.03 |
 
 The readback made about 700 separate GPU->CPU copies per tick (four per link, per entity): CPU and driver latency, which is
 why lab's server CPU made it twice as slow and the GPU sat mostly idle. NUMA pinning and fewer torch threads changed nothing.
@@ -263,7 +263,7 @@ outcome of replayed agent trajectories, deviation against the baseline's own 1e-
 - **Rigid families: CPU float64** (tooling v7, six families since v8; jobs/journal/2026-10-02/rigid_fast/): seven families run their physics on
   the CPU in float64 with one global constraint solve (`use_contact_island` off: the island machinery was most of the CPU
   constraint time); Nyx still renders on the GPU. Lab s/step, CPU vs v6's GPU float32: interlocked_claws easy 0.058-0.072
-  vs 0.164, horseshoe_ring 0.092 vs 0.195, cast_coil easy 0.080-0.088 vs 0.146 (laptop GPU), buzz_wire_3d 0.11 vs ~0.17,
+  vs 0.164, horseshoe_ring 0.092 vs 0.195, cast_coil easy 0.080-0.088 vs 0.146 (workstation GPU), buzz_wire_3d 0.11 vs ~0.17,
   fiber_bundling medium 3.3x; 8 CPU sims on one host run as fast as one (GPU throughput is flat with sims per GPU); cold
   builds halve (63-107 s vs 181-289 s). Accuracy: per-substep contact penetration, trajectory deviation and outcomes of
   replayed agent trajectories inside the GPU float32 noise envelope (interlocked_claws easy: 7 CPU vs 11 GPU runs, MWU p

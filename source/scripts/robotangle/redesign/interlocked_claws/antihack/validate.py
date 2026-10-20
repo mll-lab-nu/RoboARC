@@ -1,4 +1,4 @@
-"""Validate every family's antihack_report.json against the shared definitions (json only; runs on the laptop).
+"""Validate every family's antihack_report.json against the shared definitions (json only; runs on the workstation).
 
   python3 -m antihack.validate <session root D> [--out-dir D/review/tooling]
   -> antihack_validation.{md,json}: per family x tier: report present, schema, the strict reference used vs the registry,

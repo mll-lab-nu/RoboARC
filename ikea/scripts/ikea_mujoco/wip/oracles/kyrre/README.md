@@ -25,16 +25,16 @@ Checks: 0 rows over the arm limits, 0 gripper steps over the slew, 0 slewed tick
 at rest, no breakdown, now and after the 1.0 s hold); the stool's rigidity 0.0002 deg (bar 1 deg), hold 12.4 s.
 
 **Determinism (fresh replays, end 0a9f1a9e6d77 / settled e242979c6712 on every host).** AMD Ryzen 9 7950X (host B Docker,
-candidate image, with the hand-slew rcb_ikea and with dev's: same), Intel i9-14900HX (AVX2, laptop venv with the
-EPA-patched wheel), Intel Xeon Gold 6338 (AVX-512, Quest SIF 0.3.0 + the candidate scene dir).
+candidate image, with the hand-slew rcb_ikea and with dev's: same), Intel i9-14900HX (AVX2, workstation venv with the
+EPA-patched wheel), Intel Xeon Gold 6338 (AVX-512, the cluster SIF 0.3.0 + the candidate scene dir).
 
 **Timing.** 2740 s on the i9-14900HX (one core under the shared lock: 63 % of the 4320 s bar, 25 % of the 10800 s
-budget); 2694 s on host B's 7950X (load 5-10); Harbor's verifier replays 2746 s on host B; 8283 s on a Quest Xeon Gold 6230R core and 7953 s on a Xeon Gold 6338
+budget); 2694 s on host B's 7950X (load 5-10); Harbor's verifier replays 2746 s on host B; 8283 s on a cluster Xeon Gold 6230R core and 7953 s on a Xeon Gold 6338
 core (74 % of the budget, over the 40 % bar on that slow class, as gladom / variera / stenerik / uppsta there).
 
-**Stress (Quest, v2.13b observer, 203 episodes = 7 strategies x 29, the same seeds and checkpoints for an A/B).**
+**Stress (the cluster, v2.13b observer, 203 episodes = 7 strategies x 29, the same seeds and checkpoints for an A/B).**
 - native cylinders: CLEAN 132, VIOLENT 60, BREAKDOWN 11 (5.4 %); non-jerk 2 / 174 = 1.15 % (shipped set: 1.75 %);
-  prefix_jerk 9 / 29. All 11 reproduced from the birth on Quest Intel (the reference prefix on that CPU matched the
+  prefix_jerk 9 / 29. All 11 reproduced from the birth on the cluster Intel (the reference prefix on that CPU matched the
   Zen 4 checkpoint hashes every time).
 - the same episodes with the prism rule on (the control; the reference's states loaded into the prism scene):
   BREAKDOWN 12 (5.9 %); non-jerk 4 / 174 = 2.3 %; prefix_jerk 8 / 29.
@@ -79,7 +79,7 @@ rows; 54 of 148 segments).
 
 **Timing (measured).** The 285,137-row prefix replays in 1,814 s on a quiet a cloud host EPYC 9354 (6.4 ms per row). At that
 rate the whole build (about 710k rows: the demo's 660k + the finishes) is about 4,500 s on that Zen 4 CPU, about 105 %
-of the 4,320 s bar (an i9-14900HX is about 1.2x faster: about 3,800 s), and about 7,700 s on a Quest Xeon core. The
+of the 4,320 s bar (an i9-14900HX is about 1.2x faster: about 3,800 s), and about 7,700 s on a cluster Xeon core. The
 demo's own pace is the floor: its strokes cannot go faster (a key turned above about 1 rad/s cams out of the socket),
 and the rows where no hand touches anything (where a tempo profile could skip rows safely) are under 1 % of the demo.
 
@@ -97,7 +97,7 @@ Runs: a cloud host `/workspace/qn_ikea_v3/kyrre/` (`ref_g2/` the guide, `runs/g0
 
 There is no reference: `ikea-kyrre-i00` stays WIP. Two independent blockers, each enough on its own:
 1. **The author's demo fails under the final physics** (4 of 9 welds; screw 2-1 is lost at its hole).
-2. **Timing: one replay of the demo takes 12,316 s on a dedicated Quest core, 85.5 % of the 14,400 s budget** (the
+2. **Timing: one replay of the demo takes 12,316 s on a dedicated the cluster core, 85.5 % of the 14,400 s budget** (the
    ceiling is 30 %). A passing reference would need about 3x fewer rows than the demo, and every speed-up of the demo
    we tried breaks it at the first or second screw.
 
@@ -115,17 +115,17 @@ Status 2026-10-16 evening CDT.
 - Verdict: **fail**. Welds s1-leg-1, s1-screw-1-1, s1-screw-1-2, s1-leg-2 engage; s1-screw-2-1 never does (the screw
   ends 47.7 mm off its hole, 79.7° tilted), so nothing after it. End also not at rest (the hex key turns at 0.099 rad/s).
 - End / settled sha `4eee1ebebb30c049…` / `ab284bcaf688ba5d…`, the same in 2 processes on a cloud host EPYC 9354 (Zen 4), 1 more
-  there (the profile run) and 4 on Quest Xeon 6230R (Intel): the failure is deterministic across CPU classes.
+  there (the profile run) and 4 on the cluster Xeon 6230R (Intel): the failure is deterministic across CPU classes.
 - Where screw 2-1 is lost (`profile.py` track, `track_part.py`): picked at row ~231k, held at its hole rows 237k-255k
   while the hand works it, released, and at row ~262k it drops onto the seat (-18, 38, 126 mm); the hex key then drives
   an empty hole (rows 270k-339k).
 - Diagnostic (NOT the benchmark physics): `diag_noprism.py` replays the demo with the prism rule switched off, to see
-  whether the rule causes the loss. Without the rule all 9 welds engage (screw 2-1 by row 360k) and success.py holds at the end (goal True, released), but the end is still not at rest, so even there the terminal rules fail (9121 s on Quest). So the loss of screw 2-1 comes from the prism rule (the demo was recorded without it): the screw's thread core and head disc are prisms now, and the open-loop demo's insertion no longer catches.
+  whether the rule causes the loss. Without the rule all 9 welds engage (screw 2-1 by row 360k) and success.py holds at the end (goal True, released), but the end is still not at rest, so even there the terminal rules fail (9121 s on the cluster). So the loss of screw 2-1 comes from the prism rule (the demo was recorded without it): the screw's thread core and head disc are prisms now, and the open-loop demo's insertion no longer catches.
 
 ## Timing
 | host | one replay | % of 14,400 s |
 |---|---|---|
-| Quest Xeon 6230R, dedicated Slurm cores (SIF 0.3.0; 2 jobs x 2 processes) | 12,316-13,974 s | 85.5-97.0 % |
+| the cluster Xeon 6230R, dedicated Slurm cores (SIF 0.3.0; 2 jobs x 2 processes) | 12,316-13,974 s | 85.5-97.0 % |
 | a cloud host EPYC 9354 (box load 30 → 90 during the run) | 8,562 s | 59.5 % |
 | host C 7950X standard live episode (the standard agent's dry run) | 7,045 s | 48.9 % |
 
@@ -133,7 +133,7 @@ The cost per row grows along the episode: 224 contacts at the birth (the seat, l
 60 + 3 x 40 + ...), 393 by row 640k (welded legs keep their box contacts with the seat); the profile's wall per
 400-row block rises from 1.3 s to 15 s. Rows of the second half cost about 3x those of the first.
 
-To reach the 30 % ceiling on Quest (4,320 s at the demo's mean 18.7 ms/row), a reference needs <= ~230k rows, about 2.9x
+To reach the 30 % ceiling on the cluster (4,320 s at the demo's mean 18.7 ms/row), a reference needs <= ~230k rows, about 2.9x
 fewer than the demo; the late rows are the expensive ones, so a uniform cut has to be larger still. Where the demo's
 time goes: each screw takes ~90-120k rows (pick from the tray ~35k, then ~11 hex-key ratchet strokes over ~55k rows,
 140 s, mostly well below the joint-speed limits); six screws are ~600k of the 660k rows.
@@ -184,5 +184,5 @@ in its own container, which changes only its own local runs.
 - `warp_ref.py`, `warp_ops.py`: the two time-warp searches above.
 - `track_part.py`: one part's pose along a track. `diag_noprism.py`: the diagnostic replay without the prism rule.
 - The fresh-replay probe is `scripts/ikea_mujoco/oracles/stegesund/probe.py`.
-- Run dirs: Quest `ikea_b2_20261016/sk/runs/` (kyrre_demo*, diag), a cloud host `/workspace/qn_ikea_b2/sk/runs/` (kyrre_demo,
+- Run dirs: the cluster `ikea_b2_20261016/sk/runs/` (kyrre_demo*, diag), a cloud host `/workspace/qn_ikea_b2/sk/runs/` (kyrre_demo,
   prof, warp_test*, wops1, kyrre_mix1).

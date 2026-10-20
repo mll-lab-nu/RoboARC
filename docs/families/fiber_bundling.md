@@ -187,7 +187,7 @@ without finger contact on springref 0 was 0.01-0.03 % (only the distal pad boxes
 (f9db156d16, release_rebuild's MAKE_ONE: the released `grasp_assist`), each tier builds 71 robot-touchable cylinders as
 32-facet prisms (the terminal gland, the six trunk shells, the 64 ring tube segments), and its birth changes. The same
 rows were recorded again on those instances (`rerecord.py --tail 40`, the recipe above) and replayed in 2 fresh
-processes each (Quest, `rigid_integrate_20261012/runs/i1`):
+processes each (the cluster, `rigid_integrate_20261012/runs/i1`):
 
 | tier | birth (prisms) | rows | final state sha | 2 fresh replays | weld 20 ms mean |
 |---|---|---|---|---|---|

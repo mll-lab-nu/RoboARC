@@ -133,7 +133,7 @@ made on that code. All five tiers succeed and replay to the same state in two fr
 
 **On ccd4ba7fa** (the soft contact class at a constant impedance, solimp .95 .95; knot_chain_v7 with the tension guard;
 the same rows and the same births, re-bound to the rope agent's tree kn13), the five references replay in two fresh
-processes each (validate, Quest, 2026-10-11) to: very_easy cb0e1ae48af8ffc0 @1208, easier 2b9088531bc1a524 @1072,
+processes each (validate, the cluster, 2026-10-11) to: very_easy cb0e1ae48af8ffc0 @1208, easier 2b9088531bc1a524 @1072,
 easy 191d932660caa264 @753 (unchanged), medium 25da90d051da4a35 @1941, hard 14ed4da2f8b16ff4 @2391. All succeed; easier
 and medium succeed one and three rows earlier than above.
 
@@ -317,9 +317,9 @@ substep or task change.
   with the 2026-10-13 back strip, `premade/region_source.py`), birth a3c58ab73130b9b3; two makes byte-identical, births
   exact.
 - Reference g333: 7419 rows, end 8ae062ea4c733dbc, sha256 82c65a96cbaca655...; strict double replay (host A), the same end on
-  host B and Quest (Gold 6230R, 6338, Platinum 8592+); max arm joint step 0.0385 rad.
+  host B and the cluster (Gold 6230R, 6338, Platinum 8592+); max arm joint step 0.0385 rad.
 - Timing: 3037 s = 28.1 % of 3 h on host B (Ryzen 9 7950X, a quiet control in the same window), within the knot bar (<= 30 %,
   user 2026-10-14). The texts state 0.41 s per control step.
-- Harbor oracle 1 / nop 0 in both modes; leak probe = knot-09's findings; stress (Quest, 300 episodes, v2.13b): PASS.
+- Harbor oracle 1 / nop 0 in both modes; leak probe = knot-09's findings; stress (the cluster, 300 episodes, v2.13b): PASS.
 - The rd hard tier (hu1) stays out: its re-timed untie never stays untied (the work notes).
 - The user approved the review on 2026-10-18.

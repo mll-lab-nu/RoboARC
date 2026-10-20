@@ -1,4 +1,4 @@
-"""Robot I/O for the redesign oracle: a MuJoCo Session (the real thing) or a laptop testbed (the planning model's
+"""Robot I/O for the redesign oracle: a MuJoCo Session (the real thing) or a workstation testbed (the planning model's
 physics with the grasp weld emulated). Both send 8-D JOINT_ABS rows (7 arm targets + the Robotiq's native command,
 0 open .. 0.8 closed) at 40 Hz and expose read-only measurements."""
 from __future__ import annotations

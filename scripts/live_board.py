@@ -3,7 +3,7 @@
 every few seconds while the batch runs. A runner-side tool (stdlib only); it only reads.
 
     scripts/live_board.py [--jobs jobs/agents] [--jobs jobs] [--port N] [--bind 127.0.0.1]
-    # prints its address (default: the first free port from 8765); from a laptop: ssh -N -L 8765:127.0.0.1:<port> <host>,
+    # prints its address (default: the first free port from 8765); from a workstation: ssh -N -L 8765:127.0.0.1:<port> <host>,
     # then open http://localhost:8765
 
 States: pending (in a batch's plan, not started; scripts/run_agent_batch.sh writes <jobs>/.plan/<batch>.json), setup

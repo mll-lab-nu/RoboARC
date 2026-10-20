@@ -21,7 +21,7 @@ ROBOT_BODIES = ("link0", "link1", "link2", "link3", "link4", "link5", "link6", "
 GRIPPER = ("finger_joint1", "finger_joint2")
 FOUR_BAR = ("finger_joint1", "r85_right_coupler_joint", "r85_right_spring_link_joint", "r85_right_follower_joint",
             "finger_joint2", "r85_left_coupler_joint", "r85_left_spring_link_joint", "r85_left_follower_joint")
-# The Robotiq's settled four-bar per pad gap (m), closing on nothing in the buzz physics (laptop, 2026-10-10): pad gap,
+# The Robotiq's settled four-bar per pad gap (m), closing on nothing in the buzz physics (workstation, 2026-10-10): pad gap,
 # then the FOUR_BAR joint values. Width grasp of the 9.8 mm grip ~ command 0.69, thickness (7 mm) ~ 0.72.
 # The settled four-bar per pad gap in the live Session at the Robotiq's springref 2.62 (the shared setting since
 # c64294012: the pads close parallel), measured by scripts/robotangle/redesign/buzz_wire_3d/grip_table.py: pad gap,

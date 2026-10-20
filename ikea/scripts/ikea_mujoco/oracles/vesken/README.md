@@ -86,7 +86,7 @@ why the deviation bound is 25 mm. The kept parameters are `params.json`.
 
 ## Checks (2026-10-18)
 **Rebuild.** `rebuild.py` (a fresh process from the birth, every operation from a restored checkpoint as in the
-search) reaches the search's end state exactly: end `943aa32e…`, settled `29685e37…` (2400 s on a Quest Xeon).
+search) reaches the search's end state exactly: end `943aa32e…`, settled `29685e37…` (2400 s on a cluster Xeon).
 
 **Fresh replays** (`verify.py`, image `eai-ikea-mujoco:0.3.0` ed950d079b63): birth state `66aaaacb…` = bindings.json
 `initial_state_sha256`; 0 rows over the arm or hand limit, 0 clipped, `slewed_ticks` 0; success 23/23; end `943aa32e…`,
@@ -95,8 +95,8 @@ settled `29685e37…` on every host:
 | host | CPU | wall per replay |
 |---|---|---|
 | host B, Docker, 2 processes (loaded host, 4 Harbor trials alongside) | AMD Ryzen 9 7950X (Zen 4) | 748 s, 761 s |
-| Quest, SIF, 2 processes | Intel Xeon Platinum 8592+ | 983 s, 983 s |
-| Quest, SIF, 1 process | Intel Xeon Gold 6230R (2.1 GHz, the slow trial class) | 1822 s |
+| the cluster, SIF, 2 processes | Intel Xeon Platinum 8592+ | 983 s, 983 s |
+| the cluster, SIF, 1 process | Intel Xeon Gold 6230R (2.1 GHz, the slow trial class) | 1822 s |
 
 Against the 4320 s bar (40 % of the 10,800 s budget): 761 s on loaded Zen 4 (17.6 %), 1822 s on the Gold 6230R (42 %).
 

@@ -46,7 +46,7 @@ Success: every target inside and quiet for 0.5 s. The success row closes that wi
   record.
 - Prisms (2026-10-12, the cylinder -> prism rule b2b751580): only medium has robot-touchable cylinders (12 bar
   geoms of r 2.8-5.0 mm). Re-made on the head (f9db156d16) its birth stays d47e72299f96f4a6 and its reference still
-  succeeds at row 1442, but it now ends on 1d991d7010559803 (2 fresh replays; Quest `rigid_integrate_20261012/runs/i1`).
+  succeeds at row 1442, but it now ends on 1d991d7010559803 (2 fresh replays; the cluster `rigid_integrate_20261012/runs/i1`).
   The same head without the rule (`treeNP`) ends on 094d2865820e6292, so the change is the prisms'. The file is
   unchanged (a re-recording stops at the same first success, row 1442).
 

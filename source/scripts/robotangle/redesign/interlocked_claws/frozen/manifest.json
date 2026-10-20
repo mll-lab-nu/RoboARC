@@ -55,5 +55,5 @@
    "head_built": "no robot-touchable cylinder: same birth, same replay as the frozen instance"
   }
  },
- "checked_on_head": "6bb17729df + this branch, Quest 2026-10-12 (rigid_integrate_20261012, jobs 9616197 / 9616936 / 9617135): head_final = the reference's final state replayed open loop on this frozen instance in a fresh process; head_built = the same tier made again on the head (make-instance) and the reference replayed on it"
+ "checked_on_head": "6bb17729df + this branch, the cluster 2026-10-12 (rigid_integrate_20261012, jobs 9616197 / 9616936 / 9617135): head_final = the reference's final state replayed open loop on this frozen instance in a fresh process; head_built = the same tier made again on the head (make-instance) and the reference replayed on it"
 }

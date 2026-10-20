@@ -9,7 +9,7 @@ the ring: a same-hand regrasp); the receiver then draws the tip along the goal c
 feed the hand that holds the tip regrasps at the feeding station, with a keeper hand holding the rope on its own side
 where one is named.
 
-Kinematic checks (laptop numpy, aloha_kin): every waypoint has an IK solution with the rope between the pads (closing
+Kinematic checks (workstation numpy, aloha_kin): every waypoint has an IK solution with the rope between the pads (closing
 axis perpendicular to the rope), within joint limits, and the arm's conservative capsules clear the table and every
 fixture; consecutive solutions are continuous (the joint path is reported). `forced_handover` shows, per grommet, that
 the feeding arm has no collision-free pinch pose beyond the bulkhead (over a sphere of gripper orientations) while the

@@ -63,7 +63,7 @@ Further v1 changes during the night, each forced by a check or a robot-level run
   medium, 35 mm on hard): tilted 30 deg down it overhung the table pick beyond it; tilted 25 deg up (centre 0.12, then
   0.15 m) it lost the rope at every release on hard (the rope slid back down the incline); turned 25 deg the tip
   retracted 13 cm out of it after the same-hand release (every variant); turned -10 / 0 deg the picks beyond it failed;
-  +10 deg solved medium and hard (Quest fan-out, 10-11).
+  +10 deg solved medium and hard (the cluster fan-out, 10-11).
 - **easy has no post on B -> G3** (P4): every robot-level route pressed it (65-146 N); the chord still needs a
   same-hand regrasp and a wall passage.
 - **medium's A at x -0.22** (as hard's): at x -0.26 the laid tip swung ~70 deg off A's axis at the release (three runs).
@@ -144,10 +144,10 @@ forced-event table, and the old -i01 oracle replayed on the new scenes.
 | robot level (10-11) | easier's oracle pressed V with 128 N for 4 s, easy's pressed post P4 with up to 146 N (the load-bias compensation integrated contact force) | the bias is not grown while a hand presses; straight lines and pushes stop when the Session reports forcing; the hand lets go at the end if holding does not settle the rope. easier re-recorded without forcing |
 | robot level (10-11) | medium / hard: laid tips whipped back 130-160 deg at releases, the tip retracted 13 cm beyond T | the lacing route runs clockwise round the wall; the start spiral (= the rope's rest shape) was counter-clockwise and stored bending against it: medium / hard start from a clockwise spiral |
 | robot level (10-11) | medium: a post on the G1 -> A chord hooked the rope drawn from G1 | no post there (no single push threads both: the feeder of G1 cannot pass the wall) |
-| robot level (10-11) | medium (T +25): the tip retracted 13 cm out of T after the same-hand release in every variant | T turned +10 (Quest fan-out of T variants 0 / +-10 x CW / CCW start) |
+| robot level (10-11) | medium (T +25): the tip retracted 13 cm out of T after the same-hand release in every variant | T turned +10 (the cluster fan-out of T variants 0 / +-10 x CW / CCW start) |
 | robot level (10-11) | easy: post P4 pressed at 65-146 N on every route; hard: the left gripper hit the bulkhead strip at 3.2 kN drawing to C | no P4; C's lay run starts >= 12 cm from the wall |
 | new head (10-11, ccd4ba7fa: SOFT_CONTACT .95/.95, rings keep class) | very_easy / easier references pressed post P2 at 80-133 N: a fast joint move to a pre-grasp left forearm_roll 0.79 rad behind its target; the lagging arm left the checked joint line | joint moves lag-paced (<= 0.10 rad); a forcing stop backs off at once; references re-recorded on the head |
-| prism posts (10-12, b2b751580: robot-touchable cylinders built as 32-facet prisms) | the posts P1-P3 became prisms; very_easy / easier / medium's rows reached the full sequence but the rope was not yet quiet when the rows ended | instances rebuilt (inst5); those rows + a 10 s hold of the last row; easy's rows unchanged; fresh replays identical on Intel (Quest) and AMD (a cloud host) |
+| prism posts (10-12, b2b751580: robot-touchable cylinders built as 32-facet prisms) | the posts P1-P3 became prisms; very_easy / easier / medium's rows reached the full sequence but the rope was not yet quiet when the rows ended | instances rebuilt (inst5); those rows + a 10 s hold of the last row; easy's rows unchanged; fresh replays identical on Intel (the cluster) and AMD (a cloud host) |
 | hard on the new head (10-11 / 10-12) | with the lay run before C 12 cm off the wall (plan9) every run lost G3 when the rope was laid in front of C (~60 rewinds); the joint move onto the pick beyond A was blocked by P1 and the hand jammed on it at 197-245 N | the lay run 8 cm off the wall (plan8) under the gentle executor; a blocked pre-grasp move goes over a lift up to 20 cm or is not made |
 | evidence (10-12) | a live run's forcing summary lost an event across a rewind (hard: none live, 197 N in the fresh replays) | forcing is read from the fresh-process replays only |
 
