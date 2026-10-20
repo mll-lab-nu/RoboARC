@@ -8,8 +8,9 @@ coordinator.
 ## 0. What you need
 
 - **Code:** the head of the development branch. Pull it before every round, and run the whole round on one commit.
-- **Python:** the RoboTangle MuJoCo image (built from `images/robotangle/Dockerfile.mujoco`), or any Python with
-  `mujoco==3.14.0` and the repo's requirements.
+- **Python:** the RoboARC release image (built from `source/images/robotangle/Dockerfile.mujoco` by
+  `images/roboarc/build.sh`) with the checkout mounted, or any Python with `mujoco==3.14.0` and the image's packages.
+  Run the commands below from the repository root.
   - The tools import `tools/stress/_env.py` first. It puts this checkout's `topogym` and
     `scripts/roboarc/shared` on `sys.path`, sets the numpy / OpenBLAS SIMD masking (so AVX2 and AVX-512 hosts give
     the same hashes), and pins every library to one thread.
@@ -26,12 +27,12 @@ work/
   refs/<base>/privileged.npz          # that tier's reference action stream
 ```
 
-- **Make each instance on the commit you test**, so the birth is from the current physics:
+- **Make each instance on the commit you test**, so the birth is from the current physics (`source/` first on the path):
   ```bash
-  python scripts/roboarc/shared/rcb_topogym.py make-instance --task <task_id> --variation <variation> \
+  PYTHONPATH=source python scripts/roboarc/shared/rcb_topogym.py make-instance --task <task_id> --variation <variation> \
       --scene-seed 0 --out work/instances/<base>/instance.json
   ```
-  For example, base `cast-keyhole-easy-i01` holds the -i01 instance of `cast_keyhole` easy.
+  For example, base `cast-keyhole-03-i01` holds the instance of `cast_keyhole` easy.
 - **References:** copy or symlink your oracle's recording, `scripts/roboarc/oracles/<base>/privileged.npz`, to
   `work/refs/<base>/privileged.npz`.
   - It must succeed on that instance, and two fresh processes must end on the same state hash (step 1).
