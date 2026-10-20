@@ -38,7 +38,8 @@ repository: <head> gives the simulator source (source/), the release inputs (too
                   instances made, in the HF dataset's layout), cache/ (CoACD hulls), harbor/ (the Harbor run), logs/,
                   REPORT.md and report.json
   --families      only these families of mujoco_release.json (comma-separated)
-  --only          only these new bases (comma-separated; a dry run of single tiers)
+  --only          only these new bases (comma-separated; a dry run of single tiers; with --harbor-only, Harbor on
+                  only these bases of the previous run)
   --references    reference trajectories, <dir>/<base>/privileged.npz (the new or the released base name); default
                   oracles/<new base>/privileged.npz in the tree
   --expect        a JSON file {base: end state (prefix)}: the report compares the oracles' end states with it
@@ -740,6 +741,8 @@ def main(argv: list[str]) -> int:
         report = json.loads((a.work / "report.json").read_text())
         a.repo, a.out = pathlib.Path(report.get("repo") or a.work / "repo"), a.work / ("render" if report.get("onto") else "repo")
         bases = [dict(new=n, old=i["replaces"]) for n, i in report["instances"].items()]
+        if a.only:                       # a subset of that run's bases
+            bases = [b for b in bases if b["new"] in a.only.split(",")]
         return harbor_step(a, here, report, bases, report.get("gpu_bases", []), report["images"]["release"]["reference"],
                            module(here / "scripts/roboarc/harbor_check.py"))
     a.repo = a.work / "repo"
