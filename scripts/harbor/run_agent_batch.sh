@@ -45,21 +45,26 @@
 #   LOG_MIRROR   0 (default); 1 = start the append-only agent-record mirror below (a root container) if none runs
 #   MEM_GUARD    0 (default); 1 = start the memory guard below if none runs: while host memory is short it kills the
 #                running RoboARC trial container that uses the most memory (only containers named roboarc-*)
-#   GATEWAY      0 (default) = the agent calls its API directly, as Harbor runs it; 1 = route the agent's model API
-#                calls through a transparent usage gateway. The gateway is an EXTERNAL component, not part of this
-#                repository: install it at $USAGE_GATEWAY_DIR (default scripts/usage_gateway/: gateway.py, rawlog.py,
-#                api_paths.json); without it GATEWAY=1 stops at start. It forwards
+#   USAGE_GATEWAY  usage recording, optional (PROTOCOL H.6, docs/RUNNING.md "Usage recording"). Empty (default) = off:
+#                the agent calls its API directly, as Harbor runs it, and nothing below about the gateway runs; the
+#                token counts in the results are the harness's own (Harbor's result.json). <dir> = on: route the agent's
+#                model API calls through the transparent usage gateway installed in <dir> (gateway.py, rawlog.py,
+#                api_paths.json). The gateway is an EXTERNAL component, not part of this repository; a <dir> without
+#                gateway.py stops the runner at start. It forwards
 #                them unchanged (the agent keeps its own credentials) and records each trial's tokens per request in
 #                <trial>/gateway/ (usage.jsonl, totals.json). Before each job the runner checks that the gateway answers
 #                (/_gateway/health) and restarts it on its port, or stops the lane; a job during which it died gets
 #                <job>/gateway_down.json, and a trial whose last model calls failed at the gateway (upstream unreachable,
-#                stream broken off, provider 5xx) is published as "not a result", never the agent's 0
-#   GATEWAY_RAW  1 (default, takes effect with GATEWAY=1) = the gateway also keeps every request and response body
+#                stream broken off, provider 5xx) is published as "not a result", never the agent's 0.
+#                Either way every job gets <job>/usage_recording.json (whether the gateway ran, its token budget), and
+#                write_task_results.py copies it into each result's config.json (usage_gateway, usage_source, token_budget)
+#                The GATEWAY_* and TOKEN_BUDGET_* options below take effect only with USAGE_GATEWAY set.
+#   GATEWAY_RAW  1 (default) = the gateway also keeps every request and response body
 #                (<trial>/gateway/raw.jsonl.xz, deduplicated, see the gateway's rawlog.py; private: it holds the
 #                whole conversation); 0 = token usage only
 #                The gateway forwards model-API calls only (its api_paths.json) and answers anything
 #                else at the provider 403 (account connectors, files, web tools; counted in totals.json refused_paths)
-#   GATEWAY_EGRESS  gateway (default; takes effect with GATEWAY=1) = each job's copy of the task allows as egress only the gateway's address and the package registries (PyPI, apt), so the
+#   GATEWAY_EGRESS  gateway (default) = each job's copy of the task allows as egress only the gateway's address and the package registries (PyPI, apt), so the
 #                agent's container reaches its provider through the gateway's model-API paths only. (Harbor's allowlist
 #                names an address, not a port: every TCP service listening on that address of the host is reachable
 #                from a trial, as it has been since the gateway exists. Bind host services to 127.0.0.1.)
@@ -71,7 +76,8 @@
 #                model server) is forwarded too, to exactly that <host>:<port>
 #   GATEWAY_START_WAIT  seconds to wait for the gateway to come up (10); raise it on busy shared nodes
 #   TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT   per-trial token budget the gateway enforces (100000000 / 10000000, PROTOCOL
-#                §5): past it every further model request is refused and the trial counts as failed; 0 = no limit
+#                §5): past it every further model request is refused and the trial counts as failed; 0 = no limit.
+#                Without the gateway no token budget is enforced (the task's cutoff bounds the trial)
 # Runner-side tools (not task code), in this directory: with LOG_MIRROR=1 the container rcb-log-mirror copies every
 # trial's agent/ directory append-only into ${JOBS}_mirror/ (log_mirror.py; root-owned: neither the agent nor the host
 # user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
@@ -81,7 +87,7 @@
 set -u
 H="$(cd "$(dirname "$0")" && pwd)"          # scripts/harbor/: the runner's tools
 R="$(cd "$H/../.." && pwd)"                 # the repository: tasks/, scripts/ (the task layer)
-[ $# -ge 2 ] || { sed -n 2,45p "$0"; exit 2; }
+[ $# -ge 2 ] || { sed -n '2,/^set -u$/p' "$0" | sed '$d'; exit 2; }
 batch="$1"; shift; tasks=("$@")
 AGENT="${AGENT:-codex}"; MODEL="${MODEL:-}"; EFFORT="${EFFORT:-xhigh}"; AK="${AK:-}"
 WEB_SEARCH="${WEB_SEARCH:-disabled}"
@@ -89,22 +95,27 @@ AGENT_CONFIG="${AGENT_CONFIG:-}"; ENV_FILE="${ENV_FILE:-}"
 MODES="${MODES:-privileged standard}"; SEQ="${SEQ:-1}"; N_P="${N_P:-2}"; N_S="${N_S:-2}"; K="${K:-1}"; WAIT_FOR="${WAIT_FOR:-}"
 JOBS="${JOBS:-$R/jobs/agents}"; RESULTS="${RESULTS-$(dirname "$R")/rcb_results}"; LABEL="${LABEL:-$AGENT + $MODEL ($EFFORT)}"
 LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
-USAGE_GATEWAY_DIR="${USAGE_GATEWAY_DIR:-$R/scripts/usage_gateway}"
-GATEWAY="${GATEWAY:-0}"; GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
+USAGE_GATEWAY="${USAGE_GATEWAY:-}"
+GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
 GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
 HOST_CPUS="${HOST_CPUS:-$(nproc)}"
 [ -n "$MODEL" ] || { echo "MODEL must be set: the -m model of the agent, e.g. MODEL=openai/<model> (docs/RUNNING.md)" >&2; exit 2; }
-if [ "$GATEWAY" = 1 ] && [ ! -f "$USAGE_GATEWAY_DIR/gateway.py" ]; then
-  echo "GATEWAY=1 needs the usage gateway, an external component not in this repository: no $USAGE_GATEWAY_DIR/gateway.py (set USAGE_GATEWAY_DIR, or run without GATEWAY)" >&2; exit 2
+# the switch of earlier versions of this script: refused rather than ignored, so that nobody expects a usage record silently
+[ -n "${GATEWAY:-}${USAGE_GATEWAY_DIR:-}" ] && { echo "GATEWAY / USAGE_GATEWAY_DIR are no longer read: usage recording is USAGE_GATEWAY=<the gateway's directory> (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
+if [ -n "$USAGE_GATEWAY" ]; then
+  [ -f "$USAGE_GATEWAY/gateway.py" ] || { echo "USAGE_GATEWAY=$USAGE_GATEWAY: no gateway.py there. The usage gateway is an external component, not part of this repository: install it and point USAGE_GATEWAY at its directory, or leave USAGE_GATEWAY empty to run without usage recording (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
+  USAGE_GATEWAY="$(cd "$USAGE_GATEWAY" && pwd)"
+  case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
-case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
 # absolute paths: with the gateway on, Harbor is started from the job's own copy of the task (run_job), not from the repository
 abspath() { case "$1" in ""|/*) printf '%s' "$1" ;; *) printf '%s/%s' "$PWD" "$1" ;; esac; }
 JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(abspath "$AGENT_CONFIG")"
 [ -n "${RESULTS:-}" ] && RESULTS="$(abspath "$RESULTS")"
 [ -n "${CODEX_AUTH_JSON_PATH:-}" ] && { CODEX_AUTH_JSON_PATH="$(abspath "$CODEX_AUTH_JSON_PATH")"; export CODEX_AUTH_JSON_PATH; }
 TOKEN_BUDGET_IN="${TOKEN_BUDGET_IN:-100000000}"; TOKEN_BUDGET_OUT="${TOKEN_BUDGET_OUT:-10000000}"
+[ -z "$USAGE_GATEWAY" ] || [[ "$TOKEN_BUDGET_IN$TOKEN_BUDGET_OUT" =~ ^[0-9]+$ && -n "$TOKEN_BUDGET_IN" && -n "$TOKEN_BUDGET_OUT" ]] \
+  || { echo "TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT must be whole numbers (0 = no limit)" >&2; exit 2; }
 case "$AGENT" in codex|claude-code) ;; *) echo "AGENT must be a Harbor native agent: codex or claude-code (PROTOCOL D11)" >&2; exit 2 ;; esac
 # Run id (D4): harness = the agent name with - -> _; model = MODEL's last path segment, lower case, gpt-<n> joined
 # (gpt-5 -> gpt5), a leading claude- dropped (claude-opus-4-1 -> opus_4_1), every other
@@ -150,7 +161,7 @@ mkdir -p "$JOBS"
 LOG="$JOBS/$batch.log"
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 if [ -n "$ENV_FILE" ] && [ ! -f "$ENV_FILE" ]; then log "no env file $ENV_FILE"; exit 2; fi
-log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH"
+log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}"
 # the batch's plan, for live_board.py: every job this command runs, "pending" there until it starts
 mkdir -p "$JOBS/.plan"
 python3 - "$R" "$JOBS/.plan/$batch.json" "$batch" "$RUN_ID" "$SEQ" "$MODES" "${tasks[@]}" <<'PY'
@@ -185,7 +196,7 @@ fi
 [ -d "$JOBS/.tasks" ] && find "$JOBS/.tasks" -mindepth 1 -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + 2>/dev/null
 
 # transparent usage gateway (one per runner, stopped with it): the agent's base URL points at it, it forwards unchanged
-if [ "$GATEWAY" = 1 ]; then
+if [ -n "$USAGE_GATEWAY" ]; then
   mkdir -p "$JOBS/.gateway"; ready="$JOBS/.gateway/port.$$"; rm -f "$ready"
   # the upstream each base URL would have used: this environment, else the env file, else the API's default
   upstream() {  # <VAR> <default>
@@ -200,7 +211,7 @@ if [ "$GATEWAY" = 1 ]; then
   [[ "$agent_up" =~ ^http://([A-Za-z0-9.-]+:[0-9]+)(/|$) ]] && gw_args+=(--http-host "${BASH_REMATCH[1]}")
   gw_start() {  # [port]: start the gateway (a restart: on the port the agent's base URLs already name); 0 = it listens
     rm -f "$ready"
-    setsid python3 "$USAGE_GATEWAY_DIR/gateway.py" "${gw_args[@]}" ${1:+--port "$1"} >>"$JOBS/.gateway/gateway.$$.err" 2>&1 </dev/null &
+    setsid python3 "$USAGE_GATEWAY/gateway.py" "${gw_args[@]}" ${1:+--port "$1"} >>"$JOBS/.gateway/gateway.$$.err" 2>&1 </dev/null &
     gw_pid=$!
     local _; for _ in $(seq $((GATEWAY_START_WAIT * 5))); do [ -s "$ready" ] && return 0; kill -0 "$gw_pid" 2>/dev/null || return 1; sleep 0.2; done
     [ -s "$ready" ]
@@ -211,7 +222,7 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
   }
   gw_pid=""; trap '[ -n "$gw_pid" ] && kill "$gw_pid" 2>/dev/null' EXIT
   gw_start
-  [ -s "$ready" ] || { log "usage gateway did not start within ${GATEWAY_START_WAIT} s (see $JOBS/.gateway/gateway.$$.err); unset GATEWAY to run without it"; exit 2; }
+  [ -s "$ready" ] || { log "usage gateway did not start within ${GATEWAY_START_WAIT} s (see $JOBS/.gateway/gateway.$$.err); leave USAGE_GATEWAY empty to run without it"; exit 2; }
   gw_port="$(cat "$ready")"; GW="http://$GATEWAY_BIND:$gw_port"
   gw_alive || { log "usage gateway $GW does not answer its health check (see $JOBS/.gateway/gateway.$$.err); not starting"; exit 2; }
   # https://host/path -> $GW/u/host/path; http://host:port/path -> $GW/h/host:port/path (`t`: one rewrite only)
@@ -264,9 +275,9 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
   log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
 fi
 
-gateway_check() {  # before a job is claimed (GATEWAY=1): the gateway answers, else it is restarted on its port; 1 = it is
+gateway_check() {  # before a job is claimed (USAGE_GATEWAY set): the gateway answers, else it is restarted on its port; 1 = it is
   # down for good and the lane stops (every trial would end as an infrastructure failure)
-  [ "$GATEWAY" = 1 ] || return 0
+  [ -n "$USAGE_GATEWAY" ] || return 0
   gw_alive && return 0
   log "usage gateway $GW (pid $gw_pid) does not answer; restarting it on port $gw_port"
   kill "$gw_pid" 2>/dev/null; sleep 1
@@ -276,7 +287,7 @@ gateway_check() {  # before a job is claimed (GATEWAY=1): the gateway answers, e
 
 gateway_after() {  # <job>: the gateway died during the job: its trials are infrastructure failures, not the agent's 0
   # (<job>/gateway_down.json, read by account_failure_check.py and write_task_results.py)
-  [ "$GATEWAY" = 1 ] && [ -d "$JOBS/$1" ] || return 0
+  [ -n "$USAGE_GATEWAY" ] && [ -d "$JOBS/$1" ] || return 0
   gw_alive && return 0
   printf '{"gateway": "%s", "pid": "%s", "checked": "%s"}\n' "$GW" "$gw_pid" "$(date -u +%FT%TZ)" > "$JOBS/$1/gateway_down.json"
   log "$1: the usage gateway was down when the job ended: its trials are not results (gateway_down.json)"
@@ -292,9 +303,20 @@ wait_for() {  # <mode>: block until every WAIT_FOR file of this mode exists
   done
 }
 
-finish_job() {  # <job>: the raw logs compacted; no key in any saved file (+redact); the task results (D3)
+usage_record() {  # <job>: <job>/usage_recording.json, whether this job's trials ran through the usage gateway (and its
+  # token budget); write_task_results.py copies it into every result's config.json
+  if [ -n "$USAGE_GATEWAY" ]; then
+    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}}\n' \
+      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT"
+  else
+    printf '{"usage_gateway": false, "token_budget": null}\n'
+  fi > "$JOBS/$1/usage_recording.json"
+}
+
+finish_job() {  # <job>: the usage record; the raw logs compacted; no key in any saved file (+redact); the task results (D3)
   [ -d "$JOBS/$1" ] || return 0
-  [ "$GATEWAY" = 1 ] && [ "$GATEWAY_RAW" = 1 ] && python3 "$USAGE_GATEWAY_DIR/rawlog.py" compact "$JOBS/$1" 2>&1 | sed "s/^/[$1] /" | tee -a "$LOG"
+  usage_record "$1"
+  [ -n "$USAGE_GATEWAY" ] && [ "$GATEWAY_RAW" = 1 ] && python3 "$USAGE_GATEWAY/rawlog.py" compact "$JOBS/$1" 2>&1 | sed "s/^/[$1] /" | tee -a "$LOG"
   python3 "$H/scan_secrets.py" "$JOBS/$1" "${SCAN[@]}" --redact 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
   [ -n "$RESULTS" ] && python3 "$H/write_task_results.py" "$JOBS" "$1" "$RUN_ID" "$LABEL" --out "$RESULTS/$batch" 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
 }
@@ -312,11 +334,13 @@ from task_names import canonical  # noqa: E402
 # are ranked together, the unvalidated ones marked; a trial that is not a result (infrastructure, voided) never counts in a
 # success rate. Tasks of the easy set (docs/easy_set.toml, task_conventions.set_of) are listed, marked, and left out of
 # the headline rate (PROTOCOL §4).
-HEAD = ("| task | success | result | reward fields | actions | agent wall s | input tok | cached | output tok | gateway in / out | cost $ | exception |\n"
-        "|---|---|---|---|---|---|---|---|---|---|---|---|")
+# token columns: the harness's own counts (Harbor's result.json); the usage gateway's column only when a trial of the
+# batch ran through it (USAGE_GATEWAY, optional)
+HEAD = "| task | success | result | reward fields | actions | agent wall s | input tok | cached | output tok |{gw} cost $ | exception |"
 f = lambda s: dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
 groups = defaultdict(list)          # config key -> [(started, row, status, validated, easy)]
 labels = {}
+any_gw = False
 for trial in jobs.glob(f"{batch}-*/*__*"):
     if not trial.is_dir():
         continue
@@ -330,6 +354,7 @@ for trial in jobs.glob(f"{batch}-*/*__*"):
     # do not void the trial, and the harness's own start-up probes are not among them
     left = sum(gw.get(k, 0) for k in ("refused_paths", "refused_server_tools", "refused_bodies", "refused_hosts"))
     gw_cell += f" REFUSED {left}" if left else ""
+    any_gw = any_gw or bool(gw)
     try:
         wall = round((f(ae["finished_at"]) - f(ae["started_at"])).total_seconds())
     except Exception:
@@ -347,10 +372,13 @@ for trial in jobs.glob(f"{batch}-*/*__*"):
     res = "not a result (voided" + (f": {why}" if why else "") + ")" if status == "not_a_result" else status
     val = cfg.get("validated") is True
     easy = (R / "tasks" / task / "task.toml").is_file() and tc.set_of(R / "tasks" / task) == "easy"
-    groups[key].append((r.get("started_at") or "~", f"| {task}{'' if val else ' (unvalidated)'}{' (easy set)' if easy else ''} | {rw.get('success', '-')} | {res} | {json.dumps(keys)} | "
+    groups[key].append((r.get("started_at") or "~", (f"| {task}{'' if val else ' (unvalidated)'}{' (easy set)' if easy else ''} | {rw.get('success', '-')} | {res} | {json.dumps(keys)} | "
                         f"{rw.get('n_actions', '-')} | {wall} | {ar.get('n_input_tokens', '-')} | {ar.get('n_cache_tokens', '-')} | "
-                        f"{ar.get('n_output_tokens', '-')} | {gw_cell} | {round(ar['cost_usd'], 4) if ar.get('cost_usd') is not None else '-'} | {ex} |",
+                        f"{ar.get('n_output_tokens', '-')} |", f" {gw_cell} |", f" {round(ar['cost_usd'], 4) if ar.get('cost_usd') is not None else '-'} | {ex} |"),
                         status, val, easy))
+head = HEAD.format(gw=" usage gateway in / out |" if any_gw else "")
+head += "\n" + "|---" * head.count(" | ") + "|---|"
+cell = lambda row: row[0] + (row[1] if any_gw else "") + row[2]      # (before, the gateway's cell, after)
 print(f"# {batch}\n\nOne table per comparable configuration (RUNNING.md \"Results\"); success rates count results only "
       "(a trial that is not a result is voided and never counted). Validated and unvalidated tasks are ranked together; "
       "tasks without a validated oracle (`oracle` not `full` and no `[metadata] validated = true`), and trials of a task "
@@ -365,9 +393,9 @@ for k in sorted(groups, key=lambda k: tuple(map(str, k))):
     vrate = f" (validated tasks: {sum(s == 'success' for s in cv)} / {len(cv)})" if len(cv) != len(counted) else ""
     print(f"\n## {labels[k]}\n\nSuccess (results only): {rate}{vrate}; "
           f"{sum(s == 'not_a_result' for _, _, s, _, _ in rows)} voided"
-          + (f"; {easy_n} result(s) of easy-set tasks not counted" if easy_n else "") + f".\n\n{HEAD}")
+          + (f"; {easy_n} result(s) of easy-set tasks not counted" if easy_n else "") + f".\n\n{head}")
     for _, row, _, _, _ in sorted(rows):
-        print(row)
+        print(cell(row))
 PY
   mv -f "$JOBS/$batch.summary.md.$$" "$JOBS/$batch.summary.md"
 }
@@ -424,7 +452,7 @@ run_job() {  # <job> <concurrency> <harbor -i args...>
   local clamp=0; python3 "$H/clamp_cpus.py" --cpus "$HOST_CPUS" --needs "${dirs[@]}" >/dev/null && clamp=1
   [[ "$job" =~ ^[A-Za-z0-9._-]+$ ]] || { log "FAILED $job: not a job name (letters, digits, . _ -); not started"; return 1; }
   root="$JOBS/.tasks/$job"
-  if [ "$GATEWAY" = 1 ] && [ "$GATEWAY_EGRESS" = gateway ]; then
+  if [ -n "$USAGE_GATEWAY" ] && [ "$GATEWAY_EGRESS" = gateway ]; then
     gateway_copy "$root" "$@" || { log "FAILED $job: could not prepare its task copy (the gateway and the package registries as the only egress) ($root); not started"; rm -rf "$root"; return 1; }
   else
     plain_copy "$root" "$@" || { log "FAILED $job: could not prepare its task copy ($root); not started"; rm -rf "$root"; return 1; }

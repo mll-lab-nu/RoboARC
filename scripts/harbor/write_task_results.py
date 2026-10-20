@@ -8,6 +8,12 @@ config.json (RUNNING.md "Results", PROTOCOL v2.0): the trial's effective configu
 effective_config: protocol version, mode, cutoff, reset budget, slowdown S, seed, network, validated flag, digest), its
 result (`success`, `fail` or `not_a_result` with the reason) and whether it is counted. Results are ranked only within
 one comparable configuration (task_conventions.config_key), validated and unvalidated tasks together.
+Usage recording is optional (PROTOCOL H.6, RUNNING.md "Usage recording"); config.json says what the result has:
+`usage_gateway` (true / false: whether the runner routed the trial through the usage gateway, from
+<job>/usage_recording.json; null when the job has no such record, e.g. a plain `harbor run`), `usage_source` (where the
+token counts come from: "usage gateway" (<trial>/gateway/totals.json), "harness" (Harbor's result.json agent_result), or
+null: none recorded), `usage_recorded` (usage_source is not null) and `token_budget` (the budget the gateway enforced,
+{"input", "output"}; null without the gateway).
 attempts.json: every trial of this task x run id seen so far. RUNNING.md "Infrastructure retry": an infrastructure failure
 (not a result) allows at most one full retry with the same instance, seed and configuration; the voided attempt is never
 counted, an agent's own failure is never retried, and more than 2 attempts of one task x run id is flagged
@@ -126,6 +132,21 @@ def trial_config(trial, task, r):
     return cfg
 
 
+def usage_of(trial, r):
+    """The trial's usage recording (module docstring): usage_gateway, usage_source, usage_recorded, token_budget."""
+    rec = load_json(trial.parent / "usage_recording.json")
+    on = rec.get("usage_gateway") if isinstance(rec.get("usage_gateway"), bool) else None
+    ar = r.get("agent_result") or {}
+    if (trial / "gateway/totals.json").is_file():
+        source = "usage gateway"
+    elif ar.get("n_input_tokens") is not None or ar.get("n_output_tokens") is not None:
+        source = "harness"
+    else:
+        source = None
+    budget = rec.get("token_budget") if on and isinstance(rec.get("token_budget"), dict) else None
+    return {"usage_gateway": on, "usage_source": source, "usage_recorded": source is not None, "token_budget": budget}
+
+
 def started(r):
     return r.get("started_at") or ""
 
@@ -180,6 +201,9 @@ def main(argv):
         cfg = trial_config(trial, task, r)
         cfg.update({"run_id": slug, "job": job, "trial": trial.name, "result": status, "not_a_result_reason": why,
                     "counted": status != "not_a_result", "attempts": len(led), "attempts_over_cap": over_cap})
+        usage = usage_of(trial, r)
+        cfg.update(usage)
+        gw = load_json(trial / "gateway/totals.json")
         (out / "config.json").write_text(json.dumps(cfg, indent=1) + "\n")
         for f in ("replay.mp4", "replay.last.png"):
             if (trial / "verifier" / f).exists(): shutil.copy(trial / "verifier" / f, out / f)
@@ -195,7 +219,11 @@ def main(argv):
                  f"| attempts | {len(led)}" + (f" — **over the cap of {MAX_ATTEMPTS}**" if over_cap else "") + " |",
                  f"| agent time | {span(r.get('agent_execution') or {})} s |",
                  f"| actions / physics steps | {rw.get('steps') or rw.get('n_actions') or '—'} / {rw.get('sim_steps') or '—'} |",
-                 f"| tokens in / out | {ar.get('n_input_tokens')} / {ar.get('n_output_tokens')} |",
+                 "| tokens in / out | " + "; ".join(
+                     ([f"{ar.get('n_input_tokens')} / {ar.get('n_output_tokens')} (harness)"]
+                      if ar.get("n_input_tokens") is not None or ar.get("n_output_tokens") is not None else [])
+                     + ([f"{gw.get('input')} / {gw.get('output')} (usage gateway)"] if gw else [])) + " |"
+                 if usage["usage_recorded"] else "| tokens in / out | not recorded |",
                  f"| verifier | `{json.dumps({k: v for k, v in rw.items() if k not in ('agent_sessions','agent_records','agent_replays')})}` |",
                  f"| verifier sandbox | {r.get('verifier_environment_mode')} |\n"]
         if not limited and rw.get("agent_resets") is not None:
