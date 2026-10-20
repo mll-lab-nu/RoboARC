@@ -118,5 +118,5 @@ tolerances. The port script (not included in this repository) does this with `--
 818debf8a, f92d9f6dc and 1b0a8960b's code are byte-identical. The instances keep the released `gripper_space`
 "native", and their births are easy 7c294d48661292a8, medium c45012f92e572106 and hard f5bbde9d87c3b05d.
 
-rope_threading is not in `source/scripts/robotangle/mujoco_release.json` yet. Adding it needs knot_untying's items except the
+rope_threading is not in `tools/release/mujoco_release.json` yet. Adding it needs knot_untying's items except the
 gripper space (`mujoco_birth`, the frozen rope volume and the render host), plus the `grasp_assist` override.

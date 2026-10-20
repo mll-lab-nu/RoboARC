@@ -212,6 +212,6 @@ this repository they are: `scripts/ikea_mujoco/…` and `images/ikea-mujoco/…`
 `ikea/images/ikea-mujoco/…`; `scripts/eai_standard/v2_4/` (the 2.4 service and client) =
 `ikea/scripts/eai_standard/v2_4_live/`; `scripts/eai_standard/{client.env,run.sh,…}` = `scripts/eai_standard/`;
 `docs/protocol/README.md` = `docs/PROTOCOL.md`; `docs/protocol/standard_mode.md` = `docs/STANDARD_MODE.md`;
-`docs/rcb/RENDER_BRIDGE.md` and `scripts/robotangle/shared/` (the Nyx driver's origin) = RoboARC's simulator
+`docs/rcb/RENDER_BRIDGE.md` and `scripts/roboarc/shared/` (the Nyx driver's origin) = RoboARC's simulator
 documentation and `scripts/roboarc/shared/`. The privileged READMEs' Harbor-check lines name the image by its pre-1.0
 name `eai-ikea-mujoco` (the same ids).

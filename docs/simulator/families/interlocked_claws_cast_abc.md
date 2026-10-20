@@ -39,11 +39,11 @@ interlocked_claws --variation interlocked_claws_cast_abc --scene-seed 0 --grippe
 e6f9667c9f67c760). Recorded with
 
 ```bash
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task interlocked_claws --instance <instance.json> \
-    --code source/scripts/robotangle/references/interlocked_claws/cast_abc_oracle.py --out <dir>/privileged.npz
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task interlocked_claws --instance <instance.json> \
+    --code tools/references/interlocked_claws/cast_abc_oracle.py --out <dir>/privileged.npz
 ```
 
-The oracle code follows `source/scripts/robotangle/references/interlocked_claws/cast_abc_plan.npz`: per 40 Hz control step the
+The oracle code follows `tools/references/interlocked_claws/cast_abc_plan.npz`: per 40 Hz control step the
 planned joints of both arms (the reference route's inverse kinematics) and the planned pose of the C in the plate's frame.
 Each arm joint gets its planned target plus feedforwards of its drive's velocity lag and Coulomb friction, and a slow
 correction: the left arm integrates its joint error (the plate's weight makes the low-gain drives sag), the right arm
@@ -60,7 +60,7 @@ trimesh 5.1.0, shapely 2.1.2, scipy 1.17.1, numpy 2.3.5; the image's libraries):
 e6f9667c9f67c760, instance.json and asset bytes as the local dev image the recording used.
 - Two fresh-process strict replays (`rcb_topogym.py replay --repeat 2 --strict`): success at row 5979, both
   4701f99e7860e8c9 (the recording's own final state).
-- The stress observer (`source/scripts/robotangle/stress/replay.py --hold 0`, criteria v2.10): CLEAN; no fail, trigger or pop;
+- The stress observer (`tools/stress/replay.py --hold 0`, criteria v2.10): CLEAN; no fail, trigger or pop;
   the fastest task link 0.044 m/s, task contact force at most 9.5 N (the holding fingers), task contact depth at most
   0.41 mm (finger pads on their pieces), energy created 0.0003 J, no grasp slip, no speed or torque clamp.
 - The equal-length nop (5979 rows of the birth targets, under the observer): no success, CLEAN.
@@ -104,8 +104,8 @@ not a release text. The setting's own base followed on 2026-10-12 (next section)
 ## Harbor under its own base interlocked-claws-cast-abc-i01 (2026-10-12)
 
 Cast ABC is made evaluable, not released (2026-10-12, as for Rotor): `mujoco_release.json` lists nothing for
-it. Its texts are `scripts/robotangle/package_text/interlocked_claws/interlocked-claws-cast-abc-i01-<mode>/` (not included in this
-repository; 7f5516d02;
+it. Its texts were `package_text/interlocked_claws/interlocked-claws-cast-abc-i01-<mode>/` (7f5516d02; released later as
+`tools/release/package_text/interlocked_claws/interlocked-claws-11-i01-<mode>/`;
 the sustained contact rule corrected to 2 mm in 62d8d0d5c), laid over the released `interlocked-claws-easy-i00` by
 release_rebuild's new_bases. The base is made on a test-only commit, 21b3e083d
 (62d8d0d5c plus the interlocked_claws entry reduced to `"tiers": []` and this new base;

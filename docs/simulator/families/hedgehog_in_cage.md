@@ -22,7 +22,7 @@ to the cage, below 237 mm above the table, still for 2 s. Holding is allowed (as
 
 ## Instances
 
-Made as the release makes them (`source/scripts/robotangle/mujoco_release.json`):
+Made as the release makes them (`tools/release/mujoco_release.json`):
 `rcb_topogym.py make-instance --task hedgehog_in_cage --variation <variation> --scene-seed 0 --gripper-space native`.
 very_easy and easier keep their released variation ids (`very_easy`, `easier`); the others are
 `hedgehog_in_cage_<tier>`.
@@ -80,17 +80,17 @@ not.
   transport after it touches the mount (its route keeps 0.1 mm, and the hand lags), and the guard stops the run.
 
 ```bash
-R=source/scripts/robotangle/references/hedgehog_in_cage
+R=tools/references/hedgehog_in_cage
 # medium, hard: the family's oracle, closed loop on the frozen instance
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
     --code $R/oracle_code.py --out ref.npz
 # easy: the same run gives the first grasp (it stops at its regrasp's transport); its first 7300 rows, then the held exit
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <instance.json> \
     --code $R/oracle_code.py --out stage1.npz
 python $R/easy_held_exit.py <instance.json> stage1.npz ref.npz --release-row 7300
 ```
 
-Run them with this checkout first on the import path, as the stress tools do (`source/scripts/robotangle/stress/_env.py`;
+Run them with this checkout first on the import path, as the stress tools do (`tools/stress/_env.py`;
 in a RoboTangle image, `PYTHONPATH=<checkout>` and `TOPOGYM_SOURCE` pointing elsewhere). Each closed-loop run was made
 twice, with identical rows. Every reference passes two fresh-process replays as the graders replay
 (`rcb_topogym.py replay --repeat 1 --strict`, one process each), the stress observer (`replay.py --hold 0`) and a nop
@@ -200,14 +200,14 @@ out of reach), and the second one now rolls off the mount onto the table.
 The instance is made in the width gripper space (the oracle commands widths), and the reference is run-oracle code:
 
 ```bash
-python source/scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
+python scripts/roboarc/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
     --variation hedgehog_in_cage_window_change --scene-seed 0 --gripper-space width --out <dir>/instance.json
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
-    --code source/scripts/robotangle/references/hedgehog_in_cage/window_change_code.py --out <dir>/privileged.npz
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
+    --code tools/references/hedgehog_in_cage/window_change_code.py --out <dir>/privileged.npz
 ```
 
 `scripts/robotangle/oracles/hedgehog-in-cage-window-change-i01/` (`mujoco_release.json` new_bases: template
-`hedgehog-in-cage-very-easy-i00`, gripper space width, texts in `source/scripts/robotangle/package_text/hedgehog_in_cage/`): birth
+`hedgehog-in-cage-very-easy-i00`, gripper space width, texts in `tools/release/package_text/hedgehog_in_cage/`): birth
 2ecb7e00fc766fb8, 2961 rows, state hash 45d1fdb91dfcf298, file sha256 005916f1b7f43f78 (`standard.npz` is the same
 file). Two fresh-process strict replays end at that hash with success; the stress observer (`replay.py --hold 0`) is
 CLEAN with success (its peaks, 1.2 m/s and 22 rad/s, are the ball rolling off the mount onto the table after the
@@ -243,14 +243,14 @@ Its oracle (`topogym/planning/hedgehog_in_cage/cast_cage.py`, the designed route
 The instance is made in the width gripper space (the default), and the reference is run-oracle code:
 
 ```bash
-python source/scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
+python scripts/roboarc/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
     --variation hedgehog_in_cage_cast_cage --scene-seed 0 --out <dir>/instance.json
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
-    --code source/scripts/robotangle/references/hedgehog_in_cage/cast_cage_code.py --out <dir>/privileged.npz
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
+    --code tools/references/hedgehog_in_cage/cast_cage_code.py --out <dir>/privileged.npz
 ```
 
 `scripts/robotangle/oracles/hedgehog-in-cage-cast-cage-i01/` (`mujoco_release.json` new_bases: template
-`hedgehog-in-cage-hard-i00`, gripper space width, texts in `source/scripts/robotangle/package_text/hedgehog_in_cage/`): birth ad1fcefad2565341,
+`hedgehog-in-cage-hard-i00`, gripper space width, texts in `tools/release/package_text/hedgehog_in_cage/`): birth ad1fcefad2565341,
 2864 rows (71.6 s), state hash 72fac357df0221a0, file sha256 523c1406649f6d0f (`standard.npz` is the same file). Two
 fresh-process strict replays end at that hash with success (69 s each); the stress observer (`replay.py --hold 0`) is
 CLEAN with success (deepest task contact 0.14 mm, held finger 0.64 mm, no forcing, no review event); a nop of the same
@@ -284,14 +284,14 @@ The instance is made in the native gripper space (the rows command the Robotiq d
 steps the reference's rows:
 
 ```bash
-python source/scripts/robotangle/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
+python scripts/roboarc/shared/rcb_topogym.py make-instance --task hedgehog_in_cage \
     --variation hedgehog_in_cage_owl --scene-seed 0 --gripper-space native --out <dir>/instance.json
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
-    --code source/scripts/robotangle/references/hedgehog_in_cage/owl_code.py --out <dir>/privileged.npz
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task hedgehog_in_cage --instance <dir>/instance.json \
+    --code tools/references/hedgehog_in_cage/owl_code.py --out <dir>/privileged.npz
 ```
 
 `scripts/robotangle/oracles/hedgehog-in-cage-owl-i01/` (`mujoco_release.json` new_bases: template
-`hedgehog-in-cage-very-easy-i00`, gripper space native, texts in `source/scripts/robotangle/package_text/hedgehog_in_cage/`): birth
+`hedgehog-in-cage-very-easy-i00`, gripper space native, texts in `tools/release/package_text/hedgehog_in_cage/`): birth
 e22fac98a9c3807a, 7224 rows (180.6 s), state hash f587cfd6835c9308, file sha256 23c2871db1b55c6b (`standard.npz` is the
 same file). Two fresh-process strict replays end at that hash with success (about 175 s each, MuJoCo 3.14); the stress
 observer (`replay.py --hold 0`) is CLEAN with success (deepest task contact 0.38 mm, held finger 0.66 mm, no forcing, no

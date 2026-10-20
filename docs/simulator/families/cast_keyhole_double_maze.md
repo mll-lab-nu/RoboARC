@@ -51,11 +51,11 @@ is the same file), 8082 rows
 native`, with the MuJoCo tasks' SIMD masking; birth c15ba78d2bfda87e). Recorded with
 
 ```bash
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task cast_keyhole --instance <instance.json> \
-    --code source/scripts/robotangle/references/cast_keyhole/double_maze_oracle.py --out <dir>/privileged.npz
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task cast_keyhole --instance <instance.json> \
+    --code tools/references/cast_keyhole/double_maze_oracle.py --out <dir>/privileged.npz
 ```
 
-The oracle code follows `source/scripts/robotangle/references/cast_keyhole/double_maze_plan.npz`: per 40 Hz control step the
+The oracle code follows `tools/references/cast_keyhole/double_maze_plan.npz`: per 40 Hz control step the
 planned joints of both arms, the planned centres of mass of both plates and the silver's pose in the gold's frame. The
 plan: from the birth joints to the route's first sample (58 rows), the designed route (1254 samples, 6528 rows), the
 silver 40 mm further out of the gold's bottom opening (189 rows), then the gold 4 cm toward -y (behind the separator)
@@ -85,7 +85,7 @@ Checks of the reference on profile v2 (2026-10-12), in a local dev image on the 
   a cloud host (mujoco 3.14.0, the AMD EPYC 9354 host), record the same actions bit for bit.
 - Two fresh-process strict replays (`rcb_topogym.py replay --repeat 2 --strict`): success at row 8082, both
   5bc8f1e7136b3f59 (the recording's own final state), the instance exact.
-- The stress observer (`source/scripts/robotangle/stress/replay.py --hold 0`): CLEAN; no fail, trigger or pop; no grasp slip;
+- The stress observer (`tools/stress/replay.py --hold 0`): CLEAN; no fail, trigger or pop; no grasp slip;
   no speed or torque clamp. Its peaks are the birth's first 20 ms (before the welds bind): the fastest task link
   0.096 m/s, a finger on the silver 45.1 N, finger-pad depth 0.55 mm; energy created 0.0045 J.
 - The equal-length nop (8082 rows of the birth targets, under the observer): no success, CLEAN.
@@ -121,7 +121,7 @@ with `source/images/robotangle/Dockerfile.mujoco` from that commit; make-instanc
 | standard | nop | 0 | 90 s | no action, ends on the timeout in the birth state |
 
 The texts Harbor graded: the release's `packages/cast-keyhole-double-maze-i01-<mode>/{task.toml,README.md,instruction.md}`
-are the files of `source/scripts/robotangle/package_text/cast_keyhole/` at 167f4bbd8, byte for byte; the task dirs Harbor ran are
+are the files of `tools/release/package_text/cast_keyhole/` at 167f4bbd8, byte for byte; the task dirs Harbor ran are
 the rendered ones, named `robotangle-cast-keyhole-double-maze-i01-<mode>`, with no word of easy's scene, no difficulty
 line, `oracle = "full"`, the 60 N grasp rule, 0.036 s per control step and the 2 mm sustained contact rule, in both
 modes. The report and the text check were kept outside this repository.
@@ -197,7 +197,7 @@ nop 0; all four trials as expected:
 | standard | nop | 0 | 70 s | no action, no success |
 
 The texts Harbor graded: the release's `packages/cast-keyhole-double-maze-i01-<mode>/{task.toml,README.md,instruction.md}`
-are the files of `source/scripts/robotangle/package_text/cast_keyhole/` at e9e29c39e, byte for byte; the task dirs Harbor ran
+are the files of `tools/release/package_text/cast_keyhole/` at e9e29c39e, byte for byte; the task dirs Harbor ran
 are the rendered ones, named `robotangle-cast-keyhole-double-maze-i01-<mode>`, with no word of easy's scene, no
 difficulty line, `oracle = "full"`, the 60 N grasp rule, 0.031 s per control step and the 2 mm sustained contact rule,
 in both modes. The report and the text check were kept outside this repository. The instance upload and the image push a

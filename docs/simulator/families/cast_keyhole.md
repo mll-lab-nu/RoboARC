@@ -26,7 +26,7 @@ Goals, rules, geometry and difficulty are the released ones.
   right finger; BREAKDOWN in a fresh process). On v4 the same streams read 3.4 and 4.7 mm, CLEAN, each in two fresh
   processes with one final state hash. The references touch no robot-robot pair:
   rebuilt on v4, every tier keeps its birth hash, and every reference below replays to its recorded final state hash.
-  The shrunk stream is `source/scripts/robotangle/stress/corpus/reproducers/J1_keyhole_easier_arm_arm_depth`.
+  The shrunk stream is `tools/stress/corpus/reproducers/J1_keyhole_easier_arm_arm_depth.{json,npz}`.
 
 Scene acceptance (make-instance, nop 400 + 40 under the stress observer): birth hashes as recorded at the port; no observer flags; the released standing assembly topples at
 birth (15-22 mm, medium 3 mm) and rests within 0.45 s. Accepted: on very_easy and easier the toppled gold then leans
@@ -52,10 +52,10 @@ Recipe (the RoboTangle image's Python; `RCB_RENDER=off` for the oracle and repla
 rcb_topogym.py make-instance --task cast_keyhole --variation cast_keyhole_<tier> --scene-seed 0 --gripper-space native \
     --out <dir>/instance.json
 KEYHOLE_ORACLE_OUTPUT=<dir>/oracle_out rcb_topogym.py run-oracle --task cast_keyhole --instance <dir>/instance.json \
-    --code source/scripts/robotangle/references/cast_keyhole/oracle.py --out <dir>/privileged.npz
+    --code tools/references/cast_keyhole/oracle.py --out <dir>/privileged.npz
 rcb_topogym.py replay --task cast_keyhole --instance <dir>/instance.json --traj <dir>/privileged.npz --repeat 1 --strict  # x2, fresh processes
-source/scripts/robotangle/stress/replay.py --instance <dir>/instance.json --actions nop:400 --hold 40 --out <nop.json>
-source/scripts/robotangle/references/cast_keyhole/weldforce.py <dir>/instance.json <dir>/privileged.npz <out.json> \
+tools/stress/replay.py --instance <dir>/instance.json --actions nop:400 --hold 40 --out <nop.json>
+tools/references/cast_keyhole/weldforce.py <dir>/instance.json <dir>/privileged.npz <out.json> \
     --phases <dir>/oracle_out/private/keyhole_monitor.jsonl
 render_reference_video.py --instance <dir>/instance.json --traj <dir>/privileged.npz --out <video dir> \
     --label "cast_keyhole <tier>" --expect-sha <final sha> --renderer direct

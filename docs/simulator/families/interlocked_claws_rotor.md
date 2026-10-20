@@ -50,8 +50,8 @@ interlocked_claws --variation interlocked_claws_rotor --scene-seed 0 --gripper-s
 Recorded with
 
 ```bash
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task interlocked_claws --instance <instance.json> \
-    --code source/scripts/robotangle/references/interlocked_claws/rotor_oracle.py --out <dir>/privileged.npz
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task interlocked_claws --instance <instance.json> \
+    --code tools/references/interlocked_claws/rotor_oracle.py --out <dir>/privileged.npz
 ```
 
 The episode ends in success at row 21116: final state 87c1e785d178acfc; 2431-2814 s of wall clock on a loaded 128-core
@@ -61,7 +61,7 @@ pose relative to the gold stays within 6.3 mm of the plan (the largest while the
 regrasp). The three regrasps (route sample, hand, where the released piece came to rest, how close the carry back put
 it to the route pose): 1125, left, 15.1 mm, 0.26 mm; 1209, right, 4.7 mm, 1.4 mm; 2199, right, 7.6 mm, 0.31 mm.
 
-The oracle code (`source/scripts/robotangle/references/interlocked_claws/rotor_oracle.py`) follows `rotor_plan.npz`: per 40 Hz
+The oracle code (`tools/references/interlocked_claws/rotor_oracle.py`) follows `rotor_plan.npz`: per 40 Hz
 control step the planned joints of both arms (the reference route's two-arm trajectory, time-scaled to at most 0.2 rad/s
 per joint, 20 mm/s and 0.2 rad/s per TCP) and the planned pose of the silver piece in the gold piece's frame. Each arm
 joint gets its planned target plus feedforwards of its drive's velocity lag and Coulomb friction, and a slow
@@ -81,7 +81,7 @@ Checks of the reference on this branch's code (2026-10-12), on the RoboTangle 0.
 the image's libraries), on a loaded 128-core host, four at once:
 - Two fresh-process strict replays (`rcb_topogym.py replay --repeat 1 --strict`, two processes): success at row 21116,
   both 87c1e785d178acfc (the recording's own final state); 2928 s and 3116 s.
-- The stress observer (`source/scripts/robotangle/stress/replay.py --hold 0`, criteria v2.10): CLEAN; no fail, trigger or pop;
+- The stress observer (`tools/stress/replay.py --hold 0`, criteria v2.10): CLEAN; no fail, trigger or pop;
   the fastest task link 0.48 m/s and 2.25 rad/s (the gold piece dropping onto the silver after the first release), task
   contact force with the robot at most 14.6 N and depth at most 0.11 mm (finger pads on their pieces), energy created
   0.0008 J; no forcing event (the largest press 28.3 N at 6.5 % of a drive's cap), no speed clamp, no grasp slip.
@@ -122,8 +122,8 @@ MuJoCo's `s.objects()` order, 0.15 s a step (was the recording host's 0.13 s), a
 ## Harbor under its own base interlocked-claws-rotor-i01 (2026-10-12)
 
 Rotor is made evaluable, not released (2026-10-11): `mujoco_release.json` lists nothing for it. Its texts are
-`scripts/robotangle/package_text/interlocked_claws/interlocked-claws-rotor-i01-<mode>/` (not included in this
-repository; 1ae6a9d5a, merged as 85b984148),
+`package_text/interlocked_claws/interlocked-claws-rotor-i01-<mode>/` (1ae6a9d5a, merged as 85b984148; released later as
+`tools/release/package_text/interlocked_claws/interlocked-claws-12-i01-<mode>/`),
 laid over the released `interlocked-claws-easy-i00` by release_rebuild's new_bases. The base is made on a test-only
 commit, d2abf8f9d (1ee40ae14 plus the interlocked_claws entry reduced
 to `"tiers": []` and this new base, the entry the package_text README gives; never merged):

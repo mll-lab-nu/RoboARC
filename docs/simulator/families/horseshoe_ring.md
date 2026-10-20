@@ -36,7 +36,7 @@ Every stage checks the task's contact limits and loop interlocks on every tick.
 
 `scripts/robotangle/oracles/horseshoe-ring-<tier>-i01/privileged.npz` (development names; the tier-named -i01
 directories are not included in this repository); `standard.npz` is the same file. Each was recorded
-by `rcb_topogym.py run-oracle` with the Harbor callback (`source/scripts/robotangle/references/horseshoe_ring/` holds the tools),
+by `rcb_topogym.py run-oracle` with the Harbor callback (`tools/references/horseshoe_ring/` holds the tools),
 in a fresh Session on an instance made on this head (`make-instance --variation horseshoe_ring_<tier> --scene-seed 0
 --gripper-space native`; the state hash is the same as in width space). Runs end at the success row (the oracle stops
 there). Session-mode stages need a runtime binding next to the instance; for the recordings a dev binding was written
@@ -51,7 +51,7 @@ there). Session-mode stages need a runtime binding next to the instance; for the
 | hard | f416cbe0b5c79222 | hand swap instead of the release in the air (below) | 7817 | 11ee018da5421bd5 | 57aabe42b8b7bcdc | same hash, success; observer CLEAN | no success, CLEAN |
 
 "2 fresh replays": `rcb_topogym.py replay --repeat 2 --strict` in a fresh process; the stress observer's replay
-(`source/scripts/robotangle/stress/replay.py`, criteria v2.10) is a third process and reaches the same state hash. "nop": as
+(`tools/stress/replay.py`, criteria v2.10) is a third process and reaches the same state hash. "nop": as
 many rows holding the birth targets, under the observer.
 
 **On the 32-facet cylinder prisms (2026-10-12, 64820cfbf).** The instance build makes every cylinder a robot geom
@@ -177,10 +177,10 @@ a +90 deg turn runs out of reach partway; with 40 deg at 0.16 m the ring falls c
 which the pull-over recipe does not expect. The rest is unchanged: the ring grasp, the swing over the hanging shoe and
 the placement (this run: the direct swing).
 
-## Tools (`source/scripts/robotangle/references/horseshoe_ring/`)
+## Tools (`tools/references/horseshoe_ring/`)
 
 ```bash
-R=source/scripts/robotangle/references/horseshoe_ring
+R=tools/references/horseshoe_ring
 # try shoe grasps from the birth (oracle's own opening sequence), then screen the recorded fold with each
 python $R/grasp_probe.py <instance.json> <tier> probe.json --side right --angles 200,160 --openings 0.0165
 # write a passing trial into a recipe directory (grasps.json, approach.json re-made; recipe sha256 updated)
@@ -192,7 +192,7 @@ python $R/hang_probe.py <instance.json> <tier> out.json --lift 0.32 --views out
 # easy on the prisms: with the early shed tilt (recipe hang shed_tilt_deg / shed_yaw_deg / shed_lift_m)
 python $R/hang_probe.py <instance.json> easy out.json --lift 0.32 --shed 30 --yaw -90 --shed-lift 0.12
 # the staged oracle with a recipe of one's own (HS_RECIPE, HS_ORACLE_OUTPUT), before it goes into reference_data
-python source/scripts/robotangle/shared/rcb_topogym.py run-oracle --task horseshoe_ring --instance <bound instance.json> \
+python scripts/roboarc/shared/rcb_topogym.py run-oracle --task horseshoe_ring --instance <bound instance.json> \
     --code $R/dev_oracle.py --out ref.npz
 ```
 

@@ -120,7 +120,7 @@ measured no-go before (2026-10-14, excluded tiers: +13-29 %).
 
 Shipped in RoboARC 0.2.1 (V3 release, 2026-10-18): the texts and the demo were approved (2026-10-18). The instance
 is in the assets dataset (revision 9f34f894a454) and in the image; the release build is
-`release_rebuild.py` with `source/scripts/robotangle/freeze_manifest.v3.json` (step_s 0.23).
+`release_rebuild.py` with `records/freeze_manifests/freeze_manifest.v3.json` (step_s 0.23).
 
 ## Settling (frozen with the instance)
 
@@ -149,10 +149,10 @@ nyx_direct (`TASKS` renderer "direct"); the FEM settings are drawn as the FEM se
 through `nyx_direct.chain_cord_host`. Against the bridge's Genesis host: input buffers bitwise but rounding at birth,
 RGB within the host's own run-to-run spread (at most ~110 pixels > 8 levels per camera, as host against host).
 
-## References (`source/scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
+## References (`scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
 
 Recorded live on MuJoCo by `planning/orbits/native_session.py` (run_feedback_policy) through `rcb_topogym.py run-oracle`
-(`source/scripts/robotangle/references/orbits/record_reference.sh`, oracle code `scripts/oracle_runners/orbits_session_oracle.py`, not included in this repository)
+(`tools/references/orbits/record_reference.sh`, oracle code `tools/references/oracle_runners/orbits_session_oracle.py`, not included in this repository)
 on the width-space instances above. Each replays in two fresh processes to the recording's hash. (`orbits-very-easy-i01`
 is a development name, not included in this repository under that name.)
 

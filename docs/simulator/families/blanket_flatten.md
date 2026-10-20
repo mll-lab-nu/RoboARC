@@ -9,7 +9,7 @@ validator's open items, below).
 ## Commits (development history)
 | commit | what | kind |
 |---|---|---|
-| 24c3faceb | `flex_energy`: a 2D flex's membrane / bending potential, which mujoco 3.14's own energy leaves out (`topogym/world/mujoco/energy.py`, `source/scripts/robotangle/test_flex_energy.py`) | shared |
+| 24c3faceb | `flex_energy`: a 2D flex's membrane / bending potential, which mujoco 3.14's own energy leaves out (`topogym/world/mujoco/energy.py`, `tools/tests/test_flex_energy.py`) | shared |
 | e50b9f1cd | the stress observer books the flex energy | stress |
 | 323a223fc | MuJoCo PBD cloth: a `pbd_cloth` declaration becomes a 2D flex over contact-sphere vertices (`cloth.py`; scene dispatch next to the rope branch; world readout, checkpoints, `restore_cloth_births`) | shared |
 | 7c2c1fe3a | `pbd_local_patch_v1` on MuJoCo (`grasp_cloth.py`): the soft grasp's rules on connect pins, the 20 ms slip window | shared |
@@ -366,7 +366,7 @@ the covered patch particle. On VBD it is measured from the WHOLE patch (`exposed
   every bend grip read "occluded", including the apex. On the flex the layers were 3 mm apart and this never fired.
 - The top layer there continues the patch's own surface: it is within 36 mm of the patch's top part. A layer folded
   over a patch is at least twice its distance to the crease away in material, so it still covers.
-- `source/scripts/robotangle/test_exposure_rule.py` checks the cases:
+- `tools/tests/test_exposure_rule.py` checks the cases:
   - bend grips pass;
   - the bottom layer under a half fold fails 1.5-15 cm from the crease;
   - the sheet under a dog-ear's tip fails;
@@ -578,7 +578,7 @@ What did not work (branching lab on host C):
 - the family's fold layout on the far-left corner before the slide: the corner drag turns the sheet ~20 deg into the left
   arm base's cover (goal true at 0.976, the release clearance never).
 
-**The reference** (`source/scripts/robotangle/oracles/blanket-flatten-09-i01/`, standard.npz = privileged.npz):
+**The reference** (`scripts/robotangle/oracles/blanket-flatten-09-i01/`, standard.npz = privileged.npz):
 - 2813 rows, end 6a9c4796da46cf47, sha256 4fbd7aba306e9720ab49ae45e3b2536e1f9902c9d6d909a2fb39ceb8637f5253; recorded by
   the route oracle in eai-roboarc:0.2.0 with the branch's planning bound in (host C RTX 4090);
 - a re-record from the committed code: the same rows and tick ledger (only the file's wall-time meta differs);
@@ -606,7 +606,7 @@ What did not work (branching lab on host C):
 `blanket-flatten-08-i01`, each with the new reference. The tier-named -i01 directories below are development names, not
 included in this repository.)
 
-| tier | `source/scripts/robotangle/oracles/` | rows | birth (state_sha) | end (state_sha) | privileged.npz sha256 |
+| tier | `scripts/robotangle/oracles/` | rows | birth (state_sha) | end (state_sha) | privileged.npz sha256 |
 |---|---|---|---|---|---|
 | very_easy | `blanket-flatten-very-easy-i01/` | 1897 | 21441c0569cfbef9 | 2f3ed0fa25ffd525 | ffe810d4c9aec47c72a848f1fecaf2427ef192750d2715d41b5191c0c9e0a40b |
 | easy | `blanket-flatten-easy-i01/` | 753 | f146812a31afc5c5 | 3ad1a55ce1dbc26a | 16ebf45e4e4e0bbb9bd7d57198ffc76aff390616dda581a0ab5cbb5600199ad2 |

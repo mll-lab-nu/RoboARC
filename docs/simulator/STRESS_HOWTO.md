@@ -135,5 +135,5 @@ for the rope and cloth families: CPU 300 per tier, plus a GPU screen of ≥ 1,00
   - **ALOHA families:** unaffected; go ahead.
 - **Physics in force:** exact constraint diagonal everywhere; rule A for ALOHA pads; claws welds at 2.5 ms (claws only).
   Rebuild instances and re-validate references on the current head before a round.
-- Report results in your family's rows of [ROBOTANGLE_TRACKER.md](ROBOTANGLE_TRACKER.md): round name, commit, seeds,
+- Report results in your family's rows of the development repository's round tracker (not carried into this repository): round name, commit, seeds,
   episodes and the v2.12 verdict per tier.

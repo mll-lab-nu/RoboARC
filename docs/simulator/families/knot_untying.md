@@ -96,7 +96,7 @@ outside this repository.
 ## Energy books (stress observer)
 
 The rod is booked as stored energy: E includes ½ θᵀKθ, and W leaves out the rod's elastic couples
-(`rope_energy` / `rope_elastic_qfrc`; checked by `source/scripts/robotangle/test_rope_energy.py`). A rope link's stored energy
+(`rope_energy` / `rope_elastic_qfrc`; checked by `tools/tests/test_rope_energy.py`). A rope link's stored energy
 for the pop clause includes its rod joints. Old and new books agree within 2.2e-7 J. A free swing under the rod
 alone shows X ≈ 0: the largest rise above the running minimum is 4e-5 J.
 
@@ -161,7 +161,7 @@ The knot_chain_v4 references (pushed in a2933d0bb) were, in the same order: c74c
 ## Stress (step 2)
 
 - **Four blow-ups,** all the rod zig-zag above, kept as reproducers (`K0`-`K3` in
-  `source/scripts/robotangle/stress/corpus/reproducers/`):
+  `tools/stress/corpus/reproducers/`):
   - K0 and K1, found on knot_chain_v2 by the self-check's prefix search (e0, e1). In their reports the "robot-robot
     contact" (left finger against right wrist, 35.6 mm / 2242 N) is the arms overlapping after MuJoCo's reset to
     qpos0. It is not a cause.
@@ -299,7 +299,7 @@ bindings also name nyx_direct.py (`nyx_direct_sha256`), as `mk_tasks.dev_binding
 ab6b75ab24a5771b, easy 3fe175d34a4dbf8c, medium 3564452a7a4a8503 and hard 03de1494d1e7453e (v4's: 6a72fc56, 3e7e1540,
 7f4c65ea, 9693ada1, 2a2426a3).
 
-knot_untying is not in `source/scripts/robotangle/mujoco_release.json` yet. Adding it needs three things the release rebuild
+knot_untying is not in `tools/release/mujoco_release.json` yet. Adding it needs three things the release rebuild
 does not do today:
 - the make-instance `gripper_space` "width" (the file names "native" for every base);
 - `mujoco_birth` pointing at the released instance's `instance_assets/ipc_state/manifest.json` (its
@@ -309,11 +309,11 @@ does not do today:
 ## rd easier, re-timed: knot-untying-07-i01 (V3, 2026-10-18)
 The knot_untying rd easier tier (a loose figure-eight, its standing end clamped under a staple, two posts beside it and a
 curb) ships as knot-untying-07-i01 in RoboARC 0.2.1. Its 2026-10-14 route et1 (14172 rows) took ~39 % of the 3 h budget;
-the reference is the same route re-timed, not re-planned (`source/scripts/robotangle/redesign/knot_untying/robot/retime_search.py`): original waits
+the reference is the same route re-timed, not re-planned (`tools/redesign/knot_untying/robot/retime_search.py`): original waits
 x3, moves while the rope was quiet in the original (every node < 2 mm/s) x3, other moves x1.75, gripper changes as
 recorded, every arm joint step at most 0.0385 rad, then the final targets held to the Session's success. No physics,
 substep or task change.
-- Instance: premade (`source/scripts/robotangle/redesign/knot_untying/premade/make_premade.py` in eai-roboarc:0.2.0-noinst, from easier_v8_r2
+- Instance: premade (`tools/redesign/knot_untying/premade/make_premade.py` in eai-roboarc:0.2.0-noinst, from easier_v8_r2
   with the 2026-10-13 back strip, `premade/region_source.py`), birth a3c58ab73130b9b3; two makes byte-identical, births
   exact.
 - Reference g333: 7419 rows, end 8ae062ea4c733dbc, sha256 82c65a96cbaca655...; strict double replay (host A), the same end on

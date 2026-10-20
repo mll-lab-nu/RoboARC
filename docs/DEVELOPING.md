@@ -13,7 +13,10 @@ running tasks see [RUNNING.md](RUNNING.md); the task contract is [PROTOCOL.md](P
 | `scripts/harbor/` | the Harbor runner and its helpers (RUNNING.md) |
 | `ci_checks/` | the repository checks |
 | `images/roboarc/`, `images/monitor/` | the release image's build and push scripts; the recipe of the monitor sidecar image (tasks pin it by digest) |
-| `source/` | the simulator source the image is built from |
+| `source/` | the simulator source the image is built from (its README) |
+| `tools/` | maintainer tooling: the release rebuild (`tools/release/`), how the references were made (`tools/references/`), the redesigned tiers' generators, the stress rounds, the simulator's tests ([tools/README.md](../tools/README.md)) |
+| `records/` | inputs and archives of earlier releases, kept for provenance ([records/README.md](../records/README.md)) |
+| `docs/simulator/` | the simulator's documentation and the per-family development notes; `docs/rcb/README.md` maps the paths the frozen task files cite to where they are now |
 | `ikea/` | IKEA MuJoCo: its own generators, task layer, images and checks (`ikea/README.md`) |
 
 Files under `scripts/eai_standard/` and `scripts/rcb_monitor/` that the generator copies into tasks
@@ -59,7 +62,8 @@ What the invariants run: `check-agent-pointers.py` (H.2), `check-dataset-manifes
 `check-task.sh --tier invariants` (verifier isolation, instance copies, the standard agent image). The advisory tier adds
 the per-task conventions, `check-tooling-identity.sh` (shared files byte-identical; the 2.4 layer equal to
 `scripts/eai_standard/`), `check-standard-client.sh`, resources, cutoffs, seeds, videos, `check-protocol.py`,
-`check-world-frame-texts.sh` (no world coordinates in standard texts), `check-build-stamps.py` and the easy set.
+`check-world-frame-texts.sh` (no world coordinates in standard texts), `check-build-stamps.py`, the easy set and
+`check-doc-paths.py` (every path and relative link the docs name exists; docs/history/ excepted).
 
 What CI cannot see is checked on a GPU host with the image: strict replays of the references (end hashes equal to the
 recorded ones), and Harbor oracle / nop trials:
@@ -87,8 +91,8 @@ verified build (each local tag must be its expected image id; the registry token
 
 ## Cutting a release
 
-1. Change the generator's inputs (`scripts/roboarc/`; new references and instances come from the release tooling under
-   `source/`), bump `images/roboarc/VERSION` if the image changes, re-render, and add the release to `CHANGELOG.md`.
+1. Change the generator's inputs (`scripts/roboarc/`; new references and instances come from the release tooling,
+   `tools/release/release_rebuild.py`), bump `images/roboarc/VERSION` if the image changes, re-render, and add the release to `CHANGELOG.md`.
 2. In a fresh clone (umask 022): every check above green.
 3. Build the image from that clone. A release that keeps the simulator must give an image whose installed filesystem is
    file-for-file identical to the previous one (path, mode, size, sha256), apart from the files the release changes.

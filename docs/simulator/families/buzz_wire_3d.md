@@ -21,8 +21,8 @@ descends at 2 cm/s, closes, and lifts the wand 8 mm (`BUZZ_LIFT`); the final app
 settles 8 s (a fast open set the parallel-held wand turning: 11-12 deg after the first release).
 
 ```bash
-python source/scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
-    source/scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
+python tools/references/buzz_wire_3d/make_ref.py <instance.json> \
+    tools/references/oracles_genesis/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
 ```
 
 | tier | cut | rows (success row) | final error | quiet window | state hash | file sha256 | observer | fresh replays |
@@ -35,22 +35,22 @@ python source/scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.j
 Instances: the gpusearch b0f births (`buzz-wire-3d-<tier>-i00`, birth f5e748b7 for very_easy; a fresh make-instance on
 c64294012 gives the same birth). easy and hard need their route re-planned around the parallel grasp (low priority).
 
-**Release (2026-10-11):** easy and hard are out of `source/scripts/robotangle/mujoco_release.json`'s buzz tiers: the released
+**Release (2026-10-11):** easy and hard are out of `tools/release/mujoco_release.json`'s buzz tiers: the released
 routes fail on springref 2.62; superseded by the step-3 redesign. Their `-i01` files stayed in the oracles directory
 as history (they succeed only before c64294012).
 
 ## References before the springref change (buzz v2, on b1ec43997)
 
 `scripts/robotangle/oracles/buzz-wire-3d-<tier>-i01/privileged.npz`; `standard.npz` is the same file (the release
-rebuild's references, `source/scripts/robotangle/release_rebuild.py`). A reference here is the released Genesis route's rows up
+rebuild's references, `tools/release/release_rebuild.py`). A reference here is the released Genesis route's rows up
 to a cut, then the family's feedback finish planned live on MuJoCo from the measured state
-(`source/scripts/robotangle/references/buzz_wire_3d/make_ref.py`, finish "adaptive"), then hold rows until the episode ends.
+(`tools/references/buzz_wire_3d/make_ref.py`, finish "adaptive"), then hold rows until the episode ends.
 Each was planned in a fresh Session on the physics of b1ec43997, on the instances made on 0f8654a49 (buzz births run no
 physics: the same birth hashes), and re-made with the repository's tool (the same rows and state hashes):
 
 ```bash
-python source/scripts/robotangle/references/buzz_wire_3d/make_ref.py <instance.json> \
-    source/scripts/robotangle/oracles/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
+python tools/references/buzz_wire_3d/make_ref.py <instance.json> \
+    tools/references/oracles_genesis/buzz-wire-3d-<tier>-i00/privileged.npz --cut <cut> --finish adaptive --out ref.npz
 # easy: BUZZ_REACH_DEG=9 in the environment (the final release from up to 9 deg of remaining turn)
 ```
 
@@ -99,7 +99,7 @@ grasp: >= 1-2 mm everywhere), but the 2.62 gripper's pads and followers run into
 right finger / left follower on the wire just before each touch); slowing the route down does not change the touch row.
 
 Method (floating solution -> grasp schedule; the robot base is the frozen instance's, so there is no base
-search), tools in `source/scripts/robotangle/references/buzz_wire_3d/ported/`:
+search), tools in `tools/references/buzz_wire_3d/ported/`:
 1. Floating solution and grasp schedule: the released route's own pick and deck regrasp (`oracles/buzz-wire-3d-<tier>-i00`),
    with the traversal grip taken 14 mm further out along the handle (the approach rows after the deck release
    re-solved by IK, seeded by the route's own rows); one grip for the whole wire, as in the route.

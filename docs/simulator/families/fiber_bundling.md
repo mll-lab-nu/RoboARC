@@ -139,13 +139,13 @@ strands fold outward. They are **re-planned, seeded by the released ones**; goal
 
    Easy and medium keep their rows (open-loop feeds).
 
-The tools are in `source/scripts/robotangle/references/fiber_bundling/`: `replan.py` (the re-planner: pickup, comb loop, gated
+The tools are in `tools/references/fiber_bundling/`: `replan.py` (the re-planner: pickup, comb loop, gated
 closed-loop feed) and `weldforce.py` (the weld's force and the slip rule's 20 ms mean, the final strand radii). The
-recording is `source/scripts/robotangle/references/interlocked_claws/rerecord.py` (any MuJoCo family). Run them with the
+recording is `tools/references/interlocked_claws/rerecord.py` (any MuJoCo family). Run them with the
 RoboTangle image's Python, as the stress tools. The recipe of the -i01 references, on the exact diagonal:
 - The instance: `rcb_topogym.py make-instance --task fiber_bundling --variation fiber_bundling_<tier> --scene-seed 0
   --gripper-space native --simulator-overrides <file>`, the file holding the released instance's `grasp_assist`
-  (`source/scripts/robotangle/mujoco_release.json`).
+  (`tools/release/mujoco_release.json`).
 - very_easy and easier. Their pickup and combs, rows 0-2940 and 0-2840, are the v4 references' (replan.py from the
   released rows, `--presses .032,.030,.028,.026,.024,.022,.020`, on bbdbae3ad + fiber v4). The feed is re-planned from
   them:

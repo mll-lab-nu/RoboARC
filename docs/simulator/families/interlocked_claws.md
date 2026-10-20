@@ -7,17 +7,17 @@ Shared mechanisms (the ALOHA, its finger coupling, the contact classes, the exac
 
 `scripts/robotangle/oracles/interlocked-claws-<tier>-i01/privileged.npz` (development names; the tier-named -i01
 directories are not included in this repository); `standard.npz` is the same file (the release
-rebuild's references, `source/scripts/robotangle/release_rebuild.py`). Each was recorded in a fresh Session on b1ec43997 (the
+rebuild's references, `tools/release/release_rebuild.py`). Each was recorded in a fresh Session on b1ec43997 (the
 exact constraint diagonal), on an instance made on that commit (`rcb_topogym.py make-instance`, scene seed 0, native
 gripper space):
 - the rows: claws v5's (the released Genesis rows, re-recorded on MuJoCo), with the wrist dither removed (below);
 - then hold rows of the last row until the episode ends.
 
-The tools are in `source/scripts/robotangle/references/interlocked_claws/` (run them like the stress tools). Claws v5's rows
+The tools are in `tools/references/interlocked_claws/` (run them like the stress tools). Claws v5's rows
 are the released oracle's rows padded with copies of their last row, so the references are reproduced from the tree:
 
 ```bash
-R=source/scripts/robotangle/references/interlocked_claws; O=source/scripts/robotangle/oracles
+R=tools/references/interlocked_claws; O=scripts/robotangle/oracles
 # very_easy, easier: the released oracle, re-recorded on the current physics
 python $R/rerecord.py <instance.json> $O/interlocked-claws-<tier>-i00/privileged.npz ref.npz
 # easy, medium, hard: first the dither notched out over claws v5's length (792 / 1416 / 16202 rows)

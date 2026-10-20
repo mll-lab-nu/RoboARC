@@ -13,7 +13,7 @@ ring in the goal area. Nine settings:
 |---|---|---|
 | `very_easy`, `easier` | the rigid chain file (`topogym/assets/geometry/slotted_chain.py`, 88 links) on the easy geometry (28 mm slot), since c15011129 | contact weld on the ring only |
 | `easy_chain`, `medium_chain`, `hard_chain` | the same chain file, 34 mm slot, ring radius 64 / 62.5 / 61 mm | contact weld on the ring only |
-| `easy`, `medium`, `hard`, `clearance36` (FEM on Genesis) | on MuJoCo the cord is a rigid chain (task parameter `cord_model: chain`, set by `rcb_topogym.simulator_config`): the 10-07 chain of `tasks/slotted_post_ring/fem_chain.py` and `assets/geometry/slotted_post_chain.py` along the setting's authored cord | none (unassisted, as the FEM contract) |
+| `easy`, `medium`, `hard`, `clearance36` (FEM on Genesis) | on MuJoCo the cord is a rigid chain (task parameter `cord_model: chain`, set by `rcb_topogym.simulator_config`): the 10-07 chain of `topogym/tasks/slotted_post_ring/fem_chain.py` and `assets/geometry/slotted_post_chain.py` along the setting's authored cord | none (unassisted, as the FEM contract) |
 
 Geometry, goals and rules are the task files'; the port changes none of them. A chain cannot stretch or squeeze as the
 FEM cord (E 50 kPa) did, and the FEM-only integrity rules (tet inversion, attachment stretch) have no chain counterpart.
@@ -76,10 +76,10 @@ own run-to-run spread. Known asset issue, not fixed here: the chain file's fixtu
 the same size; the two coincident surfaces flicker between grey and wood from run to run on either renderer (up to
 ~10,000 pixels per camera).
 
-## References (`source/scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
+## References (`scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)
 
 Recorded live on MuJoCo by the family's feedback oracles through `rcb_topogym.py run-oracle`
-(`source/scripts/robotangle/references/slotted_post_ring/record_reference.sh`; oracle code in `scripts/oracle_runners/`, not included in this repository), on
+(`tools/references/slotted_post_ring/record_reference.sh`; oracle code in `tools/references/oracle_runners/`, not included in this repository), on
 an instance built in **native** gripper space (the oracles command native gripper targets; same scene and settling as the
 width instances above). Each replays in two fresh processes to the recording's hash. (The base names below are development names; these
 -i01 directories are not included in this repository under these names.)
@@ -111,8 +111,8 @@ validation's head check: CLEAN, final states dc0f919fefc35253 / d2e3a4fb21f24aa0
 easy) and are re-recorded.
 
 Recipe: `record_reference.sh slotted_post_ring slotted_post_ring_<tier> native
-scripts/oracle_runners/slotted_below_easy_session_oracle.py <out> <work>`; for the chain settings
-`... slotted_post_ring_<tier>_chain native scripts/oracle_runners/slotted_chain_session_oracle.py <out> <work>`.
+tools/references/oracle_runners/slotted_below_easy_session_oracle.py <out> <work>`; for the chain settings
+`... slotted_post_ring_<tier>_chain native tools/references/oracle_runners/slotted_chain_session_oracle.py <out> <work>`.
 
 Oracle changes for MuJoCo (plans only; goals, rules, geometry unchanged):
 - easier: the left hand's straight lift after letting bead2 go is 10 cm (was 12): the hand ends the carry ~4 mm lower
@@ -130,7 +130,7 @@ v2.10): CLEAN (easy / medium / hard_chain: peak task speed 1.61 / 1.59 / 1.58 m/
 
 `planning/slotted_post_ring/chain/` (M1 disc1 through the slot, M2 ring over the post, M3 ring back through the slot and
 off the bight, M4b discs and cord to the system side, M4a ring into the goal) through
-`scripts/oracle_runners/slotted_chain_session_oracle.py`, native gripper space. The original plan stopped at the end
+`tools/references/oracle_runners/slotted_chain_session_oracle.py`, native gripper space. The original plan stopped at the end
 of M1 on MuJoCo; contacts are harder (the hand stops where Genesis let it press on) and the chain does not stretch.
 Plan changes so far, each from one observed failure (goals, rules, geometry unchanged):
 

@@ -3,7 +3,7 @@
 Shared mechanisms are in [MUJOCO_CORE.md](../MUJOCO_CORE.md). This note (2026-10-10) covers the five released
 Genesis tiers (very_easy .. hard) on MuJoCo and their -i01 references. The official two-axis redesign
 (`cast_coil_v2_very_easy`, `cast_coil_v2_easier`, `cast_coil_v2_easy`, `cast_coil_v2_design`, profile
-`cast_coil_official_v3`, its own `OfficialCoilPolicy`; task texts in `source/scripts/robotangle/package_text/cast_coil/`) is
+`cast_coil_official_v3`, its own `OfficialCoilPolicy`; task texts in `tools/release/package_text/cast_coil/`) is
 separate work and is not covered or released here.
 
 ## The task
@@ -35,7 +35,7 @@ Goals, rules, geometry and difficulty are the released ones.
   and 2.9 mm, CLEAN, each in two fresh processes with one final state hash. The references touch no robot-robot pair:
   rebuilt on v3, every tier keeps its birth hash, and every
   reference below replays to its recorded final state hash. The shrunk stream is
-  `source/scripts/robotangle/stress/corpus/reproducers/J2_coil_easier_arm_arm_depth`.
+  `tools/stress/corpus/reproducers/J2_coil_easier_arm_arm_depth.{json,npz}`.
 - Collision geometry: each piece is declared as exact disjoint collision boxes (`topogym.assets.geometry.cast_coil`:
   orthogonal CSG partitioned on the coordinate planes), which MuJoCo collides as box primitives: no hull, no CoACD, no
   slivers. The assembled clearances (0.3 mm comb / baffle, 0.75 mm between layers) stay exact.
@@ -44,7 +44,7 @@ Goals, rules, geometry and difficulty are the released ones.
 
 ## Instances
 
-Made as the release makes them (`source/scripts/robotangle/mujoco_release.json`):
+Made as the release makes them (`tools/release/mujoco_release.json`):
 `rcb_topogym.py make-instance --task cast_coil --variation cast_coil_<tier> --scene-seed 0 --gripper-space native`.
 No simulator overrides or task parameters. (The released Genesis instances are native too.)
 
@@ -76,9 +76,9 @@ Recipe (the RoboTangle image's Python; `RCB_RENDER=off` for the oracle and repla
 rcb_topogym.py make-instance --task cast_coil --variation cast_coil_<tier> --scene-seed 0 --gripper-space native \
     --out <dir>/instance.json
 rcb_topogym.py run-oracle --task cast_coil --instance <dir>/instance.json \
-    --code source/scripts/robotangle/references/cast_coil/oracle_cast_coil.py --out <dir>/privileged.npz
+    --code tools/references/cast_coil/oracle_cast_coil.py --out <dir>/privileged.npz
 rcb_topogym.py replay --task cast_coil --instance <dir>/instance.json --traj <dir>/privileged.npz --repeat 2 --strict
-source/scripts/robotangle/stress/replay.py --instance <dir>/instance.json --actions nop:<rows> --out <nop.json>
+tools/stress/replay.py --instance <dir>/instance.json --actions nop:<rows> --out <nop.json>
 ```
 
 Recorded on 8cdf9a228 (coil_legacy_v2) on a cloud host, as `scripts/robotangle/oracles/cast-coil-<tier>-i01/`
