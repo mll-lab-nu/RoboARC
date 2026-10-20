@@ -16,7 +16,7 @@ The observer was written for a topogym Session. A thin shim (IkeaWorld) gives it
     = a part's centre of mass inside a top's solid, the workspace = the footprint + 1 m and 1.5 m over the top.
 
 Every command runs in its own process (one scene per process). Environment: IKEA_SCENES (the scenes root, default
-/opt/ikea/scenes), RT_STRESS_DIR (the RoboTangle observer + verdict, default <repo>/scripts/robotangle/stress).
+/opt/ikea/scenes), RT_STRESS_DIR (the RoboTangle observer + verdict, default <repository root>/tools/stress).
 
   ikea_stress.py checkpoints --task T --ref R.npz --out DIR [--every .05]   # the reference once, unobserved: saved states
   ikea_stress.py refseg --task T --ref R.npz --ckpt DIR --seg K --out F    # reference segment K observed (from ckpt K-1
@@ -44,8 +44,8 @@ for _k, _v in {"OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THR
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
-STRESS = Path(os.environ.get("RT_STRESS_DIR", REPO / "scripts/robotangle/stress"))
+REPO = HERE.parents[3]                     # the repository root
+STRESS = Path(os.environ.get("RT_STRESS_DIR", REPO / "tools/stress"))
 for p in (str(HERE.parent / "shared"), str(STRESS)):
     if p not in sys.path:
         sys.path.insert(0, p)
