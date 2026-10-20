@@ -4,6 +4,18 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+### The raw simulator interface: the Python package `roboarc`
+`roboarc.make(task_id)` returns a Gymnasium-compatible environment for every task (the 101 puzzle bases and the 12 IKEA
+tasks) over the graded tooling itself (`rcb_topogym.Session`, `rcb_ikea.Session`): the frozen instance at `reset()`,
+one control step of the tooling per `step()`, the tasks' own limits (clamp, never fail) and success predicates, Nyx or
+MuJoCo-raster camera images, proprioception in the standard mode's robot frame, state snapshots, and the privileged
+verifier's replay. Design, conventions and test results: [docs/API.md](docs/API.md); examples in `examples/`, tests in
+`tests/api/` (the cheap ones run in CI, job `api-tests`). Each tested reference stepped through it ends on its recorded state
+hash (one base per puzzle family and two IKEA scenes; with Nyx rendering on as well). No task, image or graded file
+changed.
+
 ## 1.0.0 (2026-10-19)
 
 The topological puzzles: 101 bases (202 task directories) in 14 families, image
