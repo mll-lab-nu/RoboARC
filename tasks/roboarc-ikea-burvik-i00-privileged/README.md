@@ -20,7 +20,7 @@ Bimanual furniture assembly with physical grasps (no assist), 16-D actuator acti
 (406.34 s of simulated time).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `6445eb0f7dc19ca2…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/burvik/build2.py` and `move_from_take.py`: the demo (time-dilated to the joint-speed limits) as the phase guide, each row held while the slewed Franka Hand is more than two ticks from its command; the top seated in the jig's slot by a two-hand servo (the demo perched it on the guards, leaning 6 degrees, so the hand threading leg_3 met the handle rack); the handle and the two handle legs servoed onto their axes in the top's frame, each leg spun by the wrist with a bounded axial press until its weld engages; for the upright turn the right hand re-takes the handle in the demo's arm configuration and the left hand takes leg_2 on its centre, then the demo's rigid two-hand motion is executed on these grasps through joint-limited IK; the table set down level on its feet, clear of the stand, before the hands open; the rows are the targets executed within the joint-speed and hand-speed limits. It never trips the speed clamp (arm joints and Franka Hand).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `6445eb0f7dc19ca2…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/burvik/build2.py` and `move_from_take.py`: the demo (time-dilated to the joint-speed limits) as the phase guide, each row held while the slewed Franka Hand is more than two ticks from its command; the top seated in the jig's slot by a two-hand servo (the demo perched it on the guards, leaning 6 degrees, so the hand threading leg_3 met the handle rack); the handle and the two handle legs servoed onto their axes in the top's frame, each leg spun by the wrist with a bounded axial press until its weld engages; for the upright turn the right hand re-takes the handle in the demo's arm configuration and the left hand takes leg_2 on its centre, then the demo's rigid two-hand motion is executed on these grasps through joint-limited IK; the table set down level on its feet, clear of the stand, before the hands open; the rows are the targets executed within the joint-speed and hand-speed limits. It never trips the speed clamp (arm joints and Franka Hand).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the scene's initial state in two fresh processes at the same time
@@ -50,7 +50,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 |---|---|
 | Grasping | physical (finger friction), no assist |
 | Success rule | the scene's `success.py` + the terminal rules (released, at rest, no breakdown), at the end of the rows and after a 1.0 s hold |
-| Scene | `/opt/ikea/scenes/burvik/` in the image; digest `49dbcc4041d4f2be…` (scripts/ikea_mujoco/assets.json) |
+| Scene | `/opt/ikea/scenes/burvik/` in the image; digest `49dbcc4041d4f2be…` (ikea/scripts/ikea_mujoco/assets.json) |
 | Initial state | sha256 `d563d833bd219a22…` of the mjSTATE_INTEGRATION vector |
 
 ### Goal
@@ -67,5 +67,5 @@ Each leg end is a right-hand M8 thread (1 mm lead, SDF mesh) in an SDF nut: abou
 ### Provenance
 - Scene and demo: the IKEA MuJoCo tree (`scenes/burvik/`, `demos/burvik/actions.npz`), MuJoCo 3.14.0, RoboARC rigid settings
   (timestep 0.625 ms, Newton, 100 iterations, elliptic cones).
-- The scene files are not in this repository: the image carries them (`images/ikea-mujoco/README.md`, build context from
-  `scripts/ikea_mujoco/stage_context.py`, pinned by `scripts/ikea_mujoco/assets.json`).
+- The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
+  context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).

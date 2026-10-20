@@ -2,7 +2,7 @@
  "note": "Standard-mode evidence of the IKEA MuJoCo tasks under the standard rules (the agent's wall clock, robot frame, the robots' real joint-speed limits, live verdict = the grader's settled verdict (final_check)). Written from Harbor runs on the lab's RTX 4090 workstations (job names relative to the run directories). budget_pct_live = live service time / the wall clock of the run; the verifier's replays run after the agent's time.",
  "lack": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305)",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode",
   "rows": 67697,
   "sim_time_s": 169.24,
   "service_time_s": 1277.0,
@@ -97,7 +97,7 @@
  },
  "gladom": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode (#305)",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode",
   "rows": 184000,
   "sim_time_s": 460.0,
   "service_time_s": 4780.4,
@@ -121,7 +121,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/gladom/gladom.npz (build.py)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/gladom/gladom.npz (build.py)",
    "rows_out": 186611,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -142,7 +142,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B harbor/jobs/A_std_oracle/ikea-variera-i00-standard__QZAYZgq",
-    "note": "graded live (#305): live settled success at control step 243159 (61 calls, n_clipped 0 on every call), live end hash 95134e1fbd5c = the privileged replays'; live service time 4274 s on loaded host B; video 1"
+    "note": "graded live: live settled success at control step 243159 (61 calls, n_clipped 0 on every call), live end hash 95134e1fbd5c = the privileged replays'; live service time 4274 s on loaded host B; video 1"
    },
    {
     "agent": "nop",
@@ -153,7 +153,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/variera/variera_ref.npz (build.py)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/variera/variera_ref.npz (build.py)",
    "rows_out": 243159,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -161,7 +161,7 @@
  },
  "eket": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305)",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode",
   "rows": 83181,
   "sim_time_s": 207.95,
   "service_time_s": 1048.7,
@@ -185,7 +185,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/eket/eket_ref.npz (build_ref.py, grip_wait)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/eket/eket_ref.npz (build_ref.py, grip_wait)",
    "rows_out": 83181,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -193,7 +193,7 @@
  },
  "ikea365": {
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305)",
+  "host": "host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode",
   "rows": 96000,
   "sim_time_s": 240.0,
   "service_time_s": 1285.0,
@@ -217,7 +217,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/ikea365/ikea365_ref.npz (build_ref.py, grip_wait)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/ikea365/ikea365_ref.npz (build_ref.py, grip_wait)",
    "rows_out": 96747,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -238,7 +238,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B 2026-10-17_ikea_hs_vesken/harbor/jobs/hs_S_oracle/ikea-vesken-i00-standard__ANNyiJS",
-    "note": "graded by the live episode (#305): live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on loaded host B"
+    "note": "graded by the live episode: live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on loaded host B"
    },
    {
     "agent": "nop",
@@ -248,7 +248,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py",
+   "source": "ikea/scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py",
    "rows_out": 389504,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -269,7 +269,7 @@
     "agent": "oracle",
     "reward": 1,
     "job": "host B 2026-10-17_ikea_hs_stegesund/harbor/jobs/A_std_oracle/ikea-stegesund-i00-standard__wJXgFBE",
-    "note": "graded live (#305): live settled success at control step 376000 (94 calls), live end hash 802cd7d68dca, video 1; live service time 1938 s"
+    "note": "graded live: live settled success at control step 376000 (94 calls), live end hash 802cd7d68dca, video 1; live service time 1938 s"
    },
    {
     "agent": "nop",
@@ -280,7 +280,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/stegesund/stegesund.npz (build.py)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/stegesund/stegesund.npz (build.py)",
    "rows_out": 379529,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -333,7 +333,7 @@
   ],
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/stenerik/stenerik.npz (build.py + pads.py, under the Franka Hand slew)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/stenerik/stenerik.npz (build.py + pads.py, under the Franka Hand slew)",
    "rows_out": 222600,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -378,7 +378,7 @@
   "budget_pct_live": 16.9,
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/burvik/burvik.npz (build2.py, the Franka Hand slew)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/burvik/burvik.npz (build2.py, the Franka Hand slew)",
    "rows_out": 162534,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -424,7 +424,7 @@
   "budget_pct_live": 39.7,
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/uppsta/uppsta.npz (search.py)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/uppsta/uppsta.npz (search.py)",
    "rows_out": 430225,
    "steps_over_limit": 0,
    "speed": "robot"
@@ -482,7 +482,7 @@
   "budget_pct_live": 28.5,
   "reference": {
    "method": "closed-loop",
-   "source": "scripts/ikea_mujoco/oracles/kyrre/kyrre_ref.npz (rebuild.sh)",
+   "source": "ikea/scripts/ikea_mujoco/oracles/kyrre/kyrre_ref.npz (rebuild.sh)",
    "rows_out": 733558,
    "steps_over_limit": 0,
    "speed": "robot"

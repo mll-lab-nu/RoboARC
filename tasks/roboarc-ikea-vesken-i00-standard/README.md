@@ -25,7 +25,7 @@ time).
 ## Reference solution
 `solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
-`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py`: the demo as the phase guide, one operation per snap; each grasp approach offset to where the part really is, each carried part held on its reference pose (near the host: on its connector error) by an integral loop through damped-least-squares IK, a gentle press until the weld engages, one arm move re-pathed in joint space to avoid a self-contact, the right hand lifting the bottom tray clear of a passing left wrist, two wrist rolls that keep caps from tipping or being hit; the rows are the targets executed within the joint-speed and Franka Hand speed limits,
+`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py`: the demo as the phase guide, one operation per snap; each grasp approach offset to where the part really is, each carried part held on its reference pose (near the host: on its connector error) by an integral loop through damped-least-squares IK, a gentle press until the weld engages, one arm move re-pathed in joint space to avoid a self-contact, the right hand lifting the bottom tray clear of a passing left wrist, two wrist rolls that keep caps from tipping or being hit; the rows are the targets executed within the joint-speed and Franka Hand speed limits,
 so the service's speed limiter never has to act (`n_clipped` 0).
 
 ## Verification
@@ -38,9 +38,9 @@ success or at a breakdown, and journals every executed control step; at the end 
 episode that ends otherwise (timeout) is judged as it stands by the same two checks. Before the episode the service checks
 the scene file by file against `runtime_binding.json` and by its initial-state hash (`instance_mismatch`, infrastructure).
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
-the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (owner, 2026-10-17, board 0151).
+the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
-Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 a466a594c463 (Nyx RGB) (2026-10-18): `oracle` scored 1 (graded by the live episode (#305): live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on loaded host B); `nop` scored 0.
+Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 a466a594c463 (Nyx RGB) (2026-10-18): `oracle` scored 1 (graded by the live episode: live success at control step 388000 (97 calls, n_clipped 0 on every call), live service time 1889 s on loaded host B); `nop` scored 0.
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
@@ -75,7 +75,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Deviations
 - `ee_pose` is not offered (only `joint_position`, the scene's actuator layout); `/kinematics` gives FK / IK.
 - Graded by the live episode (the settled check on the live simulator); no grading replay, in the sidecar or the
-  verifier (owner, 2026-10-17, board 0150/0151).
+  verifier (since 2026-10-17).
 
 ### Goal
 Build the VESKEN shelf unit body: snap the four feet into the bottom tray from below, the four columns into the bottom tray, the second tray onto the columns, four columns and a tray for each of the two upper levels, and the four caps into the top tray.

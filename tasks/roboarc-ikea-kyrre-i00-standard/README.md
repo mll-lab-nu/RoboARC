@@ -25,7 +25,7 @@ time).
 ## Reference solution
 `solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
-`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a reference built on the final physics, the scene with MuJoCo's native cylinders (kyrre is the one exception to the prism rule, approved by the owner on 2026-10-19, see scripts/ikea_mujoco/REVIEW.md) by `scripts/ikea_mujoco/oracles/kyrre/rebuild.sh`: the author's demo (every row within the arm limits), each row held until the slewed Franka Hand reaches its command (`standard/std_reference.py --grip wait`); screw 3-1's second grasp re-aimed at where the screw really lies (`patch_grasp.py`: damped-least-squares IK on the TCP, the demo's grasp pose relative to the screw); the hex key set down 12 mm along its rest, off the rest's knife-edge pose where it never comes to rest; the rows are the targets executed within the joint-speed and hand-speed limits,
+`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a reference built on the final physics, the scene with MuJoCo's native cylinders (kyrre is the one exception to the prism rule, approved on 2026-10-19, see ikea/scripts/ikea_mujoco/REVIEW.md) by `ikea/scripts/ikea_mujoco/oracles/kyrre/rebuild.sh`: the author's demo (every row within the arm limits), each row held until the slewed Franka Hand reaches its command (`standard/std_reference.py --grip wait`); screw 3-1's second grasp re-aimed at where the screw really lies (`patch_grasp.py`: damped-least-squares IK on the TCP, the demo's grasp pose relative to the screw); the hex key set down 12 mm along its rest, off the rest's knife-edge pose where it never comes to rest; the rows are the targets executed within the joint-speed and hand-speed limits,
 so the service's speed limiter never has to act (`n_clipped` 0).
 
 ## Verification
@@ -38,7 +38,7 @@ success or at a breakdown, and journals every executed control step; at the end 
 episode that ends otherwise (timeout) is judged as it stands by the same two checks. Before the episode the service checks
 the scene file by file against `runtime_binding.json` and by its initial-state hash (`instance_mismatch`, infrastructure).
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
-the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (owner, 2026-10-17, board 0151).
+the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
 Harbor oracle / nop checks: pending.
 
@@ -75,7 +75,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Deviations
 - `ee_pose` is not offered (only `joint_position`, the scene's actuator layout); `/kinematics` gives FK / IK.
 - Graded by the live episode (the settled check on the live simulator); no grading replay, in the sidecar or the
-  verifier (owner, 2026-10-17, board 0150/0151).
+  verifier (since 2026-10-17).
 
 ### Goal
 Fasten the three legs to the upside-down seat of the KYRRE stool: place each leg and drive its two screws, in the scene's order (leg 1, its two screws, leg 2, its two screws, leg 3, its two screws), and leave the stool upside-down on the table.

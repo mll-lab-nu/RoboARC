@@ -54,12 +54,12 @@ def task_dir(t: str, mode: str = "privileged") -> pathlib.Path:
 # Closed-loop references (built phase by phase on the final physics with true-state feedback, recorded as the executed
 # rows; scripts/ikea_mujoco/oracles/<task>/): the task's one reference for both modes. task -> words for the README.
 CLOSED_LOOP = {
-    "eket": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/eket/build_ref.py`: the "
+    "eket": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/eket/build_ref.py`: the "
              "demo as the phase guide, each held panel servoed onto the unclamped demo's recorded relative-pose track "
              "(damped-least-squares Jacobian IK on the TCP) and paused at each slide until its gate accepts; each demo row "
              "held (the guide tracks still running) until the slewed Franka Hand reaches its command; the rows are the "
              "targets executed after the joint-speed and hand-speed clamp"),
-    "ikea365": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/ikea365/build_ref.py`: "
+    "ikea365": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/ikea365/build_ref.py`: "
                 "the demo through the clamp as the phase guide; the right hand threads the returned screw itself before "
                 "releasing it; the screwdriver is centred on the true screw axis, spins with a 5-15 N axial push and goes "
                 "torque-free at the seat so the welds engage on an unloaded screw; guide tracks (damped-least-squares IK) "
@@ -67,14 +67,14 @@ CLOSED_LOOP = {
                 "running) until the slewed Franka Hand reaches its command, and the returned screw servoed onto its return "
                 "gate's pose in member A (the slew shifts the screw in the grasp); the rows are the targets executed after "
                 "the joint-speed and hand-speed clamp"),
-    "vesken": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py`: "
+    "vesken": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py`: "
                "the demo as the phase guide, one operation per snap; each grasp approach offset to where the part really is, "
                "each carried part held on its reference pose (near the host: on its connector error) by an integral loop "
                "through damped-least-squares IK, a gentle press until the weld engages, one arm move re-pathed in joint "
                "space to avoid a self-contact, the right hand lifting the bottom tray clear of a passing left wrist, two "
                "wrist rolls that keep caps from tipping or being hit; the rows are the targets executed within the "
                "joint-speed and Franka Hand speed limits"),
-    "burvik": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/burvik/build2.py` and "
+    "burvik": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/burvik/build2.py` and "
                "`move_from_take.py`: the demo (time-dilated to the joint-speed limits) as the phase guide, each row held "
                "while the slewed Franka Hand is more than two ticks from its command; the top seated in "
                "the jig's slot by a two-hand servo (the demo perched it on the guards, leaning 6 degrees, so the hand threading "
@@ -84,28 +84,28 @@ CLOSED_LOOP = {
                "demo's rigid two-hand motion is executed on these grasps through joint-limited IK; the table set down level "
                "on its feet, clear of the stand, before the hands open; the rows are the targets executed within the "
                "joint-speed and hand-speed limits"),
-    "stegesund": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/stegesund/build.py`: "
+    "stegesund": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/stegesund/build.py`: "
                   "the author's speed-limited demo as the phase guide, each row held until the slewed hands reach it, each "
                   "grasp approach steered onto the part where it really is, each carried bolt steered onto its hole and "
                   "kept on its axis while it is screwed in by hand, each hex-key drive moved onto the true bolt axis, the "
                   "frame turned on the guide's path and the top rod steered into the crotches; tiny target shifts searched "
                   "where the demo itself is chaotic (the half-lap press); the rows are the targets executed after the "
                   "joint-speed and hand-speed clamp"),
-    "stenerik": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/stenerik/build.py` and "
+    "stenerik": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/stenerik/build.py` and "
                  "`pads.py`: the demo as the phase guide, executed within the joint-speed limits; each carried screw steered "
                  "onto its insert axis, the screwdriver centred on the true screw axis (screws 5-6 driven closed loop: wings "
                  "aligned to the slots, spin with a light axial push, torque-free at the seat until the weld engages), the "
                  "wind-up released before each lift; each carried pad steered onto its site, and each press servoed on the "
                  "true pad-support contact force (the demo row held) until the bond latches; the rows are the targets "
                  "executed after the joint-speed clamp"),
-    "variera": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/variera/build.py`: "
+    "variera": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/variera/build.py`: "
                 "the time-dilated demo (with its release tail) as the phase guide, each row held until the slewed Franka "
                 "Hand reaches its command; each carried side frame held on the unslewed run's pose by damped-least-squares "
                 "IK and released in steps (eased off to a light touch, then a small gap, then open) so the standing frame "
                 "does not rock off its place; where the demo's screwdriver spin ends short of the seat, the spin goes on "
                 "with the tip on the true screw axis until the head seats, then torque-free before the lift; the rows are "
                 "the targets executed after the speed clamp"),
-    "uppsta": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/uppsta/search.py` "
+    "uppsta": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/uppsta/search.py` "
                "(`uppsta_oracle.py`): the guide is the author's demo (each 2.5 ms tick reached over its two rows) run in the "
                "scene without the prism rule, where it assembles the block; segment by segment (the arms' releases), each "
                "grasp approach offset to where the part really is, each carried part held on its guide pose (relative to "
@@ -114,15 +114,15 @@ CLOSED_LOOP = {
                "where it would tip over; away from every grasp and release the demo is followed at every 4th row where the "
                "segment's gate allows (`ref/tempo.npz`); the rows are the targets executed within the joint-speed limits "
                "and the Franka Hand's speed"),
-    "gladom": ("a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/gladom/build.py`: the "
+    "gladom": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/gladom/build.py`: the "
                "demo as the phase guide, each row held until the slewed Franka Hand reaches its command; each screw "
                "steered upright onto the stand's slot and lowered onto it before the fingers open; the hex driver's tip "
                "kept on the hand axis (its true offset in the fingers compensated by damped-least-squares IK, also while "
                "the wrist spins) and each screw driven on until its weld latches; the rows are the targets executed within "
                "the joint-speed and hand-speed limits"),
     "kyrre": ("a reference built on the final physics, the scene with MuJoCo's native cylinders (kyrre is the one exception "
-              "to the prism rule, approved by the owner on 2026-10-19, see scripts/ikea_mujoco/REVIEW.md) by "
-              "`scripts/ikea_mujoco/oracles/kyrre/rebuild.sh`: the author's demo (every row within the arm limits), each row "
+              "to the prism rule, approved on 2026-10-19, see ikea/scripts/ikea_mujoco/REVIEW.md) by "
+              "`ikea/scripts/ikea_mujoco/oracles/kyrre/rebuild.sh`: the author's demo (every row within the arm limits), each row "
               "held until the slewed Franka Hand reaches its command (`standard/std_reference.py --grip wait`); screw 3-1's "
               "second grasp re-aimed at where the screw really lies (`patch_grasp.py`: damped-least-squares IK on the TCP, "
               "the demo's grasp pose relative to the screw); the hex key set down 12 mm along its rest, off the rest's "
@@ -268,16 +268,16 @@ keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "{TEXTS['tasks']
 
 [metadata]
 author_name = "Xiaoyu"
-task_type = "trajectory"          # trajectory | policy   (see docs/protocol/README.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "mujoco"              # plain MuJoCo 3.14.0, CPU float64, the scene's own runtime and mechanism
 robot = "{r['robot']}"            # both arms (docs/TAXONOMY.md)
 family = "ikea_{t}"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/protocol/README.md §2): only the robot and gravity do work; springs, latches and threads are passive
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, latches and threads are passive
 oracle = "full"
 grasp = "physical (finger friction; no assisted grasp, no welds to a gripper)"
 success_rule = "the scene's success.py (port of the source assembly grader) + the terminal rules (released, at rest, no breakdown), after the last row and after a 1.0 s hold"
-instance_seed = 0                 # one frozen scene: images/ikea-mujoco scene {t}, digest {ASSETS['tasks'][t]['digest'][:12]}
+instance_seed = 0                 # one frozen scene: ikea/images/ikea-mujoco scene {t}, digest {ASSETS['tasks'][t]['digest'][:12]}
 expert_time_estimate_hours = {x['hours']}
 
 [verifier]
@@ -405,7 +405,7 @@ def ref_text(t: str, sha: str) -> str:
                 f"same rows): {ref_words(t)}. It never trips the speed clamp (arm joints and Franka Hand).")
     return (head + f"the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the "
                 f"same rows): the robot demo of the IKEA MuJoCo tree (`demos/{demo(t)}/actions.npz`), time-dilated "
-                "to the robots' real joint-speed limits by `scripts/ikea_mujoco/standard/std_reference.py`"
+                "to the robots' real joint-speed limits by `ikea/scripts/ikea_mujoco/standard/std_reference.py`"
                 + (" (each row whose gripper command steps faster than the Franka Hand's speed held until the hand reaches "
                    "it, `--grip wait`)" if gripper_speed(t) else "")
                 + ", so the speed clamp never changes a row. The demo itself commands faster than the limits and fails "
@@ -471,7 +471,7 @@ initial-state hash (`instance_ok`). Replay video (evidence only, never the verdi
 |---|---|
 | Grasping | physical (finger friction), no assist |
 | Success rule | the scene's `success.py` + the terminal rules (released, at rest, no breakdown), at the end of the rows and after a 1.0 s hold |
-| Scene | `/opt/ikea/scenes/{t}/` in the image; digest `{ASSETS['tasks'][t]['digest'][:16]}…` (scripts/ikea_mujoco/assets.json) |
+| Scene | `/opt/ikea/scenes/{t}/` in the image; digest `{ASSETS['tasks'][t]['digest'][:16]}…` (ikea/scripts/ikea_mujoco/assets.json) |
 | Initial state | sha256 `{b['initial_state_sha256'][:16]}…` of the mjSTATE_INTEGRATION vector |
 
 ### Goal
@@ -486,8 +486,8 @@ initial-state hash (`instance_ok`). Replay video (evidence only, never the verdi
 ### Provenance
 - Scene and demo: the IKEA MuJoCo tree (`scenes/{t}/`, `demos/{demo(t)}/actions.npz`), MuJoCo 3.14.0, RoboARC rigid settings
   (timestep {1e3 * b['timestep']:g} ms, Newton, 100 iterations, elliptic cones).
-- The scene files are not in this repository: the image carries them (`images/ikea-mujoco/README.md`, build context from
-  `scripts/ikea_mujoco/stage_context.py`, pinned by `scripts/ikea_mujoco/assets.json`).
+- The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
+  context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).
 '''
 
 
@@ -498,7 +498,7 @@ mkdir -p /app/output
 cp /solution/trajectory.npz /app/output/trajectory.npz
 '''
 
-ENV_DOCKERFILE = '''# Base image = plain MuJoCo 3.14.0 and the IKEA scenes (images/ikea-mujoco/). Everything task-specific is copied here.
+ENV_DOCKERFILE = '''# Base image = plain MuJoCo 3.14.0 and the IKEA scenes (ikea/images/ikea-mujoco/). Everything task-specific is copied here.
 FROM {image}
 COPY rcb_ikea.py /opt/tools/rcb_ikea.py
 ENV PYTHONPATH=/opt/tools
@@ -510,7 +510,7 @@ TESTS_DOCKERFILE = '''# Separate verifier sandbox (PROTOCOL §4): the same image
 # binding. Harbor uploads only the declared artifacts (/app/output/), so nothing the agent changed in its container
 # reaches the verdict.
 FROM {image}
-# Replay video (PROTOCOL §4, board 0136; evidence only): MuJoCo's renderer on CPU software OpenGL (OSMesa) and ffmpeg.
+# Replay video (PROTOCOL §4; evidence only): MuJoCo's renderer on CPU software OpenGL (OSMesa) and ffmpeg.
 # --no-deps: the physics packages (mujoco, numpy) stay the base image's, unchanged (the grader checks the runtime binding).
 RUN apt-get update && apt-get install -y --no-install-recommends libosmesa6=25.0.7-2+deb13u1 && rm -rf /var/lib/apt/lists/* \
  && pip install --no-cache-dir --no-deps PyOpenGL==3.1.10 imageio==2.37.0 imageio-ffmpeg==0.6.0 pillow==12.3.0
@@ -539,10 +539,10 @@ def max_rows_arg(t: str) -> str:
 def test_sh(t: str) -> str:
     return f'''#!/bin/bash
 # Verifier: replay /app/output/trajectory.npz from the scene's initial state in two fresh processes.
-# Writes /logs/verifier/reward.txt (1/0) and reward.json (numeric fields, see docs/protocol/README.md).
+# Writes /logs/verifier/reward.txt (1/0) and reward.json (numeric fields, see docs/PROTOCOL.md).
 # Harbor also mounts /logs/verifier into the agent's container: start from an empty directory, so nothing the agent
 # left there (a planted reward, a symlink) can count. rm never follows symlinks.
-rm -rf /logs/verifier/*   # verdicts from an earlier run never survive (docs/protocol/README.md §2.6)
+rm -rf /logs/verifier/*   # verdicts from an earlier run never survive (docs/PROTOCOL.md §2.6)
 # The agent's files are untrusted input (PROTOCOL v2.0 H.1): no link out of /app/output, no FIFO, socket or device.
 find /app/output -mindepth 1 \\( -type l -o -type p -o -type s -o -type b -o -type c \\) -delete 2>/dev/null || true
 mkdir -p /logs/verifier

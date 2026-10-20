@@ -52,7 +52,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the merged dev/robotangle_mujoco head (the Franka Hand slew)",
+  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
   "maintainer_checks": {
    "checks": [
     {
@@ -128,7 +128,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded ~35-65), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "host B (Ryzen 9 7950X; shared, loaded ~35-65), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 5091.2,
   "rows": 186611,
   "sim_time_s": 466.5,
@@ -164,7 +164,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the merged dev/robotangle_mujoco head (the Franka Hand slew)",
+  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
   "replay_wall_s": 359.5,
   "rows": 89126,
   "sim_time_s": 222.8,
@@ -212,7 +212,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the merged dev/robotangle_mujoco head (the Franka Hand slew)",
+  "host": "host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
   "replay_wall_s": 530.7,
   "rows": 63697,
   "sim_time_s": 159.2,
@@ -251,7 +251,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 1508.1,
   "rows": 357221,
   "sim_time_s": 893.05,
@@ -290,7 +290,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, load ~15), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "host B (Ryzen 9 7950X; shared, load ~15), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 5063.7,
   "rows": 215782,
   "sim_time_s": 539.45,
@@ -326,7 +326,7 @@
   ],
   "date": "2026-10-16",
   "end_hashes_equal_0.2.0": true,
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "maintainer_checks_standard": {
    "checks": [
     {
@@ -427,7 +427,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 3731.4,
   "rows": 243159,
   "sim_time_s": 607.9,
@@ -461,7 +461,7 @@
    }
   ],
   "date": "2026-10-18",
-  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "host": "host B (Ryzen 9 7950X; shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
   "replay_wall_s": 792.1,
   "rows": 389504,
   "sim_time_s": 973.8,
@@ -521,6 +521,6 @@
   "timing": {
    "text": "2740 s (25.4 % of the 10800 s budget, 63 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared lock); 2694 s (24.9 %) on host B (Ryzen 9 7950X, Docker, host load 5-10); one unobserved replay 8283 s (76.7 %, OVER the 40 % bar) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU) and 7953 s (73.6 %) on a Xeon Gold 6338 core, end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik / uppsta on the slow class."
   },
-  "image_note": "kyrre is the one scene with MuJoCo's native cylinders (scene.py, the prism rule off; owner's decision 2026-10-19, scripts/ikea_mujoco/REVIEW.md): end 0a9f1a9e6d77 / settled e242979c6712 on AMD Zen 4 (7950X), Intel AVX2 (i9-14900HX) and Intel AVX-512 (Xeon Gold 6338, Xeon Gold 6230R)."
+  "image_note": "kyrre is the one scene with MuJoCo's native cylinders (scene.py, the prism rule off; decided on 2026-10-19, ikea/scripts/ikea_mujoco/REVIEW.md): end 0a9f1a9e6d77 / settled e242979c6712 on AMD Zen 4 (7950X), Intel AVX2 (i9-14900HX) and Intel AVX-512 (Xeon Gold 6338, Xeon Gold 6230R)."
  }
 }

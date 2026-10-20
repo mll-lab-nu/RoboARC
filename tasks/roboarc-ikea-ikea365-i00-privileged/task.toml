@@ -9,16 +9,16 @@ keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "panda", "bimanu
 
 [metadata]
 author_name = "Xiaoyu"
-task_type = "trajectory"          # trajectory | policy   (see docs/protocol/README.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "mujoco"              # plain MuJoCo 3.14.0, CPU float64, the scene's own runtime and mechanism
 robot = "franka-panda-bimanual"            # both arms (docs/TAXONOMY.md)
 family = "ikea_ikea365"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/protocol/README.md §2): only the robot and gravity do work; springs, latches and threads are passive
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, latches and threads are passive
 oracle = "full"
 grasp = "physical (finger friction; no assisted grasp, no welds to a gripper)"
 success_rule = "the scene's success.py (port of the source assembly grader) + the terminal rules (released, at rest, no breakdown), after the last row and after a 1.0 s hold"
-instance_seed = 0                 # one frozen scene: images/ikea-mujoco scene ikea365, digest c16a27fdfc97
+instance_seed = 0                 # one frozen scene: ikea/images/ikea-mujoco scene ikea365, digest c16a27fdfc97
 expert_time_estimate_hours = 8
 
 [metadata.resources]

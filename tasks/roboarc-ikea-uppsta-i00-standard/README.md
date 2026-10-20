@@ -25,7 +25,7 @@ time).
 ## Reference solution
 `solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
-`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/uppsta/search.py` (`uppsta_oracle.py`): the guide is the author's demo (each 2.5 ms tick reached over its two rows) run in the scene without the prism rule, where it assembles the block; segment by segment (the arms' releases), each grasp approach offset to where the part really is, each carried part held on its guide pose (relative to the board near it) by an integral loop through damped-least-squares IK, the hex key's tip servoed onto the hole's axis, a screw's spin matched modulo 60 degrees, a part pressed a little deeper before its release where it would tip over; away from every grasp and release the demo is followed at every 4th row where the segment's gate allows (`ref/tempo.npz`); the rows are the targets executed within the joint-speed limits and the Franka Hand's speed,
+`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/uppsta/search.py` (`uppsta_oracle.py`): the guide is the author's demo (each 2.5 ms tick reached over its two rows) run in the scene without the prism rule, where it assembles the block; segment by segment (the arms' releases), each grasp approach offset to where the part really is, each carried part held on its guide pose (relative to the board near it) by an integral loop through damped-least-squares IK, the hex key's tip servoed onto the hole's axis, a screw's spin matched modulo 60 degrees, a part pressed a little deeper before its release where it would tip over; away from every grasp and release the demo is followed at every 4th row where the segment's gate allows (`ref/tempo.npz`); the rows are the targets executed within the joint-speed limits and the Franka Hand's speed,
 so the service's speed limiter never has to act (`n_clipped` 0).
 
 ## Verification
@@ -38,7 +38,7 @@ success or at a breakdown, and journals every executed control step; at the end 
 episode that ends otherwise (timeout) is judged as it stands by the same two checks. Before the episode the service checks
 the scene file by file against `runtime_binding.json` and by its initial-state hash (`instance_mismatch`, infrastructure).
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
-the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (owner, 2026-10-17, board 0151).
+the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
 Harbor oracle / nop checks: pending.
 
@@ -75,7 +75,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Deviations
 - `ee_pose` is not offered (only `joint_position`, the scene's actuator layout); `/kinematics` gives FK / IK.
 - Graded by the live episode (the settled check on the live simulator); no grading replay, in the sidecar or the
-  verifier (owner, 2026-10-17, board 0150/0151).
+  verifier (since 2026-10-17).
 
 ### Goal
 Build the UPPSTÅ hammering block: set two dowels into one board end, press end block b onto them and drive screw b with the hex key; turn it over, set the other two dowels, press end block a on and drive screw a; stand the block on its feet and push the eight pegs into their holes.

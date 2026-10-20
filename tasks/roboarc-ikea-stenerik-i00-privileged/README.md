@@ -20,7 +20,7 @@ Bimanual furniture assembly with physical grasps (no assist), 16-D actuator acti
 (539.45 s of simulated time).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `7a1e6e502d633bfe…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/stenerik/build.py` and `pads.py`: the demo as the phase guide, executed within the joint-speed limits; each carried screw steered onto its insert axis, the screwdriver centred on the true screw axis (screws 5-6 driven closed loop: wings aligned to the slots, spin with a light axial push, torque-free at the seat until the weld engages), the wind-up released before each lift; each carried pad steered onto its site, and each press servoed on the true pad-support contact force (the demo row held) until the bond latches; the rows are the targets executed after the joint-speed clamp. It never trips the speed clamp (arm joints and Franka Hand).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `7a1e6e502d633bfe…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/stenerik/build.py` and `pads.py`: the demo as the phase guide, executed within the joint-speed limits; each carried screw steered onto its insert axis, the screwdriver centred on the true screw axis (screws 5-6 driven closed loop: wings aligned to the slots, spin with a light axial push, torque-free at the seat until the weld engages), the wind-up released before each lift; each carried pad steered onto its site, and each press servoed on the true pad-support contact force (the demo row held) until the bond latches; the rows are the targets executed after the joint-speed clamp. It never trips the speed clamp (arm joints and Franka Hand).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the scene's initial state in two fresh processes at the same time
@@ -30,7 +30,7 @@ the last row). Pass iff both replays pass and end in the same state hashes (`det
 scene in the verifier image must match `tests/runtime_binding.json` file by file (`instance_exact`) and build to its
 initial-state hash (`instance_ok`). Replay video (evidence only, never the verdict): a third process replays the same rows and renders `/logs/verifier/replay.mp4` (CPU OSMesa, 512 x 288, at most 750 frames over the episode and the 1.0 s hold; `video_rendered`).
 
-Harbor checks (2026-10-18, host B (Ryzen 9 7950X; shared, load ~15), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.0 sha256:ed950d079b63, the replay-video verifier, image `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0` id `ed950d079b63`): `oracle` scored 1 (two replays, 3324.0 s wall); `nop` scored 0. Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`a690aa1b973b` / `20a59284ab83`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a690aa1b973b` / `20a59284ab83`, host B). Reference timing against the 10800 s budget: one unobserved replay of the hand-slew reference (222,600 rows) 2649 s (24.5 %) on the quiet i9-14900HX host (61.3 % of the 4320 s bar); 3292-3313 s (30.6 %) on host B's Ryzen 9 7950X (load ~15, two at once); 6944-7082 s (64.3-65.6 %, OVER the 40 % bar, as before the hand rule: 6253-6286 s) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on every host.
+Harbor checks (2026-10-18, host B (Ryzen 9 7950X; shared, load ~15), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier, image `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0` id `ed950d079b63`): `oracle` scored 1 (two replays, 3324.0 s wall); `nop` scored 0. Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`a690aa1b973b` / `20a59284ab83`, host B, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a690aa1b973b` / `20a59284ab83`, host B). Reference timing against the 10800 s budget: one unobserved replay of the hand-slew reference (222,600 rows) 2649 s (24.5 %) on the quiet i9-14900HX host (61.3 % of the 4320 s bar); 3292-3313 s (30.6 %) on host B's Ryzen 9 7950X (load ~15, two at once); 6944-7082 s (64.3-65.6 %, OVER the 40 % bar, as before the hand rule: 6253-6286 s) on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on every host.
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
@@ -50,7 +50,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 |---|---|
 | Grasping | physical (finger friction), no assist |
 | Success rule | the scene's `success.py` + the terminal rules (released, at rest, no breakdown), at the end of the rows and after a 1.0 s hold |
-| Scene | `/opt/ikea/scenes/stenerik/` in the image; digest `cc2dd3a687a0484a…` (scripts/ikea_mujoco/assets.json) |
+| Scene | `/opt/ikea/scenes/stenerik/` in the image; digest `cc2dd3a687a0484a…` (ikea/scripts/ikea_mujoco/assets.json) |
 | Initial state | sha256 `3dc8f1b6f99efce3…` of the mjSTATE_INTEGRATION vector |
 
 ### Goal
@@ -68,5 +68,5 @@ The M4 x 0.5 right-hand threads are exact convex pieces: a screw advances only b
 ### Provenance
 - Scene and demo: the IKEA MuJoCo tree (`scenes/stenerik/`, `demos/stenerik/actions.npz`), MuJoCo 3.14.0, RoboARC rigid settings
   (timestep 0.625 ms, Newton, 100 iterations, elliptic cones).
-- The scene files are not in this repository: the image carries them (`images/ikea-mujoco/README.md`, build context from
-  `scripts/ikea_mujoco/stage_context.py`, pinned by `scripts/ikea_mujoco/assets.json`).
+- The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
+  context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).

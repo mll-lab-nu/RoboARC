@@ -20,7 +20,7 @@ Bimanual furniture assembly with physical grasps (no assist), 16-D actuator acti
 (537.78 s of simulated time).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `69cb5194277c444e…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/uppsta/search.py` (`uppsta_oracle.py`): the guide is the author's demo (each 2.5 ms tick reached over its two rows) run in the scene without the prism rule, where it assembles the block; segment by segment (the arms' releases), each grasp approach offset to where the part really is, each carried part held on its guide pose (relative to the board near it) by an integral loop through damped-least-squares IK, the hex key's tip servoed onto the hole's axis, a screw's spin matched modulo 60 degrees, a part pressed a little deeper before its release where it would tip over; away from every grasp and release the demo is followed at every 4th row where the segment's gate allows (`ref/tempo.npz`); the rows are the targets executed within the joint-speed limits and the Franka Hand's speed. It never trips the speed clamp (arm joints and Franka Hand).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `69cb5194277c444e…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/uppsta/search.py` (`uppsta_oracle.py`): the guide is the author's demo (each 2.5 ms tick reached over its two rows) run in the scene without the prism rule, where it assembles the block; segment by segment (the arms' releases), each grasp approach offset to where the part really is, each carried part held on its guide pose (relative to the board near it) by an integral loop through damped-least-squares IK, the hex key's tip servoed onto the hole's axis, a screw's spin matched modulo 60 degrees, a part pressed a little deeper before its release where it would tip over; away from every grasp and release the demo is followed at every 4th row where the segment's gate allows (`ref/tempo.npz`); the rows are the targets executed within the joint-speed limits and the Franka Hand's speed. It never trips the speed clamp (arm joints and Franka Hand).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the scene's initial state in two fresh processes at the same time
@@ -50,7 +50,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 |---|---|
 | Grasping | physical (finger friction), no assist |
 | Success rule | the scene's `success.py` + the terminal rules (released, at rest, no breakdown), at the end of the rows and after a 1.0 s hold |
-| Scene | `/opt/ikea/scenes/uppsta/` in the image; digest `8c884957c9be172b…` (scripts/ikea_mujoco/assets.json) |
+| Scene | `/opt/ikea/scenes/uppsta/` in the image; digest `8c884957c9be172b…` (ikea/scripts/ikea_mujoco/assets.json) |
 | Initial state | sha256 `3b69cfd57f5a5330…` of the mjSTATE_INTEGRATION vector |
 
 ### Goal
@@ -68,5 +68,5 @@ Each screw's coarse right-hand thread (2.5 mm pitch) runs in a helical thread in
 ### Provenance
 - Scene and demo: the IKEA MuJoCo tree (`scenes/uppsta/`, `demos/uppsta_vlim/actions.npz`), MuJoCo 3.14.0, RoboARC rigid settings
   (timestep 0.3125 ms, Newton, 100 iterations, elliptic cones).
-- The scene files are not in this repository: the image carries them (`images/ikea-mujoco/README.md`, build context from
-  `scripts/ikea_mujoco/stage_context.py`, pinned by `scripts/ikea_mujoco/assets.json`).
+- The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
+  context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).

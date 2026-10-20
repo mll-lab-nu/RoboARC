@@ -25,7 +25,7 @@ time).
 ## Reference solution
 `solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
-`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/ikea365/build_ref.py`: the demo through the clamp as the phase guide; the right hand threads the returned screw itself before releasing it; the screwdriver is centred on the true screw axis, spins with a 5-15 N axial push and goes torque-free at the seat so the welds engage on an unloaded screw; guide tracks (damped-least-squares IK) steer the hands onto member B, the turned stand and the bowl; each demo row held (the guide tracks still running) until the slewed Franka Hand reaches its command, and the returned screw servoed onto its return gate's pose in member A (the slew shifts the screw in the grasp); the rows are the targets executed after the joint-speed and hand-speed clamp,
+`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/ikea365/build_ref.py`: the demo through the clamp as the phase guide; the right hand threads the returned screw itself before releasing it; the screwdriver is centred on the true screw axis, spins with a 5-15 N axial push and goes torque-free at the seat so the welds engage on an unloaded screw; guide tracks (damped-least-squares IK) steer the hands onto member B, the turned stand and the bowl; each demo row held (the guide tracks still running) until the slewed Franka Hand reaches its command, and the returned screw servoed onto its return gate's pose in member A (the slew shifts the screw in the grasp); the rows are the targets executed after the joint-speed and hand-speed clamp,
 so the service's speed limiter never has to act (`n_clipped` 0).
 
 ## Verification
@@ -38,9 +38,9 @@ success or at a breakdown, and journals every executed control step; at the end 
 episode that ends otherwise (timeout) is judged as it stands by the same two checks. Before the episode the service checks
 the scene file by file against `runtime_binding.json` and by its initial-state hash (`instance_mismatch`, infrastructure).
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
-the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (owner, 2026-10-17, board 0151).
+the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
-Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (#305) (2026-10-18): `oracle` scored 1 (the hand-slew reference: live settled success at control step 96000 (24 calls), live end hash 3250d0d9de31 (a chunk end before the reference's last row), video 1; live service time 1285 s on the loaded host); `nop` scored 0 (video 1).
+Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, heavily loaded: load 40-90), Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de / -sim 0.4.1 (Nyx RGB, host B 54694704aa75); graded by the live episode (2026-10-18): `oracle` scored 1 (the hand-slew reference: live settled success at control step 96000 (24 calls), live end hash 3250d0d9de31 (a chunk end before the reference's last row), video 1; live service time 1285 s on the loaded host); `nop` scored 0 (video 1).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
@@ -75,7 +75,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Deviations
 - `ee_pose` is not offered (only `joint_position`, the scene's actuator layout); `/kinematics` gives FK / IK.
 - Graded by the live episode (the settled check on the live simulator); no grading replay, in the sidecar or the
-  verifier (owner, 2026-10-17, board 0150/0151).
+  verifier (since 2026-10-17).
 
 ### Goal
 Rebuild the IKEA 365+ serving stand: take the screw out of member A and park it, lay member B across member A, bring the screw back and screw it in through both members until it seats, turn the stand over, and place the bowl on it.

@@ -3,7 +3,7 @@
 # Physics: MuJoCo 3.14.0 on the CPU (the scene's own runtime). Cameras: RGB from Nyx (RoboARC's renderer, Vulkan; a
 # separate render process, environment/sim/ikea_nyx.py), depth from MuJoCo's EGL raster, on the one GPU reserved below;
 # NVIDIA_DRIVER_CAPABILITIES=all makes the container toolkit mount the driver's Vulkan and EGL libraries, which the image's
-# ICD / vendor files name (images/ikea-mujoco/sim/Dockerfile). No `runtime: nvidia`.
+# ICD / vendor files name (ikea/images/ikea-mujoco/sim/Dockerfile). No `runtime: nvidia`.
 # Crash recovery: run.sh exits non-zero when the service crashes, compose restarts the container (same container, same
 # /data) and the service replays its journal into the same episode, never a reset.
 services:

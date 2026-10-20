@@ -20,7 +20,7 @@ Bimanual furniture assembly with physical grasps (no assist), 16-D actuator acti
 (207.95 s of simulated time).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `eb838b01a6df5fcd…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/eket/build_ref.py`: the demo as the phase guide, each held panel servoed onto the unclamped demo's recorded relative-pose track (damped-least-squares Jacobian IK on the TCP) and paused at each slide until its gate accepts; each demo row held (the guide tracks still running) until the slewed Franka Hand reaches its command; the rows are the targets executed after the joint-speed and hand-speed clamp. It never trips the speed clamp (arm joints and Franka Hand).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `eb838b01a6df5fcd…`) to `/app/output/`: the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the same rows): a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/eket/build_ref.py`: the demo as the phase guide, each held panel servoed onto the unclamped demo's recorded relative-pose track (damped-least-squares Jacobian IK on the TCP) and paused at each slide until its gate accepts; each demo row held (the guide tracks still running) until the slewed Franka Hand reaches its command; the rows are the targets executed after the joint-speed and hand-speed clamp. It never trips the speed clamp (arm joints and Franka Hand).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the scene's initial state in two fresh processes at the same time
@@ -30,7 +30,7 @@ the last row). Pass iff both replays pass and end in the same state hashes (`det
 scene in the verifier image must match `tests/runtime_binding.json` file by file (`instance_exact`) and build to its
 initial-state hash (`instance_ok`). Replay video (evidence only, never the verdict): a third process replays the same rows and renders `/logs/verifier/replay.mp4` (CPU OSMesa, 512 x 288, at most 750 frames over the episode and the 1.0 s hold; `video_rendered`).
 
-Harbor checks (2026-10-18, host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, harbor_run_safe.sh (fresh mtime base), image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the merged dev/robotangle_mujoco head (the Franka Hand slew), image `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1` id `b9552184c2de`): `oracle` scored 1 (two replays, 1454.4 s wall); `nop` scored 0. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`25be8deaa1fe` / `1d2906d52c38`, host B). Reference timing against the 10800 s budget: one unobserved replay of the hand-slew reference 220 s (2.0 %; 5.1 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared workstation lock, image 0.3.1's scene); 652 s on the loaded host B Ryzen 9 7950X (load 40-90); 575 s on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays.
+Harbor checks (2026-10-18, host B (Ryzen 9 7950X; shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew, image `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1` id `b9552184c2de`): `oracle` scored 1 (two replays, 1454.4 s wall); `nop` scored 0. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`25be8deaa1fe` / `1d2906d52c38`, host B). Reference timing against the 10800 s budget: one unobserved replay of the hand-slew reference 220 s (2.0 %; 5.1 % of the 4320 s bar) on the quiet i9-14900HX host (one process under the shared workstation lock, image 0.3.1's scene); 652 s on the loaded host B Ryzen 9 7950X (load 40-90); 575 s on a dedicated the cluster Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays.
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
@@ -50,7 +50,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 |---|---|
 | Grasping | physical (finger friction), no assist |
 | Success rule | the scene's `success.py` + the terminal rules (released, at rest, no breakdown), at the end of the rows and after a 1.0 s hold |
-| Scene | `/opt/ikea/scenes/eket/` in the image; digest `cd515879e4eee6da…` (scripts/ikea_mujoco/assets.json) |
+| Scene | `/opt/ikea/scenes/eket/` in the image; digest `cd515879e4eee6da…` (ikea/scripts/ikea_mujoco/assets.json) |
 | Initial state | sha256 `9815e6dc4b4a9856…` of the mjSTATE_INTEGRATION vector |
 
 ### Goal
@@ -68,5 +68,5 @@ Mitres, keyholes, dowels and back grooves are contact. The four frame joints (we
 ### Provenance
 - Scene and demo: the IKEA MuJoCo tree (`scenes/eket/`, `demos/eket_vlim/actions.npz`), MuJoCo 3.14.0, RoboARC rigid settings
   (timestep 0.625 ms, Newton, 100 iterations, elliptic cones).
-- The scene files are not in this repository: the image carries them (`images/ikea-mujoco/README.md`, build context from
-  `scripts/ikea_mujoco/stage_context.py`, pinned by `scripts/ikea_mujoco/assets.json`).
+- The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
+  context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).

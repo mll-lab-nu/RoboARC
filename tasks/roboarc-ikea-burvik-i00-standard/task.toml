@@ -32,12 +32,12 @@ simulator = "mujoco"              # plain MuJoCo 3.14.0, CPU float64, the scene'
 robot = "franka-panda-bimanual"            # both arms (docs/TAXONOMY.md)
 family = "ikea_burvik"
 mode = "standard"                 # RGB + proprioception only; no part poses, no success predicate, no reset
-dynamics = "static"               # scene dynamics (docs/protocol/README.md §2): only the robot and gravity do work; springs, latches and threads are passive
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, latches and threads are passive
 protocol = "eai-standard/2.4"           # the shared 2.4 service layer; 2.1 / 2.2 requests are served unchanged
 oracle = "full"
 grasp = "physical (finger friction; no assisted grasp, no welds to a gripper)"
 success_rule = "the scene's success.py + the terminal rules (released, at rest, no breakdown): evaluated by the sim service on the live episode after each call (the first settled success ends the episode) and at its end: at the last row and again after a 1.0 s hold of it (on a copy); no grading replay"
-instance_seed = 0                 # one frozen scene: images/ikea-mujoco scene burvik, digest 49dbcc4041d4
+instance_seed = 0                 # one frozen scene: ikea/images/ikea-mujoco scene burvik, digest 49dbcc4041d4
 expert_time_estimate_hours = 10
 
 [metadata.resources]

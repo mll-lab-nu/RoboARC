@@ -25,7 +25,7 @@ time).
 ## Reference solution
 `solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
-`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/gladom/build.py`: the demo as the phase guide, each row held until the slewed Franka Hand reaches its command; each screw steered upright onto the stand's slot and lowered onto it before the fingers open; the hex driver's tip kept on the hand axis (its true offset in the fingers compensated by damped-least-squares IK, also while the wrist spins) and each screw driven on until its weld latches; the rows are the targets executed within the joint-speed and hand-speed limits,
+`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/gladom/build.py`: the demo as the phase guide, each row held until the slewed Franka Hand reaches its command; each screw steered upright onto the stand's slot and lowered onto it before the fingers open; the hex driver's tip kept on the hand axis (its true offset in the fingers compensated by damped-least-squares IK, also while the wrist spins) and each screw driven on until its weld latches; the rows are the targets executed within the joint-speed and hand-speed limits,
 so the service's speed limiter never has to act (`n_clipped` 0).
 
 ## Verification
@@ -38,9 +38,9 @@ success or at a breakdown, and journals every executed control step; at the end 
 episode that ends otherwise (timeout) is judged as it stands by the same two checks. Before the episode the service checks
 the scene file by file against `runtime_binding.json` and by its initial-state hash (`instance_mismatch`, infrastructure).
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
-the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (owner, 2026-10-17, board 0151).
+the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
-Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode (#305) (2026-10-18): `oracle` scored 1 (the hand-slew reference: live settled success at control step 184000 (46 calls), startup binding 700c53dd (instance_exact), video 1; live service time 4780 s on the loaded host); `nop` scored 0 (video 1).
+Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded ~35-65), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463); graded by the live episode (2026-10-18): `oracle` scored 1 (the hand-slew reference: live settled success at control step 184000 (46 calls), startup binding 700c53dd (instance_exact), video 1; live service time 4780 s on the loaded host); `nop` scored 0 (video 1).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
@@ -75,7 +75,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Deviations
 - `ee_pose` is not offered (only `joint_position`, the scene's actuator layout); `/kinematics` gives FK / IK.
 - Graded by the live episode (the settled check on the live simulator); no grading replay, in the sidecar or the
-  verifier (owner, 2026-10-17, board 0150/0151).
+  verifier (since 2026-10-17).
 
 ### Goal
 Build the GLADOM tray table: cross frame B into frame A, drive the long screw and the bottom screw, place the ring and drive its two screws, and set the tray on the ring.

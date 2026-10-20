@@ -25,7 +25,7 @@ time).
 ## Reference solution
 `solution/solve.sh` runs `solution/oracle_replay.py`: it submits the control steps of `solution/oracle_actions.npz` through
 the client as `joint_position` chunks of 10 s, `hold`, one control step per row, as float64 (the client's transport;
-`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `scripts/ikea_mujoco/oracles/stegesund/build.py`: the author's speed-limited demo as the phase guide, each row held until the slewed hands reach it, each grasp approach steered onto the part where it really is, each carried bolt steered onto its hole and kept on its axis while it is screwed in by hand, each hex-key drive moved onto the true bolt axis, the frame turned on the guide's path and the top rod steered into the crotches; tiny target shifts searched where the demo itself is chaotic (the half-lap press); the rows are the targets executed after the joint-speed and hand-speed clamp,
+`Robot.submit` sends float32), so the service executes exactly those rows. The rows are the task's one reference, the same file as the privileged twin's `solution/trajectory.npz`: a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/stegesund/build.py`: the author's speed-limited demo as the phase guide, each row held until the slewed hands reach it, each grasp approach steered onto the part where it really is, each carried bolt steered onto its hole and kept on its axis while it is screwed in by hand, each hex-key drive moved onto the true bolt axis, the frame turned on the guide's path and the top rod steered into the crotches; tiny target shifts searched where the demo itself is chaotic (the half-lap press); the rows are the targets executed after the joint-speed and hand-speed clamp,
 so the service's speed limiter never has to act (`n_clipped` 0).
 
 ## Verification
@@ -38,9 +38,9 @@ success or at a breakdown, and journals every executed control step; at the end 
 episode that ends otherwise (timeout) is judged as it stands by the same two checks. Before the episode the service checks
 the scene file by file against `runtime_binding.json` and by its initial-state hash (`instance_mismatch`, infrastructure).
 The verifier (`tests/grade.py`, separate sandbox, no network, the shared client base) transcribes `final.json`: pass iff
-the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (owner, 2026-10-17, board 0151).
+the live episode succeeded (`graded_by_live` 1, `replays` 0). No grading replay runs (since 2026-10-17).
 
-Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463) (2026-10-18): `oracle` scored 1 (graded live (#305): live settled success at control step 376000 (94 calls), live end hash 802cd7d68dca, video 1; live service time 1938 s); `nop` scored 0 (video 1).
+Before 2026-10-17 (graded then by the verifier's two replays; history, not re-run since): Harbor checks on host B (Ryzen 9 7950X, RTX 4090; shared, loaded), Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63 / -sim 0.4.0 (Nyx RGB, a466a594c463) (2026-10-18): `oracle` scored 1 (graded live: live settled success at control step 376000 (94 calls), live end hash 802cd7d68dca, video 1; live service time 1938 s); `nop` scored 0 (video 1).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
@@ -75,7 +75,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Deviations
 - `ee_pose` is not offered (only `joint_position`, the scene's actuator layout); `/kinematics` gives FK / IK.
 - Graded by the live episode (the settled check on the live simulator); no grading replay, in the sidecar or the
-  verifier (owner, 2026-10-17, board 0150/0151).
+  verifier (since 2026-10-17).
 
 ### Goal
 Build the STEGESUND roll stand: press half B onto half A at the two leg crossings, push the shelf in from the foot end, drive the four bolts through the legs into the shelf's rail ends with the hex key, stand the frame up and drop the top rod into the two crotches.
