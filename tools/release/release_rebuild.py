@@ -28,8 +28,11 @@ repository: <head> gives the simulator source (source/), the release inputs (too
                   source than the image's is allowed only here
   --gpu           the GPU (device index) for the make-instance runs and the Harbor trials of a base on a GPU profile
                   (mujoco_release.json gpu_profiles, e.g. blanket_vbd_gpu; default 0)
-  --version       the image version: images/<bench>/VERSION and the tags ghcr.io/embodied-first-exam/<bench>:<v> and
-                  <bench>:<v> (local only; refused if the tag exists, unless --replace-tag)
+  --version       the image version: images/<bench>/VERSION, the image label (RELEASE_VERSION, as images/<bench>/build.sh
+                  passes it) and the tags ghcr.io/embodied-first-exam/<bench>:<v> and <bench>:<v> (local only; refused if
+                  the tag exists, unless --replace-tag)
+  --tag           a local tag for the release image instead of those two (the image without instances: <tag>-noinst),
+                  e.g. to re-make a released version next to its image without touching its tag
   --work          the work directory (default ./release-rebuild-<head9>): repo/ (a worktree of <head> where every
                   generated file is written and committed on the local branch release-rebuild/<head9>), instances/ (the
                   instances made, in the HF dataset's layout), cache/ (CoACD hulls), harbor/ (the Harbor run), logs/,
@@ -54,7 +57,7 @@ Steps:
      the same (installed_runtime)
   3. the release written: VERSION; packages/<new>-* (the released base's texts, renamed, and the made instance's lock;
      with --onto a benchmark of its own, a base the render tree already has packages for keeps those texts, only its
-     lock is new;
+     lock is new (or kept: below);
      a family whose mujoco_release.json entry names package_text, a directory of the tree, takes the files of its
      <package_text>/<released base>-<mode>/ over the released ones: the task texts of a changed design; a family's
      new_bases are tasks of a new design: each takes its template's released texts, renamed, with the files of its
@@ -62,8 +65,14 @@ Steps:
      oracles/<new>/ (the reference; standard.npz is the same file: a MuJoCo standard oracle streams the reference's
      rows and mk_tasks.py reads only its actions; unless the tree's oracles/<new>/standard.npz is a reference re-timed
      to the standard service's joint-speed rule, meta "speed_rule": then that file, standard_reference()); release.json (runtime, tooling, the MuJoCo base records with their
-     evidence: this run); assets.json (the made instances' pins); every task dir rendered (mk_tasks.py)
-  4. mk_tasks.py --check (every base) and --assets <work> --check (the MuJoCo bases' instance bytes)
+     evidence: this run); assets.json (the made instances' pins); the packages written from Genesis-era texts (a
+     template's or a released Genesis base's) turned into final packages (the render tree's mk_tasks.PORT_PACKAGE,
+     scripts/<bench>/port_package.py); every task dir rendered (mk_tasks.py).
+     A base that comes out unchanged (the same frozen instance, references, runtime and tooling, so the same record
+     but for its provenance words) keeps its lock and its release.json record; when every base does, release.json keeps
+     its release commit too: re-making a release with its own instances and references changes no task file
+  4. mk_tasks.py --check (every base) and --assets <work> --check (the MuJoCo bases' instance bytes); the render tree's
+     generator is driven only through its interface (mk_tasks.PACKAGE_FORMAT "final-texts/1", PORT_PACKAGE, MUJOCO_ENV)
   5. a local commit, then harbor_check.py --tasks: oracle and nop, both modes, rendering off, on that commit (a base
      on a GPU profile keeps its one-GPU reservation)
 Facts the texts state are read in the release image, per base, from its instance and the tooling (release.json):
@@ -355,76 +364,6 @@ def speed_rule_record(repo: pathlib.Path, base: str) -> dict:
     return recs[base]
 
 
-# The onto tree's mk_tasks.py words a standard reference re-timed to the joint-speed rule (release.json standard evidence
-# with "speed_rule"; dev/speedrule-refs-main 31f7a28beb). Laid over a generator that lacks it, as the tooling is; every
-# anchor must still be there (a generator that rewords them fails here instead of silently losing the words).
-SPEED_RULE_DOC = ("  oracles/       the references (privileged.npz; standard.npz is the same file)\n",
-                  "  oracles/       the references (privileged.npz; standard.npz is the same file, or, where release.json's standard evidence\n"
-                  "                 has \"speed_rule\", the reference re-timed to the standard service's joint-speed rule)\n")
-SPEED_RULE_ANCHOR = '        return ("`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode "\n'
-SPEED_RULE_BRANCH = (
-    '        if ev.get("speed_rule"):     # 2026-10-14: a standard reference re-timed to the joint-speed rule (oracles/<base>/standard.npz)\n'
-    '            return ("`solution/solve.sh` streams the rows of the standard reference (`solution/oracle_qpos.npy`, one "\n'
-    '                    "`joint_position` row per control step, `hold`) through the client (`solution/oracle_replay.py`): "\n'
-    '                    f"{ev[\'speed_rule\']} That episode scored 1 (live and fresh replay, end state `{ev[\'end_state\']}`) on "\n'
-    '                    f"{run_words(ev)}.")\n')
-
-
-def speed_rule_wording(gen: pathlib.Path) -> bool:
-    """Gives the onto tree's generator the speed-rule wording unless it has it; True when it was added."""
-    s = gen.read_text()
-    if 'ev.get("speed_rule")' in s:
-        return False
-    if s.count(SPEED_RULE_DOC[0]) != 1 or s.count(SPEED_RULE_ANCHOR) != 1:
-        raise SystemExit(f"{gen}: the speed-rule wording's anchors changed (ref_solution's standard return, the oracles/ line)")
-    gen.write_text(s.replace(SPEED_RULE_DOC[0], SPEED_RULE_DOC[1]).replace(SPEED_RULE_ANCHOR, SPEED_RULE_BRANCH + SPEED_RULE_ANCHOR))
-    return True
-
-
-# The onto tree's mk_tasks.py drops a "## Task failure conditions" section left empty (2026-10-17 instruction audit V6):
-# audit_words' B4 removes a chain base's rope-volume rules, the only failure rule of knot_untying and rope_threading,
-# so the heading stood alone (main's 26 released knot/rope dirs too). Laid over the generator as the speed-rule wording
-# is, inside audit_words, so every text it renders (README and instruction, both modes) loses such a heading.
-EMPTY_FAILURES_ANCHOR = ('    if mode == "standard":\n'
-                         '        s = re.sub(r"(?m)^- Grading: the verifier replays your trajectory twice[^\\n]*\\n", "", s)\n')
-EMPTY_FAILURES_RULE = ('    s = re.sub(r"(?m)^## Task failure conditions\\n\\s*\\n(?=## )", "", s)   '
-                       '# no empty failure section (audit V6, 2026-10-17)\n')
-
-
-# The onto tree's mk_tasks.py dates a task's Change Log entry "new task of <bench>" from its nop record, which a later
-# release writes again: a base released before would read as new on the later date (V2 release, 2026-10-17). A record
-# with "released" keeps that date, and a record's "changes" ({date, mode: privileged | standard | both, text}) are the
-# later releases' entries of that task, after the fixes. Laid over the generator as the rules above are.
-HISTORY_DATE = ('    date = rec["nop"]["date"]\n    if rec.get("template"):\n',
-                '    date = rec.get("released") or rec["nop"]["date"]   # a base released before keeps its date (V2)\n'
-                '    if rec.get("template"):\n')
-HISTORY_LOG = ("    log += fix_changes(base, mode)\n",
-               "    log += fix_changes(base, mode)\n"
-               "    log += [f\"- {c['date']}: {c['text']}\" for c in rec.get(\"changes\", ()) if c[\"mode\"] in (mode, \"both\")]   # later releases (V2)\n")
-
-
-def history_rule(gen: pathlib.Path) -> bool:
-    """Gives the onto tree's generator the released-date and later-change entries unless it has them; True when added."""
-    s = gen.read_text()
-    if HISTORY_DATE[1] in s:
-        return False
-    if s.count(HISTORY_DATE[0]) != 1 or s.count(HISTORY_LOG[0]) != 1:
-        raise SystemExit(f"{gen}: the Change Log anchors changed (mujoco_changes' date, rewrite_readme's fix_changes)")
-    gen.write_text(s.replace(HISTORY_DATE[0], HISTORY_DATE[1]).replace(HISTORY_LOG[0], HISTORY_LOG[1]))
-    return True
-
-
-def empty_failures_rule(gen: pathlib.Path) -> bool:
-    """Gives the onto tree's generator the empty-failure-section rule unless it has it; True when it was added."""
-    s = gen.read_text()
-    if EMPTY_FAILURES_RULE in s:
-        return False
-    if s.count(EMPTY_FAILURES_ANCHOR) != 1:
-        raise SystemExit(f"{gen}: the empty-failure-section rule's anchor changed (audit_words' standard Grading line)")
-    gen.write_text(s.replace(EMPTY_FAILURES_ANCHOR, EMPTY_FAILURES_RULE + EMPTY_FAILURES_ANCHOR))
-    return True
-
-
 def standard_expect(a, base: str) -> str | None:
     """The end the Harbor standard oracle must reach: a speed-rule standard reference's own (its oracles/<base>/
     standard.npz differs from privileged.npz in the release files), else None (the privileged reference's end)."""
@@ -478,10 +417,11 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
         return dict(pool.map(one, bases))
 
 
-def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: dict, noinst: dict, facts: dict) -> None:
+def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: dict, noinst: dict, facts: dict) -> dict:
     """VERSION, packages/, oracles/, release.json and assets.json for the made instances, in the render tree (a.out: the
     --onto worktree, else <head>'s); the old task dirs removed. Task texts of a changed or new design come from <head>
-    (package_text)."""
+    (package_text). Returns what it did: the bases whose packages it wrote from Genesis-era texts ("written", to port)
+    and the bases it found unchanged ("kept", with the record fields only this run's provenance words would change)."""
     rb = a.out / "scripts" / a.bench                        # this benchmark's release files
     released = a.repo / "tools/release/templates"   # the Genesis-era released texts (a new or newly ported base's template)
     new_bench = True                                # always a benchmark of its own (the Genesis in-place release is gone)
@@ -493,7 +433,8 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     shipped = json.loads(ev_file.read_text()) if ev_file.is_file() else {}
     src8, tool8 = runtime["source"]["sha256"][:8], tooling[:8]
     host = f"{a.host_label}, {cpu_model()}, no GPU"
-    records = {}
+    records, written, kept = {}, [], {}
+    same_release = rel["runtime"] == {**rel["runtime"], **runtime} and rel["tooling_sha256"] == tooling
 
     def texts_of(src: pathlib.Path, old: str, new: str) -> dict:
         """A package's files: texts with the base's name replaced; binary files (a fold's goal-state images,
@@ -520,6 +461,8 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     for b in bases:
         old, new, d = b["old"], b["new"], a.work / "instances" / b["new"]
         inst = json.loads((d / "instance.json").read_text())
+        if new not in onto_texts:
+            written.append(new)
         for mode in ("privileged", "standard") if new not in onto_texts else ():
             dst = rb / "packages" / f"{new}-{mode}"
             if b["template"]:             # a new base: its template's released texts, under the new name
@@ -546,9 +489,17 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
                 shutil.rmtree(rb / "packages" / f"{old}-{mode}", ignore_errors=True)
         assets_files = {p.relative_to(d).as_posix(): sha(p.read_bytes()) for p in sorted((d / "instance_assets").rglob("*"))
                         if p.is_file()}
-        lock = dict(schema_version=1, instance_sha256=canonical(inst), asset_files=assets_files, tooling_sha256=tooling,
-                    creation_source=inst["topogym_source"], runtime=runtime, image=noinst)
-        (rb / "packages" / f"{new}-privileged/runtime_binding.upstream.json").write_text(json.dumps(lock, indent=2) + "\n")
+        lock_file = rb / "packages" / f"{new}-privileged/runtime_binding.upstream.json"
+        prev_lock = json.loads(lock_file.read_text()) if new in onto_texts and lock_file.is_file() else {}
+        # the same frozen instance as the render tree binds (a premade instance used again): its lock, which records the
+        # image it was made in, stays
+        same_instance = (prev_lock.get("instance_sha256") == canonical(inst)
+                         and all(assets_files.get(k) == v for k, v in prev_lock.get("asset_files", {}).items()))
+        if not same_instance:
+            lock = dict(schema_version=1, instance_sha256=canonical(inst), asset_files=assets_files, tooling_sha256=tooling,
+                        creation_source=inst["topogym_source"], runtime=runtime, image=noinst)
+            lock_file.write_text(json.dumps(lock, indent=2) + "\n")
+        prev = rel["bases"].get(new) or {}
         no_ref = new in a.no_oracle
         if old and old != new and not new_bench:
             shutil.rmtree(rb / "oracles" / old, ignore_errors=True)
@@ -578,16 +529,16 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
             for m in ("privileged", "standard"):                                # a new or changed reference is this run's
                 if (released_ev.get(m) or {}).get("trajectory_sha256") == evidence[m]["trajectory_sha256"]:
                     evidence[m] = released_ev[m]
-        records[old or new] = (new, dict(
+        record = dict(
             creation_source=inst["topogym_source"]["sha256"][:8],
             evidence=evidence,
             **(dict(oracle="none") if no_ref else {}),
             # a premade instance (--instances) was not made in this image: the 0.1.0 rename's wording (audit S7)
             family=b["family"], instance_package=(
                 f"MuJoCo instance made before this image was built (TopoGym source {inst['topogym_source']['sha256'][:8]}; "
-                f"its bytes are bound into the release image eai-{a.bench}:{a.version}, "
+                f"its bytes are bound into the release image ghcr.io/embodied-first-exam/{a.bench}:{a.version}, "
                 "tools/release/release_rebuild.py --instances)" if new in a.premade else
-                f"MuJoCo instance made in the release image (eai-{a.bench}:{a.version}, "
+                f"MuJoCo instance made in the release image (ghcr.io/embodied-first-exam/{a.bench}:{a.version}, "
                 f"tools/release/release_rebuild.py; make-instance {b['variation']}, scene seed {b['scene_seed']})"),
             tier=b["tier"], physics_engine="mujoco", release_commit=head,
             # a released base keeps its nop record; a new one takes release_evidence.json's, else not_run
@@ -603,8 +554,14 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
             **{k: facts[new][k] for k in ("grasp_rules", "physics_dt_s", "grasp", "grasp_regions", "chain")
                if facts[new].get(k)},
             **(dict(gpu_physics=True) if facts[new]["gpu_physics"] else {}),
-            **(dict(step_s=a.step_s[new]) if new in a.step_s else {}),
-            **(later_release(a, rb, rel, new, evidence, no_ref) if new_bench else {})))
+            # the step time measured on this instance stays its step time when the manifest names none
+            **(dict(step_s=a.step_s[new]) if new in a.step_s else
+               dict(step_s=prev["step_s"]) if same_instance and prev.get("step_s") else {}),
+            **(later_release(a, rb, rel, new, evidence, no_ref) if new_bench else {}))
+        diff = sorted(k for k in set(prev) | set(record) if prev.get(k) != record.get(k))
+        if same_release and same_instance and prev and set(diff) <= {"instance_package", "release_commit"}:
+            record, kept[new] = prev, diff      # unchanged: its record as released (where and when it was made)
+        records[old or new] = (new, record)
         for prefix in {f"instances/{n}/" for n in (old, new) if n and (n == new or not new_bench)}:
             assets["files"] = {k: v for k, v in assets["files"].items() if not k.startswith(prefix)}
         assets["files"].update({f"instances/{new}/{k}": v for k, v in files_of(d).items()})
@@ -621,7 +578,8 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     rel["bases"] = {**bases_out, **{n: r for n, r in by_new.items() if n not in bases_out}}
     rel["runtime"].update(runtime)
     rel["tooling_sha256"] = tooling
-    rel["release_commit"] = rel["template_commit"] = head   # the commit the release is built from
+    if not (same_release and len(kept) == len(bases)):   # the commit the release is built from (unless it re-made itself)
+        rel["release_commit"] = rel["template_commit"] = head
     assert {n: b["uipc_build_sha256"] for n, b in rel["uipc_builds"].items()} == uipc_builds, "uipc builds changed"
     (rb / "release.json").write_text(json.dumps(rel, indent=1, ensure_ascii=False) + "\n")
     assets["files"] = dict(sorted(assets["files"].items()))
@@ -629,6 +587,7 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     if a.hf_revision:
         assets["revision"] = a.hf_revision
     (rb / "assets.json").write_text(json.dumps(assets, indent=1, ensure_ascii=False) + "\n")
+    return dict(written=written, kept=kept)
 
 
 EMPTY_FAILURES = re.compile(r"(?m)^## Task failure conditions\n\s*\n(?=## )")
@@ -742,6 +701,7 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--harbor", default="harbor")
     ap.add_argument("--host-label", default=socket.gethostname().split(".")[0])
     ap.add_argument("--replace-tag", action="store_true")
+    ap.add_argument("--tag")
     ap.add_argument("--no-harbor", action="store_true")
     ap.add_argument("--harbor-only", action="store_true", help="only step 5 and the report, on --work's previous run")
     a = ap.parse_args(argv)
@@ -783,10 +743,11 @@ def main(argv: list[str]) -> int:
         return harbor_step(a, here, report, bases, report.get("gpu_bases", []), report["images"]["release"]["reference"],
                            module(here / "scripts/roboarc/harbor_check.py"))
     a.repo = a.work / "repo"
-    image = f"ghcr.io/embodied-first-exam/{a.bench}:{a.version}"
-    noinst_tag = f"{a.bench}:{a.version}-noinst"
+    image = a.tag or f"ghcr.io/embodied-first-exam/{a.bench}:{a.version}"
+    noinst_tag = f"{a.tag}-noinst" if a.tag else f"{a.bench}:{a.version}-noinst"
+    tags = [image] if a.tag else [image, f"{a.bench}:{a.version}"]
     if image_id(image) and not a.replace_tag:
-        raise SystemExit(f"{image} exists here; pick another --version or pass --replace-tag")
+        raise SystemExit(f"{image} exists here; pick another --version or --tag, or pass --replace-tag")
     (a.work / "logs").mkdir(parents=True, exist_ok=True)
     report = dict(head=head, version=a.version, work=str(a.work), started=datetime.datetime.now().isoformat(timespec="seconds"))
 
@@ -825,17 +786,16 @@ def main(argv: list[str]) -> int:
         if a.out.exists():
             run(["git", "-C", str(here), "worktree", "remove", "--force", str(a.out)])
         run(["git", "-C", str(here), "worktree", "add", "-B", out_branch, str(a.out), onto])
-        gen = a.out / "scripts" / a.bench / "mk_tasks.py"
-        if not gen.is_file() or "def mujoco_lines" not in gen.read_text():
-            raise SystemExit(f"--onto {a.onto}: no scripts/{a.bench}/mk_tasks.py that renders MuJoCo bases")
+        if not (a.out / "scripts" / a.bench / "mk_tasks.py").is_file():
+            raise SystemExit(f"--onto {a.onto}: no scripts/{a.bench}/mk_tasks.py")
         for n in TOOLING:
             shutil.copy2(a.repo / "scripts/roboarc/shared" / n, a.out / "scripts" / a.bench / "shared" / n)
-        report.update(onto=onto, speed_rule_wording_added=speed_rule_wording(gen),
-                      empty_failures_rule_added=empty_failures_rule(gen), history_rule_added=history_rule(gen))
+        report.update(onto=onto)
     for b in bases:
         if b["new"] not in a.no_oracle:
             reference(b, a.references, a.repo, a.ref_paths)        # every reference exists before anything is built
-        if b["template"]:                             # and every new base's texts
+        has_texts = all((a.out / "scripts" / a.bench / "packages" / f"{b['new']}-{m}").is_dir() for m in ("privileged", "standard"))
+        if b["template"] and not has_texts:           # and every new base's texts (a released base keeps its own)
             for mode in ("privileged", "standard"):
                 need = [a.repo / "tools/release/templates" / f"{b['template']}-{mode}"] + \
                        ([a.repo / b["package_text"] / f"{b['new']}-{mode}"] if b["package_text"] else [])
@@ -847,9 +807,13 @@ def main(argv: list[str]) -> int:
     # harbor_check.py is this checkout's (the runner), mk_tasks.py the render tree's; MUJOCO_ENV is the same in both
     gen = f"scripts/{a.bench}/mk_tasks.py"     # the render tree's generator
     mk, hc = module(a.out / gen), module(here / "scripts/roboarc/harbor_check.py")
+    if getattr(mk, "PACKAGE_FORMAT", None) != "final-texts/1" or not pathlib.Path(getattr(mk, "PORT_PACKAGE", "")).is_file():
+        raise SystemExit(f"--onto {a.onto}: scripts/{a.bench}/mk_tasks.py does not render final packages "
+                         "(PACKAGE_FORMAT \"final-texts/1\" and its PORT_PACKAGE tool)")
     empty = a.work / "empty"
     empty.mkdir(exist_ok=True)
-    build = ["docker", "buildx", "build", "-f", "images/robotangle/Dockerfile.mujoco"]
+    build = ["docker", "buildx", "build", "--load", "-f", "images/robotangle/Dockerfile.mujoco",
+             "--build-arg", f"RELEASE_VERSION={a.version}"]       # as images/<bench>/build.sh builds it
     run([*build, "--build-context", f"instances={empty}", "-t", noinst_tag, "."], log=a.work / "logs/build_noinst.log",
         cwd=ctx)
     noinst = dict(reference=noinst_tag, id=image_id(noinst_tag), repo_digests=[])
@@ -883,8 +847,8 @@ def main(argv: list[str]) -> int:
                                    make_s=("made elsewhere (--instances), source " + inst["topogym_source"]["sha256"][:8]
                                            if b["new"] in a.premade else round(walls[b["new"]], 1) if walls
                                            else "uploaded, used again"))
-    run([*build, "--build-context", f"instances={a.work / 'instances'}", "-t", image, "-t", f"{a.bench}:{a.version}",
-         "."], log=a.work / "logs/build_release.log", cwd=ctx)
+    run([*build, "--build-context", f"instances={a.work / 'instances'}", *(x for t in tags for x in ("-t", t)), "."],
+        log=a.work / "logs/build_release.log", cwd=ctx)
     rel_rt = installed(image)
     assert rel_rt == rt, "the release image's runtime differs from the one the instances were made on"
     facts = json.loads(run(["docker", "run", "--rm", "--network", "none", "-e", "CUDA_VISIBLE_DEVICES=", "-v",
@@ -899,8 +863,13 @@ def main(argv: list[str]) -> int:
                   runtime=runtime, instances=instances)
 
     # 3. the release files, every task dir rendered; 4. the checks
-    write_release(a, bases, head, runtime, uipc, noinst, facts)
+    done = write_release(a, bases, head, runtime, uipc, noinst, facts)
+    report.update(packages_written=done["written"], unchanged_bases=done["kept"])
     py = sys.executable
+    # the packages written from Genesis-era texts (a new base, or a re-made one without packages yet) become final
+    # packages, through the generator's own tool; a base that kept its packages is final already
+    if done["written"]:
+        run([py, str(mk.PORT_PACKAGE), *done["written"]], log=a.work / "logs/port_package.log", cwd=a.out)
     run([py, gen], log=a.work / "logs/mk_tasks.log", cwd=a.out)
     checks = {}
     for name, cmd in (("mk_tasks.py --check, all bases", [py, gen, "--check"]),
@@ -929,7 +898,7 @@ def main(argv: list[str]) -> int:
             if name == "ci_checks/run_all.sh":   # its repo-wide part also re-renders other benchmarks (their deps, not ours)
                 fails = [x for x in (r.stdout + r.stderr).splitlines() if x.startswith("FAIL")]
                 ours = [x for x in fails if a.bench in x or "dataset" in x or "tooling" in x or "Traceback" in x]
-                checks[name] = dict(ok=not ours, output=ours[-5:] or [f"{len(fails)} FAIL lines, none about RoboTangle, "
+                checks[name] = dict(ok=not ours, output=ours[-5:] or [f"{len(fails)} FAIL lines, none about this benchmark, "
                                                                      "the dataset manifest or the tooling (see the log)"])
                 continue
             checks[name] = dict(ok=r.returncode == 0, output=(r.stdout + r.stderr).strip().splitlines()[-5:])
@@ -937,11 +906,11 @@ def main(argv: list[str]) -> int:
     run(["git", "-C", str(a.out), "add", "-A"])
     made = [b["new"] for b in bases if b["new"] not in a.premade]
     pre = [b["new"] for b in bases if b["new"] in a.premade]
-    msg = (f"RoboTangle release rebuild on {head[:9]} (image {a.version}): "
+    msg = (f"RoboARC release rebuild on {head[:9]} (image {a.version}): "
            + "; ".join(([f"MuJoCo instances made in the release image, {', '.join(made)}"] if made else [])
                        + ([f"premade MuJoCo instances (--instances) bound into it, {', '.join(pre)}"] if pre else []))
            + f"\n\ntools/release/release_rebuild.py; report: {a.work}/REPORT.md\n")
-    run(["git", "-C", str(a.out), "commit", "-q", "-m", msg])
+    run(["git", "-C", str(a.out), "commit", "-q", "--allow-empty", "-m", msg])   # a release re-made as it was: no change
     commit = run(["git", "-C", str(a.out), "rev-parse", "HEAD"]).strip()
     report.update(commit=commit, branch=out_branch,
                   diffstat=run(["git", "-C", str(a.out), "diff", "--shortstat", "HEAD~1", commit]).strip())
@@ -978,7 +947,7 @@ def harbor_step(a, here: pathlib.Path, report: dict, bases: list[dict], gpu_base
 
 def report_md(r: dict, a, bases: list[dict]) -> str:
     rt = r["runtime"]
-    out = [f"# RoboTangle release rebuild on {r['head'][:9]}: {'PASS' if r['ok'] else 'FAIL'}", "",
+    out = [f"# RoboARC release rebuild on {r['head'][:9]}: {'PASS' if r['ok'] else 'FAIL'}", "",
            f"- head `{r['head']}`, image version `{a.version}`, {r['started']} - {r['finished']}",
            f"- images (local only): release `{r['images']['release']['reference']}` = `{r['images']['release']['id']}`; "
            f"made in `{r['images']['noinst']['reference']}` = `{r['images']['noinst']['id']}`",
@@ -1011,7 +980,7 @@ def report_md(r: dict, a, bases: list[dict]) -> str:
         out += ["- HF upload of the instances (the user's OK first; upload only, nothing deleted). NOT UPLOADED: "
                 "assets.json's new pins name files that are not in the dataset at its revision.",
                 f"  `hf upload eai-v2-internal/robotangle-assets {a.work}/instances instances --repo-type dataset "
-                f"--commit-message \"RoboTangle MuJoCo instances made in eai-{a.bench}:{a.version} ({r['head'][:9]})\"`",
+                f"--commit-message \"RoboARC MuJoCo instances made in ghcr.io/embodied-first-exam/{a.bench}:{a.version} ({r['head'][:9]})\"`",
                 f"  then run this again with `--work {a.work} --hf-revision <the new dataset commit>`, which uses these "
                 "instances again (and runs Harbor again on the final bytes)."]
     out += ["- Image push, and the push of the commit: the user's OK."]

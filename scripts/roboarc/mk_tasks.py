@@ -81,7 +81,13 @@ CHUNK_S, WATCH_S = 10, 30  # the sim service's RCB_MAX_CHUNK_S / RCB_MAX_WATCH_S
 BUILD_ALLOWANCE_S = 1800  # scene build, kernel compilation and video encoding inside the verifier's timeout
 MUJOCO_ENV = (("NPY_DISABLE_CPU_FEATURES", "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR"),
               ("OPENBLAS_CORETYPE", "Haswell"))   # every container that runs a Session (docs/simulator/MUJOCO_CORE.md)
-sha = lambda b: hashlib.sha256(b).hexdigest()  # noqa: E731
+# The interface tools/release/release_rebuild.py --onto renders a release through (it loads this module from the render
+# tree and checks PACKAGE_FORMAT; it never edits this file): packages/ hold the final texts with {{FIELD}}s, a package
+# written from Genesis-era texts (a new base's template) becomes one with `PORT_PACKAGE <base> ...`, then this script
+# renders every base. MUJOCO_ENV is read there too (the make-instance containers).
+PACKAGE_FORMAT = "final-texts/1"
+PORT_PACKAGE = HERE / "port_package.py"
+sha =lambda b: hashlib.sha256(b).hexdigest()  # noqa: E731
 
 # Agent egress (owner, 2026-10-10 / 10-11): the model APIs and the package registries, the two lines
 # `scripts/set_agent_egress.py allowlist` writes, with that script's HOSTS (one list for every task:
