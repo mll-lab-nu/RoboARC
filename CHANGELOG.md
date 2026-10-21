@@ -76,6 +76,11 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ik
   re-recorded within the standard joint-speed rule (7577 rows, end `f6f8062d4270bdcb`; Harbor standard oracle 1 / nop
   0), replacing the privileged rows whose 3 faster rows the service stretched (oracle 0); the privileged reference is
   unchanged.
+  On Intel (Xeon Gold 6338, A100 GPU) two strict fresh-process replays and the standard service's rules end on
+  `f6f8062d4270bdcb` (every row executed as it is) and the privileged reference on `cc8615b8bc4a0efa`, as on AMD Zen 4.
+  Stress, as for blanket-fold-05-i01's new reference (criteria v2.13b, the CPU twin of the GPU cloth step): 371
+  episodes (random, directed, cem, periodic; 93,385 controls), 0 breakdown, 0 violent, 0 pressed-pile warning; the
+  reference under the observer on the GPU step and nop 400 are CLEAN.
 - Harbor oracle records (`scripts/roboarc/release.json` evidence, `tools/release/release_evidence.json`): the 24 that
   said `not_run`, no score claimed (privileged on 11 bases, standard on 13: blanket-flatten-04/05/07/08/09-i01,
   knot-untying-06/07/09-i01, orbits-02-i01 and slotted-post-ring-05-i01 in both modes, blanket-flatten-06-i01
