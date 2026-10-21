@@ -1,0 +1,98 @@
+{
+ "bases": 2,
+ "failed": [],
+ "rows": {
+  "battery-replacement-01-i01": {
+   "1": {
+    "state_sha": "70ff0d56b1b2b70f",
+    "seed0_state_sha": "764192d9a7e49a0f",
+    "birth_only_instance_id": true,
+    "world_equal": true,
+    "birth_leaves": 2945,
+    "fields_changed": [
+     "asset_identity",
+     "effective_task_parameters",
+     "state_sha"
+    ],
+    "assets_changed": [
+     "controller.xml",
+     "cover.xml"
+    ],
+    "appearance": {
+     "controller_finish": "white",
+     "tray_finish": "grey",
+     "box_finish": "blue",
+     "props_finish": "wood"
+    },
+    "seconds": 0.9
+   },
+   "2": {
+    "state_sha": "7013045cbd01e55c",
+    "seed0_state_sha": "764192d9a7e49a0f",
+    "birth_only_instance_id": true,
+    "world_equal": true,
+    "birth_leaves": 2945,
+    "fields_changed": [
+     "asset_identity",
+     "effective_task_parameters",
+     "state_sha"
+    ],
+    "assets_changed": [
+     "controller.xml",
+     "cover.xml"
+    ],
+    "appearance": {
+     "controller_finish": "red",
+     "tray_finish": "white",
+     "box_finish": "green",
+     "props_finish": "black"
+    },
+    "seconds": 0.9
+   }
+  },
+  "clock-assembling-01-i01": {
+   "1": {
+    "state_sha": "3a52e9259cf74f1a",
+    "seed0_state_sha": "ad4ee5041eeb19de",
+    "birth_only_instance_id": true,
+    "world_equal": true,
+    "birth_leaves": 3300,
+    "fields_changed": [
+     "asset_identity",
+     "effective_task_parameters",
+     "state_sha"
+    ],
+    "assets_changed": [
+     "clock.xml"
+    ],
+    "appearance": {
+     "movement_finish": "rhodium",
+     "stand_finish": "walnut",
+     "screw_finish": "gilt"
+    },
+    "seconds": 0.8
+   },
+   "2": {
+    "state_sha": "acdd20c785c083ad",
+    "seed0_state_sha": "ad4ee5041eeb19de",
+    "birth_only_instance_id": true,
+    "world_equal": true,
+    "birth_leaves": 3300,
+    "fields_changed": [
+     "asset_identity",
+     "effective_task_parameters",
+     "state_sha"
+    ],
+    "assets_changed": [
+     "clock.xml"
+    ],
+    "appearance": {
+     "movement_finish": "gilt",
+     "stand_finish": "white_plastic",
+     "screw_finish": "steel"
+    },
+    "seconds": 0.8
+   }
+  }
+ }
+}

@@ -1,0 +1,876 @@
+{
+ "bed-bolt-02-i01": {
+  "rows": 25277,
+  "recorded_end": "9065337a7d7b18f5",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 25277,
+    "state_sha": "9065337a7d7b18f5",
+    "world_sha": "0158c80aae5cfa8c",
+    "birth": "88e0c83081d83d55",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 491.9
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 25277,
+    "state_sha": "3adcb3644072ef55",
+    "world_sha": "0158c80aae5cfa8c",
+    "birth": "bda842bbc68e5fd0",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 494.0
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "bed-bolt-04-i01": {
+  "rows": 15535,
+  "recorded_end": "496e553fc76d49fb",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 15535,
+    "state_sha": "496e553fc76d49fb",
+    "world_sha": "411dc600bc35c6c1",
+    "birth": "76964c8ef3746bfd",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 350.8
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 15535,
+    "state_sha": "721a8c99b241dd7f",
+    "world_sha": "411dc600bc35c6c1",
+    "birth": "941847b25116e2da",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 350.5
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "bed-bolt-05-i01": {
+  "rows": 15310,
+  "recorded_end": "9ff4432d309ee102",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 15310,
+    "state_sha": "9ff4432d309ee102",
+    "world_sha": "8ff0c0a8a2d068e4",
+    "birth": "b920c4a58cb335e4",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 317.6
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 15310,
+    "state_sha": "ca89d6715989917f",
+    "world_sha": "8ff0c0a8a2d068e4",
+    "birth": "15d4127e7292fd24",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 317.7
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "buzz-wire-3d-04-i01": {
+  "rows": 9219,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 9219,
+    "state_sha": "bedce75e61d2be24",
+    "world_sha": "f841da907adfda91",
+    "birth": "b0ec89f9696bec11",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": true,
+    "episode_end": "success",
+    "wall_s": 359.1
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 9219,
+    "state_sha": "706d3056236ec639",
+    "world_sha": "f841da907adfda91",
+    "birth": "fb39fa4bb5aa5c93",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": true,
+    "episode_end": "success",
+    "wall_s": 376.0
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "cast-keyhole-01-i01": {
+  "rows": 5097,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 5097,
+    "state_sha": "17b34a5ea8c891ee",
+    "world_sha": "15061e27f5c584f8",
+    "birth": "7da2cdfd3e8d1ba1",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 78.7
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 5097,
+    "state_sha": "158f294f1b16f41f",
+    "world_sha": "15061e27f5c584f8",
+    "birth": "22d3149b2eb8d583",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 73.4
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "fiber-bundling-02-i01": {
+  "rows": 3607,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 3607,
+    "state_sha": "d979d1959ae56652",
+    "world_sha": "02ac70b6d0b4a037",
+    "birth": "44971f84830ab741",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 241.7
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 3607,
+    "state_sha": "6f2fdf107cbcd422",
+    "world_sha": "02ac70b6d0b4a037",
+    "birth": "8d0b227be4b22ab8",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 247.7
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "lock-picking-01-i01": {
+  "rows": 4303,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 4275,
+    "state_sha": "c2071db8651ca442",
+    "world_sha": "f34104e5cdf4629a",
+    "birth": "f7c6a22574420de3",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 81.0
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 4275,
+    "state_sha": "e4e40676c52f31b7",
+    "world_sha": "f34104e5cdf4629a",
+    "birth": "6ef3d59bf6cad82f",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 82.1
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "orbits-01-i01": {
+  "rows": 3330,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 3330,
+    "state_sha": "27d5ce82a052442d",
+    "world_sha": "1b0e491bb454a665",
+    "birth": "ca700d18ffbe2f03",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 306.9
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 3330,
+    "state_sha": "2c66908f790bcda3",
+    "world_sha": "1b0e491bb454a665",
+    "birth": "5c36e698a1fbfa61",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 325.5
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "rope-threading-03-i01": {
+  "rows": 3345,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 3345,
+    "state_sha": "41632c4dace19971",
+    "world_sha": "003d635efa05ed73",
+    "birth": "f5bbde9d87c3b05d",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 545.0
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 3345,
+    "state_sha": "fc88610478d2f4f9",
+    "world_sha": "003d635efa05ed73",
+    "birth": "e7deabda5bd997b9",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 554.2
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "slotted-post-ring-03-i01": {
+  "rows": 9193,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 9193,
+    "state_sha": "53166fda8ebc81ba",
+    "world_sha": "b2a413d09e14463a",
+    "birth": "146a3e5a43839f37",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 3414.0
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 9193,
+    "state_sha": "74a9dc34af032e99",
+    "world_sha": "b2a413d09e14463a",
+    "birth": "5d0ea52118e929a4",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 3382.3
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host B"
+ },
+ "bed-bolt-01-i01": {
+  "rows": 25325,
+  "recorded_end": "fa027063506f37b9",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 25325,
+    "state_sha": "fa027063506f37b9",
+    "world_sha": "7e4e0509493568c1",
+    "birth": "0bfc2739be27db3a",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 406.8
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 25325,
+    "state_sha": "3de445c732932178",
+    "world_sha": "7e4e0509493568c1",
+    "birth": "095b939067fe0e31",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 414.3
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "bed-bolt-03-i01": {
+  "rows": 15540,
+  "recorded_end": "478283fbcfd6f603",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 15540,
+    "state_sha": "478283fbcfd6f603",
+    "world_sha": "90903aa0fef193e8",
+    "birth": "83a09f9d160239c0",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 254.1
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 15540,
+    "state_sha": "3a21e7f5388b5f0c",
+    "world_sha": "90903aa0fef193e8",
+    "birth": "ace4d7a22c974367",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 258.7
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "blanket-flatten-01-i01": {
+  "rows": 1277,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 1277,
+    "state_sha": "8c7c2c175cd2395e",
+    "world_sha": "e5789516b8c72f0e",
+    "birth": "ed36dbbfece3ca48",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 2253.5
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 1277,
+    "state_sha": "6316b02065f7e49c",
+    "world_sha": "e5789516b8c72f0e",
+    "birth": "4eaa400bd52eef1c",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 2251.7
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "blanket-fold-01-i01": {
+  "rows": 884,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 884,
+    "state_sha": "b443db6478ebfe08",
+    "world_sha": "f5fd5acbaf5e76bc",
+    "birth": "e46885864fa5a666",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 644.7
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 884,
+    "state_sha": "8f137e81ca82036b",
+    "world_sha": "f5fd5acbaf5e76bc",
+    "birth": "949832b29050338e",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 635.0
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "caliper-sorting-01-i01": {
+  "rows": 22962,
+  "recorded_end": "ec9ade23fc0a034c",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 22962,
+    "state_sha": "ec9ade23fc0a034c",
+    "world_sha": "6908f5c45d545709",
+    "birth": "f0c67c958f7901e8",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 764.1
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 22962,
+    "state_sha": "79b46aff2d7bb2f0",
+    "world_sha": "6908f5c45d545709",
+    "birth": "616d6b9f05638643",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 779.8
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "cast-coil-01-i01": {
+  "rows": 1595,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 1595,
+    "state_sha": "4eb24b63a7463ca0",
+    "world_sha": "1a9a101ce3bbf38d",
+    "birth": "77cd130374da6d1b",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 71.8
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 1595,
+    "state_sha": "e470d00454f22b14",
+    "world_sha": "1a9a101ce3bbf38d",
+    "birth": "151453ec8b982409",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 68.6
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "hedgehog-in-cage-02-i01": {
+  "rows": 1882,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 1882,
+    "state_sha": "4c443ab219eeb740",
+    "world_sha": "3bab3105d7e8e880",
+    "birth": "ea2b672276d6b731",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 76.7
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 1882,
+    "state_sha": "d4b3f5e930251e98",
+    "world_sha": "3bab3105d7e8e880",
+    "birth": "a889d3ccac4115f8",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 77.7
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "horseshoe-ring-02-i01": {
+  "rows": 5285,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 5285,
+    "state_sha": "a1031f759168b50b",
+    "world_sha": "d1b45c0fcdf5096e",
+    "birth": "a6c8d9ab95fa3fe8",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 486.3
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 5285,
+    "state_sha": "cca403b66ef53500",
+    "world_sha": "d1b45c0fcdf5096e",
+    "birth": "87747f8bf4f8d73a",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 501.9
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "interlocked-claws-03-i01": {
+  "rows": 812,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 812,
+    "state_sha": "30545aa2bfa43760",
+    "world_sha": "7bb6be656da1f1f6",
+    "birth": "e1fded021d662254",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 34.0
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 812,
+    "state_sha": "6a19a1f3a3e87453",
+    "world_sha": "7bb6be656da1f1f6",
+    "birth": "267b39f34c4035a3",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 33.2
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "interlocked-claws-13-i01": {
+  "rows": 9596,
+  "recorded_end": "66be99300a3ceebd",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 9596,
+    "state_sha": "66be99300a3ceebd",
+    "world_sha": "517e1ff696e89b8e",
+    "birth": "195513489176c313",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 243.8
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 9596,
+    "state_sha": "1be8ad62b93bf78d",
+    "world_sha": "517e1ff696e89b8e",
+    "birth": "b7442e60b32dff0d",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 244.2
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "knot-untying-03-i01": {
+  "rows": 753,
+  "recorded_end": null,
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 753,
+    "state_sha": "191d932660caa264",
+    "world_sha": "bdb80ca9c00e672d",
+    "birth": "3fe175d34a4dbf8c",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 215.4
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 753,
+    "state_sha": "297dafc6072243a0",
+    "world_sha": "bdb80ca9c00e672d",
+    "birth": "de45a17fc357d0c8",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 217.8
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": null,
+  "end_record_consistent": true,
+  "host": "host A"
+ },
+ "battery-replacement-01-i01": {
+  "rows": 7029,
+  "recorded_end": "7ac8b8d39269e320",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 7029,
+    "state_sha": "7ac8b8d39269e320",
+    "world_sha": "76029cc9d8a404cb",
+    "birth": "ebd436acde9a62a1",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 304.7
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 7029,
+    "state_sha": "f822443d10a4db25",
+    "world_sha": "76029cc9d8a404cb",
+    "birth": "4edfedab6b06e2e2",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 317.7
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host C"
+ },
+ "clock-assembling-01-i01": {
+  "rows": 8171,
+  "recorded_end": "955e65d624a1ce41",
+  "seeds": {
+   "0": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 8171,
+    "state_sha": "955e65d624a1ce41",
+    "world_sha": "c6e9037ee7452f72",
+    "birth": "62e5c06433a1de4f",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 532.1
+   },
+   "1": {
+    "success": true,
+    "strict_goal_reached": true,
+    "strict_goal_row": 8171,
+    "state_sha": "494bac17d19272fa",
+    "world_sha": "c6e9037ee7452f72",
+    "birth": "39327802d5fed512",
+    "instance_exact": true,
+    "runtime_binding": true,
+    "review": null,
+    "forcing": false,
+    "episode_end": "success",
+    "wall_s": 531.3
+   }
+  },
+  "world_equal": true,
+  "seed0_end_is_recorded": true,
+  "end_record_consistent": true,
+  "host": "host C"
+ }
+}
