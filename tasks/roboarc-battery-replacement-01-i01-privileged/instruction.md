@@ -12,7 +12,7 @@ You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw
   it back until it stops (it latches there).
 - The compartment holds two old cells (grey body, tan band). They sit 4 mm below the compartment's rim with 1 mm of
   side clearance; a seated cell cannot be pinched out (see the grasp rule below). Lever an old cell up with the pry stick
-  (yellow blade with a small foot at its tip, blue handle; it stands in its holder): put the blade into the notch at the
+  (a nylon spudger: a thin blade with a small foot at its tip, a square handle; it stands in its holder): put the blade into the notch at the
   cell's + end, beside the + contact, and pivot the stick on the notch's outer edge.
 - Two new cells (black body, copper band) lie in the tray; the recycling box is on the table.
 

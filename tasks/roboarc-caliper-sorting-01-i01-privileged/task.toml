@@ -10,7 +10,7 @@ keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "traject
 [metadata]
 author_name = "Jianwen Lyu"
 tooling_version = "19"
-task_type = "trajectory"          # trajectory | policy   (see docs/rcb/PROTOCOL.md)
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "aloha-2"
 family = "caliper_sorting"
