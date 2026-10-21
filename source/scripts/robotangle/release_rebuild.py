@@ -556,9 +556,9 @@ def write_seed_files(a, rb: pathlib.Path, new: str, d: pathlib.Path, ref: bytes 
     without them): per seed S, the lock of instances/<new>/seeds/<S>/ (packages/<new>-privileged/
     runtime_binding.s<S>.upstream.json: seed 0's lock with that instance's canonical sha256, asset files and creation
     source) and, where the base has a reference, the reference re-stamped with the seed's birth (oracles/<new>/
-    privileged.s<S>.npz; the standard oracle streams only the rows, which every seed shares). A previous release's seed
-    files of the base go first, its packages' tests/seeds/ too (seed_goal_pictures writes them). Returns the base's
-    assets.json `seeds` ({} without seeds)."""
+    privileged.s<S>.npz; the standard oracle streams only the rows, which every seed shares; a reference without a stamp
+    gets none). A previous release's seed files of the base go first, its packages' tests/seeds/ too
+    (seed_goal_pictures writes them). Returns the base's assets.json `seeds` ({} without seeds)."""
     for p in [*(rb / "packages" / f"{new}-privileged").glob("runtime_binding.s*.upstream.json"),
               *(rb / "oracles" / new).glob("privileged.s*.npz")]:
         p.unlink()
@@ -572,7 +572,9 @@ def write_seed_files(a, rb: pathlib.Path, new: str, d: pathlib.Path, ref: bytes 
                  if p.is_file()}
         (rb / "packages" / f"{new}-privileged" / f"runtime_binding.s{s}.upstream.json").write_text(json.dumps(
             dict(lock, instance_sha256=canonical(si), asset_files=files, creation_source=si["topogym_source"]), indent=2) + "\n")
-        if ref is not None:
+        # a reference without a birth stamp (no instance_sha.npy: rope-threading 04-08's) serves every seed as it is:
+        # nothing reads a stamp it does not have, and mk_tasks.py then ships it alone
+        if ref is not None and "instance_sha.npy" in zipfile.ZipFile(io.BytesIO(ref)).namelist():
             (rb / "oracles" / new / f"privileged.s{s}.npz").write_bytes(restamp(ref, si["state_sha"]))
         pins[str(s)] = {"instance_sha256": canonical(si)}
     return pins

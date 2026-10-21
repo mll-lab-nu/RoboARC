@@ -1182,14 +1182,23 @@ SEED_SOLVE = ("#!/bin/bash\n# Reference solution (privileged): the trajectory th
               "cp \"/solution/$f\" /app/output/trajectory.npz\n")
 
 
-def seed_words(s: str, mode: str, seeds: list[int]) -> str:
-    """A seeded task's README: the Reference solution paragraph says which file serves which seed."""
+def stamped(ref: pathlib.Path) -> bool:
+    """Whether a reference names the birth it was recorded on (instance_sha.npy); rope-threading 04-08's do not."""
+    with zipfile.ZipFile(ref) as z:
+        return "instance_sha.npy" in z.namelist()
+
+
+def seed_words(s: str, mode: str, seeds: list[int], stamp: bool = True) -> str:
+    """A seeded task's README: the Reference solution paragraph says which file serves which seed (stamp: the reference
+    names its birth, so each appearance seed has its re-stamped copy; without a stamp the one file serves every seed)."""
     m = re.search(r"(?ms)^## Reference solution\n(`solution/solve\.sh` .*?)\n\n(?=^## )", s)
     if not m:
         return s
     more = (f" For an appearance seed S ({', '.join(map(str, seeds[1:]))}) it copies `solution/trajectory.s<S>.npz` instead: "
             "the same rows with `instance_sha` set to that seed's birth (`solve.sh` picks the file whose stamp is the staged "
-            "instance's `state_sha`)." if mode == "privileged" else
+            "instance's `state_sha`)." if mode == "privileged" and stamp else
+            " The same file serves every appearance seed: it names no birth (`instance_sha`), and a seed changes only the "
+            "looks." if mode == "privileged" else
             " The same rows serve every appearance seed: a seed changes only the looks.")
     return s[:m.end(1)] + more + s[m.end(1):]
 
@@ -1281,6 +1290,8 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
         f"{base}: a MuJoCo base needs shared/render_bridge.py (and nyx_direct.py) from the MuJoCo release's tooling"
     reference = pathlib.Path(dev["bases"][base]["reference"]) if dev else None
     seeds = seeds_of_base(base) if dev is None else [0]   # appearance seeds (assets.json); a dev render has its one instance
+    ref0 = reference or ORC / base / "privileged.npz"
+    stamp = not ref0.is_file() or stamped(ref0)          # a reference without a birth stamp serves every seed as it is
     for mode in ("privileged", "standard"):
         t = out / f"{BENCH}-{base}-{mode}"; up = PKG / f"{base}-{mode}"; dirs.append(t)
         rd = lambda n: (up / n).read_text()  # noqa: E731
@@ -1291,7 +1302,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
         put(t / "task.toml", toml.encode())
         fence = "`fence`" in rd("instruction.md")
         readme = audit_words(r5_words(frame_words(flat_words(rewrite_readme(separation_words(rd("README.md"), f"{t.name}/README.md"), base, mode, rec), fence), f"{t.name}/README.md", mode), mode), rec, mode, True)
-        put(t / "README.md", (seed_words(readme, mode, seeds) if len(seeds) > 1 else readme).encode())
+        put(t / "README.md", (seed_words(readme, mode, seeds, stamp) if len(seeds) > 1 else readme).encode())
         ins = grasp_text(contact_text(chain_text(mujoco_text(text(instance_facts(separation_words(rd("instruction.md"), f"{t.name}/instruction.md"), rec, mode)), rec), rec), rec), rec).replace("RoboARC", "RoboARC (simulator package `topogym`)", 1)
         ins = flat_words(review_fixes_r2(review_fixes(ins, "instruction.md", base, mode), base, mode), fence)
         ins = clock_words(r5_words(frame_words(safety_text(ins) if mode == "standard" else ins, f"{t.name}/instruction.md", mode), mode), mode)
@@ -1321,7 +1332,7 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                     put(t / d / n, b)
             put(t / "tests/grade.py", (SHARED / "privileged/grade.py").read_bytes())
             traj = reference or ORC / base / "privileged.npz"
-            if traj.is_file() and len(seeds) > 1:     # appearance seeds: a reference per seed, picked by the staged birth
+            if traj.is_file() and len(seeds) > 1 and stamp:   # appearance seeds: a reference per seed, picked by the staged birth
                 refs = seed_references(base, traj, seeds, inst_src)
                 for n, data, _ in refs:
                     put(t / "solution" / n, data)

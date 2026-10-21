@@ -233,6 +233,25 @@ def test_render():
                 check(False, f"seed 2's reference with other {name} must stop the render")
             except AssertionError as e:
                 check(want in str(e), f"seed 2's reference with other {name}: wrong failure {e}")
+        # a reference without a birth stamp (rope-threading 04-08's: no instance_sha.npy) has no re-stamped copies: the one
+        # file serves every seed, solve.sh copies it whatever is staged, and the README says so
+        for s in (1, 2):
+            (orc / BASE / f"privileged.s{s}.npz").unlink()
+        with zipfile.ZipFile(io.BytesIO(ref)) as z:
+            bare = io.BytesIO()
+            with zipfile.ZipFile(bare, "w") as zo:
+                for n in z.namelist():
+                    if n != "instance_sha.npy":
+                        zo.writestr(n, z.read(n))
+        (orc / BASE / "privileged.npz").write_bytes(bare.getvalue())
+        priv, _ = mk.render(BASE, td / "unstamped")
+        sol = {p.name for p in (priv / "solution").iterdir()}
+        check(sol == {"solve.sh", "trajectory.npz"} and (priv / "solution/trajectory.npz").read_bytes() == bare.getvalue(),
+              f"unstamped reference: {priv.name}/solution {sol}")
+        check("cp /solution/trajectory.npz /app/output/trajectory.npz" in (priv / "solution/solve.sh").read_text(),
+              "unstamped reference: solve.sh does not copy the one file")
+        check("The same file serves every appearance seed" in (priv / "README.md").read_text(),
+              "unstamped reference: the README does not say the one file serves every seed")
 
 
 if __name__ == "__main__":
