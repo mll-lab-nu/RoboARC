@@ -85,12 +85,12 @@ variable; the main ones:
 | what | how |
 |---|---|
 | agent, model, effort | `AGENT=codex` or `claude-code`, `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
-| credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file`. Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
+| credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
 | attempts | `K` per task (1) |
 | web search | `WEB_SEARCH=disabled` (default) or `allowed` (not for official runs) |
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
-| usage recording | `USAGE_GATEWAY=<dir>`: route the agent's model-API calls through the usage gateway installed in `<dir>` ("Usage recording" below). Empty (default) = off |
+| usage recording | `USAGE_GATEWAY=<dir>`: route the agent's model-API calls through the usage gateway installed in `<dir>` (the repository's: `USAGE_GATEWAY=scripts/usage_gateway`; "Usage recording" below). Empty (default) = off |
 | optional host tools | `LOG_MIRROR=1`: an append-only mirror of every trial's `agent/` record in a root-owned container (`rcb-log-mirror`, `scripts/harbor/log_mirror.py`), so neither the agent nor the host user can delete it. `MEM_GUARD=1`: `scripts/harbor/mem_guard.py` keeps 2 GiB of host memory available by killing the largest running RoboARC trial container (names `roboarc-*` only). Both are off by default |
 
 After each job the runner scans the job for keys and redacts them (`scripts/harbor/scan_secrets.py`), writes the
@@ -240,9 +240,11 @@ Recording the agent's model-API usage is optional, and off by default. Without i
 the harness's own (Harbor's `result.json`, `agent_result`), where the harness reports them.
 
 With `USAGE_GATEWAY=<dir>`, the batch runner routes the agent's model-API calls through a transparent usage gateway
-installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). **The gateway is an external component, not part
-of this repository**; a `USAGE_GATEWAY` without `gateway.py` stops the runner at start, before any job. The gateway
-forwards model calls only, unchanged (the agent keeps its own credentials), records each trial's tokens per request
+installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). The repository ships one in `scripts/usage_gateway/`
+(`USAGE_GATEWAY=scripts/usage_gateway`), taken unchanged from the shared benchmark repository (PROVENANCE.md); another
+gateway that takes the runner's options works too. A `USAGE_GATEWAY` without `gateway.py` stops the runner at start,
+before any job. The gateway forwards model calls only, unchanged (the agent keeps its own credentials), records each
+trial's tokens per request
 (`<trial>/gateway/usage.jsonl`, `totals.json`; with `GATEWAY_RAW=1`, the default, also the raw request and response
 bodies, which hold the whole conversation: keep them private), enforces the token budget (`TOKEN_BUDGET_IN` /
 `TOKEN_BUDGET_OUT`, 100M input tokens, cache included, and 10M output tokens, reasoning included, by default; past it

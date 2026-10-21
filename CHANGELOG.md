@@ -4,6 +4,18 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+- The usage gateway ships with the repository: `scripts/usage_gateway/` (from the shared benchmark repository,
+  unchanged; PROVENANCE.md) and `.env.example`. Usage recording stays optional and off by default; turn it on with
+  `USAGE_GATEWAY=scripts/usage_gateway` (docs/RUNNING.md "Usage recording"). Its tests and a check that it takes
+  every option the runner passes run in `ci_checks/check-unit-tests.sh`.
+- `scripts/set_agent_egress.py` runs its command line only as a script, so importing it (to read `HOSTS`) runs
+  nothing; as a script it behaves as before.
+- `tools/stress/corpus/SHA256SUMS`: the O2 reproducer's line matches its file again.
+
+No task directory, pinned tooling, hashed simulator file or image input changes.
+
 ## 1.1.0 (2026-10-20)
 
 The puzzle image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` (8.7 GB; 1.0.0 was 12.2 GB). The task

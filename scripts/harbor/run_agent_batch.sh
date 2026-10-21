@@ -49,8 +49,8 @@
 #                the agent calls its API directly, as Harbor runs it, and nothing below about the gateway runs; the
 #                token counts in the results are the harness's own (Harbor's result.json). <dir> = on: route the agent's
 #                model API calls through the transparent usage gateway installed in <dir> (gateway.py, rawlog.py,
-#                api_paths.json). The gateway is an EXTERNAL component, not part of this repository; a <dir> without
-#                gateway.py stops the runner at start. It forwards
+#                api_paths.json). This repository ships one: USAGE_GATEWAY=scripts/usage_gateway (another gateway
+#                that takes the same options works too); a <dir> without gateway.py stops the runner at start. It forwards
 #                them unchanged (the agent keeps its own credentials) and records each trial's tokens per request in
 #                <trial>/gateway/ (usage.jsonl, totals.json). Before each job the runner checks that the gateway answers
 #                (/_gateway/health) and restarts it on its port, or stops the lane; a job during which it died gets
@@ -103,7 +103,7 @@ HOST_CPUS="${HOST_CPUS:-$(nproc)}"
 # the switch of earlier versions of this script: refused rather than ignored, so that nobody expects a usage record silently
 [ -n "${GATEWAY:-}${USAGE_GATEWAY_DIR:-}" ] && { echo "GATEWAY / USAGE_GATEWAY_DIR are no longer read: usage recording is USAGE_GATEWAY=<the gateway's directory> (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
 if [ -n "$USAGE_GATEWAY" ]; then
-  [ -f "$USAGE_GATEWAY/gateway.py" ] || { echo "USAGE_GATEWAY=$USAGE_GATEWAY: no gateway.py there. The usage gateway is an external component, not part of this repository: install it and point USAGE_GATEWAY at its directory, or leave USAGE_GATEWAY empty to run without usage recording (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
+  [ -f "$USAGE_GATEWAY/gateway.py" ] || { echo "USAGE_GATEWAY=$USAGE_GATEWAY: no gateway.py there. Point USAGE_GATEWAY at the gateway's directory (this repository ships one: USAGE_GATEWAY=scripts/usage_gateway), or leave USAGE_GATEWAY empty to run without usage recording (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
   USAGE_GATEWAY="$(cd "$USAGE_GATEWAY" && pwd)"
   case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
 fi

@@ -9,7 +9,7 @@ tasks/ has, PROTOCOL §2.11), or, for a run's own copy of a task, `only <hosts>`
     scripts/set_agent_egress.py public       <task dirs...>     # a run's copy with no restriction: Harbor's default, open
 
 HOSTS below is the one list, and the one switch: every task ships with it, ci_checks/check-verifier-isolation.sh requires
-exactly it of every task in tasks/, the generator (and an external usage gateway) read it from this file's text. It is the model
+exactly it of every task in tasks/, the generator (and the usage gateway, scripts/usage_gateway/) read it from this file's text. It is the model
 APIs (what was measured to keep Codex with a ChatGPT login, Claude Code and OpenRouter working, 2026-09-24) and
 PACKAGE_HOSTS, the package registries (installing packages is part of what an agent may do): PyPI
 (pip contacts pypi.org for the index and files.pythonhosted.org for the files) and the apt archives the images'

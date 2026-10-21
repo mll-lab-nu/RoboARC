@@ -2,7 +2,8 @@
 # Unit tests of the benchmark's tooling and the shared layer, in two tiers.
 #  1. Standard library and a shell only (no numpy, no simulator, no image): the Harbor runner's helpers (retry rule,
 #     account-failure rule, Codex config, the optional usage gateway switch with a fake harbor, build stamps), the
-#     simulator source hash (tools/release/source_hash.py), and RoboARC's generator and asset pins
+#     shipped usage gateway (scripts/usage_gateway/: its own tests, and the options and host lists the runner gives it),
+#     the simulator source hash (tools/release/source_hash.py), and RoboARC's generator and asset pins
 #     (scripts/roboarc/tests/: the packages' fields and checks, assets.py pin / check / check-instances on a fake
 #     dataset). Run by run_all.sh and the CI job `unit-tests` (not required; the
 #     test that enforces PROTOCOL Appendix H.5 also runs in the required job `invariants`, run_invariants.sh).
@@ -36,7 +37,9 @@ run() {   # run <timeout s> <test path from the repository root> [arguments of t
 }
 # the standard-library tests
 for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_retry_policy.py \
-         scripts/harbor/tests/test_usage_gateway_option.py scripts/tests/test_stamp_mtimes.py \
+         scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
+         scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
+         scripts/usage_gateway/tests/test_budget_stop.py scripts/tests/test_stamp_mtimes.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py; do
   run 300 "$t"
 done
