@@ -89,8 +89,8 @@ def test_hash_prefixes():
 
 def test_standard_references_obey_the_joint_speed_rule():
     """The standard references move an arm joint target at most 0.04 rad per control step (the standard rule; checked
-    between consecutive rows), except blanket-flatten-06's 3 rows at the ALOHA's own pi rad/s limit. 12 privileged
-    references are faster in places: their standard reference is the re-timed copy."""
+    between consecutive rows). 12 privileged references are faster in places: their standard reference is the re-timed
+    copy (blanket-flatten-06's: the same route re-recorded within the rule)."""
     over_std, over_priv = [], []
     for t in roboarc.list_tasks("puzzles"):
         if not t.reference:
@@ -100,5 +100,5 @@ def test_standard_references_obey_the_joint_speed_rule():
             arm = [i for i in range(rows.shape[1]) if i not in (6, 13)] if rows.shape[1] == 14 else list(range(7))
             if np.abs(np.diff(rows[:, arm], axis=0)).max() > 0.04 + 1e-6:
                 over.append(t.base)
-    assert over_std == ["blanket-flatten-06-i01"]
+    assert over_std == []
     assert len(over_priv) == 12

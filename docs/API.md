@@ -241,11 +241,10 @@ Every limit clamps the command and the episode goes on; none fails it. The API a
   most 0.04 rad per control step from the current targets (`rcb_topogym.JOINT_STEP_LIMIT_RAD`; at 40 Hz 1.6 rad/s),
   componentwise as the standard service clamps a streamed row (`environment/sim/server.py`, `run_joint_position`, a row
   of one control step held); the grippers are not limited. A farther target is reached over the following steps if it
-  is sent again. The standard mode's references obey it (`roboarc.load_reference(task, "standard")`; one exception:
-  blanket-flatten-06's standard reference is its privileged file, with 3 rows faster than the rule, which the rule
-  clamps). 12 privileged references move faster in places (blanket-flatten-06, buzz-wire-3d-09,
-  fiber-bundling-07..10, interlocked-claws-12, rope-threading-04..08): their verifier replays them under the
-  privileged rules, and their standard reference is a re-timed copy. Replay a privileged reference with
+  is sent again. The standard mode's references obey it (`roboarc.load_reference(task, "standard")`). 12 privileged
+  references move faster in places (blanket-flatten-06, buzz-wire-3d-09, fiber-bundling-07..10, interlocked-claws-12,
+  rope-threading-04..08): their verifier replays them under the privileged rules, and their standard reference is a
+  re-timed copy (blanket-flatten-06's: the same route re-recorded within the rule). Replay a privileged reference with
   `rules="privileged"` (`python -m roboarc replay` picks the rules of the reference's mode).
 - IKEA, in `rcb_ikea.Session.step` (both modes and the grader's replays): the control range (clip), then the **speed
   clamp**: every arm joint target moves at most its real limit x control step from the previous target (Franka Panda
