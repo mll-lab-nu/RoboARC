@@ -6,10 +6,10 @@
 | Mode | privileged |
 | Twin | `roboarc-knot-untying-04-i01-standard` |
 | Simulator / robot | `roboarc` / `aloha-2` |
-| Family / instance | `knot_untying` / seed 0 |
+| Family / instance | `knot_untying` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc:1.1.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc:1.2.0` |
 
 ## Task
 RoboARC knot_untying (ALOHA 2, MuJoCo): produce one replayable trajectory. Untie and spread the rope on the tabletop until its top-down projection has no crossings or overlaps, then release it. Frozen scene instance (variation knot_untying_medium, seed 0).
@@ -18,7 +18,7 @@ RoboARC knot_untying (ALOHA 2, MuJoCo): produce one replayable trajectory. Untie
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: physical grasping only (no assisted grasping).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `2b690038b73e0bc9…`) to `/app/output/`: the MuJoCo reference (the released route re-recorded on MuJoCo with a held tail), which the verifier scored 1 in two fresh-process replays on an earlier build of this benchmark's image (2026-10-13) that holds the same frozen instance (2026-10-13; simulator source d601866b, tooling fde662d5).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `2b690038b73e0bc9…`) to `/app/output/`: the MuJoCo reference (the released route re-recorded on MuJoCo with a held tail), which the verifier scored 1 in two fresh-process replays on an earlier build of this benchmark's image (2026-10-13) that holds the same frozen instance (2026-10-13; simulator source d601866b, tooling fde662d5). For an appearance seed S (1, 2) it copies `solution/trajectory.s<S>.npz` instead: the same rows with `instance_sha` set to that seed's birth (`solve.sh` picks the file whose stamp is the staged instance's `state_sha`).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
@@ -75,9 +75,9 @@ Untie and spread the rope on the tabletop until its top-down projection has no c
 - A failure is reported in `s.status()["episode_end"]` as "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
 
 ### Provenance
-- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `d601866b` (MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image eai-roboarc:0.2.1, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `c9171f79`, tooling `d8692e15`).
+- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `d601866b` (MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image eai-roboarc:1.2.0, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `4163626d`, tooling `8cb4e65a`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `9f34f894a454`, under `instances/knot-untying-04-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 1.1.0, image `ghcr.io/embodied-first-exam/roboarc:1.1.0` (images/roboarc/); simulator source `67ed48da8` (PROVENANCE.md).
+- Release: RoboARC 1.2.0, image `ghcr.io/embodied-first-exam/roboarc:1.2.0` (images/roboarc/); simulator source `4395f8165` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log

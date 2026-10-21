@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "instance_sha256": "82fbdb3bbb757ee6dbe58509f3e48ab3562e015cf75900f5f731c1bde7921f46",
+  "asset_files": {
+    "instance_assets/mujoco/meshes/goal_region_d86fcb15d79e116e.obj": "d86fcb15d79e116e4090655dd6940fa232ad3acb602a79410c6b3d6a8310eea1",
+    "instance_assets/mujoco/scene.json": "d400f0783b1d283af39b86d635cfd39856608b5123c25115a404ee04a2eef11a",
+    "instance_assets/mujoco/scene.xml": "50d68aba055b70fd90c620c42b8329274cc759008a286cb7a9200c37400ea961"
+  },
+  "tooling_sha256": "8cb4e65a16ac8be8726d9420f869c822508dd9411d0223c84f26e7799c557073",
+  "creation_source": {
+    "sha256": "d601866b4c91c858aa4e249b5bf5145b8fe3263b2885048a86016e34c314c208",
+    "files": 444
+  },
+  "runtime": {
+    "source": {
+      "sha256": "4163626dc97d1f13cf488cd6cd831fde4e412aa29fde888a6800b2c74f5c5a34",
+      "files": 466
+    },
+    "python": "3.11.15",
+    "dependencies": {
+      "genesis-world": "1.2.1",
+      "pyuipc": "0.0.25+topogym.det1.cuda128",
+      "torch": "2.11.0+cu128",
+      "numpy": "2.3.5",
+      "scipy": "1.17.1",
+      "mujoco": "3.14.0",
+      "newton": "1.6.1",
+      "warp-lang": "1.18.0"
+    },
+    "uipc_build_sha256": "39781d192a00d0cdc784f76e9ef2aa6fa404da510cf813ff06a04ea33b2597c1"
+  },
+  "image": {
+    "reference": "roboarc:1.2.0-noinst",
+    "id": "sha256:72ecf073a9f359bc8f34eb080ad416a246f8da24bdd271a49f336dbc8fccfaf0",
+    "repo_digests": []
+  }
+}

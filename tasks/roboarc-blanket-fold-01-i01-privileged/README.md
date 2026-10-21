@@ -6,10 +6,10 @@
 | Mode | privileged |
 | Twin | `roboarc-blanket-fold-01-i01-standard` |
 | Simulator / robot | `roboarc` / `aloha-2` |
-| Family / instance | `blanket_fold` / seed 0 |
+| Family / instance | `blanket_fold` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc:1.1.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc:1.2.0` |
 
 ## Task
 RoboARC blanket_fold (ALOHA 2, MuJoCo): produce one replayable trajectory. Fold the blanket into the target shape on the table, then release it and withdraw. The blanket (600 mm x 480 mm) starts lying flat on the table. Fold it in half: turn the far half (the 240 mm of material along the far long edge) over onto the near half about the middle line parallel to the long edges, so that the far edge lies on the near edge and the far corners on the near corners. The folded stack is 600 mm x 240 mm, two layers, the far half upside down on top. The target images show the required final state: this is how the folded cloth must look and where it must lie; fold it like this. Near, far, left and right are as seen in the overhead camera cam_high (near = the lower side of its image). Frozen scene instance (variation blanket_fold_very_easy, seed 0).
@@ -19,7 +19,7 @@ The target images: `/app/goal/target_cam_high.png` (seen from the overhead camer
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (pbd_local_patch_v1).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `3aa46e4621290e28…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on the release image eai-roboarc 0.1.0 (2026-10-14; simulator source 37aa7ac0, tooling d8692e15).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `3aa46e4621290e28…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on the release image eai-roboarc 0.1.0 (2026-10-14; simulator source 37aa7ac0, tooling d8692e15). For an appearance seed S (1, 2) it copies `solution/trajectory.s<S>.npz` instead: the same rows with `instance_sha` set to that seed's birth (`solve.sh` picks the file whose stamp is the staged instance's `state_sha`).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
@@ -78,9 +78,9 @@ Fold the blanket into the target shape on the table, then release it and withdra
 - A failure is reported in `s.status()["episode_end"]` as "Cloth fell below the table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
 
 ### Provenance
-- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `e2e2f564` (MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image eai-roboarc:0.2.1, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `c9171f79`, tooling `d8692e15`).
+- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `e2e2f564` (MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image eai-roboarc:1.2.0, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `4163626d`, tooling `8cb4e65a`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `9f34f894a454`, under `instances/blanket-fold-01-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 1.1.0, image `ghcr.io/embodied-first-exam/roboarc:1.1.0` (images/roboarc/); simulator source `67ed48da8` (PROVENANCE.md).
+- Release: RoboARC 1.2.0, image `ghcr.io/embodied-first-exam/roboarc:1.2.0` (images/roboarc/); simulator source `4395f8165` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log

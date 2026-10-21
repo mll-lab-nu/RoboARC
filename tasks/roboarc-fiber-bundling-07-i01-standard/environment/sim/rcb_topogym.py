@@ -210,6 +210,24 @@ MAX_STEPS = int(os.environ.get("RCB_MAX_STEPS", "200000"))   # runaway guard on 
 _COMMON = dict(control_mode="JOINT_ABS", max_physics_steps=None, history_storage="segment", enable_rgb=True, enable_depth=True,
                enable_privileged=True, compute_backend="cuda", render_backend="nyx")
 TASKS: dict[str, dict] = {
+    # clock_assembling (2026-10-16; runs/watch_assembly_design_20261014): MuJoCo only; seating, meshing, the screws, the
+    # bridge's fixing, the click and the run test are the task's mechanism.
+    "clock_assembling": dict(
+        task_id="clock_assembling", robot="aloha",
+        text="Assemble the gear train of the enlarged watch movement on the table. Put the four wheels on their pivots in "
+             "the main plate in the train's order: the barrel (the large drum with the square on its arbor), then the "
+             "center wheel, the third wheel and the fourth wheel; each wheel's pinion must mesh with the previous wheel's "
+             "teeth, and a wheel lowered with its pinion's teeth on the other wheel's teeth stops until it is turned a "
+             "little. Lay the train bridge over the wheels on its two steady pins and pillars: every upper pivot (the "
+             "barrel: its arbor) must go into its hole in the bridge. A released wheel leans on its pivot, so a pivot can "
+             "miss its hole; the thin probe on its stand can push a wheel's rim to bring its pivot under the hole. Press "
+             "the bridge flat on its pillars, put the two screws into the bridge's screw holes and turn each clockwise by "
+             "two full turns. Then run the train: wind the barrel by turning its square (the ratchet under it turns with "
+             "it) counterclockwise seen from above by at least 120 degrees in strokes, as the click holds it; let go and "
+             "watch the fourth wheel: the mainspring must drive the train so that the fourth wheel turns freely, at least "
+             "5 turns in the rules' 5 s run, at 450 times the barrel's turn in the opposite direction. Holding parts at "
+             "the end is allowed.",
+        instances=[dict(variation_id="clock_assembling_gear_train", seed=0)], grasp_assist="recommended"),
     "cube_pick_place": dict(
         task_id="cube_pick_place", robot="panda_robotiq", fixture=True,
         text="Pick up the cube, hold it at least 5 cm above the table for at least 0.2 s, place it back at its original "
@@ -218,6 +236,24 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="base", seed=0)],
         simulator=dict(physics_dt_s=0.025, solver_substeps=40, control_decimation=1),
         grasp_assist=dict(model="contact_weld_v1", targets=[dict(entity="cube", link="box_baselink", radius_m=0.04)])),
+    # bed_bolt (2026-10-16; runs/bed_bolt_design_20261012): MuJoCo only; the thread is the task's mechanism.
+    "bed_bolt": dict(
+        task_id="bed_bolt", robot="aloha",
+        text="Drive the long bolt fully into the blind hole in the bed frame's corner block, inside the frame, with the "
+             "L-shaped hex key: carry the bolt to the hole and push its tip in until the thread catches, then turn it "
+             "with the key in its head's hex socket until the head seats on the block. The thread holds the bolt only "
+             "after two turns; once engaged, pushing or pulling does not drive the bolt and fingers cannot turn it. Leave "
+             "the seated bolt and the key still.",
+        instances=[dict(variation_id="bed_bolt_crossbar", seed=0)], grasp_assist="recommended"),
+    # battery_replacement (2026-10-16; runs/controller_battery_design_20261014): MuJoCo only; every mechanism physical.
+    "battery_replacement": dict(
+        task_id="battery_replacement", robot="aloha",
+        text="Replace the two old AA cells in the game controller's battery compartment with the two new cells from the "
+             "tray, each with its + end toward its slot's + contact, put both old cells in the recycling box and close "
+             "and latch the battery cover. The cover slides about 5 mm toward the controller's top edge to unlatch. A "
+             "seated cell cannot be pinched out: lever it up with the pry stick, its blade in the notch beside the cell's "
+             "+ end.",
+        instances=[dict(variation_id="battery_replacement_xbox_aa", seed=0)], grasp_assist="recommended"),
     "blanket_flatten": dict(
         task_id="blanket_flatten", robot="aloha",
         text="Unfold and spread the blanket flat on the table. Remove folds, rolls and self-overlaps so the fabric covers "
@@ -314,6 +350,14 @@ TASKS: dict[str, dict] = {
         # Weld on any link and on the ring for the rigid-chain settings only; the FEM tiers' recommendation is none
         # (tasks/slotted_post_ring/common.py).
         instances=[dict(variation_id="slotted_post_ring_hard_chain", seed=0)], grasp_assist="recommended"),
+    # caliper_sorting (2026-10-16, Jianwen; runs/caliper_sorting_design_20261014): a new MuJoCo family.
+    "caliper_sorting": dict(
+        task_id="caliper_sorting", robot="aloha",
+        text="Measure the sleeves with the caliper and put every sleeve into the bin whose label gives its two caliper "
+             "readings. The sleeves look alike; only measuring tells their classes apart, and the caliper, fixed on a stand, "
+             "reads in its own unit. Its slider starts locked by the knob on its face. Release every sleeve in its bin and "
+             "leave all of them still.",
+        instances=[dict(variation_id="caliper_sorting_vernier", seed=0)], grasp_assist="recommended"),
 }
 for _name, _t in TASKS.items():
     _t.setdefault("simulator", {}); _t.setdefault("grasp_assist", None); _t.setdefault("fixture", False)
@@ -333,7 +377,8 @@ TASKS["lock_picking"]["simulator"] = {**TASKS["lock_picking"]["simulator"], "pre
 # MuJoCo (2026-10-09, the Genesis -> MuJoCo migration; docs/rcb/MUJOCO_CORE.md): these families build new instances on
 # topogym.world.mujoco (CPU float64; the scene frozen with the instance). Released Genesis instances keep their own frozen
 # simulator configuration and still load on Genesis.
-for _name in ("interlocked_claws", "fiber_bundling", "hedgehog_in_cage", "cast_keyhole", "lock_picking", "buzz_wire_3d", "horseshoe_ring", "cast_coil"):
+for _name in ("interlocked_claws", "fiber_bundling", "hedgehog_in_cage", "cast_keyhole", "lock_picking", "buzz_wire_3d", "horseshoe_ring", "cast_coil",
+              "bed_bolt", "clock_assembling", "battery_replacement", "caliper_sorting"):
     TASKS[_name]["simulator"] = {**{k: v for k, v in TASKS[_name]["simulator"].items() if k != "rigid_options"},
                                  "compute_backend": "cpu", "precision": "64", "physics_engine": "mujoco"}
 # lock_picking on MuJoCo: the stop frames' round slot ends as 1-degree collision wedges (0.15-degree ones are sliver
@@ -428,7 +473,7 @@ TASKS["blanket_fold"]["simulator"] = dict(TASKS["blanket_flatten"]["simulator"])
 # names it (nyx_direct_sha256). The other families' MuJoCo instances keep the render bridge's Genesis host ("nyx", the
 # default). RCB_RENDER, when set, overrides the field (_render_bridge).
 for _name in ("blanket_flatten", "blanket_fold", "buzz_wire_3d", "fiber_bundling", "hedgehog_in_cage", "horseshoe_ring",
-              "interlocked_claws", "knot_untying", "lock_picking", "rope_threading"):
+              "interlocked_claws", "knot_untying", "lock_picking", "rope_threading", "bed_bolt", "clock_assembling", "battery_replacement"):
     TASKS[_name]["renderer"] = "direct"
 # cast_coil: every MuJoCo instance of the family, the five released tiers and the v2 design tiers
 # alike. Released tiers at birth: nyx_direct's input buffers equal the host's bit for bit, at most 12 pixels > 8 levels
@@ -443,6 +488,8 @@ TASKS["cast_keyhole"]["renderer"] = "direct"
 # boxes flicker on the host too); runs/robotangle_mujoco/v2/slotted_orbits/nyxtest.
 for _name in ("orbits", "slotted_post_ring"):
     TASKS[_name]["renderer"] = "direct"
+# caliper_sorting (2026-10-16, Jianwen): a MuJoCo-only family; its URDF parts carry one textured GLB visual per link.
+TASKS["caliper_sorting"]["renderer"] = "direct"
 
 
 def simulator_config(task: str, eval_index: int | None = None, *, variation_id: str | None = None,
@@ -4835,9 +4882,11 @@ def cmd_make_instance(a) -> None:
         shutil.copytree(s.env._world.scene_dir, target)
         out["simulator"]["mujoco_scene"] = "instance_assets/mujoco"
         ticks = int(s.config.get("reset_physics_steps") or 0)
-        if ticks:
+        if ticks and s.config["task_id"] in MUJOCO_CHAIN_FAMILIES:
             # Freeze the settled birth too: every later build restores it instead of settling `ticks` ticks again
-            # (SimulatorConfig.mujoco_settled_state; the restored state has the same state_sha).
+            # (SimulatorConfig.mujoco_settled_state; the restored state has the same state_sha). Only the chain families
+            # (their settling, MUJOCO_CHAIN_SETTLE_S): another MuJoCo instance keeps its reset_physics_steps and settles
+            # at every build (export_settled_state does not cover cloths).
             path = Path(a.out).resolve().parent / "instance_assets" / "mujoco_settled.npz"
             s.env._world.export_settled_state(path, settled_ticks=ticks)
             out["simulator"].update(reset_physics_steps=0, mujoco_settled_state="instance_assets/mujoco_settled.npz")

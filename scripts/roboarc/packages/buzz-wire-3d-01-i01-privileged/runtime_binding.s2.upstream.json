@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "instance_sha256": "cdc0a334b1bada1e21359303405c8c5f025da25be1e98e39873b1ff2e730806b",
+  "asset_files": {
+    "instance_assets/mujoco/meshes/wire_base_base_0_38acb7d381490f13.obj": "38acb7d381490f139479026ddb948cb94e0bf72c6d169bfd3d49d643049514f9",
+    "instance_assets/mujoco/meshes/wire_base_base_1_c87d69f4d9d65229.obj": "c87d69f4d9d65229ce1543705d353731d5480e72414eb6a2966ca2855ce59830",
+    "instance_assets/mujoco/meshes/wire_base_base_2_609d6ab8f21cf88a.obj": "609d6ab8f21cf88a9260ee80fd56caa428f877fe2e9a1a5be791aac293c25c66",
+    "instance_assets/mujoco/meshes/wire_base_base_3_d37cd7a134e84af9.obj": "d37cd7a134e84af9377d6d8cb039e5264686ef687852095ff2dbeecdc2bdd291",
+    "instance_assets/mujoco/meshes/wire_base_base_4_cb227b93d02863b0.obj": "cb227b93d02863b003b78dcadcb2aab1f667f2b4fd5f168985df9205b7411f60",
+    "instance_assets/mujoco/meshes/wire_base_base_5_ec3d4eabd3a2bf39.obj": "ec3d4eabd3a2bf39b41e4a78e6e5db28706d93ecd33b15f03c5d768d49dc787f",
+    "instance_assets/mujoco/scene.json": "19ccad40655d4d5591c55b2a57094d7a42edd0dcb30059da0bccc89fe5b47730",
+    "instance_assets/mujoco/scene.xml": "91811526321821915dab447cff312a71f96931187f3f95511760f89d42fc9787"
+  },
+  "tooling_sha256": "8cb4e65a16ac8be8726d9420f869c822508dd9411d0223c84f26e7799c557073",
+  "creation_source": {
+    "sha256": "d601866b4c91c858aa4e249b5bf5145b8fe3263b2885048a86016e34c314c208",
+    "files": 444
+  },
+  "runtime": {
+    "source": {
+      "sha256": "4163626dc97d1f13cf488cd6cd831fde4e412aa29fde888a6800b2c74f5c5a34",
+      "files": 466
+    },
+    "python": "3.11.15",
+    "dependencies": {
+      "genesis-world": "1.2.1",
+      "pyuipc": "0.0.25+topogym.det1.cuda128",
+      "torch": "2.11.0+cu128",
+      "numpy": "2.3.5",
+      "scipy": "1.17.1",
+      "mujoco": "3.14.0",
+      "newton": "1.6.1",
+      "warp-lang": "1.18.0"
+    },
+    "uipc_build_sha256": "39781d192a00d0cdc784f76e9ef2aa6fa404da510cf813ff06a04ea33b2597c1"
+  },
+  "image": {
+    "reference": "roboarc:1.2.0-noinst",
+    "id": "sha256:72ecf073a9f359bc8f34eb080ad416a246f8da24bdd271a49f336dbc8fccfaf0",
+    "repo_digests": []
+  }
+}

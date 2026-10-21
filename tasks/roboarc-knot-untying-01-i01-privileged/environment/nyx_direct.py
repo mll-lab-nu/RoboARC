@@ -807,8 +807,8 @@ class NyxScene:
         options = dict(spec.morph_options or {})
         e.options = options
         if kind == "mjcf":
-            if e.fixed:
-                raise NotImplementedError(f"{spec.name}: a fixed MJCF entity encodes its base in the model")
+            # fixed or free: each visual geom at its link's MuJoCo body (a fixed entity's links are static bodies whose
+            # world pose already holds the entity's base, so the base is not applied again)
             return self._mjcf(spec.name, Path(spec.asset_path), Surface.from_spec(spec.surface))
         if kind == "urdf":
             e.path = Path(spec.asset_path)

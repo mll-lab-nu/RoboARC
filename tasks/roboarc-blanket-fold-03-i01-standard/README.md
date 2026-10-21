@@ -6,10 +6,10 @@
 | Mode | standard (`eai-standard/2.4`) |
 | Twin | `roboarc-blanket-fold-03-i01-privileged` |
 | Simulator / robot | `roboarc` / `aloha-2` |
-| Family / instance | `blanket_fold` / seed 0 |
+| Family / instance | `blanket_fold` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc:1.1.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc:1.2.0` |
 
 ## Task
 Standard-mode twin of `roboarc-blanket-fold-03-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.4` client
@@ -23,7 +23,7 @@ the privileged task to measure the cost of losing resets, privileged state and t
 Same scene, instance and success rule as `roboarc-blanket-fold-03-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image eai-roboarc 0.1.0 (2026-10-14; simulator source 37aa7ac0, tooling d8692e15).
+`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image eai-roboarc 0.1.0 (2026-10-14; simulator source 37aa7ac0, tooling d8692e15). The same rows serve every appearance seed: a seed changes only the looks.
 
 ## Verification
 See `tests/grade.py`.
@@ -81,9 +81,9 @@ The target images: `/app/goal/target_cam_high.png` (seen from the overhead camer
 | crash recovery | `eai-standard/2.4` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
 
 ### Provenance
-- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `de81088e` (MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image eai-roboarc:0.2.1, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `c9171f79`, tooling `d8692e15`).
+- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `de81088e` (MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image eai-roboarc:1.2.0, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `4163626d`, tooling `8cb4e65a`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `9f34f894a454`, under `instances/blanket-fold-03-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 1.1.0, image `ghcr.io/embodied-first-exam/roboarc:1.1.0` (images/roboarc/); simulator source `67ed48da8` (PROVENANCE.md).
+- Release: RoboARC 1.2.0, image `ghcr.io/embodied-first-exam/roboarc:1.2.0` (images/roboarc/); simulator source `4395f8165` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log

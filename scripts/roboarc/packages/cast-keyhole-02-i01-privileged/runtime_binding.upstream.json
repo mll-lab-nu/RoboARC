@@ -43,15 +43,15 @@
     "instance_assets/mujoco/scene.json": "d1d4ccafa57acaca7e807d60e27d033e7fed66604be6ce250ba0f7ba9844d76b",
     "instance_assets/mujoco/scene.xml": "54994ad7bef29a586fdfc1eb75735ee87f3c7d58cbb9f148f1817cb47cdd3169"
   },
-  "tooling_sha256": "d8692e15964ac9f4c536d52b1c86d0418a4f4e37ec94f98e5d91d0b4ad0dd766",
+  "tooling_sha256": "8cb4e65a16ac8be8726d9420f869c822508dd9411d0223c84f26e7799c557073",
   "creation_source": {
     "sha256": "aae08c2e43e74bbcdf3916d72fdcdfe50280f968818f7d3f431fcd003ced13c2",
     "files": 437
   },
   "runtime": {
     "source": {
-      "sha256": "c9171f7932cebdee016b7ee1e8abd9a1afba7563a32364d91dffe85b14a51565",
-      "files": 443
+      "sha256": "4163626dc97d1f13cf488cd6cd831fde4e412aa29fde888a6800b2c74f5c5a34",
+      "files": 466
     },
     "python": "3.11.15",
     "dependencies": {
@@ -67,8 +67,8 @@
     "uipc_build_sha256": "39781d192a00d0cdc784f76e9ef2aa6fa404da510cf813ff06a04ea33b2597c1"
   },
   "image": {
-    "reference": "eai-roboarc:0.2.1-noinst",
-    "id": "sha256:cd2ac87464fd0840be7d5a71da4311eb483a8f29075b87802333be1caa569986",
+    "reference": "roboarc:1.2.0-noinst",
+    "id": "sha256:72ecf073a9f359bc8f34eb080ad416a246f8da24bdd271a49f336dbc8fccfaf0",
     "repo_digests": []
   }
 }

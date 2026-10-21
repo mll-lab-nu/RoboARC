@@ -6,10 +6,10 @@
 | Mode | privileged |
 | Twin | `roboarc-buzz-wire-3d-05-i01-standard` |
 | Simulator / robot | `roboarc` / `franka-robotiq-2f85` |
-| Family / instance | `buzz_wire_3d` / seed 0 |
+| Family / instance | `buzz_wire_3d` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `none` — No oracle; human review in PR #N (PROTOCOL §2.7). No reference solution and no positive example yet: nothing is known to solve this task. Its physics was accepted on the family's acceptance rounds and a smoke stress round on this instance. |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc:1.1.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc:1.2.0` |
 
 ## Task
 RoboARC buzz_wire_3d (Franka Panda + Robotiq 2F-85, MuJoCo): produce one replayable trajectory. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Frozen scene instance (variation buzz_wire_3d_hard, seed 0).
@@ -78,9 +78,9 @@ Guide the metal loop along the entire wire from start to finish without touching
 - A failure is reported in `s.status()["episode_end"]` as "wire_touched", "Wand fell below table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits.
 
 ### Provenance
-- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `05846213` (MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image eai-roboarc:0.2.1, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `c9171f79`, tooling `d8692e15`).
+- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `05846213` (MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image eai-roboarc:1.2.0, scripts/robotangle/release_rebuild.py --instances)); bound to this release's runtime (source `4163626d`, tooling `8cb4e65a`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `9f34f894a454`, under `instances/buzz-wire-3d-05-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 1.1.0, image `ghcr.io/embodied-first-exam/roboarc:1.1.0` (images/roboarc/); simulator source `67ed48da8` (PROVENANCE.md).
+- Release: RoboARC 1.2.0, image `ghcr.io/embodied-first-exam/roboarc:1.2.0` (images/roboarc/); simulator source `4395f8165` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log

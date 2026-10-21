@@ -2,12 +2,14 @@
 # tooling and the frozen instance baked in. Nothing the agent did in its container reaches this one — Harbor
 # uploads only the declared artifacts (/app/output/), so a patched success check or a swapped interpreter in
 # the agent container cannot influence the verdict.
-FROM ghcr.io/embodied-first-exam/roboarc:1.1.0
+FROM ghcr.io/embodied-first-exam/roboarc:1.2.0
 # MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes
 ENV NPY_DISABLE_CPU_FEATURES=AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR OPENBLAS_CORETYPE=Haswell
-COPY runtime_binding.json /tests/runtime_binding.json
+# the task's runtime bindings, one per seed, and in a runner's copy for one seed its `seed` file (scripts/task_seed.py
+# materialize; `see[d]` matches that file or nothing)
+COPY runtime_binding*.json see[d] /opt/robotangle/task/
 COPY grade.py rcb_topogym.py render_bridge.py nyx_direct.py test.sh /tests/
-RUN python /opt/robotangle/stage_instance.py blanket-flatten-05-i01 /tests --purge   # the frozen instance, from the image (scripts/roboarc/assets.json), checked against runtime_binding.json
+RUN python /opt/robotangle/stage_instance.py blanket-flatten-05-i01 /tests --binding /opt/robotangle/task/runtime_binding.json --seed-file /opt/robotangle/task/seed --purge && rm -rf /opt/robotangle/task   # the frozen instance of the task's seed (no seed file: the default one), from the image (scripts/roboarc/assets.json), checked against that seed's runtime binding
 RUN chmod +x /tests/test.sh && mkdir -p /app/output /logs/verifier
 ENV PYTHONPATH=/tests:/opt/topogym
 # the longest trajectory the verifier replays within its timeout (scripts/roboarc/mk_tasks.py row_cap)

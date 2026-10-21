@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "instance_sha256": "7bbebbc284a427dbe64237e0f3e6e663c86d37427f194f82d60b3d8244fc6d8d",
+  "asset_files": {
+    "instance_assets/initial_state/arrays.npz": "f4238c7d0712ddba243cc27dabe75ccec63c76583aeb06d05d46af6a47bd2c4a",
+    "instance_assets/initial_state/manifest.json": "0c65613086a9c0501a6de3b1a1f78ce1724fefb208bacece62050948c2472172",
+    "instance_assets/mujoco/cloth_vbd_blanket.npz": "831b8a98f01ec7e45b7c10df8a695e6bb10034111754756914f533e0462331d3",
+    "instance_assets/mujoco/scene.json": "d17d8e381697f9b6d73cdffd1b59065158f6663a2004214378fd7d20e832534d",
+    "instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
+    "instance_assets/mujoco_birth/settled_birth.json": "29446c1cb632a35402c2e13ddf7dbafd1f633ff777ef906eac91be3c2a30589a"
+  },
+  "tooling_sha256": "8cb4e65a16ac8be8726d9420f869c822508dd9411d0223c84f26e7799c557073",
+  "creation_source": {
+    "sha256": "37aa7ac005a828824289215606e8c7531d2222936cce25cbba15c3b8f91025a2",
+    "files": 443
+  },
+  "runtime": {
+    "source": {
+      "sha256": "4163626dc97d1f13cf488cd6cd831fde4e412aa29fde888a6800b2c74f5c5a34",
+      "files": 466
+    },
+    "python": "3.11.15",
+    "dependencies": {
+      "genesis-world": "1.2.1",
+      "pyuipc": "0.0.25+topogym.det1.cuda128",
+      "torch": "2.11.0+cu128",
+      "numpy": "2.3.5",
+      "scipy": "1.17.1",
+      "mujoco": "3.14.0",
+      "newton": "1.6.1",
+      "warp-lang": "1.18.0"
+    },
+    "uipc_build_sha256": "39781d192a00d0cdc784f76e9ef2aa6fa404da510cf813ff06a04ea33b2597c1"
+  },
+  "image": {
+    "reference": "roboarc:1.2.0-noinst",
+    "id": "sha256:72ecf073a9f359bc8f34eb080ad416a246f8da24bdd271a49f336dbc8fccfaf0",
+    "repo_digests": []
+  }
+}
