@@ -4,7 +4,8 @@
 #   <token source> | GHCR_USER=<github user> images/roboarc/push.sh [--log <dir>] <ref>=<expected image id> ...
 #
 # e.g. ghcr.io/embodied-first-exam/roboarc:1.0.0=sha256:18a821a1...    (the RoboARC image)
-#      ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0=sha256:5d5090ea...  ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.0.0=...
+# (Since 1.1.0 the IKEA images are pushed from their reproducible OCI archives with images/monitor/push.sh, which keeps
+# their manifest digests: ikea/images/ikea-mujoco/README.md, Registry. A docker push would change those digests.)
 # - The registry token (write:packages) is read from STDIN only. It lives in a temporary DOCKER_CONFIG directory that
 #   is logged out and removed on exit; nothing is written to ~/.docker. The token is never printed.
 # - Each local tag must be its expected image id (the verified build); a tag that is not is skipped and fails the run.

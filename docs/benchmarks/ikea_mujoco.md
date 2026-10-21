@@ -174,10 +174,15 @@ simulator error or a malformed request field are the agent's 0, never a free ret
 
 ## Images
 
-| image | used by | id (1.0.0) |
+| image | used by | id (1.1.0) |
 |---|---|---|
-| `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0` | privileged agent and verifier; the standard sidecar's physics | `5d5090ea1910` |
-| `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.0.0` | the standard `sim` sidecar (+ Nyx in `/opt/nyx`, EGL, ffmpeg) | `050cd45d70f6` |
+| `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` | privileged agent and verifier (+ OSMesa and ffmpeg for the replay video); the standard sidecar's physics | `9f9cbab8aa74` |
+| `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0` | the standard `sim` sidecar (+ Nyx in `/opt/nyx`, EGL, Vulkan) | `cbd929360257` |
+
+Both are built reproducibly from fully pinned inputs (the Python base image by digest, Debian packages by version from
+the Debian snapshot archive, wheels by sha256; the sidecar `FROM` the base by digest) and hold only what the tasks run
+(`ikea/images/ikea-mujoco/README.md`). The 1.0.0 images (`5d5090ea1910`, `050cd45d70f6`) hold the same runtime: every
+file the graded runtime loads is byte-identical.
 
 The standard agent and verifier containers run the shared standard client base (`scripts/eai_standard/client.env`).
 The scene code is in git (`ikea/images/ikea-mujoco/scenes/<scene>/`); the meshes are on a private Hugging Face dataset,

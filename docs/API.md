@@ -46,7 +46,7 @@ libmujoco and the exact dependency versions the runtime bindings require.
 | suite | image (physics) | images with Nyx RGB |
 |---|---|---|
 | puzzles | `ghcr.io/embodied-first-exam/roboarc:1.1.0` (Python 3.11) | the same image |
-| IKEA | `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0` (Python 3.12) | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.0.0` |
+| IKEA | `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` (Python 3.12) | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0` |
 
 Mount the repository (read-only is fine) and put it on `PYTHONPATH` (or `pip install --no-deps -e /repo` in a derived
 image). Run from the repository root of the checkout:
@@ -63,7 +63,7 @@ docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /
 
 # an IKEA task with Nyx images
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo -e HOME=/tmp \
-  -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.0.0 python examples/vla_loop.py lack
+  -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0 python examples/vla_loop.py lack
 ```
 
 Scratch files (staged instances, the Nyx scene export) go to `ROBOARC_CACHE` (default `~/.cache/roboarc`, here under

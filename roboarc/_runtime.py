@@ -22,8 +22,8 @@ LIBMUJOCO_EPA_SHA256 = "52e2a24e927ccac047b13576ff9fcbe455bc9a12b0d2e0bf1868bb7c
 IMAGE_TOPOGYM = Path("/opt/topogym")                     # roboarc: the simulator package (PYTHONPATH)
 IMAGE_INSTANCES = Path("/opt/robotangle/instances")      # roboarc: every base's frozen instance
 IMAGE_STAGE = Path("/opt/robotangle/stage_instance.py")  # roboarc: stages and checks one instance
-IMAGE_IKEA_SCENES = Path("/opt/ikea/scenes")             # roboarc-ikea(-sim):1.0.0: the scenes
-IMAGE_NYX_PYTHON = Path("/opt/nyx/bin/python")           # roboarc-ikea-sim:1.0.0: the Nyx render process
+IMAGE_IKEA_SCENES = Path("/opt/ikea/scenes")             # roboarc-ikea(-sim):1.1.0: the scenes
+IMAGE_NYX_PYTHON = Path("/opt/nyx/bin/python")           # roboarc-ikea-sim:1.1.0: the Nyx render process
 
 
 class RuntimeMismatch(RuntimeError):

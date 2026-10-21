@@ -64,7 +64,7 @@ Requirements:
   Python >= 3.11 for the repository tools.
 
 The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.1.0`; the IKEA tasks run
-`ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.0.0`. Pull them,
+`ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.1.0`. Pull them,
 or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 
 ```bash
@@ -102,7 +102,7 @@ docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HO
   ghcr.io/embodied-first-exam/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
 ```
 
-IKEA runs in `roboarc-ikea:1.0.0` (physics only) or `roboarc-ikea-sim:1.0.0` (with Nyx images). `pip install -e .`
+IKEA runs in `roboarc-ikea:1.1.0` (physics only) or `roboarc-ikea-sim:1.1.0` (with Nyx images). `pip install -e .`
 installs the package (the extras `.[puzzles]` and `.[ikea]` pin the images' versions); the frozen instances and scenes
 come with the images. The interface and its conventions (actions, observations, frames, the speed rules, which clamp and
 never fail), rendering and GPU needs, the wrappers and the tests: [docs/API.md](docs/API.md); examples in
