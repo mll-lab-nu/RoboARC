@@ -12,7 +12,7 @@
 | Base image | `labv18b/rcb-topogym:0.2.16-dev-cu128` |
 
 ## Task
-TopoGym interlocked_claws (aloha, Genesis): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a teal lock. Frozen scene instance (variation interlocked_claws_rd_easy, seed 0).
+TopoGym interlocked_claws (aloha, Genesis): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock. Frozen scene instance (variation interlocked_claws_rd_easy, seed 0).
 
 ## Difficulty
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (contact_weld_v1).
@@ -35,7 +35,7 @@ replay (two passes, no separate video replay). The physics runs on the CPU and i
 | Success rule | task-native success (goal_complete True; frozen parameters; terminal revision placement_region_v3_grasp_contact_2mm) |
 
 ### Goal
-Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a teal lock.
+Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock.
 
 ### Success requirements
 - Put every part of the entire brown claw piece inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.

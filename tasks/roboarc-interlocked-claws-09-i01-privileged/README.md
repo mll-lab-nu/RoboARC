@@ -12,7 +12,7 @@
 | Base image | `ghcr.io/embodied-first-exam/roboarc:1.2.0` |
 
 ## Task
-RoboARC interlocked_claws (ALOHA 2, MuJoCo): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a teal lock. Frozen scene instance (variation interlocked_claws_rd_medium, seed 0).
+RoboARC interlocked_claws (ALOHA 2, MuJoCo): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock. Frozen scene instance (variation interlocked_claws_rd_medium, seed 0).
 
 ## Difficulty
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (contact_weld_v1).
@@ -51,7 +51,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 | Success rule | task-native success (goal_complete True; frozen parameters; terminal revision placement_region_v3_grasp_contact_2mm) |
 
 ### Goal
-Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a teal lock.
+Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock.
 
 ### Success requirements
 - Put every part of the entire brown claw piece inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.
@@ -81,5 +81,5 @@ Separate and place the entire brown claw piece inside the green dashed goal regi
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log
-- 2026-10-14: new task of roboarc (RoboARC on MuJoCo 3.14.0, docs/benchmarks/roboarc.md): a new design of interlocked_claws: keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry). Its task files start from the Genesis 1.2.1 task `interlocked-claws-medium-i00` (privileged mode), with this design's own task text, rules and goal, its own frozen instance and its own reference.
+- 2026-10-14: new task of roboarc (RoboARC on MuJoCo 3.14.0, docs/benchmarks/roboarc.md): a new design of interlocked_claws: keyhole gates: a redesigned pair of interlocked pieces, a brown key and a lock (new geometry). Its task files start from the Genesis 1.2.1 task `interlocked-claws-medium-i00` (privileged mode), with this design's own task text, rules and goal, its own frozen instance and its own reference.
 - 2026-10-14: tests/grade.py, the same file in every privileged task, requires again that one grading replay reach the goal with the instance's own thresholds within the trajectory's rows (failure analysis 2026-10-14, item 12; docs/benchmarks/roboarc.md, Grading replays). This family has no grading hold: a replay succeeds only within the rows, so every verdict is unchanged. reward.json gains `success_in_hold_only` (always 0 here), and `strict_replay_required` is 1.

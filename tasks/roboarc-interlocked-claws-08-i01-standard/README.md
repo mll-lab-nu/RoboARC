@@ -46,7 +46,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 ## Details
 
 ### Goal
-Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a teal lock.
+Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock.
 
 ### Success requirements
 - Put every part of the entire brown claw piece inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.
@@ -83,4 +83,4 @@ Separate and place the entire brown claw piece inside the green dashed goal regi
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log
-- 2026-10-14: new task of roboarc (RoboARC on MuJoCo 3.14.0, docs/benchmarks/roboarc.md): a new design of interlocked_claws: keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry). Its task files start from the Genesis 1.2.1 task `interlocked-claws-easy-i00` (standard mode), with this design's own task text, rules and goal, its own frozen instance and its own reference.
+- 2026-10-14: new task of roboarc (RoboARC on MuJoCo 3.14.0, docs/benchmarks/roboarc.md): a new design of interlocked_claws: keyhole gates: a redesigned pair of interlocked pieces, a brown key and a lock (new geometry). Its task files start from the Genesis 1.2.1 task `interlocked-claws-easy-i00` (standard mode), with this design's own task text, rules and goal, its own frozen instance and its own reference.
