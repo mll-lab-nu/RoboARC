@@ -9,7 +9,8 @@ standard-mode wire protocol is [STANDARD_MODE.md](STANDARD_MODE.md); the benchma
 ## Requirements
 
 - Linux x86_64 with an NVIDIA GPU that has RT cores (Nyx renders through Vulkan; driver >= 580), Docker with the NVIDIA
-  Container Toolkit, Harbor 0.23 or newer, Python >= 3.11 for the repository tools.
+  Container Toolkit, Harbor 0.23 or newer, Python >= 3.11 for the repository tools. arm64 hosts are not supported (the
+  images are linux/amd64, Nyx needs NVIDIA on x86_64, the standard client's lock lists x86_64 wheels).
 - The images the tasks name (`ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>`; IKEA:
   `roboarc-ikea` and `roboarc-ikea-sim`), pulled or built (docs/DEVELOPING.md).
 - Every trial needs one GPU. A task's minimum allocation is its `[metadata.resources]` (README "Compute resources";

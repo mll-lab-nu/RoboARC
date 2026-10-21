@@ -13,6 +13,11 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 - `scripts/set_agent_egress.py` runs its command line only as a script, so importing it (to read `HOSTS`) runs
   nothing; as a script it behaves as before.
 - `tools/stress/corpus/SHA256SUMS`: the O2 reproducer's line matches its file again.
+- Everything the CI workflow uses is pinned: the runner image `ubuntu-24.04`, `actions/checkout` and
+  `actions/setup-python` by commit (v4.4.0, v5.6.0), Python 3.12.15, and the jobs' Python packages by version and
+  sha256 (`ci_checks/requirements-ci.lock`, installed with `--no-deps --require-hashes`).
+- PROTOCOL.md: image references by digest is a rule (§1) and one of RoboARC's changes from the shared protocol (the
+  tasks already comply). README / RUNNING: arm64 hosts are not supported.
 - Trials and seeds (owner decisions for 1.2.0; PROTOCOL.md "Changes from the shared protocol", RUNNING.md "Seeds",
   "Results"): the batch runner gives the K trials of a task distinct seeds without replacement, in an order fixed by the
   batch name and the task's base name (`scripts/task_seed.py assign`; the same seeds in both modes), runs each trial as a

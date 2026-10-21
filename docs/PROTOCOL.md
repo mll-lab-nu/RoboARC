@@ -7,7 +7,7 @@ no RoboARC task uses them. RoboARC's own choices (grading replays, safety teleme
 [benchmarks/roboarc.md](benchmarks/roboarc.md). Task files cite this document by section number: the numbers do not
 change.
 
-**Changes from the shared protocol.** RoboARC is a standalone benchmark and departs from the shared protocol in two
+**Changes from the shared protocol.** RoboARC is a standalone benchmark and departs from the shared protocol in three
 points.
 - Recording the agent's model-API usage (tokens, cost) is optional. An official run does not need the usage gateway. A
   run may record usage through it (the runner's `USAGE_GATEWAY` option, [RUNNING.md](RUNNING.md) "Usage recording");
@@ -18,6 +18,9 @@ points.
   the batch name and the task's base name, so both modes of a task run the same seeds and, with K equal to the number
   of seeds, every seed runs once. Each trial's seed alone stays uniform over `allowed`; an infrastructure retry keeps its
   trial's seed (H.5). Results are kept per trial, with the trial's seed ([RUNNING.md](RUNNING.md) "Seeds", "Results").
+- Every image a task names is pinned by digest (§1), `<repo>:<tag>@sha256:<digest>`; the shared protocol also allows a
+  tag. A pull then gets exactly the image that was validated ([images/README.md](../images/README.md);
+  `ci_checks/check-image-pins.py`).
 
 **Recommended conventions, and eight invariants that bind.** Sections 1–7 describe how a task is usually built, so that
 tasks from different benchmarks can be run, compared and reviewed the same way. They recommend; a task or a benchmark
@@ -48,7 +51,7 @@ verifier decides internally) is the task's own business.
 | The directory name `<base>-<mode>`, `<base>` = `<benchmark>-<family>-i<NN>` or the upstream name; no versions or durations in names | the mode is the whole suffix |
 | All task code in the directory, copied in by its Dockerfiles; base images hold the simulator and its assets; nothing imports repository code at run time | a task's identity is its directory (H.8) |
 | Generated tasks come with their generator (RoboARC: `scripts/roboarc/mk_tasks.py`), which ends with `scripts/task_conventions.py` `normalize`; re-running it reproduces the committed tasks | `mk_tasks.py --check` (CI job `generator`) |
-| Base images from one registry, every `FROM` / `image:` pinned to a tag or digest. RoboARC's tasks name every image by digest (`images/pins.json`): `ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>@sha256:…` (the simulator image), the client base `docker.io/library/python:3.12.14-slim@sha256:…` (`scripts/eai_standard/client.env`) for the standard agent and every verifier, and the resource monitor `ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0@sha256:…` (`scripts/rcb_monitor/inject.py`, built from `images/monitor/`); IKEA's `ghcr.io/embodied-first-exam/roboarc-ikea:<VERSION>@sha256:…` and `roboarc-ikea-sim:<VERSION>@sha256:…` | `check-dockerfile.sh`, `check-protocol.py`, `check-image-pins.py` |
+| Base images from one registry, every `FROM` / `image:` pinned by digest, `<repo>:<tag>@sha256:<digest>` (the shared protocol also allows a tag). RoboARC's tasks name every image by digest (`images/pins.json`): `ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>@sha256:…` (the simulator image), the client base `docker.io/library/python:3.12.14-slim@sha256:…` (`scripts/eai_standard/client.env`) for the standard agent and every verifier, and the resource monitor `ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0@sha256:…` (`scripts/rcb_monitor/inject.py`, built from `images/monitor/`); IKEA's `ghcr.io/embodied-first-exam/roboarc-ikea:<VERSION>@sha256:…` and `roboarc-ikea-sim:<VERSION>@sha256:…` | `check-dockerfile.sh`, `check-protocol.py`, `check-image-pins.py` |
 | README in the standard layout (`# <dir>`, key table, Task, Difficulty, Reference solution, Verification, Compute resources, Details); no `results/` | rendered by `normalize` |
 | A published task's `environment/` and `tests/` do not change; a fix changes the task in place only with a new DIGEST and a README Change Log entry | H.8 |
 

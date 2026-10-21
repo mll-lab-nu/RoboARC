@@ -58,7 +58,9 @@ Each task exists in two modes, on the same frozen instance, with the same 3 h ag
   live episode; for the puzzles a fresh-process replay must confirm it.
 
 Requirements:
-- Linux x86_64 and an NVIDIA GPU with RT cores (driver >= 580; Nyx renders through Vulkan). Each puzzle task declares
+- Linux x86_64 and an NVIDIA GPU with RT cores (driver >= 580; Nyx renders through Vulkan). arm64 hosts are not
+  supported: the images are linux/amd64, Nyx needs NVIDIA on x86_64, and the standard client's hashed lock lists
+  x86_64 wheels. Each puzzle task declares
   one GPU with 2 GB; IKEA's standard tasks reserve one GPU for rendering and its privileged tasks run on CPU only. See each task's resources in its `task.toml`.
 - Docker with the NVIDIA Container Toolkit; [Harbor](https://github.com/laude-institute/harbor) 0.23 or newer;
   Python >= 3.11 for the repository tools.

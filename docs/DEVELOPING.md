@@ -53,11 +53,14 @@ bash ci_checks/check-unit-tests.sh --all              # unit tests (numpy, reque
 bash ci_checks/run_all.sh                             # the invariants plus the advisory checks (exit 3: advisories only)
 ```
 
-They need Python >= 3.11 (with numpy, requests and scipy for the second tier of unit tests), no GPU and no image.
+They need Python >= 3.11 (with numpy, requests and scipy for the second tier of unit tests: `python3 -m pip install
+--no-deps --require-hashes -r ci_checks/requirements-ci.lock`, the CI jobs' hashed lock for Python 3.12), no GPU and no image.
 `.github/workflows/checks.yml` runs them on pushes to `main` and `dev/**` and on pull requests, in the jobs `generator`,
 `ikea`, `image-pins` (`check-image-pins.py`: every image a task names is pinned by digest, images/pins.json),
 `invariants` (required), `unit-tests` (with `check-video.py`, `check-resources.py`, `check-cutoffs.py`),
-`api-tests` (the Python package's fast tests, once `tests/api/` exists) and `advisories` (warnings only).
+`api-tests` (the Python package's fast tests, once `tests/api/` exists) and `advisories` (warnings only). The workflow
+pins its runner image, the actions (by commit), Python (3.12.15) and the Python packages (`ci_checks/requirements-ci.lock`,
+installed with `--require-hashes`).
 
 What the invariants run: `check-agent-pointers.py` (H.2), `check-dataset-manifest.sh` (H.8: every DIGEST recomputed),
 `check-twins.py` (H.7), `check-monitor.py --tier invariants` (H.1), `scripts/harbor/tests/test_retry_policy.py` (H.5),

@@ -55,7 +55,7 @@ if python3 -c "import numpy, requests" 2>/dev/null; then
   done
   run 300 tools/tests/test_nyx_startup.py   # Nyx's start-up retry, with a stub build (numpy only)
 elif [ $all -eq 1 ]; then
-  echo "FAIL check-unit-tests.sh --all: numpy and requests are needed for the second tier (pip install numpy requests)"; rc=1
+  echo "FAIL check-unit-tests.sh --all: numpy and requests are needed for the second tier (pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock)"; rc=1
 else
   echo "note check-unit-tests.sh: numpy / requests not installed, the service-layer tests were not run (CI job unit-tests runs them; locally: pip install numpy requests, then check-unit-tests.sh --all)"
 fi
@@ -63,7 +63,7 @@ fi
 if python3 -c "import numpy, scipy" 2>/dev/null; then
   run 300 tools/tests/test_exposure_rule.py
 elif [ $all -eq 1 ]; then
-  echo "FAIL check-unit-tests.sh --all: numpy and scipy are needed for tools/tests/test_exposure_rule.py (pip install numpy scipy)"; rc=1
+  echo "FAIL check-unit-tests.sh --all: numpy and scipy are needed for tools/tests/test_exposure_rule.py (pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock)"; rc=1
 else
   echo "note check-unit-tests.sh: numpy / scipy not installed, tools/tests/test_exposure_rule.py was not run"
 fi
