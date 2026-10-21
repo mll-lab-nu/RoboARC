@@ -810,6 +810,9 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, uipc_builds: d
     rel["bases"] = {**bases_out, **{n: r for n, r in by_new.items() if n not in bases_out}}
     rel["runtime"].update(runtime)
     rel["tooling_sha256"] = tooling
+    for key, name in (("render_bridge_sha256", "render_bridge.py"), ("nyx_direct_sha256", "nyx_direct.py")):
+        if key in rel:                    # the other tooling files laid over the tree (TOOLING): their pins follow them
+            rel[key] = sha((rb / "shared" / name).read_bytes())
     if new_bench:                         # the benchmark's own release: the dev/robotangle_mujoco commit it is built from
         rel["release_commit"] = rel["template_commit"] = head
         (a.out / "images" / a.bench / "Dockerfile").write_text(
