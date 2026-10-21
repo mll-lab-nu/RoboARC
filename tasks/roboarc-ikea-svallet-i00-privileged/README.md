@@ -9,7 +9,7 @@
 | Family / instance | `ikea_svallet` / seed 0 |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` |
 
 ## Task
 IKEA SVALLET work lamp (AA-2140039-1), unpowered steps 1-2 in plain MuJoCo 3.14.0 (CPU, float64) with two 6-DoF ViperX 300 s arms (MuJoCo Menagerie ALOHA), each with its own parallel gripper: produce one replayable trajectory. Press the lamp shade's key down into the socket on top of the stand column until the spring jaw snaps over it, then screw the E12 bulb up into the shade's socket until it seats.
@@ -82,3 +82,13 @@ The shade's barb cams a spring jaw (a slide joint with a spring, 1200 N/m) open 
   repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
   runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
   comparable: the instruction and the egress changed.
+- 2026-10-20: RoboARC 1.1.0, the images `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`:
+  rebuilt from fully pinned inputs (the Python base image by digest, Debian packages by version from the Debian
+  snapshot archive, wheels by sha256) and with only what the tasks run. Every file the graded runtime loads (MuJoCo
+  with its EPA patch, numpy, the scenes, the replay video's libraries, Nyx, torch and its CUDA libraries) is
+  byte-identical to 1.0.0's; left out are unused packages (mujoco's viewer and test dependencies, the Nyx environment's
+  triton, sympy and pip, curl), bytecode caches and the duplicate scene layer. The verifier's replay video libraries
+  (OSMesa, imageio with ffmpeg, Pillow) are in the base image, so the verifier image no longer installs them when it
+  is built; the agent's container has them too. The runtime binding names the new image id. The instruction, the
+  scene, the logic of the graders and of the sim service, the tooling and the reference are unchanged; every
+  reference replays to the end and settled states it reaches in 1.0.0: results graded under 1.0.x stand.

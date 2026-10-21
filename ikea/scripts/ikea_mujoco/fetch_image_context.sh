@@ -5,7 +5,7 @@
 #     per-task "files" entries;
 #   - the scene code from git, images/ikea-mujoco/scenes/<task>/;
 #   - then scripts/ikea_mujoco/stage_context.py on the two together, which checks every staged file again and writes the
-#     context (scenes/, assets.json, bytepatch_libmujoco.py).
+#     context (scenes/, assets.json, bytepatch_libmujoco.py, requirements.lock).
 # Needs read access to the dataset: `hf auth login`, or HF_TOKEN in the environment (never printed); huggingface_hub
 # (pip install huggingface_hub).
 # usage: scripts/ikea_mujoco/fetch_image_context.sh [<download dir>]   (default: $RCB_IKEA_ASSETS or ~/.cache/ikea-mujoco-assets)

@@ -32,7 +32,7 @@ TEXTS = json.loads((HERE / "tasks.json").read_text())
 ASSETS = json.loads((HERE / "assets.json").read_text())
 BIND = json.loads((HERE / "bindings.json").read_text())
 IMAGE = BIND["image"]["reference"]          # the one image of every task (a task's own bindings "image" would override it)
-assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # our registry name and version (RoboARC 1.0.0)
+assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # our registry name and version (images/ikea-mujoco/VERSION)
 sys.path.insert(0, str(ROOT.parent / "scripts"))   # the repository's task layer (normalize)
 import task_conventions as TC  # noqa: E402  the protocol's conventions: every generator ends with normalize(task_dir)
 # The agent's egress (PROTOCOL §2.11, H.6): the two lines the repository's `scripts/set_agent_egress.py allowlist`
@@ -54,6 +54,16 @@ CHANGE_LOG = """### Change Log
   repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
   runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
   comparable: the instruction and the egress changed.
+- 2026-10-20: RoboARC 1.1.0, the images `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`:
+  rebuilt from fully pinned inputs (the Python base image by digest, Debian packages by version from the Debian
+  snapshot archive, wheels by sha256) and with only what the tasks run. Every file the graded runtime loads (MuJoCo
+  with its EPA patch, numpy, the scenes, the replay video's libraries, Nyx, torch and its CUDA libraries) is
+  byte-identical to 1.0.0's; left out are unused packages (mujoco's viewer and test dependencies, the Nyx environment's
+  triton, sympy and pip, curl), bytecode caches and the duplicate scene layer. The verifier's replay video libraries
+  (OSMesa, imageio with ffmpeg, Pillow) are in the base image, so the verifier image no longer installs them when it
+  is built; the agent's container has them too. The runtime binding names the new image id. The instruction, the
+  scene, the logic of the graders and of the sim service, the tooling and the reference are unchanged; every
+  reference replays to the end and settled states it reaches in 1.0.0: results graded under 1.0.x stand.
 """
 
 
@@ -526,10 +536,8 @@ TESTS_DOCKERFILE = '''# Separate verifier sandbox (PROTOCOL §4): the same image
 # binding. Harbor uploads only the declared artifacts (/app/output/), so nothing the agent changed in its container
 # reaches the verdict.
 FROM {image}
-# Replay video (PROTOCOL §4; evidence only): MuJoCo's renderer on CPU software OpenGL (OSMesa) and ffmpeg.
-# --no-deps: the physics packages (mujoco, numpy) stay the base image's, unchanged (the grader checks the runtime binding).
-RUN apt-get update && apt-get install -y --no-install-recommends libosmesa6=25.0.7-2+deb13u1 && rm -rf /var/lib/apt/lists/* \
- && pip install --no-cache-dir --no-deps PyOpenGL==3.1.10 imageio==2.37.0 imageio-ffmpeg==0.6.0 pillow==12.3.0
+# Replay video (PROTOCOL §4; evidence only): MuJoCo's renderer on CPU software OpenGL (OSMesa) and ffmpeg, both in the
+# base image (pinned there; ikea/images/ikea-mujoco/Dockerfile), so building this image installs nothing.
 ENV MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 COPY grade.py rcb_ikea.py render_video.py video_view.json test.sh runtime_binding.json /tests/
 RUN chmod +x /tests/test.sh && mkdir -p /app/output /logs/verifier

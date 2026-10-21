@@ -28,7 +28,11 @@
   "timing": {
    "text": "one unobserved replay 3780-3783 s (35.0 %, inside the 40 % bar: 87.6 % of its 4320 s) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'; 1694 s (15.7 %) on a quiet i9-14900HX host; 1679-1684 s on a Ryzen 9 7950X workstation (Docker, image 0.3.0, two replays at once)."
   },
-  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`60878a5edc5d` / `02732bf5d33e`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`60878a5edc5d` / `02732bf5d33e`, on the same workstation)."
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`60878a5edc5d` / `02732bf5d33e`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`60878a5edc5d` / `02732bf5d33e`, on the same workstation).",
+  "image": {
+   "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
+   "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  }
  },
  "eket": {
   "checks": [
@@ -403,7 +407,11 @@
   "timing": {
    "text": "3199 s (29.6 % of the 10800 s budget, 74 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time); 3519 s (32.6 %) on a Ryzen 9 7950X workstation (Docker, image 0.3.1, host load 12-17); one unobserved replay 8414-8425 s (78.0 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik on that CPU."
   },
-  "image_note": "Merged head with the Franka Hand slew in the shared rule (2026-10-18): a fresh replay in image 0.3.1 ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on a Ryzen 9 7950X workstation, 7676 s at load 40-90): the reference was built within the slew. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on the same workstation)."
+  "image_note": "Merged head with the Franka Hand slew in the shared rule (2026-10-18): a fresh replay in image 0.3.1 ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on a Ryzen 9 7950X workstation, 7676 s at load 40-90): the reference was built within the slew. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on the same workstation).",
+  "image": {
+   "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
+   "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  }
  },
  "variera": {
   "checks": [
@@ -521,6 +529,10 @@
   "timing": {
    "text": "2740 s (25.4 % of the 10800 s budget, 63 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time); 2694 s (24.9 %) on a Ryzen 9 7950X workstation (Docker, host load 5-10); one unobserved replay 8283 s (76.7 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU) and 7953 s (73.6 %) on a Xeon Gold 6338 core, end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik / uppsta on the slow class."
   },
-  "image_note": "kyrre is the one scene with MuJoCo's native cylinders (scene.py, the prism rule off; decided on 2026-10-19, ikea/scripts/ikea_mujoco/REVIEW.md): end 0a9f1a9e6d77 / settled e242979c6712 on AMD Zen 4 (7950X), Intel AVX2 (i9-14900HX) and Intel AVX-512 (Xeon Gold 6338, Xeon Gold 6230R)."
+  "image_note": "kyrre is the one scene with MuJoCo's native cylinders (scene.py, the prism rule off; decided on 2026-10-19, ikea/scripts/ikea_mujoco/REVIEW.md): end 0a9f1a9e6d77 / settled e242979c6712 on AMD Zen 4 (7950X), Intel AVX2 (i9-14900HX) and Intel AVX-512 (Xeon Gold 6338, Xeon Gold 6230R).",
+  "image": {
+   "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
+   "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  }
  }
 }

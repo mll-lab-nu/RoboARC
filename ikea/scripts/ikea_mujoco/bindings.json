@@ -1,7 +1,7 @@
 {
  "image": {
-  "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
-  "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  "id": "sha256:9f9cbab8aa74f858b22ac1144162aad9f1b1e5b927f90f6f8251130f36d73868",
+  "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0"
  },
  "note": "per task, what the image's scene builds to: python /opt/tools/rcb_ikea.py info --task <t> inside the image; a task's own \"image\" (a scene added in a later image version) overrides the default image; speed_limits_per_s = Session.step_limit / control tick (the finite ones: the arm joints in rad/s, the Franka Hand's actuator8 in command units/s)",
  "runtime": {

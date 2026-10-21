@@ -9,7 +9,7 @@
 | Family / instance | `ikea_stenerik` / seed 0 |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.0.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0` |
 
 ## Task
 IKEA STENERIK laptop stand (AA-2372559-2), all 17 operations in plain MuJoCo 3.14.0 (CPU, float64) with two 7-DoF Franka Panda arms, each with the MuJoCo Menagerie Panda hand (two-finger, tendon-coupled), through the robot service (eai-standard/2.4; 2.1 / 2.2
@@ -103,3 +103,13 @@ The M4 x 0.5 right-hand threads are exact convex pieces: a screw advances only b
   repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
   runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
   comparable: the instruction and the egress changed.
+- 2026-10-20: RoboARC 1.1.0, the images `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`:
+  rebuilt from fully pinned inputs (the Python base image by digest, Debian packages by version from the Debian
+  snapshot archive, wheels by sha256) and with only what the tasks run. Every file the graded runtime loads (MuJoCo
+  with its EPA patch, numpy, the scenes, the replay video's libraries, Nyx, torch and its CUDA libraries) is
+  byte-identical to 1.0.0's; left out are unused packages (mujoco's viewer and test dependencies, the Nyx environment's
+  triton, sympy and pip, curl), bytecode caches and the duplicate scene layer. The verifier's replay video libraries
+  (OSMesa, imageio with ffmpeg, Pillow) are in the base image, so the verifier image no longer installs them when it
+  is built; the agent's container has them too. The runtime binding names the new image id. The instruction, the
+  scene, the logic of the graders and of the sim service, the tooling and the reference are unchanged; every
+  reference replays to the end and settled states it reaches in 1.0.0: results graded under 1.0.x stand.

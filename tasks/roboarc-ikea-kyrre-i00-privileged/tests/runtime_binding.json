@@ -18,8 +18,8 @@
   "right_actuator8"
  ],
  "image": {
-  "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
-  "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  "id": "sha256:9f9cbab8aa74f858b22ac1144162aad9f1b1e5b927f90f6f8251130f36d73868",
+  "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0"
  },
  "initial_state_sha256": "ecd23f8f42cd96e0178526ba95d1206d0a3cb7ec10fb432a5b0b136257b5954c",
  "nu": 16,

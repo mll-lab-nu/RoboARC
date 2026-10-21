@@ -51,7 +51,7 @@ def test_metadata():
             assert t.difficulty in ("very_easy", "easier", "easy", "medium", "hard")
             assert t.image == "ghcr.io/embodied-first-exam/roboarc:1.1.0"
         else:
-            assert t.render_image.endswith("roboarc-ikea-sim:1.0.0")
+            assert t.render_image.endswith("roboarc-ikea-sim:1.1.0")
 
 
 def test_puzzle_references():
