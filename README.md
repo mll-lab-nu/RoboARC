@@ -7,7 +7,7 @@ trajectory for a frozen scene instance. A separate verifier replays and grades i
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.0.0** (see [CHANGELOG.md](CHANGELOG.md)):
+Version **1.2.0** (see [CHANGELOG.md](CHANGELOG.md)):
 - the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 Harbor task directories under
   `tasks/`;
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
@@ -62,7 +62,7 @@ Requirements:
 
 The image's hardware notes are in [images/roboarc/README.md](images/roboarc/README.md).
 
-1. **Get the images.** The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.0.0`. The IKEA tasks run
+1. **Get the images.** The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.2.0`. The IKEA tasks run
    `ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0`, and their standard `sim` sidecar runs `roboarc-ikea-sim:1.0.0`.
    Pull them, or build them from this repository (step 3).
 2. **Run a task with Harbor:**
