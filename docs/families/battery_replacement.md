@@ -15,6 +15,16 @@ checked (finding 2; Goal below) and the stick may end on the table or in a hand 
 slide the cover back "until it stops (it latches there)" (finding 3). The success rule's thresholds and the reference's
 actions are unchanged; the instance's birth moved with the grasp configuration and the goal text.
 
+Changes of 2026-10-20 (the user's choices from the cam_high realism list; visual only, the shared renderer and the asset
+pipeline untouched): the pry stick drawn as a black nylon spudger, its holder dark grey, the cradle slate with a rim
+band, the cover's pad a dark grey rubber mat, the tray dark, the recycling box a blue bin with a recycling label (the
+scene list below). Every colliding geom is as before; each new visual lies within 0.92 mm of the collision it draws,
+both ways (`runs/controller_battery_design_20261014/realism2/props_gap.py`: the rounded edges at most 0.88 mm inside a
+corner (1.2 mm x (sqrt 3 - 1)) plus 0.04 mm of polygon, the bands and decals 0.1-0.2 mm proud). On dev 9115da07d8 and
+on this tree the instance is born 764192d9a7e49a0f, and the reference's qpos and qvel are bit for bit the same at every
+control step, the final state de1cb2ee33e369ed on both (`realism2/`, `port/i01r2/`); the reference is unchanged (no
+re-stamp).
+
 The same day the user chose option C of the controller's look (`runs/controller_battery_design_20261014/xbox_visual/`): the
 controller's outer body is an Xbox Wireless Controller at 1:1 in static collision, drawn by its visual twins (The task,
 the controller's outer body). Until then the shell's collision was a 90 x 80 x 24.5 mm block over an open 15 mm slot
@@ -56,17 +66,26 @@ frame; m, z = 0 the table top):
 - the pry stick standing blade down in its holder at (0, 0.225): a 2 x 1.2 x 30 mm blade with a 2.0 x 1.0 x 1.2 mm foot
   at its tip toward the cell's axis, a 6 x 6 x 40 mm shaft, a 16 x 16 x 50 mm handle, 30 g; the holder's 6.8 mm square
   hole has a 2 mm x 45 deg lead-in at its mouth (`STAND_FUNNEL`: the hole's 0.4 mm play is less than the hands' tracking
-  error);
+  error); drawn as a black nylon spudger (since 2026-10-20: the shaft and the handle as boxes with their edges rounded by
+  1.2 mm inside the colliding ones, five grip bands 0.15 mm proud on the handle), in a dark grey holder;
 - the new cells new_1, new_2 in the tray at (0.065, -0.025); the recycling box (inner 70 x 50 x 30 mm) at
-  (-0.065, -0.025), empty; a pad for the cover at (-0.12, 0.22) (display only).
+  (-0.065, -0.025), empty; a pad for the cover at (-0.12, 0.22) (display only). Since 2026-10-20 the tray is dark
+  plastic, the recycling box a blue bin with a recycling label on its front (a white panel and a green triangle, 0.1-0.2
+  mm proud), the pad a dark grey rubber mat, and the cradle slate with its edges rounded by 1 mm inside its box and a
+  lighter rim band 0.1 mm proud on its top.
 
 The new cells lie in the tray as `+-` (new_1's + end toward +x, new_2's toward -x) for every seed: until 2026-10-20 the
 scene seed chose the polarity (seed % 4: `+-`, `-+`, `++`, `--`; seed 0 `+-`); since then a seed varies appearance only
 (the user). The appearance parameters `controller_finish` (the Xbox outer body with its bumpers and triggers, the
 compartment's walls, which share the body's colour as on the real controller, and the cover), `tray_finish`,
-`box_finish` and `props_finish` (cradle, stick holder, cover pad) re-colour visual geoms only
-(`scene_variation.appearance`: appearance seed 0 is the recorded look); the cells, the red "+" marks and the stick keep
-the colours the texts name. Everything else is fixed.
+`box_finish` (the bin; its label keeps its colours) and `props_finish` (the cradle and its rim band, the stick's holder,
+the cover's pad, and in the stick entity alone the pry stick's blade, shaft, handle and grip bands) re-colour visual
+geoms only (`scene_variation.appearance`: appearance seed 0 is the recorded look); the cells and the red "+" marks keep
+the colours the texts name. Since 2026-10-21 the defaults are the props' look of 2026-10-20 (tray `dark`, bin `navy`,
+props `grey` with the black nylon stick; seed 0 writes the entity files of jianwen/battery-realism-2 byte for byte);
+seeds 1 and 2 (tray grey / white, bin blue / green, props wood with an orange-wood stick / black with a blue nylon
+stick) differ from it in every one of these parts, and the texts describe the stick without its colours. Everything
+else is fixed.
 
 Every mechanism is physical: the controller is one MJCF entity whose shell body has no joint (MuJoCo welds it to the
 world) with three slide joints (the two spring contacts, the plunger; their stiffness and spring zero in the MJCF); the
@@ -263,6 +282,14 @@ birth 764192d9a7e49a0f has its own above (battery_r3; a self-check of the budget
 before it started when the user chose option C, and the local self-check of C was withdrawn for a lab RTX 4090 host).
 
 ## Harbor
+
+The props' look (2026-10-21, physics unchanged): `release_rebuild.py 1965935f90 --version 0.3.0-dryrun-battery-replacement-4 --families
+battery_replacement --bench robotangle --jobs 1 --lanes 1` on the branch's own commit (jianwen/battery-realism-2; rendering off;
+a lab RTX 4090 host, load average 57 when it started; `runs/controller_battery_design_20261014/harbor_test/work4/`): PASS. Born
+764192d9a7e49a0f (= the reference's); `mk_tasks.py --check` ok, all bases and the MuJoCo instance bytes; oracle 1 and nop 0
+in both modes, the oracle's end state de1cb2ee33e369ed in both, the evidence claims hold (the standard live episode
+292.4 s on the loaded host). Nothing uploaded. New cam_high stills (birth, row 3514, end: `realism2/media/`) and the demo
+(`out/topogym_demo_r2/`, the oracle live: success, de1cb2ee33e369ed).
 
 The per-episode budget and the outer body (2026-10-20): `release_rebuild.py a1027c0665 --version
 0.3.0-dryrun-battery-replacement-3 --families battery_replacement --bench robotangle --jobs 1 --lanes 1` on the branch's own

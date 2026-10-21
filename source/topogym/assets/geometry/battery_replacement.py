@@ -348,23 +348,61 @@ def _compartment(meshes):
     return L
 
 
+# The props' look (2026-10-20, the user's choices from the cam_high realism list; visual only, every colliding geom as before)
+PROP_ROUND = 1.0                          # mm: the cradle's edges, drawn rounded inside its box
+STICK_ROUND = 1.2                         # mm: the stick's shaft and handle, likewise (at most 0.88 mm off a corner)
+CRADLE_RGBA, CRADLE_RIM_RGBA = "0.26 0.29 0.33 1", "0.42 0.45 0.50 1"      # slate, a lighter rim band on its top
+TRAY_RGBA = "0.23 0.25 0.28 1"            # dark plastic
+BIN_RGBA = "0.20 0.32 0.48 1"             # a blue collection bin, a recycling label on its front
+STAND_RGBA = "0.20 0.20 0.22 1"           # the stick's holder: dark grey
+PAD_RGBA = "0.27 0.27 0.29 1"             # the cover's pad: a dark grey rubber mat
+STICK_RGBA, HANDLE_RGBA, GRIP_RGBA = "0.07 0.07 0.08 1", "0.11 0.11 0.12 1", "0.20 0.20 0.21 1"   # black nylon
+
+
+def _rounded_box_visual(name, b, r, rgba, meshes, offset=(0., 0., 0.)):
+    """A visual (VIS) drawing the box b (mm bounds) with every edge rounded by r inside it: a convex mesh named name."""
+    x0, x1, y0, y1, z0, z1 = b
+    discs = [(x, y, r, z1) for x in (x0 + r, x1 - r) for y in (y0 + r, y1 - r)]
+    meshes.append(_mesh(name, _rounded_hull(discs, z0, r, r)))
+    return [f'<geom type="mesh" mesh="{name}" pos="{_f(*offset)}" rgba="{rgba}" {VIS}/>']
+
+
+def _recycling_label(y_face, z_mid):
+    """A recycling label on the recycling box's front face (y_face, mm, facing -y): a white panel 30 x 18 mm and a green
+    triangle of three bars (the recycling mark's outline), each 0.1 mm proud of the one behind it."""
+    L = [box_geom((-15., 15., y_face - .1, y_face, z_mid - 9., z_mid + 9.), rgba="0.92 0.92 0.90 1", extra=VIS)]
+    side, cz = 11., z_mid + .5
+    for phi in (0., 120., 240.):         # the bars' midpoints sit side / (2 sqrt 3) from the centre, square to it
+        a = np.radians(phi - 90.)
+        mx, mz = side / (2 * np.sqrt(3)) * np.cos(a), side / (2 * np.sqrt(3)) * np.sin(a)
+        th = -np.radians(phi)            # the bar's long axis (cos phi, 0, sin phi): a turn of -phi about y
+        q = (np.cos(th / 2), 0., np.sin(th / 2), 0.)
+        L.append(f'<geom type="box" pos="{_f(mx * MM, (y_face - .15) * MM, (cz + mz) * MM)}" quat="{_f(*q)}" '
+                 f'size="{_f(side / 2 * MM, .05 * MM, .9 * MM)}" rgba="0.16 0.58 0.28 1" {VIS}/>')
+    return L
+
+
 def _props(meshes):
     """The static props, each a top-level body (positions in the mount frame)."""
     L = []
     cx, cy = CTRL_XY_M
     L.append(f'<body name="cradle" pos="{_f(cx, cy - .01, 0)}">')
-    L.append(f'<geom name="cradle" type="box" pos="0 0 0.0075" size="{_f(.070, .060, .0075)}" rgba="0.36 0.38 0.42 1" {CONTACT}/>')
+    L.append(f'<geom name="cradle" type="box" pos="0 0 0.0075" size="{_f(.070, .060, .0075)}" rgba="0.36 0.38 0.42 1" group="3" {CONTACT}/>')
+    L += _rounded_box_visual("cradle_vis", (-70., 70., -60., 60., 0., 15.), PROP_ROUND, CRADLE_RGBA, meshes)
+    for b in ((-69., 69., -59., -54.), (-69., 69., 54., 59.), (-69., -64., -54., 54.), (64., 69., -54., 54.)):   # its rim
+        L.append(box_geom(b + (15., 15.1), rgba=CRADLE_RIM_RGBA, extra=VIS))
     L.append("</body>")
     tx, ty = TRAY_XY_M
     L.append(f'<body name="tray" pos="{_f(tx, ty, 0)}">')
     for b in subtract((-35., 35., -25., 25., 0., 14.), [(-28., 28., -21., -3., TRAY_FLOOR, 20.), (-28., 28., 3., 21., TRAY_FLOOR, 20.)]):
-        L.append(box_geom(b, rgba="0.25 0.55 0.35 1", extra=CONTACT))
+        L.append(box_geom(b, rgba=TRAY_RGBA, extra=CONTACT))
     L.append("</body>")
     bx, by = BOX_XY_M
     ix, iy, dz = BOX_IN
     L.append(f'<body name="recycle_box" pos="{_f(bx, by, 0)}">')
     for b in subtract((-ix / 2 - 3, ix / 2 + 3, -iy / 2 - 3, iy / 2 + 3, 0., dz + 3), [(-ix / 2, ix / 2, -iy / 2, iy / 2, 3., dz + 10)]):
-        L.append(box_geom(b, rgba="0.80 0.45 0.10 1", extra=CONTACT))
+        L.append(box_geom(b, rgba=BIN_RGBA, extra=CONTACT))
+    L += _recycling_label(-iy / 2 - 3., (dz + 3.) / 2)
     L.append("</body>")
     rx, ry = STAND_XY_M
     hw = SHAFT_R + .4        # a 6.8 x 6.8 mm square hole 40 mm deep: the 6 mm square shaft stands in it within 0.4 mm,
@@ -373,14 +411,14 @@ def _props(meshes):
              ("y", (-hw - c, hw + c), hw, 1., 45., c), ("y", (-hw - c, hw + c), -hw, -1., 45., c)]
     L.append(f'<body name="stick_stand" pos="{_f(rx, ry, 0)}">')
     for b in subtract((-15., 15., -15., 15., 0., 45.), [(-hw, hw, -hw, hw, 5., 50.)] + [chamfer_cut_and_prism(e)[0] for e in edges]):
-        L.append(box_geom(b, rgba="0.45 0.45 0.48 1", extra=CONTACT))
+        L.append(box_geom(b, rgba=STAND_RGBA, extra=CONTACT))
     for i, e in enumerate(edges):
         meshes.append(_mesh(f"funnel_{i}", chamfer_cut_and_prism(e)[1]))
-        L.append(f'<geom name="funnel_{i}" type="mesh" mesh="funnel_{i}" rgba="0.45 0.45 0.48 1" {CONTACT}/>')
+        L.append(f'<geom name="funnel_{i}" type="mesh" mesh="funnel_{i}" rgba="{STAND_RGBA}" {CONTACT}/>')
     L.append("</body>")
     px, py = PAD_XY_M
     L.append(f'<body name="cover_pad" pos="{_f(px, py, 0)}">')
-    L.append(f'<geom type="box" pos="0 0 0.0002" size="{_f(.045, .035, .0002)}" rgba="0.55 0.6 0.7 1" contype="0" conaffinity="0" group="2" mass="0"/>')
+    L.append(f'<geom type="box" pos="0 0 0.0002" size="{_f(.045, .035, .0002)}" rgba="{PAD_RGBA}" contype="0" conaffinity="0" group="2" mass="0"/>')
     L.append("</body>")
     return L
 
@@ -423,16 +461,31 @@ def cover_geoms():
     return g
 
 
-def stick_geoms():
-    """The pry stick in its frame: blade (yellow), foot, square shaft, square handle (blue)."""
+def stick_geoms(meshes):
+    """The pry stick in its frame, drawn as a black nylon spudger (2026-10-20): the blade and its foot, the square shaft
+    and the square handle collide as before (group 3); each is drawn by a visual inside it, the shaft's and the handle's
+    edges rounded by STICK_ROUND, five grip bands around the handle 0.15 mm proud."""
     bx, by, bl = BLADE
     fl, fh = FOOT
     yellow, blue = "0.85 0.75 0.15 1", "0.15 0.35 0.75 1"
-    return [box_geom((-bx / 2, bx / 2, -by / 2, by / 2, 0., bl), name="blade", rgba=yellow, extra=f"{CONTACT} {FRICTION}"),
-            box_geom((-bx / 2 - fl, -bx / 2 + .01, -by / 2, by / 2, 0., fh), name="foot", rgba=yellow, extra=f"{CONTACT} {FRICTION}"),
-            box_geom((-SHAFT_R, SHAFT_R, -SHAFT_R, SHAFT_R, bl - 2, bl + SHAFT_L), name="shaft", rgba=yellow, extra=CONTACT),
-            box_geom((-HANDLE[0] / 2, HANDLE[0] / 2, -HANDLE[1] / 2, HANDLE[1] / 2, bl + SHAFT_L, bl + SHAFT_L + HANDLE[2]),
-                     name="handle", rgba=blue, extra=CONTACT)]
+    blade = (-bx / 2, bx / 2, -by / 2, by / 2, 0., bl)
+    foot = (-bx / 2 - fl, -bx / 2 + .01, -by / 2, by / 2, 0., fh)
+    shaft = (-SHAFT_R, SHAFT_R, -SHAFT_R, SHAFT_R, bl - 2, bl + SHAFT_L)
+    hx, hy, h0 = HANDLE[0] / 2, HANDLE[1] / 2, bl + SHAFT_L
+    handle = (-hx, hx, -hy, hy, h0, h0 + HANDLE[2])
+    L = [box_geom(blade, name="blade", rgba=yellow, extra=f'group="3" {CONTACT} {FRICTION}'),
+         box_geom(foot, name="foot", rgba=yellow, extra=f'group="3" {CONTACT} {FRICTION}'),
+         box_geom(shaft, name="shaft", rgba=yellow, extra=f'group="3" {CONTACT}'),
+         box_geom(handle, name="handle", rgba=blue, extra=f'group="3" {CONTACT}'),
+         box_geom(blade, rgba=STICK_RGBA, extra=VIS), box_geom(foot, rgba=STICK_RGBA, extra=VIS)]
+    L += _rounded_box_visual("stick_shaft_vis", shaft, STICK_ROUND, STICK_RGBA, meshes)
+    L += _rounded_box_visual("stick_handle_vis", handle, STICK_ROUND, HANDLE_RGBA, meshes)
+    band = (-hx - .15, hx + .15, -hy - .15, hy + .15, 0., 1.5)
+    meshes.append(_mesh("stick_grip_band", _rounded_hull([(x, y, STICK_ROUND + .15, band[5]) for x in (band[0] + STICK_ROUND + .15,
+                        band[1] - STICK_ROUND - .15) for y in (band[2] + STICK_ROUND + .15, band[3] - STICK_ROUND - .15)], 0., .6, .6)))
+    for k in range(5):
+        L.append(f'<geom type="mesh" mesh="stick_grip_band" pos="{_f(0, 0, (h0 + 14. + 5. * k) * MM)}" rgba="{GRIP_RGBA}" {VIS}/>')
+    return L
 
 
 # ---------------------------------------------------------------- poses (mount frame, 4x4)
@@ -515,25 +568,36 @@ def _visual_twins(lines):
 # entry's colours (as written above) and no colliding geom's. Controller: the Xbox outer body (BODY_RGBA, which the
 # compartment's walls share, as on the real controller, whose battery bay is the body's colour), its bumpers and triggers
 # (TRIM_RGBA), the cover, its ridge, its arrow (the compartment's floor, its marks and contacts, the sticks and the
-# buttons keep theirs); props: the cradle, the stick's holder, the cover's pad.
-# The cells, the red "+" marks and the stick keep their colours: the texts name them.
+# buttons keep theirs); tray: the tray; box: the recycling bin (its label keeps its colours); props: the cradle and its rim
+# band, the stick's holder, the cover's pad and, in the stick entity alone (STICK_FINISHES, the same names), the pry
+# stick's blade, shaft, handle and grip bands. Since 2026-10-21 the defaults are the props' realistic look of 2026-10-20
+# (the tray dark, the bin navy, the props grey with a black nylon stick); the other finishes differ from it in every part.
+# The cells and the red "+" marks keep their colours: the texts name them (the stick's are no longer named).
 CONTROLLER_FINISHES = dict(
     black=(BODY_RGBA, TRIM_RGBA, "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1"),
     white=("0.86 0.87 0.88 1", "0.80 0.81 0.82 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1"),
     red=("0.62 0.08 0.10 1", "0.50 0.06 0.08 1", "0.58 0.07 0.09 1", "0.48 0.06 0.08 1", "0.75 0.32 0.32 1"),
     blue=("0.14 0.28 0.62 1", "0.11 0.23 0.52 1", "0.13 0.26 0.58 1", "0.11 0.22 0.48 1", "0.40 0.50 0.75 1"))
-TRAY_FINISHES = dict(green=("0.25 0.55 0.35 1",), white=("0.85 0.85 0.83 1",), grey=("0.60 0.62 0.64 1",))
-BOX_FINISHES = dict(orange=("0.80 0.45 0.10 1",), blue=("0.15 0.35 0.65 1",), green=("0.20 0.50 0.25 1",))
-PROPS_FINISHES = dict(grey=("0.36 0.38 0.42 1", "0.45 0.45 0.48 1", "0.55 0.6 0.7 1"),
-                      wood=("0.55 0.40 0.26 1", "0.60 0.45 0.30 1", "0.80 0.70 0.55 1"),
-                      black=("0.14 0.14 0.15 1", "0.20 0.20 0.21 1", "0.30 0.30 0.32 1"))
+TRAY_FINISHES = dict(dark=(TRAY_RGBA,), white=("0.85 0.85 0.83 1",), grey=("0.60 0.62 0.64 1",))
+BOX_FINISHES = dict(navy=(BIN_RGBA,), blue=("0.30 0.55 0.85 1",), green=("0.20 0.50 0.25 1",))
+PROPS_FINISHES = dict(      # the cradle, its rim band, the stick's holder, the cover's pad
+    grey=(CRADLE_RGBA, CRADLE_RIM_RGBA, STAND_RGBA, PAD_RGBA),
+    wood=("0.55 0.40 0.26 1", "0.68 0.52 0.35 1", "0.60 0.45 0.30 1", "0.74 0.62 0.46 1"),       # a cork pad
+    black=("0.10 0.10 0.11 1", "0.32 0.32 0.34 1", "0.09 0.09 0.10 1", "0.40 0.40 0.42 1"))      # a grey pad
+STICK_FINISHES = dict(      # the stick's blade, foot and shaft, its handle, its grip bands (props_finish's names)
+    grey=(STICK_RGBA, HANDLE_RGBA, GRIP_RGBA),                                                    # black nylon
+    wood=("0.80 0.62 0.38 1", "0.62 0.44 0.26 1", "0.50 0.34 0.20 1"),                             # orange-wood
+    black=("0.14 0.24 0.48 1", "0.10 0.17 0.36 1", "0.22 0.33 0.58 1"))                            # blue nylon
 
 
-def finish_colours(controller="black", tray="green", box="orange", props="grey") -> dict:
-    """{default look colour: its colour in these finishes} (entity_xml's look)."""
+def finish_colours(controller="black", tray="dark", box="navy", props="grey", entity=None) -> dict:
+    """{default look colour: its colour in these finishes} (entity_xml's look) for the entity named (None: as for every
+    entity but the stick): the stick takes STICK_FINISHES alone (its handle's colour is the bumpers' too), every other
+    entity the controller's, tray's, box's and props' tables."""
+    tables = ((STICK_FINISHES, props),) if entity == "stick" else (
+        (CONTROLLER_FINISHES, controller), (TRAY_FINISHES, tray), (BOX_FINISHES, box), (PROPS_FINISHES, props))
     out = {}
-    for table, name in ((CONTROLLER_FINISHES, controller), (TRAY_FINISHES, tray), (BOX_FINISHES, box),
-                        (PROPS_FINISHES, props)):
+    for table, name in tables:
         out.update(zip(next(iter(table.values())), table[name]))
     return out
 
@@ -562,7 +626,7 @@ def entity_xml(name, polarity="+-", look=None) -> str:
         T = start_poses(polarity)["stick"]
         body.append(f'<body name="stick" pos="{_f(*T[:3, 3])}" quat="{_f(*_quat(T))}"><freejoint name="root"/>')
         body.append(f'<inertial pos="0 0 0.11" mass="{STICK_MASS_KG}" diaginertia="1.2e-4 1.2e-4 2e-6"/>')
-        body += stick_geoms()
+        body += stick_geoms(meshes)
         body.append("</body>")
     else:
         raise ValueError(f"battery_replacement has no entity {name!r}")

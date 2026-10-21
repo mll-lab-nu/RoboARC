@@ -26,7 +26,7 @@ class CaliperSortingTask(RigidTaskDefinition):
     defaults = dict(stable_duration_s=.5,
                     terminal=dict(bin_half_extent_m=.04, min_height_m=.003, max_height_m=.04,
                                   max_linear_speed_m_s=.001, max_angular_speed_rad_s=.02),
-                    fixture_finish="slate_blue", bin_finish="light_grey", sleeve_finish="steel")
+                    fixture_finish="slate_blue", bin_finish="grey_blue", sleeve_finish="steel")
     # Appearance only (build_caliper_sorting's finishes; scene_variation.appearance): the defaults are the recorded look
     hash_when_changed = ("fixture_finish", "bin_finish", "sleeve_finish")
     # Every sleeve and the slider are grasp targets of both hands: a sleeve as a whole link, the slider within 20 mm of its

@@ -43,6 +43,12 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
   front-row bin's card hangs from its front wall; a back-row bin's stands behind its back wall on a post, 50 mm up, so
   that cam_high sees it over the bin's own sleeves and it is over no other bin (before, the back row's cards lay over the
   front-row bins and the sleeves put there hid them).
+  The look (2026-10-20, the user's realism list; drawn only, the collision as above): the bins dark grey-blue plastic,
+  the sleeves steel (grey, metallic 0.75, roughness 0.35), the stand drawn as a small bench vise around its block (a
+  cast-iron base plate on the table, the blue-grey body under the beam, two jaws beside the beam 0.6 mm clear of it
+  with steel jaw plates rising 2 mm above its face, the screw and T-handle on the -C y side, away from the observation
+  cameras), the rack as a row of V-blocks on a base plate (20 deg flanks; each groove dips 2.5 mm below the floor the
+  sleeve stands on, so that its flanks pass just under the sleeve's circle; they touch it for the largest sleeve).
 - Caliper (Mitutoyo 530 series 0-150 mm, catalogue D-10): URDF `caliper` with links `mount` (the stand's clamp, the root,
   fixed to the world), `beam` (on the prismatic joint `mount` along C z, its limits +-1 um, damping 10 N s/m), `slider`
   (prismatic joint `slider`, 0-152 mm = the jaw opening s; friction loss 1.5 N, damping 2 N s/m, armature 1e-3 and a
@@ -68,8 +74,14 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
   stroke font of its own (no system font). Every link has ONE textured GLB visual whose material, texture and image carry
   names of their own (Nyx draws unnamed materials of different GLB files of one scene with the first file's image).
 - The task builds scene seed 0's scenario for every seed (the user, 2026-10-20: a seed varies appearance only;
-  `fixture_finish`, `bin_finish` and `sleeve_finish` re-colour the GLBs of the rack and stand, the bins and all four
-  sleeves; the caliper and the label cards keep theirs).
+  `fixture_finish`, `bin_finish` and `sleeve_finish` re-colour GLBs only; the caliper and the label cards keep theirs).
+  On the look above (2026-10-21): `fixture_finish` the vise's body, the rack's base plate, dividers and curbs, and the
+  V-blocks (slate_blue: the look above; forest_green: green vise and rack, black-oxide V-blocks; safety_orange: orange
+  vise and rack, bright steel V-blocks; wood: a grey cast-iron vise, a wooden rack, the steel V-blocks; the vise's base
+  and its steel jaw plates, screw and handle keep theirs), `bin_finish` the bins (grey_blue, the look above, was
+  light_grey; pale_blue, pale_yellow), `sleeve_finish` all four sleeves (steel; brass, black_oxide; all with the steel's
+  metallic finish). Appearance seeds 1 and 2: forest_green / pale_blue / brass and safety_orange / pale_yellow /
+  black_oxide.
 - Per scene seed: seed 0 is the reference's scene (k 1.08 mm per unit, b 31.4; ID 38.8 / 39.1, OD 96.2 / 96.5 = 7.99 /
   8.32 and 69.98 / 70.31 mm; classes A and B, both OD 96.2, in rack slots 0-3 as A B B A; labels C A D B; no shift). Other
   seeds draw k, b, the class readings (sizes 66-74 mm outside, 7.5-9.4 mm inside), which diameter the two classes share
@@ -222,6 +234,37 @@ The rules v2 and the labels (2026-10-19; branch jianwen/caliper-label-legibility
 - The demo film (the design record's out/topogym_demo_v3/) closes on the task's cam_high at the end at its own pixels,
   with the four labels cut out of it (the same actions row for row, final state ec9ade23fc0a034c).
 - The physics did not change, so no new acceptance round (r3 above stands; the coordinator, 2026-10-19).
+
+The look (2026-10-20/21; branch jianwen/caliper-realism-2, 4e95deb921; the design record's realism/):
+- Drawn only (the scene's paragraph above). On the trees of dev 9115da07d8 and of 4e95deb921 the instance is born the
+  same (state_sha f0c67c958f7901e8, world part 055cfa28ddd7503e), its compiled scene.xml and meshes are byte for byte
+  the same (instance.json differs only in the ten drawn GLBs' hashes, scene.json only in the name and hash it gives
+  the composed robot XML), and the reference ends the same on both (ec9ade23fc0a034c, world part 6908f5c45d545709,
+  success at row 22962): the reference needs no re-stamp. A fresh-process strict replay on 4e95deb921: success at row
+  22962, final state ec9ade23fc0a034c.
+- Along the reference (every second control step, realism/vis_clearance.py) nothing passes through a drawn part: the
+  sleeves come 0.15-0.19 mm from the V-blocks' flanks as the right hand lifts them (0.23 mm standing), the arms 19.6 mm
+  from the vise (its body, a left gripper as the wrist camera reads) and 21.1 mm from its jaw plates, the slider 17.6 mm
+  from its handle; the beam rests on the vise's body (the stand's collision block) and is 0.6 mm from its jaw plates.
+- The labels in cam_high on the dark bins (realism/cam_high/): all four read at the start and at the end, the same
+  pixels as before (cap height 8.2-9.3 px).
+- Harbor under the base caliper-sorting-01-i01 (2026-10-21; this branch at 4e95deb921; image
+  ghcr.io/mll-lab-nu/eai-robotangle:0.3.0-dryrun-caliper-v5, local only; rendering off): `mk_tasks.py --check` (all
+  bases, and the MuJoCo instance bytes) ok; the instance made in the image has the reference's birth f0c67c958f7901e8
+  (instance sha256 af2de874882d6e7e); privileged oracle 1 / nop 0, standard oracle 1 / nop 0, both oracles ending in
+  ec9ade23fc0a034c. The standard sidecar's fresh-process replay took 770.7 s (0.034 s per control step) with the host's
+  load at about 20 (678.3 s at about 6 on d0a35aff89); the model is the same, so the texts keep 0.030 s.
+- The demo film (out/topogym_demo_v3/, 3:50; the one before in out/topogym_demo_v3_superseded_fin8/): the same actions
+  row for row, final state ec9ade23fc0a034c.
+- Re-done on dev d0de6082f4, the appearance seeds (2026-10-21; branch jianwen/caliper-realism-2b; the design record's
+  realism/seeds_2b/), the appearance axes re-attached to the look (the scene's paragraph above). Seed 0 writes the same
+  24 entity files as 4e95deb921 (sha256 equal, with and without the default finishes), is born f0c67c958f7901e8, and the
+  reference ends in ec9ade23fc0a034c (a fresh-process strict replay: success at row 22962);
+  `ci_checks/test-appearance-seeds.py` passes. Seeds 1 and 2 change the ten GLBs of the bins, sleeves, rack and stand;
+  the task's parameters enter the state hash (births 616d6b9f05638643 and 5703a4d15143e944, the reference's ends
+  79b46aff2d7bb2f0 and 9495967490b4a903), its world part is seed 0's at the birth and at the end (055cfa28ddd7503e,
+  6908f5c45d545709). In cam_high at the end of the reference every seed's four labels read (cap height 8.2-9.3 px; the
+  white cards on the grey-blue, pale blue and pale yellow bins). Harbor not run again: the physics is the same.
 
 Version 2 (2026-10-17: the hand-held caliper; reference 33391 rows, final state 588d58f1fbaaab36, Harbor both modes
 oracle 1 / nop 0, acceptance round r2 PASS) and version 1 (six sleeves of four classes in millimetres, no lock;

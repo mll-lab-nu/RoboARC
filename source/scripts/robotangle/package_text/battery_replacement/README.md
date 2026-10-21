@@ -28,7 +28,8 @@ template's, and the rebuild replaces the template's family by battery_replacemen
     plunger's own condition as checked, and the stick may end on the table or in a hand: the metric review
     `runs/robotangle_mujoco/metric_review_20261019/battery_zh.md`, findings 2 and 5);
   - a short scene section after the task sentence (the cover's slide and latch, slid back "until it stops (it latches
-    there)" since 2026-10-19, the review's finding 3; the old cells 4 mm below the rim, how the pry stick levers a cell;
+    there)" since 2026-10-19, the review's finding 3; the old cells 4 mm below the rim, how the pry stick levers a cell,
+    the stick described without its colours since 2026-10-21 (they follow the props' appearance finish);
     REGISTRATION_PROPOSAL.md section 5);
   - the grader details: `scripts/topogym_rules.py` for battery_replacement (a rigid family: the contact review rules; the
     six grasp regions, the stick's around its handle), the goal-square and separator lines dropped (no placement goal);

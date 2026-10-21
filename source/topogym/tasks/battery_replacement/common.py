@@ -62,7 +62,7 @@ class BatteryReplacementTask(RigidTaskDefinition):
         axis_tolerance_rad=float(np.radians(5.)), lateral_tolerance_m=.0012, vertical_tolerance_m=.001, axial_tolerance_m=.0015,
         spring_min_compression_m=.001, cover_tolerance_m=.0005, cover_sink_m=.0002, cover_lift_m=.0006,
         cover_tilt_rad=float(np.radians(1.)), plunger_min_m=.00025, quiet_speed_m_s=.005, quiet_spin_rad_s=.1),
-        controller_finish="black", tray_finish="green", box_finish="orange", props_finish="grey")
+        controller_finish="black", tray_finish="dark", box_finish="navy", props_finish="grey")
     # Appearance only (geo.finish_colours; scene_variation.appearance): the defaults are the recorded scene's look
     hash_when_changed = ("controller_finish", "tray_finish", "box_finish", "props_finish")
     polarity = POLARITY
@@ -105,7 +105,7 @@ class BatteryReplacementTask(RigidTaskDefinition):
             path = folder / f"{name}.xml"
             path.write_text(geo.entity_xml(name, self.polarity, geo.finish_colours(
                 self.config["controller_finish"], self.config["tray_finish"], self.config["box_finish"],
-                self.config["props_finish"])))
+                self.config["props_finish"], entity=name)))
             # The controller's shell body has no joint: MuJoCo welds it to the world (as fiber_bundling's terminal); the
             # entity is not declared fixed, so nyx_direct draws its visuals at the body (it draws no fixed MJCF entity).
             entities.append(EntitySpec(name, "mjcf", path, tuple(self.origin())))

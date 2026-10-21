@@ -131,8 +131,9 @@ AXES = {
     ),
     # The fixed-scene families below vary appearance only (appearance(); the user, 2026-10-20): every axis re-colours
     # visual geoms or meshes, never a colliding one; the values leave out the default and their order is the looks of
-    # appearance seeds 1, 2, ... Colours the texts name stay (battery cells, red "+" marks, the stick's yellow blade and
-    # blue handle; caliper labels, scale and the knob's white line; Trinity's green goal region).
+    # appearance seeds 1, 2, ... Colours the texts name stay (battery cells and red "+" marks; caliper labels, scale and
+    # the knob's white line; Trinity's green goal region). Battery's pry stick follows props_finish since 2026-10-21 (its
+    # texts no longer name its colours).
     "bed_bolt": (
         dict(path="wood_finish", kind="choice", values=["walnut", "white_painted", "white_oak"], visual=True),
         dict(path="bolt_finish", kind="choice", values=["zinc", "yellow_zinc"], visual=True),
