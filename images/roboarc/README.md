@@ -97,23 +97,20 @@ The runtime is the simulator source's hash (`SOURCE.json`, re-hashed from the in
 and the versions of torch, numpy, scipy, mujoco, newton and warp-lang. Every Session checks it again at start
 (`runtime_binding_ok` in reward.json) and refuses a different runtime.
 
-## Push
+## Archive and push
 
-```bash
-<token source> | GHCR_USER=<github user> images/roboarc/push.sh [--log <dir>] <ref>=<expected image id> ...
-```
-
-`push.sh` pushes local tags after a verified build. Each tag must be its expected image id, or nothing is pushed. The
-registry token (write:packages) is read from stdin only and lives in a temporary Docker config that is removed on
-exit. After each push the pushed digest must equal the remote manifest's, and the remote config digest the image id.
-New packages start private.
+A validated build is not rebuilt for the registry: `images/archive.sh` exports it from the local Docker store into a
+deterministic OCI archive (the config kept byte for byte, so the archive's config digest is the image id; the layers
+compressed with fixed settings), whose manifest digest goes into `images/pins.json`. `images/push_all.sh` pushes that
+archive byte for byte with RoboARC's other images (images/README.md). For 1.1.0: archive
+`roboarc-1.1.0.oci.tar`, manifest digest `sha256:85ea90032a55…`, config digest = image id `sha256:dadc2d710ad2…`.
 
 ## Files
 
 | file | what | pinned |
 |---|---|---|
 | `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/embodied-first-exam/roboarc:<VERSION>` into every task's Dockerfiles, compose files and README | changing it re-renders all 202 task dirs (new DIGESTs) |
-| `build.sh`, `push.sh` | the build (above) and the push | no (tools; not image inputs) |
+| `build.sh` | the build (above); the archive and the push are `images/archive.sh` and `images/push_all.sh` | no (tools; not image inputs) |
 
 The recipe and its inputs are under `source/` (`source/README.md`). Up to 1.0.x the image was built on the RoboTangle
 0.2.22 image (Genesis 1.2.1, two libuipc builds); that recipe, its libuipc build files and the records of the libuipc

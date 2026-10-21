@@ -91,11 +91,11 @@ named build context, checks every instance file against `scripts/roboarc/assets.
 installs the runtime every task is bound to (`scripts/roboarc/release.json` `runtime`). Every input of the recipe is
 pinned (the base image by digest, Debian packages by version from a snapshot, wheels by sha256), so two builds install
 the same files. It needs about 25 GB of disk
-([images/roboarc/README.md](../images/roboarc/README.md)). `images/roboarc/push.sh` pushes a verified
-build (each local tag must be its expected image id; the registry token on stdin only). The monitor sidecar's image
-is built reproducibly by `images/monitor/build.sh` (an OCI archive whose manifest digest every task pins,
-`scripts/rcb_monitor/inject.py` `IMAGE`) and pushed byte for byte by `images/monitor/push.sh`
-([images/monitor/README.md](../images/monitor/README.md)).
+([images/roboarc/README.md](../images/roboarc/README.md)). A validated build is exported, not rebuilt, into a
+deterministic OCI archive by `images/archive.sh`. The monitor sidecar's image and the two IKEA images are built
+reproducibly straight into OCI archives (`images/monitor/build.sh`, `ikea/images/ikea-mujoco/build.sh`). Every task
+names each image by the manifest digest of its archive (`images/pins.json`), and `images/push_all.sh` pushes the four
+archives byte for byte (the registry token on stdin only; [images/README.md](../images/README.md)).
 
 ## Cutting a release
 
@@ -113,7 +113,7 @@ is built reproducibly by `images/monitor/build.sh` (an OCI archive whose manifes
 4. On a GPU host with the new image: strict replays of one base per family (and of every new or changed base), end
    hashes equal to the recorded ones; Harbor oracle (reward 1) and nop (reward 0) on a sample of bases in both modes,
    deterministic, without infra or grader errors.
-5. Push the images with `images/roboarc/push.sh` (expected image ids), then tag the commit.
+5. Push the images with `images/push_all.sh` (the archives of `images/pins.json`), then tag the commit.
 
 ## Reviewing a change
 

@@ -27,17 +27,12 @@ registry, so a task runs from a local build only after its `image:` line is chan
 
 ## Push
 
-```bash
-<token source> | GHCR_USER=<github user> images/monitor/push.sh [--log <dir>] <archive> [<repo>:<tag>@<digest>]
-```
-
-copies the archive to the registry unchanged (skopeo `--preserve-digests`, in a container pinned by digest), so the
-registry's digest is the pinned one; it checks the archive's digest before logging in and the registry's manifest
-after the copy. The target defaults to `IMAGE` above. The token (write:packages) is read from stdin only and lives in
-the skopeo container's tmpfs; nothing is written to `~/.docker`. A new package starts private: the tasks need it
-public (anonymous pulls), which `push.sh` reports.
+`images/push_all.sh` pushes the archive byte for byte with RoboARC's other images (skopeo `--preserve-digests`, in a
+container pinned by digest), so the registry's digest is the pinned one; images/README.md. The pin is also in
+`images/pins.json` (`ci_checks/check-image-pins.py` checks that it is `inject.py`'s `IMAGE`).
 
 ## Changing the image
 
-Change `Dockerfile`, bump `VERSION`, run `build.sh`, put the printed reference into `inject.py` `IMAGE`, re-render every
-task (both generators; docs/DEVELOPING.md), and push the archive before the tasks are published.
+Change `Dockerfile`, bump `VERSION`, run `build.sh`, put the printed reference into `inject.py` `IMAGE` and
+`images/pins.json`, re-render every task (both generators; docs/DEVELOPING.md), and push the archive before the tasks
+are published.

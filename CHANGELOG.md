@@ -95,7 +95,7 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ik
   tasks' verifier image installs nothing when it is built (until 1.0.x it installed them from the live Debian archive
   and PyPI at that moment). The privileged agent's container has them too. Each IKEA task's runtime binding names the
   new base image id, and its README a 1.1.0 Change Log entry.
-- Push the two images from their OCI archives byte for byte (`images/monitor/push.sh`), so the registry's digests are
+- Push the two images from their OCI archives byte for byte (`images/push_all.sh`), so the registry's digests are
   the ones above; a `docker push` re-compresses the layers.
 
 ### Validation of 1.1.0

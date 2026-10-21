@@ -3,8 +3,8 @@
 #
 #   images/monitor/build.sh [--out <file>] [--load]
 #
-# - Output: an OCI image layout archive (default ./roboarc-monitor-<VERSION>.oci.tar), the exact bytes images/monitor/
-#   push.sh copies to the registry. Its manifest digest is printed and compared with the pin in
+# - Output: an OCI image layout archive (default ./roboarc-monitor-<VERSION>.oci.tar), the exact bytes
+#   images/push_all.sh copies to the registry. Its manifest digest is printed and compared with the pin in
 #   scripts/rcb_monitor/inject.py (`IMAGE`): exit 1 when they differ.
 # - Reproducible: a throwaway BuildKit builder of a pinned version, the base image pinned by digest, no provenance or
 #   SBOM attestations, and every timestamp set to SOURCE_DATE_EPOCH below (rewrite-timestamp), so the same recipe gives
@@ -41,7 +41,7 @@ print(m["digest"], json.loads(blob)["config"]["digest"])
 PY
 )
 echo "built $OUT"
-echo "  manifest digest $DIGEST (the registry's digest after push.sh)"
+echo "  manifest digest $DIGEST (the registry's digest after images/push_all.sh)"
 echo "  config digest   $CONFIG (the Docker image id)"
 if [ $LOAD -eq 1 ]; then   # docker load (classic image store) wants a manifest.json next to the OCI layout: add one
   python3 - "$OUT" "$REF" <<'PY' | docker load -q >/dev/null

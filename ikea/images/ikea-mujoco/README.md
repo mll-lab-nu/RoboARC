@@ -95,8 +95,8 @@ the meshes as a new dataset revision and pin it, and re-render the tasks. A chan
 The tasks name the tags; `scripts/ikea_mujoco/bindings.json` holds the base image's id, which every privileged task's
 `tests/runtime_binding.json` and every standard task's `environment/sim/runtime_binding.json` repeat. Push the two OCI
 archives byte for byte, so the registry's manifest digests are the ones above and `sim/Dockerfile`'s `FROM` resolves:
-`images/monitor/push.sh <archive> <ref>@<digest>` (a skopeo copy that preserves digests and checks them after the copy;
-base first). A `docker push` of the loaded images would re-compress their layers and give other manifest digests (the
+`images/push_all.sh` (a skopeo copy that preserves digests and checks them after the copy; the base first; the
+digests are pinned in `images/pins.json`, images/README.md). A `docker push` of the loaded images would re-compress their layers and give other manifest digests (the
 image ids stay). The build context's source of record is the dataset revision in `scripts/ikea_mujoco/assets.json`.
 Before RoboARC 1.0.0 the 1.0.0 images (same ids) were published as `eai-ikea-mujoco:0.3.2` and `eai-ikea-mujoco-sim:0.4.2`;
 the IKEA task texts and evidence records of earlier runs keep those names.

@@ -119,7 +119,7 @@ never fail), rendering and GPU needs, the wrappers and the tests: [docs/API.md](
 | `scripts/` | the task layer the tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`) and build helpers (`stamp_mtimes.py`, `check_image_files.py`) |
 | `scripts/harbor/` | the Harbor batch runner and its helpers ([docs/RUNNING.md](docs/RUNNING.md)) |
 | `source/` | the image build context: the simulator package `topogym/` (with `planning/`, the planners that made the references), `assets/robots/`, the recipe `source/images/roboarc/Dockerfile` with its pinned inputs and the MuJoCo EPA patch |
-| `images/roboarc/`, `images/monitor/` | the release image's `build.sh` / `push.sh` and its README (what it holds, how it is pinned); the monitor sidecar's recipe |
+| `images/` | the image pins (`pins.json`), `archive.sh` and `push_all.sh` ([images/README.md](images/README.md)); `roboarc/`: the release image's `build.sh` and its README (what it holds, how it is pinned); `monitor/`: the monitor sidecar's recipe |
 | `tools/` | development tools: the release rebuild, reference recording, redesign and stress tests ([tools/README.md](tools/README.md)) |
 | `records/` | freeze manifests and archived release records |
 | `ci_checks/`, `.github/` | the repository checks and the CI workflow |
