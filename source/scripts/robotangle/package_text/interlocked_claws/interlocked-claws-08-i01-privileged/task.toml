@@ -3,7 +3,7 @@ artifacts = ["/app/output/"]
 
 [task]
 name = "robot-coding-bench/topogym-interlocked-claws-08-i01-privileged"
-description = "TopoGym interlocked_claws (aloha, Genesis): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a teal lock. Frozen scene instance (variation interlocked_claws_rd_easy, seed 0)."
+description = "TopoGym interlocked_claws (aloha, Genesis): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock. Frozen scene instance (variation interlocked_claws_rd_easy, seed 0)."
 authors = [{ name = "jianwen" }]
 keywords = ["robotics", "topogym", "genesis", "aloha", "code-as-policy", "trajectory", "interlocked_claws"]
 

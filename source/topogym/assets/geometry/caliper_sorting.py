@@ -130,7 +130,11 @@ FIXTURE_FINISHES = dict(slate_blue=dict(vise=VISE_BODY, rack=RACK_BASE, vblock=R
                         forest_green=dict(vise=(0.18, 0.34, 0.24), rack=(0.20, 0.40, 0.28), vblock=(0.20, 0.20, 0.22)),
                         safety_orange=dict(vise=(0.78, 0.38, 0.10), rack=(0.85, 0.45, 0.12), vblock=(0.62, 0.63, 0.66)),
                         wood=dict(vise=(0.33, 0.34, 0.36), rack=(0.62, 0.47, 0.32), vblock=RACK_VBLOCK))
-BIN_FINISHES = dict(grey_blue=BIN_RGB, pale_blue=(0.62, 0.75, 0.88), pale_yellow=(0.92, 0.86, 0.55))
+# The bins of appearance seeds 1 and 2 (the user, 2026-10-21: any colours, as long as the seeds tell apart, the bins
+# show clearly on the white table and their labels read): dark plastics of hues far from the grey-blue and from the
+# same seed's vise and rack (seed 1 forest_green: dark red; seed 2 safety_orange: dark green). Were pale_blue and
+# pale_yellow, whose edges hardly showed on the white table.
+BIN_FINISHES = dict(grey_blue=BIN_RGB, dark_red=(0.45, 0.10, 0.09), dark_green=(0.14, 0.36, 0.22))
 SLEEVE_FINISHES = dict(steel=SLEEVE_RGB, brass=(0.80, 0.64, 0.32), black_oxide=(0.18, 0.18, 0.20))
 
 

@@ -12,6 +12,9 @@ class InterlockedClawsCastTrinityTask(InterlockedClawsTask):
     pregrasp_weld = True
     placement_description = "the entire gold piece (T)"
     separation_summary = "Completely separate all three pieces from one another and briefly hold them still."
+    # Appearance only: the colour of the third piece, B (None: other_rgb, as for H), so that the three pieces differ.
+    defaults = dict(InterlockedClawsTask.defaults, third_rgb=None)
+    hash_when_changed = (*InterlockedClawsTask.hash_when_changed, "third_rgb")
     # The reference takes all three pieces (T again at its head, H and B where they hang): every piece is a grasp target
     # of both hands, centred on its bounding box with a radius of 9 cm (the farthest point, a corner of B, is 85.8 mm from
     # its box centre), and a hand may acquire with its TCP up to 12 cm from that centre.
@@ -30,6 +33,12 @@ class InterlockedClawsCastTrinityTask(InterlockedClawsTask):
         from topogym.assets.geometry.cast_trinity import build_cast_trinity
         assembly, report, self.initial_robot_q = build_cast_trinity(folder)
         return assembly, report
+
+    def other_color(self, index):
+        """B (index 2; T, H, B in build order) takes third_rgb when it is set."""
+        if index == 2 and self.config["third_rgb"] is not None:
+            return self.config["third_rgb"]
+        return super().other_color(index)
 
     def pregrasp_targets(self, assembly, entities, transformed):
         """All three pieces, each as a whole (the family's targets are the two opening pieces near the opening grasps)."""

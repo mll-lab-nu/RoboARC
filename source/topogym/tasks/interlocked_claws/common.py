@@ -206,13 +206,18 @@ class InterlockedClawsTask(PlacementGoalMixin, RigidTaskDefinition):
     def evaluate_state(self, state):
         return self.evaluate_placement(state)
 
+    def other_color(self, index):
+        """The colour of non-target piece ``index`` (1, 2, ...): other_rgb for every one; None keeps the piece's own."""
+        return self.config["other_rgb"]
+
     def paint_pieces(self, assembly, folder):
         """Per-piece RGBA; non-default appearance also rewrites the piece's URDF and GLB colours."""
         import xml.etree.ElementTree as ET
         from topogym.assets.scene_visuals import scale_glb_color
-        shade, other = float(self.config["target_shade"]), self.config["other_rgb"]
+        shade = float(self.config["target_shade"])
         colors = []
         for index, body in enumerate(assembly.bodies):
+            other = self.other_color(index)
             if index == 0 and shade != 1.:
                 paint = lambda rgba: [*(min(1., float(c)*shade) for c in rgba[:3]), float(rgba[3])]
             elif index > 0 and other is not None:

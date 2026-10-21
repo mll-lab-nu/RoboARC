@@ -79,9 +79,11 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
   V-blocks (slate_blue: the look above; forest_green: green vise and rack, black-oxide V-blocks; safety_orange: orange
   vise and rack, bright steel V-blocks; wood: a grey cast-iron vise, a wooden rack, the steel V-blocks; the vise's base
   and its steel jaw plates, screw and handle keep theirs), `bin_finish` the bins (grey_blue, the look above, was
-  light_grey; pale_blue, pale_yellow), `sleeve_finish` all four sleeves (steel; brass, black_oxide; all with the steel's
-  metallic finish). Appearance seeds 1 and 2: forest_green / pale_blue / brass and safety_orange / pale_yellow /
-  black_oxide.
+  light_grey; dark_red, dark_green: dark plastics of hues far from grey_blue and from the same seed's vise and rack, the
+  user, 2026-10-21: any colours as long as the seeds tell apart, the bins show clearly on the white table and their
+  labels read; were pale_blue and pale_yellow, whose edges hardly showed on the table), `sleeve_finish` all four sleeves
+  (steel; brass, black_oxide; all with the steel's metallic finish). Appearance seeds 1 and 2: forest_green / dark_red /
+  brass and safety_orange / dark_green / black_oxide.
 - Per scene seed: seed 0 is the reference's scene (k 1.08 mm per unit, b 31.4; ID 38.8 / 39.1, OD 96.2 / 96.5 = 7.99 /
   8.32 and 69.98 / 70.31 mm; classes A and B, both OD 96.2, in rack slots 0-3 as A B B A; labels C A D B; no shift). Other
   seeds draw k, b, the class readings (sizes 66-74 mm outside, 7.5-9.4 mm inside), which diameter the two classes share
@@ -262,9 +264,19 @@ The look (2026-10-20/21; branch jianwen/caliper-realism-2, 4e95deb921; the desig
   reference ends in ec9ade23fc0a034c (a fresh-process strict replay: success at row 22962);
   `ci_checks/test-appearance-seeds.py` passes. Seeds 1 and 2 change the ten GLBs of the bins, sleeves, rack and stand;
   the task's parameters enter the state hash (births 616d6b9f05638643 and 5703a4d15143e944, the reference's ends
-  79b46aff2d7bb2f0 and 9495967490b4a903), its world part is seed 0's at the birth and at the end (055cfa28ddd7503e,
-  6908f5c45d545709). In cam_high at the end of the reference every seed's four labels read (cap height 8.2-9.3 px; the
-  white cards on the grey-blue, pale blue and pale yellow bins). Harbor not run again: the physics is the same.
+  79b46aff2d7bb2f0 and 9495967490b4a903, with the pale bins of then), its world part is seed 0's at the birth and at
+  the end (055cfa28ddd7503e, 6908f5c45d545709). In cam_high at the end of the reference every seed's four labels read
+  (cap height 8.2-9.3 px; the white cards on the grey-blue, pale blue and pale yellow bins). Harbor not run again: the
+  physics is the same.
+- The bins of seeds 1 and 2 dark red and dark green (2026-10-21; branch jianwen/caliper-bin-colours; the design
+  record's realism/bins_bc/): seed 0 writes the same 24 entity files as before (sha256 equal, with and without the
+  default finishes), is born f0c67c958f7901e8 and the reference ends in ec9ade23fc0a034c; seeds 1 and 2 differ from
+  the pale-bin look in the four bins' GLBs only, are born a7ae88ab2e8a6871 and e05d3b1fb46018a2, the reference ends in
+  fec4a1a8b8cff210 and 37396d8236713e39, and their world part is seed 0's at the birth and at the end
+  (055cfa28ddd7503e, 6908f5c45d545709); `ci_checks/test-appearance-seeds.py` passes. In cam_high at the end of the
+  reference every seed's four labels read (8.2-9.3 px), the bins' edges show on the table and the three seeds' bins
+  (grey-blue, dark red beside the green rack, dark green beside the orange rack) tell apart (realism/bins_bc/
+  seeds_end_sheet.png). Harbor not run: the physics is the same.
 
 Version 2 (2026-10-17: the hand-held caliper; reference 33391 rows, final state 588d58f1fbaaab36, Harbor both modes
 oracle 1 / nop 0, acceptance round r2 PASS) and version 1 (six sleeves of four classes in millimetres, no lock;

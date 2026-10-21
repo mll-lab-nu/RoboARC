@@ -83,9 +83,14 @@ the cover's pad, and in the stick entity alone the pry stick's blade, shaft, han
 geoms only (`scene_variation.appearance`: appearance seed 0 is the recorded look); the cells and the red "+" marks keep
 the colours the texts name. Since 2026-10-21 the defaults are the props' look of 2026-10-20 (tray `dark`, bin `navy`,
 props `grey` with the black nylon stick; seed 0 writes the entity files of jianwen/battery-realism-2 byte for byte);
-seeds 1 and 2 (tray grey / white, bin blue / green, props wood with an orange-wood stick / black with a blue nylon
-stick) differ from it in every one of these parts, and the texts describe the stick without its colours. Everything
-else is fixed.
+seeds 1 and 2 (tray grey / white, bin blue / green, props wood with an orange nylon stick / black with a blue nylon
+stick) differ from it in every one of these parts, and the texts describe the stick without its colours. Since
+2026-10-21 (the user, after the migration session's colour table, `<host work dir>/colour_table_20261021/`): the stick is
+always a nylon colour (black, orange, blue; the "wood" props had drawn it in wood's tan, beside a text that says "a nylon
+spudger"), and the coloured controller finishes are the real coloured controllers (Pulse Red, Shock Blue: a coloured
+front and a white back, battery door included), so face down a white back with coloured bumpers and triggers, on which
+the rim's red "+" marks read (seed 2's red body had made them red on red); the rim's white "-" marks turn dark on a white
+back. Seed 0 writes the entity files of f6471bc717 byte for byte. Everything else is fixed.
 
 Every mechanism is physical: the controller is one MJCF entity whose shell body has no joint (MuJoCo welds it to the
 world) with three slide joints (the two spring contacts, the plunger; their stiffness and spring zero in the MJCF); the

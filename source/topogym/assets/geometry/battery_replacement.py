@@ -573,20 +573,28 @@ def _visual_twins(lines):
 # stick's blade, shaft, handle and grip bands. Since 2026-10-21 the defaults are the props' realistic look of 2026-10-20
 # (the tray dark, the bin navy, the props grey with a black nylon stick); the other finishes differ from it in every part.
 # The cells and the red "+" marks keep their colours: the texts name them (the stick's are no longer named).
-CONTROLLER_FINISHES = dict(
-    black=(BODY_RGBA, TRIM_RGBA, "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1"),
-    white=("0.86 0.87 0.88 1", "0.80 0.81 0.82 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1"),
-    red=("0.62 0.08 0.10 1", "0.50 0.06 0.08 1", "0.58 0.07 0.09 1", "0.48 0.06 0.08 1", "0.75 0.32 0.32 1"),
-    blue=("0.14 0.28 0.62 1", "0.11 0.23 0.52 1", "0.13 0.26 0.58 1", "0.11 0.22 0.48 1", "0.40 0.50 0.75 1"))
+# 2026-10-21 (the user, after the migration session's colour table): the red "+" marks on the compartment's rim stay red
+# and must read on the body, which the rim shares; so the coloured finishes are the real coloured controllers (Pulse Red,
+# Shock Blue: a coloured front and a white back, battery door included), face down showing the white back with the
+# coloured bumpers and triggers; and the rim's white "-" marks (the sixth column) turn dark on a white back.
+CONTROLLER_FINISHES = dict(   # body (and the compartment's walls and rim), bumpers and triggers, cover, ridge, arrow, rim "-"
+    black=(BODY_RGBA, TRIM_RGBA, "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1", "0.92 0.92 0.92 1"),
+    white=("0.86 0.87 0.88 1", "0.80 0.81 0.82 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1",
+           "0.12 0.12 0.13 1"),
+    red=("0.90 0.90 0.91 1", "0.66 0.07 0.09 1", "0.88 0.88 0.89 1", "0.80 0.80 0.81 1", "0.62 0.62 0.64 1",
+         "0.12 0.12 0.13 1"),
+    blue=("0.90 0.90 0.91 1", "0.12 0.30 0.70 1", "0.88 0.88 0.89 1", "0.80 0.80 0.81 1", "0.62 0.62 0.64 1",
+          "0.12 0.12 0.13 1"))
 TRAY_FINISHES = dict(dark=(TRAY_RGBA,), white=("0.85 0.85 0.83 1",), grey=("0.60 0.62 0.64 1",))
 BOX_FINISHES = dict(navy=(BIN_RGBA,), blue=("0.30 0.55 0.85 1",), green=("0.20 0.50 0.25 1",))
 PROPS_FINISHES = dict(      # the cradle, its rim band, the stick's holder, the cover's pad
     grey=(CRADLE_RGBA, CRADLE_RIM_RGBA, STAND_RGBA, PAD_RGBA),
     wood=("0.55 0.40 0.26 1", "0.68 0.52 0.35 1", "0.60 0.45 0.30 1", "0.74 0.62 0.46 1"),       # a cork pad
     black=("0.10 0.10 0.11 1", "0.32 0.32 0.34 1", "0.09 0.09 0.10 1", "0.40 0.40 0.42 1"))      # a grey pad
-STICK_FINISHES = dict(      # the stick's blade, foot and shaft, its handle, its grip bands (props_finish's names)
+STICK_FINISHES = dict(      # the stick's blade, foot and shaft, its handle, its grip bands, keyed by props_finish's names
+    # but always a nylon spudger's colour, as the texts call it (2026-10-21: the "wood" props drew it in wood's tan)
     grey=(STICK_RGBA, HANDLE_RGBA, GRIP_RGBA),                                                    # black nylon
-    wood=("0.80 0.62 0.38 1", "0.62 0.44 0.26 1", "0.50 0.34 0.20 1"),                             # orange-wood
+    wood=("0.88 0.40 0.08 1", "0.72 0.31 0.06 1", "0.95 0.56 0.22 1"),                             # orange nylon
     black=("0.14 0.24 0.48 1", "0.10 0.17 0.36 1", "0.22 0.33 0.58 1"))                            # blue nylon
 
 

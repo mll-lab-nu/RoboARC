@@ -89,8 +89,9 @@ AXES = {
         # 1.1 m rope's far end (5 deg -> ~5 cm), so this envelope is small.
         dict(path="geometry.translation_m", kind="offset", range=[[-.01, .02], [-.01, 0.], None]),
         dict(path="geometry.yaw_deg", kind="offset", range=[-2., 2.]),
-        # Ring colours stay: the instruction orders the rings cyan, green, purple.
-        dict(path="rope_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # Ring colours stay: the instruction orders the rings cyan, green, purple. The rope is hemp, blue or black, apart
+        # from every ring and grommet (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
+        dict(path="rope_finish", kind="choice", values=["hemp", "blue_rope", "black_rope"], visual=True),
     ),
     "slotted_post_ring": (
         # FEM volumes cannot rotate, so translation only; -y beyond ~2.5 cm pushes the discs out of frame.
@@ -103,6 +104,9 @@ AXES = {
         dict(path="target_shade", kind="offset", range=[-.15, .15], visual=True),
         dict(path="other_rgb", kind="choice", visual=True, values=[
             None, [.18, .32, .65], [.25, .55, .30], [.50, .52, .55]]),
+        # Only Cast Trinity defines third_rgb (its third piece, B; the other bases have two pieces): B takes green, then
+        # blue, where other_rgb gives H blue, then green, so that its three pieces differ at appearance seeds 1 and 2.
+        dict(path="third_rgb", kind="choice", visual=True, values=[None, [.25, .55, .30], [.18, .32, .65]]),
     ),
     "blanket_flatten": (
         # Drawn before freezing: each seeded instance gets its own prepared archive
@@ -142,7 +146,7 @@ AXES = {
     "caliper_sorting": (
         # The four sleeves stay alike (one finish for all); bins keep the white label cards.
         dict(path="fixture_finish", kind="choice", values=["forest_green", "safety_orange", "wood"], visual=True),
-        dict(path="bin_finish", kind="choice", values=["pale_blue", "pale_yellow"], visual=True),
+        dict(path="bin_finish", kind="choice", values=["dark_red", "dark_green"], visual=True),
         dict(path="sleeve_finish", kind="choice", values=["brass", "black_oxide"], visual=True),
     ),
     "clock_assembling": (
