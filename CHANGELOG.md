@@ -38,8 +38,9 @@ No task directory, pinned tooling, hashed simulator file or image input changes.
 The puzzle image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` (8.7 GB; 1.0.0 was 12.2 GB), and the IKEA
 images rebuilt from fully pinned inputs with only what the tasks run: `roboarc-ikea:1.1.0` (1.05 GB; 1.31 GB) and
 `roboarc-ikea-sim:1.1.0` (7.67 GB; 9.08 GB). The task set's version is 1.1.0. Every task binds its new image; the
-instructions, the graders' logic, the frozen instances and scenes and the references are unchanged. Results graded
-under 1.0.x stand: every reference replays in the new images to the end state it reaches in 1.0.0.
+instructions, the graders' logic, the frozen instances and scenes and the references are unchanged (except
+blanket-flatten-06-i01's standard reference, under Records). Results graded under 1.0.x stand: every reference replays
+in the new images to the end state it reaches in 1.0.0.
 Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ikea/images/ikea-mujoco/README.md`.
 
 ### The image
@@ -71,6 +72,10 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ik
   `0d25b901f83db04e` and `3dd3136502cb9e13`. The old values came from a pre-release dry run; the released references end on
   the new ones in images 0.2.0 (Harbor oracle runs), 1.0.0 and 1.1.0, with equal state hashes at every 250-row checkpoint.
   The references themselves are unchanged.
+- blanket-flatten-06-i01's standard reference (`scripts/roboarc/oracles/blanket-flatten-06-i01/standard.npz`): its route
+  re-recorded within the standard joint-speed rule (7577 rows, end `f6f8062d4270bdcb`; Harbor standard oracle 1 / nop
+  0), replacing the privileged rows whose 3 faster rows the service stretched (oracle 0); the privileged reference is
+  unchanged.
 
 ### Repository
 - Removed (they only served porting from Genesis; RoboARC 1.0.0 at main 153eb8cf01 keeps them): the Genesis-era task
