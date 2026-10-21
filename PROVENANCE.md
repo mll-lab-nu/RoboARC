@@ -141,3 +141,9 @@ the graded runtime loads is the same file as in 1.0.0, and every reference repla
 `tools/release/package_text_tool.py`, `scripts/roboarc/port_package.py`, `tools/tests/test_mujoco_kinematics.py`,
 `images/roboarc/{Dockerfile.genesis-0.2.22,install_uipc_prefix.py,verify_uipc_wheel.py,uipc-sm86-build/}`. The
 row "Genesis base image" above is the input of 1.0.x only.
+
+The IKEA images of 1.1.0 (`ikea/images/ikea-mujoco/`, README there) are rebuilt from the same pinned inputs as 1.0.0's,
+now all pinned in the recipes: the Python base image by digest, the Debian packages at the 1.0.0 images' versions from
+snapshot.debian.org (2026-10-19), the wheels by sha256, the sidecar `FROM` the base by digest; reproducible OCI archives
+(base `sha256:2c56d9226aaf…`, id `9f9cbab8aa74`; sidecar `sha256:f22a1e9042c7…`, id `cbd929360257`). Unused packages
+are left out; every file the graded runtime loads is the same as in 1.0.0 (`5d5090ea1910`, `050cd45d70f6`).

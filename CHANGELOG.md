@@ -18,11 +18,12 @@ No task directory, pinned tooling, hashed simulator file or image input changes.
 
 ## 1.1.0 (2026-10-20)
 
-The puzzle image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` (8.7 GB; 1.0.0 was 12.2 GB). The task
-set's version is 1.1.0. Every puzzle task binds the new image's runtime; the instructions, the graders' logic, the
-frozen instances, the references and the IKEA tasks and images (still `roboarc-ikea:1.0.0`, `roboarc-ikea-sim:1.0.0`)
-are unchanged. Results graded under 1.0.x stand: every reference replays in the new image to the end state it reaches in 1.0.0.
-Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md).
+The puzzle image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` (8.7 GB; 1.0.0 was 12.2 GB), and the IKEA
+images rebuilt from fully pinned inputs with only what the tasks run: `roboarc-ikea:1.1.0` (1.05 GB; 1.31 GB) and
+`roboarc-ikea-sim:1.1.0` (7.67 GB; 9.08 GB). The task set's version is 1.1.0. Every task binds its new image; the
+instructions, the graders' logic, the frozen instances and scenes and the references are unchanged. Results graded
+under 1.0.x stand: every reference replays in the new images to the end state it reaches in 1.0.0.
+Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ikea/images/ikea-mujoco/README.md`.
 
 ### The image
 - Built from the Python base image (`source/images/roboarc/Dockerfile`) instead of the RoboTangle 0.2.22 (Genesis)
@@ -61,6 +62,30 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md).
   (`records/genesis_release/`), the Genesis base image's recipe and libuipc build files, and the Genesis kinematics
   comparison test. `release_rebuild.py` gives a new base its template's final packages.
 
+### The IKEA images
+- `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0` (`ikea/images/ikea-mujoco/`): every input is pinned, the Python base
+  image by digest (as before), the Debian packages at the 1.0.0 images' versions from the Debian snapshot archive of
+  their build day, the wheels by sha256 (`requirements.lock`, `sim/nyx-requirements.txt`; until 1.0.0 the base resolved
+  mujoco's dependencies at build time and the sidecar installed its Debian and pip packages unpinned). The sidecar is
+  `FROM` the base by digest. `build.sh` builds both reproducibly (pinned BuildKit, SOURCE_DATE_EPOCH, rewritten
+  timestamps) as OCI archives with fixed manifest digests: base `sha256:2c56d9226aaf…` (id `9f9cbab8aa74`), sidecar
+  `sha256:f22a1e9042c7…` (id `cbd929360257`).
+- The same files as 1.0.0 for everything the graded runtime loads (traced: privileged grading with its replay video,
+  the standard sim service with Nyx, the agent's tooling): MuJoCo with the EPA patch, numpy, the scenes, OSMesa and
+  ffmpeg, Nyx, torch and its CUDA libraries, the graphics loaders (the dynamic linker's cache lists the added and
+  removed libraries; every library resolves to the same file); every Debian package keeps its version. The verifier's
+  replay videos are byte-identical to 1.0.0's.
+- Removed as unused: mujoco's absl-py, etils, fsspec, websockets and zipp (its viewer, studio and test code); in the
+  Nyx venv triton, sympy, mpmath, jinja2, markupsafe, filelock, fsspec, cuda-toolkit, cuda-pathfinder, absl-py, etils,
+  glfw and pip; curl in the sidecar; bytecode caches; the second copy of the scenes the 1.0.0 base carried (a `chmod`
+  layer).
+- The verifier's replay video libraries (OSMesa, imageio with ffmpeg, Pillow) are in the base image: the privileged
+  tasks' verifier image installs nothing when it is built (until 1.0.x it installed them from the live Debian archive
+  and PyPI at that moment). The privileged agent's container has them too. Each IKEA task's runtime binding names the
+  new base image id, and its README a 1.1.0 Change Log entry.
+- Push the two images from their OCI archives byte for byte (`images/monitor/push.sh`), so the registry's digests are
+  the ones above; a `docker push` re-compresses the layers.
+
 ### Validation of 1.1.0
 - The 99 references, replayed strictly in fresh processes as the privileged verifier does (two replays, rendering
   off): all succeed, both replays agree, every birth is the frozen instance's; 97 end on the freeze manifest's hash, and
@@ -72,6 +97,15 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md).
   rendering reaches the recorded end states; `tests/api`: 29 simulator tests and 17 bit-identity tests pass in 1.1.0.
 - `release_rebuild.py --onto 1.1.0` with its own instances builds the same image id and changes no file; the
   generators' `--check`, the invariants, unit tests and advisories pass.
+- IKEA: the 12 references replayed in fresh processes in the 1.1.0 verifier image exactly as the privileged verifier
+  does (two replays and the replay video): all succeed, both replays agree, and every end and settled state equals
+  1.0.0's (and the recorded hashes). Harbor oracle 1 / nop 0 on all 12 scenes in both modes (48 trials) with the 1.1.0
+  images; every oracle ends on its recorded state. Every file the traced runtime loads is byte-identical to 1.0.0's;
+  three builds (two from fresh clones) give byte-identical archives. Nyx's RGB frames of a moving scene differ from
+  run to run on one host in 1.0.0 as in 1.1.0 (hundreds to tens of thousands of pixels, by up to 25 levels, between two
+  runs of the same image; the frames at reset are identical), so they are compared by that spread; depth,
+  proprioception and every physics state are identical. `tests/api` in `roboarc-ikea-sim:1.1.0` with a GPU: 29 passed
+  (the IKEA reference bit-identity tests for lack and svallet among them), 19 skipped (puzzles).
 
 ## 1.0.1 (2026-10-19)
 
