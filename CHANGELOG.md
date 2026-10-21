@@ -33,6 +33,20 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 No task directory, pinned tooling, hashed simulator file or image input changes.
 
+## 1.1.1 (2026-10-21)
+
+RoboARC's four images moved to the `mll-lab-nu` organization, with the same bytes and digests:
+`ghcr.io/mll-lab-nu/roboarc:1.1.0`, `roboarc-ikea:1.1.0`, `roboarc-ikea-sim:1.1.0` and `roboarc-monitor:0.1.0`
+(`images/pins.json`; before: `ghcr.io/embodied-first-exam/<name>`). The packages are private and inherit the
+repository's access, so a collaborator with read access to the repository can pull them (`docker login ghcr.io` with a
+token that has `read:packages`). Every task directory is re-rendered: its Dockerfiles, compose files and README name the
+new references, its Change Log has a 1.1.1 entry ("image references moved to ghcr.io/mll-lab-nu (same images, same
+digests)"), and the puzzles' Release line names the task set 1.1.1; each task gets a new `DIGEST`. The runtime bindings
+keep the image ids and the names the images were bound under, and the IKEA sim recipe keeps its `FROM` (an input of
+the sim image). `ci_checks/check-image-pins.py` allows `ghcr.io/mll-lab-nu/` only (a task naming the former registry
+fails). No instruction, grader, tooling, binding, instance, reference, image or archive changed: results graded under
+1.1.0 stand. The repository changes listed under Unreleased above change no task.
+
 ## 1.1.0 (2026-10-20)
 
 The puzzle image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` (8.7 GB; 1.0.0 was 12.2 GB), and the IKEA

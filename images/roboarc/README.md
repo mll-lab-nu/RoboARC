@@ -1,6 +1,6 @@
 # roboarc (the release image)
 
-`ghcr.io/embodied-first-exam/roboarc:<VERSION>` (this directory's `VERSION`) is the image every RoboARC task runs in:
+`ghcr.io/mll-lab-nu/roboarc:<VERSION>` (this directory's `VERSION`) is the image every RoboARC task runs in:
 the privileged agent and verifier containers are built `FROM` it, and the standard mode's `sim` service runs it. Its
 recipe is `source/images/roboarc/Dockerfile`; `build.sh` builds it. It holds:
 
@@ -89,7 +89,7 @@ maps).
 The image must install exactly the runtime every task is bound to (`build.sh` runs this):
 
 ```bash
-docker run --rm ghcr.io/embodied-first-exam/roboarc:$(cat images/roboarc/VERSION) python -c 'import json; from topogym.simulator.frozen_binding import installed_runtime; print(json.dumps(installed_runtime(), sort_keys=True))' > /tmp/roboarc_runtime.json
+docker run --rm ghcr.io/mll-lab-nu/roboarc:$(cat images/roboarc/VERSION) python -c 'import json; from topogym.simulator.frozen_binding import installed_runtime; print(json.dumps(installed_runtime(), sort_keys=True))' > /tmp/roboarc_runtime.json
 python3 -c 'import json, sys; sys.exit(0 if json.load(open("/tmp/roboarc_runtime.json")) == json.load(open("scripts/roboarc/release.json"))["runtime"] else "image differs from the tasks runtime binding: do not run")'
 ```
 
@@ -109,7 +109,7 @@ archive byte for byte with RoboARC's other images (images/README.md). For 1.1.0:
 
 | file | what | pinned |
 |---|---|---|
-| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/embodied-first-exam/roboarc:<VERSION>@<manifest digest>` (the pin of `images/pins.json`) into every task's Dockerfiles, compose files and README | changing it (or the pin) re-renders all 202 task dirs (new DIGESTs) |
+| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/mll-lab-nu/roboarc:<VERSION>@<manifest digest>` (the pin of `images/pins.json`) into every task's Dockerfiles, compose files and README | changing it (or the pin) re-renders all 202 task dirs (new DIGESTs) |
 | `build.sh` | the build (above); the archive and the push are `images/archive.sh` and `images/push_all.sh` | no (tools; not image inputs) |
 
 The recipe and its inputs are under `source/` (`source/README.md`). Up to 1.0.x the image was built on the RoboTangle

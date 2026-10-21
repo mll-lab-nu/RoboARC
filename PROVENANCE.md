@@ -154,3 +154,9 @@ the config kept byte for byte, so the archive's config digest is the image id, a
 id; two exports byte-identical); the IKEA images and the monitor keep the digests of their reproducible builds. The
 four archives are pushed byte for byte by `images/push_all.sh`. The standard agent's client packages are installed from
 a hashed lock of the same versions (`--no-deps --require-hashes`).
+
+## 1.1.1: the images' registry
+
+1.1.1 names the same four images (same digests and ids) under `ghcr.io/mll-lab-nu/` instead of
+`ghcr.io/embodied-first-exam/` (`images/pins.json`); nothing else changed. The runtime bindings and the IKEA sim
+recipe's `FROM` keep the names the images were bound and built under.

@@ -56,7 +56,7 @@ the family pages list each family's robot and success rule.
   `scripts/roboarc/port_package.py`, in RoboARC 1.0.0).
 - The frozen instances (about 700 MB) are not in git: they are in a Hugging Face dataset, pinned file by file in
   `scripts/roboarc/assets.json`. The image carries them, so running tasks needs no dataset access.
-- Image: `ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>`, built by `images/roboarc/build.sh` from
+- Image: `ghcr.io/mll-lab-nu/roboarc:<images/roboarc/VERSION>`, built by `images/roboarc/build.sh` from
   `source/` (recipe `source/images/roboarc/Dockerfile`, the instances as a named build context) on the Python base
   image pinned by digest, with Debian packages and wheels pinned by version and hash (images/roboarc/README.md). Every task is bound to the runtime the image installs (`release.json`
   `runtime`; the build checks it).

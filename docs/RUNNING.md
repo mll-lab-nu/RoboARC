@@ -11,8 +11,8 @@ standard-mode wire protocol is [STANDARD_MODE.md](STANDARD_MODE.md); the benchma
 - Linux x86_64 with an NVIDIA GPU that has RT cores (Nyx renders through Vulkan; driver >= 580), Docker with the NVIDIA
   Container Toolkit, Harbor 0.23 or newer, Python >= 3.11 for the repository tools. arm64 hosts are not supported (the
   images are linux/amd64, Nyx needs NVIDIA on x86_64, the standard client's lock lists x86_64 wheels).
-- The images the tasks name (`ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>`; IKEA:
-  `roboarc-ikea` and `roboarc-ikea-sim`), pulled or built (docs/DEVELOPING.md).
+- The images the tasks name (`ghcr.io/mll-lab-nu/roboarc:<images/roboarc/VERSION>`; IKEA:
+  `roboarc-ikea` and `roboarc-ikea-sim`), pulled or built (docs/DEVELOPING.md). The image packages are private and inherit this repository's access: a collaborator with read access to the repository logs in with `docker login ghcr.io -u <github user>` and a GitHub token with the `read:packages` scope.
 - Every trial needs one GPU. A task's minimum allocation is its `[metadata.resources]` (README "Compute resources";
   2 GB of GPU memory, measured peak about 1.1 GB).
 

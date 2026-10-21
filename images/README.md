@@ -1,6 +1,6 @@
 # RoboARC's images: pins, archives, push
 
-RoboARC's tasks run four images of its own, all in `ghcr.io/embodied-first-exam/`, and the standard client base
+RoboARC's tasks run four images of its own, all in `ghcr.io/mll-lab-nu/`, and the standard client base
 `docker.io/library/python:3.12.14-slim@sha256:…` (`scripts/eai_standard/client.env`). Every task names each image by
 its manifest digest, `<repo>:<tag>@sha256:<digest>`, so a pull gets exactly the bytes that were validated. The digests
 are in one file, [`pins.json`](pins.json), in push order:
@@ -16,7 +16,8 @@ Each entry of `pins.json` has the pinned reference (`ref`), the image id (`id`, 
 inspect` shows after a pull) and the file name of its OCI archive (`archive`). The generators read it
 (`scripts/task_conventions.py` `pinned_image`), and `ci_checks/check-image-pins.py` (CI job `image-pins`) fails a task
 that names an image by tag only, by another digest or from another registry, and checks that the monitor's `IMAGE` and
-the IKEA sim recipe's `FROM` are pins of `pins.json`.
+the IKEA sim recipe's `FROM` are pins of `pins.json` (the sim recipe, an input of that image, keeps the
+registry name it was built under, `ghcr.io/embodied-first-exam/`, with the same tag and digest).
 
 ## The archives
 
@@ -28,7 +29,7 @@ An image is pushed from an OCI archive whose manifest digest is known before any
   and validated there. `images/archive.sh` then exports that image without rebuilding it:
 
   ```bash
-  images/archive.sh ghcr.io/embodied-first-exam/roboarc:1.1.0 roboarc-1.1.0.oci.tar
+  images/archive.sh ghcr.io/mll-lab-nu/roboarc:1.1.0 roboarc-1.1.0.oci.tar
   ```
 
   `docker save`, then `images/oci_archive.py` in the pinned client base image (no network): the image's config is kept

@@ -45,8 +45,8 @@ libmujoco and the exact dependency versions the runtime bindings require.
 
 | suite | image (physics) | images with Nyx RGB |
 |---|---|---|
-| puzzles | `ghcr.io/embodied-first-exam/roboarc:1.1.0` (Python 3.11) | the same image |
-| IKEA | `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` (Python 3.12) | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0` |
+| puzzles | `ghcr.io/mll-lab-nu/roboarc:1.1.0` (Python 3.11) | the same image |
+| IKEA | `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0` (Python 3.12) | `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0` |
 
 The tasks name these images by manifest digest (`images/pins.json`); `TaskInfo.image` and `render_image` are those
 pinned references, `<repo>:<tag>@sha256:<digest>`.
@@ -58,15 +58,15 @@ image). Run from the repository root of the checkout:
 # a puzzle task, physics only (CPU; rendering off): its reference replayed and checked against the recorded end
 # hash (about 30 s; orbits-02's 7918 rows take about 30 min on one core)
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/embodied-first-exam/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01
+  ghcr.io/mll-lab-nu/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01
 
 # with Nyx images (one GPU, Vulkan through the NVIDIA container toolkit)
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
 
 # an IKEA task with Nyx images
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo -e HOME=/tmp \
-  -u $(id -u):$(id -g) ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0 python examples/vla_loop.py lack
+  -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0 python examples/vla_loop.py lack
 ```
 
 Scratch files (staged instances, the Nyx scene export) go to `ROBOARC_CACHE` (default `~/.cache/roboarc`, here under

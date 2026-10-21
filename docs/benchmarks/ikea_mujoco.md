@@ -176,8 +176,8 @@ simulator error or a malformed request field are the agent's 0, never a free ret
 
 | image | used by | id (1.1.0) | manifest digest (the tasks' pin) |
 |---|---|---|---|
-| `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` | privileged agent and verifier (+ OSMesa and ffmpeg for the replay video); the standard sidecar's physics | `9f9cbab8aa74` | `sha256:2c56d9226aaf…` |
-| `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0` | the standard `sim` sidecar (+ Nyx in `/opt/nyx`, EGL, Vulkan) | `cbd929360257` | `sha256:f22a1e9042c7…` |
+| `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0` | privileged agent and verifier (+ OSMesa and ffmpeg for the replay video); the standard sidecar's physics | `9f9cbab8aa74` | `sha256:2c56d9226aaf…` |
+| `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0` | the standard `sim` sidecar (+ Nyx in `/opt/nyx`, EGL, Vulkan) | `cbd929360257` | `sha256:f22a1e9042c7…` |
 
 Both are built reproducibly from fully pinned inputs (the Python base image by digest, Debian packages by version from
 the Debian snapshot archive, wheels by sha256; the sidecar `FROM` the base by digest) and hold only what the tasks run
