@@ -64,6 +64,12 @@ CHANGE_LOG = """### Change Log
   is built; the agent's container has them too. The runtime binding names the new image id. The instruction, the
   scene, the logic of the graders and of the sim service, the tooling and the reference are unchanged; every
   reference replays to the end and settled states it reaches in 1.0.0: results graded under 1.0.x stand.
+- 2026-10-21: RoboARC 1.1.0, every image by digest: the Dockerfiles and compose files name the IKEA images and the
+  resource monitor's image by manifest digest (images/pins.json), so a pull gets exactly the images that were
+  validated (until now the IKEA images were named by their tags). In standard mode the agent container's client
+  packages are installed from a hashed lock (`environment/client-requirements.txt`, the same versions with the sha256
+  of each file, installed with `--no-deps --require-hashes`): the same files as before. The images, the instruction,
+  the scene, the graders, the tooling and the reference are unchanged: results graded under 1.1.0 stand.
 """
 
 
@@ -180,6 +186,12 @@ EVID = json.loads((HERE / "evidence.json").read_text()) if (HERE / "evidence.jso
 
 def image(t: str) -> dict:
     return BIND["tasks"][t].get("image", BIND["image"])
+
+
+def pinned(t: str) -> str:
+    """The task's image as its files name it: `<repo>:<tag>@sha256:<manifest digest>` (images/pins.json; the pin's image
+    id must be the bound one)."""
+    return TC.pinned_image(image(t)["reference"], image(t)["id"])
 
 
 def robot_text(t: str) -> dict:
@@ -468,7 +480,7 @@ def readme(t: str, traj: pathlib.Path) -> str:
 | Family / instance | `ikea_{t}` / seed 0 |
 | Oracle | `full` |
 | Agent time budget | {AGENT_S} s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `{image(t)['reference']}` |
+| Base image | `{pinned(t)}` |
 
 ## Task
 {x['manual']} in plain MuJoCo 3.14.0 (CPU, float64) with {r['words']}: produce one replayable trajectory. {x['goal']}
@@ -592,8 +604,8 @@ def video_view(t: str) -> str:
 
 def render(t: str, out: pathlib.Path) -> None:
     files = {"task.toml": task_toml(t), "instruction.md": instruction(t),
-             "environment/Dockerfile": ENV_DOCKERFILE.format(image=image(t)["reference"]),
-             "tests/Dockerfile": TESTS_DOCKERFILE.format(image=image(t)["reference"]), "tests/test.sh": test_sh(t),
+             "environment/Dockerfile": ENV_DOCKERFILE.format(image=pinned(t)),
+             "tests/Dockerfile": TESTS_DOCKERFILE.format(image=pinned(t)), "tests/test.sh": test_sh(t),
              "tests/runtime_binding.json": binding(t), "tests/video_view.json": video_view(t), "solution/solve.sh": SOLVE}
     for rel, s in files.items():
         p = out / rel

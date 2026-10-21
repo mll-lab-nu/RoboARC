@@ -12,6 +12,16 @@
    "date": "2026-10-20",
    "mode": "both",
    "text": "RoboARC 1.1.0, the image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` is built from the Python base image with the same operating system, the same Debian package versions and the same wheels (by sha256) as 1.0.0, without genesis-world, libuipc and the packages only they used (no task of 1.0.0 ran on them: every base is MuJoCo, every family renders with nyx_direct.py). The simulator source drops its Genesis-only modules, the tooling (v20) drops the libuipc build choice and Genesis' kernel replacements, so the runtime binding names the new simulator source, tooling and runtime. The instruction, the grader, the frozen instance and the reference are unchanged; every reference replays in the new image to the end state it reaches in 1.0.0: results graded under 1.0.x stand."
+  },
+  {
+   "date": "2026-10-21",
+   "mode": "both",
+   "text": "RoboARC 1.1.0, every image by digest: the Dockerfiles and compose files name the simulator image and the resource monitor's image by manifest digest, `ghcr.io/embodied-first-exam/roboarc:1.1.0@sha256:85ea9003\u2026` (images/pins.json), so a pull gets exactly the image that was validated (until now the simulator image was named by its tag). The image, the instruction, the grader, the tooling, the frozen instance and the reference are unchanged: results graded under 1.1.0 stand."
+  },
+  {
+   "date": "2026-10-21",
+   "mode": "standard",
+   "text": "RoboARC 1.1.0, the agent container's client packages are installed from a hashed lock: `environment/client-requirements.txt` keeps the same versions and adds the sha256 of the file pip selects for the client base, and `environment/Dockerfile` installs it with `--no-deps --require-hashes`, so a build installs exactly those files or fails. The installed packages are the same files as before."
   }
  ],
  "release_commit": "67ed48da8514eb3cb95c2d5b64cc8639125d6b7a",

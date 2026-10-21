@@ -1,7 +1,7 @@
 # Separate verifier sandbox (PROTOCOL §4): the same image with the verifier's own copies of the tooling and the scene's
 # binding. Harbor uploads only the declared artifacts (/app/output/), so nothing the agent changed in its container
 # reaches the verdict.
-FROM ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0
+FROM ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b
 # Replay video (PROTOCOL §4; evidence only): MuJoCo's renderer on CPU software OpenGL (OSMesa) and ffmpeg, both in the
 # base image (pinned there; ikea/images/ikea-mujoco/Dockerfile), so building this image installs nothing.
 ENV MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa

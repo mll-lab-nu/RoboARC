@@ -9,7 +9,7 @@
 | Family / instance | `ikea_variera` / seed 0 |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` |
+| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b` |
 
 ## Task
 IKEA VARIERA shelf insert (AA-741461-4), step 1 in plain MuJoCo 3.14.0 (CPU, float64) with two 7-DoF Franka Panda arms, each with the MuJoCo Menagerie Panda hand (two-finger, tendon-coupled): produce one replayable trajectory. Assemble the VARIERA shelf insert: place the two side frames, lower the shelf onto them, and drive the four screws through the shelf holes into the frames' receivers until they seat.
@@ -92,3 +92,9 @@ Screw threads and receivers are non-convex SDF meshes (0.5 mm pitch, right-hand)
   is built; the agent's container has them too. The runtime binding names the new image id. The instruction, the
   scene, the logic of the graders and of the sim service, the tooling and the reference are unchanged; every
   reference replays to the end and settled states it reaches in 1.0.0: results graded under 1.0.x stand.
+- 2026-10-21: RoboARC 1.1.0, every image by digest: the Dockerfiles and compose files name the IKEA images and the
+  resource monitor's image by manifest digest (images/pins.json), so a pull gets exactly the images that were
+  validated (until now the IKEA images were named by their tags). In standard mode the agent container's client
+  packages are installed from a hashed lock (`environment/client-requirements.txt`, the same versions with the sha256
+  of each file, installed with `--no-deps --require-hashes`): the same files as before. The images, the instruction,
+  the scene, the graders, the tooling and the reference are unchanged: results graded under 1.1.0 stand.

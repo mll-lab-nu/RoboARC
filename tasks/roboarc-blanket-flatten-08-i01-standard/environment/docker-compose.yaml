@@ -18,7 +18,7 @@ services:
     cpus: 8   # rcb-monitor
     mem_limit: 12288m   # rcb-monitor
     pids_limit: 8192   # rcb-monitor
-    image: ghcr.io/embodied-first-exam/roboarc:1.1.0
+    image: ghcr.io/embodied-first-exam/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f
     volumes:
       - rcb_observe:/run/rcb-observe:ro   # rcb-monitor
       - ./sim:/srv:ro

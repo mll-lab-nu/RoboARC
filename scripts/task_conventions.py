@@ -41,6 +41,7 @@ from __future__ import annotations
 import fnmatch
 import functools
 import hashlib
+import json
 import re
 import shutil
 import sys
@@ -50,6 +51,21 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from rcb_monitor import inject as rcb_monitor_inject  # noqa: E402
+
+# RoboARC's images by manifest digest (images/pins.json, images/README.md): the generators name every image of a task as
+# `<repo>:<tag>@sha256:<digest>`, so a pull gets exactly the archive that was validated and pushed.
+IMAGE_PINS = Path(__file__).resolve().parent.parent / "images" / "pins.json"
+
+
+def pinned_image(ref: str, image_id: str | None = None) -> str:
+    """`<repo>:<tag>` -> its pinned reference `<repo>:<tag>@sha256:<manifest digest>` from images/pins.json; with
+    image_id, the pin's image id (its config digest) must be that id."""
+    for p in json.loads(IMAGE_PINS.read_text())["images"]:
+        if p["ref"].split("@", 1)[0] == ref:
+            if image_id is not None and p["id"] != image_id:
+                raise ValueError(f"images/pins.json: {ref} is image {p['id']}, not {image_id}")
+            return p["ref"]
+    raise KeyError(f"images/pins.json has no pin for {ref}: archive the image (images/archive.sh), pin its digests")
 
 CLIENT_ASSERT_OLD = 'assert str(self._spec.get("protocol", "")).startswith("rcb-limited/2."), self._spec.get("protocol")'
 CLIENT_ASSERT_NEW = ('assert str(self._spec.get("protocol", "")).startswith(("eai-standard/2.", "rcb-limited/2.")), '

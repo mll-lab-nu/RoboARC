@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # PROTOCOL §2.4: the agent container and the verifier of every standard task share ONE client base image, pinned by
 # digest, and pinned pip versions. The image and the pins are scripts/eai_standard/client.env (CLIENT_IMAGE) and
-# scripts/eai_standard/client-requirements.txt. For each standard or standard-realtime task (mode standard /
-# standard-realtime, or a -standard / -standard-realtime name), environment/Dockerfile and tests/Dockerfile:
+# scripts/eai_standard/client-requirements.txt, a hashed lock: every pin `name==version` carries the sha256 of its file
+# (`--hash=sha256:...`). For each standard or standard-realtime task (mode standard / standard-realtime, or a -standard /
+# -standard-realtime name), environment/Dockerfile and tests/Dockerfile:
 #   - every FROM is CLIENT_IMAGE;
-#   - every `pip install` installs the pins: `-r <file>` with a byte-identical copy of client-requirements.txt in the
-#     build context, or the full pin list inline (name==version for every pin, nothing else).
+#   - every `pip install` installs the lock: `-r <file>` with a byte-identical copy of client-requirements.txt in the
+#     build context, and `--no-deps --require-hashes` (pip installs exactly the hashed files, nothing resolved); an
+#     inline pin list is refused (it carries no hashes).
 # A failure for the eai-standard/2.2 and 2.4 tasks, whose generator copies client.env and the pins (RoboARC: 2.4). For
 # any other standard task it only reports (a warning, never a failure) whether it shares the one client image of
 # client.env.
@@ -20,11 +22,14 @@ env = dict(l.split("=", 1) for l in open(os.path.join(src, "client.env")).read()
 IMAGE = env["CLIENT_IMAGE"].strip()
 req_path = os.path.join(src, env.get("CLIENT_REQUIREMENTS", "client-requirements.txt").strip())
 REQ_BYTES = open(req_path, "rb").read()
-PINS = {}
-for line in REQ_BYTES.decode().splitlines():
+PINS, LOCK_BAD = {}, []
+for line in re.sub(r"\\\n", " ", REQ_BYTES.decode()).splitlines():   # a requirement continues over `\` line ends
     line = line.split("#", 1)[0].strip()
     if line:
-        name, ver = line.split("==", 1); PINS[re.sub(r"[-_.]+", "-", name).lower()] = ver.strip()
+        spec, *opts = line.split()
+        name, ver = spec.split("==", 1); PINS[re.sub(r"[-_.]+", "-", name).lower()] = ver.strip()
+        if not any(re.fullmatch(r"--hash=sha256:[0-9a-f]{64}", o) for o in opts) or any(not o.startswith("--hash=") for o in opts):
+            LOCK_BAD.append(spec)
 FLAGS_WITH_ARG = {"-r", "--requirement", "-c", "--constraint", "-i", "--index-url", "--extra-index-url", "-f", "--find-links"}
 
 
@@ -60,13 +65,10 @@ def pip_problems(dockerfile: str, context: str) -> list:
                 local = os.path.join(context, os.path.basename(r))
                 if os.path.basename(r) != "client-requirements.txt" or not os.path.isfile(local) or open(local, "rb").read() != REQ_BYTES:
                     out.append(f"pip install -r {r}: needs a byte-identical copy of scripts/eai_standard/client-requirements.txt in the build context")
+                if not {"--no-deps", "--require-hashes"} <= set(toks):
+                    out.append(f"pip install -r {r}: needs --no-deps --require-hashes (install exactly the hashed files)")
             if specs:
-                got = {}
-                for s in specs:
-                    n, sep, v = s.partition("==")
-                    got[re.sub(r"[-_.]+", "-", n).lower()] = v if sep else None
-                if got != PINS:
-                    out.append("pip install " + " ".join(specs)[:120] + " (install the full pin list of client-requirements.txt, or -r it)")
+                out.append("pip install " + " ".join(specs)[:120] + " (install the hashed lock: -r client-requirements.txt --no-deps --require-hashes)")
     return out
 
 
@@ -91,6 +93,8 @@ for t in sorted(os.listdir(tasks)):
         v1_off.append((t, sorted(set(f for f in froms if f != IMAGE))))
     if probs and is22:
         bad.append((t, probs))
+for spec in LOCK_BAD:
+    print(f"FAIL scripts/eai_standard/client-requirements.txt: {spec} needs exactly its --hash=sha256:<digest> options")
 for t, probs in bad:
     for p in probs:
         print(f"FAIL {t}: {p}")
@@ -102,6 +106,6 @@ if v1_off:
 else:
     print(f"ok one client image: all {v1} standard task dirs FROM {IMAGE}")
 if not bad:
-    print(f"ok standard client: {n22} eai-standard/2.2 / 2.4 task dirs on the client image with the shared pins")
-sys.exit(1 if bad else 0)
+    print(f"ok standard client: {n22} eai-standard/2.2 / 2.4 task dirs on the client image with the shared hashed pins")
+sys.exit(1 if bad or LOCK_BAD else 0)
 PY

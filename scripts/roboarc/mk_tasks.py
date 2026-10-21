@@ -22,7 +22,7 @@ the reference solution, then scripts/task_conventions.normalize (the protocol's 
 Inputs (Python standard library only, plus scripts/task_conventions.normalize):
   packages/      per task dir, its texts as they ship (task.toml, README.md, instruction.md, the Dockerfiles and compose
                  files, tests/test.sh, environment/goal/*.png) before normalize. The values that come from another
-                 source are fields, written {{NAME}} and filled by fields() below: the image (images/roboarc/VERSION), the
+                 source are fields, written {{NAME}} and filled by fields() below: the image (images/roboarc/VERSION, by digest: images/pins.json), the
                  agent egress (scripts/set_agent_egress.py), the tooling version, the oracle level and every record of
                  release.json (reference solution, nop run, provenance, change log), the row cap and the standard
                  service's time per call. check_texts() holds the facts every text must state as the pinned tooling
@@ -66,7 +66,7 @@ ASSETS = json.loads((HERE / "assets.json").read_text())        # the pinned HF d
 NAMES = json.loads((HERE / "roboarc_names.json").read_text())   # owner's mapping: old base -> new base, family, number, difficulty
 VERSION = (ROOT / "images" / BENCH / "VERSION").read_text().strip()   # the image's version
 TASKSET_VERSION = REL["version"]   # the task set's version (README Release line); 1.0.1 = texts only, image 1.0.0
-IMAGE = f"ghcr.io/embodied-first-exam/{BENCH}:{VERSION}"
+IMAGE = TC.pinned_image(f"ghcr.io/embodied-first-exam/{BENCH}:{VERSION}")   # by manifest digest (images/pins.json)
 EAI = ROOT / "scripts/eai_standard"
 LAYER = {"environment/rcb_client.py": EAI / "v2_4/rcb_client.py", "environment/rcb1.py": EAI / "rcb1.py",
          "environment/client-requirements.txt": EAI / "client-requirements.txt",

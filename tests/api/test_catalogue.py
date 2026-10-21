@@ -1,5 +1,6 @@
 """The task catalogue and the reference records: no simulator needed."""
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -41,6 +42,11 @@ def test_unknown_task():
         roboarc.resolve("no-such-task")
 
 
+# every image by its manifest digest (images/pins.json)
+PINS = {p["name"]: p["ref"] for p in json.loads((Path(__file__).resolve().parents[2] / "images/pins.json").read_text())["images"]}
+assert PINS["roboarc"] == "ghcr.io/embodied-first-exam/roboarc:1.1.0@" + PINS["roboarc"].split("@")[1]
+
+
 def test_metadata():
     for t in roboarc.list_tasks():
         assert t.max_episode_steps > 0 and t.agent_time_limit_s == 10800.0
@@ -49,9 +55,9 @@ def test_metadata():
         json.dumps(t.to_dict())
         if t.suite == "puzzles":
             assert t.difficulty in ("very_easy", "easier", "easy", "medium", "hard")
-            assert t.image == "ghcr.io/embodied-first-exam/roboarc:1.1.0"
+            assert t.image == PINS["roboarc"]
         else:
-            assert t.render_image.endswith("roboarc-ikea-sim:1.1.0")
+            assert t.image == PINS["roboarc-ikea"] and t.render_image == PINS["roboarc-ikea-sim"]
 
 
 def test_puzzle_references():

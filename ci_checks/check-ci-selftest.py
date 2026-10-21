@@ -37,6 +37,7 @@ STDIMG = ["bash", str(ROOT / "ci_checks/check-standard-agent-image.sh")]
 MONITOR = [sys.executable, str(ROOT / "ci_checks/check-monitor.py"), "--tier", "invariants"]
 DIGESTS = ["bash", str(ROOT / "ci_checks/check-dataset-manifest.sh")]
 DOCKERFILE = ["bash", str(ROOT / "ci_checks/check-dockerfile.sh")]
+PINS = [sys.executable, str(ROOT / "ci_checks/check-image-pins.py")]   # its own CI job (image-pins); advisory tier here
 FIELDS = ["bash", str(ROOT / "ci_checks/check-task-fields.sh")]
 # the checks that enforce Appendix H (run_invariants.sh); every other check here is advisory
 INVARIANT_CMDS = (ISOLATION, POINTERS, TWINS, INSTANCE, STDIMG, MONITOR, DIGESTS)
@@ -252,6 +253,15 @@ MUTATIONS = [
     ("the kernel's OOM killer switched off for a container", STD, COMPOSE, in_service("sim", "    oom_kill_disable: true"), ISOLATION, "`oom_kill_disable` is not allowed"),
     # ---- pinned images in every stage and file; the verifier's log directory emptied, not a look-alike of it
     ("a second, unpinned stage in the verifier's Dockerfile", STD, TEST_DF, append("FROM python:latest\nCOPY --from=0 /tests /tests\n"), DOCKERFILE, "must be a pinned registry image"),
+    # ---- every image by digest (images/pins.json)
+    ("the simulator image by its tag only", PRIV, "environment/Dockerfile", sub(r"^(FROM \S+)@sha256:[0-9a-f]{64}", r"\1"),
+     PINS, "not pinned by digest"),
+    ("the sim sidecar's image by its tag only", STD, COMPOSE, sub(r"^(    image: \S+/roboarc:\S+)@sha256:[0-9a-f]{64}", r"\1"),
+     PINS, "not pinned by digest"),
+    ("RoboARC's image by another digest", PRIV, TEST_DF, sub(r"@sha256:[0-9a-f]{64}", "@sha256:" + "0" * 64),
+     PINS, "not a pin of images/pins.json"),
+    ("the client base from another repository", STD, TEST_DF, sub(r"^FROM docker\.io/library/python", "FROM docker.io/someone/python"),
+     PINS, "outside ghcr.io/embodied-first-exam/"),
     ("tests/test.sh removes only a look-alike of the verifier's logs",
      STD, TEST_SH, sub(r"^rm -rf /logs/verifier/\*", "rm -rf /logs/verifier/*.bak"), ISOLATION, "must empty /logs/verifier"),
     # ---- shared sources (D9): one version of each shared file, the eai-standard/2.4 layer as in scripts/eai_standard/

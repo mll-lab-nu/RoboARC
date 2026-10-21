@@ -79,6 +79,9 @@ add python3 ci_checks/check-seed-files.py"$targs"
 add python3 ci_checks/check-video.py"$targs"
 # The task protocol (docs/PROTOCOL.md): the protocol version per mode, oracle fields, the image registry, no results/, no personal paths
 add python3 ci_checks/check-protocol.py"$targs"
+# every image a task names by digest: RoboARC's own as images/pins.json pins them, the client base as client.env (the
+# blocking CI job image-pins)
+add python3 ci_checks/check-image-pins.py"$targs"
 # PROTOCOL §6: the resource monitor sidecar's copies and the verifier step (its isolation: run_invariants.sh)
 add python3 ci_checks/check-monitor.py --tier advisory"$targs"
 # every script that builds images builds from a stamped copy (scripts/stamp_mtimes.py; BuildKit and equal-size files)
