@@ -48,6 +48,9 @@ libmujoco and the exact dependency versions the runtime bindings require.
 | puzzles | `ghcr.io/embodied-first-exam/roboarc:1.1.0` (Python 3.11) | the same image |
 | IKEA | `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` (Python 3.12) | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0` |
 
+The tasks name these images by manifest digest (`images/pins.json`); `TaskInfo.image` and `render_image` are those
+pinned references, `<repo>:<tag>@sha256:<digest>`.
+
 Mount the repository (read-only is fine) and put it on `PYTHONPATH` (or `pip install --no-deps -e /repo` in a derived
 image). Run from the repository root of the checkout:
 

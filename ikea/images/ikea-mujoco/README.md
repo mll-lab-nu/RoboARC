@@ -92,7 +92,7 @@ the meshes as a new dataset revision and pin it, and re-render the tasks. A chan
 
 ## Registry
 
-The tasks name the tags; `scripts/ikea_mujoco/bindings.json` holds the base image's id, which every privileged task's
+The tasks name the images by manifest digest (`images/pins.json` at the repository root); `scripts/ikea_mujoco/bindings.json` holds the base image's id, which every privileged task's
 `tests/runtime_binding.json` and every standard task's `environment/sim/runtime_binding.json` repeat. Push the two OCI
 archives byte for byte, so the registry's manifest digests are the ones above and `sim/Dockerfile`'s `FROM` resolves:
 `images/push_all.sh` (a skopeo copy that preserves digests and checks them after the copy; the base first; the

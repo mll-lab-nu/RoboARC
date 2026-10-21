@@ -24,7 +24,7 @@ its own pinned copy.
 
 | version | image id | size | built from |
 |---|---|---|---|
-| 1.1.0 | `sha256:dadc2d710ad2…` | 8.7 GB | `source/images/roboarc/Dockerfile` (the Python base image) |
+| 1.1.0 | `sha256:dadc2d710ad2…` (manifest digest `sha256:85ea90032a55…`, images/pins.json) | 8.7 GB | `source/images/roboarc/Dockerfile` (the Python base image) |
 | 1.0.0 | `sha256:18a821a18d2b…` | 12.2 GB | a delta on the RoboTangle 0.2.22 image (Genesis 1.2.1, libuipc), pinned by digest |
 
 ## Pins
@@ -109,7 +109,7 @@ archive byte for byte with RoboARC's other images (images/README.md). For 1.1.0:
 
 | file | what | pinned |
 |---|---|---|
-| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/embodied-first-exam/roboarc:<VERSION>` into every task's Dockerfiles, compose files and README | changing it re-renders all 202 task dirs (new DIGESTs) |
+| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/embodied-first-exam/roboarc:<VERSION>@<manifest digest>` (the pin of `images/pins.json`) into every task's Dockerfiles, compose files and README | changing it (or the pin) re-renders all 202 task dirs (new DIGESTs) |
 | `build.sh` | the build (above); the archive and the push are `images/archive.sh` and `images/push_all.sh` | no (tools; not image inputs) |
 
 The recipe and its inputs are under `source/` (`source/README.md`). Up to 1.0.x the image was built on the RoboTangle

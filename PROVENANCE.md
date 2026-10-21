@@ -27,7 +27,7 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 | puzzle image base (1.1.0) | `python:3.11.15-slim-bookworm@sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3` (the 0.2.22 image's own base); Debian packages from `snapshot.debian.org` 20260930T230000Z at the versions in `source/images/roboarc/Dockerfile`; wheels by sha256 in `source/images/roboarc/runtime.lock` and `vbd-requirements.txt` |
 | Genesis base image (`eai-robotangle` 0.2.22; 1.0.x only) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
 | monitor sidecar (`eai-monitor` 0.1.0) | `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f53f79c2bfa4a71298b10c78383cae3afc40720ca562cc845b8d20fb0c`, the same digest as the published `eai-monitor:0.1.0` |
-| standard agent base | `docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f` |
+| standard agent base | `docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f`; its packages by version and wheel sha256 in `scripts/eai_standard/client-requirements.txt` (from 1.1.0) |
 | MuJoCo EPA fix | upstream google-deepmind/mujoco `6d662aedda693a1225a03a26c6b3ddd5e3cc4fbe`, backported as a byte patch |
 
 | IKEA scene meshes: HF dataset `eai-v2-internal/ikea-mujoco-assets` (private) | revision `610b424b3d4152d8990e226eae60b9170ac7dbdf`; every file by sha256 in `ikea/scripts/ikea_mujoco/assets.json` |
@@ -147,3 +147,10 @@ now all pinned in the recipes: the Python base image by digest, the Debian packa
 snapshot.debian.org (2026-10-19), the wheels by sha256, the sidecar `FROM` the base by digest; reproducible OCI archives
 (base `sha256:2c56d9226aaf…`, id `9f9cbab8aa74`; sidecar `sha256:f22a1e9042c7…`, id `cbd929360257`). Unused packages
 are left out; every file the graded runtime loads is the same as in 1.0.0 (`5d5090ea1910`, `050cd45d70f6`).
+
+Every image of 1.1.0 is pinned by manifest digest in every task (`images/pins.json`): `roboarc:1.1.0@sha256:85ea90032a55…`
+is the validated image `dadc2d710ad2` exported without a rebuild into a deterministic OCI archive (`images/archive.sh`:
+the config kept byte for byte, so the archive's config digest is the image id, and every layer's content is its diff
+id; two exports byte-identical); the IKEA images and the monitor keep the digests of their reproducible builds. The
+four archives are pushed byte for byte by `images/push_all.sh`. The standard agent's client packages are installed from
+a hashed lock of the same versions (`--no-deps --require-hashes`).

@@ -98,6 +98,24 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ik
 - Push the two images from their OCI archives byte for byte (`images/push_all.sh`), so the registry's digests are
   the ones above; a `docker push` re-compresses the layers.
 
+### Every image by digest; the client lock
+- Every `FROM` and compose `image:` of the 226 task dirs names its image by manifest digest, from `images/pins.json`:
+  `roboarc:1.1.0@sha256:85ea90032a55…` (the validated image `dadc2d710ad2`, exported without a rebuild into a
+  deterministic OCI archive by `images/archive.sh`: its config digest is the image id and its layers' diff ids are the
+  image's), `roboarc-ikea:1.1.0@sha256:2c56d9226aaf…`, `roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7…`, and as before
+  `roboarc-monitor:0.1.0@sha256:ea1b0d4b8599…` and the client base. `ci_checks/check-image-pins.py` (CI job
+  `image-pins`) fails a bare tag, a digest that is not a pin and another registry.
+- `images/push_all.sh` pushes the four archives byte for byte (skopeo `--preserve-digests`; the archives checked
+  against their pins before login, the registry's manifests and configs after), the IKEA base before its sidecar. It
+  replaces `images/roboarc/push.sh` (a `docker push`, which re-compresses the layers) and `images/monitor/push.sh`.
+- The standard agent's client (`scripts/eai_standard/client-requirements.txt`, copied into every standard task) is a
+  hashed lock of the same versions, installed with `--no-deps --require-hashes`; a built client image has the same
+  `pip freeze` and the same site-packages files as before.
+- `release_rebuild.py` archives the release image and pins its digest before rendering; `harbor_check.py --tasks` runs
+  a pinned task on the local image of the same id before the push.
+- Each task's README has a 2026-10-21 Change Log entry; no instruction, grader, tooling, binding, instance or reference
+  changed.
+
 ### Validation of 1.1.0
 - The 99 references, replayed strictly in fresh processes as the privileged verifier does (two replays, rendering
   off): all succeed, both replays agree, every birth is the frozen instance's; 97 end on the freeze manifest's hash, and

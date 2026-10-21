@@ -64,8 +64,9 @@ Requirements:
   Python >= 3.11 for the repository tools.
 
 The puzzle tasks run `ghcr.io/embodied-first-exam/roboarc:1.1.0`; the IKEA tasks run
-`ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.1.0`. Pull them,
-or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
+`ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.1.0`. Every task
+names its images by manifest digest ([images/pins.json](images/pins.json), [images/README.md](images/README.md)), so
+Harbor pulls exactly the validated images. Pull them, or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 
 ```bash
 python3 scripts/stamp_mtimes.py tasks   # once per checkout: fixed file times, so Harbor's build cache hits

@@ -189,7 +189,7 @@ and `client-requirements.txt` in [`scripts/eai_standard/`](../scripts/eai_standa
 replace the rest, Part 4.) The 2.2 source is the service layer
 `rcb_limited.py` (HTTP, RCB1 responses, the protocol helpers, the `/spec` self-check, crash recovery), the client
 `rcb_client.py` + `rcb1.py`, the sidecar entrypoint `run.sh`, and the client image: `client.env` (the one client base,
-pinned by digest) and `client-requirements.txt` (exact pins). The generators copy the code unchanged into every 2.2
+pinned by digest) and `client-requirements.txt` (exact pins, each with the sha256 of its file). The generators copy the code unchanged into every 2.2
 task (`environment/rcb_client.py`, `environment/rcb1.py`, `environment/sim/{rcb_limited.py,rcb1.py,run.sh}`). Each
 benchmark writes only its adapter, `environment/sim/server.py`: the robot, the cameras, the clock (`toy_server.py` is
 the smallest complete one).
@@ -420,9 +420,10 @@ numeric ones into `reward.json`, with `infra_error`.
 - Optional: `RCB_MAX_RESUMES` (2), `RCB_MAX_CALL_WALL_S` (900), `RCB_RESUME_MAX_DEV_M` (0.05).
 - `artifacts`: also `journal.f64`, `startups.jsonl`, `server.log` from `service = "sim"`.
 - The agent container (`environment/Dockerfile`) and the verifier (`tests/Dockerfile`) `FROM` the `CLIENT_IMAGE` of
-  `scripts/eai_standard/client.env`, and any `pip install` installs `client-requirements.txt`: the full pin list inline,
-  or `-r client-requirements.txt` with a byte-identical copy in the build context. A new package or version is a change
-  to the pins.
+  `scripts/eai_standard/client.env`, and any `pip install` installs `client-requirements.txt`, a hashed lock:
+  `pip install --no-deps --require-hashes -r client-requirements.txt` with a byte-identical copy in the build context,
+  so a build installs exactly the locked files or fails. A new package or version is a change to the lock (version and
+  sha256 of the file pip selects for the client base).
 - The collect hook starts with `python3 /srv/rcb_limited.py end "$DATA"`: it waits through a resume (no PID file until the
   service is ready), signals only the process that wrote the newest `startups.jsonl` line, resends SIGUSR1 every 30 s, and
   exits 2 when `final.json` already holds the verdict (a give-up, or an in-process grade), 0 when the service dumped the

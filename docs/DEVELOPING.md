@@ -55,7 +55,8 @@ bash ci_checks/run_all.sh                             # the invariants plus the 
 
 They need Python >= 3.11 (with numpy, requests and scipy for the second tier of unit tests), no GPU and no image.
 `.github/workflows/checks.yml` runs them on pushes to `main` and `dev/**` and on pull requests, in the jobs `generator`,
-`ikea`, `invariants` (required), `unit-tests` (with `check-video.py`, `check-resources.py`, `check-cutoffs.py`),
+`ikea`, `image-pins` (`check-image-pins.py`: every image a task names is pinned by digest, images/pins.json),
+`invariants` (required), `unit-tests` (with `check-video.py`, `check-resources.py`, `check-cutoffs.py`),
 `api-tests` (the Python package's fast tests, once `tests/api/` exists) and `advisories` (warnings only).
 
 What the invariants run: `check-agent-pointers.py` (H.2), `check-dataset-manifest.sh` (H.8: every DIGEST recomputed),
@@ -106,6 +107,9 @@ archives byte for byte (the registry token on stdin only; [images/README.md](../
    `release_rebuild.py` renders on a commit of this repository (`--onto`); with premade instances (`--instances`) and a
    local tag (`--tag`) it re-makes a released version next to its image: with that release's own instances and
    references it changes no task file and builds the same image.
+   A new image is archived (`images/archive.sh`, or the archives of the IKEA / monitor builds) and its manifest
+   digest and id go into `images/pins.json` before the tasks are rendered (`release_rebuild.py` does this for the
+   release image): the tasks name every image by that digest.
 2. In a fresh clone (umask 022): every check above green.
 3. Build the image from that clone. A release that keeps the simulator must give an image whose installed filesystem is
    file-for-file identical to the previous one (path, mode, size, sha256; the `.pyc` files aside, whose bytes hold
