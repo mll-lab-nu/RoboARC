@@ -19,8 +19,11 @@ Marks used below:
 
 ## 1. Commits f5a3d6f..HEAD
 
-`dev/jianwen` was `f5a3d6f` before 2026-10-20 and `d6f2f23` after the user's push of 2026-10-21. The commits after
-`d6f2f23` are fast-forwards on top of it.
+`dev/jianwen` was `f5a3d6f` before 2026-10-20. The pushes of 2026-10-21 come in three batches, each a fast-forward of
+the one before:
+- batch 1, `d6f2f23`: 19 commits;
+- batch 2, `ae3be16`: 5 commits;
+- batch 3: the commits after `ae3be16`.
 
 | commit | what | mark |
 |---|---|---|
@@ -46,11 +49,15 @@ Marks used below:
 | 94d77d1 | `source/`: TopoGym dev 3eed5d8b33 (battery 2b, caliper 2b, F4) | **WIP**: battery and caliper instances stale (section 5) |
 | 808edcc | the nine new bases' texts after that sync (battery's pry stick without colours, F4 paths), 18 task dirs re-rendered | **WIP**: battery and caliper bindings stale |
 | 03925b2 | `source/ci_checks/`: TopoGym's `test-appearance-seeds.py` and `test-release-seeds.py` | |
-| (this commit) | these notes and `docs/handover/evidence_20261021/` | |
+| 24ed8e2 | these notes and `docs/handover/evidence_20261021/` | |
+| ae3be16 | the migration session's Chinese handoff note (draft), `docs/benchmarks/roboarc_seeds_handoff_20261021.md` | |
+| f53d5f2 | `source/`: TopoGym dev a849170272 (the colour-table fixes: caliper, battery, Cast Trinity, rope_threading seeds 1 and 2; the claws 06-10 texts) | **WIP**: more seed instances stale (section 5) |
+| 23c69e3 | interlocked-claws 06-10: the second piece is "a lock", no longer "teal" (packages, `release.json` designs, 10 task dirs) | |
+| (batch 3, docs) | the colour table in `evidence_20261021/`, these notes updated, the handoff note's final text | |
 
-Later top-ups may come, each as its own WIP commit:
+Batch 3 carries the two top-ups that were outstanding:
 - the migration session's base x seed colour table;
-- caliper's seed 1 / 2 bin colours from TopoGym dev.
+- caliper's seed 1 / 2 bin colours (TopoGym 28f8f4da8f, in the a849170272 sync).
 
 ## 2. D2: the runner's result layout does not match the owner's choice
 
@@ -65,12 +72,13 @@ layout. The assignment itself (D1: without replacement, keyed by batch and base,
 
 ## 3. Source delta since e3ea480
 
-e3ea480 is the sync of TopoGym 497a9e9d7f that the owner's physics review covered. Three syncs followed:
+e3ea480 is the sync of TopoGym 497a9e9d7f that the owner's physics review covered. Four syncs followed:
 - 7deaad8: TopoGym 622c7801c6;
 - 715ecdd: 738231f5cb;
-- 94d77d1: 3eed5d8b33.
+- 94d77d1: 3eed5d8b33;
+- f53d5f2: a849170272.
 
-`source/topogym/` outside `planning/` is byte-identical to TopoGym 3eed5d8b33. Changes:
+`source/topogym/` outside `planning/` is byte-identical to TopoGym a849170272. Changes:
 
 | change | TopoGym | in RoboARC | physics |
 |---|---|---|---|
@@ -83,6 +91,8 @@ e3ea480 is the sync of TopoGym 497a9e9d7f that the owner's physics review covere
 | battery 2b: props drawn realistically, on the appearance axes | f6471bc717 | 94d77d1 | none (birth and end unchanged; files seed 0 declares change, section 5) |
 | caliper 2b: drawn like the real things, `fixture_finish` axis, `bin_finish` default `grey_blue` | e18370887a / 3eed5d8b33 | 94d77d1 | none (GLB textures change, section 5) |
 | F4: the nine new bases' package texts cite `docs/PROTOCOL.md` / `docs/STANDARD_MODE.md` | 9e36ecf429 | 94d77d1, 808edcc | texts only |
+| the colour-table fixes, seeds 1 and 2 only: caliper's bins dark red / dark green (28f8f4da8f); battery's pry stick always nylon, seed 1 a white controller, seed 2 Pulse Red with its white back up (b995fe32a0); Cast Trinity's third piece its own colour (`third_rgb`) and rope_threading's blue / black ropes (`scene_visuals.py` `blue_rope`, `black_rope`) (a849170272) | 28f8f4da8f, b995fe32a0, a849170272 | f53d5f2 | none (seed 0 declares the same files as on 3eed5d8b33: battery, caliper, Cast Trinity, rope_threading easy and rd very_easy checked here, every base per the migration session; `test-appearance-seeds` 6 OK from this tree) |
+| interlocked-claws 06-10 texts: the second piece is "a lock", no longer "teal" (seeds 1 and 2 paint it blue and green) | 02135c5161 | f53d5f2, 23c69e3 | texts only |
 
 The rows marked "already in e3ea480" are listed as asked. They were part of TopoGym 497a9e9d7f, which e3ea480 synced.
 
@@ -96,7 +106,8 @@ mujoco_release.json reference's) and the same end state, with success on both:
 
 Sources: `evidence_20261021/neutrality_9115da07d8_vs_497a9e9d7f_compare2.txt`, and TopoGym
 `docs/rcb/handover/jianwen_push_20261019.md` M8. The 3eed5d8b33 changes touch only battery and caliper geometry, their
-defaults and one comment in `scene_variation.py`.
+defaults and one comment in `scene_variation.py`. The a849170272 changes touch appearance values of seeds 1 and 2
+and the claws 06-10 texts only.
 
 The tooling copies in every task change with the sync, but `tooling_version` stays "19":
 - `rcb_topogym.py`: the new families registered; a settled state exported at make-instance only for the chain families;
@@ -118,35 +129,46 @@ All our hosts are AMD Ryzen 9 7950X (Zen 4).
 | `seed0_declared_files_before_after_2b.md` | the cheap check of section 5 |
 | `tests_20261021.md` | `test-appearance-seeds` on TopoGym 3eed5d8b33 (6 OK); `test_runner_seeds`, `test_seed_staging` and `test_seed_goal_images` on this tree |
 | `neutrality_9115da07d8_vs_497a9e9d7f_compare2.txt` | section 3 |
+| `colour_table.md`, `colour_table.csv` | the migration session's base x seed colour table (TopoGym a849170272): for every colour or material word a task text names, the part's colour at seeds 0, 1 and 2 and a verdict. 79 of the 110 bases name one (35 rows). It found the claws 06-10 "teal lock", which led to the text change. Host paths replaced |
 
 The blanket families' GPU cloth needs a CUDA 13 driver (>= 580). On a 570 driver the verifier stops with "Warp sees no
 CUDA device": three host-A rows in `harbor.md` show this, and those trials were rerun on host B. Fake-harbor runner run
 on the helper tree (K = 3): three trials on three different seeds, the same seeds in both modes, seed files and goal
 pictures per seed in each copy, results per seed slot.
 
-## 5. Stale after the 3eed5d8b33 sync (WIP, not re-derived)
+## 5. Stale after the 3eed5d8b33 and a849170272 syncs (WIP, not re-derived)
 
-battery-replacement-01-i01 and caliper-sorting-01-i01 are stale in these files:
-- their frozen instances (seed 0 and the derived seeds 1 and 2);
-- the `assets.json` pins, `packages/<base>-privileged/runtime_binding*.upstream.json` and the task dirs' runtime
-  bindings;
-- seeds 1 and 2's re-stamped references.
+These seed instances must be derived again (your integration). The files concerned are:
+- the frozen instances;
+- their `assets.json` pins and `packages/<base>-privileged/runtime_binding*.upstream.json` locks;
+- the task dirs' runtime bindings and the seeds' re-stamped references.
 
-The reason: 2b changes the files seed 0 declares (`evidence_20261021/seed0_declared_files_before_after_2b.md`, from
-`TaskDefinition.declare()` at seed 0 on 738231f5cb and on 3eed5d8b33):
-- battery: `controller.xml` and `stick.xml`;
-- caliper: 11 GLB textures (four bins, the stand, four sleeves, the rack).
+| base | what must be redone | why |
+|---|---|---|
+| battery-replacement-01-i01 | seed 0 made again, then seeds 1 and 2 derived | 2b changes the files seed 0 declares (`controller.xml`, `stick.xml`): its `asset_identity` no longer matches; b995fe32a0 changes the seeds' colours |
+| caliper-sorting-01-i01 | seed 0 made again, then seeds 1 and 2 derived | 2b changes 11 GLB textures seed 0 declares (four bins, the stand, four sleeves, the rack); 28f8f4da8f changes the seeds' bins |
+| interlocked-claws-13-i01 | seeds 1 and 2 | `third_rgb` (a849170272) |
+| rope-threading-01..08-i01 | seeds 1 and 2 | blue and black ropes (a849170272) |
 
-With the synced source, a strict Session would find their `asset_identity` changed. Births (`state_sha`) and the
-references' rows are unchanged per TopoGym's 2b checks. The seeds' task parameters also change with the renamed
-defaults and new axes. Your integration remakes and re-derives both. No other base is affected.
+Evidence: `evidence_20261021/seed0_declared_files_before_after_2b.md`, from `TaskDefinition.declare()` at seed 0 on
+738231f5cb and on 3eed5d8b33. With the synced source, a strict Session would find battery's and caliper's
+`asset_identity` changed. Births (`state_sha`) and the references' rows are unchanged per TopoGym's checks. Seed 0
+declares the same files on a849170272 as on 3eed5d8b33: checked here for battery, caliper, Cast Trinity and
+rope_threading (easy, rd very_easy), and reported by the migration session for every base. Per its checks, the
+other twelve claws bases and slotted-post-ring are unchanged at every seed.
+
+Text change in five released bases: interlocked-claws-06..10 call the second piece "a lock", no longer "teal", in both
+modes. Their instances, references and grading do not change. Their task dirs are re-rendered (23c69e3); please
+review.
 
 ## 6. Evidence that is missing (yours to do)
 
 - replays on Intel: every host of ours is a Zen 4 7950X;
 - all four checks for every derived seed (D4), including the strict double replay and the strict scene check. We ran
   the three derivation gates on all 220, strict staging on 9 and replays on 46 + 4;
-- the base x seed colour table: the migration session is producing it and may hand it in as a top-up;
+- review of the base x seed colour table, delivered as `evidence_20261021/colour_table.{md,csv}`: especially the
+  claws 06-10 text change, and fiber-bundling 05-10's "the red fiber" (16 fibres in 8 cycled colours, so two red ones
+  at every seed; your call);
 - Harbor at seed 0 for the 101 released bases with the new tooling copy.
 
 ## 7. The owner's decisions, as recorded here
@@ -170,7 +192,7 @@ Nothing was uploaded, to the organisation dataset `eai-v2-internal/robotangle-as
 
 In the push:
 - **references**: the -i01 references (`source/scripts/robotangle/oracles/<base>/`, `scripts/roboarc/oracles/<base>/`),
-  with the re-stamped seed copies under `scripts/roboarc/oracles/` (stale for battery and caliper);
+  with the re-stamped seed copies under `scripts/roboarc/oracles/` (stale for battery, caliper, Cast Trinity and rope-threading: section 5);
 - **recording tools**: `source/scripts/robotangle/references/{bed_bolt,caliper_sorting,clock_assembling,battery_replacement}/`
   and `references/interlocked_claws/cast_trinity/`. Every TopoGym file at 3eed5d8b33 whose path names these families
   is in `source/`;
@@ -203,8 +225,8 @@ cd source && python ci_checks/test-appearance-seeds.py      # topogym's dependen
 - the commit list and marks;
 - D2;
 - the source delta since e3ea480 and its neutrality evidence;
-- the evidence we have and what is missing;
-- the stale battery / caliper files after 2b;
+- the evidence we have (with the colour table) and what is missing;
+- the stale seed instances after 2b and the colour fixes, and the claws 06-10 text change;
 - the owner's decisions;
 - HF;
 - the new bases' pushed and local-only parts;
