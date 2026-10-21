@@ -63,7 +63,9 @@ Steps:
      oracles/<new>/ (the reference; standard.npz is the same file: a MuJoCo standard oracle streams the reference's
      rows and mk_tasks.py reads only its actions; unless the tree's oracles/<new>/standard.npz is a reference re-timed
      to the standard service's joint-speed rule, meta "speed_rule": then that file, standard_reference()); release.json (runtime, tooling, the MuJoCo base records with their
-     evidence: this run); assets.json (the made instances' pins); every task dir rendered (mk_tasks.py).
+     evidence: this run); assets.json (the made instances' pins); the release image's archive (images/archive.sh,
+     <work>/image/) and its manifest digest in images/pins.json, which the tasks name; every task dir rendered
+     (mk_tasks.py).
      A base that comes out unchanged (the same frozen instance, references, runtime and tooling, so the same record
      but for its provenance words) keeps its lock and its release.json record; when every base does, release.json keeps
      its release commit too: re-making a release with its own instances and references changes no task file
@@ -857,6 +859,23 @@ def main(argv: list[str]) -> int:
     runtime = dict(rt["runtime"])
     report.update(images=dict(noinst=noinst, release=dict(reference=image, id=image_id(image))),
                   runtime=runtime, instances=instances)
+    # the release image's deterministic archive (the bytes images/push_all.sh pushes) and its pin: the tasks name the
+    # image by that manifest digest (images/pins.json in the render tree; the same image gives the same digest)
+    if (a.out / "images/pins.json").is_file():
+        reg = f"ghcr.io/embodied-first-exam/{a.bench}:{a.version}"
+        arch = a.work / "image" / f"{a.bench}-{a.version}.oci.tar"
+        made = json.loads(run(["bash", str(here / "images/archive.sh"), image, str(arch), reg]))
+        assert made["config_digest"] == report["images"]["release"]["id"], made
+        pins_path = a.out / "images/pins.json"
+        pins = json.loads(pins_path.read_text())
+        entry = dict(name=a.bench, ref=f"{reg}@{made['manifest_digest']}", id=made["config_digest"], archive=arch.name)
+        k = next((i for i, p in enumerate(pins["images"]) if p["name"] == a.bench), None)
+        if k is None:
+            pins["images"].insert(0, dict(entry, made_by="images/roboarc/build.sh, then images/archive.sh"))
+        else:
+            pins["images"][k].update(entry)
+        pins_path.write_text(json.dumps(pins, indent=1) + "\n")
+        report["images"]["release"].update(archive=str(arch), manifest_digest=made["manifest_digest"])
 
     # 3. the release files, every task dir rendered; 4. the checks
     done = write_release(a, bases, head, runtime, noinst, facts)

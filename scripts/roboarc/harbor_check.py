@@ -18,7 +18,10 @@ usage: python3 scripts/roboarc/harbor_check.py --instances <dir> --references <d
   --harbor      the harbor command (default: harbor)
   --tasks       run on task dirs that exist already (<dir>/<bench>-<base>-<mode>, e.g. the repo's tasks/ as
                 scripts/roboarc/mk_tasks.py renders them from release.json) instead of rendering dev task dirs; --image
-                names the image they are built FROM, for the record
+                names the image they are built FROM, for the record. A task names its image by digest
+                (images/pins.json next to <dir>), which Docker resolves only for an image pulled from a registry: while
+                that pinned reference is not local and --image is the pinned image (the same image id), the
+                rendering-off copies name --image instead (a local run before the push)
   --report      only (re)write results.md of an existing run directory
   --bench       the benchmark whose task dirs these are: <bench>-<base>-<mode> (default roboarc)
   --gpu-bases   bases whose physics needs the GPU (a GPU physics profile, e.g. the blanket's blanket_vbd_gpu): their
@@ -99,6 +102,25 @@ def render_off(src: pathlib.Path, dst: pathlib.Path, keep_gpu: bool = False) -> 
         assert not re.search(r"(?m)^\s*runtime: nvidia", left) and left.count(GPU_BLOCK) >= 1, dst
     else:
         assert not re.search(r"(?m)^\s*(deploy:|- driver: nvidia|capabilities: \[gpu\]|runtime: nvidia)", left), dst
+
+
+def local_pins(task: pathlib.Path, image: str, image_id: str, pins_file: pathlib.Path) -> list[str]:
+    """--tasks: in the copy, a pinned reference of the image --image is (the same image id) that Docker cannot resolve
+    here (not pulled from a registry) is replaced by --image. Returns the references replaced."""
+    if not pins_file.is_file():
+        return []
+    done = set()
+    for p in json.loads(pins_file.read_text())["images"]:
+        if p["id"] != image_id or p["ref"] == image:
+            continue
+        if subprocess.run(["docker", "image", "inspect", p["ref"]], capture_output=True).returncode == 0:
+            continue                                   # pulled from the registry: the pin resolves
+        for f in [*task.glob("*/Dockerfile"), *task.glob("*/docker-compose.yaml")]:
+            s = f.read_text()
+            if p["ref"] in s:
+                f.write_text(s.replace(p["ref"], image))
+                done.add(p["ref"])
+    return sorted(done)
 
 
 def trial(a, task: pathlib.Path, agent: str) -> dict:
@@ -218,6 +240,9 @@ def main(argv: list[str]) -> int:
         for mode in a.modes.split(","):
             src = tasks / f"{a.bench}-{b}-{mode}"
             render_off(src, a.run / "tasks_off" / src.name, keep_gpu=b in a.gpu_bases.split(","))
+            if a.tasks is not None:
+                for ref in local_pins(a.run / "tasks_off" / src.name, a.image, image_id, tasks.parent / "images/pins.json"):
+                    print(f"{src.name}: {ref} is not pulled here; the copy runs the local {a.image} (the same image id)")
             jobs += [(size * COST.get((mode, agent), 0.1), a.run / "tasks_off" / src.name, agent) for agent in a.agents.split(",")]
     results = []
     with cf.ThreadPoolExecutor(max_workers=a.lanes) as pool:
