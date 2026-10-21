@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Unit tests of the benchmark's tooling and the shared layer, in two tiers.
 #  1. Standard library and a shell only (no numpy, no simulator, no image): the Harbor runner's helpers (retry rule,
-#     account-failure rule, Codex config, the optional usage gateway switch with a fake harbor, build stamps), the
+#     account-failure rule, Codex config, the optional usage gateway switch and the trials' seeds and results with a fake
+#     harbor, build stamps), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
 #     shipped usage gateway (scripts/usage_gateway/: its own tests, and the options and host lists the runner gives it),
 #     the simulator source hash (tools/release/source_hash.py), and RoboARC's generator and asset pins
 #     (scripts/roboarc/tests/: the packages' fields and checks, assets.py pin / check / check-instances on a fake
@@ -40,6 +41,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
          scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
          scripts/usage_gateway/tests/test_budget_stop.py scripts/tests/test_stamp_mtimes.py \
+         scripts/tests/test_task_seed.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py; do
   run 300 "$t"
 done

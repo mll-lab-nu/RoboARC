@@ -71,6 +71,9 @@ add python3 ci_checks/check-resources.py"$targs"
 # the limit (the twins' equal number is an invariant: check-twins.py)
 add python3 ci_checks/check-cutoffs.py"$targs"
 add python3 ci_checks/check-seeds.py"$targs"
+# every allowed seed of a task that stages its seeds at run time has its seed file, bindings, goal images and oracle
+# (also in the CI job unit-tests, where a failure fails the job)
+add python3 ci_checks/check-seed-files.py"$targs"
 # PROTOCOL §4: every task renders a replay video and the runner can collect it; a declared video time bound is not
 # shorter than the verdict replay's
 add python3 ci_checks/check-video.py"$targs"

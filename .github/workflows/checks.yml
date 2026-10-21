@@ -49,13 +49,14 @@ jobs:
         with: { python-version: "3.12" }
       - name: Test dependencies
         run: python3 -m pip install --quiet numpy requests scipy
-      - name: Unit tests, check-video, resources, cutoffs
+      - name: Unit tests, check-video, resources, cutoffs, seed files
         run: |
           set -e
           bash ci_checks/check-unit-tests.sh --all
           python3 ci_checks/check-video.py tasks/roboarc-*
           python3 ci_checks/check-resources.py tasks/roboarc-*
           python3 ci_checks/check-cutoffs.py tasks/roboarc-*
+          python3 ci_checks/check-seed-files.py tasks/roboarc-*
   api-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
