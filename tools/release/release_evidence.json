@@ -1,5 +1,5 @@
 {
- "note": "RoboARC V2: the Harbor records of the references this release ships new or changed in a base it already released (release_rebuild.py writes each as that base's release.json evidence, without `provenance`). A new or changed reference without a record here is `not_run`: no score is claimed. The four new bases (knot-untying-06/09-i01, blanket-flatten-07/08-i01) get theirs from their Harbor runs on the 0.2.0 image. RoboARC V3 (0.2.1): blanket-fold-05-i01's new reference (both modes) from its Harbor run on 0.2.0; the three new bases (orbits-02-i01, knot-untying-07-i01, blanket-flatten-09-i01) are not_run here, their Harbor runs on 0.2.1 are the release's evidence.",
+ "note": "RoboARC V2: the Harbor records of the references this release ships new or changed in a base it already released (release_rebuild.py writes each as that base's release.json evidence, without `provenance`). A new or changed reference without a record here is `not_run`: no score is claimed. The four new bases (knot-untying-06/09-i01, blanket-flatten-07/08-i01) get theirs from their Harbor runs on the 0.2.0 image. RoboARC V3 (0.2.1): blanket-fold-05-i01's new reference (both modes) from its Harbor run on 0.2.0; the three new bases (orbits-02-i01, knot-untying-07-i01, blanket-flatten-09-i01) are not_run here, their Harbor runs on 0.2.1 are the release's evidence. RoboARC 1.1.0: blanket-flatten-06-i01's new standard reference (tools/release/standard_speed_rule.json) from its Harbor runs on 1.1.0.",
  "bases": {
   "buzz-wire-3d-09-i01": {
    "standard": {
@@ -197,6 +197,18 @@
     "tooling": "d8692e15",
     "date": "2026-10-18",
     "provenance": "Harbor oracle 1 / nop 0 in both modes on eai-roboarc:0.2.0 (b971ca472d33), end 4f1b6724fc0a6512 live = replay, all_success / deterministic / instance_exact 1 (V3 fold-05 agent, 2026-10-18, host B harbor/h1, tree cd1d1351b9)"
+   }
+  },
+  "blanket-flatten-06-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor standard oracle 1 / nop 0 (two trials each) on roboarc:1.1.0 (dadc2d710ad2), end f6f8062d4270bdcb live = replay, all_success / deterministic / instance_exact 1 (2026-10-21)"
    }
   }
  }

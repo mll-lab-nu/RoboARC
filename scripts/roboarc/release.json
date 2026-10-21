@@ -262,9 +262,16 @@
      "trajectory_sha256": "4f9e875f4d998c10faa0b9c5279282d472a650fcfafb6a349348be86cb0e92b5"
     },
     "standard": {
-     "status": "not_run",
-     "rows_over": 3,
-     "trajectory_sha256": "4f9e875f4d998c10faa0b9c5279282d472a650fcfafb6a349348be86cb0e92b5"
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
+     "trajectory_sha256": "1d1e0ff333f536dd144d006d6e57ab01ca375aa5ceaa9ba8ab6fa75a10a7acee",
+     "speed_rule": "the released reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 3 rows, and re-timed in place (as buzz-wire-3d-09-i01's) its episode does not solve the task under the service; the standard reference is the released route re-recorded from the frozen instance by the family's feedback policy with the oracle rate limiter's guard-stop clamp, as blanket-fold-05-i01's reference: 7577 rows, every arm joint step at most 0.039 rad, so the service runs every row as it is (scripts/roboarc/oracles/blanket-flatten-06-i01/standard.npz, meta speed_rule; the privileged reference is unchanged).",
+     "end_state": "f6f8062d4270bdcb"
     }
    },
    "family": "blanket_flatten",
@@ -288,7 +295,14 @@
     "standard": "Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region."
    },
    "gpu_physics": true,
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "standard",
+     "text": "roboarc 1.1.0: the standard reference (`solution/`) replaced by one within the standard service's joint-speed rule (release.json `speed_rule`); the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-fold-01-i01": {
    "creation_source": "e2e2f564",
