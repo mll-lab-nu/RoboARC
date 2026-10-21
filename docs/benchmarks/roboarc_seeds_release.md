@@ -31,13 +31,27 @@ standard oracle streams the same rows for every seed; `task_seed.py materialize`
   PROVENANCE.md). Its `source/scripts/robotangle/release_rebuild.py` has both this repository's V2-release additions
   (history rule, `release_evidence.json`, `simulator_overrides` of new bases, the embodied-first-exam tags) and the seed
   steps, so step 1 runs from this repository (the head and `--onto` are commits of it).
-- Bases this repository cannot make: the knot_untying and rope_threading tiers (`render_host`) read the released
-  Genesis binding `tasks/robotangle-<old>-privileged/environment/runtime_binding.json`, which `source/` does not carry;
-  a premade base (`--instances` / the manifest) is copied as it is, so it must bring its own `seeds/<S>/`. Pass those
-  as premade instances with their seeds, or run step 1 from a topogym checkout that carries this `release_rebuild.py`.
+- Seeds are derived, never made: `source/scripts/robotangle/derive_seed_instance.py` turns a base's seed-0 instance
+  (made in the run or premade, e.g. the knot_untying / rope_threading `render_host` tiers and the redesigns this
+  repository cannot make) into `seeds/<S>/`: `appearance(cls, S)` task parameters, `instance_assets/` byte for byte, the
+  build's fields (`state_sha`, `asset_identity`, ...) recomputed in the image without instances. It stops unless the
+  birth equals seed 0's but for `task.instance_id`. So the release can run from the released instances
+  (`--instances <dataset copy>/instances`); a premade base that brings its own `seeds/<S>/` keeps them.
 - A docker host with Harbor; one NVIDIA GPU with RT cores (Nyx) for the goal pictures and the GPU-profile bases.
 
 ## Commands
+
+0. Optional, the seeds alone (to look at or upload before step 1): from a copy of the dataset, in an image without
+   instances built from this repository's `source/` (the one step 1 builds, `<bench>:<v>-noinst`, or
+   `docker buildx build -f images/robotangle/Dockerfile.mujoco --build-context instances=<empty dir> -t <tag> source/`):
+
+   ```bash
+   python3 source/scripts/robotangle/derive_seed_instance.py --image <tag> --tooling source/scripts/robotangle/shared \
+     --instances <dataset copy>/instances --out <work>/seeds --seeds 1,2 [--cuda-compat <dir>] [--check]
+   ```
+
+   It writes `<work>/seeds/<base>/seeds/<S>/` and one log per base; copy those `seeds/` into the dataset copy's
+   `instances/<base>/` and step 1 keeps them.
 
 1. Make the seed instances and write the release files (from this repository):
 
@@ -46,7 +60,8 @@ standard oracle streams the same rows for every seed; `task_seed.py materialize`
      --appearance-seeds 1,2 --work <work> --gpu 0 --no-harbor [--instances <dir>]
    ```
 
-   It makes every base's instance and `instances/<base>/seeds/{1,2}/` in the image without instances, builds the
+   It makes (or copies, `--instances`) every base's instance, derives `instances/<base>/seeds/{1,2}/` from it in the
+   image without instances (`<work>/logs/derive_<base>.log`), builds the
    release image with them, and writes on the render tree (`<work>/render`, local branch `release-render/...`):
    `assets.json`, `packages/`, `oracles/`, `release.json`, the task dirs. Steps 2 and 3 run inside it.
 

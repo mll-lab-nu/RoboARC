@@ -41,21 +41,24 @@ usage: scripts/robotangle/release_rebuild.sh <head> --version <v> [options]
   --hf-revision   the dataset commit that holds the instances of a previous run in --work (the upload is a separate,
                   gated step: REPORT.md prints it); those instances are used again, not made again. Without it,
                   assets.json keeps its revision and its new pins name files that are not uploaded
-  --lanes, --jobs concurrent Harbor trials (default 3) and make-instance runs (default 4)
-  --appearance-seeds  also make each base's instance for these appearance seeds (comma-separated, >= 1; manifest
-                  "appearance_seeds": a list): the base's make with the task parameters
-                  topogym.tasks.scene_variation.appearance(<task class>, S) over its own (the released ones where
-                  released_task_parameters), scene seed unchanged (the user, 2026-10-20: a seed varies appearance only,
-                  one reference serves every seed). Written to instances/<base>/seeds/<S>/ (instance.json +
-                  instance_assets/), which the image copies with its base (/opt/robotangle/instances/<base>/seeds/<S>/)
-                  and assets.json pins (files under instances/<base>/seeds/<S>/, instances[<base>].seeds[<S>]
-                  instance_sha256); a premade base (--instances / the manifest) brings its own seeds/<S>/. Seed 0 is
-                  the base instance itself, made as without this option. For each seed S the release files also get
-                  (write_seed_files): packages/<base>-privileged/runtime_binding.s<S>.upstream.json, the seed
-                  instance's lock (mk_tasks.py: runtime_binding.s<S>.json), and oracles/<base>/privileged.s<S>.npz, the
-                  reference re-stamped (restamp: the same rows, instance_sha = seed S's birth; mk_tasks.py:
-                  solution/trajectory.s<S>.npz); and, for a base whose packages show goal pictures (environment/goal/),
-                  the seed's own in packages/<base>-<mode>/tests/seeds/<S>/goal/, pinned in assets.json under
+  --lanes, --jobs concurrent Harbor trials (default 3) and make-instance / seed derivation runs (default 4)
+  --appearance-seeds  also each base's instance for these appearance seeds (comma-separated, >= 1; manifest
+                  "appearance_seeds": a list), derived from the base's instance (made in this run or premade) in the
+                  image without instances (derive_seed_instance.py, next to this file): the task parameters
+                  topogym.tasks.scene_variation.appearance(<task class>, S) over the instance's own, instance_assets/
+                  byte for byte (frozen MuJoCo scene, birth archives, frozen generated assets), the build's fields
+                  (state_sha, asset_identity, ...) recomputed; the birth must equal the base's but for task.instance_id
+                  (the user, 2026-10-20: a seed varies appearance only, one reference serves every seed). Written to
+                  instances/<base>/seeds/<S>/ (instance.json + instance_assets/), which the image copies with its base
+                  (/opt/robotangle/instances/<base>/seeds/<S>/) and assets.json pins (files under
+                  instances/<base>/seeds/<S>/, instances[<base>].seeds[<S>] instance_sha256); a premade base that brings
+                  its own seeds/<S>/ keeps them. Seed 0 is the base instance itself, made as without this option. For
+                  each seed S the release files also get (write_seed_files):
+                  packages/<base>-privileged/runtime_binding.s<S>.upstream.json, the seed instance's lock (mk_tasks.py:
+                  runtime_binding.s<S>.json), and oracles/<base>/privileged.s<S>.npz, the reference re-stamped (restamp:
+                  the same rows, instance_sha = seed S's birth; mk_tasks.py: solution/trajectory.s<S>.npz); and, for a
+                  base whose packages show goal pictures (environment/goal/), the seed's own in
+                  packages/<base>-<mode>/tests/seeds/<S>/goal/, pinned in assets.json under
                   instances[<base>].seeds[<S>].goal (seed_goal_pictures)
   --goal-pictures the appearance seeds' goal pictures rendered elsewhere, <dir>/<base>/seeds/<S>/ (the renderer's
                   pictures and its record *_images.json; manifest "goal_pictures"), used instead of rendering them in
@@ -164,12 +167,7 @@ if over:
     json.dump(over, open(job["overrides_file"], "w"), indent=1)
     argv += ["--simulator-overrides", job["overrides_file"]]
 params = inst["simulator"]["task_parameters"] if job["released_task_parameters"] else None
-if job.get("appearance_seed"):   # an appearance seed's instance: appearance(<task class>, S) over the base's parameters
-    from topogym.config.registry import task_definition
-    from topogym.tasks.base import merge_parameters
-    from topogym.tasks.scene_variation import appearance
-    params = merge_parameters(params or {}, appearance(task_definition(job["task"], job["variation"]), job["appearance_seed"]))
-if job["released_task_parameters"] or job.get("appearance_seed"):
+if job["released_task_parameters"]:
     json.dump(params, open(job["task_parameters_file"], "w"), indent=1)
     argv += ["--task-parameters", job["task_parameters_file"]]
 print(" ".join(argv), flush=True)
@@ -490,7 +488,8 @@ def standard_expect(a, base: str) -> str | None:
 
 
 def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
-    """make-instance for every base inside the image without instances, in parallel; {base: wall seconds}."""
+    """make-instance for every base inside the image without instances, in parallel, then each base's appearance seeds
+    (derive_seeds); {base or <base>/seeds/<S>: wall seconds}."""
     inst, mk = a.work / "instances", a.work / "mk"
     shutil.rmtree(inst, ignore_errors=True)
     for d in (inst, mk, a.work / "cache"):
@@ -498,23 +497,20 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
     for b in bases:                    # made elsewhere (--instances / the manifest): copied as they are
         if b["new"] in a.premade:
             shutil.copytree(a.premade[b["new"]], inst / b["new"], symlinks=False)
-    bases = [b for b in bases if b["new"] not in a.premade]
+    made = [b for b in bases if b["new"] not in a.premade]
     (mk / "make_one.py").write_text(MAKE_ONE)
     env = [*(f"{k}={v}" for k, v in mujoco_env), "OMP_NUM_THREADS=1", "MKL_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
            "RCB_TORCH_THREADS=1", "HOME=/tmp", "XDG_CACHE_HOME=/work/cache"]
     tooling = a.repo / "scripts/robotangle/shared"
 
-    def one(b: dict, seed: int | None = None) -> tuple[str, float]:
-        name = b["new"] if seed is None else f"{b['new']}/seeds/{seed}"      # an appearance seed: instances/<base>/seeds/<S>/
-        tag = b["new"] if seed is None else f"{b['new']}.seed{seed}"
+    def one(b: dict) -> tuple[str, float]:
+        name = tag = b["new"]
         job = {k: b[k] for k in ("variation", "released_simulator_keys", "simulator_overrides", "scene_seed",
                                  "gripper_space", "render_host", "frozen_assets", "released_task_parameters",
                                  "grasp_weld_links")}
         job.update(task=b["task"], released=b["old"] or b["template"], out=f"/work/instances/{name}/instance.json",
                    overrides_file=f"/work/mk/{tag}.overrides.json",
                    task_parameters_file=f"/work/mk/{tag}.task_parameters.json")
-        if seed is not None:
-            job["appearance_seed"] = seed
         if b["render_host"]:     # the released task's binding goes with the released instance into the render host
             shutil.copyfile(a.repo / "tasks" / f"robotangle-{b['old']}-privileged/environment/runtime_binding.json",
                             mk / f"{b['new']}.released_binding.json")
@@ -529,9 +525,30 @@ def make_instances(a, bases: list[dict], noinst: str, mujoco_env) -> dict:
              "python", "/work/mk/make_one.py", f"/work/mk/{tag}.json"], log=a.work / "logs" / f"make_{tag}.log")
         return name, (datetime.datetime.now() - t0).total_seconds()
 
-    jobs = [(b, None) for b in bases] + [(b, s) for b in bases for s in a.appearance_seeds]
     with cf.ThreadPoolExecutor(max_workers=a.jobs) as pool:
-        return dict(pool.map(lambda j: one(*j), jobs))
+        walls = dict(pool.map(one, made))
+    return {**walls, **derive_seeds(a, bases, noinst)} if a.appearance_seeds else walls
+
+
+def derive_seeds(a, bases: list[dict], image: str) -> dict:
+    """--appearance-seeds: each base's seeds derived from its instance in <work>/instances/<base>/ (made in this run or
+    premade) in the image without instances, as make-instance runs (derive_seed_instance.py: instance_assets/ byte for
+    byte, appearance(cls, S) task parameters, the build's fields recomputed; it stops unless the birth is the base's but
+    for task.instance_id). A premade base's own seeds/<S>/ are kept. A GPU-profile instance derives on --gpu.
+    {<base>/seeds/<S>: wall seconds of the base's derivation per seed}."""
+    dsi = module(pathlib.Path(__file__).resolve().parent / "derive_seed_instance.py")
+
+    def one(b: dict) -> dict:
+        d = a.work / "instances" / b["new"]
+        todo = [s for s in a.appearance_seeds if not (d / "seeds" / str(s) / "instance.json").is_file()]
+        if not todo:
+            return {}
+        gpu = (json.loads((d / "instance.json").read_text())["simulator"].get("mujoco_profile") or "") in a.gpu_profiles
+        wall = dsi.docker_derive(image, a.repo / "scripts/robotangle/shared", d, d, todo,
+                                 a.work / "logs" / f"derive_{b['new']}.log", gpu=a.gpu if gpu else None)
+        return {f"{b['new']}/seeds/{s}": wall / len(todo) for s in todo}
+    with cf.ThreadPoolExecutor(max_workers=a.jobs) as pool:
+        return {k: v for r in pool.map(one, bases) for k, v in r.items()}
 
 
 def write_seed_files(a, rb: pathlib.Path, new: str, d: pathlib.Path, ref: bytes | None, lock: dict) -> dict:
@@ -1039,9 +1056,9 @@ def main(argv: list[str]) -> int:
                                      f"{', '.join(str(p) for p in need if not p.is_dir()) or 'no package_text'}")
         if a.hf_revision and not (a.work / "instances" / b["new"] / "instance.json").is_file():
             raise SystemExit(f"--hf-revision uses the instances of a previous run in {a.work}: {b['new']} has none")
-        src = a.work / "instances" / b["new"] if a.hf_revision else a.premade.get(b["new"])
-        lacking = [s for s in a.appearance_seeds if src and not (src / "seeds" / str(s) / "instance.json").is_file()]
-        if lacking:                       # a premade or reused base: its appearance seeds come with it
+        src = a.work / "instances" / b["new"]
+        lacking = [s for s in a.appearance_seeds if a.hf_revision and not (src / "seeds" / str(s) / "instance.json").is_file()]
+        if lacking:                       # the uploaded instances, used again: their appearance seeds come with them
             raise SystemExit(f"{b['new']}: --appearance-seeds {','.join(map(str, lacking))}: {src} has no seeds/<S>/instance.json")
     # harbor_check.py is this checkout's (the runner), mk_tasks.py the render tree's; MUJOCO_ENV is the same in both
     gen = f"scripts/{a.bench if a.onto else 'robotangle'}/mk_tasks.py"     # the render tree's generator
@@ -1218,8 +1235,8 @@ def report_md(r: dict, a, bases: list[dict]) -> str:
             f"`{i['instance_sha256'][:16]}` | {i['files']} | {i['bytes']} | {i['make_s']} |" for n, i in r["instances"].items()]
     seeded = {n: i["seeds"] for n, i in r["instances"].items() if i.get("seeds")}
     if seeded:                            # --appearance-seeds: instances/<base>/seeds/<S>/
-        out += ["", "## Appearance seeds (instances/<base>/seeds/<S>/: the base's make, appearance(cls, S) task parameters)", "",
-                "| base | seed | birth (state_sha) | instance sha256 | task parameters | simulator keys differing | make s | "
+        out += ["", "## Appearance seeds (instances/<base>/seeds/<S>/: derived from the base's instance, appearance(cls, S) task parameters)", "",
+                "| base | seed | birth (state_sha) | instance sha256 | task parameters | simulator keys differing | derive s | "
                 "reference re-stamped (oracles/<base>/privileged.s<S>.npz) | goal pictures |",
                 "|---|---|---|---|---|---|---|---|---|"]
         out += [f"| {n} | {s} | `{x['birth']}` | `{x['instance_sha256'][:16]}` | `{json.dumps(x['task_parameters'])[:120]}` | "
