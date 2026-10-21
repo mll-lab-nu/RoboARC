@@ -261,7 +261,9 @@ MUTATIONS = [
     ("RoboARC's image by another digest", PRIV, TEST_DF, sub(r"@sha256:[0-9a-f]{64}", "@sha256:" + "0" * 64),
      PINS, "not a pin of images/pins.json"),
     ("the client base from another repository", STD, TEST_DF, sub(r"^FROM docker\.io/library/python", "FROM docker.io/someone/python"),
-     PINS, "outside ghcr.io/embodied-first-exam/"),
+     PINS, "outside ghcr.io/mll-lab-nu/"),
+    ("RoboARC's image under its former registry name", PRIV, "environment/Dockerfile",
+     sub(r"^FROM ghcr\.io/mll-lab-nu/", "FROM ghcr.io/embodied-first-exam/"), PINS, "outside ghcr.io/mll-lab-nu/"),
     ("tests/test.sh removes only a look-alike of the verifier's logs",
      STD, TEST_SH, sub(r"^rm -rf /logs/verifier/\*", "rm -rf /logs/verifier/*.bak"), ISOLATION, "must empty /logs/verifier"),
     # ---- shared sources (D9): one version of each shared file, the eai-standard/2.4 layer as in scripts/eai_standard/

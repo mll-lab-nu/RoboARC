@@ -9,7 +9,7 @@
 | Family / instance | `ikea_stenerik` / seed 0 |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e` |
+| Base image | `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e` |
 
 ## Task
 IKEA STENERIK laptop stand (AA-2372559-2), all 17 operations in plain MuJoCo 3.14.0 (CPU, float64) with two 7-DoF Franka Panda arms, each with the MuJoCo Menagerie Panda hand (two-finger, tendon-coupled), through the robot service (eai-standard/2.4; 2.1 / 2.2
@@ -119,3 +119,7 @@ The M4 x 0.5 right-hand threads are exact convex pieces: a screw advances only b
   packages are installed from a hashed lock (`environment/client-requirements.txt`, the same versions with the sha256
   of each file, installed with `--no-deps --require-hashes`): the same files as before. The images, the instruction,
   the scene, the graders, the tooling and the reference are unchanged: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the
+  Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of
+  1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0
+  stand.

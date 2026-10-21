@@ -35,7 +35,7 @@ EAI = ROOT.parent / "scripts/eai_standard"             # the repository's shared
 EAI_LIVE = ROOT.parent / "scripts/eai_standard/v2_4_live"   # IKEA's live-grading 2.4 service pair (its own variant)
 TC = P.TC
 IMAGE = P.IMAGE
-SIM_IMAGE = TC.pinned_image(f"ghcr.io/embodied-first-exam/roboarc-ikea-sim:{(ROOT / 'images/ikea-mujoco/sim/VERSION').read_text().strip()}")
+SIM_IMAGE = TC.pinned_image(f"ghcr.io/mll-lab-nu/roboarc-ikea-sim:{(ROOT / 'images/ikea-mujoco/sim/VERSION').read_text().strip()}")
 CLIENT_IMAGE = dict(l.split("=", 1) for l in (EAI / "client.env").read_text().splitlines() if "=" in l and not l.startswith("#"))["CLIENT_IMAGE"]
 RIGS = json.loads((STD / "rigs.json").read_text())
 # The Nyx driver ikea_nyx.py uses (sha256 4809c45a7a5c...), copied unchanged into every task: an earlier version of RoboARC's

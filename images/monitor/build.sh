@@ -9,13 +9,14 @@
 # - Reproducible: a throwaway BuildKit builder of a pinned version, the base image pinned by digest, no provenance or
 #   SBOM attestations, and every timestamp set to SOURCE_DATE_EPOCH below (rewrite-timestamp), so the same recipe gives
 #   the same digest on any host.
-# - --load also loads the archive into the local Docker image store as ghcr.io/embodied-first-exam/roboarc-monitor:<VERSION>
+# - --load also loads the archive into the local Docker image store as ghcr.io/mll-lab-nu/roboarc-monitor:<VERSION>
 #   (a local tag only: Docker resolves the tasks' `<ref>@<digest>` pin only after a pull from a registry; README.md).
 # Needs Docker with buildx (the docker-container driver) and network access to docker.io (BuildKit, the base image).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 VERSION="$(cat "$ROOT/images/monitor/VERSION")"
-REF="ghcr.io/embodied-first-exam/roboarc-monitor:$VERSION"
+REF="ghcr.io/mll-lab-nu/roboarc-monitor:$VERSION"
+NAME="ghcr.io/embodied-first-exam/roboarc-monitor:$VERSION"   # the name the archive records (as built for 0.1.0)
 BUILDKIT="docker.io/moby/buildkit:v0.23.2@sha256:ddd1ca44b21eda906e81ab14a3d467fa6c39cd73b9a39df1196210edcb8db59e"
 EPOCH=1791625780   # 2026-10-10T09:49:40Z: the build time of the first monitor image (the mtime of its /var/rcb-monitor)
 OUT="$PWD/roboarc-monitor-$VERSION.oci.tar" LOAD=0
@@ -31,7 +32,7 @@ trap 'docker buildx rm "$B" >/dev/null 2>&1 || true' EXIT
 docker buildx create --name "$B" --driver docker-container --driver-opt "image=$BUILDKIT" --driver-opt memory=2g >/dev/null
 docker buildx build --builder "$B" --platform linux/amd64 --no-cache --provenance=false --sbom=false \
   --build-arg "VERSION=$VERSION" --build-arg "SOURCE_DATE_EPOCH=$EPOCH" \
-  --output "type=oci,dest=$OUT,name=$REF,rewrite-timestamp=true" "$ROOT/images/monitor"
+  --output "type=oci,dest=$OUT,name=$NAME,rewrite-timestamp=true" "$ROOT/images/monitor"
 read -r DIGEST CONFIG < <(python3 - "$OUT" <<'PY'
 import json, sys, tarfile
 t = tarfile.open(sys.argv[1])

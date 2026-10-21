@@ -3,28 +3,28 @@
  "images": [
   {
    "name": "roboarc",
-   "ref": "ghcr.io/embodied-first-exam/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f",
+   "ref": "ghcr.io/mll-lab-nu/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f",
    "id": "sha256:dadc2d710ad2146dcca5d88e3c270d6e37b3bfba3939d4467015d56f2dcbcfdf",
    "archive": "roboarc-1.1.0.oci.tar",
    "made_by": "images/roboarc/build.sh, then images/archive.sh"
   },
   {
    "name": "roboarc-ikea",
-   "ref": "ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b",
+   "ref": "ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b",
    "id": "sha256:9f9cbab8aa74f858b22ac1144162aad9f1b1e5b927f90f6f8251130f36d73868",
    "archive": "roboarc-ikea-1.1.0.oci.tar",
    "made_by": "ikea/images/ikea-mujoco/build.sh"
   },
   {
    "name": "roboarc-ikea-sim",
-   "ref": "ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e",
+   "ref": "ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e",
    "id": "sha256:cbd929360257e48e6a68a54f28737c2d86b24c76c0e1885156fb933cb82bc626",
    "archive": "roboarc-ikea-sim-1.1.0.oci.tar",
    "made_by": "ikea/images/ikea-mujoco/build.sh"
   },
   {
    "name": "roboarc-monitor",
-   "ref": "ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0@sha256:ea1b0d4b859998d6a47e2cb7a72c3a9ae85870b32c75de1bc1448e387da07093",
+   "ref": "ghcr.io/mll-lab-nu/roboarc-monitor:0.1.0@sha256:ea1b0d4b859998d6a47e2cb7a72c3a9ae85870b32c75de1bc1448e387da07093",
    "id": "sha256:c87b21124aa3abcf93872ffe84a25dbd3cbe70595c61f142ada899adaa7b347b",
    "archive": "roboarc-monitor-0.1.0.oci.tar",
    "made_by": "images/monitor/build.sh"

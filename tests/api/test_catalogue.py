@@ -44,14 +44,14 @@ def test_unknown_task():
 
 # every image by its manifest digest (images/pins.json)
 PINS = {p["name"]: p["ref"] for p in json.loads((Path(__file__).resolve().parents[2] / "images/pins.json").read_text())["images"]}
-assert PINS["roboarc"] == "ghcr.io/embodied-first-exam/roboarc:1.1.0@" + PINS["roboarc"].split("@")[1]
+assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.1.0@" + PINS["roboarc"].split("@")[1]
 
 
 def test_metadata():
     for t in roboarc.list_tasks():
         assert t.max_episode_steps > 0 and t.agent_time_limit_s == 10800.0
         assert set(t.task_dirs) == {"privileged", "standard"}
-        assert t.image.startswith("ghcr.io/embodied-first-exam/roboarc")
+        assert t.image.startswith("ghcr.io/mll-lab-nu/roboarc")
         json.dumps(t.to_dict())
         if t.suite == "puzzles":
             assert t.difficulty in ("very_easy", "easier", "easy", "medium", "hard")

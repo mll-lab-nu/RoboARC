@@ -57,9 +57,16 @@ from rcb_monitor import inject as rcb_monitor_inject  # noqa: E402
 IMAGE_PINS = Path(__file__).resolve().parent.parent / "images" / "pins.json"
 
 
+IMAGE_REGISTRY = "ghcr.io/mll-lab-nu/"                  # RoboARC's images (images/pins.json), since 1.1.1
+FORMER_IMAGE_REGISTRY = "ghcr.io/embodied-first-exam/"  # the same images' name up to 1.1.0 (the runtime bindings keep it)
+
+
 def pinned_image(ref: str, image_id: str | None = None) -> str:
     """`<repo>:<tag>` -> its pinned reference `<repo>:<tag>@sha256:<manifest digest>` from images/pins.json; with
-    image_id, the pin's image id (its config digest) must be that id."""
+    image_id, the pin's image id (its config digest) must be that id. A name under FORMER_IMAGE_REGISTRY is the same
+    image under IMAGE_REGISTRY."""
+    if ref.startswith(FORMER_IMAGE_REGISTRY):
+        ref = IMAGE_REGISTRY + ref[len(FORMER_IMAGE_REGISTRY):]
     for p in json.loads(IMAGE_PINS.read_text())["images"]:
         if p["ref"].split("@", 1)[0] == ref:
             if image_id is not None and p["id"] != image_id:

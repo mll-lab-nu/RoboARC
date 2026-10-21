@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Every image a task names is pinned by digest (images/README.md): each `FROM` of a Dockerfile and each compose
 `image:` in a task dir is `<repo>[:<tag>]@sha256:<64 hex>`, and it is one of
-  - RoboARC's own images, `ghcr.io/embodied-first-exam/...`, exactly as images/pins.json pins them (the digest of the
+  - RoboARC's own images, `ghcr.io/mll-lab-nu/...`, exactly as images/pins.json pins them (the digest of the
     archive images/push_all.sh pushes), or
   - the standard client base `docker.io/library/python...@sha256:...`, exactly scripts/eai_standard/client.env's
     CLIENT_IMAGE.
 A bare tag, another digest, another registry: a failure. Repository-wide (no arguments): images/pins.json itself (each
 reference pinned, an image id per entry, unique names and archives), the monitor's reference
 (scripts/rcb_monitor/inject.py IMAGE) and the IKEA sim recipe's base (ikea/images/ikea-mujoco/sim/Dockerfile FROM) are
-pins of images/pins.json.
+pins of images/pins.json. The sim recipe names its base as it was built, under the former registry
+`ghcr.io/embodied-first-exam/` (an input of the sim image, so it keeps its text): the same name, tag and digest.
 
 Usage: check-image-pins.py [task dirs...]   (default: every task under tasks/ plus the repository-wide checks)
 """
@@ -18,7 +19,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REGISTRY = "ghcr.io/embodied-first-exam/"
+REGISTRY = "ghcr.io/mll-lab-nu/"
+FORMER_REGISTRY = "ghcr.io/embodied-first-exam/"   # the images' name up to 1.1.0 (same digests)
 CLIENT_REPO = "docker.io/library/python"
 DIGEST = re.compile(r"^(?P<name>[a-z0-9][^@\s]*)@sha256:[0-9a-f]{64}$")
 PINS = json.loads((ROOT / "images/pins.json").read_text())["images"]
@@ -73,8 +75,8 @@ def repository() -> list[str]:
         bad.append(f"scripts/rcb_monitor/inject.py IMAGE {inject.IMAGE} is not a pin of images/pins.json")
     sim = ROOT / "ikea/images/ikea-mujoco/sim/Dockerfile"
     for base in re.findall(r"^FROM\s+(\S+)", sim.read_text(), re.M):
-        if base not in PINNED:
-            bad.append(f"ikea/images/ikea-mujoco/sim/Dockerfile FROM {base} is not a pin of images/pins.json")
+        if not base.startswith(FORMER_REGISTRY) or REGISTRY + base[len(FORMER_REGISTRY):] not in PINNED:
+            bad.append(f"ikea/images/ikea-mujoco/sim/Dockerfile FROM {base} is not a pin of images/pins.json (under {FORMER_REGISTRY})")
     return bad
 
 

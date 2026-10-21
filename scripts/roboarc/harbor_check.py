@@ -10,7 +10,7 @@ usage: python3 scripts/roboarc/harbor_check.py --instances <dir> --references <d
                 its rows, scripts/roboarc/mk_tasks.py)
   --run         the run directory (created): dev.json, tasks/ (the dev task dirs, as mk_tasks.py --dev renders them),
                 tasks_off/ (their rendering-off copies), jobs/ (Harbor), logs/, results.json, results.md
-  --image       the image the tasks use (default ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION>); --build
+  --image       the image the tasks use (default ghcr.io/mll-lab-nu/roboarc:<images/roboarc/VERSION>); --build
                 builds it first from this checkout (source/images/robotangle/Dockerfile.mujoco in source/, with
                 --instances as its instances; images/roboarc/build.sh is the release build)
   --lanes       concurrent Harbor trials (default 3; a MuJoCo Session uses about one core)
@@ -195,7 +195,7 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--references", type=pathlib.Path)
     ap.add_argument("--tasks", type=pathlib.Path, help="existing task dirs (see usage)")
     ap.add_argument("--run", type=pathlib.Path, required=True)
-    ap.add_argument("--image", default="ghcr.io/embodied-first-exam/roboarc:" + (ROOT / "images/roboarc/VERSION").read_text().strip())
+    ap.add_argument("--image", default="ghcr.io/mll-lab-nu/roboarc:" + (ROOT / "images/roboarc/VERSION").read_text().strip())
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--lanes", type=int, default=3)
     ap.add_argument("--agents", default="oracle,nop")

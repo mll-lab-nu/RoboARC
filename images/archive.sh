@@ -4,7 +4,7 @@
 #
 #   images/archive.sh <local ref> <out .oci.tar> [<registry ref>]
 #
-# e.g. images/archive.sh ghcr.io/embodied-first-exam/roboarc:1.1.0 roboarc-1.1.0.oci.tar
+# e.g. images/archive.sh ghcr.io/mll-lab-nu/roboarc:1.1.0 roboarc-1.1.0.oci.tar
 # For an image built into the Docker store (images/roboarc/build.sh); the monitor and IKEA builds write their OCI
 # archives themselves. `docker save`, then images/oci_archive.py in the pinned client base image (scripts/eai_standard/
 # client.env, no network): the config bytes are kept (config digest = the local image id), every layer is checked

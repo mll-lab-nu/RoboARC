@@ -16,7 +16,7 @@ repository: <head> gives the simulator source (source/), the release inputs (too
                   time per control step the texts state, measured on MuJoCo). Options on the command line win.
   --bench         the benchmark the MuJoCo tasks belong to (default roboarc; BENCH in scripts/<bench>/mk_tasks.py): its
                   files are scripts/<bench>/ (release.json, assets.json, packages/, oracles/, shared/),
-                  images/<bench>/VERSION, the image ghcr.io/embodied-first-exam/<bench>:<version> and the task dirs
+                  images/<bench>/VERSION, the image ghcr.io/mll-lab-nu/<bench>:<version> and the task dirs
                   tasks/<bench>-<base>-<mode>. A new base's texts start from its template's final package in the
                   render tree (scripts/<bench>/packages/<template>-<mode>, the base's name replaced)
   --onto          required: render the task dirs on this commit (one whose scripts/<bench>/mk_tasks.py renders MuJoCo
@@ -29,7 +29,7 @@ repository: <head> gives the simulator source (source/), the release inputs (too
   --gpu           the GPU (device index) for the make-instance runs and the Harbor trials of a base on a GPU profile
                   (mujoco_release.json gpu_profiles, e.g. blanket_vbd_gpu; default 0)
   --version       the image version: images/<bench>/VERSION, the image label (RELEASE_VERSION, as images/<bench>/build.sh
-                  passes it) and the tags ghcr.io/embodied-first-exam/<bench>:<v> and <bench>:<v> (local only; refused if
+                  passes it) and the tags ghcr.io/mll-lab-nu/<bench>:<v> and <bench>:<v> (local only; refused if
                   the tag exists, unless --replace-tag)
   --tag           a local tag for the release image instead of those two (the image without instances: <tag>-noinst),
                   e.g. to re-make a released version next to its image without touching its tag
@@ -54,7 +54,7 @@ Steps:
   1. a worktree of <head>; the image without MuJoCo instances (source/images/roboarc/Dockerfile built from source/, as
      images/roboarc/build.sh does, with an empty `instances` context): <bench>:<v>-noinst
   2. every MuJoCo base's instance made inside it (rcb_topogym.py make-instance, the MuJoCo tasks' SIMD masking, no
-     network), then the release image with them: ghcr.io/embodied-first-exam/<bench>:<v>; the runtime of both must be
+     network), then the release image with them: ghcr.io/mll-lab-nu/<bench>:<v>; the runtime of both must be
      the same (installed_runtime)
   3. the release written: VERSION; packages/<new>-* (a base the render tree already has packages for keeps those
      texts, only its instance lock is new (or kept: below); a new base without packages gets its template's final
@@ -534,9 +534,9 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, noinst: dict, 
             # a premade instance (--instances) was not made in this image: the 0.1.0 rename's wording (audit S7)
             family=b["family"], instance_package=(
                 f"MuJoCo instance made before this image was built (TopoGym source {inst['topogym_source']['sha256'][:8]}; "
-                f"its bytes are bound into the release image ghcr.io/embodied-first-exam/{a.bench}:{a.version}, "
+                f"its bytes are bound into the release image ghcr.io/mll-lab-nu/{a.bench}:{a.version}, "
                 "tools/release/release_rebuild.py --instances)" if new in a.premade else
-                f"MuJoCo instance made in the release image (ghcr.io/embodied-first-exam/{a.bench}:{a.version}, "
+                f"MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/{a.bench}:{a.version}, "
                 f"tools/release/release_rebuild.py; make-instance {b['variation']}, scene seed {b['scene_seed']})"),
             tier=b["tier"], physics_engine="mujoco", release_commit=head,
             # a released base keeps its nop record; a new one takes release_evidence.json's, else not_run
@@ -742,7 +742,7 @@ def main(argv: list[str]) -> int:
         return harbor_step(a, here, report, bases, report.get("gpu_bases", []), report["images"]["release"]["reference"],
                            module(here / "scripts/roboarc/harbor_check.py"))
     a.repo = a.work / "repo"
-    image = a.tag or f"ghcr.io/embodied-first-exam/{a.bench}:{a.version}"
+    image = a.tag or f"ghcr.io/mll-lab-nu/{a.bench}:{a.version}"
     noinst_tag = f"{a.tag}-noinst" if a.tag else f"{a.bench}:{a.version}-noinst"
     tags = [image] if a.tag else [image, f"{a.bench}:{a.version}"]
     if image_id(image) and not a.replace_tag:
@@ -862,7 +862,7 @@ def main(argv: list[str]) -> int:
     # the release image's deterministic archive (the bytes images/push_all.sh pushes) and its pin: the tasks name the
     # image by that manifest digest (images/pins.json in the render tree; the same image gives the same digest)
     if (a.out / "images/pins.json").is_file():
-        reg = f"ghcr.io/embodied-first-exam/{a.bench}:{a.version}"
+        reg = f"ghcr.io/mll-lab-nu/{a.bench}:{a.version}"
         arch = a.work / "image" / f"{a.bench}-{a.version}.oci.tar"
         made = json.loads(run(["bash", str(here / "images/archive.sh"), image, str(arch), reg]))
         assert made["config_digest"] == report["images"]["release"]["id"], made
@@ -993,7 +993,7 @@ def report_md(r: dict, a, bases: list[dict]) -> str:
         out += ["- HF upload of the instances (the user's OK first; upload only, nothing deleted). NOT UPLOADED: "
                 "assets.json's new pins name files that are not in the dataset at its revision.",
                 f"  `hf upload eai-v2-internal/robotangle-assets {a.work}/instances instances --repo-type dataset "
-                f"--commit-message \"RoboARC MuJoCo instances made in ghcr.io/embodied-first-exam/{a.bench}:{a.version} ({r['head'][:9]})\"`",
+                f"--commit-message \"RoboARC MuJoCo instances made in ghcr.io/mll-lab-nu/{a.bench}:{a.version} ({r['head'][:9]})\"`",
                 f"  then run this again with `--work {a.work} --hf-revision <the new dataset commit>`, which uses these "
                 "instances again (and runs Harbor again on the final bytes)."]
     out += ["- Image push, and the push of the commit: the user's OK."]

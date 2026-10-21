@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the two IKEA MuJoCo images of RoboARC from this checkout, reproducibly (ikea/images/ikea-mujoco/README.md):
-#   ghcr.io/embodied-first-exam/roboarc-ikea:<VERSION>          privileged tasks and the physics of the standard ones
-#   ghcr.io/embodied-first-exam/roboarc-ikea-sim:<sim/VERSION>  the standard tasks' `sim` sidecar (+ Nyx, EGL)
+#   ghcr.io/mll-lab-nu/roboarc-ikea:<VERSION>                   privileged tasks and the physics of the standard ones
+#   ghcr.io/mll-lab-nu/roboarc-ikea-sim:<sim/VERSION>           the standard tasks' `sim` sidecar (+ Nyx, EGL)
 #
 #   ikea/images/ikea-mujoco/build.sh [--assets <dir>] [--download <dir>] [--out <dir>] [--no-load]
 #
@@ -40,6 +40,9 @@ EPOCH=1792396800   # 2026-10-19T08:00:00Z, the day the 1.0.0 images were built (
 VERSION="$(cat "$I/VERSION")"; SIM_VERSION="$(cat "$I/sim/VERSION")"
 BASE="ghcr.io/embodied-first-exam/roboarc-ikea:$VERSION"
 SIM="ghcr.io/embodied-first-exam/roboarc-ikea-sim:$SIM_VERSION"
+# BASE and SIM: the names the archives record and sim/Dockerfile's FROM pins (an input of the sim image), as the
+# 1.1.0 images were built; the registry (images/pins.json) and the local tags of --load are ghcr.io/mll-lab-nu/
+REG="ghcr.io/mll-lab-nu"
 PIN="$(sed -n 's/^FROM \(\S*\)$/\1/p' "$I/sim/Dockerfile")"
 case "$PIN" in "$BASE@sha256:"*) ;; *) echo "sim/Dockerfile is not FROM $BASE@sha256:<digest> ($PIN)" >&2; exit 1 ;; esac
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/roboarc-ikea-build.XXXXXX")"
@@ -98,8 +101,8 @@ PY
   [ "$(docker image inspect --format '{{.Id}}' "$2")" = "$3" ] || { echo "load: $2 is not $3" >&2; exit 1; }
   echo "loaded $2 = $3"
 }
-load "$BASE_TAR" "$BASE" "$BASE_ID"
-load "$SIM_TAR" "$SIM" "$SIM_ID"
+load "$BASE_TAR" "$REG/roboarc-ikea:$VERSION" "$BASE_ID"
+load "$SIM_TAR" "$REG/roboarc-ikea-sim:$SIM_VERSION" "$SIM_ID"
 want=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["image"]["id"])' "$H/bindings.json")
 [ "$BASE_ID" = "$want" ] && echo "ok: the base image is the one every task is bound to" \
   || { echo "the base image $BASE_ID is not the bound image $want: the tasks refuse it" >&2; exit 1; }

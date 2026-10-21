@@ -22,7 +22,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 VERSION="$(cat "$ROOT/images/roboarc/VERSION")"
-TAG="ghcr.io/embodied-first-exam/roboarc:$VERSION"
+TAG="ghcr.io/mll-lab-nu/roboarc:$VERSION"
 INST="" DL="${RCB_ROBOTANGLE_ASSETS:-$HOME/.cache/robotangle-assets}" NOINST=0
 while [ $# -gt 0 ]; do
   case "$1" in

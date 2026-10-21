@@ -9,7 +9,7 @@ for g in "scripts/ikea_mujoco/mk_tasks.py --check" "scripts/ikea_mujoco/mk_stand
   if out=$(python3 $g 2>&1); then echo "ok $g: ${out##*$'\n'}"; else echo "FAIL $g:"; echo "$out" | tail -20; rc=1; fi
 done
 if [ "${1:-}" = "--image-tests" ]; then
-  IMG="ghcr.io/embodied-first-exam/roboarc-ikea:$(cat images/ikea-mujoco/VERSION)"
+  IMG="ghcr.io/mll-lab-nu/roboarc-ikea:$(cat images/ikea-mujoco/VERSION)"
   for t in scripts/ikea_mujoco/tests/test_grade.py scripts/ikea_mujoco/tests/test_nyx_startup.py scripts/ikea_mujoco/tests/test_standard_grade.py; do
     if out=$(timeout 1800 docker run --rm --network none --cpus 4 --memory 8g -v "$I:/repo:ro" -w /repo -e PYTHONDONTWRITEBYTECODE=1 "$IMG" python "$t" 2>&1); then
       echo "ok $t: ${out##*$'\n'}"; else echo "FAIL $t:"; echo "$out" | tail -20; rc=1; fi

@@ -9,7 +9,7 @@
 | Family / instance | `ikea_svallet` / seed 0 |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/embodied-first-exam/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e` |
+| Base image | `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e` |
 
 ## Task
 IKEA SVALLET work lamp (AA-2140039-1), unpowered steps 1-2 in plain MuJoCo 3.14.0 (CPU, float64) with two 6-DoF ViperX 300 s arms (MuJoCo Menagerie ALOHA), each with its own parallel gripper, through the robot service (eai-standard/2.4; 2.1 / 2.2
@@ -118,3 +118,7 @@ The shade's barb cams a spring jaw (a slide joint with a spring, 1200 N/m) open 
   packages are installed from a hashed lock (`environment/client-requirements.txt`, the same versions with the sha256
   of each file, installed with `--no-deps --require-hashes`): the same files as before. The images, the instruction,
   the scene, the graders, the tooling and the reference are unchanged: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the
+  Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of
+  1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0
+  stand.

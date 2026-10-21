@@ -1,7 +1,7 @@
 {
  "name": "roboarc-r1",
  "note": "RoboARC release record (docs/benchmarks/roboarc.md), written by tools/release/release_rebuild.py --onto. release_commit: the simulator commit the image, the tooling and the instances come from; runtime: the image's installed runtime; bases: one record per task base (ported_from / template, instance, facts the texts state, evidence). version: the task set's version (the Release line of every task README; the image's version is images/roboarc/VERSION); changes: Change Log entries of every base.",
- "version": "1.1.0",
+ "version": "1.1.1",
  "changes": [
   {
    "date": "2026-10-19",
@@ -22,6 +22,11 @@
    "date": "2026-10-21",
    "mode": "standard",
    "text": "RoboARC 1.1.0, the agent container's client packages are installed from a hashed lock: `environment/client-requirements.txt` keeps the same versions and adds the sha256 of the file pip selects for the client base, and `environment/Dockerfile` installs it with `--no-deps --require-hashes`, so a build installs exactly those files or fails. The installed packages are the same files as before."
+  },
+  {
+   "date": "2026-10-21",
+   "mode": "both",
+   "text": "RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of 1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0 stand."
   }
  ],
  "release_commit": "67ed48da8514eb3cb95c2d5b64cc8639125d6b7a",

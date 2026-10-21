@@ -32,7 +32,7 @@ TEXTS = json.loads((HERE / "tasks.json").read_text())
 ASSETS = json.loads((HERE / "assets.json").read_text())
 BIND = json.loads((HERE / "bindings.json").read_text())
 IMAGE = BIND["image"]["reference"]          # the one image of every task (a task's own bindings "image" would override it)
-assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # our registry name and version (images/ikea-mujoco/VERSION)
+assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # the name the image was bound under (its pin is in ghcr.io/mll-lab-nu, images/pins.json) and its version
 sys.path.insert(0, str(ROOT.parent / "scripts"))   # the repository's task layer (normalize)
 import task_conventions as TC  # noqa: E402  the protocol's conventions: every generator ends with normalize(task_dir)
 # The agent's egress (PROTOCOL §2.11, H.6): the two lines the repository's `scripts/set_agent_egress.py allowlist`
@@ -70,6 +70,10 @@ CHANGE_LOG = """### Change Log
   packages are installed from a hashed lock (`environment/client-requirements.txt`, the same versions with the sha256
   of each file, installed with `--no-deps --require-hashes`): the same files as before. The images, the instruction,
   the scene, the graders, the tooling and the reference are unchanged: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the
+  Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of
+  1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0
+  stand.
 """
 
 

@@ -66,7 +66,7 @@ ASSETS = json.loads((HERE / "assets.json").read_text())        # the pinned HF d
 NAMES = json.loads((HERE / "roboarc_names.json").read_text())   # owner's mapping: old base -> new base, family, number, difficulty
 VERSION = (ROOT / "images" / BENCH / "VERSION").read_text().strip()   # the image's version
 TASKSET_VERSION = REL["version"]   # the task set's version (README Release line); 1.0.1 = texts only, image 1.0.0
-IMAGE = TC.pinned_image(f"ghcr.io/embodied-first-exam/{BENCH}:{VERSION}")   # by manifest digest (images/pins.json)
+IMAGE = TC.pinned_image(f"ghcr.io/mll-lab-nu/{BENCH}:{VERSION}")   # by manifest digest (images/pins.json)
 EAI = ROOT / "scripts/eai_standard"
 LAYER = {"environment/rcb_client.py": EAI / "v2_4/rcb_client.py", "environment/rcb1.py": EAI / "rcb1.py",
          "environment/client-requirements.txt": EAI / "client-requirements.txt",
