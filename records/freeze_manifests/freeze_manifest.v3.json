@@ -332,13 +332,15 @@
   "knot-untying-06-i01": {
    "reference": "../../scripts/roboarc/oracles/knot-untying-06-i01/privileged.npz",
    "sha256": "c0e5b4b730d208d457938f25cb333c8c12886a5b8961b0e9fe774ecbd8808e6c",
-   "expect": "e235713d44851ce5",
+   "expect": "0d25b901f83db04e",
+   "expect_note": "corrected 2026-10-20: e235713d44851ce5 came from a pre-release dry run; images 0.2.0, 1.0.0 and 1.1.0 all end on 0d25b901f83db04e",
    "step_s": 0.45
   },
   "knot-untying-09-i01": {
    "reference": "../../scripts/roboarc/oracles/knot-untying-09-i01/privileged.npz",
    "sha256": "61f4be9922b7c6629d1ed34d97ed95c0e2541652977071ea29fb43c7d1fc2678",
-   "expect": "120b884db510d9a5",
+   "expect": "3dd3136502cb9e13",
+   "expect_note": "corrected 2026-10-20: 120b884db510d9a5 came from a pre-release dry run; images 0.2.0, 1.0.0 and 1.1.0 all end on 3dd3136502cb9e13",
    "step_s": 0.32
   },
   "rope-threading-01-i01": {
