@@ -188,11 +188,23 @@
    "creation_source": "e2e2f564",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "aea2c9fe88ec41e77618b9cc45d052672b1788d6d1fd4f4dae54b689404447af"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "aea2c9fe88ec41e77618b9cc45d052672b1788d6d1fd4f4dae54b689404447af"
     }
    },
@@ -217,17 +229,36 @@
     "standard": "Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region."
    },
    "gpu_physics": true,
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-flatten-05-i01": {
    "creation_source": "e2e2f564",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "f9b6a2df7a1f512048555cfa52886e2c44a34c456da3df3653fec3eee7afec63"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "f9b6a2df7a1f512048555cfa52886e2c44a34c456da3df3653fec3eee7afec63"
     }
    },
@@ -252,13 +283,26 @@
     "standard": "Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region."
    },
    "gpu_physics": true,
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-flatten-06-i01": {
    "creation_source": "e2e2f564",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "4f9e875f4d998c10faa0b9c5279282d472a650fcfafb6a349348be86cb0e92b5"
     },
     "standard": {
@@ -301,6 +345,11 @@
      "date": "2026-10-21",
      "mode": "standard",
      "text": "roboarc 1.1.0: the standard reference (`solution/`) replaced by one within the standard service's joint-speed rule (release.json `speed_rule`); the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-21",
+     "mode": "privileged",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
     }
    ]
   },
@@ -365,7 +414,13 @@
      "trajectory_sha256": "7c9b0cd284dd71d5b0cedf8f5ed946e6077b86e70d9590fcfeded887b56320b0"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "7c9b0cd284dd71d5b0cedf8f5ed946e6077b86e70d9590fcfeded887b56320b0"
     }
    },
@@ -390,7 +445,14 @@
     "standard": "Soft grasp patches: blanket: spatial radius 18 mm, material radius 18 mm, finger proximity 6 mm, maximum material strain ratio 1.5, exposed patch required. Both fingers must be near the same material patch; penetration and native constraint health checks still apply. Two hands may hold disjoint patches of one object. Material bounds, when present, restrict the admissible region."
    },
    "gpu_physics": true,
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "standard",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-fold-03-i01": {
    "creation_source": "de81088e",
@@ -4669,7 +4731,13 @@
      "trajectory_sha256": "9fbd149690e0187d79de19b29efbfd94bd792be462c79e1f4347a9c1548ac003"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "9fbd149690e0187d79de19b29efbfd94bd792be462c79e1f4347a9c1548ac003"
     }
    },
@@ -4711,7 +4779,14 @@
     "tension_guard": null,
     "plastic": null
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "standard",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "slotted-post-ring-04-i01": {
    "creation_source": "d601866b",
@@ -4727,7 +4802,13 @@
      "trajectory_sha256": "26faa85b50715a7c59e1f40bc748afbf770e2d56089a6dbd749de63e851515ba"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "26faa85b50715a7c59e1f40bc748afbf770e2d56089a6dbd749de63e851515ba"
     }
    },
@@ -4769,17 +4850,36 @@
     "tension_guard": null,
     "plastic": null
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "standard",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "slotted-post-ring-05-i01": {
    "creation_source": "eb4db660",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "9b6b921182119c262d20eb1379ce9bf0a8ec9a68a904587072490cd0e06a813f"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "9b6b921182119c262d20eb1379ce9bf0a8ec9a68a904587072490cd0e06a813f"
     }
    },
@@ -4821,17 +4921,36 @@
     "tension_guard": null,
     "plastic": null
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-flatten-07-i01": {
    "creation_source": "37aa7ac0",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "dfb55159b9ae2794edf1940f509cbf289cdd03062217165079bc40ef1ecbf698"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "dfb55159b9ae2794edf1940f509cbf289cdd03062217165079bc40ef1ecbf698"
     }
    },
@@ -4853,17 +4972,36 @@
    },
    "gpu_physics": true,
    "step_s": 0.53,
-   "released": "2026-10-17"
+   "released": "2026-10-17",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-flatten-08-i01": {
    "creation_source": "37aa7ac0",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "3f9d713fc87c9bc82103399dcf1b8aacbda9c8094456c6b7e5caca029666d28e"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "3f9d713fc87c9bc82103399dcf1b8aacbda9c8094456c6b7e5caca029666d28e"
     }
    },
@@ -4885,17 +5023,36 @@
    },
    "gpu_physics": true,
    "step_s": 0.57,
-   "released": "2026-10-17"
+   "released": "2026-10-17",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "knot-untying-06-i01": {
    "creation_source": "c9171f79",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "c0e5b4b730d208d457938f25cb333c8c12886a5b8961b0e9fe774ecbd8808e6c"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "c0e5b4b730d208d457938f25cb333c8c12886a5b8961b0e9fe774ecbd8808e6c"
     }
    },
@@ -4939,17 +5096,36 @@
     "plastic": null
    },
    "step_s": 0.45,
-   "released": "2026-10-17"
+   "released": "2026-10-17",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "knot-untying-09-i01": {
    "creation_source": "c9171f79",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "61f4be9922b7c6629d1ed34d97ed95c0e2541652977071ea29fb43c7d1fc2678"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "61f4be9922b7c6629d1ed34d97ed95c0e2541652977071ea29fb43c7d1fc2678"
     }
    },
@@ -4993,17 +5169,36 @@
     "plastic": null
    },
    "step_s": 0.32,
-   "released": "2026-10-17"
+   "released": "2026-10-17",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "blanket-flatten-09-i01": {
    "creation_source": "37aa7ac0",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "4fbd7aba306e9720ab49ae45e3b2536e1f9902c9d6d909a2fb39ceb8637f5253"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "4fbd7aba306e9720ab49ae45e3b2536e1f9902c9d6d909a2fb39ceb8637f5253"
     }
    },
@@ -5025,17 +5220,36 @@
    },
    "gpu_physics": true,
    "step_s": 0.57,
-   "released": "2026-10-18"
+   "released": "2026-10-18",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "knot-untying-07-i01": {
    "creation_source": "c9171f79",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "82c65a96cbaca655473d10a00be618a5c30871277db1574175fc63c1cf8041ac"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "82c65a96cbaca655473d10a00be618a5c30871277db1574175fc63c1cf8041ac"
     }
    },
@@ -5079,17 +5293,36 @@
     "plastic": null
    },
    "step_s": 0.41,
-   "released": "2026-10-18"
+   "released": "2026-10-18",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   },
   "orbits-02-i01": {
    "creation_source": "c9171f79",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-21",
      "trajectory_sha256": "a87ba3fc4e37f52376454f29d84640957f1fd7ac9585784f2f0514b6812ccfde"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.1.0",
+     "source": "a7487c51",
+     "tooling": "cae5375e",
+     "date": "2026-10-20",
      "trajectory_sha256": "a87ba3fc4e37f52376454f29d84640957f1fd7ac9585784f2f0514b6812ccfde"
     }
    },
@@ -5130,7 +5363,14 @@
     "plastic": null
    },
    "step_s": 0.23,
-   "released": "2026-10-18"
+   "released": "2026-10-18",
+   "changes": [
+    {
+     "date": "2026-10-21",
+     "mode": "both",
+     "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    }
+   ]
   }
  },
  "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",

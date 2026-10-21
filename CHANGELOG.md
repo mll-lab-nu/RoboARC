@@ -76,6 +76,13 @@ Details: [docs/history/GENESIS_REMOVAL.md](docs/history/GENESIS_REMOVAL.md), `ik
   re-recorded within the standard joint-speed rule (7577 rows, end `f6f8062d4270bdcb`; Harbor standard oracle 1 / nop
   0), replacing the privileged rows whose 3 faster rows the service stretched (oracle 0); the privileged reference is
   unchanged.
+- Harbor oracle records (`scripts/roboarc/release.json` evidence, `tools/release/release_evidence.json`): the 24 that
+  said `not_run`, no score claimed (privileged on 11 bases, standard on 13: blanket-flatten-04/05/07/08/09-i01,
+  knot-untying-06/07/09-i01, orbits-02-i01 and slotted-post-ring-05-i01 in both modes, blanket-flatten-06-i01
+  privileged, blanket-fold-02-i01 and slotted-post-ring-03/04-i01 standard) now hold their trials of the 1.1.0
+  validation round on the release image: oracle 1 at the recorded end state (privileged: both replays agree;
+  standard: live = replay) and nop 0. The READMEs' Reference solution and Change Log say so; no reference, instance
+  or grader changed.
 
 ### Repository
 - Removed (they only served porting from Genesis; RoboARC 1.0.0 at main 153eb8cf01 keeps them): the Genesis-era task

@@ -1,5 +1,5 @@
 {
- "note": "RoboARC V2: the Harbor records of the references this release ships new or changed in a base it already released (release_rebuild.py writes each as that base's release.json evidence, without `provenance`). A new or changed reference without a record here is `not_run`: no score is claimed. The four new bases (knot-untying-06/09-i01, blanket-flatten-07/08-i01) get theirs from their Harbor runs on the 0.2.0 image. RoboARC V3 (0.2.1): blanket-fold-05-i01's new reference (both modes) from its Harbor run on 0.2.0; the three new bases (orbits-02-i01, knot-untying-07-i01, blanket-flatten-09-i01) are not_run here, their Harbor runs on 0.2.1 are the release's evidence. RoboARC 1.1.0: blanket-flatten-06-i01's new standard reference (tools/release/standard_speed_rule.json) from its Harbor runs on 1.1.0.",
+ "note": "RoboARC V2: the Harbor records of the references this release ships new or changed in a base it already released (release_rebuild.py writes each as that base's release.json evidence, without `provenance`). A new or changed reference without a record here is `not_run`: no score is claimed. The four new bases (knot-untying-06/09-i01, blanket-flatten-07/08-i01) get theirs from their Harbor runs on the 0.2.0 image. RoboARC V3 (0.2.1): blanket-fold-05-i01's new reference (both modes) from its Harbor run on 0.2.0; the three new bases (orbits-02-i01, knot-untying-07-i01, blanket-flatten-09-i01) are not_run here, their Harbor runs on 0.2.1 are the release's evidence. RoboARC 1.1.0: blanket-flatten-06-i01's new standard reference (tools/release/standard_speed_rule.json) from its Harbor runs on 1.1.0. RoboARC 1.1.0 validation round: the references that had no Harbor record (not_run, no score claimed) take theirs from its Harbor oracle trials on 1.1.0.",
  "bases": {
   "buzz-wire-3d-09-i01": {
    "standard": {
@@ -209,6 +209,272 @@
     "tooling": "cae5375e",
     "date": "2026-10-21",
     "provenance": "Harbor standard oracle 1 / nop 0 (two trials each) on roboarc:1.1.0 (dadc2d710ad2), end f6f8062d4270bdcb live = replay, all_success / deterministic / instance_exact 1 (2026-10-21)"
+   },
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end cc8615b8bc4a0efa (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "blanket-flatten-04-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 18d1701495e0564f (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 18d1701495e0564f (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "blanket-flatten-05-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end c783a1bb198b25c8 (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end c783a1bb198b25c8 (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   }
+  },
+  "blanket-flatten-07-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end a6f78e4255ff5adf (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end a6f78e4255ff5adf (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   }
+  },
+  "blanket-flatten-08-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end d539d4d85d80ab0e (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end d539d4d85d80ab0e (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   }
+  },
+  "blanket-flatten-09-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 6a9c4796da46cf47 (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 6a9c4796da46cf47 (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   }
+  },
+  "blanket-fold-02-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end e108b023283b1577 (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   }
+  },
+  "knot-untying-06-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 0d25b901f83db04e (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 0d25b901f83db04e (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "knot-untying-07-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 8ae062ea4c733dbc (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 8ae062ea4c733dbc (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "knot-untying-09-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 3dd3136502cb9e13 (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 3dd3136502cb9e13 (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "orbits-02-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-21",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end b9c68d6502105df4 (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-21)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end b9c68d6502105df4 (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "slotted-post-ring-03-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end 53166fda8ebc81ba (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "slotted-post-ring-04-i01": {
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end cf9b8cc743473af3 (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   }
+  },
+  "slotted-post-ring-05-i01": {
+   "privileged": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor privileged oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end fd92819c3925a0cb (both fresh-process replays succeed on the same end state, all_success / deterministic / instance_exact 1, the strict goal within the rows; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
+   },
+   "standard": {
+    "status": "passed",
+    "success": 1,
+    "deterministic": 1,
+    "image": "the release image roboarc 1.1.0",
+    "source": "a7487c51",
+    "tooling": "cae5375e",
+    "date": "2026-10-20",
+    "provenance": "Harbor standard oracle 1 / nop 0 on roboarc:1.1.0 (dadc2d710ad2), end fd92819c3925a0cb (live = replay, live_success / replay_success / live_matches_replay 1; the 1.1.0 validation round, task dirs of 1.1.0, 2026-10-20)"
    }
   }
  }
