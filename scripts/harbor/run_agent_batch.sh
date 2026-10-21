@@ -21,20 +21,30 @@
 #     ChatGPT login (codex)          CODEX_FORCE_AUTH_JSON=1 (Harbor uploads ~/.codex/auth.json into each trial)
 #     Claude subscription            CLAUDE_FORCE_OAUTH=1 and CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`)
 #     Azure OpenAI (codex)           AGENT_CONFIG=<config.toml with the Azure provider> and its key variable
-#   MODES        "privileged standard"   K  attempts per task (1); add `standard-realtime` for <base>-standard-realtime where it exists
-#   SEQ          1 = one trial at a time per runner (default): task by task, each mode in MODES order, one Harbor job per
-#                task and mode ($JOBS/<batch>-<mode>-<task>/). Start the same command again to add a lane: every job is
-#                claimed (mkdir $JOBS/.claims/<job>) by exactly one runner, so K runners run K trials at a time. A job that
+#   MODES        "privileged standard"; add `standard-realtime` for <base>-standard-realtime where it exists
+#   K            trials per task and mode (1). Each trial is a Harbor job of its own (`-k 1`) and runs from its own seed:
+#                the K trials of a task get distinct seeds of its `[metadata.seeds] allowed`, without replacement, in an
+#                order fixed by the batch name and the task's base name (scripts/task_seed.py assign; the same seeds in
+#                every mode; docs/RUNNING.md "Seeds"). A task that allows one seed runs it in every trial. Each job's copy
+#                of a task is made by scripts/task_seed.py materialize with the trial's seed, and the job records the
+#                trial and its seeds in <job>/seed.json (also $JOBS/.seeds/<job>.json, written before the job starts)
+#   SEQ          1 = one trial at a time per runner (default): task by task, trial by trial, each mode in MODES order, one
+#                Harbor job per task, trial and mode ($JOBS/<batch>-<mode>-<task>/; with K > 1
+#                $JOBS/<batch>-<mode>-<task>-t<k>/, k = 1..K). Start the same command again to add a lane: every job is
+#                claimed (mkdir $JOBS/.claims/<job>) by exactly one runner, so N runners run N trials at a time. A job that
 #                already has its result.json (Harbor writes it when the job starts) is skipped; to rerun an interrupted
-#                job, move its directory and its claim away first.
-#                0 = one job per mode ($JOBS/<batch>-<mode>/), the modes side by side, N_P / N_S concurrent trials (2 / 2;
-#                N_S also for standard-realtime)
+#                job (or a trial voided for infrastructure: the retry gets the same seed), move its directory and its
+#                claim away first.
+#                0 = one job per mode and trial ($JOBS/<batch>-<mode>/; with K > 1 $JOBS/<batch>-<mode>-t<k>/), the
+#                modes side by side, a mode's trials one after another, N_P / N_S concurrent trials (2 / 2; N_S also for
+#                standard-realtime)
 #   WAIT_FOR     a file that must exist before a mode starts, e.g. "standard:<path>" (default: none)
 #   JOBS         <repo>/jobs/agents (ignored by git)     LABEL  the run's title for the results README
 #   RUN_ID       the run id (PROTOCOL D4, docs/TAXONOMY.md): <harness>-<model>-<effort>, derived from AGENT / MODEL /
 #                EFFORT, e.g. codex-gpt5-xhigh. Provider, service tier and settings go in metadata, never in the id.
-#   RESULTS      a directory OUTSIDE the repository: after each job scripts/harbor/write_task_results.py writes the per-task
-#                results there, <RESULTS>/<batch>/<task>/<RUN_ID>/ (PROTOCOL D3: no results in the repository);
+#   RESULTS      a directory OUTSIDE the repository: after each job scripts/harbor/write_task_results.py writes the per-trial
+#                results there, <RESULTS>/<batch>/<task>/<RUN_ID>/t<k>/, with an index of the task's trials in
+#                <RESULTS>/<batch>/<task>/<RUN_ID>/ (README.md, trials.json) (PROTOCOL D3: no results in the repository);
 #                default <repo>/../rcb_results; "" = skip
 #   HOST_CPUS    the host's CPU count (`nproc`): a task's CPU cap above it ([environment] / [verifier.environment] cpus,
 #                a compose service's cpus) is clamped to it in the job's own copy of the task (below), as PROTOCOL §2.10
@@ -108,6 +118,7 @@ if [ -n "$USAGE_GATEWAY" ]; then
   case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
+[[ "$K" =~ ^[1-9][0-9]*$ ]] || { echo "K must be a positive integer (trials per task and mode)" >&2; exit 2; }
 # absolute paths: with the gateway on, Harbor is started from the job's own copy of the task (run_job), not from the repository
 abspath() { case "$1" in ""|/*) printf '%s' "$1" ;; *) printf '%s/%s' "$PWD" "$1" ;; esac; }
 JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(abspath "$AGENT_CONFIG")"
@@ -162,17 +173,35 @@ LOG="$JOBS/$batch.log"
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 if [ -n "$ENV_FILE" ] && [ ! -f "$ENV_FILE" ]; then log "no env file $ENV_FILE"; exit 2; fi
 log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}"
-# the batch's plan, for live_board.py: every job this command runs, "pending" there until it starts
+# the batch's plan: every job this command runs, with its trial and seeds ("pending" in live_board.py until it starts);
+# $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run
 mkdir -p "$JOBS/.plan"
-python3 - "$R" "$JOBS/.plan/$batch.json" "$batch" "$RUN_ID" "$SEQ" "$MODES" "${tasks[@]}" <<'PY'
+PLAN="$JOBS/.plan/$batch.tsv"
+python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "${tasks[@]}" <<'PY' || { log "could not plan batch $batch (scripts/task_seed.py assign)"; exit 2; }
 import json, os, pathlib, sys
-repo, out, batch, run_id, seq, modes, *tasks = sys.argv[1:]
+repo, out, tsv, batch, run_id, seq, modes, K, *tasks = sys.argv[1:]
+sys.path.insert(0, str(pathlib.Path(repo) / "scripts"))
+import task_seed  # noqa: E402
+K = int(K)
 name = lambda m, t: {"standard": f"{t}-standard", "limited": f"{t}-standard", "standard-realtime": f"{t}-standard-realtime"}.get(m, f"{t}-privileged")
-jobs = [{"job": f"{batch}-{m}-{t}" if seq == "1" else f"{batch}-{m}", "task": name(m, t), "mode": m}
-        for t in tasks for m in modes.split() if (pathlib.Path(repo) / "tasks" / name(m, t)).is_dir()]
-tmp = pathlib.Path(f"{out}.{os.getpid()}")
-tmp.write_text(json.dumps({"batch": batch, "run_id": run_id, "jobs": jobs}, indent=1))
-tmp.replace(out)
+suffix = lambda k: f"-t{k}" if K > 1 else ""
+seeds = {}                                 # task -> the seeds of trials 1..K (twins: the same, task_seed.assign)
+jobs = []
+order = ([(t, k, m) for t in tasks for k in range(1, K + 1) for m in modes.split()] if seq == "1"
+         else [(t, k, m) for k in range(1, K + 1) for m in modes.split() for t in tasks])
+for t, k, m in order:
+    d = pathlib.Path(repo) / "tasks" / name(m, t)
+    if not d.is_dir():
+        continue
+    if d.name not in seeds:
+        seeds[d.name] = task_seed.assign(d, batch, K)
+    job = f"{batch}-{m}-{t}{suffix(k)}" if seq == "1" else f"{batch}-{m}{suffix(k)}"
+    jobs.append({"job": job, "task": d.name, "mode": m, "trial": k, "trials": K, "seed": seeds[d.name][k - 1]})
+for f, text in ((out, json.dumps({"batch": batch, "run_id": run_id, "trials": K, "jobs": jobs}, indent=1)),
+                (tsv, "".join(f"{j['job']}\t{j['task']}\t{j['mode']}\t{j['trial']}\t{j['seed']}\n" for j in jobs))):
+    tmp = pathlib.Path(f"{f}.{os.getpid()}")
+    tmp.write_text(text)
+    tmp.replace(f)
 PY
 
 # append-only mirror of every trial's agent/ directory, out of every trial container's reach
@@ -336,9 +365,10 @@ from task_names import canonical  # noqa: E402
 # the headline rate (PROTOCOL §4).
 # token columns: the harness's own counts (Harbor's result.json); the usage gateway's column only when a trial of the
 # batch ran through it (USAGE_GATEWAY, optional)
-HEAD = "| task | success | result | reward fields | actions | agent wall s | input tok | cached | output tok |{gw} cost $ | exception |"
+HEAD = "| task | trial | seed | success | result | reward fields | actions | agent wall s | input tok | cached | output tok |{gw} cost $ | exception |"
 f = lambda s: dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
 groups = defaultdict(list)          # config key -> [(started, row, status, validated, easy)]
+per_task = defaultdict(lambda: defaultdict(list))   # config key -> task -> [(trial, seed, status)]: R4, a task over its trials
 labels = {}
 any_gw = False
 for trial in jobs.glob(f"{batch}-*/*__*"):
@@ -365,6 +395,10 @@ for trial in jobs.glob(f"{batch}-*/*__*"):
         cfg = wtr.trial_config(trial, task, r)
     else:
         status, why, cfg = ("not_a_result", "no result.json", {}) if not r else ("legacy", None, {"mode": task.rsplit("-", 1)[-1]})
+    if "trial" not in cfg:
+        cfg["trial"] = wtr.trial_index(trial, task, r)[0] if r else "-"
+        rec = (wtr.seed_record(trial).get("tasks") or {}).get(task) or {}
+        cfg.setdefault("seed", rec.get("seed", "-"))
     key = tc.config_key(cfg)
     labels[key] = tc.config_label(cfg)
     keys = {k: rw[k] for k in ("deterministic", "live_success", "replay_success", "instance_ok", "missing_trajectory", "grader_error",
@@ -372,7 +406,8 @@ for trial in jobs.glob(f"{batch}-*/*__*"):
     res = "not a result (voided" + (f": {why}" if why else "") + ")" if status == "not_a_result" else status
     val = cfg.get("validated") is True
     easy = (R / "tasks" / task / "task.toml").is_file() and tc.set_of(R / "tasks" / task) == "easy"
-    groups[key].append((r.get("started_at") or "~", (f"| {task}{'' if val else ' (unvalidated)'}{' (easy set)' if easy else ''} | {rw.get('success', '-')} | {res} | {json.dumps(keys)} | "
+    per_task[key][task].append((cfg.get("trial"), cfg.get("seed"), status, easy))
+    groups[key].append((r.get("started_at") or "~", (f"| {task}{'' if val else ' (unvalidated)'}{' (easy set)' if easy else ''} | {cfg.get('trial')} | {cfg.get('seed')} | {rw.get('success', '-')} | {res} | {json.dumps(keys)} | "
                         f"{rw.get('n_actions', '-')} | {wall} | {ar.get('n_input_tokens', '-')} | {ar.get('n_cache_tokens', '-')} | "
                         f"{ar.get('n_output_tokens', '-')} |", f" {gw_cell} |", f" {round(ar['cost_usd'], 4) if ar.get('cost_usd') is not None else '-'} | {ex} |"),
                         status, val, easy))
@@ -396,6 +431,14 @@ for k in sorted(groups, key=lambda k: tuple(map(str, k))):
           + (f"; {easy_n} result(s) of easy-set tasks not counted" if easy_n else "") + f".\n\n{head}")
     for _, row, _, _, _ in sorted(rows):
         print(cell(row))
+    tt = per_task[k]
+    if any(len(v) > 1 for v in tt.values()):     # R4: each task over its trials (results only; the easy set marked)
+        print("\nPer task over its trials (results only):\n\n| task | successes / results | trials (trial: seed, result) |\n|---|---|---|")
+        for task in sorted(tt):
+            v = sorted(tt[task], key=lambda x: str(x[0]))
+            res = [x for x in v if x[2] in ("success", "fail")]
+            print(f"| {task}{' (easy set)' if v[0][3] else ''} | {sum(x[2] == 'success' for x in res)} / {len(res)} | "
+                  + ", ".join(f"{x[0]}: s{x[1]} {x[2]}" for x in v) + " |")
 PY
   mv -f "$JOBS/$batch.summary.md.$$" "$JOBS/$batch.summary.md"
 }
@@ -408,29 +451,67 @@ stamp_task_dirs() {  # <root>: give every file of the job's task copies a mtime 
   python3 "$R/scripts/stamp_mtimes.py" --full "$1/tasks" >/dev/null
 }
 
-gateway_copy() {  # <dir> <harbor -i args...>: <dir>/tasks/<task> = the task with the gateway and the package registries as its only egress (PROTOCOL §2.11)
-  local dir="$1" a; shift
+seed_of() {  # <job> <task>: the seed the plan gives this task in this job
+  awk -F'\t' -v j="$1" -v t="$2" '$1 == j && $2 == t { print $5; exit }' "$PLAN"
+}
+
+seed_copy() {  # <job> <dir> <task>: <dir>/tasks/<task> = the task from the seed the plan gives it (scripts/task_seed.py
+  # materialize: that seed's instance or seed file and goal images in the copy; a single-seed task's copy is the task as it is)
+  local seed; seed="$(seed_of "$1" "$3")"
+  [[ "$seed" =~ ^-?[0-9]+$ ]] || { log "$1: no seed for $3 in the plan $PLAN"; return 1; }
+  python3 "$R/scripts/task_seed.py" materialize "$R/tasks/$3" --seed "$seed" --out "$2/tasks" >/dev/null
+}
+
+gateway_copy() {  # <job> <dir> <harbor -i args...>: <dir>/tasks/<task> = the task (from its seed) with the gateway and the package registries as its only egress (PROTOCOL §2.11)
+  local job="$1" dir="$2" a; shift 2
   rm -rf "$dir" && mkdir -p "$dir/tasks" || return 1
   while [ $# -gt 0 ]; do
     a="$1"; shift
     if [ "$a" = -i ] && [ $# -gt 0 ]; then
       if [ "$(python3 "$R/scripts/set_agent_egress.py" network "$R/tasks/$1")" = open ]; then    # the task declares open egress (`[metadata] network = "open"`, PROTOCOL §2): the copy keeps it
-        cp -a "$R/tasks/$1" "$dir/tasks/$1" || return 1; shift; continue
+        seed_copy "$job" "$dir" "$1" || return 1; shift; continue
       fi
-      cp -a "$R/tasks/$1" "$dir/tasks/$1" && python3 "$R/scripts/set_agent_egress.py" only "$GATEWAY_ONLY" "$dir/tasks/$1" >/dev/null || return 1
+      seed_copy "$job" "$dir" "$1" && python3 "$R/scripts/set_agent_egress.py" only "$GATEWAY_ONLY" "$dir/tasks/$1" >/dev/null || return 1
       grep -q "^allowed_hosts = \[\"${GATEWAY_ONLY//,/\", \"}\"\]\$" "$dir/tasks/$1/task.toml" || return 1     # fail closed
       shift
     fi
   done
 }
 
-plain_copy() {  # <dir> <harbor -i args...>: <dir>/tasks/<task> = the task as it is
-  local dir="$1" a; shift
+plain_copy() {  # <job> <dir> <harbor -i args...>: <dir>/tasks/<task> = the task from its seed
+  local job="$1" dir="$2" a; shift 2
   rm -rf "$dir" && mkdir -p "$dir/tasks" || return 1
   while [ $# -gt 0 ]; do
     a="$1"; shift
-    if [ "$a" = -i ] && [ $# -gt 0 ]; then cp -a "$R/tasks/$1" "$dir/tasks/$1" || return 1; shift; fi
+    if [ "$a" = -i ] && [ $# -gt 0 ]; then seed_copy "$job" "$dir" "$1" || return 1; shift; fi
   done
+}
+
+seed_record() {  # <job>: the job's trial and the seed of each of its tasks, $JOBS/.seeds/<job>.json (before the job
+  # starts) and <job>/seed.json (after it); write_task_results.py, the summary and regrade.py read it
+  mkdir -p "$JOBS/.seeds"
+  python3 - "$R" "$PLAN" "$batch" "$1" "$JOBS/.seeds/$1.json" <<'PY'
+import json, os, pathlib, sys
+repo, plan, batch, job, out = sys.argv[1:]
+sys.path.insert(0, str(pathlib.Path(repo) / "scripts"))
+import task_seed  # noqa: E402
+rows = [l.rstrip("\n").split("\t") for l in open(plan) if l.split("\t")[0] == job]
+tasks = {}
+for _, task, mode, k, seed in rows:
+    d = pathlib.Path(repo) / "tasks" / task
+    sd = task_seed.seeds(d)
+    dg = (d / "DIGEST").read_text().strip() if (d / "DIGEST").is_file() else None
+    tasks[task] = {"seed": int(seed), "default": sd["default"], "allowed": sd["allowed"], "build": sd["build"], "digest": dg}
+rec = {"batch": batch, "job": job, "trial": int(rows[0][3]), "trials": None, "seed_source": "runner",
+       "assignment": "scripts/task_seed.py assign (batch name, task base name)", "tasks": tasks}
+try:
+    rec["trials"] = json.load(open(pathlib.Path(plan).with_suffix(".json"))).get("trials")
+except (OSError, ValueError):
+    pass
+tmp = pathlib.Path(f"{out}.{os.getpid()}")
+tmp.write_text(json.dumps(rec, indent=1) + "\n")
+tmp.replace(out)
+PY
 }
 
 task_dirs() {  # <root> <harbor -i args...>: the task directories the -i arguments name under <root>/tasks
@@ -441,7 +522,7 @@ task_dirs() {  # <root> <harbor -i args...>: the task directories the -i argumen
   done
 }
 
-run_job() {  # <job> <concurrency> <harbor -i args...>
+run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed the plan gives it in this job)
   local job="$1" n="$2"; shift 2
   local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
   local root="$R" f dirs=()
@@ -453,9 +534,9 @@ run_job() {  # <job> <concurrency> <harbor -i args...>
   [[ "$job" =~ ^[A-Za-z0-9._-]+$ ]] || { log "FAILED $job: not a job name (letters, digits, . _ -); not started"; return 1; }
   root="$JOBS/.tasks/$job"
   if [ -n "$USAGE_GATEWAY" ] && [ "$GATEWAY_EGRESS" = gateway ]; then
-    gateway_copy "$root" "$@" || { log "FAILED $job: could not prepare its task copy (the gateway and the package registries as the only egress) ($root); not started"; rm -rf "$root"; return 1; }
+    gateway_copy "$job" "$root" "$@" || { log "FAILED $job: could not prepare its task copy (the gateway and the package registries as the only egress) ($root); not started"; rm -rf "$root"; return 1; }
   else
-    plain_copy "$root" "$@" || { log "FAILED $job: could not prepare its task copy ($root); not started"; rm -rf "$root"; return 1; }
+    plain_copy "$job" "$root" "$@" || { log "FAILED $job: could not prepare its task copy ($root); not started"; rm -rf "$root"; return 1; }
   fi
   for f in .env .env.local; do [ -e "$R/$f" ] && ln -s "$R/$f" "$root/$f"; done     # what Harbor would load from the repository
   if [ "$clamp" = 1 ]; then
@@ -465,9 +546,11 @@ run_job() {  # <job> <concurrency> <harbor -i args...>
       || { log "FAILED $job: could not clamp its CPU caps to the host's $HOST_CPUS ($root); not started"; rm -rf "$root"; return 1; }
   fi
   stamp_task_dirs "$root" || { log "FAILED $job: could not stamp its task copy (scripts/stamp_mtimes.py, $root); not started"; rm -rf "$root"; return 1; }
-  log "start $job: $* (concurrency $n, attempts $K)"
-  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${envf[@]}" -n "$n" -k "$K" -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
+  seed_record "$job" || { log "FAILED $job: could not write its seed record ($JOBS/.seeds/$job.json); not started"; rm -rf "$root"; return 1; }
+  log "start $job: $* (concurrency $n; trial $(awk -F'\t' -v j="$job" -v K="$K" '$1 == j { print $4 " of " K; exit }' "$PLAN"), seeds $(awk -F'\t' -v j="$job" '$1 == j { printf "%s%s=%s", s, $2, $5; s = " " }' "$PLAN"))"
+  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
   log "done $job (harbor rc=$?)"
+  [ -d "$JOBS/$job" ] && cp "$JOBS/.seeds/$job.json" "$JOBS/$job/seed.json"
   rm -rf "$root"
   return 0
 }
@@ -481,39 +564,42 @@ name() {  # <mode> <base> -> task dir name: <base>-privileged / <base>-standard 
 }
 
 not_started=0
+for t in "${tasks[@]}"; do
+  for m in $MODES; do [ -d "$R/tasks/$(name "$m" "$t")" ] || log "skip $batch-$m-$t (no task dir $(name "$m" "$t"))"; done
+done
 if [ "$SEQ" = 1 ]; then
   mkdir -p "$JOBS/.claims"
-  for t in "${tasks[@]}"; do
-    for m in $MODES; do
-      job="$batch-$m-$t"
-      if [ ! -d "$R/tasks/$(name "$m" "$t")" ]; then log "skip $job (no task dir $(name "$m" "$t"))"; continue; fi
-      if [ -f "$JOBS/$job/result.json" ]; then log "skip $job (already has result.json)"; continue; fi
-      mkdir "$JOBS/.claims/$job" 2>/dev/null || continue   # another lane of this batch took it
-      wait_for "$m"
-      gateway_check || { rmdir "$JOBS/.claims/$job" 2>/dev/null; break 2; }
-      run_job "$job" 1 -i "$(name "$m" "$t")" || { rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
-      gateway_after "$job"; finish_job "$job"; summary
-      # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
-      # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
-      why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
-      if [ $rc -eq 4 ]; then
-        log "STOP lane $$: $job hit a model-account or config failure, or its model API was unreachable through the gateway ($(grep -m1 '"stop": true' <<< "$why" | cut -c1-300)); move its dir and claim aside to rerun it"; break 2
-      elif [ $rc -ne 0 ]; then
-        log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
-      fi
-    done
-  done
+  while IFS=$'\t' read -r job task m k seed <&3; do
+    if [ -f "$JOBS/$job/result.json" ]; then log "skip $job (already has result.json)"; continue; fi
+    mkdir "$JOBS/.claims/$job" 2>/dev/null || continue   # another lane of this batch took it
+    wait_for "$m"
+    gateway_check || { rmdir "$JOBS/.claims/$job" 2>/dev/null; break; }
+    run_job "$job" 1 -i "$task" || { rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
+    gateway_after "$job"; finish_job "$job"; summary
+    # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
+    # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
+    why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
+    if [ $rc -eq 4 ]; then
+      log "STOP lane $$: $job hit a model-account or config failure, or its model API was unreachable through the gateway ($(grep -m1 '"stop": true' <<< "$why" | cut -c1-300)); move its dir and claim aside to rerun it"; break
+    elif [ $rc -ne 0 ]; then
+      log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
+    fi
+  done 3< "$PLAN"
 else
   pids=()
   for m in $MODES; do
-    inc=(); for t in "${tasks[@]}"; do [ -d "$R/tasks/$(name "$m" "$t")" ] && inc+=(-i "$(name "$m" "$t")"); done
-    [ ${#inc[@]} -eq 0 ] && continue
+    mapfile -t mjobs < <(awk -F'\t' -v m="$m" '$3 == m && !seen[$1]++ { print $1 }' "$PLAN")
+    [ ${#mjobs[@]} -eq 0 ] && continue
     n="$N_P"; case "$m" in standard|limited|standard-realtime) n="$N_S" ;; esac   # sidecar modes
-    (wait_for "$m"; run_job "$batch-$m" "$n" "${inc[@]}") &
+    (wait_for "$m"
+     for job in "${mjobs[@]}"; do                 # the mode's trials one after another, each job all its tasks at once
+       inc=(); while IFS= read -r task; do inc+=(-i "$task"); done < <(awk -F'\t' -v j="$job" '$1 == j { print $2 }' "$PLAN")
+       run_job "$job" "$n" "${inc[@]}"
+     done) &
     pids+=($!)
   done
   wait "${pids[@]}"
-  for m in $MODES; do gateway_after "$batch-$m"; finish_job "$batch-$m"; done
+  while IFS= read -r job; do gateway_after "$job"; finish_job "$job"; done < <(awk -F'\t' '!seen[$1]++ { print $1 }' "$PLAN")
 fi
 [ -d "${JOBS}_mirror" ] && python3 "$H/scan_secrets.py" "${JOBS}_mirror" "${SCAN[@]}" 2>&1 | tail -2 | sed "s/^/[mirror] /" | tee -a "$LOG"
 summary

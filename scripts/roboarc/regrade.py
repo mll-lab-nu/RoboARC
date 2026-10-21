@@ -27,14 +27,18 @@ it ran on.
 
 Scope: only the 94 tasks of the RoboARC 0.1.0 release (RELEASED below) are re-graded. A trial of any other task (a RoboARC
 task added after 0.1.0, a Genesis robotangle-* task) is listed with `skipped` and the reason, and so is a standard trial
-(the standard twins' grading did not change). Output: one JSON line per trial (--out) and a table on stdout."""
+(the standard twins' grading did not change). Seeds: a trial of a task that allows more than one seed ran from the seed
+its job's record names (<job>/seed.json, else <jobs>/.seeds/<job>.json, written by scripts/harbor/run_agent_batch.sh;
+none: the default seed); --replay grades it with that seed's verifier files (a copy of the task made by
+scripts/task_seed.py materialize). Output: one JSON line per trial (--out, with its `seed` and `trial`) and a table on
+stdout."""
 from __future__ import annotations
 import argparse, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import check_image_files, stamp_mtimes  # noqa: E402  (issue #258: a stamped build context, the image checked)
+import check_image_files, stamp_mtimes, task_seed  # noqa: E402  (issue #258: a stamped build context, the image checked)
 # The RoboARC 0.1.0 release (main at 2026-10-14): family -> number of tasks, roboarc-<family>-01..NN-i01-{privileged,standard}.
 RELEASED_FAMILIES = {"blanket-flatten": 6, "blanket-fold": 5, "buzz-wire-3d": 10, "cast-coil": 8, "cast-keyhole": 6,
                      "fiber-bundling": 10, "hedgehog-in-cage": 8, "horseshoe-ring": 5, "interlocked-claws": 12,
@@ -80,6 +84,21 @@ def record_of(d: pathlib.Path) -> dict:
         return {}
 
 
+def seed_of(d: pathlib.Path, task: str) -> tuple[int | None, int | None]:
+    """(seed, trial) of a Harbor trial dir from its job's seed record (run_agent_batch.sh), else (None, None): the
+    task's default seed."""
+    job = d.parent
+    for f in (job / "seed.json", job.parent / ".seeds" / f"{job.name}.json"):
+        try:
+            rec = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        ent = (rec.get("tasks") or {}).get(task) if isinstance(rec, dict) else None
+        if isinstance(ent, dict) and isinstance(ent.get("seed"), int):
+            return ent["seed"], rec.get("trial")
+    return None, None
+
+
 def find_trials(roots: list[str]) -> list[dict]:
     """Trial dirs under the roots: a Harbor trial (result.json, config.json or verifier/) or a dashboard download
     (trial.json, files/verifier/)."""
@@ -96,7 +115,9 @@ def find_trials(roots: list[str]) -> list[dict]:
                 continue
             seen.add(d)
             traj = d / "artifacts/app/output/trajectory.npz"
-            out.append({"trial": str(d), "task": task, "reward": record_of(d), "traj": str(traj) if traj.is_file() else None})
+            seed, k = seed_of(d, task)
+            out.append({"trial": str(d), "task": task, "reward": record_of(d), "traj": str(traj) if traj.is_file() else None,
+                        "seed": seed, "trial_no": k})
     return out
 
 
@@ -140,7 +161,13 @@ def replay(t: dict, work: pathlib.Path, memory: str) -> dict:
         return {"replay_error": f"no task dir {tests.parent.name} in this checkout"}
     if not t["traj"]:
         return {"replay_error": "no recorded trajectory (artifacts/app/output/trajectory.npz) in the trial dir"}
-    tag = f"rcb-regrade-{t['task']}:local"
+    if t.get("seed") is not None and t["seed"] != task_seed.seeds(tests.parent)["default"]:
+        # another seed's verifier files: a copy of the task from that seed (its binding, seed file, instance)
+        try:
+            tests = task_seed.materialize(tests.parent, t["seed"], work / "seeded") / "tests"
+        except SystemExit as e:
+            return {"replay_error": f"seed {t['seed']}: {e}"}
+    tag = f"rcb-regrade-{t['task']}-s{t.get('seed') if t.get('seed') is not None else 'default'}:local"
     # built from a stamped copy and checked after (issue #258: BuildKit can put another task's equal-size tests/ file, a
     # runtime_binding.json, into this image when the checkout's mtimes are equal; scripts/stamp_mtimes.py)
     ctx = work / "context" / "tests"
@@ -192,7 +219,7 @@ def main() -> int:
     results = []
     todo = []
     for t in trials:
-        r = {"trial": t["trial"], "task": t["task"]}
+        r = {"trial": t["trial"], "task": t["task"], "seed": t["seed"], "trial_no": t["trial_no"]}
         why = scope(t)
         if why:
             results.append({**r, "skipped": why}); continue

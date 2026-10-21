@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
-"""Write per-task agent results for the results site (not into the repository, PROTOCOL D3): <out>/<task>/<run id>/README.md
-(+ replay.mp4, replay.last.png, config.json, attempts.json). One folder per agent+model; the privileged and standard twins
-each get their own.
+"""Write per-task agent results for the results site (not into the repository, PROTOCOL D3): one folder per trial,
+<out>/<task>/<run id>/t<k>/ (README.md, config.json, attempts.json, + replay.mp4, replay.last.png), and an index of the
+task's trials, <out>/<task>/<run id>/README.md and trials.json. One run id per agent+model; the privileged and standard
+twins each get their own.
 usage: write_task_results.py <jobs_dir> <job_name> <run-id> "<agent label>" --out <dir> [--analysis <a Python file with ANALYSIS = {family: {"U": text, "L": text}}>]
 
+Trials and seeds (RUNNING.md "Seeds", "Results"): a run gives each task K trials (k = 1..K), each from its own seed. The
+batch runner records a job's trial and the seed of each of its tasks in <job>/seed.json (else $JOBS/.seeds/<job>.json);
+a job without that record (a plain `harbor run`, a runner before seeds) numbers the trials of each task in it by their
+start, k = 1, 2, ..., on the task's default seed.
 config.json (RUNNING.md "Results", PROTOCOL v2.0): the trial's effective configuration (scripts/task_conventions.py
 effective_config: protocol version, mode, cutoff, reset budget, slowdown S, seed, network, validated flag, digest), its
-result (`success`, `fail` or `not_a_result` with the reason) and whether it is counted. Results are ranked only within
-one comparable configuration (task_conventions.config_key), validated and unvalidated tasks together.
+trial (`trial`, `trials`) and how its seed is known (`seed_source`: "runner" from the seed record, "default"), its result
+(`success`, `fail` or `not_a_result` with the reason) and whether it is counted. Results are ranked only within one
+comparable configuration (task_conventions.config_key), validated and unvalidated tasks together.
 Usage recording is optional (PROTOCOL H.6, RUNNING.md "Usage recording"); config.json says what the result has:
 `usage_gateway` (true / false: whether the runner routed the trial through the usage gateway, from
 <job>/usage_recording.json; null when the job has no such record, e.g. a plain `harbor run`), `usage_source` (where the
 token counts come from: "usage gateway" (<trial>/gateway/totals.json), "harness" (Harbor's result.json agent_result), or
 null: none recorded), `usage_recorded` (usage_source is not null) and `token_budget` (the budget the gateway enforced,
 {"input", "output"}; null without the gateway).
-attempts.json: every trial of this task x run id seen so far. RUNNING.md "Infrastructure retry": an infrastructure failure
-(not a result) allows at most one full retry with the same instance, seed and configuration; the voided attempt is never
-counted, an agent's own failure is never retried, and more than 2 attempts of one task x run id is flagged
-(`attempts_over_cap`)."""
+attempts.json: every attempt of this task x run id x trial seen so far. RUNNING.md "Infrastructure failures": an
+infrastructure failure (not a result) allows at most one full retry with the same instance, seed and configuration; the
+voided attempt is never counted, an agent's own failure is never retried, and more than 2 attempts of one trial is
+flagged (`attempts_over_cap`). The K trials of a task are not attempts of one another."""
 import json, pathlib, shutil, sys, re, glob, datetime as dt, ast
 sys.path[:0] = [str(pathlib.Path(__file__).resolve().parent), str(pathlib.Path(__file__).resolve().parents[1])]; from task_names import base, canonical, mode as mode_of  # noqa: E402
 import account_failure_check  # noqa: E402
@@ -98,35 +104,74 @@ def classify(trial, r, rw):
     return ("success" if ok else "not_a_result" if why else "fail"), why, over
 
 
+def seed_record(trial):
+    """The runner's record of the trial's job (<job>/seed.json, else <jobs>/.seeds/<job>.json): its trial and the seed of
+    each task; {} when there is none."""
+    job = trial.parent
+    rec = load_json(job / "seed.json")
+    return rec or load_json(job.parent / ".seeds" / f"{job.name}.json")
+
+
+def trial_index(trial, task, r, rec=None):
+    """(k, K) of the trial: the seed record's, else its place among the trials of the same task in its job, by start
+    (K = their number)."""
+    rec = seed_record(trial) if rec is None else rec
+    if isinstance(rec.get("trial"), int) and task in (rec.get("tasks") or {}):
+        return rec["trial"], rec.get("trials") if isinstance(rec.get("trials"), int) else None
+    mine = []
+    for t in trial.parent.glob("*__*"):
+        rr = load_json(t / "result.json")
+        if rr.get("task_name") and canonical(rr["task_name"].split("/")[-1]) == task:
+            mine.append((started(rr), t.name))
+    mine.sort()
+    key = (started(r), trial.name)
+    return (mine.index(key) + 1 if key in mine else 1), len(mine) or 1
+
+
 def trial_config(trial, task, r):
-    """The trial's effective configuration (task_conventions.effective_config) with how its seed is known. The seed: the
-    runner's copy of the task the trial ran from (a runner that draws another seed writes it as the copy's
-    `[metadata.seeds] default`), else the task's default seed (`seed_source = "default"`). Run-time overrides: the trial's
-    recorded environment. A trial of another version of the task (its `task_checksum` is not the task's DIGEST now) keeps
-    only what its name says; the rest is "legacy"."""
+    """The trial's effective configuration (task_conventions.effective_config) with its trial and how its seed is known.
+    The seed: the runner's seed record (`seed_source = "runner"`), else the runner's copy of the task the trial ran from
+    if it still exists ("runner copy"), else the task's default seed ("default"). Run-time overrides: the trial's recorded
+    environment. The task version: the digest the seed record names (the committed task the runner copied), else Harbor's
+    `task_checksum`; a trial of another version of the task (not the task's DIGEST now) keeps only what its name and its
+    seed record say; the rest is "legacy"."""
     tdir = ROOT / "tasks" / task
     hc = load_json(trial / "config.json")
     env = {}
     for src in ((hc.get("environment") or {}).get("env"), (hc.get("agent") or {}).get("env"), hc.get("env")):
         if isinstance(src, dict):
             env.update({k: str(v) for k, v in src.items() if k in OVERRIDES})
+    rec = seed_record(trial)
+    ent = (rec.get("tasks") or {}).get(task) if isinstance(rec.get("tasks"), dict) else None
     seed, source = None, "default"
-    p = ((hc.get("task") or {}).get("path") or "")
-    if p:
-        copy = pathlib.Path(p) if pathlib.Path(p).is_absolute() else ROOT / p
-        if copy.resolve() != tdir.resolve() and (copy / "task.toml").is_file():
-            try:
-                seed, source = tc.seeds_of(tc.metadata_of(copy))["default"], "runner copy"
-            except (ValueError, KeyError, TypeError):
-                pass
+    if isinstance(ent, dict) and isinstance(ent.get("seed"), int):
+        seed, source = ent["seed"], "runner"
+    else:
+        p = ((hc.get("task") or {}).get("path") or "")
+        if p:
+            copy = pathlib.Path(p) if pathlib.Path(p).is_absolute() else ROOT / p
+            if copy.resolve() != tdir.resolve() and (copy / "task.toml").is_file():
+                try:
+                    seed, source = tc.seeds_of(tc.metadata_of(copy))["default"], "runner copy"
+                except (ValueError, KeyError, TypeError):
+                    pass
     cfg = tc.effective_config(tdir, seed=seed, env=env)
     cfg["seed_source"] = source
-    want = (r.get("task_checksum") or "").removeprefix("sha256:")
+    k, n = trial_index(trial, task, r, rec)
+    cfg["trial"], cfg["trials"] = k, n
+    if rec.get("batch"):
+        cfg["batch"] = rec["batch"]
+    copy_sum = (r.get("task_checksum") or "").removeprefix("sha256:")
+    want = ((ent or {}).get("digest") or "").removeprefix("sha256:") if source == "runner" else copy_sum
     have = cfg.get("digest", "").removeprefix("sha256:")
     cfg["digest_match"] = (want == have) if want and have else None
-    if cfg["digest_match"] is False and source == "default":   # another version of the task: only the name is known
-        for k in ("cutoff_s", "reset_budget", "slowdown", "seed", "network", "validated", "oracle", "service_protocol"):
-            cfg[k] = "legacy"
+    if source == "runner" and copy_sum:
+        cfg["copy_checksum"] = "sha256:" + copy_sum      # Harbor's digest of the runner's copy (seed, egress, CPU caps)
+    if cfg["digest_match"] is False and source in ("default", "runner"):   # another version of the task
+        for key in ("cutoff_s", "reset_budget", "slowdown", "network", "validated", "oracle", "service_protocol"):
+            cfg[key] = "legacy"
+        if source == "default":
+            cfg["seed"] = "legacy"
         cfg["protocol_version"] = "legacy"
         cfg["digest"] = "sha256:" + want
     return cfg
@@ -152,7 +197,7 @@ def started(r):
 
 
 def record_attempt(out, trial, r, status):
-    """attempts.json in the task's result folder: every trial of this task x run id, oldest first."""
+    """attempts.json in the trial's result folder: every attempt of this task x run id x trial, oldest first."""
     f = out / "attempts.json"
     led = load_json(f).get("attempts", [])
     key = r.get("id") or trial.name
@@ -175,6 +220,7 @@ def main(argv):
         m = re.search(r"ANALYSIS = (\{.*?\n\})\n", src, re.S)
         if m: analysis = ast.literal_eval(m.group(1))
     n = 0
+    touched = set()
     trials = []
     for trial in (jobs / job).glob("*__*"):
         if (trial / "result.json").exists():
@@ -183,23 +229,29 @@ def main(argv):
         task = canonical(r["task_name"].split("/")[-1])   # also pre-v1.0 jobs
         tdir = ROOT / "tasks" / task
         if not tdir.is_dir(): continue
+        top = out_root / task / slug
+        if (top / "config.json").is_file():
+            sys.exit(f"{top} holds a result in the layout before trials (config.json directly in it): write into a new "
+                     "--out directory (RUNNING.md \"Results\")")
         rw = load_reward(trial)
         ar = r.get("agent_result") or {}; mode = mode_of(task); limited = mode != "privileged"; fam = base(task)
-        out = out_root / task / slug; out.mkdir(parents=True, exist_ok=True)
+        cfg = trial_config(trial, task, r)
+        k = cfg["trial"]
+        out = top / f"t{k}"; out.mkdir(parents=True, exist_ok=True)
+        touched.add(top)
         status, why, over = classify(trial, r, rw)
         led = record_attempt(out, trial, r, status)
         rule = rp.check_attempts([{"outcome": OUTCOME.get(a["status"], "agent_failure")} for a in led])
         over_cap = bool(rule)
         if over_cap:
-            print(f"WARN {task} / {slug}: {len(led)} attempts break the retry rule (PROTOCOL Appendix H.5, at most "
-                  f"{MAX_ATTEMPTS}: one retry after an infrastructure failure): {'; '.join(rule)}")
+            print(f"WARN {task} / {slug} / trial {k}: {len(led)} attempts break the retry rule (PROTOCOL Appendix H.5, "
+                  f"at most {MAX_ATTEMPTS}: one retry after an infrastructure failure): {'; '.join(rule)}")
         counted = [a for a in led if a["counted"]]
         if status == "not_a_result" and counted:
             # a voided attempt never replaces a counted one: it is recorded in attempts.json only
-            print(f"{task} / {slug}: trial {trial.name} is not a result (voided); the counted attempt stays")
+            print(f"{task} / {slug} / trial {k}: {trial.name} is not a result (voided); the counted attempt stays")
             continue
-        cfg = trial_config(trial, task, r)
-        cfg.update({"run_id": slug, "job": job, "trial": trial.name, "result": status, "not_a_result_reason": why,
+        cfg.update({"run_id": slug, "job": job, "trial_dir": trial.name, "result": status, "not_a_result_reason": why,
                     "counted": status != "not_a_result", "attempts": len(led), "attempts_over_cap": over_cap})
         usage = usage_of(trial, r)
         cfg.update(usage)
@@ -213,7 +265,8 @@ def main(argv):
                  f"Run: Harbor job `{job}`, trial `{trial.name}`, {(r.get('started_at') or '')[:10]}. Mode: **{ {'standard': 'standard (robot as a service)', 'standard-realtime': 'standard-realtime (robot as a service, time does not stop)'}.get(mode, 'privileged')}**.\n",
                  "| | |", "|---|---|",
                  f"| result | {'**1 (success)**' if ok else NOT_A_RESULT.format(why) if why else '**0**' + (' — over the token budget' if over else ' — no trajectory handed in' if rw.get('missing_trajectory') else '')} |",
-                 f"| configuration | {tc.config_label(cfg)}; seed {cfg.get('seed')} ({cfg.get('seed_source')}); "
+                 f"| trial | {k}" + (f" of {cfg['trials']}" if cfg.get("trials") else "") + f"; seed {cfg.get('seed')} ({cfg.get('seed_source')}) |",
+                 f"| configuration | {tc.config_label(cfg)}; "
                  f"{'validated' if cfg.get('validated') is True else 'unvalidated' if cfg.get('validated') is False else 'legacy'}"
                  f"{'; easy set (docs/easy_set.toml)' if cfg.get('set') == 'easy' else ''} (`config.json`) |",
                  f"| attempts | {len(led)}" + (f" — **over the cap of {MAX_ATTEMPTS}**" if over_cap else "") + " |",
@@ -236,7 +289,35 @@ def main(argv):
         if msgs:
             lines += ["## Agent's last messages\n"] + [f"- {m[:600]}" for m in msgs] + [""]
         (out / "README.md").write_text("\n".join(lines)); n += 1
+    for top in sorted(touched):
+        write_index(top, label)
     print(f"{job}: wrote {n} result folders for {slug}")
+
+
+def write_index(top, label):
+    """<task>/<run id>/trials.json and README.md: the task's trials in this run, their seeds and results (RUNNING.md
+    "Results": a task's success over its trials counts results only)."""
+    rows = []
+    for d in sorted(top.glob("t*"), key=lambda d: int(d.name[1:]) if d.name[1:].isdigit() else 0):
+        cfg = load_json(d / "config.json")
+        if not d.name[1:].isdigit() or not cfg:
+            continue
+        rows.append({"trial": int(d.name[1:]), "dir": d.name, "seed": cfg.get("seed"), "seed_source": cfg.get("seed_source"),
+                     "result": cfg.get("result"), "counted": cfg.get("counted"), "attempts": cfg.get("attempts"),
+                     "attempts_over_cap": cfg.get("attempts_over_cap"), "job": cfg.get("job")})
+    res = [x for x in rows if x["counted"]]
+    ok = sum(x["result"] == "success" for x in res)
+    (top / "trials.json").write_text(json.dumps({"task": top.parent.name, "run_id": top.name, "trials": rows,
+                                                 "results": len(res), "successes": ok}, indent=1) + "\n")
+    lines = [f"# {label} — {top.parent.name}\n",
+             f"{len(rows)} trial(s); success over its trials (results only): **{ok} / {len(res)}**"
+             + (f"; {len(rows) - len(res)} not a result (voided)" if len(rows) != len(res) else "") + ".\n",
+             "| trial | seed | result | attempts |", "|---|---|---|---|"]
+    for x in rows:
+        res_txt = {"success": "**1 (success)**", "fail": "0"}.get(x["result"], "not a result")
+        lines.append(f"| [{x['trial']}]({x['dir']}/README.md) | {x['seed']} | {res_txt} | {x['attempts']}"
+                     + (" (over the cap)" if x["attempts_over_cap"] else "") + " |")
+    (top / "README.md").write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

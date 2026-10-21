@@ -99,7 +99,7 @@ class UsageGatewayOption(unittest.TestCase):
         return [json.loads(x) for x in self.log.read_text().splitlines()] if self.log.exists() else []
 
     def results_config(self, run_id="codex-test_model-high"):
-        return json.loads((self.root / "results" / "b" / self.task / run_id / "config.json").read_text())
+        return json.loads((self.root / "results" / "b" / self.task / run_id / "t1" / "config.json").read_text())
 
     def test_off_by_default(self):
         p = self.run_batch()
