@@ -27,22 +27,23 @@ standard oracle streams the same rows for every seed; `task_seed.py materialize`
   families' appearance axes, `release_rebuild.py --appearance-seeds` / `--goal-pictures`, and the MuJoCo image's
   `stage_instance.py --seed-file` (`images/robotangle/Dockerfile.mujoco` installs it; the Genesis 0.2.22 base image's
   copy has no `--seed-file`).
-- `source/` of this repository synced from that checkout before step 5 (`source/topogym/`,
-  `source/scripts/robotangle/`, `source/images/robotangle/stage_instance.py` and `Dockerfile.mujoco`,
-  `source/.dockerignore`). Open: this repository's copy of `release_rebuild.py` carries V2-release additions (history
-  rule, `release_evidence.json`, `simulator_overrides` of new bases, the embodied-first-exam tags) that the topogym copy
-  lacks, and the topogym copy has the seed steps; step 1 needs one file with both.
-- This repository's release branch fetched into the topogym repository (`--onto` renders on it).
+- `source/` of this repository synced from that checkout: done on `jianwen/seeds-release` (TopoGym `622c7801c6`,
+  PROVENANCE.md). Its `source/scripts/robotangle/release_rebuild.py` has both this repository's V2-release additions
+  (history rule, `release_evidence.json`, `simulator_overrides` of new bases, the embodied-first-exam tags) and the seed
+  steps, so step 1 runs from this repository (the head and `--onto` are commits of it).
+- Bases this repository cannot make: the knot_untying and rope_threading tiers (`render_host`) read the released
+  Genesis binding `tasks/robotangle-<old>-privileged/environment/runtime_binding.json`, which `source/` does not carry;
+  a premade base (`--instances` / the manifest) is copied as it is, so it must bring its own `seeds/<S>/`. Pass those
+  as premade instances with their seeds, or run step 1 from a topogym checkout that carries this `release_rebuild.py`.
 - A docker host with Harbor; one NVIDIA GPU with RT cores (Nyx) for the goal pictures and the GPU-profile bases.
 
 ## Commands
 
-1. Make the seed instances and write the release files (from the topogym checkout):
+1. Make the seed instances and write the release files (from this repository):
 
    ```bash
-   git fetch <this repository> <release branch>:roboarc/seeds
-   scripts/robotangle/release_rebuild.sh <head> --onto roboarc/seeds --bench roboarc --version <v> \
-     --appearance-seeds 1,2 --work <work> --gpu 0 --no-harbor
+   source/scripts/robotangle/release_rebuild.sh <head> --onto <head> --bench roboarc --version <v> \
+     --appearance-seeds 1,2 --work <work> --gpu 0 --no-harbor [--instances <dir>]
    ```
 
    It makes every base's instance and `instances/<base>/seeds/{1,2}/` in the image without instances, builds the
@@ -66,7 +67,7 @@ standard oracle streams the same rows for every seed; `task_seed.py materialize`
    ```bash
    hf upload eai-v2-internal/robotangle-assets <work>/instances instances --repo-type dataset \
      --commit-message "RoboARC appearance seeds (<head9>)"
-   scripts/robotangle/release_rebuild.sh <head> --onto roboarc/seeds --bench roboarc --version <v> \
+   source/scripts/robotangle/release_rebuild.sh <head> --onto <head> --bench roboarc --version <v> \
      --appearance-seeds 1,2 --work <work> --hf-revision <dataset commit> --no-harbor
    ```
 
