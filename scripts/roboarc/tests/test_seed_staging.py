@@ -121,7 +121,7 @@ def test_stage_instance():
 
 def test_render():
     mk = load("mk_tasks_seeds", ROOT / "scripts" / "roboarc" / "mk_tasks.py")
-    check(mk.seeds_of_base(BASE) == [0], "assets.json as committed: no appearance seeds yet")
+    check(mk.seeds_of_base(BASE) in ([0], [0, 1, 2]), f"assets.json as committed: seeds {mk.seeds_of_base(BASE)}")
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         pkg = td / "packages"
@@ -129,6 +129,7 @@ def test_render():
             shutil.copytree(mk.PKG / f"{BASE}-{m}", pkg / f"{BASE}-{m}")
         lock0 = json.loads((pkg / f"{BASE}-privileged" / "runtime_binding.upstream.json").read_text())
         assets = copy.deepcopy(mk.ASSETS)
+        assets["instances"][BASE].pop("seeds", None)   # the release's own seed pins give way to the fake ones
         fake = {}
         for s in (1, 2):                       # seed 0's lock and asset pins under another instance hash
             fake[s] = hashlib.sha256(f"fake instance {s}".encode()).hexdigest()

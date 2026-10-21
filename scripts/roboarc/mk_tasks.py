@@ -505,7 +505,13 @@ def separation_words(s: str, where: str) -> str:
     """The grader details of a claws separation text say what its predicate checks (instruction.md and README.md)."""
     if SEPARATION_MARK not in s:
         return s
-    line = SEPARATION_LINE.format(gap=SEPARATION_GAP.search(s).group(1))
+    gap = SEPARATION_GAP.search(s)
+    if gap is None:     # pairwise separation of more pieces (Cast Trinity: "between every two of the three pieces"): its
+        left = [w for w in ("free to move", "speed is not checked", "Goal square", "The separator is") if w in s]
+        assert "- Separation as the grader measures it: " in s and not left, \
+            f"{where}: a separation text of more pieces without its own separation line, or still saying {left}"
+        return s        # package text states its own separation line
+    line = SEPARATION_LINE.format(gap=gap.group(1))
     false = SEPARATION_FALSE.findall(s)
     if line in s:
         assert not false, f"{where}: the separation line next to a goal-square / separator line"

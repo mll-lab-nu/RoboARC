@@ -96,12 +96,16 @@ def make_repo(root: Path) -> None:
     for b in (SEEDED, SINGLE):
         for m in ("privileged", "standard"):
             shutil.copytree(REPO / "tasks" / f"{b}-{m}", root / "tasks" / f"{b}-{m}", symlinks=True)
-    for m in ("privileged", "standard"):
+    seeded = 'allowed = [0, 1, 2]\noracle = [0, 1, 2]\nbuild = "runtime"\n'
+    for m in ("privileged", "standard"):     # SEEDED allows seeds 0-2 (as released since 1.2.0, or made so), SINGLE seed 0 only
         p = root / "tasks" / f"{SEEDED}-{m}" / "task.toml"
         s = p.read_text()
-        s2 = re.sub(r"(?m)^allowed = \[0\]\noracle = \[0\]\n", 'allowed = [0, 1, 2]\noracle = [0, 1, 2]\nbuild = "runtime"\n', s)
-        assert s2 != s, p
+        s2 = s if seeded in s else re.sub(r"(?m)^allowed = \[0\]\noracle = \[0\]\n", seeded, s)
+        assert seeded in s2, p
         p.write_text(s2)
+        p = root / "tasks" / f"{SINGLE}-{m}" / "task.toml"
+        p.write_text(p.read_text().replace(seeded, "allowed = [0]\noracle = [0]\n"))
+        assert "allowed = [0]\noracle = [0]\n" in p.read_text(), p
     (root / "bin").mkdir()
     (root / "bin" / "harbor").write_text(FAKE_HARBOR)
     os.chmod(root / "bin" / "harbor", 0o755)
