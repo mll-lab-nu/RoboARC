@@ -8,8 +8,9 @@ trajectory for a frozen scene instance. A separate verifier replays and grades i
 Website: <https://roboarc.embodied-first-exam.ai>
 
 Version **1.2.0** (see [CHANGELOG.md](CHANGELOG.md)):
-- the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 Harbor task directories under
-  `tasks/`;
+- the topological puzzles: 110 task bases in 18 families, each in two modes, so 220 Harbor task directories under
+  `tasks/`. Every base has three appearance seeds (0, 1 and 2): the same scene, physics, rules and reference
+  solution, other colours and materials; the runner picks the seed (`docs/RUNNING.md`, "Seeds");
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
   directories under `ikea/tasks/`. The scenes are by Xiaoyu's team (Xiaoyu, Zhen Wu). See [ikea/README.md](ikea/README.md).
 
@@ -17,15 +18,19 @@ Version **1.2.0** (see [CHANGELOG.md](CHANGELOG.md)):
 
 | family | bases | robot | difficulty tiers |
 |---|---:|---|---|
+| battery-replacement | 1 | ALOHA 2 | no tier yet (a new design) |
+| bed-bolt | 5 | ALOHA 2 | no tier yet (new designs) |
 | blanket-flatten | 9 | ALOHA 2 | very_easy 2, easier 1, easy 2, medium 2, hard 2 |
 | blanket-fold | 5 | ALOHA 2 | very_easy .. hard, 1 each |
 | buzz-wire-3d | 10 | Franka + Robotiq 2F-85 | 2 per tier |
+| caliper-sorting | 1 | ALOHA 2 | no tier yet (a new design) |
 | cast-coil | 8 | ALOHA 2 | very_easy 2, easier 2, easy 2, medium 1, hard 1 |
 | cast-keyhole | 6 | ALOHA 2 | very_easy 1, easier 1, easy 1, medium 1, hard 2 |
+| clock-assembling | 1 | ALOHA 2 | no tier yet (a new design) |
 | fiber-bundling | 10 | Franka + Robotiq 2F-85 | 2 per tier |
 | hedgehog-in-cage | 8 | Franka + Robotiq 2F-85 | very_easy 1, easier 2, easy 2, medium 1, hard 2 |
 | horseshoe-ring | 5 | ALOHA 2 | 1 per tier |
-| interlocked-claws | 12 | ALOHA 2 | very_easy 2, easier 2, easy 2, medium 3, hard 3 |
+| interlocked-claws | 13 | ALOHA 2 | very_easy 2, easier 2, easy 2, medium 3, hard 3; 13 (Cast Trinity) no tier yet |
 | knot-untying | 8 | ALOHA 2 | very_easy 2, easier 2, easy 1, medium 2, hard 1 |
 | lock-picking | 5 | Franka + Robotiq 2F-85 | 1 per tier |
 | orbits | 2 | ALOHA 2 | very_easy 1, easier 1 |
@@ -102,7 +107,7 @@ graded tasks run, not a copy:
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the 202 Harbor task directories. They are generated: never edit them by hand |
+| `tasks/roboarc-*` | the 220 Harbor task directories. They are generated: never edit them by hand |
 | `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins) |
 | `scripts/` | the shared task layer the tasks use: `task_conventions.py`, `eai_standard/` (the standard client and service layer), `rcb_monitor/` (the resource-limits sidecar), the runner (`run_agent_batch.sh`, `write_task_results.py`, `retry_policy.py`) |
 | `ci_checks/` | the repository checks (invariants, advisories, unit tests) |

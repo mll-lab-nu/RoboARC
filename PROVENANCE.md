@@ -23,7 +23,7 @@ not carried over: this repository starts with a fresh history.
 
 | input | pin |
 |---|---|
-| frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `9f34f894a454d4f39ebaed5dcf8c8c9d40f828b9`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
+| frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `9f34f894a454d4f39ebaed5dcf8c8c9d40f828b9`: 1.0.0's 101 seed-0 instances, 21477 files by sha256 in `scripts/roboarc/assets.json`, unchanged. Since 1.2.0 assets.json also pins, by sha256 only, the 9 new bases' instances (262 files) and every base's appearance seeds 1 and 2 (43448 files): those are **not in the dataset**. Nothing is uploaded to the organisation dataset and its revision is not raised (owner, 2026-10-20); the 1.2.0 image is built from the local instances (`images/roboarc/build.sh --instances`). The seeds derive again from the seed-0 instances (`docs/benchmarks/roboarc_seeds_release.md`, steps 0 and 4) |
 | Genesis base image (`eai-robotangle` 0.2.22) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
 | monitor sidecar (`eai-monitor` 0.1.0) | `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f53f79c2bfa4a71298b10c78383cae3afc40720ca562cc845b8d20fb0c`, the same digest as the published `eai-monitor:0.1.0` |
 | standard agent base | `docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f` |

@@ -21,8 +21,12 @@ it. Maintainers push it with `images/roboarc/push.sh` after validating a build.
     runtime binding names. nvcc output is not bit-reproducible, so a wheel compiled elsewhere never matches the binding;
   - `image/uipc-sm86/`: the sm_86 build of the same recipe and its `uipc-build.json` (sha256 `712470d2…`; "The libuipc
     builds", below). The image installs it in `/opt/uipc_sm86` (`install_uipc_prefix.py`);
-  - `instances/`: every task's frozen instance. `stage_instance.py` copies a task's instance next to its
-    `runtime_binding.json` and checks it (privileged `environment/` and `tests/` images; the standard `sim` entrypoint).
+  - `instances/`: the frozen instances of 1.0.0's 101 bases (seed 0). `stage_instance.py` copies a task's instance next
+    to its `runtime_binding.json` and checks it (privileged `environment/` and `tests/` images; the standard `sim`
+    entrypoint). 1.2.0's nine new bases and every base's appearance seeds 1 and 2 are pinned in `assets.json` by sha256
+    but are not in the dataset (nothing is uploaded to it: owner, 2026-10-20). The 1.2.0 image is built from a local
+    copy (`build.sh --instances`); the seeds derive again from the seed-0 instances
+    (`docs/benchmarks/roboarc_seeds_release.md`, steps 0 and 4).
     A base's appearance seeds are `instances/<base>/seeds/<S>/` (pinned under the base's `seeds` in `assets.json`): for
     the seed in a runner's `seed` file (`scripts/task_seed.py materialize`) `stage_instance.py --seed-file` stages that
     instance with the task's `runtime_binding.s<S>.json`; no seed file stages the default instance.
@@ -57,6 +61,7 @@ it. Maintainers push it with `images/roboarc/push.sh` after validating a build.
 
 ```bash
 images/roboarc/build.sh                       # instances from the HF dataset pinned in scripts/roboarc/assets.json
+                                              # (1.0.0's bases only: 1.2.0 needs --instances, above)
 images/roboarc/build.sh --instances <dir>     # or a local copy: <dir>/<base>/instance.json + instance_assets/
 images/roboarc/build.sh --noinst              # the image without instances (to make new instances in it)
 ```

@@ -10,7 +10,7 @@ the seeds (`scripts/run_agent_batch.sh`, `scripts/task_seed.py assign`) and runs
 
 | what | where | written by |
 |---|---|---|
-| frozen instance | HF dataset `instances/<base>/seeds/<S>/`; in the image `/opt/robotangle/instances/<base>/seeds/<S>/` | `release_rebuild.py --appearance-seeds` |
+| frozen instance | in the image `/opt/robotangle/instances/<base>/seeds/<S>/` (not in the HF dataset: "No upload" below) | `release_rebuild.py --appearance-seeds` (`derive_seed_instance.py`) |
 | its pin | `scripts/roboarc/assets.json`: `instances[<base>].seeds[<S>].instance_sha256` and the files | `release_rebuild.py`, `assets.py pin` |
 | its lock and binding | `packages/<base>-privileged/runtime_binding.s<S>.upstream.json`; tasks: `runtime_binding.s<S>.json` beside every `runtime_binding.json` | `release_rebuild.py`; `mk_tasks.py` |
 | privileged reference | `oracles/<base>/privileged.s<S>.npz`; task: `solution/trajectory.s<S>.npz` | `release_rebuild.py` (`restamp`: the same rows, `instance_sha` = seed S's birth); `mk_tasks.py` |
@@ -41,7 +41,7 @@ standard oracle streams the same rows for every seed; `task_seed.py materialize`
 
 ## Commands
 
-0. Optional, the seeds alone (to look at or upload before step 1): from a copy of the dataset, in an image without
+0. Optional, the seeds alone (to look at them before step 1, or to make them again): from a copy of the dataset, in an image without
    instances built from this repository's `source/` (the one step 1 builds, `<bench>:<v>-noinst`, or
    `docker buildx build -f images/robotangle/Dockerfile.mujoco --build-context instances=<empty dir> -t <tag> source/`):
 
@@ -77,24 +77,19 @@ standard oracle streams the same rows for every seed; `task_seed.py materialize`
    against its instance bytes, each re-stamped reference's birth against that instance's `state_sha`. REPORT.md lists
    per seed the birth, the instance sha256, the re-stamped reference and the pictures.
 
-4. Upload and pin (the HF upload needs the owner's OK):
+4. No upload, no new pin (the owner, 2026-10-20): nothing goes to the organisation dataset
+   `eai-v2-internal/robotangle-assets`, and no `assets.py pin` or `--hf-revision` run raises its revision. `assets.json`
+   keeps the dataset revision of 1.0.0 (`9f34f894a454`, every seed-0 instance) and pins each seed's instance by sha256
+   only; those files are not in the dataset. The image is built from the local instances (step 5, `--instances`). Anyone
+   holding the dataset's seed-0 instances derives the seeds again with step 0's command in the release's image without
+   instances (`--seeds 1,2 --check`; the derivation reads nothing but the seed-0 instance and the image's source) and
+   compares them with the pins: `python3 scripts/roboarc/mk_tasks.py --assets <dir holding instances/> --check`. An
+   upload, if ever, goes to a directory of the owner's own, with the owner's OK, never to the organisation dataset.
+
+5. Build the image from the local instances (after the `source/` sync; `images/roboarc/VERSION` = `<v>`):
 
    ```bash
-   hf upload eai-v2-internal/robotangle-assets <work>/instances instances --repo-type dataset \
-     --commit-message "RoboARC appearance seeds (<head9>)"
-   source/scripts/robotangle/release_rebuild.sh <head> --onto <head> --bench roboarc --version <v> \
-     --appearance-seeds 1,2 --work <work> --hf-revision <dataset commit> --no-harbor
-   ```
-
-   The second run uses the uploaded instances and the pictures in `<work>/goal/` again and pins the revision. To pin
-   from a copy of the dataset instead: `python3 scripts/roboarc/assets.py pin <copy> <rev>` (it keeps every seed and,
-   while a seed's instance is unchanged, its goal pins), then `assets.py check <copy>`. Fetch the render branch into
-   this repository.
-
-5. Build the image (after the `source/` sync; `images/roboarc/VERSION` = `<v>`):
-
-   ```bash
-   images/roboarc/build.sh
+   images/roboarc/build.sh --instances <work>/instances
    docker run --rm ghcr.io/embodied-first-exam/roboarc:<v> python /opt/robotangle/stage_instance.py 2>&1 | grep -- --seed-file
    docker run --rm ghcr.io/embodied-first-exam/roboarc:<v> ls /opt/robotangle/instances/<base>/seeds
    ```
