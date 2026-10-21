@@ -4,6 +4,83 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 1.2.0 (2026-10-21)
+
+Appearance seeds and nine new bases: 110 bases (220 task directories) in 18 families, image
+`ghcr.io/embodied-first-exam/roboarc:1.2.0`. IKEA MuJoCo is unchanged (its 1.0.0 images). The version skips 1.1.0: a
+1.1.0 tag of this image name was built elsewhere (owner, 2026-10-20).
+
+### Appearance seeds
+Every base has three seeds (`[metadata.seeds] allowed = oracle = [0, 1, 2]`, `build = "runtime"`): seed 0 is the
+frozen instance as released, seeds 1 and 2 change the looks only (colours, materials, textures:
+`topogym.tasks.scene_variation.appearance(cls, S)`, scene seed 0). The runner picks the seed (`scripts/task_seed.py`).
+- **Derived, not made again** (`source/scripts/robotangle/derive_seed_instance.py`): a seed's instance is seed 0's with
+  the appearance task parameters, `instance_assets/` byte for byte (frozen MuJoCo scene, birth and settled-state
+  archives, frozen generated assets), and the build's fields (`state_sha`, `asset_identity`, ...) recomputed. Each of the
+  220 seed instances passed three gates: the physical fields equal seed 0's, the birth's tick record differs from seed
+  0's in `task.instance_id` only, and the birth's world hash equals seed 0's.
+- **One reference for every seed**: the privileged `solution/` has seed 0's reference and, per seed, the same rows with
+  `instance_sha` set to that seed's birth (`trajectory.s<S>.npz`; `solve.sh` copies the one whose stamp is the staged
+  instance's `state_sha`). A reference without a birth stamp (rope-threading 04-08) serves every seed as it is. The
+  standard oracle streams the same rows for every seed.
+- **Staging**: the image holds `/opt/robotangle/instances/<base>/seeds/<S>/`; `stage_instance.py --seed-file` stages a
+  seed's instance with its `runtime_binding.s<S>.json`. The goal pictures of blanket-fold 01-05 and knot-untying 07 / 09
+  are rendered per seed (`tests/seeds/<S>/goal/`, copied over `environment/goal/` by `task_seed.py materialize`).
+- **Not in the HF dataset.** Nothing is uploaded to the organisation dataset `eai-v2-internal/robotangle-assets`
+  and its revision stays `9f34f894a454` (owner, 2026-10-20). `scripts/roboarc/assets.json` pins the seed instances and
+  the new bases' instances by sha256 only; the image is built from local instances (`images/roboarc/build.sh
+  --instances`). The seeds derive again from the dataset's seed-0 instances
+  ([docs/benchmarks/roboarc_seeds_release.md](docs/benchmarks/roboarc_seeds_release.md), steps 0 and 4).
+
+### New bases (no difficulty tier yet)
+- **bed-bolt-01 .. 05-i01** (bed_bolt): a bed frame's corner bolt driven home with an L-shaped hex key (five variants).
+- **caliper-sorting-01-i01** (caliper_sorting): sleeves measured with a caliper on a stand, sorted into labelled bins.
+- **clock-assembling-01-i01** (clock_assembling): a watch movement's gear train enlarged 8 times, assembled and run.
+  The v3 model (TopoGym 9115da07d8: drawn realistically, the metric review's rules, the bridge solid to the wheels).
+- **battery-replacement-01-i01** (battery_replacement): a game controller's two AA cells swapped; the outer body is an
+  Xbox Wireless Controller at 1:1, and rule C's weak holds count from where a cell leaves the compartment.
+- **interlocked-claws-13-i01** (Cast Trinity): three cast pieces separated pairwise.
+Their references are the -i01 references of TopoGym (births equal to the instances bound here); their families' pages
+are in [docs/families/](docs/families/).
+
+### Changed
+- **Simulator source** synced from TopoGym `738231f5cb` (dev 9115da07d8 with the appearance seeds; PROVENANCE.md). Every
+  task's tooling copy changes with it: `rcb_topogym.py` (the new families registered, a settled state exported only for
+  the chain families at make-instance) and `nyx_direct.py` (a fixed MJCF entity's visuals drawn at its static bodies).
+  The released bases' frozen instances, references and grading rules are unchanged.
+
+### Evidence
+Release image `ghcr.io/embodied-first-exam/roboarc:1.2.0` = `sha256:301adcb64b06` (`images/roboarc/build.sh --instances`,
+the runtime check passes; source `4163626d`, tooling `8cb4e65a`):
+- **Seed instances:** 220 (110 bases x seeds 1 and 2), each through the three gates above. battery-replacement-01 and
+  clock-assembling-01 were made again in the image without instances (births 764192d9a7e49a0f and ad4ee5041eeb19de,
+  the references' own) and their seeds derived there; the other 108 bases' instances and seeds are the ones derived on
+  2026-10-20.
+- **The re-sync leaves the released bases alone:** 14 contact-weld bases (one per family: slotted-post-ring-01,
+  knot-untying-03, interlocked-claws-03, cast-coil-01, hedgehog-in-cage-02, rope-threading-01, orbits-01,
+  fiber-bundling-02, lock-picking-01, cast-keyhole-01, horseshoe-ring-02, buzz-wire-3d-04, bed-bolt-01,
+  caliper-sorting-01) made and strictly replayed on TopoGym 497a9e9d7f and on 9115da07d8: the same birth (= the
+  reference's) and the same end state on both, success on both (`<host work dir>/neutrality_9115da07d8/results/
+  compare2.txt`). So the 108 other bases keep their seed-0 instances and derived seeds.
+- **Staging in the release image:** battery-replacement-01, horseshoe-ring-01 and blanket-fold-01 at seeds 0, 1 and 2,
+  `stage_instance.py --seed-file` with the task's bindings, then a strict Session: 9 / 9 instance_exact and assets_exact,
+  births as recorded, one world hash per base across its seeds.
+- **Replays:** 23 bases (one per family and the nine new ones) at seeds 0 and 1, 46 / 46 success (2026-10-20); battery-
+  and clock-assembling-01 again on the new source, seeds 0 and 1: 4 / 4 success at the strict goal, seed 0 at the
+  references' ends (de1cb2ee33e369ed, 9683cab251ece2c0), the same world hash at both seeds. Frames of seeds 0, 1 and 2
+  (GPU) show the looks change.
+- **Harbor, rendering off:** the nine new bases, both modes, oracle and nop: 36 / 36 as expected (oracle 1 at the
+  reference's end state, deterministic; nop 0). Seed copies (`scripts/task_seed.py materialize`), both modes, oracle
+  and nop: interlocked-claws-03 and hedgehog-in-cage-02 at seeds 1 and 2, 16 / 16; blanket-fold-01 (seed goal pictures,
+  GPU cloth) at seeds 1 and 2, 8 / 8 (on a host with a 580 driver); rope-threading-04 (a reference without a birth stamp) at seed 1, privileged
+  oracle 1.
+- **Checks:** `mk_tasks.py --check` (220 match) and `--assets <instances> --check`; check-seeds, check-twins,
+  check-protocol, task_conventions, check-resources, check-cutoffs; `run_all.sh` (the invariants hold; the advisories
+  note that the new bases' task.toml declare no `[metadata].dynamics`); the unit tests (10 / 10).
+
+Host notes: the blanket families' GPU cloth needs a CUDA 13 driver (>= 580): on a 570 driver the verifier stops with
+"Warp sees no CUDA device". Not run: Harbor on the 101 released bases at seed 0 with the new tooling copy.
+
 ## 1.0.0 (2026-10-19)
 
 The topological puzzles: 101 bases (202 task directories) in 14 families, image

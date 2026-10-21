@@ -5121,11 +5121,23 @@
    "creation_source": "4163626d",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "472848140a225398975d17df4996b9b3ea84f111ae32e71ab7ad91e6855553b3"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "472848140a225398975d17df4996b9b3ea84f111ae32e71ab7ad91e6855553b3"
     }
    },
@@ -5135,7 +5147,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "battery_replacement_xbox_aa",
@@ -5153,11 +5167,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8"
     }
    },
@@ -5167,7 +5193,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_crossbar",
@@ -5185,11 +5213,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f"
     }
    },
@@ -5199,7 +5239,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_torx",
@@ -5217,11 +5259,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a"
     }
    },
@@ -5231,7 +5285,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_square",
@@ -5249,11 +5305,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37"
     }
    },
@@ -5263,7 +5331,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_phillips",
@@ -5281,11 +5351,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3"
     }
    },
@@ -5295,7 +5377,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_slotted",
@@ -5313,11 +5397,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "ad07d12db682283a181eca98f8fc5cf0d92370645d0fca4908c8636a03b2d0a9"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "ad07d12db682283a181eca98f8fc5cf0d92370645d0fca4908c8636a03b2d0a9"
     }
    },
@@ -5327,7 +5423,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "caliper_sorting_vernier",
@@ -5345,11 +5443,23 @@
    "creation_source": "4163626d",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "3f5b8292181f2ecfa7f828265428c25e76c42951adb35fa455df38bee1a17924"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "3f5b8292181f2ecfa7f828265428c25e76c42951adb35fa455df38bee1a17924"
     }
    },
@@ -5359,7 +5469,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "clock_assembling_gear_train",
@@ -5377,11 +5489,23 @@
    "creation_source": "95f678a5",
    "evidence": {
     "privileged": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "6dfe3a698467f487c3784d41229c7d229da4e29b7e9b7a702c9053bcaf8beab1"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py)",
+     "source": "4163626d",
+     "tooling": "8cb4e65a",
+     "date": "2026-10-21",
      "trajectory_sha256": "6dfe3a698467f487c3784d41229c7d229da4e29b7e9b7a702c9053bcaf8beab1"
     }
    },
@@ -5391,7 +5515,9 @@
    "physics_engine": "mujoco",
    "release_commit": "4395f81656284d414fc7a88d8ffb1353491e7161",
    "nop": {
-    "status": "not_run"
+    "status": "passed",
+    "run": "the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py)",
+    "date": "2026-10-21"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "interlocked_claws_cast_trinity",

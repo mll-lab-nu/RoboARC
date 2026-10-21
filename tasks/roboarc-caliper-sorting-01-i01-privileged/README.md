@@ -18,7 +18,7 @@ RoboARC caliper_sorting (ALOHA 2, MuJoCo): produce one replayable trajectory. Me
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (contact_weld_v1).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `ad07d12db682283a…`) to `/app/output/`: the MuJoCo reference, which its author replayed to success with a reproducible end state outside Harbor. No Harbor oracle trial of it has been run yet, so no score is claimed here. For an appearance seed S (1, 2) it copies `solution/trajectory.s<S>.npz` instead: the same rows with `instance_sha` set to that seed's birth (`solve.sh` picks the file whose stamp is the staged instance's `state_sha`).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `ad07d12db682283a…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py) (2026-10-21; simulator source 4163626d, tooling 8cb4e65a). For an appearance seed S (1, 2) it copies `solution/trajectory.s<S>.npz` instead: the same rows with `instance_sha` set to that seed's birth (`solve.sh` picks the file whose stamp is the staged instance's `state_sha`).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
@@ -29,7 +29,7 @@ replay (two passes, no separate video replay). The physics runs on the CPU and i
 A trajectory may have at most 200000 rows (`RCB_MAX_STEPS`: two replays must fit the verifier's timeout; a longer one is
 `bad_trajectory`).
 
-`nop`: no record yet on this base (`harbor run -p tasks/roboarc-caliper-sorting-01-i01-privileged -a nop`).
+`nop` scored 0 on this base in both modes (the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py); 2026-10-21).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.

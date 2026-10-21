@@ -23,12 +23,12 @@ the privileged task to measure the cost of losing resets, privileged state and t
 Same scene, instance and success rule as `roboarc-bed-bolt-01-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-`solution/solve.sh` streams the recorded rows of the reference (`solution/oracle_qpos.npy`, one `joint_position` row per control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). No Harbor oracle trial of it has been run yet on this standard service, so no score is claimed here. The same rows serve every appearance seed: a seed changes only the looks.
+`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image roboarc 1.2.0 (ghcr.io/embodied-first-exam/roboarc:1.2.0, sha256:301adcb64b06), built by images/roboarc/build.sh --instances; harbor run -a oracle with rendering off (scripts/robotangle/harbor_check.py) (2026-10-21; simulator source 4163626d, tooling 8cb4e65a). The same rows serve every appearance seed: a seed changes only the looks.
 
 ## Verification
 See `tests/grade.py`.
 
-`nop`: no record yet on this base (`harbor run -p tasks/roboarc-bed-bolt-01-i01-standard -a nop`).
+`nop` scored 0 on this base in both modes (the release image roboarc 1.2.0; harbor run -a nop with rendering off (scripts/robotangle/harbor_check.py); 2026-10-21).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
