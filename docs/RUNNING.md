@@ -76,17 +76,19 @@ MODEL=openai/<model> EFFORT=high JOBS="$PWD/jobs/agents" RESULTS=/path/outside/t
 ```
 
 It runs one Harbor-native agent over `<base>-privileged` and `<base>-standard` of every task base given (`MODES` picks
-the modes), one Harbor job per task and mode, `$JOBS/<batch>-<mode>-<task>/`. Starting the same command again adds a
-lane: every job is claimed by exactly one runner (`$JOBS/.claims/<job>`); a job that already has its `result.json` is
-skipped. Each job runs from its own stamped copy of the task (`$JOBS/.tasks/<job>/`, removed afterwards; a CPU cap above
-the host's count is clamped in that copy, `scripts/harbor/clamp_cpus.py`). The header of the script lists every
-variable; the main ones:
+the modes), `K` trials of each (default 1), one Harbor job per task, mode and trial: `$JOBS/<batch>-<mode>-<task>/`, or
+`$JOBS/<batch>-<mode>-<task>-t<k>/` (k = 1..K) when K > 1. Each trial runs from its own seed ("Seeds" below). Starting
+the same command again adds a lane: every job is claimed by exactly one runner (`$JOBS/.claims/<job>`); a job that
+already has its `result.json` is skipped. Each job runs from its own stamped copy of the task, made from the trial's
+seed (`$JOBS/.tasks/<job>/`, removed afterwards; a CPU cap above the host's count is clamped in that copy,
+`scripts/harbor/clamp_cpus.py`). The batch's plan (every job, its trial and seeds) is `$JOBS/.plan/<batch>.json`. The
+header of the script lists every variable; the main ones:
 
 | what | how |
 |---|---|
 | agent, model, effort | `AGENT=codex` or `claude-code`, `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
 | credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
-| attempts | `K` per task (1) |
+| trials | `K` per task and mode (1); each its own job and seed |
 | web search | `WEB_SEARCH=disabled` (default) or `allowed` (not for official runs) |
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
@@ -148,8 +150,35 @@ time.
 
 ## Seeds
 
-The seed is the runner's, never the agent's: one of the task's `[metadata.seeds] allowed`. Every RoboARC task allows
-only its default seed (its one frozen instance), so every run is on the default seed.
+The seed is the runner's, never the agent's: one of the task's `[metadata.seeds] allowed` (PROTOCOL §2). A seed names
+one frozen instance of the task; `default` is the one the task directory holds as committed.
+
+**Official batches assign the seeds without replacement.** The K trials of a task get distinct seeds, in an order fixed
+by the batch name and the task's base name: the allowed seeds sorted by sha256("`<batch>`\n`<base>`\n`<seed>`"), trial
+k running the k-th (`python3 scripts/task_seed.py assign tasks/<task> --batch <batch> --trials K`). So:
+- both modes of a base (its privileged and standard twins) run the same seeds;
+- with K equal to the number of seeds, every seed runs once; with more trials than seeds the order starts over, so every
+  seed runs equally often, give or take one; a task that allows one seed runs it in every trial;
+- each trial's seed alone is uniform over `allowed` (the trials of one task are not independent draws);
+- a trial run again (the infrastructure retry below, or a rerun of an interrupted job) gets its seed again.
+
+The batch runner makes each job's copy of a task with `scripts/task_seed.py materialize` and the trial's seed: that
+seed's instance (a committed one under the privileged twin's `tests/seeds/<S>/`), or, for a task that stages its
+instance at run time (`build = "runtime"`), the file `seed` in each place the task stages from (privileged
+`environment/` and `tests/`, standard `environment/sim/` and `tests/`), and the seed's goal images
+(`tests/seeds/<S>/goal/`) in `environment/goal/`, which the agent sees as `/app/goal/`. The agent never chooses or sees
+the list: the copy carries only its seed. The runner records the job's trial and the seed of each of its tasks in
+`<job>/seed.json` (and `$JOBS/.seeds/<job>.json`, written before the job starts); results are written from it.
+
+To run one seed by hand:
+
+```bash
+python3 scripts/task_seed.py list tasks/<task>                                   # default, allowed, oracle, build
+python3 scripts/task_seed.py materialize tasks/<task> --seed 1 --out /tmp/run1   # prints the copy and the seed
+harbor run -p /tmp/run1 -i <task> -a <agent> ...
+```
+
+A task that allows its default seed only (every task before RoboARC 1.2.0) runs from a copy that is the task as it is.
 
 ## Infrastructure failures: one full retry
 
@@ -160,25 +189,41 @@ behavior; no further retries. Normal task failures do not qualify.
   `infra_error` / `grader_error`, no `reward.json`, a Harbor exception other than the agent's cutoff, a model-account
   failure. The agent's own end, its cutoff and its token budget are results and are never retried.
 - The voided attempt's directory is moved aside and never counted; the retry starts from a new environment with the
-  first attempt's recorded configuration. A launch that never started a trial is no attempt.
+  first attempt's recorded configuration. With the batch runner: move the job's directory and its claim
+  (`$JOBS/.claims/<job>`) aside and start the batch's command again; the job runs again from the trial's seed. A launch
+  that never started a trial is no attempt.
 - The rule is implemented once, `scripts/harbor/retry_policy.py` (`decide`, `check_attempts`), tested by the required CI
-  job `invariants`. `write_task_results.py` keeps every attempt of a task x run id in `attempts.json` and flags a
-  sequence that breaks the rule (`attempts_over_cap`).
+  job `invariants`. It applies to each trial: `write_task_results.py` keeps every attempt of a task x run id x trial in
+  that trial's `attempts.json` and flags a sequence that breaks the rule (`attempts_over_cap`). The K trials of a task
+  are not attempts of one another.
 - In-trial crash recovery (a sim service that replays its journal and resumes the episode, STANDARD_MODE.md) is the
   service layer's implementation, not a rule; a crash it cannot recover is an infrastructure failure like any other.
 
 ## Results
 
 Results are not committed. `scripts/harbor/write_task_results.py <jobs_dir> <job> <run id> "<label>" --out <dir>`
-writes, per task and run id, `<dir>/<task>/<run id>/`: `README.md` (the result and its cost),
-`replay.mp4` and `replay.last.png`, `config.json` (the trial's effective configuration: `protocol_version`, `mode`,
-`cutoff_s`, `reset_budget`, `slowdown`, `seed`, `network`, `validated`, `set`, `oracle`, `service_protocol`, `digest`,
-the result and whether it counts, and the usage recording: `usage_gateway`, `usage_source`, `usage_recorded`,
-`token_budget`, see "Usage recording") and `attempts.json`. The run id is `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md));
-provider, service tier and settings go in the metadata.
+writes one folder per trial, `<dir>/<task>/<run id>/t<k>/` (k = 1..K, the trial's number in the run):
+- `README.md`: the result and its cost;
+- `replay.mp4` and `replay.last.png`;
+- `config.json`: the trial's effective configuration (`protocol_version`, `mode`, `cutoff_s`, `reset_budget`,
+  `slowdown`, `seed`, `network`, `validated`, `set`, `oracle`, `service_protocol`, `digest`); its trial (`trial`,
+  `trials`, the Harbor trial directory `trial_dir` and job `job`) and how its seed is known (`seed_source`: `runner`,
+  from the job's `seed.json`; `default` for a job without one); the result and whether it counts (`result`, `counted`,
+  `attempts`, `attempts_over_cap`); and the usage recording (`usage_gateway`, `usage_source`, `usage_recorded`,
+  `token_budget`, see "Usage recording");
+- `attempts.json`: every attempt of this trial (the infrastructure retry above).
+
+Next to the trials, `<dir>/<task>/<run id>/trials.json` and `README.md` list the task's trials in the run: number,
+seed, result, attempts, and the task's successes over its trials (results only). A job without `seed.json` (a plain
+`harbor run`) numbers the trials of each task in it by their start, on the task's default seed. A results directory
+written in the layout before trials (`config.json` directly in `<dir>/<task>/<run id>/`) is refused: write into a new
+one. The run id is `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)); provider, service tier and settings go
+in the metadata. The batch runner's `$JOBS/<batch>.summary.md` has one row per trial (with its trial number and seed)
+and, per configuration, each task's successes over its trials.
 
 Rankings compare trials only within one comparable configuration (`task_conventions.config_key`: protocol version,
-mode, cutoff, reset budget, S, network), report success together with cost (tokens, money, turns, wall clock,
+mode, cutoff, reset budget, S, network; the seed is not part of it: a task's trials over its seeds are one task's
+results), report success together with cost (tokens, money, turns, wall clock,
 simulation steps; tokens and money where usage was recorded), and align reasoning effort, `max_turns` and the token
 budget (`token_budget`; null when none was enforced) before comparing agents. Validated and
 unvalidated tasks are ranked together (every puzzle task has `oracle = "full"`). The easy set
@@ -196,6 +241,8 @@ privileged trial recorded before the grading rule of 2026-10-14 is recomputed by
 python3 scripts/roboarc/regrade.py <jobs dir> ... --out regrade.jsonl            # from the recorded reward.json
 python3 scripts/roboarc/regrade.py <jobs dir> ... --replay --out regrade.jsonl   # also replays the trajectory (docker, GPU)
 ```
+
+A trial's seed comes from its job's `seed.json`; `--replay` grades it with that seed's verifier files.
 
 ## Resources: limits and their enforcement
 

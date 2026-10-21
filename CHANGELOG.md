@@ -13,6 +13,18 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 - `scripts/set_agent_egress.py` runs its command line only as a script, so importing it (to read `HOSTS`) runs
   nothing; as a script it behaves as before.
 - `tools/stress/corpus/SHA256SUMS`: the O2 reproducer's line matches its file again.
+- Trials and seeds (owner decisions for 1.2.0; PROTOCOL.md "Changes from the shared protocol", RUNNING.md "Seeds",
+  "Results"): the batch runner gives the K trials of a task distinct seeds without replacement, in an order fixed by the
+  batch name and the task's base name (`scripts/task_seed.py assign`; the same seeds in both modes), runs each trial as a
+  Harbor job of its own from a copy made for its seed (`scripts/task_seed.py materialize`, back from 1.0.0 with
+  `assign`, the verifier's `tests/` in standard mode and per-seed goal images), and records the trial and its seeds in
+  `<job>/seed.json`. Results are one folder per trial, `<task>/<run id>/t<k>/` (`config.json` gains `trial`, `trials`,
+  `trial_dir`, `copy_checksum`; `seed_source` is `runner`), with an index (`trials.json`, `README.md`) per task and run
+  id. A single-seed task run with K > 1 is no longer over the retry cap: the retry rule (H.5) counts attempts per trial.
+  The seed of a trial was recorded as the default before (the runner's task copy was gone when results were written);
+  a trial's task version is now the committed DIGEST the runner copied (Harbor's checksum of the copy, which differs
+  from it whenever the copy does, is kept as `copy_checksum`). `scripts/roboarc/regrade.py --replay` grades a trial with its seed's
+  verifier files. New check `ci_checks/check-seed-files.py`. Every task still allows one seed: no task changes.
 
 No task directory, pinned tooling, hashed simulator file or image input changes.
 

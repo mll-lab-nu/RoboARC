@@ -63,7 +63,9 @@ What the invariants run: `check-agent-pointers.py` (H.2), `check-dataset-manifes
 `check-ci-selftest.py --tier invariants` (real tasks broken one way each; every rule must fire), and per task
 `check-task.sh --tier invariants` (verifier isolation, instance copies, the standard agent image). The advisory tier adds
 the per-task conventions, `check-tooling-identity.sh` (shared files byte-identical; the 2.4 layer equal to
-`scripts/eai_standard/`), `check-standard-client.sh`, resources, cutoffs, seeds, videos, `check-protocol.py`,
+`scripts/eai_standard/`), `check-standard-client.sh`, resources, cutoffs, seeds (`check-seeds.py`; `check-seed-files.py`:
+every allowed seed of a task with `build = "runtime"` has its `seed` file, `runtime_binding.s<S>.json`, goal images and
+oracle; also a failing step of the CI job `unit-tests`), videos, `check-protocol.py`,
 `check-world-frame-texts.sh` (no world coordinates in standard texts), `check-build-stamps.py`, the easy set and
 `check-doc-paths.py` (every path and relative link the docs name exists; docs/history/ excepted).
 

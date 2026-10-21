@@ -1,17 +1,23 @@
 # RoboARC task protocol (Robot Coding Bench task protocol v2.0)
 
 **In this repository.** RoboARC's tasks follow the task protocol of Robot Coding Bench, the multi-benchmark
-repository RoboARC's task layer comes from (v2.0, with the one change below). RoboARC ships two modes, privileged and
+repository RoboARC's task layer comes from (v2.0, with the two changes below). RoboARC ships two modes, privileged and
 standard (`eai-standard/2.4`); the parts about standard-realtime mode and exported tasks are kept for completeness, and
 no RoboARC task uses them. RoboARC's own choices (grading replays, safety telemetry, world frame, time budget) are in
 [benchmarks/roboarc.md](benchmarks/roboarc.md). Task files cite this document by section number: the numbers do not
 change.
 
-**Changes from the shared protocol.** RoboARC is a standalone benchmark and departs from the shared protocol in one
-point: recording the agent's model-API usage (tokens, cost) is optional. An official run does not need the usage
-gateway. A run may record usage through it (the runner's `USAGE_GATEWAY` option, [RUNNING.md](RUNNING.md) "Usage
-recording"); without it, the usage a result reports is what the harness itself logs, if anything. Every result records
-which (§4, H.6).
+**Changes from the shared protocol.** RoboARC is a standalone benchmark and departs from the shared protocol in two
+points.
+- Recording the agent's model-API usage (tokens, cost) is optional. An official run does not need the usage gateway. A
+  run may record usage through it (the runner's `USAGE_GATEWAY` option, [RUNNING.md](RUNNING.md) "Usage recording");
+  without it, the usage a result reports is what the harness itself logs, if anything. Every result records which (§4,
+  H.6).
+- Seeds are assigned to a run's trials without replacement (§2, Seeds; formerly §2.13). The shared protocol draws each
+  trial's seed independently and uniformly. Here the K trials of a task get distinct allowed seeds, in an order fixed by
+  the batch name and the task's base name, so both modes of a task run the same seeds and, with K equal to the number
+  of seeds, every seed runs once. Each trial's seed alone stays uniform over `allowed`; an infrastructure retry keeps its
+  trial's seed (H.5). Results are kept per trial, with the trial's seed ([RUNNING.md](RUNNING.md) "Seeds", "Results").
 
 **Recommended conventions, and eight invariants that bind.** Sections 1–7 describe how a task is usually built, so that
 tasks from different benchmarks can be run, compared and reviewed the same way. They recommend; a task or a benchmark
@@ -62,7 +68,7 @@ configuration (`config_key`; RUNNING.md "Results").
 | Slowdown S (standard-realtime) | `RCB_SLOWDOWN` default, `[metadata] slowdown`, the instruction (`S = <S>`) | S = 1 when the service's real-time factor is ≥ 3, else ⌈1.5 / RTF⌉ |
 | Observation and action extensions | `/spec`, the instruction, the benchmark doc | the `eai-standard` core |
 | Grading kind | the instruction, the frozen instance, `reward.json` (`replays`, `graded_by_live`) | two fresh replays; one replay or the trusted live record by the task's choice (within H.4) |
-| Seeds | `[metadata.seeds]` `default`, `allowed` (list, `{from, to}`, `"any"`), `oracle`, `build` | the default seed only |
+| Seeds | `[metadata.seeds]` `default`, `allowed` (list, `{from, to}`, `"any"`), `oracle`, `build` | the default seed only. The runner, never the agent, picks a trial's seed: the K trials of a task in a run get distinct allowed seeds, without replacement, in an order fixed by the batch name and the task's base name (the same seeds in both modes; RUNNING.md "Seeds") |
 | Network | `[metadata] network` | `"allowlist"`; `"open"` by the author's choice (H.6) |
 | Scene dynamics | `[metadata] dynamics` (`dynamic`: something other than the robot does work by a force other than the robot's and gravity) | none: declared by every task |
 | Validated | `[metadata] validated`, else `oracle = "full"` | a recorded marker, not part of the configuration: validated and unvalidated tasks are ranked together |
