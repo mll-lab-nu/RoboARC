@@ -37,9 +37,9 @@ Replace the two old AA cells in the game controller's battery compartment with t
 
 - Each of the two slots holds a new cell (black body, copper band), fully seated: its axis within 5 degrees of the slot's, its centre within 1.2 mm sideways, 1 mm vertically and 1.5 mm along the axis of the seated position, and the slot's spring contact compressed at least 1 mm.
 - Polarity: a cell's + end (the small nub, and the '+' printed on its coloured band) faces that slot's + contact plate, marked with a red '+' on the compartment floor; its - end presses the spring contact.
-- The cover is closed and latched: within 0.5 mm of its closed position along and across the controller, between 0.2 mm below and 0.6 mm above it, tilted at most 1 degree, its detent plunger in the groove.
+- The cover is closed and latched: within 0.5 mm of its closed position along and across the controller (so pushed all the way back along its slide, where the detent plunger sits in the cover's groove), between 0.2 mm below and 0.6 mm above it, tilted at most 1 degree, and the detent plunger not held down more than 0.25 mm below its upper stop.
 - Both old cells (grey body, tan band) lie inside the recycling box (their centres within its inner walls, below its rim).
-- The four cells and the cover move at most 5 mm/s and 0.1 rad/s. Holding parts is allowed; the pry stick may end anywhere on the table.
+- The four cells and the cover move at most 5 mm/s and 0.1 rad/s. Holding parts is allowed; the pry stick may end anywhere (on the table or in a hand).
 - Keep all final conditions satisfied together for at least 0.5 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.
 
 ## Task failure conditions

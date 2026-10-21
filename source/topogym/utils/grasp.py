@@ -169,11 +169,23 @@ class WeakHoldGraspTarget(ForceClosureGraspTarget):
     runs/controller_battery_design_20261014/GRASP_PROPOSAL.md, the user's choice of 2026-10-18: an old cell may be
     plucked out of its slot by the fingertips but must be held from both sides to be carried). A hold is firm when its
     acquisition pinch also closes force at firm_friction_coefficient (across a cylinder: a central angle between the two
-    contacts of at least 180 - 2 atan(firm mu) degrees, 150 at 0.268), else weak; a weak hold is lost (reason
-    "weak_hold_travel", as any lost grasp: the hand opens before it takes hold again) once the target link's origin is
-    more than weak_hold_travel_m from where it was taken. A firm hold has no such limit. Both decided at acquisition."""
+    contacts of at least 180 - 2 atan(firm mu) degrees, 150 at 0.268), else weak. Firm or weak is decided at
+    acquisition; a firm hold has no travel limit and spends nothing.
+
+    The weak holds of a target share one travel budget for the whole episode (the user's choice of 2026-10-19; the
+    metric review runs/robotangle_mujoco/metric_review_20261019/battery_zh.md, finding 7): each weak hold spends the
+    straight-line distance its target link's origin moves from where the hold's count starts to where it is let go, and
+    the spent distances add up. The count of a hold starts where it is taken, or, for a hold taken while the origin is
+    inside the target's home region, where the origin is first outside it (checked after every World tick; a hold that
+    never leaves the home spends nothing). A weak hold is lost (reason "weak_hold_travel", as any lost grasp: the hand
+    opens before it takes hold again) once what earlier weak holds spent plus its own distance so far exceeds
+    weak_hold_travel_m; with the budget overspent, a later weak hold is lost at its first check.
+    The home region (optional; the battery: the compartment, so a pried cell plucked out of its slot spends only what it
+    moves once out): home_box_m (x0, x1, y0, y1, z0, z1), a box in the frame of the link home_link (entity, link)."""
     firm_friction_coefficient: float = .268
     weak_hold_travel_m: float = .06
+    home_link: tuple[str, str] | None = None
+    home_box_m: tuple[float, float, float, float, float, float] | None = None
 
     def __post_init__(self):
         super().__post_init__()
@@ -186,6 +198,17 @@ class WeakHoldGraspTarget(ForceClosureGraspTarget):
             raise ValueError("Grasp weak-hold travel must be finite and positive")
         object.__setattr__(self, "firm_friction_coefficient", float(firm))
         object.__setattr__(self, "weak_hold_travel_m", float(travel))
+        if (self.home_link is None) != (self.home_box_m is None):
+            raise ValueError("Grasp home region needs both home_link and home_box_m")
+        if self.home_link is not None:
+            link = tuple(self.home_link)
+            if len(link) != 2 or not all(isinstance(v, str) and v for v in link):
+                raise ValueError("Grasp home link must be an (entity, link) pair of names")
+            box = np.asarray(self.home_box_m, dtype=float)
+            if box.shape != (6,) or not np.isfinite(box).all() or np.any(box[1::2] <= box[0::2]):
+                raise ValueError("Grasp home box must be six finite bounds (x0, x1, y0, y1, z0, z1), each low below high")
+            object.__setattr__(self, "home_link", link)
+            object.__setattr__(self, "home_box_m", tuple(float(v) for v in box))
 
 
 @dataclass(frozen=True)

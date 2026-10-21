@@ -72,6 +72,9 @@ CHAMFER = .0012           # 45 deg entry cone under each bridge hole (a tip with
 LOW_PIVOT_L = .004        # lower pivot below the plate face
 UP_PIVOT_L = .006         # upper pivot above the arbor's shoulder
 SHOULDER_Z = H_BRIDGE - .0004    # the arbor's shoulder 0.4 mm under the bridge (end shake)
+SEAT_PLAY = .0008         # a wheel seats up to this high (the seat rule, mechanism.SEAT_HEIGHT_M) and stays there
+ARBOR_TOP = SHOULDER_Z - SEAT_PLAY   # an arbor collides up to here: 0.4 mm under the bridge even seated that high (the
+                                     # bridge is solid to the wheels; an arbor touching it brakes the train)
 ARBOR_R = .0025           # graspable arbor 5 mm
 TILT_MAX = .0262          # lean of a wheel standing on its lower pivot alone, per hinge (rad, 1.5 deg: the center
                           # wheel's disc edge, 34 mm out, then stays 0.1 mm clear of the barrel drum 1 mm under it)
@@ -89,8 +92,8 @@ GEARS = {
 }
 PARENT = {"center": "barrel", "third": "center", "fourth": "third"}
 MASS = {"barrel": .050, "center": .015, "third": .008, "fourth": .008}
-COLORS = {"barrel": (.72, .72, .76, 1), "center": (.86, .68, .22, 1), "third": (.90, .72, .25, 1),
-          "fourth": (.70, .72, .76, 1)}
+COLORS = {"barrel": (.60, .62, .66, 1), "center": (.86, .68, .22, 1), "third": (.90, .72, .25, 1),
+          "fourth": (.76, .77, .80, 1)}
 
 
 def pitch_r(name):
@@ -139,6 +142,11 @@ CLICK_DAMPING = 1e-3      # N m s / rad on the arbor's turn (the click's spring 
                           # arbor falls back onto the click at a few rad/s, not the 140 rad/s of a bare light arbor
 ARBOR_MASS = .006
 PLATE_R = .152
+HOLDER_RING = (PLATE_R - .006, PLATE_R + .010, -.030, -.004)   # drawn: r_in, r_out, z0, z1 (W), its top under the plate's
+# drawn screws and jewels on the plate (W): spots at least 8 mm clear of every wheel, pillar and bridge bar in plan
+PLATE_DECOR = ((-.130, -.022, "screw"), (.122, .050, "jewel"), (.038, -.118, "jewel"), (-.034, .122, "screw"),
+               (-.070, -.106, "jewel"), (.038, -.010, "jewel"), (.122, -.046, "screw"), (-.106, .062, "jewel"),
+               (.050, .098, "jewel"), (-.010, .062, "screw"))
 
 BRIDGE_PTS = {"B": POS["barrel"], "C": POS["center"], "T": POS["third"], "F": POS["fourth"],
               "P1": PILLARS["P1"], "P2": PILLARS["P2"], "P3": PILLARS["P3"]}
@@ -162,14 +170,15 @@ SCREW_TRAY_TOP = .03
 SCREW_TRAY_X = (-.022, .022)
 PROBE_STAND_Z = .11
 PROBE_L, PROBE_R, PROBE_TIP, PROBE_TIP_R = .09, .003, .012, .0012
+PROBE_HANDLE_L = .055     # drawn: the wooden handle from the back end (the hand holds the probe there)
 
 # ---------------------------------------------------------------- collision classes and contact parameters
 TOOL, WHEEL, PLATE, PIVOT, BRIDGE, HOLE, HEAD, PEG, PEGHOLE, GATE = (1 << k for k in range(10))
 AFF = {TOOL: TOOL | WHEEL | PLATE | PIVOT | BRIDGE | HEAD | PEG,
-       WHEEL: TOOL | WHEEL | PLATE,
+       WHEEL: TOOL | WHEEL | PLATE | BRIDGE,
        PLATE: TOOL | WHEEL | BRIDGE | HEAD,
        PIVOT: TOOL | HOLE,
-       BRIDGE: TOOL | PLATE | HEAD,
+       BRIDGE: TOOL | PLATE | HEAD | WHEEL,       # the bridge is solid to the wheels (no wheel passes through it)
        HOLE: PIVOT,
        HEAD: TOOL | PLATE | BRIDGE,
        PEG: TOOL | PEGHOLE,
@@ -182,17 +191,46 @@ HARD_LIMIT = dict(solreflimit="0.00125 2", solimplimit="0.99 0.999 0.001 0.5 2")
 HARD_FRICTION = dict(solreffriction="0.00125 2", solimpfriction="0.99 0.999 0.001 0.5 2")
 WELD_SOLREF = "0.002 1"   # the task's welds (seats, screws, the bridge's fixing), as in the design's runs
 
-C = dict(plate=(.78, .55, .45, 1), brass=(.80, .66, .30, 1), steel=(.70, .72, .76, 1), ruby=(.75, .10, .35, 1),
-         bridge=(.82, .58, .48, 1), dark=(.18, .18, .20, 1), wood=(.62, .48, .34, 1), tool=(.20, .45, .70, 1),
-         red=(.90, .10, .10, 1), screw=(.35, .40, .70, 1))
+# Colours (2026-10-19, the realism list, runs/watch_assembly_design_20261014/REALISM_LIST.md; drawn only): a copper-gilt
+# plate and a paler gilt bridge (one hue they shared hid the bridge on the plate), darker steel, deep-red jewels in gilt
+# settings, blued screws, a steel probe with a wooden handle, a grey movement holder.
+C = dict(plate=(.66, .45, .34, 1), steel=(.56, .58, .62, 1), ruby=(.55, .04, .12, 1),
+         bridge=(.86, .70, .46, 1), bevel=(.96, .86, .64, 1), chaton=(.92, .76, .42, 1), dark=(.18, .18, .20, 1),
+         wood=(.62, .48, .34, 1), handle=(.40, .27, .17, 1), tool=(.62, .64, .68, 1), screw=(.16, .22, .50, 1),
+         holder=(.42, .44, .47, 1), polish=(.70, .72, .76, 1))
+_MESHES = []    # the visual meshes of the entity being written (entity_xml): (name, vertices, faces)
+
+
+def annulus_mesh(name, r_in, r_out, z0, z1, n=64):
+    """A closed flat ring (r_in..r_out, z0..z1, in its geom's frame) as an MJCF mesh asset, for the drawn rings a ring of
+    boxes showed facet by facet. Returns the mesh name."""
+    a = 2 * np.pi * np.arange(n) / n
+    ring = lambda r, z: np.c_[r * np.cos(a), r * np.sin(a), np.full(n, z)]     # noqa: E731
+    v = np.vstack([ring(r_out, z1), ring(r_in, z1), ring(r_out, z0), ring(r_in, z0)])   # OT, IT, OB, IB
+    f = []
+    for i in range(n):
+        j = (i + 1) % n
+        ot, it, ob, ib = (i, n + i, 2 * n + i, 3 * n + i)
+        ot2, it2, ob2, ib2 = (j, n + j, 2 * n + j, 3 * n + j)
+        f += [(ot, ot2, it2), (ot, it2, it),            # top, facing +z
+              (ob, ib2, ob2), (ob, ib, ib2),            # bottom, facing -z
+              (ob, ob2, ot2), (ob, ot2, ot),            # outer wall, facing out
+              (ib, it2, ib2), (ib, it, it2)]            # inner wall, facing in
+    _MESHES.append((name, v, np.asarray(f)))
+    return name
+
+
 # The appearance parameters (ClockAssemblingTask defaults movement_finish, stand_finish, screw_finish; the user,
 # 2026-10-20: a seed varies appearance only): each replaces the colours of the visual geoms drawn in the first entry's
 # colours (the look above) and no colliding geom's (those are drawn "1 1 1 0"). Movement: the plate and its pillars, the
-# bridge, the center and third wheels (barrel and fourth stay steel); stand: the stands, the cups, the tray, the posts.
+# bridge, their bevels and the jewels' chatons, the center and third wheels (barrel and fourth stay steel); stand: the
+# stands, the cups, the tray, the posts, the bridge's rack (the movement holder stays grey).
 MOVEMENT_FINISHES = dict(
-    rose_gilt=(C["plate"], C["bridge"], COLORS["center"], COLORS["third"]),
-    rhodium=((.80, .81, .83, 1), (.84, .85, .87, 1), COLORS["center"], COLORS["third"]),
-    gilt=((.84, .70, .40, 1), (.87, .73, .44, 1), (.78, .45, .30, 1), (.82, .48, .32, 1)))
+    rose_gilt=(C["plate"], C["bridge"], C["bevel"], C["chaton"], COLORS["center"], COLORS["third"]),
+    rhodium=((.80, .81, .83, 1), (.84, .85, .87, 1), (.93, .94, .95, 1), (.88, .89, .91, 1), COLORS["center"],
+             COLORS["third"]),
+    gilt=((.84, .70, .40, 1), (.87, .73, .44, 1), (.97, .90, .66, 1), (.90, .78, .45, 1), (.78, .45, .30, 1),
+          (.82, .48, .32, 1)))
 STAND_FINISHES = dict(beech=(C["wood"],), walnut=((.38, .26, .17, 1),), white_plastic=((.86, .86, .84, 1),))
 SCREW_FINISHES = dict(blued=(C["screw"],), steel=((.72, .73, .76, 1),), gilt=((.85, .70, .38, 1),))
 
@@ -243,6 +281,10 @@ class _Body:
         ET.SubElement(self.el, "geom", name=name, rgba=_v(rgba), contype="0", conaffinity="0", group="2", mass="0",
                       **self._shape(kind, pos, quat, attrs))
 
+    def annulus(self, name, c, r_in, r_out, z0, z1, rgba, n=64):
+        """A drawn ring (annulus_mesh) about the vertical axis through c."""
+        self.look(name, "mesh", (c[0], c[1], 0.), rgba, mesh=annulus_mesh(f"{name}_mesh", r_in, r_out, z0, z1, n))
+
     def ring(self, prefix, c, r_in, r_out, z0, z1, n, cls, rgba, hidden=False):
         rm, w = (r_in + r_out) / 2, (r_out - r_in) / 2
         ht = rm * math.tan(math.pi / n) * 1.02
@@ -284,7 +326,18 @@ def _movement(world):
     # the plate collides as a box (a 30 cm flat cylinder against thin wheel discs gave false deep contacts), drawn round
     b.look("plate_vis", "cylinder", (0, 0, -.006), C["plate"], size=(PLATE_R, .006))
     b.geom("plate", "box", (0, 0, -.006), PLATE, C["plate"], size=(PLATE_R * .75, PLATE_R * .75, .006), hidden=True)
-    b.geom("holder", "box", (0, 0, -(o[2] - .012) / 2 - .012), TOOL, C["brass"], size=(.05, .05, (o[2] - .012) / 2))
+    b.geom("holder", "box", (0, 0, -(o[2] - .012) / 2 - .012), TOOL, C["holder"], size=(.05, .05, (o[2] - .012) / 2))
+    # drawn only: the movement holder's ring round the plate's edge (below its top face, HOLDER_RING), the plate's
+    # bevelled rim, and a few of a real plate's other holes and screws where no part of this train covers them
+    b.annulus("holder_ring", (0, 0), *HOLDER_RING, C["holder"])
+    b.annulus("plate_rim", (0, 0), PLATE_R - .003, PLATE_R - .0002, -.0001, .00012, C["bevel"])
+    for i, (x, y, kind) in enumerate(PLATE_DECOR):
+        if kind == "screw":
+            b.look(f"decor_screw_{i}", "cylinder", (x, y, .0006), C["polish"], size=(.0032, .0006))
+            b.look(f"decor_slot_{i}", "box", (x, y, .00125), C["dark"], quat=quat_z(.7 * i), size=(.003, .0004, .0001))
+        else:
+            b.annulus(f"decor_chaton_{i}", (x, y), .0011, .0024, 0., .0001, C["chaton"], n=24)
+            b.look(f"decor_jewel_{i}", "cylinder", (x, y, .00005), C["ruby"], size=(.0011, .00005))
     for name in WHEELS:
         p = POS[name]
         b.ring(f"hole_{name}_", p, PIVOT_HOLE_R, PIVOT_HOLE_R + .002, -LOW_PIVOT_L - .001, 0., 10, HOLE, C["ruby"],
@@ -295,6 +348,7 @@ def _movement(world):
             b.geom(f"gate_{name}", "cylinder", (p[0], p[1], LOW_PIVOT_L / 2), GATE, (1, 0, 0, 0),
                    size=(.0035, LOW_PIVOT_L / 2), hidden=True)
         b.look(f"jewel_{name}", "cylinder", (p[0], p[1], .00005), C["ruby"], size=(PIVOT_HOLE_R + .0012, .00005))
+        b.annulus(f"chaton_{name}", p, PIVOT_HOLE_R + .0012, PIVOT_HOLE_R + .0032, 0., .0001, C["chaton"], n=32)
     for k, p in PILLARS.items():
         b.geom(f"pillar_{k}", "cylinder", (p[0], p[1], H_BRIDGE / 2), PLATE, C["plate"], size=(PILLAR_R, H_BRIDGE / 2))
         pp = p + PIN_OFF
@@ -343,12 +397,20 @@ def _stands(world):
     b.geom("wheel_stand", "box", (x, y, STAND_TOP / 2), TOOL, C["wood"], size=(.11, .065, STAND_TOP / 2))
     for name, (dx, dy) in WHEEL_STAND_POS.items():          # a cup under each wheel's disc (the barrel's drum)
         r_in, r_out, z_rest = CUP[name]
-        b.ring(f"cup_{name}_", (x + dx, y + dy), r_in, r_out, STAND_TOP, STAND_TOP + z_rest + CUP_LIFT, 12, TOOL, C["wood"])
+        # it collides as a ring of 12 boxes and is drawn as one smooth ring (the boxes' facets looked like a cake mould)
+        b.ring(f"cup_{name}_", (x + dx, y + dy), r_in, r_out, STAND_TOP, STAND_TOP + z_rest + CUP_LIFT, 12, TOOL, C["wood"],
+               hidden=True)
+        b.annulus(f"cup_{name}_vis", (x + dx, y + dy), r_in, r_out, STAND_TOP, STAND_TOP + z_rest + CUP_LIFT, C["wood"])
     bp = opening_poses()["bridge"][0]
     for k in ("B", "P1", "P2", "P3"):
         q = BRIDGE_PTS[k]
+        # the barrel's post wider than the barrel boss's opening (BOSS_HOLE_R): the boss, a ring, rests on it
         b.geom(f"bridge_post_{k}", "cylinder", (bp[0] + q[0], bp[1] + q[1], BRIDGE_STAND_TOP / 2), TOOL, C["wood"],
-               size=(.008, BRIDGE_STAND_TOP / 2))
+               size=(.017 if k == "B" else .008, BRIDGE_STAND_TOP / 2))
+    # drawn only: the posts stand in one 2 mm board (a rack, not four loose sticks)
+    xy = np.array([bp[:2] + BRIDGE_PTS[k] for k in ("B", "P1", "P2", "P3")])
+    lo, hi = xy.min(axis=0) - .018, xy.max(axis=0) + .018
+    b.look("bridge_rack", "box", (*(lo + hi) / 2, .001), C["wood"], size=(*(hi - lo) / 2, .001))
     x, y = LAYOUT["screw_tray"]
     # PLATE class: the screw heads rest on it, the shanks pass into its holes
     b.geom("screw_tray", "box", (x, y, SCREW_TRAY_TOP / 2), PLATE, C["wood"], size=(.040, .025, SCREW_TRAY_TOP / 2))
@@ -373,14 +435,17 @@ def _barrel_arbor(barrel, z_drum):
     ET.SubElement(el, "joint", name="spring_barrel", type="hinge", axis="0 0 1", stiffness=_v(SPRING_K), springref="0",
                   damping=_v(SPRING_DAMPING), armature=_v(ARBOR_MASS * BARREL_ARBOR_R ** 2))
     b = _Body(el)
-    b.geom("barrel_arbor", "cylinder", (0, 0, (z_drum + H_BRIDGE) / 2), WHEEL, C["steel"],
-           size=(BARREL_ARBOR_R, (H_BRIDGE - z_drum) / 2))
+    top = SHOULDER_Z                         # drawn to the bridge's underside less the end shake; collides to ARBOR_TOP
+    b.geom("barrel_arbor", "cylinder", (0, 0, (z_drum + ARBOR_TOP) / 2), WHEEL, C["steel"],
+           size=(BARREL_ARBOR_R, (ARBOR_TOP - z_drum) / 2), hidden=True)
+    b.look("barrel_arbor_v", "cylinder", (0, 0, (z_drum + top) / 2), C["steel"], size=(BARREL_ARBOR_R, (top - z_drum) / 2))
     b.geom("barrel_upper", "capsule", (0, 0, 0), PIVOT, C["steel"], size=BARREL_ARBOR_R,
            fromto=(0, 0, H_BRIDGE - .002, 0, 0, H_BRIDGE + T_BRIDGE - BARREL_ARBOR_R))
     r0, r1 = RATCHET_Z
     b.geom("barrel_ratchet", "cylinder", (0, 0, (r0 + r1) / 2), WHEEL, C["steel"], size=(RATCHET_R, (r1 - r0) / 2))
     b.teeth("ratchet_t", RATCHET_TEETH, RATCHET_R + .001, .0008, r0, r1, C["steel"])
-    b.look("ratchet_mark", "cylinder", (.6 * RATCHET_R, 0, r1 + .0002), C["red"], size=(.0012, .0002))
+    for i, (ra, rb) in enumerate(((.0045, .0060), (.0072, .0086))):    # drawn: the ratchet's polished rings
+        b.annulus(f"ratchet_snail{i}", (0, 0), ra, rb, r1, r1 + .0001, C["polish"], n=48)
     b.geom("barrel_square", "box", (0, 0, (SQUARE_BOTTOM + BARREL_SQUARE_TOP) / 2), WHEEL, C["steel"],
            size=(.0032, .0032, (BARREL_SQUARE_TOP - SQUARE_BOTTOM) / 2))
 
@@ -399,33 +464,41 @@ def _wheel(world, name, pos, quat):
         z0, z1 = g["drum"]
         b.geom("barrel_drum", "cylinder", (0, 0, (z0 + z1) / 2), WHEEL, rgba, size=(r - 1.25 * g["m"] - COL_SHRINK, (z1 - z0) / 2))
         b.look("barrel_cover", "cylinder", (0, 0, z1 + .00025), C["steel"], size=(r * .7, .00025))
+        for i in range(4):                     # drawn: the cover's snailing, rings of polish
+            ra = r * (.16 + .135 * i)
+            b.annulus(f"barrel_snail{i}", (0, 0), ra, ra + .3 * .135 * r, z1 + .0005, z1 + .0006, C["polish"], n=64)
         b.teeth("barrel_t", g["teeth"], r, g["m"], g["band"][0], g["band"][1], rgba)
-        mark_x, mark_z = .5 * r, z1 + .0006
         _barrel_arbor(el, z1)
     else:
         z0, z1 = g["band"]
         # the arbor starts 0.8 mm above the plate face (end shake): only the lower pivot touches the jewel, so a wheel
         # without its bridge leans freely on that pivot
-        b.geom(f"{name}_arbor", "cylinder", (0, 0, (SHOULDER_Z + .0008) / 2), WHEEL, C["steel"],
-               size=(ARBOR_R, (SHOULDER_Z - .0008) / 2))
+        b.geom(f"{name}_arbor", "cylinder", (0, 0, (ARBOR_TOP + .0008) / 2), WHEEL, C["steel"],
+               size=(ARBOR_R, (ARBOR_TOP - .0008) / 2), hidden=True)          # collides up to ARBOR_TOP ...
+        b.look(f"{name}_arbor_v", "cylinder", (0, 0, (SHOULDER_Z + .0008) / 2), C["steel"],
+               size=(ARBOR_R, (SHOULDER_Z - .0008) / 2))                        # ... drawn up to its shoulder
         b.geom(f"{name}_uppivot", "cylinder", (0, 0, SHOULDER_Z + (UP_PIVOT_L - PIVOT_R) / 2), PIVOT, C["steel"],
                size=(PIVOT_R, (UP_PIVOT_L - PIVOT_R) / 2))
         b.geom(f"{name}_tip", "sphere", (0, 0, SHOULDER_Z + UP_PIVOT_L - PIVOT_R), PIVOT, C["steel"], size=PIVOT_R)
         rr = r - 1.25 * g["m"]
-        b.geom(f"{name}_disc", "cylinder", (0, 0, (z0 + z1) / 2), WHEEL, rgba, size=(rr - COL_SHRINK, (z1 - z0) / 2))
-        b.look(f"{name}_hub", "cylinder", (0, 0, (z0 + z1) / 2), C["steel"], size=(ARBOR_R * 2.2, (z1 - z0) / 2 + .001))
-        k_win = 5 if name != "fourth" else 4                 # the spokes' cut-outs drawn as dark windows
-        for k in range(k_win):
-            a = 2 * math.pi * (k + .5) / k_win
-            b.look(f"{name}_win{k}", "box", (.58 * rr * math.cos(a), .58 * rr * math.sin(a), z1 + .00005), (.15, .12, .08, 1),
-                   quat=quat_z(a), size=(.22 * rr, .16 * rr, .00005))
+        # it collides as a whole disc; it is drawn crossed out as a real wheel: a rim, spokes and the hub (the spokes
+        # also show it turn)
+        b.geom(f"{name}_disc", "cylinder", (0, 0, (z0 + z1) / 2), WHEEL, rgba, size=(rr - COL_SHRINK, (z1 - z0) / 2),
+               hidden=True)
+        b.annulus(f"{name}_rim", (0, 0), .80 * rr, rr, z0, z1, rgba)
+        hub = ARBOR_R * 2.2
+        b.look(f"{name}_hub", "cylinder", (0, 0, (z0 + z1) / 2), C["steel"], size=(hub, (z1 - z0) / 2 + .001))
+        n_spoke = 5 if name != "fourth" else 4
+        for k in range(n_spoke):
+            a = 2 * math.pi * (k + .5) / n_spoke
+            rm = .5 * (hub + .82 * rr)
+            b.look(f"{name}_spoke{k}", "box", (rm * math.cos(a), rm * math.sin(a), (z0 + z1) / 2), rgba, quat=quat_z(a),
+                   size=(.5 * (.82 * rr - hub), .045 * rr, (z1 - z0) / 2))
         b.teeth(f"{name}_t", g["teeth"], r, g["m"], z0, z1, rgba)
         p0, p1 = g["pband"]
         pr = pin_pitch_r(name) - 1.25 * g["pm"]
         b.geom(f"{name}_pinion", "cylinder", (0, 0, (p0 + p1) / 2), WHEEL, C["steel"], size=(pr - COL_SHRINK / 2, (p1 - p0) / 2))
         b.teeth(f"{name}_p", g["pin"], pin_pitch_r(name), g["pm"], p0, p1, C["steel"])
-        mark_x, mark_z = .6 * r, z1 + .0002
-    b.look(f"{name}_mark", "cylinder", (mark_x, 0, mark_z), C["red"], size=(.0015, .0002))   # shows the spin
 
 
 def _bridge(world, pos, quat):
@@ -435,41 +508,52 @@ def _bridge(world, pos, quat):
     b = _Body(el)
     for i, (pa, pb) in enumerate(BRIDGE_BARS):
         a, c = BRIDGE_PTS[pa], BRIDGE_PTS[pb]
-        mid, d = (a + c) / 2, c - a
+        d = c - a
         yaw = math.atan2(d[1], d[0])
-        b.geom(f"bridge_bar{i}", "box", (mid[0], mid[1], T_BRIDGE / 2), BRIDGE, C["bridge"], quat=quat_z(yaw),
-               size=(np.linalg.norm(d) / 2, BAR_W / 2, T_BRIDGE / 2), hidden="B" in (pa, pb))
-        if "B" in (pa, pb):        # drawn from the barrel boss's opening on (the ratchet rises through it)
+        if "B" in (pa, pb):        # from the barrel boss's opening on (the ratchet and the square pass through it)
             u = d / np.linalg.norm(d)
-            a2, c2 = (a + u * BOSS_HOLE_R, c) if pa == "B" else (a, c - u * BOSS_HOLE_R)
-            m2 = (a2 + c2) / 2
-            b.look(f"bridge_bar{i}_v", "box", (m2[0], m2[1], T_BRIDGE / 2), C["bridge"], quat=quat_z(yaw),
-                   size=(np.linalg.norm(c2 - a2) / 2, BAR_W / 2, T_BRIDGE / 2))
+            a, c = (a + u * BOSS_HOLE_R, c) if pa == "B" else (a, c - u * BOSS_HOLE_R)
+        mid = (a + c) / 2
+        b.geom(f"bridge_bar{i}", "box", (mid[0], mid[1], T_BRIDGE / 2), BRIDGE, C["bridge"], quat=quat_z(yaw),
+               size=(np.linalg.norm(c - a) / 2, BAR_W / 2, T_BRIDGE / 2))
     for k, r in BOSS_R.items():
         p = BRIDGE_PTS[k]
-        b.geom(f"bridge_boss_{k}", "cylinder", (p[0], p[1], T_BRIDGE / 2), BRIDGE, C["bridge"], size=(r, T_BRIDGE / 2),
-               hidden=k == "B")
+        if k == "B":               # a ring: its opening (BOSS_HOLE_R) lets the ratchet and the square through
+            b.ring("bridge_bossB_", p, BOSS_HOLE_R, r, 0., T_BRIDGE, 16, BRIDGE, C["bridge"], hidden=True)
+        else:
+            b.geom(f"bridge_boss_{k}", "cylinder", (p[0], p[1], T_BRIDGE / 2), BRIDGE, C["bridge"], size=(r, T_BRIDGE / 2))
+        if k != "B":                   # drawn: the boss's polished bevel
+            b.annulus(f"bridge_bossbevel_{k}", p, r - .0014, r, T_BRIDGE, T_BRIDGE + .00012, C["bevel"], n=48)
     p = BRIDGE_PTS["B"]            # the barrel boss drawn as a ring (its opening is wider than the ratchet) ...
-    n_seg = 28
-    rm, w = .5 * (BOSS_HOLE_R + BOSS_R["B"]), .5 * (BOSS_R["B"] - BOSS_HOLE_R)
-    for i in range(n_seg):
-        a = 2 * math.pi * (i + .5) / n_seg
-        b.look(f"bridge_bossring_{i}", "box", (p[0] + rm * math.cos(a), p[1] + rm * math.sin(a), T_BRIDGE / 2), C["bridge"],
-               quat=quat_z(a), size=(w, rm * math.tan(math.pi / n_seg) * 1.04, T_BRIDGE / 2))
+    b.annulus("bridge_bossring", p, BOSS_HOLE_R, BOSS_R["B"], 0., T_BRIDGE, C["bridge"])
+    b.annulus("bridge_bossring_bevel", p, BOSS_R["B"] - .0016, BOSS_R["B"], T_BRIDGE, T_BRIDGE + .00012, C["bevel"])
     # ... and the click on it: a lever whose tip rests on the ratchet's teeth (drawn only; the click is a joint limit)
     a = math.radians(-35)
     tip = p + (RATCHET_R + .0012) * np.array([math.cos(a), math.sin(a)])
     piv = tip + np.array([.006, -.010])
     mid, d = (tip + piv) / 2, piv - tip
-    b.look("click", "box", (mid[0], mid[1], T_BRIDGE + .0015), C["brass"], quat=quat_z(math.atan2(d[1], d[0])),
+    b.look("click", "box", (mid[0], mid[1], T_BRIDGE + .0015), C["polish"], quat=quat_z(math.atan2(d[1], d[0])),
            size=(np.linalg.norm(d) / 2, .0018, .0015))
-    b.look("click_screw", "cylinder", (piv[0], piv[1], T_BRIDGE + .0015), C["steel"], size=(.0022, .0016))
+    b.look("click_screw", "cylinder", (piv[0], piv[1], T_BRIDGE + .0015), C["screw"], size=(.0022, .0016))
+    # drawn: the bars' polished bevels, a line along each top edge, stopping short of the bosses and the junctions
+    for i, (pa, pb) in enumerate(BRIDGE_BARS):
+        a, c = BRIDGE_PTS[pa], BRIDGE_PTS[pb]
+        u = (c - a) / np.linalg.norm(c - a)
+        a2 = a + u * (BOSS_R.get(pa, BAR_W / 2) + .001)
+        c2 = c - u * (BOSS_R.get(pb, BAR_W / 2) + .001)
+        n_ = np.array([-u[1], u[0]])
+        for side in (-1, 1):
+            m3 = (a2 + c2) / 2 + side * n_ * (BAR_W / 2 - .0008)
+            b.look(f"bridge_bevel{i}_{'lr'[side > 0]}", "box", (m3[0], m3[1], T_BRIDGE + .00006), C["bevel"],
+                   quat=quat_z(math.atan2(u[1], u[0])), size=(np.linalg.norm(c2 - a2) / 2, .0008, .00006))
     for name in ("center", "third", "fourth"):
         p = POS[name]
         b.ring(f"pad_{name}_", p, PIVOT_HOLE_R, .010, CHAMFER, .008, 12, HOLE, C["bridge"], hidden=True)
         b.ring(f"padlow_{name}_", p, PIVOT_HOLE_R + CHAMFER, .010, -.0003, CHAMFER, 12, HOLE, C["bridge"], hidden=True)
         b.cone(f"cham_{name}_", p, PIVOT_HOLE_R, CHAMFER, 12, HOLE)
         b.look(f"bjewel_{name}", "cylinder", (p[0], p[1], T_BRIDGE + .00005), C["ruby"], size=(PIVOT_HOLE_R + .0015, .00005))
+        b.annulus(f"bchaton_{name}", p, PIVOT_HOLE_R + .0015, PIVOT_HOLE_R + .0036, T_BRIDGE, T_BRIDGE + .0001, C["chaton"],
+                  n=32)
     p = POS["barrel"]
     b.ring("pad_barrel_", p, BARREL_ARBOR_R + .0005, .014, -.0005, T_BRIDGE, 14, HOLE, C["bridge"], hidden=True)
     for k, q in PILLARS.items():
@@ -498,7 +582,10 @@ def _probe(world, pos, quat):
     ET.SubElement(el, "inertial", pos=_v([.45 * PROBE_L, 0, 0]), mass="0.02", diaginertia="1e-6 2e-5 2e-5")
     b = _Body(el)
     b.geom("probe_rod", "cylinder", (PROBE_L / 2, 0, 0), TOOL, C["tool"], quat=(.7071068, 0, .7071068, 0),
-           size=(PROBE_R, PROBE_L / 2))
+           size=(PROBE_R, PROBE_L / 2), hidden=True)
+    # drawn as a watchmaker's probe: a wooden handle (where the hand holds it) and a steel shaft
+    for nm, x0, x1, rgba in (("probe_handle", 0., PROBE_HANDLE_L, C["handle"]), ("probe_shaft", PROBE_HANDLE_L, PROBE_L, C["tool"])):
+        b.look(nm, "cylinder", ((x0 + x1) / 2, 0, 0), rgba, quat=(.7071068, 0, .7071068, 0), size=(PROBE_R, (x1 - x0) / 2))
     b.geom("probe_tip", "capsule", (0, 0, 0), TOOL, C["dark"], size=PROBE_TIP_R,
            fromto=(PROBE_L, 0, 0, PROBE_L + PROBE_TIP, 0, 0))
     # The probe's own contacts win (priority 1) and are hard (the HARD_LIMIT impedance): a 20 g rod squeezed between an
@@ -535,6 +622,8 @@ def entity_xml(spins=None, look=None) -> str:
     P = opening_poses(spins)
     root = ET.Element("mujoco", model=ENTITY)
     ET.SubElement(root, "compiler", angle="radian", autolimits="true")
+    asset = ET.SubElement(root, "asset")     # the drawn rings' meshes (annulus_mesh), filled as the bodies are written
+    _MESHES.clear()
     world = ET.SubElement(root, "worldbody")
     for name in WHEELS:                       # the barrel first: the entity's base link
         _wheel(world, name, *P[name])
@@ -545,6 +634,8 @@ def entity_xml(spins=None, look=None) -> str:
     _movement(world)
     _carriers(world)
     _stands(world)
+    for name, v, f in _MESHES:
+        ET.SubElement(asset, "mesh", name=name, vertex=_v(v.ravel()), face=" ".join(str(int(i)) for i in f.ravel()))
     eq = ET.SubElement(root, "equality")
     for n in WHEELS:
         ET.SubElement(eq, "weld", name=f"seat_{n}", body1=f"carr_{n}_s", body2=n, active="false", solref=WELD_SOLREF)

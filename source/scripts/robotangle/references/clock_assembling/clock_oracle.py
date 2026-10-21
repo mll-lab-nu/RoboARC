@@ -836,8 +836,9 @@ class ClockOracle:
 
     def wind_and_run(self, strokes=3, stroke=math.radians(90.)):
         """The run test: the left hand winds the barrel by its square (counterclockwise from above: the click lets the
-        arbor turn that way only), regrasping between strokes as on a screw; then lets go and lifts: the mainspring drives
-        the train, and the rules time the run (RUN_SETTLE_S after the last advance, then RUN_WINDOW_S)."""
+        arbor turn that way only), regrasping between strokes as on a screw; then lets go, lifts and withdraws to its
+        park pose (clear of the train, so the run is the mainspring's alone and the cameras see the train turn): the
+        mainspring drives the train, and the rules time the run (RUN_SETTLE_S after the last advance, then RUN_WINDOW_S)."""
         h = "L"
         A = self.part_T("barrel_arbor")
         g = T(A[:3, 3] + A[:3, :3] @ np.array([0, 0, self.wheel_grasp_z("barrel") + .013]),
@@ -857,6 +858,8 @@ class ClockOracle:
                 self.move(h, self.up(self.pose[h], -.003), v=.02)
         self.move(h, self.up(self.pose[h], .03), v=.05)
         self.step_name("run: the mainspring drives the train")
+        if self.go(h, T(self.PARK[h], Rcols(DOWN, EX)), v=.10, v_end=.10):
+            return
         for _ in range(int(9. / self.tick_s)):
             if self.tick():
                 return

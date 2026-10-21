@@ -9,7 +9,10 @@ Goal: the four wheels seated on their lower pivots, every upper pivot (the barre
 bridge seated, both screws tight and the bridge fixed, the three meshes coupled, and the run test: the barrel wound by at
 least wind_min_rad through its ratchet (the click holds it), then the train running on the mainspring alone for the rules'
 5 s window: the fourth wheel at least run_turns_min turns, stalled at most run_stall_max_s, at the train's ratio (-450)
-within ratio_tolerance; all together for stable_duration_s. Holding is allowed."""
+within ratio_tolerance, with no hand and no probe on the drum or a wheel from the last winding to the window's end and the
+drum turning the mainspring's way; all together for stable_duration_s. Holding is allowed. Terminal revision v3
+(2026-10-19, the metric review runs/robotangle_mujoco/metric_review_20261019/clock_zh.md): the rules' fixing, screw and run
+changes (mechanism.py) and run_turns_min 5 -> 3.5 (a train wound from rest spins up for seconds)."""
 from pathlib import Path
 
 import numpy as np
@@ -31,13 +34,14 @@ def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
 class ClockAssemblingTask(RigidTaskDefinition):
     task_id = "clock_assembling"
     physics_model = "rigid_articulated"
-    terminal_revision = "clock_gear_train_v2"
+    terminal_revision = "clock_gear_train_v3"
     defaults = dict(stable_duration_s=.5, terminal=dict(
         seat_height_m=.001,                     # a wheel's origin above its seat (the rule seats at 0.8 mm)
         pivot_depth_m=.001,                     # an upper pivot's tip inside its bridge hole
         bridge_height_m=.0005, bridge_lateral_m=.0005, bridge_tilt_rad=float(np.radians(.5)),
         wind_min_rad=float(np.radians(120.)),   # the arbor's wind held by the click when the run test starts
-        run_turns_min=5.,                       # the fourth wheel's turns in the rules' 5 s window
+        run_turns_min=3.5,                      # the fourth wheel's turns in the rules' 5 s window (from rest, wound
+                                                # 125 deg fast: 4.2; a binding train fails on its stall time)
         run_stall_max_s=.2,                     # time in that window with the fourth wheel under 10 % of its free-run speed
         ratio_tolerance=.02),                   # the fourth wheel's turn per drum turn in that window, relative to -450
         movement_finish="rose_gilt", stand_finish="beech", screw_finish="blued")
@@ -141,6 +145,7 @@ class ClockAssemblingTask(RigidTaskDefinition):
         metrics |= dict(bridge_seated=bridge_seated, bridge_height_error_m=float(bp[2] - geo.H_BRIDGE),
                         bridge_tilt_rad=tilt, bridge_fixed=fixed, meshed=meshed, wound_rad=wound, run_done=bool(rules["run_done"]),
                         run_fourth_turns=turns, run_stall_s=stall, run_ratio=ratio, run_test=ran,
+                        run_void=bool(rules["run_void"]),
                         screw1_turns=float(rules["screw1_turns"]), screw2_turns=float(rules["screw2_turns"]))
         return bool(seated and in_bridge and bridge_seated and fixed and meshed and ran), None, metrics
 
@@ -152,34 +157,43 @@ class ClockAssemblingTask(RigidTaskDefinition):
                 "bridge over them on its pillars with every upper pivot in its hole, the two bridge screws tight; then wind "
                 "the barrel through its ratchet, let go and watch the fourth wheel run.", [
                     f"Seat the barrel, the center wheel, the third wheel and the fourth wheel on their lower pivots in the "
-                    f"main plate (each wheel within {t['seat_height_m'] * 1000:g} mm of its seat); a wheel seats once its "
-                    f"lower pivot is down in its hole, within {.6:g} mm of the hole's axis and tilted less than 3 degrees. "
-                    "Each wheel's pinion must mesh with the previous wheel's teeth (barrel, center, third, fourth); a wheel "
-                    "lowered with its pinion's teeth tip to tip on the other wheel's teeth stops until it is turned a little.",
+                    f"main plate (each wheel no more than {t['seat_height_m'] * 1000:g} mm above its seat); a wheel seats "
+                    f"once its lower pivot is down in its hole: the wheel at most {.8:g} mm above its seat, within "
+                    f"{.6:g} mm of the hole's axis and tilted less than 3 degrees. Each wheel's pinion must mesh with the "
+                    "previous wheel's teeth (barrel, center, third, fourth); a wheel lowered with its pinion's teeth tip to "
+                    "tip on the other wheel's teeth stops until it is turned a little.",
                     f"Every upper pivot (the barrel: its arbor) inside its hole in the bridge, at least "
                     f"{t['pivot_depth_m'] * 1000:g} mm deep and within the hole's radius of its axis.",
                     f"The bridge seated on its pillars: within {t['bridge_height_m'] * 1000:g} mm of its seat height, "
                     f"{t['bridge_lateral_m'] * 1000:g} mm of its seat position and tilted less than {deg(t['bridge_tilt_rad'])}.",
-                    f"Both screws in the bridge's screw holes and turned clockwise by {geo.SCREW_TURNS:g} full turns with "
-                    "their heads on the bridge (no thread is simulated: the turns are counted while a head sits on the "
-                    "bridge); with both tight and the bridge seated, the bridge is fixed.",
+                    f"Both screws in the bridge's two screw holes (either screw in either hole, one to a hole) and turned "
+                    f"clockwise by {geo.SCREW_TURNS:g} full turns there (no thread is simulated: the turns are counted only "
+                    f"while the screw's head sits on the bridge over its hole, its underside between {.3:g} mm below and "
+                    f"{.8:g} mm above the bridge's top and its axis within {.6:g} mm of the hole's; counterclockwise turns "
+                    "count back; a screw moved to the other hole starts again). Once both are tight, every wheel is seated, "
+                    "every upper pivot is in its bridge hole and the bridge is seated (height and tilt), the bridge is "
+                    "fixed: screw the bridge down after the wheels, not before.",
                     f"After the bridge is fixed, wind the barrel: turn its square (the ratchet under it turns with it) "
                     f"counterclockwise seen from above; the click lets it turn that way only and holds it one ratchet tooth "
                     f"({np.degrees(geo.CLICK_PITCH):g} degrees) behind the furthest point reached. Wind it at least "
-                    f"{deg(t['wind_min_rad'])} (as held by the click), then stop winding: the mainspring drives the barrel "
-                    f"and the train. Half a second after the last winding the rules time a "
-                    f"{5:g} s run: the fourth wheel must turn at least {t['run_turns_min']:g} times in it, spend at most "
-                    f"{t['run_stall_max_s']:g} s slower than a tenth of its free-run speed (the speed the mainspring's "
-                    "present windup gives the train against its own damping and friction), and turn "
-                    f"{abs(geo.TOTAL_RATIO):g} times as much as the barrel in the opposite direction, within "
-                    f"{t['ratio_tolerance'] * 100:g} %. Winding again restarts the run.",
-                    "Holding parts is allowed; the probe and the hands may stay anywhere.",
+                    f"{deg(t['wind_min_rad'])} (as held by the click), then stop winding and let go of the square: the "
+                    "mainspring drives the barrel and the train, and any further advance of the square counts as winding "
+                    f"again. Half a second after the last winding the rules time a {5:g} s run: the fourth wheel must turn "
+                    f"at least {t['run_turns_min']:g} times in it, spend at most {t['run_stall_max_s']:g} s slower than a "
+                    "tenth of its free-run speed (the speed the mainspring's present windup gives the train against its own "
+                    f"damping and friction), and turn {abs(geo.TOTAL_RATIO):g} times as much as the barrel in the opposite "
+                    f"direction, within {t['ratio_tolerance'] * 100:g} %. The run counts only for the mainspring alone: "
+                    "from the last winding to the end of the run neither the hands (any part of the robot) nor the probe "
+                    "may touch the barrel or a wheel, and the barrel must turn the way the mainspring drives it; otherwise "
+                    "the run does not count until the barrel is wound again. Winding again restarts the run.",
+                    "Holding parts is allowed, apart from the run above.",
                 ])
 
     def terminal_metadata(self):
         return super().terminal_metadata() | dict(
             goal_kind="gear_train_assembled", total_ratio=geo.TOTAL_RATIO, screw_turns=geo.SCREW_TURNS,
             rules="seat, gate, mesh, screw and fixing rules of the task's mechanism (carrier welds, joint equalities for "
-                  "the meshes, gate contacts, screw welds after two turns, the bridge welded once both are tight); the run "
-                  "test (the mainspring a hinge stiffness released at the fixing, the click a joint limit the rules move, "
-                  "a 5 s run window)")
+                  "the meshes, gate contacts, screw welds after two turns in either hole, the bridge welded once both are "
+                  "tight and every wheel and upper pivot is in); the run test (the mainspring a hinge stiffness released at "
+                  "the fixing, the click a joint limit the rules move, a 5 s run window, void if the robot or the probe "
+                  "touches the drum or a wheel or the drum runs backwards)")

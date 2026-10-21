@@ -14,9 +14,12 @@ README_v3.md section 4; mv_rules.py there):
            set to the wheel's orientation (as bed_bolt's thread carriage);
   mesh     two seated wheels whose pinion and teeth meet are coupled (joint equality, polycoef[1] = -teeth / leaves), the
            constant chosen so the leaves sit in the tooth gaps;
-  screws   a screw whose head sits on the bridge (0-0.8 mm above the bridge top, axis within 0.6 mm of its hole) counts
-           its clockwise turns relative to the bridge; at 2 turns it is tight, welded to the bridge (no thread simulated);
-  fix      both screws tight and the bridge seated (underside within 0.5 mm of its seat, tilt < 0.5 deg): the bridge is
+  screws   a screw whose head sits on the bridge over either screw hole (its underside 0.3 mm below to 0.8 mm above the
+           bridge top, its axis within 0.6 mm of the hole's) counts its clockwise turns relative to the bridge in that hole
+           (one screw to a hole; moved to the other hole it starts again); at 2 turns it is tight, welded to the bridge (no
+           thread simulated);
+  fix      both screws tight, the four wheels seated, every upper pivot in its bridge hole (entered) and the bridge seated
+           (underside within 0.5 mm of its seat, tilt < 0.5 deg): the bridge is
            welded to the world, every wheel's lean hinges locked where they are (joint equalities), the pivot-hole
            contacts switched off (the locks now hold the arbors; locked arbors rubbing in their holes would brake the
            train); the barrel's arbor welded to its click carrier and the mainspring's lock released;
@@ -26,7 +29,14 @@ README_v3.md section 4; mv_rules.py there):
            running on the mainspring alone: the fourth wheel's turns, the time it spends slower than STALL_FRACTION of
            its free-run speed (the speed the mainspring's present windup gives against the train's damping and friction,
            from the model: within 1 % of the measured speed on the -i01 reference) and its turn per drum turn. Winding
-           again restarts the window.
+           again restarts the window. The run counts only for the mainspring alone: from the last winding to the window's
+           end neither the drum nor any wheel touches the robot or the probe, and the drum turns the way the mainspring
+           drives it (+z, the arbor's winding sense); otherwise the run is void until the arbor is wound again.
+Rule changes of 2026-10-19 (the metric review, runs/robotangle_mujoco/metric_review_20261019/clock_zh.md): the fixing
+waits for the wheels and their pivots (a bridge screwed down before the wheels are in no longer fixes, so its pivot holes
+stay solid; a wheel can still be dropped through it exactly over its hole, as its bars and the wheels do not collide),
+either screw counts in either hole, a head pressed into the bridge (soft contact) counts, and the run's contact and
+direction conditions.
 Its state and the contact bits it writes are part of every checkpoint (capture / restore); the equalities' data and
 switches are in the world's own state (model.eq_data, mjData.eq_active)."""
 from __future__ import annotations
@@ -42,6 +52,7 @@ SEP = "::"
 GATE_LATERAL_M, GATE_PHASE = .0015, .2
 SEAT_LATERAL_M, SEAT_HEIGHT_M, SEAT_TILT_DEG = .0006, .0008, 3.
 SCREW_HEIGHT_M, SCREW_LATERAL_M = .0008, .0006
+SCREW_SINK_M = .0003                          # a head resting or pressed on the bridge sinks microns into the soft contact
 FIX_HEIGHT_M, FIX_TILT_DEG = .0005, .5
 RUN_SETTLE_S, RUN_WINDOW_S = .5, 5.          # the run test: no winding for 0.5 s, then a 5 s window
 RUN_MIN_WIND = math.radians(10.)             # a window opens only on a wound arbor
@@ -112,11 +123,20 @@ class GearTrainRules:
         self.gate_closed = {n: False for n in geo.PARENT}
         self.mesh_on = {n: False for n in geo.PARENT}
         self.turns = {"screw1": 0., "screw2": 0.}
+        self.hole = {"screw1": None, "screw2": None}          # the screw hole (P1, P2) each screw counts in
         self.tight = {"screw1": False, "screw2": False}
         self.last_rel = {"screw1": None, "screw2": None}
         self.fixed = False
         self.arbor0 = self.max_arbor = self.last_advance_t = None
         self.run = self._run_blank()
+        self.run_void = False                 # the run since the last winding was touched or ran backwards
+        # the run's touch check: the drum and the wheels (not the arbor: the hand winds by its square) against the robot
+        # and the probe
+        body_names = [mujoco.mj_id2name(m, B, b) or "" for b in range(m.nbody)]
+        self.guarded = np.zeros(m.nbody, bool)
+        self.guarded[[self.b[n] for n in geo.WHEELS]] = True
+        self.toucher = np.array([nm.startswith(("left/", "right/")) for nm in body_names], bool)
+        self.toucher[self.b["probe"]] = True
         self.gate_blocks = {n: 0 for n in geo.PARENT}
         for n in geo.PARENT:
             self._set_gate(n, False)
@@ -240,27 +260,37 @@ class GearTrainRules:
 
     def _screws(self, d):
         bp, BR = self.bridge_local(d)
-        for s, k in (("screw1", "P1"), ("screw2", "P2")):
+        axis = BR[:, 2]
+        taken = {self.hole[s] for s in self.tight if self.tight[s]}
+        for s in ("screw1", "screw2"):
             if self.tight[s]:
                 continue
             p, R = self._T(d, self.b[s])
-            hole = bp + BR @ np.array([geo.PILLARS[k][0] + geo.SCREW_OFF[0], geo.PILLARS[k][1] + geo.SCREW_OFF[1],
-                                       geo.T_BRIDGE])
-            axis = BR[:, 2]
-            v = p - self.o - hole
-            h = float(v @ axis)
-            lat = float(np.linalg.norm(v - h * axis))
-            rel = yaw_of(BR.T @ R)
-            if 0. <= h <= SCREW_HEIGHT_M and lat <= SCREW_LATERAL_M:
-                if self.last_rel[s] is not None:
-                    dy = (rel - self.last_rel[s] + math.pi) % (2 * math.pi) - math.pi
-                    self.turns[s] += -dy / (2 * math.pi)       # clockwise seen from above tightens
-                self.last_rel[s] = rel
-                if self.turns[s] >= geo.SCREW_TURNS:
-                    self._weld_here(d, self.e_screw[s])
-                    self.tight[s] = True
-            else:
+            at = None
+            for k in geo.SCREWED:                          # either screw in either hole, one screw to a hole
+                if k in taken:
+                    continue
+                hole = bp + BR @ np.array([geo.PILLARS[k][0] + geo.SCREW_OFF[0], geo.PILLARS[k][1] + geo.SCREW_OFF[1],
+                                           geo.T_BRIDGE])
+                v = p - self.o - hole
+                h = float(v @ axis)
+                if -SCREW_SINK_M <= h <= SCREW_HEIGHT_M and float(np.linalg.norm(v - h * axis)) <= SCREW_LATERAL_M:
+                    at = k
+                    break
+            if at is None:
                 self.last_rel[s] = None
+                continue
+            if self.hole[s] != at:                         # a screw moved to the other hole starts again
+                self.hole[s], self.turns[s], self.last_rel[s] = at, 0., None
+            rel = yaw_of(BR.T @ R)
+            if self.last_rel[s] is not None:
+                dy = (rel - self.last_rel[s] + math.pi) % (2 * math.pi) - math.pi
+                self.turns[s] += -dy / (2 * math.pi)       # clockwise seen from above tightens
+            self.last_rel[s] = rel
+            if self.turns[s] >= geo.SCREW_TURNS:
+                self._weld_here(d, self.e_screw[s])
+                self.tight[s] = True
+                taken.add(at)
 
     def _fix(self, d):
         self._weld_here(d, self.e_fix)
@@ -300,6 +330,17 @@ class GearTrainRules:
     def _set_click(self, lower):
         self.m.jnt_range[self.j_click, 0] = float(lower)
 
+    def _touched(self, d) -> bool:
+        """A contact (live, not excluded) between the drum or a wheel and the robot or the probe."""
+        n = int(d.ncon)
+        if not n:
+            return False
+        c = d.contact
+        live = np.asarray(c.exclude[:n]) == 0
+        b1 = self.m.geom_bodyid[np.asarray(c.geom1[:n])[live]]
+        b2 = self.m.geom_bodyid[np.asarray(c.geom2[:n])[live]]
+        return bool(np.any((self.guarded[b1] & self.toucher[b2]) | (self.guarded[b2] & self.toucher[b1])))
+
     def _click_and_run(self, d):
         a = float(d.qpos[self.q_click])
         t = float(d.time)
@@ -309,7 +350,13 @@ class GearTrainRules:
             self._set_click(a - geo.CLICK_PITCH)
             if self.run["active"] or self.run["done"]:    # winding again restarts the run test
                 self.run = self._run_blank()
+            self.run_void = False
         r = self.run
+        if not r["done"] and not self.run_void and self._touched(d):    # a hand or the probe on the train: void
+            self.run_void = True
+            self.run = r = self._run_blank()
+        if self.run_void:
+            return
         if not r["active"] and not r["done"]:
             if t - self.last_advance_t >= RUN_SETTLE_S and self.max_arbor - self.arbor0 >= RUN_MIN_WIND:
                 r.update(active=True, t0=t, t_prev=t, fourth0=self.spin(d, "fourth"), drum0=self.spin(d, "barrel"),
@@ -326,6 +373,10 @@ class GearTrainRules:
             if t - r["t0"] >= RUN_WINDOW_S:
                 dfourth = self.spin(d, "fourth") - r["fourth0"]
                 ddrum = self.spin(d, "barrel") - r["drum0"]
+                if ddrum <= 0.:                            # the mainspring turns the drum +z (the arbor's winding sense)
+                    self.run_void = True
+                    self.run = self._run_blank()
+                    return
                 r.update(active=False, done=True, turns=abs(dfourth) / (2 * math.pi), drum_turn=ddrum,
                          ratio=dfourth / ddrum if abs(ddrum) > 1e-9 else None)
 
@@ -353,27 +404,29 @@ class GearTrainRules:
         self._screws(d)
         if self.fixed:
             self._click_and_run(d)
-        elif all(self.tight.values()):
+        elif all(self.tight.values()) and all(self.seated.values()):
             dz, _, tilt = self.bridge_seat_error(d)
-            if abs(dz) <= FIX_HEIGHT_M and tilt < FIX_TILT_DEG:
+            if abs(dz) <= FIX_HEIGHT_M and tilt < FIX_TILT_DEG and all(self.entered(d, n) for n in geo.WHEELS):
                 self._fix(d)
 
     def capture(self) -> dict:
         return dict(seated=dict(self.seated), gate_closed=dict(self.gate_closed), mesh_on=dict(self.mesh_on),
-                    turns=dict(self.turns), tight=dict(self.tight), last_rel=dict(self.last_rel), fixed=self.fixed,
-                    arbor0=self.arbor0, max_arbor=self.max_arbor, last_advance_t=self.last_advance_t, run=dict(self.run),
-                    gate_blocks=dict(self.gate_blocks))
+                    turns=dict(self.turns), hole=dict(self.hole), tight=dict(self.tight), last_rel=dict(self.last_rel),
+                    fixed=self.fixed, arbor0=self.arbor0, max_arbor=self.max_arbor, last_advance_t=self.last_advance_t,
+                    run=dict(self.run), run_void=self.run_void, gate_blocks=dict(self.gate_blocks))
 
     def restore(self, snap: dict) -> None:
         self.seated = {n: bool(v) for n, v in snap["seated"].items()}
         self.mesh_on = {n: bool(v) for n, v in snap["mesh_on"].items()}
         self.turns = {s: float(v) for s, v in snap["turns"].items()}
+        self.hole = dict(snap["hole"])
         self.tight = {s: bool(v) for s, v in snap["tight"].items()}
         self.last_rel = {s: None if v is None else float(v) for s, v in snap["last_rel"].items()}
         self.fixed = bool(snap["fixed"])
         f = lambda v: None if v is None else float(v)     # noqa: E731
         self.arbor0, self.max_arbor, self.last_advance_t = f(snap["arbor0"]), f(snap["max_arbor"]), f(snap["last_advance_t"])
         self.run = dict(snap["run"])
+        self.run_void = bool(snap["run_void"])
         self._set_click(self.max_arbor - geo.CLICK_PITCH if self.fixed else self.click_range0)
         self.gate_blocks = {n: int(v) for n, v in snap["gate_blocks"].items()}
         for n, closed in snap["gate_closed"].items():
@@ -387,7 +440,8 @@ class GearTrainRules:
                    run_wound_rad=float(r["wound"]) if r["wound"] is not None else 0.,
                    run_fourth_turns=float(r["turns"]), run_stall_s=float(r["stall_s"]),
                    run_ratio=float(r["ratio"]) if r["ratio"] is not None else 0., run_ratio_measured=r["ratio"] is not None,
-                   run_speed_of_free=float(r["speed_sum"] / r["free_sum"]) if r["free_sum"] else 0.)
+                   run_speed_of_free=float(r["speed_sum"] / r["free_sum"]) if r["free_sum"] else 0.,
+                   run_void=self.run_void)
         for n in geo.WHEELS:
             out[f"{n}_seated"] = self.seated[n]
         for n in geo.PARENT:
@@ -396,4 +450,5 @@ class GearTrainRules:
         for s in ("screw1", "screw2"):
             out[f"{s}_turns"] = float(self.turns[s])
             out[f"{s}_tight"] = self.tight[s]
+            out[f"{s}_hole"] = geo.SCREWED.index(self.hole[s]) + 1 if self.hole[s] else 0   # 1: P1, 2: P2, 0: none
         return out

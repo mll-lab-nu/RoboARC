@@ -19,19 +19,24 @@ template's, and the rebuild replaces the template's family by battery_replacemen
 
 - Each file is Cast Trinity's text of the same template (`scripts/robotangle/package_text/interlocked_claws/
   interlocked-claws-13-i01-<mode>/`, the current wording of an ALOHA new base) with every task line replaced, each value
-  from the battery_replacement instance (birth ebd436acde9a62a1, rule C) or from what the tooling generates for it
+  from the battery_replacement instance (birth 764192d9a7e49a0f: rule C with its 60 mm per cell and episode, the controller's outer body in collision) or from what the tooling generates for it
   (`runs/controller_battery_design_20261014/port/mk_package_text.py <instance.json> <step_s>`, every replacement asserted):
   - the names (`topogym-battery-replacement-01-i01-<mode>`, the family, the variation, the Session and replay commands);
   - the task sentence and the success requirements: the instance's public goal (`goal_description.describe_goal`,
-    `BatteryReplacementTask.goal_words`; the sideways tolerance 1.2 mm, the user's choice of 2026-10-17);
-  - a short scene section after the task sentence (the cover's slide and latch, the old cells 4 mm below the rim, how the
-    pry stick levers a cell; REGISTRATION_PROPOSAL.md section 5);
+    `BatteryReplacementTask.goal_words`; the sideways tolerance 1.2 mm, the user's choice of 2026-10-17; since 2026-10-19
+    the cover's line says what latches it, the 0.5 mm along the slide where the plunger sits in its groove, and the
+    plunger's own condition as checked, and the stick may end on the table or in a hand: the metric review
+    `runs/robotangle_mujoco/metric_review_20261019/battery_zh.md`, findings 2 and 5);
+  - a short scene section after the task sentence (the cover's slide and latch, slid back "until it stops (it latches
+    there)" since 2026-10-19, the review's finding 3; the old cells 4 mm below the rim, how the pry stick levers a cell;
+    REGISTRATION_PROPOSAL.md section 5);
   - the grader details: `scripts/topogym_rules.py` for battery_replacement (a rigid family: the contact review rules; the
     six grasp regions, the stick's around its handle), the goal-square and separator lines dropped (no placement goal);
   - the grasp line: every part graspable (cover, new_1, new_2, old_A, old_B, stick), the tool frame within 6 cm, the
     grippers start empty and nearly closed; and one sentence on the cells' pinch rules (rule C, the user's choice of
-    2026-10-18): a pinch's central angle defined, an old cell plucked at 90 deg or more, a hold below 150 deg let go once
-    the cell has moved 60 mm, a new cell taken at 150 deg or more (`WeakHoldGraspTarget` / `ForceClosureGraspTarget`);
+    2026-10-18): a pinch's central angle defined, an old cell plucked at 90 deg or more, the holds below 150 deg of a cell
+    sharing 60 mm per episode, counted from where the cell leaves the compartment (the user's choice of 2026-10-19, the
+    review's finding 7), a new cell taken at 150 deg or more (`WeakHoldGraspTarget` / `ForceClosureGraspTarget`);
   - the objects line: the seven entities; privileged agents read the spring contacts and the plunger from the world state;
   - the implementation reference: `BatteryReplacementTask._slot` and `evaluate_state`;
   - the per-step wall clock, in both modes (the standard "Time per call" line keeps its wording): 0.04 s, MuJoCo, from

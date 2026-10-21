@@ -24,8 +24,10 @@ base while any other text still names interlocked_claws (`release_rebuild.py`, f
 
 - Each file is Cast Trinity's text of the same template (`scripts/robotangle/package_text/interlocked_claws/
   interlocked-claws-13-i01-<mode>/`, the current wording of an ALOHA new base) with every task line replaced,
-  each value from the clock_assembling instance (birth 62e5c06433a1de4f; regenerated from it 2026-10-18 after the
-  probe's contact change: every file byte for byte the same) or from what the tooling generates for it
+  each value from the clock_assembling instance (birth e479193c42dee4e0; regenerated from it 2026-10-20 after the
+  rule changes of 2026-10-19, terminal revision clock_gear_train_v3: the success requirements' wording and the success
+  rule's revision changed, nothing else; again from the instance of the model revision v3, birth ad4ee5041eeb19de: every
+  file byte for byte the same) or from what the tooling generates for it
   (`runs/watch_assembly_design_20261014/scripts/port/mk_package_text.py <instance.json> 0.04`):
   - the names (`topogym-clock-assembling-01-i01-<mode>`, the family, the variation, the Session and replay
     commands);
@@ -51,4 +53,8 @@ base while any other text still names interlocked_claws (`release_rebuild.py`, f
     Harbor on the same host (2026-10-18, image `eai-robotangle:0.3.0-dryrun-clock-assembling-v3`, test-only commit
     003470adb9): the standard live episode 447.2 s (0.055 s), the privileged grader's replays 908.2 s (0.056 s); the
     value stays 0.04 s. With the probe's hard contacts (image `eai-robotangle:0.3.0-dryrun-clock-assembling-v4`,
-    test-only commit 7a88493802): 224.5 s (0.027 s) and 474.2 s (0.029 s), a quieter host; the value stays 0.04 s.
+    test-only commit 7a88493802): 224.5 s (0.027 s) and 474.2 s (0.029 s), a quieter host; the value stays 0.04 s. The v3
+    reference (8 047 control steps; the realism change, the rule changes, the bridge solid to the wheels) through Harbor
+    on this host (2026-10-20, image `eai-robotangle:0.3.0-dryrun-clock-assembling-v5`, the branch's own commit
+    97a4e50f36): the standard live episode 319.3 s (0.040 s), the privileged grader's two replays 668.8 s (0.042 s); the
+    value stays 0.04 s.

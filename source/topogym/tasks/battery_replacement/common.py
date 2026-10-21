@@ -10,9 +10,11 @@ mechanism is physical (contacts, joint springs, hard limits); the task runs on M
 Grasping: contact_weld_v1 on the cover, the stick's handle and the four cells (rule C of the design's GRASP_PROPOSAL.md,
 the user's choice of 2026-10-18). The old cells are WeakHoldGraspTarget (mu 1, firm at 0.268, 60 mm): two fingers
 touching a seated cell's top cannot take it; a cell lifted by the stick can be plucked out by a fingertip pinch (central
-angle between the two contacts at least 90 deg), but a hold below 150 deg is lost once the cell has moved 60 mm, so a
-cell is carried only held from both sides. The new cells are ForceClosureGraspTarget (mu 0.268): taken only by a pinch
-whose contacts are at least 150 deg apart around the cell.
+angle between the two contacts at least 90 deg), but the holds below 150 deg of one cell share 60 mm per episode,
+counted from where its centre leaves the compartment (the cavity between the compartment's walls, up to the rim; the
+user's choice of 2026-10-19, after the metric review's finding 7), so a cell is carried only held from both sides. The
+new cells are ForceClosureGraspTarget (mu 0.268): taken only by a pinch whose contacts are at least 150 deg apart around
+the cell.
 
 Goal (all held for stable_duration_s): each slot holds a new cell, seated with the right polarity (axis within
 axis_tolerance_rad of the slot's, centre within lateral_tolerance_m sideways (1.2 mm: the slot's free play is 1 mm
@@ -21,7 +23,9 @@ choice of 2026-10-17),
 vertical_tolerance_m vertically and axial_tolerance_m along the axis of the seated pose, the slot's spring contact
 compressed at least spring_min_compression_m); the cover closed
 and latched (within cover_tolerance_m in x and y, between -cover_sink_m and cover_lift_m in z, cover_tilt_rad, the
-plunger in its groove); both old cells inside the recycling box; the cells and the cover at most quiet_speed_m_s and
+plunger not pressed more than plunger_min_m below its upper stop: at rest the plunger stands above it, so this only
+fails while something holds the plunger down; within 0.5 mm along the slide the plunger sits in the cover's groove,
+metric review 2026-10-19 finding 2); both old cells inside the recycling box; the cells and the cover at most quiet_speed_m_s and
 quiet_spin_rad_s. Holding is allowed; where the stick ends does not matter."""
 from pathlib import Path
 
@@ -34,8 +38,11 @@ from topogym.tasks.base import EntitySpec, RigidTaskDefinition, TaskSpec
 # origin, so the design's mount-frame coordinates hold as they are.
 MOUNT_XY_M = (-.1356786, 0.)
 # A firm hold of a cell: its two finger contacts at least 150 deg apart around the cell (force closure at mu = tan 15 deg);
-# a weak (fingertip) hold of an old cell is lost once the cell has moved this far from where it was taken.
+# the weak (fingertip) holds of an old cell may move it this far in all, counted once its centre is out of the
+# compartment (HOME_BOX_M: the cavity between the walls up to the rim, in the controller frame C, which is the shell
+# body's frame; the user's choice of 2026-10-19).
 FIRM_MU, WEAK_TRAVEL_M = .268, .06
+HOME_BOX_M = tuple(v * geo.MM for v in (-geo.X_IN, geo.X_IN, -geo.Y_IN, geo.Y_IN, 0., geo.Z_RIM))
 # The new cells' polarity in the tray ('+' = that cell's + end toward +x): scene seed 0's of the former per-seed choice
 # ("+-", "-+", "++", "--" by seed % 4), for every task seed: the -i01 reference was recorded on it, and a seed varies
 # appearance only (the user, 2026-10-20).
@@ -62,7 +69,8 @@ class BatteryReplacementTask(RigidTaskDefinition):
 
     def grasp_assist(self):
         """contact_weld_v1 on the cover, the stick's handle and the four cells, each as a whole part; the old cells on a
-        force-closure pinch, carried only by a firm one (WeakHoldGraspTarget); the new cells only on a firm pinch."""
+        force-closure pinch, carried only by a firm one (WeakHoldGraspTarget, its home the compartment); the new cells
+        only on a firm pinch."""
         from topogym.utils.grasp import ForceClosureGraspTarget, GraspAssistConfig, WeakHoldGraspTarget, rigid_grasp_region
         targets = [rigid_grasp_region("cover", "cover", geo.cover_points()),
                    rigid_grasp_region("stick", "stick", geo.handle_points())]
@@ -71,7 +79,8 @@ class BatteryReplacementTask(RigidTaskDefinition):
             if name.startswith("old"):
                 region = WeakHoldGraspTarget(region.entity, region.link, region.center_m, region.radius_m,
                                              friction_coefficient=1., firm_friction_coefficient=FIRM_MU,
-                                             weak_hold_travel_m=WEAK_TRAVEL_M)
+                                             weak_hold_travel_m=WEAK_TRAVEL_M, home_link=("controller", "shell"),
+                                             home_box_m=HOME_BOX_M)
             else:
                 region = ForceClosureGraspTarget(region.entity, region.link, region.center_m, region.radius_m,
                                                  friction_coefficient=FIRM_MU)
@@ -182,16 +191,19 @@ class BatteryReplacementTask(RigidTaskDefinition):
                     "Polarity: a cell's + end (the small nub, and the '+' printed on its coloured band) faces that slot's + "
                     "contact plate, marked with a red '+' on the compartment floor; its - end presses the spring contact.",
                     f"The cover is closed and latched: within {mm(t['cover_tolerance_m'])} of its closed position along and "
-                    f"across the controller, between {mm(t['cover_sink_m'])} below and {mm(t['cover_lift_m'])} above it, "
-                    f"tilted at most {tilt:g} degree{'s' * (tilt != 1.)}, its detent plunger in the groove.",
+                    f"across the controller (so pushed all the way back along its slide, where the detent plunger sits in "
+                    f"the cover's groove), between {mm(t['cover_sink_m'])} below and {mm(t['cover_lift_m'])} above it, "
+                    f"tilted at most {tilt:g} degree{'s' * (tilt != 1.)}, and the detent plunger not held down more than "
+                    f"{mm(t['plunger_min_m'])} below its upper stop.",
                     "Both old cells (grey body, tan band) lie inside the recycling box (their centres within its inner walls, "
                     "below its rim).",
                     f"The four cells and the cover move at most {mm(t['quiet_speed_m_s'])}/s and {t['quiet_spin_rad_s']:g} "
-                    "rad/s. Holding parts is allowed; the pry stick may end anywhere on the table.",
+                    "rad/s. Holding parts is allowed; the pry stick may end anywhere (on the table or in a hand).",
                 ])
 
     def terminal_metadata(self):
         return super().terminal_metadata() | dict(
             goal_kind="battery_swap", polarity=self.polarity,
-            grasp_rules="contact_weld_v1; the old cells on a force-closure pinch (mu 1), a hold below 150 deg (mu 0.268) "
-                        "lost after 60 mm (WeakHoldGraspTarget); the new cells only at 150 deg or more (ForceClosureGraspTarget, mu 0.268)")
+            grasp_rules="contact_weld_v1; the old cells on a force-closure pinch (mu 1), the holds below 150 deg (mu 0.268) "
+                        "of a cell 60 mm in all once out of the compartment (WeakHoldGraspTarget); the new cells only at 150 "
+                        "deg or more (ForceClosureGraspTarget, mu 0.268)")

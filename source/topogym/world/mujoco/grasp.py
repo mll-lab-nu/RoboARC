@@ -10,8 +10,9 @@ carry the welds' slip windows (sample(), after every substep).
 Two opt-in rules (topogym/utils/grasp.py, 2026-10-14) run only when the configuration declares them: a
 ForceClosureGraspTarget is a candidate only on a force-closure pinch (_force_closure), and MultiRopeGraspAssistConfig
 lets one hand weld several ropes as one binding (_rope_bundle, and the "parts" branches below). A third (2026-10-18):
-a WeakHoldGraspTarget's hold that does not close force at its firm coefficient is lost once its link has moved
-weak_hold_travel_m from where it was taken (_weak, check_health).
+a WeakHoldGraspTarget's hold that does not close force at its firm coefficient is weak, and its weak holds share a
+travel budget of weak_hold_travel_m per episode, counted from where each leaves the target's home region (2026-10-19:
+_weak, _home, _weak_spent; acquire, check_health, release; the spent budget rides in the slip state of checkpoints).
 
 A task mechanism (MujocoWorld.set_mechanism) may refuse targets: when it has grasp_allowed(entity, link), a target it
 refuses is no candidate, and a binding on it is lost (reason "target_not_graspable"; bed_bolt: the bolt while its
@@ -114,9 +115,14 @@ class MujocoGraspBackend:
         self._closure = {key: spec.friction_coefficient for key, (spec, _) in self.targets.items()
                          if isinstance(spec, ForceClosureGraspTarget)}
         # WeakHoldGraspTarget: target key -> (firm friction coefficient, weak-hold travel m); acquisition records whether
-        # the pinch is firm and, for a weak one, the link's origin; check_health releases it beyond the travel.
+        # the pinch is firm and, for a weak one, what earlier weak holds spent and where its count starts (where it is
+        # taken, or once outside the home region: _home, target key -> (link, box in its frame)); check_health releases
+        # it beyond the budget; release adds its distance to what its target has spent (_weak_spent, target key -> m).
         self._weak = {key: (spec.firm_friction_coefficient, spec.weak_hold_travel_m) for key, (spec, _) in self.targets.items()
                       if isinstance(spec, WeakHoldGraspTarget)}
+        self._home = {key: (world.entities[spec.home_link[0]].get_link(spec.home_link[1]), np.asarray(spec.home_box_m))
+                      for key, (spec, _) in self.targets.items() if key in self._weak and spec.home_link is not None}
+        self._weak_spent = {}
         # MultiRopeGraspAssistConfig.weld_each_rope: a rope pinch welds one link of each touched rope to the hand, as one
         # binding whose "parts" are the plain bindings of those welds (_rope_bundle, _bundle_health).
         self._each_rope = frozenset(getattr(config, "weld_each_rope", ()))
@@ -168,12 +174,23 @@ class MujocoGraspBackend:
             reason = "grasp_slipped"
         if reason is None and self.contact_lost_s is not None and self._untouched.get(eid, 0.) >= self.contact_lost_s - 1e-12:
             reason = "finger_contact_lost"
-        if reason is None and binding.get("weak_hold_origin_m") is not None:     # opt-in WeakHoldGraspTarget
-            travel = self._weak[tuple(binding["target"])][1]
-            moved = np.linalg.norm(self.targets[tuple(binding["target"])][1].get_pos() - np.asarray(binding["weak_hold_origin_m"]))
-            if moved > travel:
+        if reason is None and binding.get("firm_hold") is False:     # opt-in WeakHoldGraspTarget: a weak hold
+            key = tuple(binding["target"])
+            position = self.targets[key][1].get_pos()
+            if binding["weak_hold_origin_m"] is None and not self._at_home(key, position):
+                binding["weak_hold_origin_m"] = position.tolist()     # out of its home: the hold's count starts here
+            if binding["weak_hold_origin_m"] is not None and binding["weak_hold_spent_m"] + \
+                    np.linalg.norm(position - np.asarray(binding["weak_hold_origin_m"])) > self._weak[key][1]:
                 reason = "weak_hold_travel"
         return reason
+
+    def _at_home(self, key, position):
+        """WeakHoldGraspTarget (opt-in): whether the target's link origin is inside its home region (none: never)."""
+        if key not in self._home:
+            return False
+        link, box = self._home[key]
+        p = rotation(link.get_quat()).inv().apply(position - link.get_pos())
+        return bool(np.all(box[0::2] <= p) and np.all(p <= box[1::2]))
 
     def sample(self):
         """After every substep: each active grasp weld's translational constraint force enters its slip window; a window
@@ -209,13 +226,17 @@ class MujocoGraspBackend:
             self._untouched[eid] = 0. if touch.any() else self._untouched[eid] + dt
 
     def capture_slip(self):
-        return dict(windows={eid: tuple(window) for eid, window in self._window.items()}, slipped=sorted(self._slipped),
-                    untouched=dict(self._untouched))
+        state = dict(windows={eid: tuple(window) for eid, window in self._window.items()}, slipped=sorted(self._slipped),
+                     untouched=dict(self._untouched))
+        if self._weak:      # opt-in WeakHoldGraspTarget: what each target's weak holds have spent
+            state["weak_spent"] = sorted([*key, spent] for key, spent in self._weak_spent.items())
+        return state
 
     def restore_slip(self, state):
         self._window = {eid: deque(window, maxlen=self.slip_samples) for eid, window in state["windows"].items()}
         self._slipped = set(state["slipped"])
         self._untouched = dict(state.get("untouched", {}))
+        self._weak_spent = {(entity, link): spent for entity, link, spent in state.get("weak_spent", ())}
 
     def candidates(self, hand):
         contacts = self.world.contacts()
@@ -399,10 +420,14 @@ class MujocoGraspBackend:
         binding = dict(hand=hand, target=tuple(target), links=links, relative_pose=reference,
                        finger_fractions=self.finger_fractions(hand), weld=int(eid),
                        acquisition_evidence=self._evidence[hand, tuple(target)])
-        if tuple(target) in self._weak:         # opt-in WeakHoldGraspTarget: a weak hold remembers where it was taken
+        if tuple(target) in self._weak:         # opt-in WeakHoldGraspTarget: a weak hold's budget and count start
+            key = tuple(target)
             firm = bool(binding["acquisition_evidence"].get("firm_hold"))
-            binding.update(firm_hold=firm, weak_hold_origin_m=None if firm else
-                           self.targets[tuple(target)][1].get_pos().tolist())
+            position = self.targets[key][1].get_pos()
+            binding.update(firm_hold=firm, weak_hold_origin_m=None if firm or self._at_home(key, position) else
+                           position.tolist())
+            if not firm:
+                binding["weak_hold_spent_m"] = self._weak_spent.get(key, 0.)
         return binding
 
     def exists(self, binding):
@@ -422,6 +447,10 @@ class MujocoGraspBackend:
         self._window.pop(eid, None)
         self._slipped.discard(eid)
         self._untouched.pop(eid, None)
+        if binding.get("firm_hold") is False and binding["weak_hold_origin_m"] is not None:     # opt-in WeakHold
+            key = tuple(binding["target"])
+            self._weak_spent[key] = binding["weak_hold_spent_m"] + float(np.linalg.norm(
+                self.targets[key][1].get_pos() - np.asarray(binding["weak_hold_origin_m"])))
 
     def verify_bindings(self, bindings):
         self.verify_current_bindings(bindings)

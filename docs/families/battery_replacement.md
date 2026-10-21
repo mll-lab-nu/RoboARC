@@ -5,8 +5,21 @@ cells out with a pry stick, drop them into a recycling box, seat two new cells w
 cover. First setting `battery_replacement_xbox_aa` (pool experimental, no tier; model revision `xbox_aa_v3b`), base
 `battery-replacement-01-i01`. Design record, sources and every measurement: `runs/controller_battery_design_20261014/`
 (README.md v2 design, README_v3.md the v3b demo and section 10 the topogym port, REGISTRATION_PROPOSAL.md; not in git).
-The registration (registry, variation record, profile, rcb_topogym TASKS, goal_description, topogym_rules, mk_tasks) waits
-for the user's approval of the proposal.
+The registration (registry, variation record, profile, rcb_topogym TASKS, goal_description, topogym_rules, mk_tasks) was
+approved by the user on 2026-10-19.
+
+Changes of 2026-10-19 (the user's choice in the main session, after the metric review
+`runs/robotangle_mujoco/metric_review_20261019/battery_zh.md`): rule C's 60 mm is one budget per cell and episode,
+counted from where the cell leaves the compartment (finding 7; Grasping below); the public goal's cover line says what is
+checked (finding 2; Goal below) and the stick may end on the table or in a hand (finding 5); the texts' scene says to
+slide the cover back "until it stops (it latches there)" (finding 3). The success rule's thresholds and the reference's
+actions are unchanged; the instance's birth moved with the grasp configuration and the goal text.
+
+The same day the user chose option C of the controller's look (`runs/controller_battery_design_20261014/xbox_visual/`): the
+controller's outer body is an Xbox Wireless Controller at 1:1 in static collision, drawn by its visual twins (The task,
+the controller's outer body). Until then the shell's collision was a 90 x 80 x 24.5 mm block over an open 15 mm slot
+above the cradle, and the grips and the body's sides were drawn without collision, up to 47 mm off it (a hand or a cell
+could pass through them, a cell laid on a grip would fall through).
 
 ## The task
 
@@ -19,6 +32,23 @@ frame; m, z = 0 the table top):
   A's + end toward +x, slot B's toward -x) and a spring contact at the other (a slide joint, 1.2 N/mm, 2 mm compressed by
   a seated cell, at most 1.5 mm more); the rim stands 4 mm above a seated cell, with 1 mm of side clearance around it;
   beside each + end a pry notch (4 x 6.55 mm, 2 mm into the end wall and the long wall, a 1 mm floor groove);
+- the controller's outer body (option C, 2026-10-19; `BODY_PIECES`, `body_pieces()`): an Xbox Wireless Controller at 1:1,
+  152.9 x 101.9 x 61 mm, 280 g (dimensions.com, "Xbox One Controller"; retailers list the Series model at 153 x 102 x 61 mm,
+  for example Kaufland; Microsoft's pages give no dimensions), face down: its face 0.1 mm above the cradle's top, 18.9 mm
+  below the compartment floor, the back of its centre the shell's back (20.5 mm above the floor), the grips toward -y (the
+  cameras), the top edge with the bumpers toward +y, the triggers standing up from the back at the top edge (to 27 mm),
+  overall x +-76.5, y -55 to +46.5, z -18.9 to +27 (with the sticks, hidden in the cradle, 60 mm). The pieces are static
+  collision geoms of the shell body (the same contact and friction as the shell): a box filling the slot under the shell
+  down to the face, and twelve convex hulls of rounded discs (`_rounded_hull`): the shell's sides, the top edge, the
+  bottom edge with its chin, two shoulders, two grips, two bumpers, two triggers. Each is drawn by its visual twin, so
+  what is drawn is what collides (`xbox_visual/gap_check.py`: every visual geom of the controller that is not a collision
+  twin, the decals, the face's sticks and buttons, the headset jack, lies within 0.21 mm of the collision; the polarity
+  marks on the rim moved from 13 to 21 mm off centre, where slot B's had lain 3 mm above the cover's hook slots). The
+  colours: Carbon Black (the shell's), the bumpers and triggers darker. The face's two sticks, D-pad, A/B/X/Y, Xbox, view,
+  menu and share buttons are visual geoms below the face, inside the cradle: face down they are not seen. The cradle stays
+  140 x 120 x 15 mm: the shell is welded to the world, so the grips' 6.5 mm overhang on each side needs no support, and a
+  stand narrower than the controller, its grips over the edges, is how such a holder looks; a wider one would only add
+  collision where no part goes;
 - the cover (59.6 x 38.6 x 2 mm, a tongue, three hooks, a 3 mm ridge, 5.5 g), closed and latched: it unlatches by sliding
   5 mm toward the controller's top edge (+y) past a detent plunger (2 N preload, 0.5 N/mm; measured 5.0 N to open, 5.9 N
   to close), then lifts off;
@@ -32,10 +62,11 @@ frame; m, z = 0 the table top):
 
 The new cells lie in the tray as `+-` (new_1's + end toward +x, new_2's toward -x) for every seed: until 2026-10-20 the
 scene seed chose the polarity (seed % 4: `+-`, `-+`, `++`, `--`; seed 0 `+-`); since then a seed varies appearance only
-(the user). The appearance parameters `controller_finish` (outer body and cover), `tray_finish`, `box_finish` and
-`props_finish` (cradle, stick holder, cover pad) re-colour visual geoms only (`scene_variation.appearance`: appearance
-seed 0 is the recorded look); the cells, the red "+" marks and the stick keep the colours the texts name. Everything else
-is fixed.
+(the user). The appearance parameters `controller_finish` (the Xbox outer body with its bumpers and triggers, the
+compartment's walls, which share the body's colour as on the real controller, and the cover), `tray_finish`,
+`box_finish` and `props_finish` (cradle, stick holder, cover pad) re-colour visual geoms only
+(`scene_variation.appearance`: appearance seed 0 is the recorded look); the cells, the red "+" marks and the stick keep
+the colours the texts name. Everything else is fixed.
 
 Every mechanism is physical: the controller is one MJCF entity whose shell body has no joint (MuJoCo welds it to the
 world) with three slide joints (the two spring contacts, the plunger; their stiffness and spring zero in the MJCF); the
@@ -59,9 +90,19 @@ design's GRASP_PROPOSAL.md: a cell must look and be held, not hang from a finger
 - the **old cells** are `WeakHoldGraspTarget(friction coefficient 1, firm 0.268, 60 mm)` (`topogym/utils/grasp.py`; an
   opt-in subclass of `ForceClosureGraspTarget`, its runtime in `topogym/world/mujoco/grasp.py`): any force-closure pinch
   welds (a seated cell's top is all the fingertips reach, 31-35 deg above its mid-plane at best with 1 mm of side
-  clearance and the rim 4 mm over it, so a seated cell is never taken; pried up by the stick it can be plucked), but a
-  weak hold is lost (reason `weak_hold_travel`, as a lost grasp: the gripper opens before it takes hold again) once the
-  cell's centre is more than 60 mm from where it was taken; a firm hold carries it anywhere;
+  clearance and the rim 4 mm over it, so a seated cell is never taken; pried up by the stick it can be plucked), but the
+  weak holds of a cell share **60 mm for the whole episode** (the user's choice of 2026-10-19, after the metric review
+  `runs/robotangle_mujoco/metric_review_20261019/battery_zh.md`, finding 7; until then each weak hold had its own 60 mm
+  from where it was taken, so pluck, carry 55 mm, put down and pluck again moved a cell anywhere): each weak hold spends
+  the straight-line distance the cell's centre moves from where its count starts to where it is let go, and its count
+  starts where it is taken or, when it is taken with the cell still **in the compartment** (its centre inside the cavity
+  between the compartment's walls, up to the rim: |x| <= 28, |y| <= 17.3, 0 <= z <= 18.5 mm in the compartment frame,
+  `HOME_BOX_M`, the target's `home_link` / `home_box_m` on the controller's shell body), where the centre first leaves
+  it (checked after every World tick); a hold that never leaves the compartment spends nothing. A weak hold is lost
+  (reason `weak_hold_travel`, as a lost grasp: the gripper opens before it takes hold again) once what the cell's earlier
+  weak holds spent plus its own distance so far exceed 60 mm; with the budget overspent a later weak hold of that cell is
+  lost at its first check. The spent budget is part of the world's checkpoints (the grasp backend's slip state); a firm
+  hold carries a cell anywhere and spends nothing;
 - the **new cells** are `ForceClosureGraspTarget(friction coefficient 0.268)`: taken only by a firm pinch.
 The reference also holds every carried cell near its middle (the two contacts' midpoint within 8 mm of the cell's centre
 along it, the middle third of its 50.5 mm) with the gripper closed on it (the opening the cell's width at the contacts,
@@ -75,8 +116,12 @@ allowed, the stick anywhere:
   vertically and 1.5 mm along the axis of the seated pose, the slot's spring compressed at least 1 mm (a seated cell
   compresses it 1.78 mm; a pried one 0 or less); polarity right (the cell's + end toward the slot's + plate);
 - the cover closed and latched: within 0.5 mm of its closed pose along and across, between 0.2 mm below and 0.6 mm above
-  it (latched: +0.24 mm; slid open 5.2-5.5 mm; lying on top unlatched +3.7 mm), tilted at most 1 deg, the plunger at
-  least -0.25 mm (in its groove);
+  it (latched: +0.24 mm; slid open 5.2-5.5 mm; lying on top unlatched +3.7 mm), tilted at most 1 deg, the plunger's
+  joint at least -0.25 mm. What makes the cover latched is the 0.5 mm along the slide: there the plunger (2.4 mm wide at
+  the rim) sits at least 79 % in the cover's 2.4 mm groove. The plunger's own condition fails only while something holds
+  the plunger down: its 2 N preload carries it past the joint's soft upper limit, so at rest it reads +0.36 to +0.42 mm
+  with the cover latched, short of its place or absent (metric review 2026-10-19, finding 2; until that day this line
+  said "in its groove", and the public goal "its detent plunger in the groove");
 - both old cells' centres inside the recycling box (within its inner walls, below its rim);
 - the four cells and the cover at most 5 mm/s and 0.1 rad/s.
 
@@ -92,7 +137,7 @@ half way, fingertips on a seated cell, a fingertip or the cover or a new cell as
 
 `scripts/robotangle/oracles/battery-replacement-01-i01/privileged.npz` (`standard.npz` is the same file), 7029 rows
 (175.7 s), native gripper space, on the instance `rcb_topogym.py make-instance --task battery_replacement --variation
-battery_replacement_xbox_aa --scene-seed 0 --gripper-space native` (birth ebd436acde9a62a1). sha256 005f718ce4b0e0fa.
+battery_replacement_xbox_aa --scene-seed 0 --gripper-space native` (birth 764192d9a7e49a0f). sha256 472848140a225398.
 No row moves an arm joint more than 0.035 rad. Recorded with
 
 ```bash
@@ -104,6 +149,14 @@ Rule C (2026-10-18) replaced the reference of 2026-10-17 (6453 rows, birth 20a67
 old cells were carried 16 cm hanging from a fingertip pinch (central angle 109 / 117 deg) and its new cells welded by
 nearly closed fingertips on their top (45-60 deg, new cell 1 carried with no finger on it). The birth hash moved with
 the grasp configuration frozen in the instance (the cells' targets); the scene is the same.
+
+The weak-hold budget per episode (2026-10-19) re-recorded it on the new instance (birth 15a12bc37ada9259, before
+ebd436acde9a62a1): the oracle wrote the same 7029 rows of actions and the same tick ledger, the physics ran the same (the
+observer's peaks identical), and the final state moved from 7ac8b8d39269e320 to 3b286ba853cb929c with the frozen
+grasp configuration and the goal text in the record. Each old cell has one weak hold (the pluck to the shell's back); it
+leaves the compartment 1.3 / 2.7 mm (A / B) after it is taken (the pried cell's centre is then 17.4 / 16.0 mm above the
+floor, the rim at 18.5) and spends 41.6 / 39.6 mm of its 60 (measured on the run r4 of the same actions,
+`grasp_proposal/v4/r4/br_log.npz`).
 
 The oracle (`scripts/robotangle/references/battery_replacement/`: `oracle.py`, its plan `plan.npz` / `plan.json`
 exported by `export_plan.py` from the design's kinematic planner `runs/controller_battery_design_20261014/scripts/
@@ -118,7 +171,8 @@ mm, a new cell pressed down). Only joint and gripper targets are commanded. Step
   about the shell's edge; the foot lifts the cell about 8 mm; at 30 s the left hand plucks it with a fingertip pinch (a
   weak hold: central angle 109 deg), lifts it 20 mm, moves it 8 mm toward -x (away from the right hand, whose gripper
   base it touches about 130 mm above the cell) and lays it on the shell's back outside the cover's recess (-y strip, 31
-  mm off the compartment's centre line; the farthest it gets from where it was taken: 44.3 mm, the rule's limit 60);
+  mm off the compartment's centre line; the farthest it gets from where it was taken: 44.3 mm; it spends 41.6 mm of
+  the 60 from where its centre leaves the compartment, at 18.6 mm above the floor);
   the hand lets go, rises 6 mm and at 36 s pinches the cell's middle from both sides (171 deg, the contacts 1.1 mm from
   the centre, opening 13.9 mm), carries it to the box and drops it there; the stick goes back into its holder;
 - 57-102 s, old cell B: the same with the hands swapped, laid on the +y strip (pluck 118 deg, 43.2 mm; middle 176 deg);
@@ -133,8 +187,24 @@ mm, a new cell pressed down). Only joint and gripper targets are commanded. Step
 - 165-176 s, the cover: the left hand puts the tongue under the lip, lays the cover flat, lets go of the ridge and pushes
   it -5.5 mm with a fingertip until the plunger snaps into its groove, then lets go and lifts 6 cm while the goal holds.
 
+Option C (2026-10-19) re-stamped it (`runs/controller_battery_design_20261014/scripts/restamp.py`: `instance_sha`
+rewritten, the 7029 rows and the tick ledger byte for byte the same) with the birth of the instance with the outer body,
+764192d9a7e49a0f, after the reference's qpos and qvel matched bit for bit at every control step on the instance before C
+(15a12bc37ada9259, the source of e85fe67bd7) and on C's (`xbox_visual/qdump.py`, `qcompare.py`; 7030 x 61 qpos, 7030 x 55
+qvel). Nothing comes within 2.0 mm of the new pieces at any step (`qdump.py`, MuJoCo's geom distances from every robot
+and part geom: the right hand's finger 2.05 mm from the top edge, a left finger 2.26 mm from the bottom edge, the stick's
+blade 3.0 mm from the fill (through the floor), its shaft 4.7 mm from the side, 11.1 mm from a grip). Two fresh-process
+strict replays: success at row 7029, final state de1cb2ee33e369ed (the end's record carries the birth's), 131 s and
+117 s; the observer CLEAN with the same peaks (`port/i01c/`).
+
+Checks of the reference under the per-episode budget (2026-10-19, a lab RTX 4090 host, the same image, rendering off, one process
+with one thread at a time; `runs/controller_battery_design_20261014/port/i01v5/`): the opt-in tests pass in the image
+(18); run-oracle success at row 7029, final state 3b286ba853cb929c, 133 s; two fresh-process strict replays success at
+row 7029, final state 3b286ba853cb929c, 126 s and 140 s; the observer CLEAN with the same peaks as on 10-18 (no event, no
+grasp lost, deepest task contact 0.82 mm, largest contact force 62.5 N, 44 ms per control step).
+
 Checks of the reference (2026-10-18, a lab RTX 4090 host, ghcr.io/mll-lab-nu/eai-robotangle:0.3.2-rc1, mujoco 3.14, rendering off,
-one process with one thread at a time; `runs/controller_battery_design_20261014/port/i01v4/`):
+one process with one thread at a time; `runs/controller_battery_design_20261014/port/i01v4/`; birth ebd436acde9a62a1):
 - One run of the oracle: success at row 7029, final state 7ac8b8d39269e320, 132 s of wall clock.
 - Two fresh-process strict replays (`rcb_topogym.py replay --repeat 1 --strict`): both success at row 7029, final state
   7ac8b8d39269e320, 122 s and 125 s.
@@ -165,6 +235,21 @@ not replayed; the rope-chain and grasp paths they use run in slotted, orbits and
 
 ## Stress (docs/rcb/STRESS_HOWTO.md)
 
+The -i01 of 2026-10-19 (the per-episode weak-hold budget and the outer body; birth 764192d9a7e49a0f) on a1027c0665
+(a lab RTX 4090 host, assigned by the migration session; a git archive of the commit, its id checked; `eai-robotangle:0.3.2-rc1`,
+one container jwbat-stress-<stage> of 6 CPUs, 4 search and 2 replay workers, one thread each, started below 80 % load and
+memory; `<host work dir>/bat_stress/out/battery_r3/` there), criteria v2.13b:
+- self-check (seeds 123401-123406, 2026-10-20 06:59-07:17 UTC): PASS. The instance made from the checkout is born
+  764192d9a7e49a0f (= the reference's); the reference success, CLEAN, the same hash in two fresh processes (9.2 min); the
+  nop no success, CLEAN; 62 episodes, 12,520 controls, 0 confirmed BREAKDOWN, 0 grasp slips.
+- acceptance round (seeds 123501-123509, 2026-10-20 07:50-10:38 UTC): PASS. 1,000 episodes, 465,750 controls, every
+  strategy (random 41,178, directed 23,103, mutate 18,573, cem 23,268, periodic 86,049, prefix 273,579 controls); the
+  reference success, CLEAN, final state de1cb2ee33e369ed in both fresh processes (7.6 min); the nop no success, CLEAN;
+  0 confirmed BREAKDOWN under every reading (v2 ... v2.13b); in-search VIOLENT 7 (all prefix); 1 pop (0.60 m/s); lost
+  holds over the 1,000 episodes: 15 grasp slips, 4 relative-pose errors, 2 fingers opened and 2 by rule C's
+  weak_hold_travel (prefix2 episodes 0 and 7, both CLEAN). The host's load rose to 98 during the round (other users);
+  memory stayed at 18-45 %.
+
 Rule C's -i01 on the test-only commit 2186292da1 (a lab RTX 4090 host, `eai-robotangle:0.3.2-rc1`, 4 search and 2 replay
 workers, one thread each; `<host work dir>/bat_stress/out/battery_r2/` there), criteria v2.13b:
 - self-check (seeds 123201-123206): PASS. The reference success, CLEAN, the same hash in two fresh processes (5.1 min);
@@ -173,9 +258,21 @@ workers, one thread each; `<host work dir>/bat_stress/out/battery_r2/` there), c
   strategy; 0 confirmed BREAKDOWN under every reading (v2 ... v2.13b); in-search VIOLENT 14 (random 1, cem 3, prefix
   10); 1 pop (0.88 m/s); 15 grasp slips; among the saved episodes one hold lost by rule C's weak_hold_travel.
 The round before rule C (battery_r1 on 780d3a669e, seeds 123001-123006 and 123101-123109, PASS) no longer stands for the
-base; its outputs are kept.
+base; its outputs are kept. battery_r2 ran before the per-episode budget and the outer body of 2026-10-19; the base's
+birth 764192d9a7e49a0f has its own above (battery_r3; a self-check of the budget alone, queued on 10-19, was withdrawn
+before it started when the user chose option C, and the local self-check of C was withdrawn for a lab RTX 4090 host).
 
 ## Harbor
+
+The per-episode budget and the outer body (2026-10-20): `release_rebuild.py a1027c0665 --version
+0.3.0-dryrun-battery-replacement-3 --families battery_replacement --bench robotangle --jobs 1 --lanes 1` on the branch's own
+commit (the registration and the manifest's new base are in dev below it, so no test-only commit; rendering off;
+a lab RTX 4090 host, load average 6.8; `runs/controller_battery_design_20261014/harbor_test/work3/`): PASS. The base made in the
+image is born 764192d9a7e49a0f (= the reference's; instance 40 files, 323,567 bytes, the outer body's meshes); `mk_tasks.py
+--check` ok, all bases and the MuJoCo instance bytes; oracle 1 and nop 0 in both modes, the oracle's end state
+de1cb2ee33e369ed in both, the evidence claims hold. The standard live episode took 132.6 s (0.0189 s per control step),
+its collect hook's replay 167.9 s; the privileged oracle trial 334 s (its grader's two replays). The texts keep 0.04 s per
+step.
 
 Rule C's -i01 (2026-10-18): `release_rebuild.py 2186292da1 --families battery_replacement --bench robotangle --jobs 1
 --lanes 1` (the test-only branch jianwen/battery-replacement-harbor-test2: this family's 38a4a0a023 with the shared

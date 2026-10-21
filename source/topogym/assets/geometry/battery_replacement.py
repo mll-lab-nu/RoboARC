@@ -8,6 +8,9 @@ detent plunger). The slots hold two old AA cells, each pushed by its spring cont
 take a seated cell (the old cells are force-closure grasp targets); a pry notch beside each + plate takes the blade of
 the pry stick, whose tip carries a small foot that lifts the cell from below when the stick is levered about the notch's
 outer edge. Two new cells lie in a tray, the stick stands in a holder behind the controller, a recycling box sits in front.
+The controller's outer body is an Xbox Wireless Controller at 1:1 (BODY_PIECES, option C of 2026-10-19): static convex
+collision pieces around the compartment's shell (grips, shoulders, the top and bottom edges, bumpers, triggers, the fill
+under the shell down to the cradle), each drawn by its visual twin, so a hand or a cell meets what it sees.
 
 Frames. Mount frame: the ALOHA's (x from the left arm base toward the right, y away from the observation cameras, z up,
 origin on the table top between the arm bases). Controller frame C (all compartment geometry, millimetres): origin at the
@@ -68,6 +71,28 @@ SHAFT_R, SHAFT_L = 3.0, 40.0
 HANDLE = (16.0, 16.0, 50.0)
 STICK_MASS_KG = .03
 STAND_FUNNEL = 2.0           # the stick holder's square hole: a 2 mm x 45 deg lead-in at its mouth
+
+# ---------------------------------------------------------------- the controller's outer body (controller frame C), mm
+# An Xbox Wireless Controller at 1:1 (152.9 x 101.9 x 61 mm, 280 g: dimensions.com "Xbox One Controller"; retailers list the
+# Series model at 153 x 102 x 61 mm), face down: its face on the cradle's top (FACE_Z, 0.1 mm above it), the back of its
+# centre the shell's back (Z_TOP), the grips toward -y (the cameras), the top edge with the bumpers toward +y, the triggers
+# standing up from the back at the top edge. Static collision, each piece a convex hull (_rounded_hull) of rounded discs
+# (centre x, centre y, radius, top z) in plan; the user's choice of 2026-10-19 (design xbox_visual/: option C), so that
+# what is seen is what collides. Overall x +-76.5, y -55 .. +47, z from the stick caps (-33, hidden in the cradle) to the
+# triggers' tops (+27).
+FACE_Z = -18.9
+BODY_PIECES = {   # name: (discs, top rounding, bottom rounding[, bottom z: FACE_Z]); BODY_SPLIT ones mirrored in x (_L, _R)
+    "side": ([(46., -36., 3., Z_TOP), (46., 36., 3., Z_TOP)], 3., 0.),
+    "top": ([(-46., 40., 5., Z_TOP), (46., 40., 5., Z_TOP)], 5., 0.),
+    "bottom": ([(-40., -40., 3., Z_TOP), (40., -40., 3., Z_TOP), (-32., -44., 4., 4.), (32., -44., 4., 4.)], 3., 3.),
+    "shoulder": ([(47., 40., 6., Z_TOP), (62., 34., 9., 19.), (64., 12., 12.5, 18.), (47., 12., 2., Z_TOP)], 5., 4.),
+    "grip": ([(64., 12., 12.5, 18.), (60., -20., 14., 16.), (52., -41., 14., 11.), (46., 5., 2., Z_TOP), (46., -30., 2., 19.)], 6., 4.),
+    "bumper": ([(22., 42., 4.5, -3.), (50., 40., 6.5, -3.)], 3., 2.),
+    "trigger": ([(38., 41., 5., 27.), (49., 41., 5., 25.5), (43., 36., 3., 23.)], 3., 0., 17.),
+}
+BODY_SPLIT = ("side", "shoulder", "grip", "bumper", "trigger")      # one piece each side
+BODY_RGBA = "0.17 0.17 0.18 1"            # Carbon Black, the shell's colour
+TRIM_RGBA = "0.11 0.11 0.12 1"            # bumpers and triggers
 
 # ---------------------------------------------------------------- layout (mount frame, m)
 LAYOUT_DY = .02              # the design layout moved 20 mm toward +y (the arms' reach band's middle; README_v3 4.1)
@@ -212,6 +237,53 @@ def _mesh(name, verts_mm):
     return f'<mesh name="{name}" vertex="{" ".join(f"{v * MM:.9g}" for p in verts_mm for v in p)}"/>'
 
 
+def _rounded_hull(discs, z0, r_top, r_bot, n=20, k=3):
+    """Vertices (mm) whose convex hull is a slab over the plan hull of the discs (cx, cy, radius, top z), from z0 up to
+    each disc's top, its top edge rounded by r_top and its bottom edge by r_bot (quarter circles in k steps)."""
+    out = []
+    ang = np.linspace(0., 2 * np.pi, n, endpoint=False)
+    for cx, cy, R, zt in discs:
+        for i in range(k + 1):
+            th = np.pi / 2 * i / k
+            for rad, z in ((R - r_top * (1 - np.cos(th)), zt - r_top + r_top * np.sin(th)),
+                           (R - r_bot * (1 - np.cos(th)), z0 + r_bot - r_bot * np.sin(th))):
+                rad = max(rad, .1)
+                out += [(cx + rad * np.cos(a), cy + rad * np.sin(a), z) for a in ang]
+    return out
+
+
+def body_pieces():
+    """The outer body's convex pieces: name -> (vertices mm, rgba), and the fill under the shell (a box, mm bounds)."""
+    pieces = {}
+    for name, (discs, r_top, r_bot, *z0) in BODY_PIECES.items():
+        sides = (("L", 1.), ("R", -1.)) if name in BODY_SPLIT else (("", 1.),)
+        for tag, sx in sides:
+            d = [(sx * cx, cy, R, zt) for cx, cy, R, zt in discs]
+            pieces[f"xbox_{name}{'_' + tag if tag else ''}"] = (
+                _rounded_hull(d, z0[0] if z0 else FACE_Z, r_top, r_bot), TRIM_RGBA if name in ("bumper", "trigger") else BODY_RGBA)
+    return pieces, (-45., 45., -40., 40., FACE_Z, -4.)
+
+
+def _face_details():
+    """The controller's face, visual only (VIS): face down it lies inside the cradle's top (the sticks, the D-pad and the
+    buttons stand below FACE_Z). The user's left hand is at +x face down."""
+    z, L = FACE_Z * MM, []
+    def disc(x, y, r, h, rgba):       # a button: a short cylinder below the face
+        return f'<geom type="cylinder" pos="{_f(x * MM, y * MM, z - h / 2 * MM)}" size="{_f(r * MM, h / 2 * MM)}" rgba="{rgba}" {VIS}/>'
+    for x, y in ((37., 16.), (-20., -6.)):      # the left stick (upper) and the right stick (lower): shaft, cap
+        L.append(disc(x, y, 4., 10.1, "0.12 0.12 0.13 1"))
+        L.append(f'<geom type="cylinder" pos="{_f(x * MM, y * MM, z - 12. * MM)}" size="{_f(9.5 * MM, 2. * MM)}" rgba="0.10 0.10 0.11 1" {VIS}/>')
+    for sx, sy in ((9.5, 3.), (3., 9.5)):        # the D-pad (lower left: +x face down)
+        L.append(f'<geom type="box" pos="{_f(20. * MM, -6. * MM, z - 1. * MM)}" size="{_f(sx * MM, sy * MM, 1. * MM)}" rgba="0.12 0.12 0.13 1" {VIS}/>')
+    for dx, dy, rgba in ((0., -9.5, "0.20 0.62 0.25 1"), (-9.5, 0., "0.80 0.16 0.16 1"),       # A, B (face down: B at -x)
+                         (9.5, 0., "0.16 0.36 0.80 1"), (0., 9.5, "0.92 0.76 0.12 1")):         # X, Y
+        L.append(disc(-37. + dx, 16. + dy, 4.6, 2.5, rgba))
+    L.append(disc(0., 28., 7., 1.5, "0.86 0.86 0.86 1"))                                       # the Xbox button
+    for x, y in ((10., 11.), (-10., 11.), (0., 2.)):                                           # view, menu, share
+        L.append(disc(x, y, 2.6, 1.5, "0.12 0.12 0.13 1"))
+    return L
+
+
 def _compartment(meshes):
     """The shell body's content (C frame, positions in metres relative to the compartment floor centre)."""
     shell = "0.17 0.17 0.18 1"
@@ -238,7 +310,9 @@ def _compartment(meshes):
         L.append(f'<geom type="box" pos="{_f(xp * MM, yc * MM, .05 * MM)}" size="{_f(3 * MM, .8 * MM, .05 * MM)}" rgba="0.85 0.1 0.1 1" {VIS}/>')
         L.append(f'<geom type="box" pos="{_f(xp * MM, yc * MM, .05 * MM)}" size="{_f(.8 * MM, 3 * MM, .05 * MM)}" rgba="0.85 0.1 0.1 1" {VIS}/>')
         L.append(f'<geom type="box" pos="{_f(xm * MM, yc * MM, .05 * MM)}" size="{_f(3 * MM, .8 * MM, .05 * MM)}" rgba="0.1 0.1 0.12 1" {VIS}/>')
-        yr, xr = s * (Y_IN + 2.6), s * (X_PLUS - 14.)
+        # on the rim beside the slot (x 21 mm off centre: until 2026-10-19 at 13 mm, where slot B's marks lay over the
+        # cover's hook slots, 3 mm above their floor)
+        yr, xr = s * (Y_IN + 2.6), s * (X_PLUS - 6.)
         L.append(f'<geom type="box" pos="{_f(xr * MM, yr * MM, (Z_RIM + .05) * MM)}" size="{_f(1.8 * MM, .45 * MM, .05 * MM)}" rgba="0.85 0.1 0.1 1" {VIS}/>')
         L.append(f'<geom type="box" pos="{_f(xr * MM, yr * MM, (Z_RIM + .05) * MM)}" size="{_f(.45 * MM, 1.8 * MM, .05 * MM)}" rgba="0.85 0.1 0.1 1" {VIS}/>')
         L.append(f'<geom type="box" pos="{_f(-xr * MM, yr * MM, (Z_RIM + .05) * MM)}" size="{_f(1.8 * MM, .45 * MM, .05 * MM)}" rgba="0.92 0.92 0.92 1" {VIS}/>')
@@ -260,16 +334,17 @@ def _compartment(meshes):
     L.append(f'<geom name="plunger" type="capsule" fromto="{_f(-2 * MM, 0, 0, 2 * MM, 0, 0)}" size="{PLUNGER_R * MM:.6g}" '
              f'rgba="0.75 0.75 0.78 1" mass="0.001" {CONTACT} {FRICTION}/>')
     L.append("</body>")
-    # the controller's outer shape lying face down (visual), and its face as a flat collision box under the body
-    col = "0.16 0.16 0.17 1"
-    vis = f'{VIS} rgba="{col}"'
-    L += [f'<geom type="box" pos="{_f(0, 0, -.017)}" size="{_f(.050, .040, .013)}" {vis}/>',
-          f'<geom type="capsule" fromto="{_f(-.048, -.032, -.016, -.048, .034, -.016)}" size="0.0155" {vis}/>',
-          f'<geom type="capsule" fromto="{_f(.048, -.032, -.016, .048, .034, -.016)}" size="0.0155" {vis}/>',
-          f'<geom type="capsule" fromto="{_f(-.052, -.034, -.012, -.062, -.082, .006)}" size="0.0195" {vis}/>',
-          f'<geom type="capsule" fromto="{_f(.052, -.034, -.012, .062, -.082, .006)}" size="0.0195" {vis}/>',
-          f'<geom type="box" pos="{_f(0, .044, -.008)}" size="{_f(.050, .005, .008)}" {vis}/>',
-          f'<geom name="ctrl_face" type="box" pos="{_f(0, -.01, -.0275)}" size="{_f(.055, .045, .0025)}" rgba="0.16 0.16 0.17 1" group="3" {CONTACT}/>']
+    # the controller's outer body (option C, 2026-10-19): static collision pieces around the shell and the fill under it,
+    # each drawn by its visual twin; the face's sticks and buttons (visual, inside the cradle); the headset jack on the
+    # bottom edge, facing the cameras
+    pieces, fill = body_pieces()
+    L.append(box_geom(fill, name="xbox_fill", rgba=BODY_RGBA, extra=f"{CONTACT} {FRICTION}"))
+    for name, (verts, rgba) in pieces.items():
+        meshes.append(_mesh(name, verts))
+        L.append(f'<geom name="{name}" type="mesh" mesh="{name}" rgba="{rgba}" {CONTACT} {FRICTION}/>')
+    L += _face_details()
+    L.append(f'<geom type="cylinder" pos="{_f(0, -48.05 * MM, -8. * MM)}" quat="0.7071068 0.7071068 0 0" '
+             f'size="{_f(1.9 * MM, .1 * MM)}" rgba="0.04 0.04 0.04 1" {VIS}/>')
     return L
 
 
@@ -437,14 +512,16 @@ def _visual_twins(lines):
 
 # The appearance parameters (BatteryReplacementTask defaults controller_finish, tray_finish, box_finish, props_finish; the
 # user, 2026-10-20: a seed varies appearance only): each replaces the colours of the visual geoms drawn in the first
-# entry's colours (as written above) and no colliding geom's. Controller: its outer body, the cover, its ridge, its
-# arrow (the compartment, its marks and contacts keep theirs); props: the cradle, the stick's holder, the cover's pad.
+# entry's colours (as written above) and no colliding geom's. Controller: the Xbox outer body (BODY_RGBA, which the
+# compartment's walls share, as on the real controller, whose battery bay is the body's colour), its bumpers and triggers
+# (TRIM_RGBA), the cover, its ridge, its arrow (the compartment's floor, its marks and contacts, the sticks and the
+# buttons keep theirs); props: the cradle, the stick's holder, the cover's pad.
 # The cells, the red "+" marks and the stick keep their colours: the texts name them.
 CONTROLLER_FINISHES = dict(
-    black=("0.16 0.16 0.17 1", "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1"),
-    white=("0.86 0.87 0.88 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1"),
-    red=("0.62 0.08 0.10 1", "0.58 0.07 0.09 1", "0.48 0.06 0.08 1", "0.75 0.32 0.32 1"),
-    blue=("0.14 0.28 0.62 1", "0.13 0.26 0.58 1", "0.11 0.22 0.48 1", "0.40 0.50 0.75 1"))
+    black=(BODY_RGBA, TRIM_RGBA, "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1"),
+    white=("0.86 0.87 0.88 1", "0.80 0.81 0.82 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1"),
+    red=("0.62 0.08 0.10 1", "0.50 0.06 0.08 1", "0.58 0.07 0.09 1", "0.48 0.06 0.08 1", "0.75 0.32 0.32 1"),
+    blue=("0.14 0.28 0.62 1", "0.11 0.23 0.52 1", "0.13 0.26 0.58 1", "0.11 0.22 0.48 1", "0.40 0.50 0.75 1"))
 TRAY_FINISHES = dict(green=("0.25 0.55 0.35 1",), white=("0.85 0.85 0.83 1",), grey=("0.60 0.62 0.64 1",))
 BOX_FINISHES = dict(orange=("0.80 0.45 0.10 1",), blue=("0.15 0.35 0.65 1",), green=("0.20 0.50 0.25 1",))
 PROPS_FINISHES = dict(grey=("0.36 0.38 0.42 1", "0.45 0.45 0.48 1", "0.55 0.6 0.7 1"),

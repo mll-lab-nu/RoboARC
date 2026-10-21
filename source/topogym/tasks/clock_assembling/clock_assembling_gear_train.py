@@ -6,5 +6,5 @@ from .common import ClockAssemblingTask
 class ClockAssemblingGearTrainTask(ClockAssemblingTask):
     variation_id = "clock_assembling_gear_train"
     family_id = "clock_gear_train"
-    model_revision = "clock_gear_train_v2"
+    model_revision = "clock_gear_train_v3"
     difficulty = None
