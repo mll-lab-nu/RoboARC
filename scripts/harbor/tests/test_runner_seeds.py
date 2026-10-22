@@ -53,19 +53,26 @@ for t in tasks:
 
 
 def pair_bases():
-    """Two committed task pairs (base names), the smallest ones."""
-    bases = []
-    for d in sorted((REPO / "tasks").glob("roboarc-*-privileged"), key=lambda d: sum(f.stat().st_size for f in d.rglob("*") if f.is_file())):
-        b = d.name.removesuffix("-privileged")
-        if (REPO / "tasks" / f"{b}-standard" / "task.toml").is_file() and not b.startswith("roboarc-ikea"):
-            bases.append(b)
-        if len(bases) == 2:
-            return bases
-    raise unittest.SkipTest("fewer than two task pairs in tasks/")
+    """Two committed task pairs (base names), the smallest of each kind: a puzzle base (three appearance seeds since
+    1.2.0) and an IKEA base (its default seed only)."""
+    size = lambda d: sum(f.stat().st_size for f in d.rglob("*") if f.is_file())  # noqa: E731
+    out = []
+    for kind in ("puzzle", "ikea"):
+        for d in sorted((REPO / "tasks").glob("roboarc-*-privileged"), key=size):
+            b = d.name.removesuffix("-privileged")
+            if b.startswith("roboarc-ikea") == (kind == "ikea") and (REPO / "tasks" / f"{b}-standard" / "task.toml").is_file():
+                out.append(b)
+                break
+    if len(out) != 2:
+        raise unittest.SkipTest("no puzzle or no IKEA task pair in tasks/")
+    return out
 
 
 def three_seeds(task: pathlib.Path) -> None:
+    """Seeds 0, 1, 2 staged at run time (a task the generator rendered with seeds has them already)."""
     p = task / "task.toml"
+    if 'build = "runtime"' in p.read_text():
+        return
     s = re.sub(r"(?m)^allowed = .*$", "allowed = [0, 1, 2]", p.read_text(), count=1)
     s = re.sub(r"(?m)^oracle = \[.*$", 'oracle = [0, 1, 2]\nbuild = "runtime"', s, count=1)
     p.write_text(s)

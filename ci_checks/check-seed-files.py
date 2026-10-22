@@ -9,8 +9,13 @@ falls back to another seed's files (a Dockerfile COPY of a pattern that matches 
     default;
   - a task with goal images (`environment/goal/`) has, for every allowed seed other than the default, that seed's
     images with the same file names under `tests/seeds/<S>/goal/` (its own, or its privileged twin's);
-  - a task whose reference solution is a trajectory (`solution/trajectory.npz`) has `solution/trajectory.s<S>.npz`
-    for every seed of `[metadata.seeds] oracle` other than the default.
+  - a task whose reference solution is a trajectory with a birth stamp (`solution/trajectory.npz` holding
+    instance_sha.npy) has `solution/trajectory.s<S>.npz` for every seed of `[metadata.seeds] oracle` other than the
+    default (a reference without a stamp serves every seed as it is);
+  - its images stage the seed: privileged `environment/Dockerfile` and `tests/Dockerfile` copy every
+    `runtime_binding.s<S>.json` and the `seed` file by name and run stage_instance.py with --seed-file; the standard sim
+    service's entrypoint passes `--seed-file /srv/seed`, and the standard grader's `tests/Dockerfile` copies the
+    bindings and picks the seed's; no COPY source is a pattern (a pattern that matches nothing does not fail a build).
 Tasks that allow one seed only (every task until RoboARC 1.2.0), and frozen-instance seeds (ci_checks/check-seeds.py),
 are not concerned. Run by the CI job `unit-tests` (a failure fails it) and by run_all.sh.
 
@@ -20,6 +25,7 @@ Standard library only.
 from __future__ import annotations
 
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,10 +65,41 @@ def check(task: Path) -> list[str]:
                 errs.append(f"no goal images of seed {s} (tests/seeds/{s}/goal/ of the task or its twin)")
             elif sorted(p.name for p in g.iterdir()) != names:
                 errs.append(f"{g.relative_to(task.parent)}: not the files of {task_seed.GOAL}/ ({names})")
-    if (task / "solution" / "trajectory.npz").is_file():
+    ref = task / "solution" / "trajectory.npz"
+    if ref.is_file() and "instance_sha.npy" in zipfile.ZipFile(ref).namelist():   # a reference without a birth stamp serves every seed
         for s in sd["oracle"]:
             if s != sd["default"] and not (task / "solution" / f"trajectory.s{s}.npz").is_file():
                 errs.append(f"solution/trajectory.s{s}.npz missing (seed {s} is in seeds.oracle)")
+    return errs + staging(task, others)
+
+
+def read(p: Path) -> str:
+    return p.read_text() if p.is_file() else ""
+
+
+def staging(task: Path, others: list[int]) -> list[str]:
+    """The images stage the trial's seed (module docstring)."""
+    errs = []
+    names = [f"runtime_binding.s{s}.json" for s in others] + ["seed"]
+    sidecar = task_seed.places(task)[0] != "environment"
+    dfs = ["tests/Dockerfile"] if sidecar else ["environment/Dockerfile", "tests/Dockerfile"]
+    for rel in dfs:
+        text = read(task / rel)
+        copies = [l for l in text.splitlines() if l.lstrip().upper().startswith("COPY")]
+        for l in copies:
+            if any(c in l for c in "*?["):
+                errs.append(f"{rel}: COPY of a pattern ({l.strip()}): name the files")
+        named = " ".join(copies).split()
+        for n in names:
+            if n not in named:
+                errs.append(f"{rel}: does not copy {n}")
+        if not sidecar and "--seed-file" not in text:
+            errs.append(f"{rel}: does not stage with --seed-file (stage_instance.py)")
+    if sidecar:
+        if "b=runtime_binding.s$s.json" not in read(task / "tests/Dockerfile"):
+            errs.append("tests/Dockerfile: does not pick the seed's runtime_binding.s<S>.json")
+        if "--seed-file /srv/seed" not in read(task / "environment/docker-compose.yaml"):
+            errs.append("environment/docker-compose.yaml: the sim service does not stage with --seed-file /srv/seed")
     return errs
 
 

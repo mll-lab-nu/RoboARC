@@ -48,7 +48,8 @@ def main() -> int:
         assert "unknown fields" in str(e), e
     assert M.tooling_check() == [], M.tooling_check()
     assert M.PACKAGE_FORMAT == "final-texts/1", "the interface release_rebuild.py relies on"
-    assert M.DIRECT and set(M.DIRECT) <= {r["family"] for r in M.REL["bases"].values()}, M.DIRECT
+    families = {r["family"] for r in [*M.REL["bases"].values(), *(M.REL.get("experimental_bases") or {}).values()]}
+    assert M.DIRECT and set(M.DIRECT) <= families, M.DIRECT    # a direct-render family is a released or experimental one
     with tempfile.TemporaryDirectory() as tmp:
         for b in ("orbits-01-i01", "blanket-fold-02-i01"):
             for t in M.render(b, pathlib.Path(tmp)):

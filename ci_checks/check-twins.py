@@ -11,6 +11,8 @@ Standard library only.
 """
 from __future__ import annotations
 
+import json
+import re
 import sys
 import tomllib
 from pathlib import Path
@@ -66,7 +68,41 @@ def errors(tasks: list[Path]) -> list[str]:
             if mine != theirs:
                 errs.append(f"{t.name}: seeds (default, allowed, build) {mine} differ from its privileged twin's {theirs} "
                             "(PROTOCOL Appendix H.7: twins share instance, success rule and seeds)")
+            ma, mb = seed_bindings(t), seed_bindings(twin)
+            for task, m in ((t, ma), (twin, mb)):
+                for seed, shas in sorted(m.items()):
+                    if len(shas) != 1:
+                        errs.append(f"{task.name}: its copies of runtime_binding.s{seed}.json name {len(shas)} instances "
+                                    "(PROTOCOL Appendix H.7: one frozen instance per seed)")
+            if {k: sorted(v) for k, v in ma.items()} != {k: sorted(v) for k, v in mb.items()}:
+                errs.append(f"{t.name}: its seed bindings (runtime_binding.s<S>.json: {fmt(ma)}) are not its privileged "
+                            f"twin's ({fmt(mb)}) (PROTOCOL Appendix H.7: twins share each seed's frozen instance)")
+            if seed_files(t) != seed_files(twin):
+                errs.append(f"{t.name}: its `seed` files {seed_files(t)} are not its privileged twin's {seed_files(twin)}")
     return errs
+
+
+def seed_bindings(task: Path) -> dict:
+    """{seed: {instance_sha256 of every runtime_binding.s<seed>.json of the task}} (docs/RUNNING.md "Seeds")."""
+    out: dict = {}
+    for p in sorted(task.rglob("runtime_binding.s*.json")):
+        m = re.fullmatch(r"runtime_binding\.s(\d+)\.json", p.name)
+        if not m:
+            continue
+        try:
+            sha = json.loads(p.read_text()).get("instance_sha256")
+        except (OSError, ValueError, AttributeError):
+            sha = f"unreadable {p.relative_to(task)}"
+        out.setdefault(int(m.group(1)), set()).add(sha)
+    return out
+
+
+def seed_files(task: Path) -> set:
+    return {p.read_text().strip() for p in task.rglob("seed") if p.is_file()}
+
+
+def fmt(m: dict) -> str:
+    return ", ".join(f"{k}: {','.join(str(x)[:12] for x in sorted(v))}" for k, v in sorted(m.items())) or "none"
 
 
 def main(argv: list[str]) -> int:

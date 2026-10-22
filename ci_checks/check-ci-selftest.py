@@ -37,6 +37,7 @@ STDIMG = ["bash", str(ROOT / "ci_checks/check-standard-agent-image.sh")]
 MONITOR = [sys.executable, str(ROOT / "ci_checks/check-monitor.py"), "--tier", "invariants"]
 DIGESTS = ["bash", str(ROOT / "ci_checks/check-dataset-manifest.sh")]
 DOCKERFILE = ["bash", str(ROOT / "ci_checks/check-dockerfile.sh")]
+SEEDFILES = [sys.executable, str(ROOT / "ci_checks/check-seed-files.py")]   # also a failing step of the CI job unit-tests
 PINS = [sys.executable, str(ROOT / "ci_checks/check-image-pins.py")]   # its own CI job (image-pins); advisory tier here
 FIELDS = ["bash", str(ROOT / "ci_checks/check-task-fields.sh")]
 # the checks that enforce Appendix H (run_invariants.sh); every other check here is advisory
@@ -282,6 +283,14 @@ MUTATIONS = [
      sub(r"(^\[agent\]\n(?:(?!\[).*\n)*?timeout_sec = )[0-9.]+", r"\g<1>1234.0"), TWINS, "the twins have the same cutoff"),
     ("a standard task whose allowed seeds are not its privileged twin's", STD, TOML,
      sub(r"^allowed = \[(.*)\]$", r"allowed = [\1, 12345]"), TWINS, "differ from its privileged twin's"),
+    ("a standard task whose seed-1 binding is not its privileged twin's", STD, None,
+     {"+tests/runtime_binding.s1.json": lambda _: '{"instance_sha256": "' + "0" * 64 + '"}\n'}, TWINS,
+     "are not its privileged twin's"),
+    # ---- appearance seeds (docs/RUNNING.md "Seeds"): every allowed seed has its files, and the images stage it
+    ("a seeded task whose committed seed file names another seed than the default", PRIV, None,
+     {"+environment/seed": lambda _: "1\n"}, SEEDFILES, "not the default seed"),
+    ("a seeded task whose images do not stage the seed", PRIV, None,
+     {"environment/Dockerfile": sub(r" --seed-file /tmp/rcb-seed/seed", "")}, SEEDFILES, "does not stage with --seed-file"),
     ("a standard task's agent image takes the sidecar's code", STD, "environment/Dockerfile",
      append("COPY sim/ /opt/sim/\n"), STDIMG, "name files outside sim/ only"),
     ("the monitor sidecar gets a network", STD, COMPOSE, sub(r"^    network_mode: none\n", ""), MONITOR,

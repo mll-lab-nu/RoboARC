@@ -16,15 +16,20 @@ import unittest
 REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "scripts"))
 import task_seed  # noqa: E402
+sys.path.insert(0, str(REPO / "scripts" / "roboarc"))
+import mk_tasks  # noqa: E402
 
 spec = importlib.util.spec_from_file_location("check_seed_files", REPO / "ci_checks" / "check-seed-files.py")
 check_seed_files = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check_seed_files)
 
 
-def a_pair():
-    """A committed privileged / standard pair (base name)."""
-    for d in sorted((REPO / "tasks").glob("roboarc-*-privileged")):
+def a_pair(single: bool = False):
+    """A committed privileged / standard pair (base name): a puzzle base (three appearance seeds since 1.2.0), or with
+    single=True an IKEA base (its default seed only)."""
+    for d in sorted((REPO / "tasks").glob("roboarc-ikea-*-privileged" if single else "roboarc-*-privileged")):
+        if not single and d.name.startswith("roboarc-ikea-"):
+            continue
         if (d.with_name(d.name.replace("-privileged", "-standard")) / "task.toml").is_file():
             return d.name.removesuffix("-privileged")
     raise unittest.SkipTest("no task pair in tasks/")
@@ -35,8 +40,12 @@ def tree(d: pathlib.Path) -> dict:
 
 
 def three_seeds(task: pathlib.Path, oracle="[0, 1, 2]") -> None:
-    """Make a copied task allow seeds 0, 1, 2 built at run time, with the files check-seed-files.py asks for."""
+    """Make a copied task allow seeds 0, 1, 2 built at run time, with the files check-seed-files.py asks for (a task the
+    generator rendered with seeds has them already)."""
     p = task / "task.toml"
+    if 'build = "runtime"' in p.read_text():          # rendered with seeds: only the oracle seeds are set here
+        p.write_text(re.sub(r"(?m)^oracle = \[.*$", f"oracle = {oracle}", p.read_text(), count=1))
+        return
     s = re.sub(r"(?m)^allowed = .*$", "allowed = [0, 1, 2]", p.read_text(), count=1)
     s = re.sub(r"(?m)^oracle = \[.*$", f"oracle = {oracle}\nbuild = \"runtime\"", s, count=1)
     p.write_text(s)
@@ -49,6 +58,16 @@ def three_seeds(task: pathlib.Path, oracle="[0, 1, 2]") -> None:
     if (task / "solution" / "trajectory.npz").is_file():
         for k in (1, 2):
             shutil.copyfile(task / "solution" / "trajectory.npz", task / "solution" / f"trajectory.s{k}.npz")
+    # the images stage the seed: the generator's own text edits (scripts/roboarc/mk_tasks.py seed_texts)
+    mode = "standard" if task.name.endswith("-standard") else "privileged"
+    base = task.name.removeprefix("roboarc-").removesuffix(f"-{mode}")
+    names = ("environment/Dockerfile", "tests/Dockerfile") if mode == "privileged" else \
+        ("environment/docker-compose.yaml", "tests/Dockerfile")
+    texts = {n: (task / n).read_text() for n in names}
+    texts["task.toml"] = ""
+    mk_tasks.seed_texts(base, mode, texts, [1, 2], None)
+    for n in names:
+        (task / n).write_text(texts[n])
 
 
 class Assign(unittest.TestCase):
@@ -62,7 +81,7 @@ class Assign(unittest.TestCase):
         for t in (cls.p, cls.s):
             shutil.copytree(REPO / "tasks" / t.name, t, symlinks=True)
             three_seeds(t)
-        cls.one = REPO / "tasks" / f"{cls.base}-privileged"
+        cls.one = REPO / "tasks" / f"{a_pair(single=True)}-privileged"
 
     @classmethod
     def tearDownClass(cls):
@@ -165,9 +184,9 @@ class Materialize(unittest.TestCase):
         self.assertTrue(any("not the files of environment/goal/" in e for e in check_seed_files.check(p)))
 
     def test_single_seed_copy_is_the_task(self):
-        """A committed single-seed task materialized on its default seed is the task, byte for byte."""
+        """A committed single-seed task (IKEA) materialized on its default seed is the task, byte for byte."""
         for m in ("privileged", "standard"):
-            t = REPO / "tasks" / f"{self.base}-{m}"
+            t = REPO / "tasks" / f"{a_pair(single=True)}-{m}"
             dst = task_seed.materialize(t, 0, self.root / f"plain-{m}")
             self.assertEqual(tree(dst), tree(t))
             self.assertEqual(check_seed_files.check(t), [])

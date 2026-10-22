@@ -22,7 +22,7 @@ RoboARC's own fields:
 
 | Field | Values |
 |---|---|
-| `difficulty` | `very_easy` · `easier` · `easy` · `medium` · `hard`: the task's rating within its family; task names carry no difficulty |
+| `difficulty` | `very_easy` · `easier` · `easy` · `medium` · `hard`: the task's rating within its family; task names carry no difficulty. `untiered`: a new base not yet rated, rendered only as an experimental base (`mk_tasks.py --experimental`), never in `tasks/` |
 | `grasp` | `assisted (<model> grasp regions on <parts>)` · `physical (no assisted grasping)` |
 | `success_rule` | the task-native success rule and its terminal revision (text) |
 | `tooling_version` | the generation of the privileged tooling `rcb_topogym.py` the task is bound to |

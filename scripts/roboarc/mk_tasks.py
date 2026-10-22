@@ -5,6 +5,8 @@ task.toml's `difficulty`.
 
 usage: python3 scripts/roboarc/mk_tasks.py [--check] [--list] [--assets <dir>] [base ...]
        python3 scripts/roboarc/mk_tasks.py --dev <dev.json> --out <dir> base ...
+       python3 scripts/roboarc/mk_tasks.py --experimental --out <dir> [--assets <dir>] [base ...]
+       python3 scripts/roboarc/mk_tasks.py --experimental --dev <dev.json> --out <dir> base ...
   no base   every base in release.json
   --check   write nothing; exit 1 if a task would change, or if an identity check fails
   --list    print the bases with their evidence
@@ -15,6 +17,10 @@ usage: python3 scripts/roboarc/mk_tasks.py [--check] [--list] [--assets <dir>] [
             --instances): dev.json names the image ("image": reference, id; "runtime" as its installed_runtime()
             reports it) and, per base, a local frozen instance directory ("instance") and the
             reference trajectory both modes replay ("reference")
+  --experimental   also the bases of release.json `experimental_bases` (new bases the owner has not reviewed yet: not
+            in tasks/ until then), written to --out only (never tasks/); without base names, all of them. A record
+            whose instance is not made yet (release_commit, creation_source, instance_package null) is refused, and
+            so is a base without its runtime_binding.upstream.json or its pins in assets.json
 
 A task dir is: the package's texts with their fields filled in, the pinned tooling and graders, the runtime binding,
 the reference solution, then scripts/task_conventions.normalize (the protocol's shared sections) and the DIGEST.
@@ -76,6 +82,7 @@ TEXTS = ("task.toml", "README.md", "instruction.md", "environment/Dockerfile", "
          "tests/Dockerfile", "tests/docker-compose.yaml", "tests/test.sh")   # the package files rendered as text
 GOAL_DIR = "environment/goal"   # a package's goal-state images (fold: the target shape is shown, never given as coordinates)
 TIERS = ("very_easy", "easier", "easy", "medium", "hard")
+UNTIERED = "untiered"     # an experimental base's difficulty until the owner has reviewed and rated it
 MAX_STEPS = 200000        # rcb_topogym.MAX_STEPS (RCB_MAX_STEPS): the runaway guard on an episode's / a trajectory's length
 MAX_CALL_WALL_S = 900     # v2_4/rcb_limited.MAX_CALL_WALL_S (RCB_MAX_CALL_WALL_S): no compose file overrides it
 CHUNK_S, WATCH_S = 10, 30  # the sim service's RCB_MAX_CHUNK_S / RCB_MAX_WATCH_S defaults
@@ -424,7 +431,9 @@ def check_texts(base: str, mode: str, rec: dict, texts: dict[str, str]) -> None:
     # the task's own declarations, never taken from the committed task dir by normalize (a render depends on its inputs only)
     assert re.search(r'(?m)^dynamics = "(?:static|dynamic)"', texts["task.toml"]), f"{where}: task.toml declares no dynamics"
     d = re.search(r'(?m)^difficulty = "([^"]*)"', texts["task.toml"])
-    assert d and d[1] in TIERS, f"{where}: task.toml has no difficulty of {TIERS}"
+    # an experimental base (release.json experimental_bases, not in tasks/) may be "untiered" until the owner rates it
+    tiers = TIERS + ((UNTIERED,) if rec.get("experimental") else ())
+    assert d and d[1] in tiers, f"{where}: task.toml has no difficulty of {tiers}"
     named = [v["difficulty"] for v in NAMES.values() if v["new"] == f"{BENCH}-{base}"]
     assert named in ([], [d[1]]), f"{where}: difficulty {d[1]!r}, roboarc_names.json {named}"
     fam = rec["family"]
@@ -442,21 +451,30 @@ def check_texts(base: str, mode: str, rec: dict, texts: dict[str, str]) -> None:
 
 
 # ---------------------------------------------------------------- the task dir
-def binding(base: str, inst_dir: pathlib.Path | None, direct: bool) -> bytes:
+def seeds_of_base(base: str) -> list[int]:
+    """The base's appearance seeds other than 0 (docs/RUNNING.md "Seeds"): the ones assets.json pins
+    (instances.<base>.seeds); [] for a base without seeds."""
+    return sorted(int(s) for s in (ASSETS["instances"].get(base, {}).get("seeds") or {}))
+
+
+def binding(base: str, inst_dir: pathlib.Path | None, direct: bool, seed: int = 0) -> bytes:
     """The task's runtime binding: the upstream lock (instance and asset hashes) with this release's tooling and runtime,
     the render bridge next to the tooling (render_bridge_sha256) and, for a family that renders with nyx_direct.py, that
     file (nyx_direct_sha256): the tooling checks both at Session start. The frozen instance must be the pinned one in
-    assets.json; with inst_dir (a local copy), its bytes are checked too."""
-    lock = json.loads((PKG / f"{base}-privileged" / "runtime_binding.upstream.json").read_text())
-    pinned = ASSETS["instances"].get(base, {}).get("instance_sha256")
-    assert lock["instance_sha256"] == pinned, f"{base}: the bound instance is not the one pinned in assets.json"
-    prefix = f"instances/{base}/"
+    assets.json; with inst_dir (a local copy), its bytes are checked too. seed > 0: the binding of that appearance seed
+    (runtime_binding.s<S>.upstream.json, the instance under instances/<base>/seeds/<S>/)."""
+    up = "runtime_binding.upstream.json" if seed == 0 else f"runtime_binding.s{seed}.upstream.json"
+    lock = json.loads((PKG / f"{base}-privileged" / up).read_text())
+    rec = ASSETS["instances"].get(base, {})
+    pinned = rec.get("instance_sha256") if seed == 0 else ((rec.get("seeds") or {}).get(str(seed)) or {}).get("instance_sha256")
+    assert lock["instance_sha256"] == pinned, f"{base} seed {seed}: the bound instance is not the one pinned in assets.json"
+    prefix = f"instances/{base}/" if seed == 0 else f"instances/{base}/seeds/{seed}/"
     pinned_assets = {k[len(prefix):]: v for k, v in ASSETS["files"].items() if k.startswith(prefix + "instance_assets/")}
     # Frozen generated assets (image 0.2.22: knot_untying's rope volume meshes, rcb_topogym._install_frozen_assets), added to
     # the instance after the upstream lock: each is a generated file whose sha256 the instance's asset_identity records.
     frozen = {k: v for k, v in pinned_assets.items() if k.startswith("instance_assets/frozen_assets/")}
     lock["asset_files"] = {**lock["asset_files"], **frozen}
-    assert lock["asset_files"] == pinned_assets, f"{base}: instance_assets pinned in assets.json differ from the binding"
+    assert lock["asset_files"] == pinned_assets, f"{base} seed {seed}: instance_assets pinned in assets.json differ from the binding"
     if inst_dir is not None and frozen:
         identity = json.loads((inst_dir / "instance.json").read_text()).get("asset_identity") or {}
         for rel, want in frozen.items():
@@ -510,11 +528,111 @@ def goal_images(up: pathlib.Path, t: pathlib.Path, instruction: str, dockerfile:
         put(t / GOAL_DIR / p.name, p.read_bytes())
 
 
+# ---------------------------------------------------------------- appearance seeds (docs/RUNNING.md "Seeds")
+# A base whose instance has appearance seeds (assets.json instances.<base>.seeds) renders its twins with
+# `[metadata.seeds]` allowed = [0, <seeds>], build = "runtime"; a `seed` file (0, the default; the runner's
+# scripts/task_seed.py materialize overwrites it) and runtime_binding.s<S>.json beside every runtime_binding.json;
+# Dockerfiles that copy those files by name (no glob) and stage with /opt/robotangle/stage_instance.py --seed-file; the
+# standard grader's one-line choice of its binding; per-seed goal images (packages/<task>/tests/seeds/<S>/goal/) and
+# privileged references (oracles/<base>/privileged.s<S>.npz, tools/release/restamp.py). Every text edit below must
+# apply exactly once (fail closed). ci_checks/check-seed-files.py checks the result.
+SEED_PLACES = {"privileged": ("environment", "tests"), "standard": ("environment/sim", "tests")}
+SEED_TMP = "/tmp/rcb-seed"   # where an image takes the bindings and the seed file to stage from; removed after staging,
+# so no file a Dockerfile copies is rewritten (scripts/check_image_files.py, which a re-grade runs on its verifier image)
+STD_BINDING_CHOICE = (f'RUN s=$(cat {SEED_TMP}/seed) && case "$s" in 0) b=runtime_binding.json ;; *[!0-9]*|"") exit 1 ;; '
+                      f'*) b=runtime_binding.s$s.json ;; esac && cp {SEED_TMP}/$b /tests/runtime_binding.json && rm -rf {SEED_TMP}'
+                      '   # the runtime binding of the seed (docs/RUNNING.md "Seeds"); a missing one fails the build\n')
+SEEDED_SOLVE = ("#!/bin/bash\n# Reference solution (privileged): the trajectory the author's oracle produced and the verifier scored 1\n"
+                "# on the evidence run named in README.md (Reference solution); for an appearance seed S, the same rows\n"
+                "# re-stamped with that seed's birth state (solution/trajectory.s<S>.npz). Uses nothing but the recorded files.\n"
+                "set -euo pipefail\nmkdir -p /app/output\nS=$(cat /opt/robotangle/seed 2>/dev/null || echo 0)\n"
+                "f=/solution/trajectory.npz; [ \"$S\" = 0 ] || f=/solution/trajectory.s$S.npz\n"
+                "test -f \"$f\" || { echo \"no reference for seed $S\" >&2; exit 1; }\ncp \"$f\" /app/output/trajectory.npz\n")
+
+
+def once(text: str, old: str, new: str, where: str) -> str:
+    assert text.count(old) == 1, f"{where}: expected exactly one {old.strip()!r} to give it its seeds"
+    return text.replace(old, new)
+
+
+def seed_texts(base: str, mode: str, texts: dict, seeds: list[int], oracle_seeds: list[int] | None) -> None:
+    """The text edits of a seeded base's task dir (module comment above), in place."""
+    where = f"packages/{base}-{mode}"
+    names = " ".join(["runtime_binding.json"] + [f"runtime_binding.s{x}.json" for x in seeds])
+    if mode == "privileged":
+        for rel, dest, keep in (("environment/Dockerfile", "/app", " && cp {t}/seed /opt/robotangle/seed"), ("tests/Dockerfile", "/tests", "")):
+            texts[rel] = once(once(texts[rel],
+                f"COPY runtime_binding.json {dest}/runtime_binding.json\n", f"COPY {names} seed {SEED_TMP}/\n", where),
+                f"stage_instance.py {base} {dest} --purge",
+                f"stage_instance.py {base} {dest} --binding {SEED_TMP}/runtime_binding.json --seed-file {SEED_TMP}/seed --purge"
+                + keep.format(t=SEED_TMP) + f" && rm -rf {SEED_TMP}", where)
+    else:
+        texts["environment/docker-compose.yaml"] = once(texts["environment/docker-compose.yaml"],
+            "--binding /srv/runtime_binding.json", "--binding /srv/runtime_binding.json --seed-file /srv/seed", where)
+        texts["tests/Dockerfile"] = once(texts["tests/Dockerfile"], "COPY runtime_binding.json /tests/runtime_binding.json\n",
+                                         f"COPY {names} seed {SEED_TMP}/\n" + STD_BINDING_CHOICE, where)
+    assert "[metadata.seeds]" not in texts["task.toml"], f"{where}/task.toml: the generator writes [metadata.seeds]"
+    block = f"\n[metadata.seeds]\ndefault = 0\nallowed = [{', '.join(str(x) for x in [0] + seeds)}]\n"
+    if oracle_seeds is not None:
+        block += f"oracle = [{', '.join(str(x) for x in oracle_seeds)}]\n"
+    texts["task.toml"] = texts["task.toml"].rstrip("\n") + "\n" + block + 'build = "runtime"\n'
+
+
+def oracle_seeds_of(base: str, rec: dict, seeds: list[int]) -> list[int] | None:
+    """`[metadata.seeds] oracle` of a seeded base with a reference (owner decision D4): seed 0 and the seeds whose Harbor
+    oracle run passed (release.json seeds.<S>.harbor = "passed"); None for a base without a reference."""
+    if not {"privileged", "standard"} <= set(rec["evidence"]):
+        return None
+    passed = {int(k) for k, v in (rec.get("seeds") or {}).items() if (v or {}).get("harbor") == "passed"}
+    return [0] + [x for x in seeds if x in passed]
+
+
+def seed_files(base: str, mode: str, t: pathlib.Path, up: pathlib.Path, inst_src: pathlib.Path | None, direct: bool,
+               seeds: list[int]) -> None:
+    """The files of a seeded base's task dir (module comment above)."""
+    for d in SEED_PLACES[mode]:
+        put(t / d / "seed", b"0\n")
+        for x in seeds:
+            put(t / d / f"runtime_binding.s{x}.json", binding(base, inst_src / "seeds" / str(x) if inst_src else None, direct, x))
+    goal = up / GOAL_DIR
+    for x in seeds:
+        g = up / "tests" / "seeds" / str(x) / "goal"
+        if goal.is_dir():
+            assert g.is_dir(), f"{up.name}: no goal images of seed {x} (tests/seeds/{x}/goal/)"
+            assert sorted(p.name for p in g.iterdir()) == sorted(p.name for p in goal.iterdir() if p.is_file()), \
+                f"{up.name}: tests/seeds/{x}/goal/ is not the files of {GOAL_DIR}/"
+            pins = ((ASSETS["instances"][base].get("seeds") or {}).get(str(x)) or {}).get("goal") or {}
+            assert sorted(pins) == sorted(p.name for p in g.iterdir()), \
+                f"{base} seed {x}: assets.json pins the goal pictures {sorted(pins)}, the task shows {sorted(p.name for p in g.iterdir())}"
+            for p in sorted(g.iterdir()):
+                assert sha(p.read_bytes()) == pins[p.name], f"{up.name}: tests/seeds/{x}/goal/{p.name} is not the picture assets.json pins"
+                put(t / "tests" / "seeds" / str(x) / "goal" / p.name, p.read_bytes())
+        else:
+            assert not g.exists(), f"{up.name}: goal images of seed {x} but no {GOAL_DIR}/"
+    # a reference with a birth stamp (instance_sha.npy) has one re-stamped file per seed and the seed's solve.sh; one
+    # without (rope-threading 04-08) serves every seed as it is: the grader reads no stamp it does not have
+    if mode == "privileged" and stamped(t / "solution/trajectory.npz"):
+        for x in seeds:
+            ref = ORC / base / f"privileged.s{x}.npz"
+            assert ref.is_file(), f"{base}: oracles/{base}/privileged.s{x}.npz missing (tools/release/restamp.py)"
+            put(t / f"solution/trajectory.s{x}.npz", ref.read_bytes())
+        put(t / "solution/solve.sh", SEEDED_SOLVE.encode(), exe=True)
+    elif mode == "privileged":
+        assert not any((ORC / base / f"privileged.s{x}.npz").is_file() for x in seeds), \
+            f"{base}: a re-stamped reference of a reference without a birth stamp"
+
+
+def stamped(npz: pathlib.Path) -> bool:
+    """A reference that records the birth it was planned from (instance_sha.npy)."""
+    return npz.is_file() and "instance_sha.npy" in zipfile.ZipFile(npz).namelist()
+
+
 def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, dev: dict | None = None) -> list[pathlib.Path]:
     rec = REL["bases"][base]
     assert rec.get("physics_engine") == "mujoco", f"{base}: every base of {BENCH} is a MuJoCo base (release.json physics_engine)"
     direct = rec["family"] in DIRECT
     lock = binding(base, inst_src, direct) if dev is None else dev_binding(inst_src, dev, direct)
+    seeds = seeds_of_base(base) if dev is None else []
     reference = pathlib.Path(dev["bases"][base]["reference"]) if dev else None
     tool = (SHARED / "rcb_topogym.py").read_bytes()
     extra = [("render_bridge.py", (SHARED / "render_bridge.py").read_bytes())] + \
@@ -526,6 +644,8 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
         texts = {n: fill((up / n).read_text(), values, f"packages/{up.name}/{n}") for n in TEXTS if (up / n).is_file()}
         texts["task.toml"] = TC.set_agent_timeout(texts["task.toml"], CUTOFF_SEC, base)
         check_texts(base, mode, rec, texts)
+        if seeds:
+            seed_texts(base, mode, texts, seeds, oracle_seeds_of(base, rec, seeds))
         for n, s in texts.items():
             put(t / n, s.encode(), exe=n.endswith(".sh"))
         goal_images(up, t, texts["instruction.md"], texts["environment/Dockerfile"])
@@ -562,6 +682,8 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
                     "joint_position rows of the evidence episode (README.md, Reference solution)"}, indent=1) + "\n").encode())
                 put(t / "solution/oracle_replay.py", (SHARED / "standard/solution/oracle_replay.py").read_bytes())
                 put(t / "solution/solve.sh", (SHARED / "standard/solution/solve.sh").read_bytes(), exe=True)
+        if seeds:
+            seed_files(base, mode, t, up, inst_src, direct, seeds)
     for t in dirs:
         TC.normalize(t)          # leaves the layer alone: scripts/eai_standard/ is a shared source (task_conventions)
         if main_cpus(t):
@@ -608,14 +730,59 @@ def dev_main(a) -> int:
     return 0
 
 
+EXPERIMENTAL_NEEDS = ("release_commit", "creation_source", "instance_package")
+
+
+def experimental_main(a) -> int:
+    """--experimental: release.json's experimental_bases (owner, 2026-10-21: the 9 new bases of 1.2.0 stay out of tasks/
+    until the owner has reviewed their demos) are rendered to --out, never to tasks/ (module docstring). Their records
+    are made visible to render() for this run only; release.json is not changed."""
+    exp = REL.get("experimental_bases") or {}
+    if a.out is None or a.check or a.list:
+        raise SystemExit("--experimental needs --out and takes neither --check nor --list")
+    out = a.out.resolve()
+    if out == TASKS.resolve() or TASKS.resolve() in out.parents or out in TASKS.resolve().parents:
+        raise SystemExit(f"--out {a.out}: experimental bases are never rendered into tasks/")
+    bases = a.bases or sorted(exp)
+    unknown = [b for b in bases if b not in exp and b not in REL["bases"]]
+    if unknown:
+        raise SystemExit(f"not in release.json bases or experimental_bases: {', '.join(unknown)}")
+    for b in bases:
+        if b in exp and a.dev is None:
+            missing = [k for k in EXPERIMENTAL_NEEDS if not exp[b].get(k)]
+            if missing:
+                raise SystemExit(f"{b}: its instance is not made yet ({', '.join(missing)} null in release.json "
+                                 "experimental_bases); render it from a local instance with --dev, or make it first")
+            if not (PKG / f"{b}-privileged" / "runtime_binding.upstream.json").is_file() or b not in ASSETS["instances"]:
+                raise SystemExit(f"{b}: no runtime_binding.upstream.json in its package or no pins in assets.json yet")
+    REL["bases"] = {**REL["bases"], **{b: exp[b] for b in bases if b in exp}}
+    if a.dev is not None:
+        a.bases = bases
+        return dev_main(a)
+    bad = tooling_check()
+    if bad:
+        print("\n".join(bad), file=sys.stderr); return 1
+    out.mkdir(parents=True, exist_ok=True)
+    for b in bases:
+        inst = a.assets / "instances" / b if a.assets else None
+        for m in ("privileged", "standard"):
+            shutil.rmtree(out / f"{BENCH}-{b}-{m}", ignore_errors=True)
+        for t in render(b, out, inst):
+            print(f"experimental task {t}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true"); ap.add_argument("--list", action="store_true")
     ap.add_argument("--assets", type=pathlib.Path, help="a local copy of the pinned HF dataset (assets.py fetch)")
     ap.add_argument("--dev", type=pathlib.Path, help="dev.json: task dirs of a locally built image (see usage)")
-    ap.add_argument("--out", type=pathlib.Path, help="with --dev: where the dev task dirs go")
+    ap.add_argument("--out", type=pathlib.Path, help="with --dev or --experimental: where the task dirs go")
+    ap.add_argument("--experimental", action="store_true", help="the new bases of release.json experimental_bases, to --out")
     ap.add_argument("bases", nargs="*")
     a = ap.parse_args(argv)
+    if a.experimental:
+        return experimental_main(a)
     if a.dev is not None:
         return dev_main(a)
     bases = a.bases or sorted(REL["bases"])
