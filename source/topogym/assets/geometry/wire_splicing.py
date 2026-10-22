@@ -254,7 +254,7 @@ def needle_q(u) -> float:
     return dial_angle(u) - dial_angle(METER["rest_u"])
 
 
-def meter_xml() -> str:
+def meter_xml(panel=None) -> str:
     """The splice meter (user decision 2026-10-19): a needle meter in a case on the table by the terminals (METER), its
     dial turned toward cam_high. Every geom is visual (contype 0); all but the case have no mass, so the MuJoCo scene
     drops them (Nyx draws them on their bodies); it keeps the case, colliding with nothing, for the entity's bounds. The
@@ -262,7 +262,8 @@ def meter_xml() -> str:
     0 at the rest stop), with a light inertia whose centre lies on the hinge axis, so the task's mechanism can set it
     every tick without moving any mass. The scale: logarithmic from 100 mOhm (left) to 1 mOhm (right) over sweep_deg,
     decade ticks long, the others short; the red band from R_TURN_MOHM / BAND_TURNS to 1 mOhm; the rest stop a pin just
-    left of the 100 mOhm end."""
+    left of the 100 mOhm end. panel: an rgba for the case (an appearance seed's PANEL_FINISHES), drawn by a visual-only
+    box 0.3 mm over it; None keeps the recorded look (the case's own grey, no cover)."""
     c = METER
     beta = np.radians(90. - c["face_elevation_deg"])
     Rd = Rotation.from_euler("x", beta)
@@ -289,6 +290,8 @@ def meter_xml() -> str:
     out = head[:-1] + ['  <asset>', f'    <mesh name="case" vertex="{_v(np.ravel(corners))}"/>', '  </asset>', head[-1]]
     out.append(f'<body name="panel" pos="{_v([c["x"], c["y"], 0.])}">')
     out.append('<geom type="mesh" mesh="case" rgba=".22 .23 .25 1" contype="0" conaffinity="0" group="1"/>')
+    if panel is not None:
+        out.append(visual("box", on_dial([0., half[1] - r - .01, -half[2] - .001]), [h + .0003 for h in half], panel))
     out.append(visual("cylinder", on_dial([0., 0., .0005]), [r, .0005], (.96, .96, .93, 1.)))                 # the dial
     # the red band, in arcs of at most 2 deg
     u0 = dial_position(R_TURN_MOHM / BAND_TURNS)
@@ -333,11 +336,14 @@ POST_FINISHES = dict(       # the base plate, the post, the rod
     steel=((.35, .35, .38, 1.), (.45, .45, .48, 1.), (.75, .76, .78, 1.)),
     green=((.14, .30, .18, 1.), (.18, .38, .23, 1.), (.32, .58, .38, 1.)),
     black=((.09, .09, .10, 1.), (.12, .12, .13, 1.), (.22, .22, .24, 1.)))
-# the meter's dial face (light, so the black ticks, the red band and the black needle read; the case keeps its colour:
-# it carries the panel's mass, so its geom is part of the physics scene)
+# the meter's dial face (light, so the black ticks, the red band and the black needle read)
 METER_FINISHES = dict(ivory=((.96, .96, .93, 1.),), cream=((.95, .89, .74, 1.),), pale_grey=((.83, .85, .87, 1.),))
 CORE_FINISHES = dict(copper=(RGBA_CU, RGBA_SEAM), tinned=((.74, .75, .77, 1.), (.42, .43, .46, 1.)))
 CORE_CHOICES = dict(copper=("copper", "copper"), b_tinned=("copper", "tinned"), a_tinned=("tinned", "copper"))
+# the meter's panel, its largest part in cam_high (user decision 2026-10-22: seeds told apart at a glance). The case
+# carries the panel's mass, so its geom is part of the physics scene and keeps its dark grey; another finish is a
+# visual-only cover box over it (meter_xml's panel). Neither red nor blue, so the wires stay the red and the blue one.
+PANEL_FINISHES = dict(dark=None, yellow=(.93, .74, .12, 1.), green=(.16, .55, .26, 1.))
 
 
 def look_colours(name, terminal="white", post="steel", meter="ivory", core="copper") -> dict:
@@ -353,9 +359,10 @@ def look_colours(name, terminal="white", post="steel", meter="ivory", core="copp
     return {**pairs(TERMINAL_FINISHES, terminal), **pairs(CORE_FINISHES, CORE_CHOICES[core]["AB".index(wire)])}
 
 
-def entity_xml(name: str, look=None) -> str:
-    """The entity's MJCF; look: look_colours() (None: the recorded look), applied to visual geoms (contype 0) only."""
-    xml = jig_xml() if name == "jig" else meter_xml() if name == "meter" else wire_xml(name)
+def entity_xml(name: str, look=None, panel="dark") -> str:
+    """The entity's MJCF; look: look_colours() (None: the recorded look), applied to visual geoms (contype 0) only;
+    panel: the meter's PANEL_FINISHES entry."""
+    xml = jig_xml() if name == "jig" else meter_xml(PANEL_FINISHES[panel]) if name == "meter" else wire_xml(name)
     if not look:
         return xml
 
