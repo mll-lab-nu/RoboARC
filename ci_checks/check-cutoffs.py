@@ -4,7 +4,8 @@
 The number is the task's `[agent] timeout_sec` in task.toml, set by its author (or its benchmark's generator) in the
 pull request that adds or changes the task, as in Terminal-Bench; there is no table. For every task given (default:
 every task):
-  - `[agent] timeout_sec` is a whole positive number of seconds, at most 14400 (PROTOCOL D8; no benchmark is excepted);
+  - `[agent] timeout_sec` is a whole positive number of seconds, at most 14400 (PROTOCOL D8), or its base's owner exception
+    (scripts/task_conventions.py CUTOFF_EXCEPTIONS);
   - instruction.md ends with the section scripts/task_conventions.py renders from that number, the last thing the agent
     reads: `## Time limit`, "You have N seconds to complete this task. Do not cheat by using online solutions or hints
     specific to this task." with the same N (Terminal-Bench's sentence), then what the cutoff means in the task's mode;
@@ -95,8 +96,9 @@ def number_errors(task: Path) -> list[str]:
         return ["task.toml has no `[agent] timeout_sec` (the agent's cutoff, set by the task's author; PROTOCOL §2.12)"]
     if isinstance(v, bool) or not isinstance(v, (int, float)) or v <= 0 or float(v) != int(v):
         return [f"[agent] timeout_sec = {v!r} is not a whole positive number of seconds"]
-    if v > tc.CUTOFF_CAP:
-        return [f"[agent] timeout_sec = {v:g} is above the {tc.CUTOFF_CAP} s cap (PROTOCOL D8, §2.3; no benchmark is excepted)"]
+    if v > tc.cutoff_cap_for(task):
+        return [f"[agent] timeout_sec = {v:g} is above the {tc.CUTOFF_CAP} s cap (PROTOCOL D8, §2.3; the owner's exceptions: "
+                "scripts/task_conventions.py CUTOFF_EXCEPTIONS)"]
     return []
 
 

@@ -45,7 +45,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/tests/test_task_seed.py scripts/harbor/tests/test_runner_seeds.py tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py \
          scripts/roboarc/tests/test_generator_seeds.py tools/tests/test_release_seeds.py images/tests/test_pull_all.py \
-         tools/tests/test_d4_tools.py; do
+         tools/tests/test_d4_tools.py scripts/roboarc/tests/test_cutoff_exceptions.py; do
   run 300 "$t"
 done
 run 120 scripts/harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials

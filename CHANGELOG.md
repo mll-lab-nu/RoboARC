@@ -4,6 +4,16 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+- **Owner exceptions to the cutoff cap** (no task changes: the 202 task dirs render byte-identically). The protocol's
+  14400 s cap now admits the bases listed in `scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`, each with the owner's
+  approval; `check-cutoffs.py` and `check-task-fields.sh` read the same list. The first entry is the experimental base
+  wire-splicing-01-i01 (owner, 2026-10-22: 21600 s; 160 ball-jointed links at about 0.5 s per control step), which is
+  not in `tasks/` yet. For an excepted base `mk_tasks.py` writes the cutoff and raises the grading timeouts with it:
+  the privileged verifier to 2 x cutoff + 1800 s, the standard collect hook to 1.5 x cutoff (32400 s at 21600 s).
+  `cutoff_s` is part of the configuration results are ranked by, so its trials form their own group.
+
 ## 1.2.1 (2026-10-22)
 
 Nyx on GPUs without RT cores: a clear error instead of a crash. The same images (`roboarc:1.2.0`, the IKEA images

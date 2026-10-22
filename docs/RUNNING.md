@@ -159,7 +159,9 @@ starting by then is waited out inside the agent's time. At the cutoff Harbor sto
 collects the artifacts and runs the verifier as after any other end: the trial is graded as it stands, is a result,
 and is not run again.
 
-The rules on the number (`ci_checks/check-cutoffs.py`, `check-twins.py`): a whole number of seconds, at most 14400; the
+The rules on the number (`ci_checks/check-cutoffs.py`, `check-twins.py`): a whole number of seconds, at most 14400
+(or the owner's exception for the task's base, `scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`; `cutoff_s` is part of
+the configuration results are ranked by, so an excepted task's trials form their own group); the
 privileged and standard versions of a task have the same cutoff (H.7); the instruction's closing `## Time limit` section
 (rendered by `scripts/task_conventions.py`, the last thing the agent reads), the README's `Agent time budget` row and,
 in standard mode, the sim service's `RCB_WALL_CLOCK_S` state the same number, and nothing else in the instruction states
