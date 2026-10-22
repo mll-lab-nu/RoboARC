@@ -6,10 +6,10 @@
 | Mode | standard (`eai-standard/2.4`) |
 | Twin | `roboarc-cast-coil-04-i01-privileged` |
 | Simulator / robot | `roboarc` / `aloha-2` |
-| Family / instance | `cast_coil` / seed 0 |
+| Family / instance | `cast_coil` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
-| Base image | `ghcr.io/mll-lab-nu/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f` |
+| Base image | `ghcr.io/mll-lab-nu/roboarc:1.2.0@sha256:a8561b770908d2e9289390ff31992adeb35d8eee7453560177b57386291174a3` |
 
 ## Task
 Standard-mode twin of `roboarc-cast-coil-04-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.4` client
@@ -77,9 +77,9 @@ Assemble the gold and silver Cast Coil pieces into their matching interlocking c
 | crash recovery | `eai-standard/2.4` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
 
 ### Provenance
-- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `aae08c2e` (MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image eai-roboarc:0.2.1, tools/release/release_rebuild.py --instances)); bound to this release's runtime (source `a7487c51`, tooling `cae5375e`).
+- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `aae08c2e` (MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)); bound to this release's runtime (source `cacc831d`, tooling `676e1803`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `9f34f894a454`, under `instances/cast-coil-04-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 1.1.1, image `ghcr.io/mll-lab-nu/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f` (images/roboarc/); simulator source `67ed48da8` (PROVENANCE.md).
+- Release: RoboARC 1.2.0, image `ghcr.io/mll-lab-nu/roboarc:1.2.0@sha256:a8561b770908d2e9289390ff31992adeb35d8eee7453560177b57386291174a3` (images/roboarc/); simulator source `9ed9ace4d` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log
@@ -89,3 +89,4 @@ Assemble the gold and silver Cast Coil pieces into their matching interlocking c
 - 2026-10-21: RoboARC 1.1.0, every image by digest: the Dockerfiles and compose files name the simulator image and the resource monitor's image by manifest digest, `ghcr.io/embodied-first-exam/roboarc:1.1.0@sha256:85ea9003…` (images/pins.json), so a pull gets exactly the image that was validated (until now the simulator image was named by its tag). The image, the instruction, the grader, the tooling, the frozen instance and the reference are unchanged: results graded under 1.1.0 stand.
 - 2026-10-21: RoboARC 1.1.0, the agent container's client packages are installed from a hashed lock: `environment/client-requirements.txt` keeps the same versions and adds the sha256 of the file pip selects for the client base, and `environment/Dockerfile` installs it with `--no-deps --require-hashes`, so a build installs exactly those files or fails. The installed packages are the same files as before.
 - 2026-10-21: RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of 1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.2.0, three scenes per base (appearance seeds): seed 0 is the released scene, unchanged; seeds 1 and 2 are the same scene and physics in other colours, materials and textures. The task allows seeds 0, 1 and 2 (`[metadata.seeds]`); the runner picks the trial's seed and the image stages that seed's frozen instance against its own runtime binding (`runtime_binding.s<S>.json`, `stage_instance.py --seed-file`). `oracle` lists seed 0 and the seeds whose Harbor oracle run passed; the reference serves every seed (re-stamped with each seed's birth where it records one). Image `ghcr.io/mll-lab-nu/roboarc:1.2.0` (the seeds' simulator source and tooling); seed 0's birth, end state and render inputs are those of 1.1.x, so results graded under 1.1.x stand.

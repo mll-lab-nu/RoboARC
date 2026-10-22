@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "instance_sha256": "a7454bb188800f42f5236aed78100efcff4756de353dac2861b13e4db578cd6c",
+  "asset_files": {
+    "instance_assets/fold_target/blanket_fold_hard_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
+    "instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
+    "instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
+    "instance_assets/mujoco/cloth_vbd_blanket.npz": "fd4e3c96a7af4e691641db6578ab6b3dfe825d477234ee88ba0f338e4fc73397",
+    "instance_assets/mujoco/scene.json": "4a1bf903ade910445989e930edc68726188bab5edbacc6b8a3a8e75ae6628970",
+    "instance_assets/mujoco/scene.xml": "dd9376a606a5bd4ce760ef1c559c0a7ccfec9dc790e1def0b319c377d9fa19ae",
+    "instance_assets/mujoco_birth/settled_birth.json": "1d47043c313b115cdc20a5c6cd97230688e65082d1519d5a7ba407a0a5f73c99"
+  },
+  "tooling_sha256": "676e1803d865bc745b0fe8e221241e1a1465fb07ffbe2f1e0a8caf74e5c15631",
+  "creation_source": {
+    "sha256": "de81088e64a201431b18514c769a0ea2d682048cda9491c3da44f3dae25b1897",
+    "files": 835
+  },
+  "runtime": {
+    "dependencies": {
+      "torch": "2.11.0+cu128",
+      "numpy": "2.3.5",
+      "scipy": "1.17.1",
+      "mujoco": "3.14.0",
+      "newton": "1.6.1",
+      "warp-lang": "1.18.0"
+    },
+    "python": "3.11.15",
+    "source": {
+      "sha256": "cacc831d220dedfdbaf16d3066dafca03e83ebbaedc14af4d83d2458a22c8b3f",
+      "files": 449
+    }
+  },
+  "image": {
+    "reference": "eai-roboarc:0.2.1-noinst",
+    "id": "sha256:cd2ac87464fd0840be7d5a71da4311eb483a8f29075b87802333be1caa569986",
+    "repo_digests": []
+  },
+  "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
+  "nyx_direct_sha256": "8bf9cd0bd9f330c3ab2bd46151b5f8c25faad07292a1e8a5ea66cd0941e11850"
+}

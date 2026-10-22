@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · cast_keyhole — frozen instance
 
 You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
-**Task:** Separate and place the entire silver keyhole piece inside the green dashed goal region. Keep the gold piece on the puzzle/system side.
+**Task:** Separate and place the entire silver keyhole piece (`keyhole_silver`) inside the green dashed goal region. Keep the gold piece (`keyhole_gold`) on the puzzle/system side.
 
 ## Success requirements
 

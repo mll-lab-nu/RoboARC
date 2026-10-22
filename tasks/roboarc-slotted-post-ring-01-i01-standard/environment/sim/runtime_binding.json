@@ -8,7 +8,7 @@
     "instance_assets/mujoco/scene.xml": "16beeec957360e1683511e4ff74efa09d6169253515b485999fbeb007026754d",
     "instance_assets/mujoco_settled.npz": "b42f9c0496679dd50c24bea5df5223eb795c84f5ce21ab699a7d57993c47b9a1"
   },
-  "tooling_sha256": "cae5375e233117bdfce4311b75579f33ae146acff539b1b7ad932a1a4645c78f",
+  "tooling_sha256": "676e1803d865bc745b0fe8e221241e1a1465fb07ffbe2f1e0a8caf74e5c15631",
   "creation_source": {
     "sha256": "d601866b4c91c858aa4e249b5bf5145b8fe3263b2885048a86016e34c314c208",
     "files": 444
@@ -24,8 +24,8 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "a7487c513cf60a254bf10fd6cebc8c35f4e28a2ff04464fab7157350a83c49bd",
-      "files": 426
+      "sha256": "cacc831d220dedfdbaf16d3066dafca03e83ebbaedc14af4d83d2458a22c8b3f",
+      "files": 449
     }
   },
   "image": {
@@ -34,5 +34,5 @@
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
-  "nyx_direct_sha256": "5de8d394e4f3cd6764c80de6c6aca3131bff16bb165e721ceb8924f595668df5"
+  "nyx_direct_sha256": "8bf9cd0bd9f330c3ab2bd46151b5f8c25faad07292a1e8a5ea66cd0941e11850"
 }

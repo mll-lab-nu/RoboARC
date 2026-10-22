@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · cast_keyhole — STANDARD MODE (robot as a service, eai-standard/2.4)
 
 You control a robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**) **as if it were real hardware**: the simulator runs in a service you cannot open. You get one
-client and one episode. **Task:** Separate and place the entire silver keyhole piece inside the green dashed goal region. Keep the gold piece on the puzzle/system side.
+client and one episode. **Task:** Separate and place the entire silver keyhole piece (`keyhole_silver`) inside the green dashed goal region. Keep the gold piece (`keyhole_gold`) on the puzzle/system side.
 
 ## Success requirements
 

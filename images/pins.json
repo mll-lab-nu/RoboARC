@@ -3,9 +3,9 @@
  "images": [
   {
    "name": "roboarc",
-   "ref": "ghcr.io/mll-lab-nu/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f",
-   "id": "sha256:dadc2d710ad2146dcca5d88e3c270d6e37b3bfba3939d4467015d56f2dcbcfdf",
-   "archive": "roboarc-1.1.0.oci.tar",
+   "ref": "ghcr.io/mll-lab-nu/roboarc:1.2.0@sha256:a8561b770908d2e9289390ff31992adeb35d8eee7453560177b57386291174a3",
+   "id": "sha256:b600616bee6c5c7e14ff3df82380d0d8049c5e0026ee62df8e1d3805d2e6d36f",
+   "archive": "roboarc-1.2.0.oci.tar",
    "made_by": "images/roboarc/build.sh, then images/archive.sh"
   },
   {

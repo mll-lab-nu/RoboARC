@@ -2,12 +2,12 @@
 # tooling and the frozen instance baked in. Nothing the agent did in its container reaches this one — Harbor
 # uploads only the declared artifacts (/app/output/), so a patched success check or a swapped interpreter in
 # the agent container cannot influence the verdict.
-FROM ghcr.io/mll-lab-nu/roboarc:1.1.0@sha256:85ea90032a55838d4d31b4d51325dd208ac082cf78239404ccbde5be7a212f2f
+FROM ghcr.io/mll-lab-nu/roboarc:1.2.0@sha256:a8561b770908d2e9289390ff31992adeb35d8eee7453560177b57386291174a3
 # MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes
 ENV NPY_DISABLE_CPU_FEATURES=AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR OPENBLAS_CORETYPE=Haswell
-COPY runtime_binding.json /tests/runtime_binding.json
+COPY runtime_binding.json runtime_binding.s1.json runtime_binding.s2.json seed /tmp/rcb-seed/
 COPY grade.py rcb_topogym.py render_bridge.py nyx_direct.py test.sh /tests/
-RUN python /opt/robotangle/stage_instance.py fiber-bundling-10-i01 /tests --purge   # the frozen instance, from the image (scripts/roboarc/assets.json), checked against runtime_binding.json
+RUN python /opt/robotangle/stage_instance.py fiber-bundling-10-i01 /tests --binding /tmp/rcb-seed/runtime_binding.json --seed-file /tmp/rcb-seed/seed --purge && rm -rf /tmp/rcb-seed   # the frozen instance, from the image (scripts/roboarc/assets.json), checked against runtime_binding.json
 RUN chmod +x /tests/test.sh && mkdir -p /app/output /logs/verifier
 ENV PYTHONPATH=/tests:/opt/topogym
 # the longest trajectory the verifier replays within its timeout (scripts/roboarc/mk_tasks.py row_cap)

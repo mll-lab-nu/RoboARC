@@ -9,7 +9,7 @@ keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "traject
 
 [metadata]
 author_name = "Jianwen Lyu"
-tooling_version = "20"
+tooling_version = "21"
 task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU physics, Nyx RGB)
 robot = "aloha-2"
@@ -60,8 +60,9 @@ main = { cpus = 16.0, memory_gb = 40.0, pids = 8192 }
 # the instances this task may run from (docs/PROTOCOL.md §2.13): the default, the ones a runner may draw
 # from (a list, { from = A, to = B } or "any"), and the ones the reference solution under solution/ is for
 default = 0
-allowed = [0]
-oracle = [0]
+allowed = [0, 1, 2]
+oracle = [0, 1, 2]
+build = "runtime"
 
 [verifier]
 timeout_sec = 45000.0
