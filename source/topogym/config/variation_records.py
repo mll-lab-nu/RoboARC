@@ -1112,6 +1112,21 @@ RECORDS = (*RECORDS, {'task_id': 'clock_assembling',
   'pool': 'experimental'})
 
 
+# wire_splicing (2026-10-18; runs/wire_splice_design_20261014): splice two stiff wires (eye, thread, wind, fold back),
+# one experimental setting, MuJoCo only.
+RECORDS = (*RECORDS, {'task_id': 'wire_splicing',
+  'variation_id': 'wire_splicing_eye_wrap',
+  'difficulty': None,
+  'family_id': 'wire_eye_wrap',
+  'model_revision': 'wire_splicing_v5_eye_wrap',
+  'implementation': 'topogym.tasks.wire_splicing.wire_splicing_eye_wrap:WireSplicingEyeWrapTask',
+  'aliases': ['base', 'eye_wrap'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+
+
 def _interlocked_claws_redesign():
     """The redesigned interlocked_claws tiers (keyhole gates; agent claws 2026-10-10/11)."""
     from topogym.tasks.interlocked_claws.redesign.registration import variation_records

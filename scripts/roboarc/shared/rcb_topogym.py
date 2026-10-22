@@ -252,6 +252,19 @@ TASKS: dict[str, dict] = {
              "seated cell cannot be pinched out: lever it up with the pry stick, its blade in the notch beside the cell's "
              "+ end.",
         instances=[dict(variation_id="battery_replacement_xbox_aa", seed=0)], grasp_assist="recommended"),
+    # wire_splicing (2026-10-18; runs/wire_splice_design_20261014): MuJoCo only; the wires are laid 1.5 mm above their
+    # resting height and settle for 1.5 s (600 ticks) at every build, as the design's start state (v5_lay.py).
+    "wire_splicing": dict(
+        task_id="wire_splicing", robot="aloha",
+        text="Splice the red and the blue wire: bend the red wire's bare end into a small eye round the rod of the bending "
+             "post, thread the blue wire's bare end through the eye, turn the wires so that their insulated parts point "
+             "away from each other, wind the blue wire's bare tail tightly round the red wire's doubled end one and a "
+             "half turns, at least one full turn of it round both strands of the doubled end together, fold the red "
+             "wire's leftover end back over the coil, then let go and leave the splice still. "
+             "The needle meter on the panel by the terminals reads this splice: its needle stays in the red band only "
+             "when the splice is complete.",
+        instances=[dict(variation_id="wire_splicing_eye_wrap", seed=0)], grasp_assist="recommended",
+        simulator=dict(reset_physics_steps=600)),
     "blanket_flatten": dict(
         task_id="blanket_flatten", robot="aloha",
         text="Unfold and spread the blanket flat on the table. Remove folds, rolls and self-overlaps so the fabric covers "
@@ -376,7 +389,7 @@ TASKS["lock_picking"]["simulator"] = {**TASKS["lock_picking"]["simulator"], "pre
 # topogym.world.mujoco (CPU float64; the scene frozen with the instance). Released Genesis instances keep their own frozen
 # simulator configuration and still load on Genesis.
 for _name in ("interlocked_claws", "fiber_bundling", "hedgehog_in_cage", "cast_keyhole", "lock_picking", "buzz_wire_3d", "horseshoe_ring", "cast_coil",
-              "bed_bolt", "clock_assembling", "battery_replacement", "caliper_sorting"):
+              "bed_bolt", "clock_assembling", "battery_replacement", "caliper_sorting", "wire_splicing"):
     TASKS[_name]["simulator"] = {**{k: v for k, v in TASKS[_name]["simulator"].items() if k != "rigid_options"},
                                  "compute_backend": "cpu", "precision": "64", "physics_engine": "mujoco"}
 # lock_picking on MuJoCo: the stop frames' round slot ends as 1-degree collision wedges (0.15-degree ones are sliver
@@ -471,7 +484,8 @@ TASKS["blanket_fold"]["simulator"] = dict(TASKS["blanket_flatten"]["simulator"])
 # names it (nyx_direct_sha256). The other families' MuJoCo instances keep the render bridge's Genesis host ("nyx", the
 # default). RCB_RENDER, when set, overrides the field (_render_bridge).
 for _name in ("blanket_flatten", "blanket_fold", "buzz_wire_3d", "fiber_bundling", "hedgehog_in_cage", "horseshoe_ring",
-              "interlocked_claws", "knot_untying", "lock_picking", "rope_threading", "bed_bolt", "clock_assembling", "battery_replacement"):
+              "interlocked_claws", "knot_untying", "lock_picking", "rope_threading", "bed_bolt", "clock_assembling", "battery_replacement",
+              "wire_splicing"):
     TASKS[_name]["renderer"] = "direct"
 # cast_coil: every MuJoCo instance of the family, the five released tiers and the v2 design tiers
 # alike. Released tiers at birth: nyx_direct's input buffers equal the host's bit for bit, at most 12 pixels > 8 levels

@@ -229,9 +229,34 @@ class MultiRopeGraspAssistConfig(GraspAssistConfig):
 
     rope_max_rotation_error_rad: the relative rotation a rope pinch's welds may drift before the grasp is lost
     (relative_pose_error); None keeps max_rotation_error_rad. Twisting the wires turns each welded tip link up to
-    0.41 rad off its weld (the design's v4 measurement), past the plain 0.15 rad."""
+    0.41 rad off its weld (the design's v4 measurement), past the plain 0.15 rad.
+
+    weld_links_between_pads (default False): a rope pinch welds, for every touched rope, its touched link nearest the
+    TCP and every other target link of that rope whose centre lies between the hand's two pads, all to that hand in
+    the one binding (acquired after stable_time_s, health-checked weld by weld, lost and released together). Wire
+    splice design, README_v6: with one link per wire the clamped doubled section bent 20-45 deg between the pads and
+    its legs pried open from 3 mm to 7-15 mm; welding the links between the pads let the winding pass 2 turns. A
+    link's centre is its grasp target's centre (GraspTarget.center_m in the link frame). It lies between the pads
+    when, in the TCP frame (origin the TCP, axes the hand link's turned by tcp_orientation_in_hand_wxyz: x approach,
+    y closing, z the third axis), x0 <= x <= x1, z0 <= z <= z1 and -(q1 - q_meet) <= y <= q2 - q_meet: q1, q2 the
+    hand's two finger joints in finger_joints order (the -y finger first), the two y bounds its two pad faces. The
+    box is per robot (PAD_BOX_M, topogym/world/mujoco/grasp.py). The ALOHA's, from aloha.xml's finger collision
+    hulls: x 0 to 16.2 mm (the TCP plane to the fingertips), z -10.1 to +10.7 mm (the hulls' width ahead of the TCP
+    plane), q_meet 0.0079 m (the finger slide at which the fingertips' inner faces meet on y = 0), so the pad faces at
+    y = -/+(q - 0.0079). Without a rope pinch, a named rope that both fingers touch (one wire held alone) welds its
+    bilaterally touched link nearest the TCP and its other links between the pads, as one binding the same way.
+
+    hold_between_pads (default False; needs weld_links_between_pads): a hand whose two fingers both touch named ropes,
+    every such contact on the pads between them (the contact point inside the pad box above, widened by
+    HOLD_BETWEEN_PADS_TOL_M on every side), holds as on a rope pinch, whether or not any link is touched by both fingers
+    and the ropes are pressed together: a wire folded between the pads (each pad on one of its two legs), a wire's loop
+    with another wire's lead beside it (each pad on one side of the loop). Wire splice design, user decision
+    2026-10-19 (runs/wire_splice_design_20261014, README_v6): such two-finger grips are real, and without it the
+    assist refused them (no_bilateral_candidate)."""
     weld_each_rope: tuple[str, ...] = ()
     rope_max_rotation_error_rad: float | None = None
+    weld_links_between_pads: bool = False
+    hold_between_pads: bool = False
 
     def __post_init__(self):
         super().__post_init__()
@@ -249,6 +274,12 @@ class MultiRopeGraspAssistConfig(GraspAssistConfig):
             raise ValueError("rope_max_rotation_error_rad must be finite and positive")
         if limit is not None:
             object.__setattr__(self, "rope_max_rotation_error_rad", float(limit))
+        if not isinstance(self.weld_links_between_pads, bool):
+            raise ValueError("weld_links_between_pads must be boolean")
+        if not isinstance(self.hold_between_pads, bool):
+            raise ValueError("hold_between_pads must be boolean")
+        if self.hold_between_pads and not self.weld_links_between_pads:
+            raise ValueError("hold_between_pads needs weld_links_between_pads (the pad box)")
 
 
 def force_closure_pair(position_a, normal_a, position_b, normal_b, friction_coefficient):

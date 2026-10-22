@@ -11,6 +11,7 @@ TASK_IDS = frozenset({
     "cast_keyhole", "buzz_wire_3d", "blanket_flatten", "slotted_post_ring", "orbits", "blanket_fold", "bed_bolt",
     "clock_assembling", "battery_replacement",
     "caliper_sorting",
+    "wire_splicing",
 })
 
 PLACEMENT = {
@@ -321,6 +322,11 @@ def describe_goal(task):
     elif name == "battery_replacement":
         summary, swap_rules = task.goal_words()
         rules += swap_rules
+        failures.append(_rigid_contact_failure())
+
+    elif name == "wire_splicing":
+        summary, splice_rules = task.goal_words()
+        rules += splice_rules
         failures.append(_rigid_contact_failure())
 
     settling = task.final_settling_spec()

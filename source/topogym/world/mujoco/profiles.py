@@ -11,6 +11,8 @@ Fields:
            (sliding from the task material's friction, else `friction`; torsional, rolling). The robot keeps its MJCF's
            condim and friction (ALOHA: condim 6, mu 1); margin optional.
   weld     the assisted grasp welds' solref / solimp.
+  weld_work_guard_j  optional (absent: off): an assisted grasp weld whose net work within its hold exceeds this many
+           joules is released through the slip path (grasp.py MujocoGraspBackend, reason grasp_slipped).
   mjcf_equality  optional {solref, solimp}: replaces the authored softness of an MJCF entity's <equality><connect>.
   birth_overlap_exclude  optional True: an MJCF entity's same-root, non-parent body pairs that overlap in the authored
            pose are excluded from contact (Genesis' neutral-overlap filter; mjcf_entity.py).
@@ -642,6 +644,34 @@ PROFILES = {
     # off a cell lying on a box (the recycling box's floor) touches at one point and rocks without end (0.3 rad/s at rest).
     # The parts' own contact parameters are in their MJCF (topogym.assets.geometry.battery_replacement).
     ("battery_replacement", None): dict(_CLAWS, name="battery_replacement_v1", weld=_CLAWS_WELD),
+    # wire_splicing (2026-10-18; runs/wire_splice_design_20261014): two elastoplastic ball-joint wires, MJCF entities
+    # with the design's own contacts in their MJCF (1.25 ms, dampratio 2, .9 / .99; wire-wire friction 0.5, margin
+    # 0.2 mm), the terminals and the bending post static. claws' robot and statics (_CLAWS: the soft class on robot-robot
+    # and robot-static contacts, the stiff follower-finger coupling), _RIGID's weld (1.25 ms, the design's arm sandbox
+    # weld), the table's friction 1 (the design's), every wire joint elastoplastic at fiber v4's 0.4 deg.
+    # wire_splicing_v2 (2026-10-19): the bending post (jig) keeps its own contact, the design's (1.25 ms, .9 / .99), and
+    # wins (static_contact.keep). Its rod has priority 1 for its friction 0.1, and a higher-priority geom gives all of a
+    # contact's parameters: with the jig on the soft class, the wires' contacts with the rod took the soft 5 ms / .95
+    # and they sank up to 3 mm into the rod while the neck was pressed (the design's L3 comparison, out/l3/topo/diag).
+    # wire_splicing_v3 (2026-10-19, the user's decision): the assisted grasp welds at solimp .99 / .999 (buzz_v2's): the
+    # welded bare links are light (about 0.2 g), and at .9 / .95 a 2-8 N load moved a held link 10-22 mm in the hand, past
+    # the grasp health limits (10 mm / 0.15 rad), while the winding pried the neck open to 4.5-6.8 mm; at .99 / .999
+    # every stroke stays inside them and the neck at 1.2-1.6 mm (the design's P9 runs, README_v6).
+    # wire_splicing_v5 (2026-10-22, the user's decision; v4, the welds at 2.5 ms, withdrawn): v3 + the weld work guard
+    # at 0.1 J. The acceptance round on 6dc61d32a3 broke down once (prefix5_e1: the reference's first 7345 rows, then
+    # random joint targets): with the right hand welded to six bare links of A (about 0.23 g each), the 2 dt weld of the
+    # outermost (A_040) went into a self-sustained ~215 Hz oscillation once the arm had flung A's free tail, doing
+    # about +3 W of net work (2.69 J) after the arm had stopped. Softer welds stop it (2.5 ms: 2.6 mJ) but let B sag
+    # 2.35 mm in the hand while it is threaded through the eye (0.28 mm at 1.25 ms), and the reference missed the eye.
+    # A real grasp cannot feed energy into what it holds: at 0.1 J of net work a weld lets go as a slip. From a
+    # checkpoint 75 rows before the event the stream then reads VIOLENT (0.3 mJ created); the reference's welds stay
+    # below it (0.037 J at most). runs/wire_splice_design_20261014/README_v6 section 6.
+    ("wire_splicing", None): dict(_CLAWS, name="wire_splicing_v5", weld_work_guard_j=.1,
+                                  weld=dict(_RIGID["weld"], solimp=[.99, .999, .001, .5, 2.]), memory="512M",
+                                  static_contact=dict(_CLAWS["static_contact"],
+                                                      keep={"jig": "the bending post: the wires are bent and pressed "
+                                                                       "round its rod"}),
+                                  plastic=dict(joints="wire_[ab]::[AB]_j*", yield_angle_deg=_YIELD_DEG)),
     # Hanayama Cast Trinity (an experimental setting, 2026-10-12): claws_v6, each of the three pieces colliding as its
     # exact convex decomposition (topogym.assets.geometry.cast_trinity), so the windows, slots and head gaps stay open.
     # caliper_sorting (2026-10-16): claws_v6's contacts, welds and robot; the caliper's slider joint gets the design's

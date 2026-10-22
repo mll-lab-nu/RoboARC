@@ -8,7 +8,7 @@ citations), with the tier's values from the frozen instance.json. It repeats not
 of it. No positions or poses: conditions, thresholds, names and sizes only (the limited-mode rule)."""
 
 RIGID = {"cast_coil", "cast_keyhole", "interlocked_claws", "hedgehog_in_cage", "horseshoe_ring", "bed_bolt",
-         "clock_assembling", "battery_replacement", "caliper_sorting"}
+         "clock_assembling", "battery_replacement", "caliper_sorting", "wire_splicing"}
 SOFT = {"knot_untying", "rope_threading", "orbits", "slotted_post_ring"}
 # The tooling's physical-validity policy (rcb_topogym.py, tooling v16; ci_checks/test-topogym-safety-rules.py checks the
 # numbers match): it replaces the instant volume-failure wording of his text (the task text itself states the contact
