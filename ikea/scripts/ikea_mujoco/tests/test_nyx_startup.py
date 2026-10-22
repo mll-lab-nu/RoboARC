@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Unit test of the Nyx render process's start-up retry (scripts/ikea_mujoco/standard/ikea_nyx.py, NyxRig._start), without
 Nyx, MuJoCo or a GPU: RCB_NYX_PYTHON is a shell script that plays the render process, failing (an exit code, a signal, no
-ready line) for the first attempts as each case says, then sending its ready line.
+ready line) for the first attempts as each case says, then sending its ready line; or reporting a GPU Nyx cannot run on
+(nyx_direct.UnsupportedDevice in its ready line), which is raised at once, never retried.
     python3 scripts/ikea_mujoco/tests/test_nyx_startup.py   (also run by test_grade.py)"""
 import os, pathlib, sys, tempfile, types
 
@@ -13,7 +14,7 @@ except ImportError:                  # the start-up path does not use it: the st
     sys.modules["numpy"] = types.ModuleType("numpy")
 import ikea_nyx  # noqa: E402
 
-# the render process: attempt k (1, 2, ...) does what word k of $PLAN says: exit3 / kill9 / hang / ok
+# the render process: attempt k (1, 2, ...) does what word k of $PLAN says: exit3 / kill9 / hang / unsupported / ok
 FAKE = r'''#!/bin/sh
 folder="$4"; n=$(( $(cat "$folder/n" 2>/dev/null || echo 0) + 1 )); echo $n > "$folder/n"
 what=$(echo "$PLAN" | cut -d' ' -f$n)
@@ -22,6 +23,7 @@ case "$what" in
   exit3) exit 3 ;;
   kill9) kill -9 $$ ;;
   hang) exec sleep 60 ;;
+  unsupported) echo '{"ready": false, "unsupported": "Nyx cannot render on this host: the GPU lacks VK_KHR_ray_query"}'; exit 1 ;;
   ok) echo '{"ready": true, "instances": 1, "meshes": 1, "build_s": 0.0}'; cat > /dev/null ;;
 esac
 '''
@@ -57,7 +59,10 @@ def main() -> int:
     e, log = start("exit3 exit3 kill9 ok")        # every attempt failed: RenderError after the last one, never a 4th
     assert isinstance(e, ikea_nyx.RenderError) and "3 attempts" in str(e) and "exit -9" in str(e), e
     assert log.count("start-up attempt") == 3 and "attempt 4" not in log, log
-    print("test_nyx_startup: ok (first start; two deaths then ready; a hang; three failures raise)")
+    e, log = start("unsupported ok")              # a GPU Nyx cannot run on: raised after the first attempt, not retried
+    assert isinstance(e, ikea_nyx.UnsupportedGPU) and isinstance(e, ikea_nyx.RenderError) and "VK_KHR_ray_query" in str(e), e
+    assert log.count("start-up attempt") == 1 and "not retried" in log and "attempt 2" not in log, log
+    print("test_nyx_startup: ok (first start; two deaths then ready; a hang; three failures raise; an unsupported GPU is not retried)")
     return 0
 
 
