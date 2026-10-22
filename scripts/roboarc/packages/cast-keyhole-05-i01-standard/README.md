@@ -33,7 +33,7 @@ See `tests/grade.py`.
 ## Details
 
 ### Goal
-Separate and place the entire silver keyhole piece inside the green dashed goal region. Keep the gold piece on the puzzle/system side.
+Separate and place the entire silver keyhole piece (`keyhole_silver`) inside the green dashed goal region. Keep the gold piece (`keyhole_gold`) on the puzzle/system side.
 
 ### Success requirements
 - Put every part of the entire silver keyhole piece inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.

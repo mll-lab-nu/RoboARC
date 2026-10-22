@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · interlocked_claws — frozen instance
 
 You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
-**Task:** Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side.
+**Task:** Separate and place the entire brown claw piece (`piece_0`) inside the green dashed goal region. Keep the other claw piece (`piece_1`) on the puzzle/system side.
 
 ## Success requirements
 
