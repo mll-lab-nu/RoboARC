@@ -18,6 +18,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from topogym.assets.geometry.slotted_chain import COLOURS
+from topogym.assets.scene_visuals import surface
 from topogym.assets.geometry.slotted_post_ring import SlottedPostLayout
 from topogym.tasks.base import merge_parameters
 from .slotted_post_ring_easy import SlottedPostRingEasyTask
@@ -136,3 +137,10 @@ class SlottedBelowEasyTask(SlottedPostRingEasyChainTask):
 
     def make_layout(self):
         return ROUTES[self.config["cord_route"]](**self.config["geometry"])
+
+    def link_colours(self):
+        """One flat colour for every link, as the beige cord: the default cord_finish keeps CORD."""
+        if self.config["cord_finish"] == self.defaults["cord_finish"]:
+            return self.colours["links"]
+        rgba = " ".join(f"{v:.4g}" for v in surface(self.config["cord_finish"])["color"])
+        return rgba, rgba

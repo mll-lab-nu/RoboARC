@@ -646,6 +646,18 @@ class SceneBuilder:
                 add_link(body, j.find("child").get("link"), _urdf_origin(j), link_name, j)
 
         add_link(self.world, roots[0], T_root, None, None)
+        # The entity's own joint equalities (morph_options "joint_equalities": [{name, joint1, optional joint2, polycoef
+        # (5 values), optional active (default true), solref, solimp}]), names and joints prefixed as the joints are. An
+        # MJCF entity authors them in its file (mjcf_entity.py); a URDF entity, whose glTF visuals Nyx draws with their
+        # textures, declares them here (caliper_sorting's slider lock, switched by the task's mechanism).
+        for eq in dict(spec.morph_options or {}).get("joint_equalities", ()):
+            attrs = dict(name=f"{spec.name}{SEP}{eq['name']}", joint1=f"{spec.name}{SEP}{eq['joint1']}")
+            if eq.get("joint2") is not None:
+                attrs["joint2"] = f"{spec.name}{SEP}{eq['joint2']}"
+            attrs.update(polycoef=numbers(eq["polycoef"]), active="true" if eq.get("active", True) else "false")
+            attrs.update({k: numbers(eq[k]) for k in ("solref", "solimp") if k in eq})
+            ET.SubElement(self.equality, "joint", **attrs)
+            record.setdefault("equalities", []).append(attrs["name"])
         if names is not None:
             record["geoms"] = names
         if spec.initial_joint_positions:

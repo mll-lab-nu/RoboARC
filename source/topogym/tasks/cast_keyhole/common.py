@@ -89,12 +89,13 @@ class CastKeyholeTask(PlacementGoalMixin, RigidTaskDefinition):
         cfg, folder = self.config, Path(asset_dir)
         assembly, report = self.build_assets(folder)
         if cfg["piece_tint"] != self.defaults["piece_tint"]:
-            # Appearance only: rescale each piece's baked GLB colour after generation.
-            from topogym.assets.scene_visuals import scale_glb_color
+            # Appearance only: rescale each piece's baked GLB colour and its URDF material colour after generation.
+            from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color
             for body in assembly.bodies:
                 metal = "gold" if "gold" in body.name else "silver"
                 for path in sorted((folder/body.name).glob("*.glb")):
                     scale_glb_color(path, cfg["piece_tint"][metal])
+                scale_urdf_color(folder/body.name/f"{body.name}.urdf", cfg["piece_tint"][metal])
         xy = np.asarray(cfg["center_xy_m"], dtype=float)
         clearance = float(cfg["initial_floor_clearance_m"])
         if xy.shape != (2,) or not np.isfinite(xy).all() or not np.isfinite(clearance) or clearance < 0:

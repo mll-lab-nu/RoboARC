@@ -58,6 +58,11 @@ class BlanketFlattenTask(TaskDefinition):
     # rigid entity: MuJoCo collides it with the robot, the VBD cloth takes it as a static collider like the table.
     defaults.update(obstacles=())
     hash_when_changed = ("obstacles",)
+    # Looks only (scene_variation's visual axes): a frozen birth's scene identity reads them at their nominal values
+    # and leaves out the asset files only a drawn look writes (appearance_files; world/initial_state.py scene_identity),
+    # so one prepared state serves every look of the same scene.
+    appearance_parameters = ("color", "texture")
+    appearance_files = ()
 
     def final_settling_spec(self):
         from topogym.evaluation.terminal import SettlingSpec
@@ -164,6 +169,15 @@ class BlanketFlattenTask(TaskDefinition):
                     f"Blanket owns texture dimensions, color, seed and output: {sorted(reserved)}"
                 )
             texture_path = path.with_name("blanket_diffuse.png")
+            nominal = {key: self.defaults[key] for key in self.appearance_parameters}
+            if nominal["texture"] is not None and {key: cfg[key] for key in nominal} != nominal:
+                # A drawn look: the nominal texture keeps its place in the asset tree and the drawn one is an asset file
+                # of its own, so an instance's asset_identity covers what is drawn, while the frozen birth's scene
+                # identity, which leaves out appearance_files, stays the nominal scene's.
+                fabric_weave(color=nominal["color"], size_m=(self.layout.length_m, self.layout.width_m),
+                             seed=self.seed, preview_path=texture_path, **nominal["texture"])
+                texture_path = path.with_name("blanket_appearance_diffuse.png")
+                self.appearance_files = (texture_path.relative_to(asset_dir).as_posix(),)
             fabric_weave(
                 color=cfg["color"],
                 size_m=(self.layout.length_m, self.layout.width_m),

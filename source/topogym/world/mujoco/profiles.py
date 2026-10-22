@@ -625,6 +625,47 @@ PROFILES = {
         _CLAWS, name="claws_v6_rotor", weld=_CLAWS_WELD,
         split={"piece_0": "topogym.assets.geometry.claws_rotor:rotor_parts",
                "piece_1": "topogym.assets.geometry.claws_rotor:rotor_parts"}),
+    # bed_bolt (2026-10-16): claws_v6, the values the design's sandbox ran the ALOHA with (runs/bed_bolt_design_20261012,
+    # phys3.py); the bolt's and key's own contact parameters are in their MJCF (topogym.assets.geometry.bed_bolt).
+    # bed_bolt_v2 (2026-10-17, the threaded hole): the bolt entity's one static body, the thread's stop plate (thr_stop),
+    # keeps its own nearly hard contact and wins (static_contact.keep): at the soft class a 200 N push on a loose bolt
+    # pressed its tip 3-5 mm into the plate (into a 1 mm plate: popped, 1.6 J created). No other body changes.
+    ("bed_bolt", None): dict(_CLAWS, name="bed_bolt_v2", weld=_CLAWS_WELD,
+                             static_contact=dict(_CLAWS["static_contact"],
+                                                 keep={"bolt": "the thread's stop plate: a loose bolt pushed onto it"})),
+    # clock_assembling (2026-10-16): claws_v6, the values the design's demo ran the ALOHA with
+    # (runs/watch_assembly_design_20261014, README_v3.md 7.3); the movement's own contact parameters, joint limits and
+    # welds are in its MJCF (topogym.assets.geometry.clock_gear_train).
+    ("clock_assembling", None): dict(_CLAWS, name="clock_v1", weld=_CLAWS_WELD),
+    # battery_replacement (2026-10-16): claws_v6 (the values the design's sandbox ran the ALOHA with:
+    # runs/controller_battery_design_20261014, scripts/d3_phys.py). MuJoCo's multi-point convex collision stays on: with it
+    # off a cell lying on a box (the recycling box's floor) touches at one point and rocks without end (0.3 rad/s at rest).
+    # The parts' own contact parameters are in their MJCF (topogym.assets.geometry.battery_replacement).
+    ("battery_replacement", None): dict(_CLAWS, name="battery_replacement_v1", weld=_CLAWS_WELD),
+    # Hanayama Cast Trinity (an experimental setting, 2026-10-12): claws_v6, each of the three pieces colliding as its
+    # exact convex decomposition (topogym.assets.geometry.cast_trinity), so the windows, slots and head gaps stay open.
+    # caliper_sorting (2026-10-16): claws_v6's contacts, welds and robot; the caliper's slider joint gets the design's
+    # armature and a stiff friction constraint (runs/caliper_sorting_design_20261014, README_v3.md section 2: below its
+    # 1.5 N breakaway it still creeps 0.03 mm in 5 s at 0.05 N; a stiffer one broke the two-hand control), and the inside
+    # jaws' 0.3 mm knife edges are exact capsules.
+    # caliper_sorting_v2 (2026-10-17): the locking screw's knob joint caliper::screw holds its friction loss (0.02 N m)
+    # and its stops nearly hard, as bed_bolt's (docs/rcb/MUJOCO_CORE.md, task mechanisms: at MuJoCo's defaults a joint's
+    # friction loss creeps under a load below it and a stop gives), with a small armature for the 2 g knob.
+    # caliper_sorting_v3 (2026-10-18, the caliper fixed on its stand): the beam on its joint caliper::mount, held by its
+    # limits within 1 um (topogym.assets.geometry.caliper_sorting.build_caliper), a hard limit as the knob's.
+    ("caliper_sorting", None): dict(
+        _CLAWS, name="caliper_sorting_v3", weld=_CLAWS_WELD, capsules=True,
+        joints=[dict(match="caliper::mount", armature=1e-5, solreflimit=[.00125, 2.], solimplimit=[.99, .999, .001, .5, 2.]),
+                dict(match="caliper::slider", armature=.001, solreffriction=[.00125, 1.],
+                     solimpfriction=[.99, .999, .001, .5, 2.]),
+                dict(match="caliper::screw", armature=1e-5, solreffriction=[.00125, 1.],
+                     solimpfriction=[.99, .999, .001, .5, 2.], solreflimit=[.00125, 2.],
+                     solimplimit=[.99, .999, .001, .5, 2.])]),
+    ("interlocked_claws", "interlocked_claws_cast_trinity"): dict(
+        _CLAWS, name="claws_v6_cast_trinity", weld=_CLAWS_WELD,
+        split={"trinity_t": "topogym.assets.geometry.cast_trinity:t_parts",
+               "trinity_h": "topogym.assets.geometry.cast_trinity:h_parts",
+               "trinity_b": "topogym.assets.geometry.cast_trinity:b_parts"}),
     # knot_chain_v5 (2026-10-10): the rod's rotational inertia floor 12 -> 24 k dt^2 (inertia_rule), its damping
     # 0.15 I / dt as v4 (damping_rule). The GPU search found a fourth blow-up (K3, knot easy, e99), on v4 with the exact
     # constraint diagonal: the arms fling the rope; in free flight its end whip-cracks (link 0: 7.6 -> 18 m/s in 4 ms)

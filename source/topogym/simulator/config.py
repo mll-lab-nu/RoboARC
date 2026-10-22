@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Mapping, Any
 
 from topogym.utils.snapshots import freeze
-from topogym.utils.grasp import GraspAssistConfig, GraspTarget, SoftGraspTarget
+from topogym.utils.grasp import (ForceClosureGraspTarget, GraspAssistConfig, GraspTarget, MultiRopeGraspAssistConfig,
+                                 SoftGraspTarget, WeakHoldGraspTarget)
 
 
 # "segment" (default): a complete checkpoint at the episode start and at each SegmentRunner segment start, a light
@@ -86,9 +87,12 @@ class SimulatorConfig:
             data = dict(self.grasp_assist)
             try:
                 target_type = SoftGraspTarget if data.get("model") in {"ipc_soft_band_v1", "pbd_local_patch_v1"} else GraspTarget
-                data["targets"] = tuple(target_type(**dict(v)) if isinstance(v, Mapping) else v
-                                        for v in data.get("targets", ()))
-                object.__setattr__(self, "grasp_assist", GraspAssistConfig(**data))
+                # the opt-in subclasses (topogym/utils/grasp.py) are read back by their own field names
+                data["targets"] = tuple((WeakHoldGraspTarget if "weak_hold_travel_m" in v else
+                                         ForceClosureGraspTarget if "friction_coefficient" in v else target_type)(**dict(v))
+                                        if isinstance(v, Mapping) else v for v in data.get("targets", ()))
+                config_type = MultiRopeGraspAssistConfig if "weld_each_rope" in data else GraspAssistConfig
+                object.__setattr__(self, "grasp_assist", config_type(**data))
             except (TypeError, ValueError) as error:
                 raise ValueError(f"Invalid grasp_assist configuration: {error}") from error
         if not isinstance(self.grasp_assist, GraspAssistConfig):

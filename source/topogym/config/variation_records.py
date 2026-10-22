@@ -575,6 +575,17 @@ RECORDS = ({'task_id': 'orbits',
   'reason': None,
   'validation': 'not_runtime_validated',
   'pool': 'experimental'},
+ {'task_id': 'interlocked_claws',
+  'variation_id': 'interlocked_claws_cast_trinity',
+  'difficulty': None,
+  'family_id': 'hanayama_cast_trinity',
+  'model_revision': 'cast_trinity_v12',
+  'implementation': 'topogym.tasks.interlocked_claws.interlocked_claws_cast_trinity:InterlockedClawsCastTrinityTask',
+  'aliases': ['cast_trinity'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'},
  {'task_id': 'knot_untying',
  'variation_id': 'knot_untying_very_easy',
  'difficulty': 'very_easy',
@@ -1026,6 +1037,81 @@ def _rope_threading_redesign():
 RECORDS = (*RECORDS, *_rope_threading_redesign())
 
 
+# bed_bolt (2026-10-16; runs/bed_bolt_design_20261012): the bed-frame corner bolt, one experimental setting, MuJoCo only.
+RECORDS = (*RECORDS, {'task_id': 'bed_bolt',
+  'variation_id': 'bed_bolt_crossbar',
+  'difficulty': None,
+  'family_id': 'bed_corner_bolt',
+  'model_revision': 'bed_bolt_v2_crossbar',
+  'implementation': 'topogym.tasks.bed_bolt.bed_bolt_crossbar:BedBoltCrossbarTask',
+  'aliases': ['base', 'crossbar'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+# bed_bolt's drives (2026-10-18; runs/robotangle_mujoco/bed_bolt/20261018_variants): bed_bolt_crossbar with another recess
+# in the bolt's head and the matching tips on the L-shaped tool.
+RECORDS = (*RECORDS, {'task_id': 'bed_bolt',
+  'variation_id': 'bed_bolt_torx',
+  'difficulty': None,
+  'family_id': 'bed_corner_bolt',
+  'model_revision': 'bed_bolt_v2_torx',
+  'implementation': 'topogym.tasks.bed_bolt.bed_bolt_drives:BedBoltTorxTask',
+  'aliases': ['torx'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+RECORDS = (*RECORDS, {'task_id': 'bed_bolt',
+  'variation_id': 'bed_bolt_square',
+  'difficulty': None,
+  'family_id': 'bed_corner_bolt',
+  'model_revision': 'bed_bolt_v2_square',
+  'implementation': 'topogym.tasks.bed_bolt.bed_bolt_drives:BedBoltSquareTask',
+  'aliases': ['square'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+RECORDS = (*RECORDS, {'task_id': 'bed_bolt',
+  'variation_id': 'bed_bolt_phillips',
+  'difficulty': None,
+  'family_id': 'bed_corner_bolt',
+  'model_revision': 'bed_bolt_v2_phillips',
+  'implementation': 'topogym.tasks.bed_bolt.bed_bolt_drives:BedBoltPhillipsTask',
+  'aliases': ['phillips'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+RECORDS = (*RECORDS, {'task_id': 'bed_bolt',
+  'variation_id': 'bed_bolt_slotted',
+  'difficulty': None,
+  'family_id': 'bed_corner_bolt',
+  'model_revision': 'bed_bolt_v2_slotted',
+  'implementation': 'topogym.tasks.bed_bolt.bed_bolt_drives:BedBoltSlottedTask',
+  'aliases': ['slotted'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+
+
+# clock_assembling (2026-10-16; runs/watch_assembly_design_20261014): a watch movement's gear train, one experimental
+# setting, MuJoCo only.
+RECORDS = (*RECORDS, {'task_id': 'clock_assembling',
+  'variation_id': 'clock_assembling_gear_train',
+  'difficulty': None,
+  'family_id': 'clock_gear_train',
+  'model_revision': 'clock_gear_train_v3',
+  'implementation': 'topogym.tasks.clock_assembling.clock_assembling_gear_train:ClockAssemblingGearTrainTask',
+  'aliases': ['base', 'gear_train'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+
+
 def _interlocked_claws_redesign():
     """The redesigned interlocked_claws tiers (keyhole gates; agent claws 2026-10-10/11)."""
     from topogym.tasks.interlocked_claws.redesign.registration import variation_records
@@ -1060,3 +1146,33 @@ def _fiber_bundling_redesign():
 
 
 RECORDS = (*RECORDS, *_fiber_bundling_redesign())
+
+
+# battery_replacement (2026-10-16; runs/controller_battery_design_20261014): the game controller battery swap, one
+# experimental setting, MuJoCo only.
+RECORDS = (*RECORDS, {'task_id': 'battery_replacement',
+  'variation_id': 'battery_replacement_xbox_aa',
+  'difficulty': None,
+  'family_id': 'xbox_aa',
+  'model_revision': 'xbox_aa_v3b',
+  'implementation': 'topogym.tasks.battery_replacement.battery_replacement_xbox_aa:BatteryReplacementXboxAaTask',
+  'aliases': ['base', 'xbox_aa'],
+  'status': 'integrated',
+  'reason': None,
+  'validation': 'not_runtime_validated',
+  'pool': 'experimental'})
+# caliper_sorting (2026-10-16, Jianwen; runs/caliper_sorting_design_20261014): look-alike sleeves measured with a
+# hand-held vernier caliper and sorted into the bins labelled with their readings. 2026-10-17 (caliper_sorting_v2): the
+# caliper's own unit and zero per scene, four sleeves of two classes, the slider's locking screw on its face.
+# 2026-10-18 (caliper_sorting_v3): the caliper fixed face up on a stand (a pinch on the beam's tail could not carry it).
+RECORDS = (*RECORDS, {'task_id': 'caliper_sorting',
+                      'variation_id': 'caliper_sorting_vernier',
+                      'difficulty': None,
+                      'family_id': 'vernier_caliper_sleeves',
+                      'model_revision': 'caliper_sorting_v3',
+                      'implementation': 'topogym.tasks.caliper_sorting.caliper_sorting_vernier:CaliperSortingVernierTask',
+                      'aliases': ['base', 'vernier'],
+                      'status': 'integrated',
+                      'reason': None,
+                      'validation': 'not_runtime_validated',
+                      'pool': 'experimental'})

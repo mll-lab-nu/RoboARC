@@ -49,10 +49,13 @@ def defaults(task_id, **parameters):
 def record_preset(task, folder):
     if task.config["scene_preset_id"] != SCENE_PRESET_ID:
         raise ValueError(f"Unknown scene_preset_id: {task.config['scene_preset_id']!r}")
-    from topogym.assets.scene_visuals import SURFACES
+    from topogym.assets.scene_visuals import LATE_SURFACES, SURFACES
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
+    parameters = task.identity_config()
+    named = json.dumps(parameters)
+    roles = {**SURFACES, **{k: v for k, v in LATE_SURFACES.items() if json.dumps(k) in named}}
     record = dict(scene_preset_id=SCENE_PRESET_ID, task_id=task.task_id,
-                  parameters=task.identity_config(), visual_roles=SURFACES)
+                  parameters=parameters, visual_roles=roles)
     (folder / "scene_preset.json").write_text(json.dumps(record, sort_keys=True, indent=2)+"\n")
     return {"scene_preset_id": SCENE_PRESET_ID}

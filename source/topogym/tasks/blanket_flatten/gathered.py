@@ -47,7 +47,8 @@ class GatheredBlanketTask(BlanketFlattenTask):
 
     def scene_resource(self, seed, config=None):
         """Tier archives live at seed_<N>; an instance whose seeded scene variation
-        (colour, pattern, centre) differs from the tier is frozen under seeded_v<version>/."""
+        moves the cloth (centre) away from the tier is frozen under seeded_v<version>/. A drawn
+        colour or pattern alone keeps the tier archive (appearance_parameters)."""
         folder = f"{seeded_folder()}/" if self.seeded_draw(config) else ""
         from topogym.world.physics.initial_state_compatibility import ARCHIVE_REVISION, resource_profile
         return f"blanket_flatten/{ARCHIVE_REVISION}/{resource_profile()}/{self.difficulty}/{folder}seed_{seed}/manifest.json"
@@ -58,7 +59,7 @@ class GatheredBlanketTask(BlanketFlattenTask):
         from topogym.tasks.scene_variation import axes
         merged = merge_parameters(cls.defaults, config or {})
         return any(_parameter_at(merged, axis["path"]) != _parameter_at(cls.defaults, axis["path"])
-                   for axis in axes(cls))
+                   for axis in axes(cls) if not axis.get("visual"))
 
     def initial_state_recipe(self):
         """The offline preparation that births this scene (scripts/prepare_blanket_initial_states.py --tier): controller,

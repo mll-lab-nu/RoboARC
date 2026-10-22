@@ -303,15 +303,15 @@ def merge_mjcf_entity(builder, spec, *, drop_visual=True) -> dict:
             excludes.append(pair)
             overlaps.append([a, b])
         record["birth_overlap_exclusions"] = overlaps
-    # <equality><connect> (orbits' middle tie: site tip_a to site tip_b), prefixed, under the entity's default class. The
-    # profile's mjcf_equality {solref, solimp} replaces the authored softness (the authored 5 ms tie is Genesis' soft
-    # constraint).
+    # <equality> (orbits' middle tie: a <connect> of site tip_a to site tip_b; bed_bolt's thread: a <weld> its task mechanism
+    # switches and a <joint> coupling), prefixed, under the entity's default class. The profile's mjcf_equality {solref,
+    # solimp} replaces the authored softness (the authored 5 ms tie is Genesis' soft constraint).
     override = builder.profile.get("mjcf_equality")
     for child in (src.find("equality") if src.find("equality") is not None else ()):
-        if child.tag != "connect":
+        if child.tag not in ("connect", "weld", "joint"):
             raise NotImplementedError(f"{name}: <equality><{child.tag}> in an MJCF entity")
         eq = copy.deepcopy(child)
-        for key in ("name", "site1", "site2", "body1", "body2"):
+        for key in ("name", "site1", "site2", "body1", "body2", "joint1", "joint2"):
             if eq.get(key) is not None:
                 eq.set(key, f"{name}{SEP}{eq.get(key)}")
         eq.set("class", f"{cls}/{eq.get('class')}" if eq.get("class") is not None else cls)

@@ -8,9 +8,10 @@ Genesis' solver substeps. After a tick:
   - both are cached as the tick's readout, which capture_state stores and restore_state puts back, so a restored
     state reads exactly as it did when it was captured.
 State: mj_getState(mjSTATE_INTEGRATION) (time, qpos, qvel, act, warmstart, ctrl, applied forces, eq_active, ...) plus
-the grasp welds' anchors (model.eq_data rows, which acquisition writes), their slip windows, the grasp manager's state
-and the elastoplastic joints' rest orientations (model.qpos_spring rows of profile plastic, which the return mapping
-writes). Stepping is single-threaded and deterministic: the same state and controls give the same bits.
+the grasp welds' anchors (model.eq_data rows, which acquisition writes), their slip windows, the grasp manager's state,
+the elastoplastic joints' rest orientations (model.qpos_spring rows of profile plastic, which the return mapping
+writes) and a task mechanism's own state (set_mechanism). Stepping is single-threaded and deterministic: the same state
+and controls give the same bits.
 A non-finite state or a MuJoCo instability warning (bad qacc / qpos / qvel, after which MuJoCo resets its data) faults
 the world and raises FloatingPointError, as GenesisWorld.read_state does on a non-finite state.
 """
@@ -79,6 +80,7 @@ class MujocoWorldState:
     grasp_slip: Any = None           # the grasp welds' slip windows (grasp.py)
     eq_obj2id: Any = None            # model.eq_obj2id (a cloth's grasp pins are re-targeted at acquisition: grasp_cloth.py)
     plastic_rest: Any = None         # the elastoplastic joints' rest orientations (profile plastic)
+    mechanism: Any = None            # a task mechanism's snapshot (set_mechanism), with the model fields it writes
 
 
 class MujocoWorld:
@@ -127,6 +129,7 @@ class MujocoWorld:
         self.clamp_stats = None             # its activations since the world was built (as RopeChain.clamp_stats)
         self._attachments = ()              # tasks.base.AttachmentSpec: rope ends welded to rigid entities
         self._attached = {}                 # attachment -> (rigid body, welded link bodies, their birth offsets)
+        self._mechanism = None              # a task's mechanism stepped with the physics (set_mechanism)
 
     @classmethod
     def from_tabletop(cls, env_cfg, robot_cfg, *, physics_options=None, compute_backend="cpu", precision="64", seed=0,
@@ -369,6 +372,21 @@ class MujocoWorld:
         from .grasp import MujocoGraspBackend
         self._grasp_manager = GraspManager(MujocoGraspBackend(self, robot, config), config)
 
+    def set_mechanism(self, mechanism):
+        """A task's own mechanism, stepped with the physics (TaskDefinition.mujoco_mechanism; docs/rcb/MUJOCO_CORE.md,
+        "Task mechanisms"). It may switch the task's own equalities (data.eq_active, model.eq_data rows) and write model
+        fields of the task's own geoms and joints (contact bits, stiffness); it never touches the robot. Its calls:
+          tick(model, data)     after every tick's MuJoCo steps, before the tick's readout;
+          capture() / restore(snapshot)  with every checkpoint (capture_state / restore_state): its own state and the
+                                model fields it writes;
+          read()                a dict of finite numbers and flags, read_state()["mechanism"].
+        Set once, after build and before any tick. A world without one steps, captures and reads exactly as before."""
+        self._require_built()
+        if self.physics_step or self._mechanism is not None:
+            raise RuntimeError("A task mechanism is set once, at episode birth")
+        self._mechanism = mechanism
+        self._state_changed()
+
     def configure_final_settling(self, rigid_targets, *, exact_robot_contact=False):
         """Read-only release-confirmation evidence (release.py) for tasks that require release."""
         self._require_built()
@@ -408,6 +426,8 @@ class MujocoWorld:
         self._require_built()
         if self._cloths:
             raise NotImplementedError("a settled state with cloths (their tick state) is not exported")
+        if self._mechanism is not None:
+            raise NotImplementedError("a settled state with a task mechanism (its own state) is not exported")
         m, d = self.model, self.data
         spec = mujoco.mjtState.mjSTATE_INTEGRATION
         state = np.empty(mujoco.mj_stateSize(m, spec))
@@ -497,6 +517,8 @@ class MujocoWorld:
                 collector.end()
             if sum(int(d.warning[w].number) for w in self._BAD) != bad:
                 raise FloatingPointError("MuJoCo reported an unstable state (bad qacc / qpos / qvel) and reset its data")
+            if self._mechanism is not None:  # a task mechanism, after the tick's steps and before its readout
+                self._mechanism.tick(m, d)
             self.physics_step += 1
             self._finish_tick()
             if self._grasp_manager is not None:
@@ -822,6 +844,8 @@ class MujocoWorld:
             result["release_geometry"] = self._release_geometry.read()
         if self._contact_collector is not None:
             result["contact_events"] = self._contact_collector.read()
+        if self._mechanism is not None:
+            result["mechanism"] = self._mechanism.read()
         result["terminal_contract_version"] = self.terminal_contract_version
         try:
             if self._sources_finite(lin, ang):
@@ -880,7 +904,8 @@ class MujocoWorld:
                                 None if self._contact_collector is None else self._contact_collector.read(),
                                 None if self._grasp_manager is None else self._grasp_manager.backend.capture_slip(),
                                 eq_obj2id=np.array(m.eq_obj2id) if self._cloths else None,
-                                plastic_rest=None if self._plastic is None else np.array(m.qpos_spring[self._plastic["qidx"]]))
+                                plastic_rest=None if self._plastic is None else np.array(m.qpos_spring[self._plastic["qidx"]]),
+                                mechanism=None if self._mechanism is None else self._mechanism.capture())
 
     def restore_state(self, state):
         import mujoco
@@ -898,6 +923,10 @@ class MujocoWorld:
                 if state.plastic_rest is None:
                     raise ValueError("WorldState lacks the elastoplastic joints' rest orientations")
                 m.qpos_spring[self._plastic["qidx"]] = state.plastic_rest
+            if self._mechanism is not None:
+                if state.mechanism is None:
+                    raise ValueError("WorldState lacks the task mechanism's state")
+                self._mechanism.restore(state.mechanism)
             mujoco.mj_setState(m, d, state.integration, mujoco.mjtState.mjSTATE_INTEGRATION)
             # The instability counters restart at zero, as mj_resetData does: they lie outside mjSTATE_INTEGRATION, and
             # MuJoCo's auto-reset after a bad state zeroes them and then counts once, so a count kept from an earlier fault

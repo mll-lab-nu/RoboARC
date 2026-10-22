@@ -17,6 +17,7 @@ import numpy as np
 
 from topogym.assets.geometry.slotted_chain import (
     COLOURS, EYE_LOCAL_M, LINKS, ChainLayout, fixture_boxes, part_vertices, scene_xml)
+from topogym.assets.scene_visuals import surface
 from topogym.evaluation.task_metrics import body_points, body_points_batch, quiet_body
 from topogym.utils.geometry.regions import placement_measurements
 from ..base import EntitySpec, TaskSpec, merge_parameters
@@ -47,6 +48,14 @@ class SlottedPostRingHardChainTask(SlottedPostRingHardTask):
         """The setting's geometry with the chain's longer cord (slotted_chain.ChainLayout)."""
         return ChainLayout(**self.config["geometry"])
 
+    def link_colours(self):
+        """The chain links' look (appearance only: the links' visual twins). At the default cord_finish the class
+        palette, else the finish's colour alternating with half its brightness (still a chain, not a rope)."""
+        if self.config["cord_finish"] == self.defaults["cord_finish"]:
+            return self.colours["links"]
+        r, g, b, _ = surface(self.config["cord_finish"])["color"]
+        return tuple(" ".join(f"{v:.4g}" for v in (k*r, k*g, k*b, 1.)) for k in (.5, 1.))
+
     def grasp_assist(self):
         """contact_weld_v1 on the ring only, its region round its whole body. The beads, the discs and the chain's
         links get no weld region."""
@@ -59,7 +68,7 @@ class SlottedPostRingHardChainTask(SlottedPostRingHardTask):
         preset = record_preset(self, asset_dir)
         self.origin = np.r_[np.asarray(self.config["center_xy_m"], float), table_height_m]
         self.layout = self.make_layout().validate()
-        xml, points = scene_xml(self.layout, LINKS, self.colours)
+        xml, points = scene_xml(self.layout, LINKS, {**self.colours, "links": self.link_colours()})
         path = Path(asset_dir)/f"{ENTITY}.xml"
         path.write_text(xml)
         self.chord_m = float(np.linalg.norm(points[1]-points[0]))

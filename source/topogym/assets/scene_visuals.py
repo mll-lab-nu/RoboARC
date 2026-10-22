@@ -11,12 +11,21 @@ SURFACES = {
     "orange_rope": dict(color=(.82, .27, .045, 1.), metallic=0., roughness=.88),
     "golden_rope": dict(color=(.92, .61, .035, 1.), metallic=0., roughness=.88),
 }
+# Roles added after scene_preset.json began recording SURFACES: kept out of it so every existing scene's record stays
+# byte-identical; record_preset adds the ones a scene's parameters name. brass: Horseshoe's third target-ring look
+# (appearance seeds, 2026-10-20), apart from the silver horseshoes and the default copper ring. blue_rope, black_rope:
+# Rope Threading's rope looks of appearance seeds 1 and 2 (2026-10-21), apart from every ring and grommet colour.
+LATE_SURFACES = {
+    "brass": dict(color=(.78, .60, .25, 1.), metallic=.9, roughness=.35),
+    "blue_rope": dict(color=(.04, .12, .60, 1.), metallic=0., roughness=.88),
+    "black_rope": dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.88),
+}
 
 
 def surface(role):
     """Fresh surface options; never mutate physical friction/density/constraints."""
     try:
-        return deepcopy(SURFACES[role])
+        return deepcopy({**SURFACES, **LATE_SURFACES}[role])
     except KeyError as exc:
         raise ValueError(f"Unknown task visual role: {role}") from exc
 
@@ -85,6 +94,27 @@ def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
     rest = data[20+length:]
     path.write_bytes(struct.pack("<4sII", b"glTF", version, 20+len(chunk)+len(rest))
                      + struct.pack("<I4s", len(chunk), b"JSON") + chunk + rest)
+
+
+def scale_urdf_color(path, rgb_scale):
+    """Rescale a URDF's visual material colours in place, as scale_glb_color does a GLB's.
+
+    A URDF visual's own ``<material><color>`` is the colour Nyx draws for its mesh,
+    not the mesh file's baseColorFactor, so a tint must change both. Only the
+    ``rgba`` values inside ``<visual>`` change; the rest of the file keeps its bytes.
+    """
+    import re
+    from pathlib import Path
+    path = Path(path)
+
+    def colour(match):
+        base = [float(v) for v in match.group(2).split()]
+        return match.group(1) + " ".join(str(min(1., base[i]*float(rgb_scale))) for i in range(3)) \
+            + f" {base[3]:g}" + match.group(3)
+
+    def visual(match):
+        return re.sub(r'(<color\s+rgba=")([^"]+)(")', colour, match.group(0))
+    path.write_text(re.sub(r"<visual\b.*?</visual>", visual, path.read_text(), flags=re.S))
 
 
 def localize_generated_urdfs(folder):

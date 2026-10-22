@@ -167,7 +167,7 @@ def shape_in_root_frame(paths):
     return (paths-center)@np.column_stack((np.cross(y, z), y, z))
 
 
-def write_bundle(path, layout, paths, *, fixture=False):
+def write_bundle(path, layout, paths, *, fixture=False, strand_colors=COLORS, jacket_color=JACKET_COLOR):
     root = ET.Element("mujoco", model="fiber_bundling")
     ET.SubElement(root, "compiler", angle="radian", autolimits="true")
     defaults = ET.SubElement(root, "default")
@@ -192,16 +192,16 @@ def write_bundle(path, layout, paths, *, fixture=False):
                           damping=str(layout.trunk_damping), stiffness="0", armature="0.000001")
         ET.SubElement(parent, "geom", name=f"trunk_shell_{i:02d}", type="cylinder",
                       fromto=vector_text((0, 0, 0, step, 0, 0)), size=str(layout.trunk_radius_m),
-                      group="3", rgba=vector_text(JACKET_COLOR))
+                      group="3", rgba=vector_text(jacket_color))
         ET.SubElement(parent, "geom", name=f"trunk_joint_cover_{i:02d}", type="sphere",
-                      size=str(layout.trunk_radius_m), group="3", rgba=vector_text(JACKET_COLOR))
+                      size=str(layout.trunk_radius_m), group="3", rgba=vector_text(jacket_color))
         ET.SubElement(parent, "geom", name=f"jacket_visual_{i:02d}", type="mesh",
                       mesh="jacket_end_segment" if i == layout.trunk_segments-1 else "jacket_segment",
-                      contype="0", conaffinity="0", mass="0", rgba=vector_text(JACKET_COLOR))
+                      contype="0", conaffinity="0", mass="0", rgba=vector_text(jacket_color))
         if i == layout.trunk_segments-1:
             ET.SubElement(parent, "geom", name="jacket_cut_lip", type="mesh", mesh="jacket_lip",
                           pos=vector_text((step-.001, 0, 0)), contype="0", conaffinity="0", mass="0",
-                          rgba=vector_text(JACKET_COLOR))
+                          rgba=vector_text(jacket_color))
             ET.SubElement(parent, "geom", name="jacket_inner_filler", type="cylinder",
                           fromto=vector_text((step-.0015, 0, 0, step-.001, 0, 0)),
                           size=str(layout.trunk_radius_m*.855), contype="0", conaffinity="0", mass="0",
@@ -223,14 +223,15 @@ def write_bundle(path, layout, paths, *, fixture=False):
             inset = 2.5*layout.fiber_radius_m if j == 0 else 0.
             ET.SubElement(body, "geom", name=f"fiber_surface_{i:02d}_{j:02d}", type="capsule",
                           fromto=vector_text((inset, 0, 0, np.linalg.norm(b-a), 0, 0)),
-                          size=str(layout.fiber_radius_m), group="3", rgba=vector_text(COLORS[i % len(COLORS)]))
+                          size=str(layout.fiber_radius_m), group="3",
+                          rgba=vector_text(strand_colors[i % len(strand_colors)]))
             length = float(np.linalg.norm(b-a))
             tip = j == layout.fiber_segments-1
             exposed = min(COPPER_EXPOSURE_M, length*.4)
             ET.SubElement(body, "geom", name=f"insulation_{i:02d}_{j:02d}", type="cylinder" if tip else "capsule",
                           fromto=vector_text((0, 0, 0, length-exposed if tip else length, 0, 0)),
                           size=str(layout.fiber_radius_m), contype="0", conaffinity="0", mass="0",
-                          rgba=vector_text(COLORS[i % len(COLORS)]))
+                          rgba=vector_text(strand_colors[i % len(strand_colors)]))
             if tip:
                 # Seven fine copper filaments stay inside the collision capsule.
                 for k in range(7):
@@ -245,7 +246,7 @@ def write_bundle(path, layout, paths, *, fixture=False):
     ET.ElementTree(root).write(path, encoding="unicode", xml_declaration=True)
 
 
-def generate_assets(folder, layout=None):
+def generate_assets(folder, layout=None, *, strand_colors=COLORS, jacket_color=JACKET_COLOR):
     import trimesh
     from trimesh.visual.material import PBRMaterial
     from trimesh.visual.texture import TextureVisuals
@@ -275,12 +276,13 @@ def generate_assets(folder, layout=None):
         radial[:, 0] = 0
         tube.vertex_normals = radial/np.linalg.norm(radial, axis=1)[:, None]
         tube.export(folder/f"{name}.obj", include_normals=True)
-    write_bundle(folder/"bundle.xml", layout, paths)
+    write_bundle(folder/"bundle.xml", layout, paths, strand_colors=strand_colors, jacket_color=jacket_color)
     ring_report = write_ring(folder/"ring.urdf", layout.ring, color=(.86, .60, .20, 1))
     preview = trimesh.Scene()
     for name, points, radius, color in [("trunk", np.array([[0, 0, 0], [layout.trunk_length_m, 0, 0]]),
-                                         layout.trunk_radius_m, JACKET_COLOR)] + [
-            (f"fiber_{i:02d}", p, layout.fiber_radius_m, COLORS[i % len(COLORS)]) for i, p in enumerate(paths)]:
+                                         layout.trunk_radius_m, jacket_color)] + [
+            (f"fiber_{i:02d}", p, layout.fiber_radius_m, strand_colors[i % len(strand_colors)])
+            for i, p in enumerate(paths)]:
         points = points.copy()
         end = points[-1].copy()
         direction = (points[-1]-points[-2])/np.linalg.norm(points[-1]-points[-2])
@@ -294,7 +296,7 @@ def generate_assets(folder, layout=None):
         finish(mesh, color, .68 if name == "trunk" else .34)
         preview.add_geometry(mesh, node_name=name, geom_name=name)
         if name == "trunk":
-            preview.add_geometry(finish(lip.copy().apply_translation(end-[.001, 0, 0]), JACKET_COLOR, .68),
+            preview.add_geometry(finish(lip.copy().apply_translation(end-[.001, 0, 0]), jacket_color, .68),
                                  node_name="jacket_cut_lip", geom_name="jacket_cut_lip")
             filler = trimesh.creation.cylinder(radius=radius*.855, sections=48,
                 segment=(end-[.0015, 0, 0], end-[.001, 0, 0]))
@@ -445,11 +447,11 @@ class AnchoredLayout:
         ]
 
 
-def part_color(name):
-    return next((color for prefix,color in TERMINAL_COLORS.items() if name.startswith(prefix)), JACKET_COLOR)
+def part_color(name, jacket_color=JACKET_COLOR):
+    return next((color for prefix,color in TERMINAL_COLORS.items() if name.startswith(prefix)), jacket_color)
 
 
-def write_anchored_bundle(path, layout, anchor):
+def write_anchored_bundle(path, layout, anchor, *, jacket_color=JACKET_COLOR):
     root = ET.parse(path).getroot()
     world = root.find("worldbody")
     trunk = world.find("body")
@@ -459,7 +461,7 @@ def write_anchored_bundle(path, layout, anchor):
         trunk.remove(free)
     terminal = ET.SubElement(world,"body",name="fixed_terminal",pos="0 0 0")
     for name,kind,position,size,collision in anchor.terminal_parts():
-        attrs = dict(name=name,type=kind,rgba=vector_text(part_color(name)))
+        attrs = dict(name=name,type=kind,rgba=vector_text(part_color(name,jacket_color)))
         attrs["fromto" if kind == "cylinder" else "pos"] = vector_text(position)
         attrs["size"] = vector_text(np.asarray(size)/2 if kind == "box" else size)
         if not collision:
@@ -478,7 +480,7 @@ def write_anchored_bundle(path, layout, anchor):
                 damping=str(layout.trunk_damping),stiffness="0",armature="0.000001")
         ET.SubElement(body,"geom",name=f"lead_jacket_{i:02d}",type="capsule",
             fromto=vector_text((0,0,0,np.linalg.norm(b-a),0,0)),size=str(layout.trunk_radius_m),
-            rgba=vector_text(JACKET_COLOR))
+            rgba=vector_text(jacket_color))
         previous, previous_rotation, previous_origin = body, rotation, a
     trunk.set("pos",vector_text(previous_rotation.inv().apply(-previous_origin)))
     trunk.set("quat",vector_text(previous_rotation.inv().as_quat()[[3,0,1,2]]))
@@ -556,10 +558,11 @@ def write_dynamic_material_visuals(path):
     return records
 
 
-def generate_anchored_assets(folder, layout=None, anchor=None):
+def generate_anchored_assets(folder, layout=None, anchor=None, *, strand_colors=COLORS, jacket_color=JACKET_COLOR):
+    """strand_colors / jacket_color: the strands' and the jacket's look (appearance only; defaults: today's)."""
     import trimesh
     folder = Path(folder)
-    layout, report = generate_assets(folder,layout)
+    layout, report = generate_assets(folder,layout,strand_colors=strand_colors,jacket_color=jacket_color)
     anchor = anchor or AnchoredLayout()
     lead = anchor.lead()
     coarse = np.vstack([lead, np.column_stack((np.arange(1,layout.trunk_segments+1)*
@@ -569,21 +572,21 @@ def generate_anchored_assets(folder, layout=None, anchor=None):
         for j,(c,d) in enumerate(zip(coarse[:-1],coarse[1:])) if j>i+1)
     if clearance <= 0:
         raise ValueError(f"Slack lead self-intersects ({clearance} m)")
-    write_anchored_bundle(folder/"bundle.xml",layout,anchor)
+    write_anchored_bundle(folder/"bundle.xml",layout,anchor,jacket_color=jacket_color)
     material_visuals = write_dynamic_material_visuals(folder / "bundle.xml")
     preview = trimesh.load(folder/"bundle_initial.glb",force="scene")
     for i,(a,b) in enumerate(zip(lead[:-1],lead[1:])):
         mesh = trimesh.creation.cylinder(radius=layout.trunk_radius_m,segment=(a,b),sections=32)
-        mesh.visual.vertex_colors=np.array(JACKET_COLOR)*255
+        mesh.visual.vertex_colors=np.array(jacket_color)*255
         preview.add_geometry(mesh,node_name=f"lead_{i:02d}")
         joint=trimesh.creation.icosphere(radius=layout.trunk_radius_m,subdivisions=2).apply_translation(a)
-        joint.visual.vertex_colors=np.array(JACKET_COLOR)*255
+        joint.visual.vertex_colors=np.array(jacket_color)*255
         preview.add_geometry(joint,node_name=f"lead_joint_{i:02d}")
     for name,kind,position,size,collision in anchor.terminal_parts():
         if kind=="box": mesh=trimesh.creation.box(extents=size).apply_translation(position)
         elif kind=="sphere": mesh=trimesh.creation.icosphere(radius=size[0],subdivisions=2).apply_translation(position)
         else: mesh=trimesh.creation.cylinder(radius=size[0],segment=np.array(position).reshape(2,3),sections=32)
-        mesh.visual.vertex_colors=np.array(part_color(name))*255
+        mesh.visual.vertex_colors=np.array(part_color(name,jacket_color))*255
         preview.add_geometry(mesh,node_name=name)
     preview.export(folder/"bundle_initial.glb")
     preview.to_geometry().export(folder/"bundle_initial.obj")

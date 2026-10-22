@@ -78,7 +78,7 @@ def ring_parts(vertices, faces):
 
 
 def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint_damping=2e-4, young_modulus_pa=0.,
-                        armature=1e-6, friction=.3):
+                        armature=1e-6, friction=.3, cord_rgba=CORD_RGBA):
     """Write cord.xml: the handle (free root) with one chain branch from each eye, joined at the middle.
 
     points are the n+1 link roots and final tip from resample_links, eye to eye. Link i always has its frame at
@@ -88,7 +88,8 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
     The teammate standard (2026-10-07): a handle root with two branches keeps the tree shallow; ball-joint damping 2e-4,
     armature 1e-6, friction 0.3 with condim 3, mass from each link's cylinder only (the capsule's end spheres overlap the
     neighbours'), bending stiffness from a Young's modulus, k = E pi r^4 / (4 L).
-    Returns (path, link names, link lengths, m).
+    cord_rgba colours the links (appearance only; a non-default colour on visual-only twins). Returns (path, link
+    names, link lengths, m).
     """
     folder = Path(folder)
     points = np.asarray(points, dtype=float)
@@ -121,6 +122,13 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
         ET.SubElement(link, "geom", name=f"cord_{i:02d}", type="capsule", fromto=_v([0., 0., 0., lengths[i], 0., 0.]),
                       size=f"{radius_m:.9g}", mass=f"{density*np.pi*radius_m**2*lengths[i]:.9g}", rgba=CORD_RGBA,
                       **LINK_BITS)
+        if cord_rgba != CORD_RGBA:
+            # A non-default cord_finish: the renderer draws a colliding geom of groups 0-2 in one grey whatever its
+            # rgba, so the colour goes on a visual-only twin just around the link (mass 0, no contact); the colliding
+            # link keeps its bytes.
+            ET.SubElement(link, "geom", name=f"cord_{i:02d}_visual", type="capsule",
+                          fromto=_v([0., 0., 0., lengths[i], 0., 0.]), size=f"{radius_m*1.03:.9g}", mass="0",
+                          contype="0", conaffinity="0", rgba=cord_rgba)
         links[i] = link
         return link
 

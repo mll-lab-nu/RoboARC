@@ -58,6 +58,27 @@ class HedgehogOwlTask(HedgehogInCageTask):
         preset = record_preset(self, folder)
         pose = cfg["owl_pose"]
         report = geometry.write_assets(folder, pose)
+        if cfg["wood_tint"] != 1.:
+            # Appearance only (the family's wood_tint, which this declare does not inherit): the cage's wood GLB (its
+            # URDF names no colour, so Nyx draws the GLB's baseColorFactor) and the owl's wooden visual-only geoms (the
+            # drawn twins; the colliding geoms in group 3 keep their bytes).
+            import re
+            from topogym.assets.scene_visuals import scale_glb_color
+            tint = float(cfg["wood_tint"])
+            scale_glb_color(folder / "owl_cage_meshes" / "visual.glb", tint, materials=("wood",))
+            wood = {geometry._rgba(c) for c in (geometry.WOOD_D, geometry.WOOD_W)}
+
+            def darker(match):
+                if match.group(1) not in wood:
+                    return match.group(0)
+                r, g, b, a = (float(v) for v in match.group(1).split())
+                return f'rgba="{geometry._rgba((min(1., r*tint), min(1., g*tint), min(1., b*tint), a))}"'
+
+            def visual(match):
+                geom = match.group(0)
+                return re.sub(r'rgba="([^"]+)"', darker, geom) if 'contype="0" conaffinity="0" mass="0"' in geom else geom
+            owl = folder / "owl.xml"
+            owl.write_text(re.sub(r"<geom\b[^>]*/>", visual, owl.read_text()))
         if report["initial_pose"]["clearance_to_cage_m"] < -TASK_CONTACT_PENETRATION_M:
             raise ValueError(f"{self.variation_id}: the owl starts deeper in the cage than the task allows")
         xy = np.asarray(cfg["center_xy_m"], dtype=float)
