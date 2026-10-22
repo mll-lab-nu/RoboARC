@@ -38,6 +38,58 @@ GraspManager, the Session and its rules (`rcb_topogym.py`), the standard service
 - `physics_step`, `sim_time_s`, `physics_dt_s`, `entities`, `cameras` (empty until the render bridge attaches), `close()`.
 - `contact_events` in `read_state()` (tasks whose entities declare `contact_roles`, `contacts.py`): GenesisWorld's
   schema-1 per-substep contact evidence, sampled after every MuJoCo step of the tick; part of the checkpoints.
+- `set_mechanism(mechanism)`: a task's own mechanism (below, "Task mechanisms"); `read_state()["mechanism"]`.
+
+### Task mechanisms
+
+A task can own a mechanism that MuJoCo has no element for: `TaskDefinition.mujoco_mechanism(world)` returns an object,
+and `Env.reset` hands it to `MujocoWorld.set_mechanism` right after the task binds, before any tick. A world holds one;
+a task with several (gears, press fits, screws) returns one object that calls its parts in turn and joins their
+snapshots and readings. A world without a mechanism steps, captures and reads exactly as before: every task without one
+returns None (bed_bolt's evidence: `<design record>/robotangle_mujoco/bed_bolt/20261016/neutrality/`).
+
+The calls:
+
+- `tick(model, data)`: once per World tick (2.5 ms), after the tick's MuJoCo steps and before the tick's readout. The
+  contacts in `data` are the tick's last step's; the kinematics are that step's start (one step old).
+- `capture()`: the mechanism's own state and every model field it has written, as plain values (bools, floats, lists of
+  floats). It is stored in every checkpoint (`capture_state`; the Session restores the birth checkpoint before every
+  episode).
+- `restore(snapshot)`: puts all of it back, the model fields included, so a restored world steps exactly as the
+  captured one did.
+- `grasp_allowed(entity, link)` (optional): the assisted grasp (contact_weld_v1, `grasp.py`) asks it every tick. A
+  target it refuses is no candidate, and a binding on it is lost (reason `target_not_graspable`); the fingers' contacts
+  stay, so a physical pinch still holds by friction. bed_bolt refuses the bolt while its thread is engaged.
+- `read()`: finite numbers and flags, `read_state()["mechanism"]`; the task's predicates read it there. It must expose
+  all of `capture()`'s discrete state (or a digest of it): the instance's state_sha hashes the tick's `read_state()`, so a
+  restored world whose mechanism differs (a switch, a flag, a written model field) must not hash the same.
+
+What a tick may change: only the task's own elements, never the robot's. `data.eq_active` of the task's equalities and
+their `model.eq_data` rows (a weld's relative pose, written when it is switched on); the contact bits of the task's own
+geoms (`model.geom_contype` / `geom_conaffinity`); parameters of the task's own joints (`model.jnt_stiffness`). It must
+be a deterministic function of the model, the data and its own state: no clock, no randomness, no iteration over an
+unordered set. A settled birth (`export_settled_state`) with a mechanism is not exported yet.
+
+What keeps a mechanism clean under the stress observer (docs/simulator/STRESS_VALIDATION.md), each learned on bed_bolt:
+
+- **Couplings are constraints in MuJoCo's solver**, not state written between steps: the observer books the work of
+  every equality and limit, never a qpos / qvel edit. bed_bolt's lead is a `<joint>` equality (slide = lead / 2 pi x spin;
+  a gear mesh is the same element with its ratio), the seat a joint range limit, the caught bolt a `<weld>` switched by
+  `eq_active`. bed_bolt writes qpos once, when the thread catches, and only to its near-massless carriage (velocities
+  zeroed), so the weld can be anchored where the bolt already is.
+- **Constraints that carry the task's loads are nearly hard.** On the exact constraint diagonal MuJoCo's defaults are
+  soft: a joint range limit at the default 20 ms let a key turned against the seated head push the slide 1.3 mm past
+  the seat; a joint's friction loss at the default impedance crept about 1 rad/s under a load below its limit (the bolt
+  screwed itself in during every failed push of the key). bed_bolt sets its limits to `solreflimit` 2 dt with damping
+  ratio 2 and `solimplimit` .99 .999, and the friction that must hold to `solreffriction` 2 dt and `solimpfriction`
+  .99 .999.
+- **Contacts switched off come back only when nothing overlaps them.** Switched on into an overlap, they push the parts
+  apart with the energy of that overlap (the first observer check: a key drawn out of the socket after a slip, the
+  socket's contacts back on at once, 0.70 J stored against it). bed_bolt keeps them off while `mj_geomDistance` of any
+  pair is negative and checks again every tick.
+- **Prefer switching equalities to changing a joint's stiffness**: the observer caches joint stiffnesses at its start
+  (an entity's spring potential), so a changed stiffness puts its books off by 1/2 dk theta^2. bed_bolt's tilt stiffness
+  step at 2 engaged turns (2e-4 -> 3 N m/rad, under a degree of tilt) reads CLEAN.
 
 ### Readout timing (one tick)
 
@@ -126,7 +178,8 @@ It writes:
     vertices (below);
 - task entities: `urdf` (any tree of fixed, revolute and prismatic joints), `mesh`, `box`, `sphere`, `cylinder`, and
   `mjcf` (`mjcf_entity.merge_mjcf_entity`: the authored articulated tree under `<entity>::` names, visual-only geoms
-  dropped, every parent-child body pair excluded from contact as in Genesis).
+  dropped, every parent-child body pair excluded from contact as in Genesis; its `<equality>` `<connect>`, `<weld>` and
+  `<joint>` entries kept, prefixed, active or not as authored: a task mechanism may switch them, below).
   - URDF inertials are copied exactly.
   - Collision primitives stay primitives.
   - A collision mesh collides as its convex hull, or as CoACD hulls when the profile sets `coacd`. The hulls are cached

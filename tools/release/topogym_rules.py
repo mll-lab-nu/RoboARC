@@ -7,7 +7,8 @@ sampling, edge cases), read from his task code at 2ec4b8d6 (build78/predicates_t
 citations), with the tier's values from the frozen instance.json. It repeats nothing his text says and contradicts none
 of it. No positions or poses: conditions, thresholds, names and sizes only (the limited-mode rule)."""
 
-RIGID = {"cast_coil", "cast_keyhole", "interlocked_claws", "hedgehog_in_cage", "horseshoe_ring"}
+RIGID = {"cast_coil", "cast_keyhole", "interlocked_claws", "hedgehog_in_cage", "horseshoe_ring", "bed_bolt",
+         "clock_assembling", "battery_replacement", "caliper_sorting"}
 SOFT = {"knot_untying", "rope_threading", "orbits", "slotted_post_ring"}
 # The tooling's physical-validity policy (rcb_topogym.py, tooling v16; ci_checks/test-topogym-safety-rules.py checks the
 # numbers match): it replaces the instant volume-failure wording of his text (the task text itself states the contact
@@ -91,16 +92,33 @@ def _square_mm(inst):
 
 def claws_separation(inst):
     """True for the interlocked_claws settings whose goal is the whole-piece separation (easy / medium / hard, Cast ABC,
-    Rotor: InterlockedClawsTask.separation_only, terminal revision claws_separation_*), not a placement in the goal
-    square (very_easy / easier and the rd tiers)."""
+    Rotor: InterlockedClawsTask.separation_only, terminal revision claws_separation_*; Cast Trinity's three pieces pair by
+    pair, terminal revision trinity_pairwise_separation_*), not a placement in the goal square (very_easy / easier and
+    the rd tiers)."""
     goal = (inst or {}).get("public_goal") or {}
-    return goal.get("task_id") == "interlocked_claws" and str(goal.get("terminal_revision", "")).startswith("claws_separation")
+    return goal.get("task_id") == "interlocked_claws" and str(goal.get("terminal_revision", "")).startswith(
+        ("claws_separation", "trinity_pairwise_separation"))
 
 
-def claws_separation_words(minimum_separation_m=.01):
+def claws_three_pieces(inst):
+    """Cast Trinity: the separation of three pieces, every two of them (trinity_terminal.pairwise_separation_candidate)."""
+    goal = (inst or {}).get("public_goal") or {}
+    return str(goal.get("terminal_revision", "")).startswith("trinity_pairwise_separation")
+
+
+def claws_separation_words(minimum_separation_m=.01, three=False):
     """The grader-details line of the whole-piece separation (topogym/tasks/interlocked_claws/terminal.py
-    separation_candidate): what it measures and his text does not state. It replaces the goal-square and separator lines
-    of the placement families, which this goal does not check."""
+    separation_candidate; three pieces: trinity_terminal.pairwise_separation_candidate, every two of them): what it
+    measures and his text does not state. It replaces the goal-square and separator lines of the placement families, which
+    this goal does not check."""
+    if three:
+        return ("Separation as the grader measures it: for every two of the three pieces, every vertex of both pieces' "
+                "visual and collision meshes counts, and the gap is measured along ten directions only: the three world "
+                "axes, each of the two pieces' own three body axes, and the line between the two pieces' centres (the mean "
+                "of each piece's vertices). For every two pieces, along at least one of them they must be at least "
+                f"{_mm(minimum_separation_m, 0)} apart; a separating plane in any other direction does not count. The green "
+                "dashed square on the table is not part of this goal: neither containment in it nor a separator plane is "
+                "checked.")
     return ("Separation as the grader measures it: every vertex of both pieces' visual and collision meshes counts, and "
             "the gap is measured along ten directions only: the three world axes, each piece's own three body axes, and "
             "the line between the two pieces' centres (the mean of each piece's vertices). Along at least one of them the "
@@ -120,7 +138,7 @@ def grader_details(fam, inst, *, limited):
     window_ticks = max(1, math.ceil(CONTACT_RULE["window_s"] / dt - 1e-12))
     out = []
     if claws_separation(inst):
-        out.append(claws_separation_words(tp.get("minimum_separation_m", .01)))
+        out.append(claws_separation_words(tp.get("minimum_separation_m", .01), three=claws_three_pieces(inst)))
     elif fam in PLACEMENT:
         side = _square_mm(inst)
         if side:
@@ -187,6 +205,12 @@ def grader_details(fam, inst, *, limited):
         out.append(f"Simulator breakdown ({_or(broken)}): the episode ends as an infrastructure error, not your failure, "
                    f"unless an arm was forcing (even for one tick) within the {ps['attribution_s']:g} s before it: then it is "
                    "your failure (forced_breakdown: what broke and what forced it).")
+    if fam == "clock_assembling":
+        out.append("The rules (seating, the tooth-on-tooth gates, meshing, the screws' turns, the bridge's fixing, the "
+                   "click and the run test's timing) are applied after every physics tick "
+                   f"({dt * 1000:g} ms); the success conditions are checked at the end of every tick. The mainspring is a "
+                   "spring between the barrel's arbor and drum; the click is a limit on the arbor's turn that the rules move "
+                   "up as it is wound.")
     if fam == "horseshoe_ring":
         out.append("The four permanent connections (the upper and lower eye of each horseshoe with its chain link) are "
                    "checked at every tick by the linking number of the two loops.")
@@ -423,7 +447,8 @@ def grading_replay_words(fam, inst, *, limited):
 
 # where his declared grasp regions sit, by construction of his recipes (76583213 topogym/tasks/<family>/common.py
 # recommended_grasp_assist and the tooling's explicit lock_picking entry): words only, never a centre (a position)
-GRASP_WHERE = {("buzz_wire_3d", "wand"): "on the wand's grip", ("lock_picking", "lock_key"): "on the key's handle"}
+GRASP_WHERE = {("buzz_wire_3d", "wand"): "on the wand's grip", ("lock_picking", "lock_key"): "on the key's handle",
+               ("battery_replacement", "stick"): "around the stick's handle"}
 GRASP_WHOLE = {"hedgehog_in_cage", "horseshoe_ring"}      # rigid_grasp_region: the part's whole mesh + 5 mm
 
 
@@ -446,8 +471,8 @@ def grasp_regions(fam, inst, *, limited):
                 "penetration and native constraint health checks still apply. Two hands may hold disjoint patches "
                 "of one object. Material bounds, when present, restrict the admissible region.")
     regs, per = [], {}
-    for t in targets:
-        per.setdefault(t["entity"], []).append(t)
+    for t in targets:       # clock_assembling: every part is a link of the one entity "clock", named by its link
+        per.setdefault(t["link"] if fam == "clock_assembling" else t["entity"], []).append(t)
     several = any(len(ts) > 1 for ts in per.values())   # e.g. the claws redesign: a grip block at each end of a piece
     for ent, ts in per.items():
         where = "enclosing the whole part" if fam in GRASP_WHOLE else GRASP_WHERE.get((fam, ent))
