@@ -324,8 +324,48 @@ def meter_xml() -> str:
     return "\n".join(out)
 
 
-def entity_xml(name: str) -> str:
-    return jig_xml() if name == "jig" else meter_xml() if name == "meter" else wire_xml(name)
+# Appearance seeds (user decision 2026-10-22: a colour axis, scene_variation AXES["wire_splicing"]; the task's
+# terminal_finish, post_finish, meter_finish, core_finish): visual geoms only, re-coloured by look_colours(). The texts
+# name the wires red (A) and blue (B) and the meter's red band: the insulation, the dial, its red band, ticks and the
+# black needle keep their colours. The first entry of each table is the recorded look (seed 0).
+TERMINAL_FINISHES = dict(white=((.93, .93, .90, 1.),), black=((.14, .14, .15, 1.),), grey=((.55, .57, .60, 1.),))
+POST_FINISHES = dict(       # the base plate, the post, the rod
+    steel=((.35, .35, .38, 1.), (.45, .45, .48, 1.), (.75, .76, .78, 1.)),
+    green=((.14, .30, .18, 1.), (.18, .38, .23, 1.), (.32, .58, .38, 1.)),
+    black=((.09, .09, .10, 1.), (.12, .12, .13, 1.), (.22, .22, .24, 1.)))
+# the meter's dial face (light, so the black ticks, the red band and the black needle read; the case keeps its colour:
+# it carries the panel's mass, so its geom is part of the physics scene)
+METER_FINISHES = dict(ivory=((.96, .96, .93, 1.),), cream=((.95, .89, .74, 1.),), pale_grey=((.83, .85, .87, 1.),))
+CORE_FINISHES = dict(copper=(RGBA_CU, RGBA_SEAM), tinned=((.74, .75, .77, 1.), (.42, .43, .46, 1.)))
+CORE_CHOICES = dict(copper=("copper", "copper"), b_tinned=("copper", "tinned"), a_tinned=("tinned", "copper"))
+
+
+def look_colours(name, terminal="white", post="steel", meter="ivory", core="copper") -> dict:
+    """{a default colour as the entity's MJCF writes it: its colour in these finishes} for the entity named (entity_xml's
+    look). core: which wire's bare core is tinned, if any (CORE_CHOICES), so the two cores also tell apart up close."""
+    def pairs(table, finish):
+        return {_v(a): _v(b) for a, b in zip(next(iter(table.values())), table[finish])}
+    if name == "jig":
+        return pairs(POST_FINISHES, post)
+    if name == "meter":
+        return pairs(METER_FINISHES, meter)
+    wire = WIRE_OF[name]
+    return {**pairs(TERMINAL_FINISHES, terminal), **pairs(CORE_FINISHES, CORE_CHOICES[core]["AB".index(wire)])}
+
+
+def entity_xml(name: str, look=None) -> str:
+    """The entity's MJCF; look: look_colours() (None: the recorded look), applied to visual geoms (contype 0) only."""
+    xml = jig_xml() if name == "jig" else meter_xml() if name == "meter" else wire_xml(name)
+    if not look:
+        return xml
+
+    def repaint(line):
+        if 'contype="0"' not in line:
+            return line
+        for old, new in look.items():
+            line = line.replace(f'rgba="{old}"', f'rgba="{new}"')
+        return line
+    return "\n".join(repaint(line) for line in xml.split("\n"))
 
 
 def link_name(entity: str, k: int) -> str:

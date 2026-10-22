@@ -53,7 +53,10 @@ class WireSplicingTask(TaskDefinition):
                    "only when the splice is complete.")
     defaults = dict(stable_duration_s=2., terminal=dict(
         min_wrap_turns=1.5, min_both_turns=1., max_coil_radius_d=2., tail_fold_dot=.5, min_tail_radius_d=1.2,
-        max_turns_lost=.25, max_splice_speed_m_s=.005))
+        max_turns_lost=.25, max_splice_speed_m_s=.005),
+        terminal_finish="white", post_finish="steel", meter_finish="ivory", core_finish="copper")
+    # Appearance only (geo.look_colours; scene_variation.appearance): the defaults are the recorded scene's look
+    hash_when_changed = ("terminal_finish", "post_finish", "meter_finish", "core_finish")
 
     def grasp_assist(self):
         """contact_weld_v1 on every link of both wires; a hand pinching both welds, of each wire, its touched link
@@ -84,7 +87,9 @@ class WireSplicingTask(TaskDefinition):
         entities = []
         for name in geo.ENTITIES:
             path = folder / f"{name}.xml"
-            path.write_text(geo.entity_xml(name))
+            path.write_text(geo.entity_xml(name, look=geo.look_colours(
+                name, self.config["terminal_finish"], self.config["post_finish"], self.config["meter_finish"],
+                self.config["core_finish"])))
             entities.append(EntitySpec(name, "mjcf", path, tuple(self.origin()), fixed=name == "jig"))
         return TaskSpec(tuple(entities), {}, dict(
             task_id=self.task_id, instance_id=self.instance_id, physics_engine="mujoco",

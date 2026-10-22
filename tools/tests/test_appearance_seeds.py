@@ -19,7 +19,7 @@ from topogym.tasks.scene_variation import appearance, axes
 BASES = (("bed_bolt", "bed_bolt_crossbar"), ("bed_bolt", "bed_bolt_slotted"), ("caliper_sorting", "caliper_sorting_vernier"),
          ("clock_assembling", "clock_assembling_gear_train"), ("battery_replacement", "battery_replacement_xbox_aa"),
          ("interlocked_claws", "interlocked_claws_cast_trinity"), ("horseshoe_ring", "horseshoe_ring_easy"),
-         ("lock_picking", "lock_picking_very_easy"))
+         ("lock_picking", "lock_picking_very_easy"), ("wire_splicing", "wire_splicing_eye_wrap"))
 
 
 def release_bases():
