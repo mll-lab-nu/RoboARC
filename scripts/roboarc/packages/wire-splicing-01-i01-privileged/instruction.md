@@ -1,0 +1,139 @@
+# RoboARC (simulator package `topogym`) · wire_splicing — frozen instance
+
+You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
+**Task:** Splice the red and the blue wire: bend the red wire's bare end into an eye round the rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go.
+
+## Success requirements
+
+- The red wire's bare end is turned back on itself by more than 150 degrees into an eye that is closed at its neck: the two legs touch where they first meet below the bend.
+- The blue wire passes through the closed eye exactly once (its linking number with the eye is +1 or -1).
+- The blue wire's bare tail winds at least 1.5 turns round the red wire's doubled section. The turns are counted about the doubled section's axis: the line fitted to the red wire's stem (its bare part from the strip to the neck) and the return-leg points that lie beside it, within 8.9 mm (2.5 core diameters; the core is 3.56 mm thick) of the stem's own line. The counted coil is the longest run of the blue wire's bare points within 8.9 mm of that axis and between the neck and the red wire's strip, each widened by one core diameter.
+- At least 1 full turn of the coil goes round both strands of the red wire's doubled end together, not only round the line between them. The strands: the stem side, from the strip to the eye's apex (its point nearest the eye end of the axis), and the return side, from the apex to the return leg's point farthest toward the strip (a leftover end folded back from there is not one of them). For each point of the counted coil, each strand's point at the same station along the axis is taken, where the strand crosses the plane through the coil point perpendicular to the axis, and the coil point's angle about it in that plane; along the coil these angles accumulate into turns about each strand, a step counting only where both strands have their points. Some contiguous part of the coil must wind at least 1 turn about each strand, both the same way as the coil winds about the axis: a loop round one strand only, or one passing between the strands, does not count.
+- The coil is tight: its points lie on average at most 7.1 mm (2 core diameters) from the axis.
+- The red wire's leftover end is folded back: the direction from its fourth-last to its last point points back toward the eye (its dot product with the axis, which runs from the eye toward the strip, is at most -0.5), and its tip is at least 4.3 mm (1.2 core diameters) from the axis.
+- Let go: no hand holds a wire. The blue wire's turns may drop by at most 0.25 and the threading may not change while the conditions are held, and the splice must be still: every bare point's speed relative to the bare points' mean motion at most 5 mm/s.
+- The needle meter on the panel by the terminals displays this splice: no reading unless the eye is closed, the blue wire threads it once and the coil lies on the bare core; otherwise the equivalent resistance 10 mOhm divided by the coil's turns round both strands, on a logarithmic dial from 100 to 1 mOhm. Its needle enters the red band (10 mOhm or less) only when every condition above but the stillness and the release holds. It is a display of these conditions, not a further one.
+- Keep all final conditions satisfied together for at least 2 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.
+
+## Task failure conditions
+
+- A task piece falling more than 100 mm below the tabletop ends the episode in failure. Finger contact with a held movable piece may penetrate at most 2 mm; holding requires both fingers of the same hand to contact the same piece, or an active assisted grasp by that hand. All other task contacts, including piece-piece, table, arm and gripper-housing contacts, may penetrate at most 1 mm. Exceeding either limit ends the episode in failure.
+
+## Grader details (in addition to the requirements above)
+
+- Contact penetration as this benchmark grades it: penetration is recorded, it never ends the episode by itself. A success with deep interpenetration (a task contact deeper than 3 mm, or deeper than 2 mm for at least 0.25 s: 100 consecutive physics ticks; for a finger contact with a held piece 4 mm, or 2 mm for 0.25 s) is not credited automatically but reviewed, with the recorded evidence and frames; a clean success is credited automatically. A task contact deeper than 10 mm is a simulator breakdown (below).
+- Contact penetration is read from the contacts at the end of every physics tick (2.5 ms; 10 ticks per control step). "Held" is decided anew at every tick: a zero-force touch counts, and if one finger loses contact (with no active assisted grasp), the other finger is back at the non-held limits in the same tick.
+- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 16 mm beyond the tool frame (TCP) along its approach axis, open or closed. Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque. An arm with any part more than 5 mm deep in a fixed object (a fixture, the table) is stopped where it is: its joint targets become its measured joints for that control step, so it stops pushing (the safety readings report these stops as static_guard).
+- Forcing is recorded, not judged: an arm drive (not a gripper drive) at 95% of its torque cap or more while that arm's gripper, or a part it holds, presses on anything else with 20 N or more in total is forcing; 0.5 s of it on every physics tick is a forcing event in the evidence (`s.safety()`, `s.status()["forcing"]`), shown to the reviewer when a success is reviewed. Forcing does not end the episode and does not change the grade by itself.
+- Simulator breakdown (a non-finite state or a task contact deeper than 10 mm): the episode ends as an infrastructure error, not your failure, unless an arm was forcing (even for one tick) within the 0.25 s before it: then it is your failure (forced_breakdown: what broke and what forced it).
+- Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): wire_a: 63 spheres of radii 26.1 mm, 5.1 mm; wire_b: 97 spheres of radii 25.1 mm, 5.5 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.
+- A failure is reported in `s.status()["episode_end"]` as "A task body fell below the table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits, and `s.status()["review"]` the deep task contacts that would hold a success for review.
+
+The scene objects are the task's entities (`s.objects()`: `wire_a` (red) and `wire_b` (blue), each fixed at its terminal, `jig` (fixed: the bending post), `meter` (fixed: the needle meter by the terminals, a display that takes no contact)). The meter's reading (conducting, resistance, turns, in the red band) is `s.env._world.read_state()["mechanism"]`.
+Implementation reference: `WireSplicingEyeWrapTask.evaluate_transition` (module `topogym.tasks.wire_splicing.common`, class `WireSplicingTask`).
+This is a partial implementation excerpt; delegated helpers, passage history and the shared release/confirmation
+checks also apply. The complete public goal requirements are stated above.
+```python
+    def evaluate_transition(self, state, task_state):
+        for entity in WIRE_ENTITIES:
+            points = np.array([x["position_m"] for x in state["articulations"][entity]["links"].values()])
+            if not np.isfinite(points).all():
+                return False, "Non-finite wire state", {}, task_state
+        t = self.config["terminal"]
+        m, checks = self.judge(self.nodes(state, "wire_a"), self.nodes(state, "wire_b"))
+        speed = self.splice_speed(state)
+        checks.update(quiet=speed <= t["max_splice_speed_m_s"], hands_off=not state.get("assist_active", False))
+        now = all(checks.values())
+        reference = (task_state or {}).get("hold_reference")
+        if now:
+            if reference is None:       # the window's first tick: the turns and the linking number to hold
+                reference = dict(wrap_turns=float(m["wrap_turns"]), pierce=int(m["pierce"]))
+            held = (reference["wrap_turns"] - m["wrap_turns"] <= t["max_turns_lost"]
+                    and m["pierce"] == reference["pierce"])
+        else:
+            held = False
+        if not held:
+            reference = None
+        checks["held"] = held
+        metrics = {k: v for k, v in m.items()}
+        if state.get("mechanism") is not None:      # the splice meter's reading of this tick (display only)
+            metrics["meter"] = dict(state["mechanism"])
+        metrics.update(checks=checks, splice_speed_m_s=speed, evaluation_status="available",
+                       goal_evaluation_complete=self.goal_complete)
+        return bool(now and held), None, metrics, dict(hold_reference=reference)
+```
+
+This is a *fixed scene instance*: object poses and the robot's start pose never change between resets. You may reset
+and retry as many times as you want. Your deliverable is **one replayable trajectory**, not a general policy.
+
+## Deliverable
+Write the final trajectory to `/app/output/trajectory.npz` with `Session.save_trajectory(...)` (below).
+It is replayed open-loop from the same initial state in a fresh process and scored 1 if the task is
+completed at the end of the replay, else 0. Also leave the script that produced it at `/app/output/gen.py`.
+
+## Startup and long-running commands
+
+- Scene initialization and kernel compilation can take minutes. Actual time depends on the task, hardware, and load.
+  Quiet logs during initialization do not by themselves mean failure. Use `python -u` for unbuffered script output.
+- A command tool's wait/yield interval (for example, `yield_time_ms=30000`) is not the command's lifetime.
+  When a command is still running, retain its process/session identifier and continue waiting for that same command.
+  With Codex's `exec_command`, expose the complete result, including `session_id` and `exit_code`, rather than only
+  `output` (for example, `text(r)` instead of only `text(r.output)`). Continue it with `write_stdin` using the returned
+  `session_id` and no input. An outer JavaScript wrapper saying `Script completed` does not prove Python has exited.
+  Use the corresponding wait/status operation if another command tool is provided.
+- Do not rerun a command just because its first wait returned partial logs. Confirm the original process has exited
+  before starting a replacement; if cancellation is necessary, stop only your own identified process and confirm exit.
+- Keep the task's simulator and sensor configuration. Waiting does not extend the actual agent wall-clock budget.
+- Keep at most one live simulator process in this trial at a time. A new Python process calling `Session(...)`
+  creates another scene and consumes more GPU memory; separate replay/render CLI commands also create scenes.
+- Reuse the initialized Session for observations, actions, reset, and replay. Avoid separate initialization-only probes:
+  put the first useful actions and trajectory save in the same script that initializes the simulator.
+- Initialization consumes the agent budget. Save a real trajectory as soon as practical and keep saving progress.
+
+## Tooling (already installed; run `python` from any directory)
+```python
+from rcb_topogym import Session
+s = Session("wire_splicing", instance="/app/instance.json")   # builds the frozen scene (instance.json) and compiles kernels
+s.reset()                          # back to the frozen initial state (unlimited; a restore of the first recorded state)
+p = s.primitives()                 # thin wrappers of the low-level action; each has a docstring: help(p["move_ee"])
+s.objects()                        # objects: name -> position, orientation_wxyz, euler_xyz, bounds, size, velocity
+p["move_ee"]("left", pos, quat_wxyz, linear=3)   # IK on the robot's model to a TCP pose, then joint interpolation
+p["move_joints"]("left", q_arm); p["set_gripper"]("left", 0.0); p["open_gripper"]("left"); p["hold"](10)
+s.ee_pose("left"); s.joint_positions(); s.ik("left", pos, quat_wxyz)    # kinematics helpers (arms: ['left', 'right'])
+s.render_frame("cam_high")         # RGB uint8 (480, 848, 3) from one camera (s.VIDEO_CAMERAS); s.render_grid()
+s.render_depth("cam_high")         # float32 (480, 848) z-depth in metres (0 = no reading), pixel-aligned with render_frame
+s.camera_info()                    # per camera: intrinsic_cv, extrinsic_cv (world -> camera, OpenCV axes), cam2world_gl, mount
+s.robot_spec()                     # joints (limits), grippers (the grasping rule), PD gains, tool frames ['left_tcp', 'right_tcp']
+s.kinematics({"op": "fk", "q": q})   # stateless FK / IK on the robot's model; {"op": "ik", "targets": {"left_tcp": pose7}, "seed": q}
+s.joint_velocities(); s.joint_efforts(); s.gripper_width("left")   # measured state in action layout (efforts: the PD drives')
+s.object_pose(name); s.object_bounds(name); s.state_sha()          # one object's pose / AABB; the state hash that replays compare
+p["object_in_hand"]("left"); p["set_joint_targets"](row, steps=1); p["gripper_quat"](yaw, approach)   # help(p[...])
+s.step(action)                     # one low-level action (14 entries, below) = one control step (1/40 s)
+s.record_start(); ...; actions = s.record_stop()   # (T, 14) actions, one row per control step
+s.status()                         # {'success', 'progress', 'sim_steps', 'resets', 'state_sha', 'episode_end', 'review', 'forcing'}
+s.safety()                         # since the last call: forcing / deepest contacts / rope volume / table-guard stops vs the limits
+s.replay(actions)                  # resets, replays open-loop, returns status  -> use this to self-check
+s.save_trajectory(actions, "/app/output/trajectory.npz")
+s.render_video(actions, "/app/output/check.mp4")   # replays from the frozen state and writes a tiled camera video
+```
+The primitives are deliberately thin (IK moves, joint moves, gripper, hold): grasping, placing and every other skill
+are yours to build from them.
+
+CLI equivalent of the grader:
+`python /opt/tools/rcb_topogym.py replay --task wire_splicing --instance /app/instance.json --traj /app/output/trajectory.npz`
+
+## Conventions
+- World frame: +z up. Quaternions are **WXYZ**. The ee_pose action and the proprio TCP pose are given in this world frame.
+- Action (14): arm `left`: 6 joint targets (rad), then `left_native_gripper` = native drive target (m, limits 0.002 .. 0.037; open/closed targets in robot_spec); arm `right`: 6 joint targets (rad), then `right_native_gripper` = native drive target (m, limits 0.002 .. 0.037; open/closed targets in robot_spec); absolute position targets tracked by PD controllers, out-of-limit
+  values clipped. `s.hold_action()` is the no-op.
+- Control runs at 40 Hz (10 physics step(s) per control step). There is no step budget, but a trajectory may have at most
+  {{ROW_CAP}} rows ({{ROW_CAP_MIN}} min of simulated time): the verifier has to replay it twice within its own time limit, so `s.step` stops
+  after that many control steps since the last reset, and a longer trajectory is rejected as invalid (reward 0). The time limit
+  (`## Time limit`) is your only budget. One control step takes about 0.5 s of wall clock here, so budget your experiments.
+- Grippers: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a wire (wire_a, wire_b) once both fingers touch it inside its links' grasp regions, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s: of each wire it touches, the touched link nearest the tool frame and every other link whose centre lies between the two pads then follow the gripper rigidly. Both fingers on the wires with every contact between the pads also holds, the same way (the red wire's two legs side by side, one pad on each; the eye's two sides with the blue wire beside them). Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, a held link drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull with more than 60 N averaged over 20 ms, or a weld has fed more than 0.1 J of work into the wire) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held wire is pulled hard against the other hand or a fixture. The jig and the meter are fixed; the grippers start empty and nearly closed: open a gripper, then close it on a wire to take hold.
+- Tool frame (TCP, the ee pose and IK frame): a fixed point near the closed finger pads; approach axis (hand -> fingertips) = local [1.0, 0.0, -0.023], finger-closing axis = local [0.0, 1.0, 0.004]. The ee_pose action, the proprio tcp pose and the IK use this frame.
+  `p["top_down_quat"](yaw)` builds a vertical approach whose fingers close along `yaw`; `p["gripper_quat"](yaw, approach)` any other.
+- The task succeeds once its predicate has held continuously for 0.5 s; that, or one of its failure predicates,
+  ends the simulated episode: later steps do not change the execution record or move the scene (`s.status()["episode_end"]`), and
+  `s.reset()` starts over.
+- One `Session` per process (one simulator per process). Do not call `s.close()` before writing every output.
