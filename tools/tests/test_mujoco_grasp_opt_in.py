@@ -17,6 +17,25 @@ wire, the wires press together) the plain rule finds no candidate; side by side 
 several and calls them ambiguous. With weld_each_rope both become one grasp welding each wire's touched link nearest
 the TCP to the same hand, and the two welds carry both tips when the hand moves.
 
+MultiRopeGraspAssistConfig.weld_links_between_pads (wire splice design, README_v6, user decision 2026-10-18): two
+wires of 12 links of 2.54 mm (A's bare links) run across two pads shaped as the ALOHA's box (PAD_BOX_M: x 0-16.2 mm
+ahead of the TCP, z -10.1 to +10.7 mm), 12 mm ahead of the TCP, one behind the other. The pads touch links 1-10 of
+each wire; the centres of links 2-9 lie in the box. With the option the pinch welds those 8 links of each wire (16
+welds, one binding); without it the two links nearest the TCP, as before. One wire alone between the pads (both pads on
+it, no rope pinch): with the option its links 2-9 (one binding), without it the link nearest the TCP.
+
+The weld work guard (profile weld_work_guard_j, wire_splicing_v5, user decision 2026-10-22): the two wire tips welded as
+above, each weld's anchor then shaken 1 mm at 40 Hz across the wires (the hand's z) while a viscous load (20 N s/m)
+brakes each welded link: each weld feeds its load about 2 W, and with the guard at 0.1 J the hold is lost
+(grasp_slipped) once a weld's net work passes it. Without the profile field the same shaking keeps the hold and the
+slip state has no work book; with the guard and the hand held still the books stay below 1 mJ.
+
+MultiRopeGraspAssistConfig.hold_between_pads (wire splice design, README_v6, user decision 2026-10-19): the same two
+rows of links as one wire folded between the pads (its two legs, one behind the other, each pad on one leg). No link is
+touched by both pads and there is no second wire: the plain rope rule finds no candidate. With the option the hand
+holds, welding the links between the pads of both legs (links 2-9 and 14-21, one binding); every contact must lie
+between the pads (the pad box widened by HOLD_BETWEEN_PADS_TOL_M).
+
   PYTHONPATH=. python tests/test_mujoco_grasp_opt_in.py
 """
 from copy import deepcopy
@@ -126,10 +145,11 @@ class World:
 
 
 class Robot:
-    def __init__(self, world):
-        self.description = SimpleNamespace(robot_id="aloha")
+    def __init__(self, world, robot_id="aloha"):
+        self.description = SimpleNamespace(robot_id=robot_id)
         self.groups = dict(right=SimpleNamespace(
-            hand_link="hand", tcp_position_in_hand_m=(0., 0., 0.), gripper_field="gripper",
+            hand_link="hand", tcp_position_in_hand_m=(0., 0., 0.), tcp_orientation_in_hand_wxyz=(1., 0., 0., 0.),
+            gripper_field="gripper",
             finger_joints=("finger_a", "finger_b"),
             grasp=SimpleNamespace(finger_links=("finger_a", "finger_b"), open_position=.02, closed_position=0.)))
         self.entity = Entity(world, dict(hand="hand", finger_a="finger_a", finger_b="finger_b"), 2)
@@ -532,6 +552,253 @@ class RopePinch(unittest.TestCase):
             backend.release(state["binding"])
 
 
+# --------------------------------------------------------------------------------------------- the pad box
+PAD_L, PAD_N, PAD_AHEAD = .00254, 12, .012
+PAD_Q0 = .0079          # PAD_BOX_M["aloha"]["meet"]: a finger joint q puts its pad face q - PAD_Q0 off y = 0
+
+
+def pad_wires_world():
+    """Two straight wires of PAD_N links (PAD_L long, radius WIRE_R) along the hand's z, PAD_AHEAD ahead of the TCP
+    (the hand frame's origin), one behind the other along the closing direction (y), pressed 0.05 mm together, each pad
+    0.05 mm into its own wire. Link k's centre lies at z = -8.59 + 2.54 (k - 2) mm: links 2-9 inside the ALOHA box's
+    z -10.1..10.7 mm (1.03 mm clear of its edges each way), link 5 nearest the TCP. The pads are boxes of that extent
+    (x 0..16.2 mm, z -10.1..10.7 mm), so they touch links 1-10. Finger joints as the ALOHA's: each pad face at
+    y = -/+(q - PAD_Q0), q at its qpos0 (ref)."""
+    pad = 2 * WIRE_R - 7.5e-5                   # each pad face's distance from y = 0
+    x_start = -.00859 - 2.5 * PAD_L             # hand z of link 0's start (world x: the hand's z axis)
+    axis_z = .05 - PAD_AHEAD                    # world z of the wires (the hand at z 0.05, approach down)
+    bits = {"A": 'contype="2" conaffinity="5"', "B": 'contype="4" conaffinity="3"'}     # no self contact
+    bodies, targets = "", []
+    for y, name in ((-(WIRE_R - 2.5e-5), "A"), (WIRE_R - 2.5e-5, "B")):
+        chain = ""
+        for k in reversed(range(PAD_N)):
+            joint = f'<joint name="{name}_j{k}" type="ball" stiffness=".02" damping=".0005" armature="2e-6"/>'
+            chain = (f'<body name="{name}_{k:02d}" pos="0 0 {PAD_L if k else 0}">{joint}'
+                     f'<geom type="capsule" fromto="0 0 0 0 0 {PAD_L}" size="{WIRE_R}" mass=".00018" {bits[name]}/>'
+                     f'{chain}</body>')
+        bodies += f'<body name="{name}_base" pos="{x_start} {y} {axis_z}" quat="{DOWN}">{chain}</body>'
+        targets += [GraspTarget(f"wire_{name}", f"{name}_{k:02d}", (0., 0., PAD_L / 2), PAD_L / 2 + WIRE_R + .002)
+                    for k in range(PAD_N)]
+    box = 'size=".0081 .0025 .0104" mass=".01"'             # x 0..16.2 mm, 5 mm thick, z -10.1..10.7 mm
+    xml = f"""<mujoco><option timestep="{DT / SUBSTEPS}" gravity="0 0 0"/><worldbody>{bodies}
+ <body name="hand" mocap="true" pos="0 0 .05" quat="{DOWN}">
+  <body name="finger_a"><joint name="finger_a" type="slide" axis="0 -1 0" ref="{PAD_Q0 + pad}"/>
+   <geom type="box" {box} pos=".0081 {-(pad + .0025)} .0003"/></body>
+  <body name="finger_b"><joint name="finger_b" type="slide" axis="0 1 0" ref="{PAD_Q0 + pad}"/>
+   <geom type="box" {box} pos=".0081 {pad + .0025} .0003"/></body>
+ </body></worldbody>
+<equality>{welds_xml(targets, lambda t: t.link)}</equality></mujoco>"""
+    entities = {f"wire_{n}": {f"{n}_{k:02d}": f"{n}_{k:02d}" for k in range(PAD_N)} for n in "AB"}
+    return World(xml, entities, targets), targets
+
+
+def one_wire_world():
+    """pad_wires_world with wire A alone, centred between the pads (y = 0), each pad face 0.025 mm into it: both pads
+    touch links 1-10 of the one wire."""
+    pad = WIRE_R - 2.5e-5
+    x_start = -.00859 - 2.5 * PAD_L
+    axis_z = .05 - PAD_AHEAD
+    chain = ""
+    for k in reversed(range(PAD_N)):
+        joint = f'<joint name="A_j{k}" type="ball" stiffness=".02" damping=".0005" armature="2e-6"/>'
+        chain = (f'<body name="A_{k:02d}" pos="0 0 {PAD_L if k else 0}">{joint}'
+                 f'<geom type="capsule" fromto="0 0 0 0 0 {PAD_L}" size="{WIRE_R}" mass=".00018" contype="2" '
+                 f'conaffinity="1"/>{chain}</body>')
+    targets = [GraspTarget("wire_A", f"A_{k:02d}", (0., 0., PAD_L / 2), PAD_L / 2 + WIRE_R + .002) for k in range(PAD_N)]
+    box = 'size=".0081 .0025 .0104" mass=".01"'
+    xml = f"""<mujoco><option timestep="{DT / SUBSTEPS}" gravity="0 0 0"/><worldbody>
+ <body name="A_base" pos="{x_start} 0 {axis_z}" quat="{DOWN}">{chain}</body>
+ <body name="hand" mocap="true" pos="0 0 .05" quat="{DOWN}">
+  <body name="finger_a"><joint name="finger_a" type="slide" axis="0 -1 0" ref="{PAD_Q0 + pad}"/>
+   <geom type="box" {box} pos=".0081 {-(pad + .0025)} .0003"/></body>
+  <body name="finger_b"><joint name="finger_b" type="slide" axis="0 1 0" ref="{PAD_Q0 + pad}"/>
+   <geom type="box" {box} pos=".0081 {pad + .0025} .0003"/></body>
+ </body></worldbody>
+<equality>{welds_xml(targets, lambda t: t.link)}</equality></mujoco>"""
+    return World(xml, {"wire_A": {f"A_{k:02d}": f"A_{k:02d}" for k in range(PAD_N)}}, targets), targets
+
+
+def folded_wire_world():
+    """pad_wires_world's two rows of links as one wire, wire_A, folded between the pads: its first leg A_00-A_11 on the
+    -y pad, its second leg A_12-A_23 (the row that was B) on the +y pad, pressed 0.05 mm together."""
+    world, targets = pad_wires_world()             # the same scene, its second row named as wire_A's links 12-23
+    names = {f"B_{k:02d}": f"A_{k + PAD_N:02d}" for k in range(PAD_N)}
+    entities = {"wire_A": {**{f"A_{k:02d}": f"A_{k:02d}" for k in range(PAD_N)}, **{v: b for b, v in names.items()}}}
+    folded = [GraspTarget("wire_A", names.get(t.link, t.link), t.center_m, t.radius_m) for t in targets]
+    world.entities = {name: Entity(world, bodies, 6) for name, bodies in entities.items()}
+    world.manifest = dict(welds=[dict(name=weld_name(t), hand="right", target=["wire_A", names.get(t.link, t.link)])
+                                 for t in targets])
+    return world, folded
+
+
+class LinksBetweenPads(unittest.TestCase):
+    BETWEEN = [(f"wire_{n}", f"{n}_{k:02d}") for n in "AB" for k in range(2, 10)]
+
+    def run_ticks(self, world, config, ticks=12):
+        backend, manager = assisted(world, config)
+        for _ in range(ticks):
+            tick(world, manager)
+        return backend, manager, manager.hands["right"]
+
+    def active(self, world):
+        m, d = world.model, world.data
+        return sorted(tuple(m.equality(e).name.split("/")[2:]) for e in range(m.neq) if d.eq_active[e])
+
+    def test_scene(self):
+        """Each pad touches links 1-10 of its own wire and no other; the wires touch each other."""
+        world, _ = pad_wires_world()
+        m, c = world.model, world.contacts()
+        fingers = {m.body("finger_a").id: "a", m.body("finger_b").id: "b"}
+        touched = set()
+        for x, y in zip(c["link_a"], c["link_b"]):
+            for f, w in ((int(x), int(y)), (int(y), int(x))):
+                if f in fingers and w not in fingers:
+                    touched.add((fingers[f], m.body(w).name))
+        self.assertEqual(touched, {(f, f"{w}_{k:02d}") for f, w in (("a", "A"), ("b", "B")) for k in range(1, 11)})
+        owner = {m.body(f"{n}_{k:02d}").id: n for n in "AB" for k in range(PAD_N)}
+        pairs = {frozenset((owner.get(int(x)), owner.get(int(y)))) for x, y in zip(c["link_a"], c["link_b"])}
+        self.assertIn(frozenset("AB"), pairs)
+
+    def test_option_welds_every_link_between_the_pads(self):
+        world, targets = pad_wires_world()
+        backend, manager, state = self.run_ticks(world, rope_config(targets, True, weld_links_between_pads=True))
+        self.assertEqual(state["phase"], "holding")
+        binding = state["binding"]
+        self.assertEqual(list(binding["target"]), self.BETWEEN)       # links 1 and 10 touch the pads, centres outside
+        self.assertEqual([tuple(p["target"]) for p in binding["parts"]], self.BETWEEN)
+        self.assertEqual(self.active(world), self.BETWEEN)
+        nearest = {("wire_A", "A_05"), ("wire_B", "B_05")}
+        for part in binding["parts"]:       # the two nearest links as before, the others marked between_pads
+            evidence = part["acquisition_evidence"]
+            self.assertEqual(evidence.get("between_pads", False), tuple(part["target"]) not in nearest)
+            self.assertTrue(evidence["rows"])                           # each pad touches its wire's links 2-9 too
+        lost = deepcopy(binding)            # one weld drifting loses the whole grasp
+        lost["parts"][-1]["relative_pose"]["position_m"][0] += .02
+        self.assertEqual(backend.check_health(lost), "relative_pose_error")
+        backend.robot.gripper = .015        # an opening command releases all 16 welds
+        tick(world, manager)
+        self.assertEqual([e["event"] for e in manager.events], ["released"])
+        self.assertEqual(self.active(world), [])
+
+    def test_without_the_option_one_link_per_wire(self):
+        world, targets = pad_wires_world()
+        _, _, state = self.run_ticks(world, rope_config(targets, True))
+        self.assertEqual(state["phase"], "holding")
+        self.assertEqual(tuple(state["binding"]["target"]), (("wire_A", "A_05"), ("wire_B", "B_05")))
+        self.assertTrue(all("between_pads" not in p["acquisition_evidence"] for p in state["binding"]["parts"]))
+        self.assertEqual(self.active(world), [("wire_A", "A_05"), ("wire_B", "B_05")])
+
+    def test_option_one_wire_held_alone(self):
+        """A wire pinched alone (no rope pinch: both pads on the one wire) welds, with the option, its link nearest
+        the TCP and its other links between the pads as one binding; without it, its link nearest the TCP."""
+        def config(targets, on):
+            return MultiRopeGraspAssistConfig("contact_weld_v1", tuple(targets), initial_intent="close",
+                                              weld_each_rope=("wire_A",), weld_links_between_pads=on)
+        between = [("wire_A", f"A_{k:02d}") for k in range(2, 10)]
+        world, targets = one_wire_world()
+        backend, manager, state = self.run_ticks(world, config(targets, True))
+        self.assertEqual(state["phase"], "holding")
+        self.assertEqual([tuple(p["target"]) for p in state["binding"]["parts"]], between)
+        self.assertEqual(self.active(world), between)
+        for part in state["binding"]["parts"]:
+            self.assertEqual(part["acquisition_evidence"].get("between_pads", False), tuple(part["target"]) != ("wire_A", "A_05"))
+        backend.robot.gripper = .015        # an opening command releases all eight welds
+        tick(world, manager)
+        self.assertEqual(self.active(world), [])
+        world, targets = one_wire_world()
+        _, _, state = self.run_ticks(world, config(targets, False))
+        self.assertEqual(state["phase"], "holding")
+        self.assertEqual(tuple(state["binding"]["target"]), ("wire_A", "A_05"))
+        self.assertEqual(self.active(world), [("wire_A", "A_05")])
+
+    def test_closing_axis_bound_is_the_pad_faces(self):
+        """The y bound follows the finger joints: faces 0.01 mm outside the wires' centres admit them, 0.01 mm inside
+        do not (the centres at y = -/+1.755 mm)."""
+        world, targets = pad_wires_world()
+        backend = MujocoGraspBackend(world, Robot(world), rope_config(targets, True, weld_links_between_pads=True))
+        m, d = world.model, world.data
+        tcp = d.xpos[m.body("hand").id].copy()
+        for offset, expected in ((1e-5, set(self.BETWEEN)), (-1e-5, set())):
+            for joint in ("finger_a", "finger_b"):
+                d.qpos[m.joint(joint).qposadr[0]] = PAD_Q0 + WIRE_R - 2.5e-5 + offset
+            mujoco.mj_kinematics(m, d)
+            found = backend._between_pads("right", tcp, ("wire_A", "wire_B"))
+            self.assertEqual(found["wire_A"] | found["wire_B"], expected, offset)
+
+    def test_robot_without_a_pad_box(self):
+        world, targets = pad_wires_world()
+        panda = Robot(world, "panda_robotiq")
+        with self.assertRaises(ValueError):
+            MujocoGraspBackend(world, panda, rope_config(targets, True, weld_links_between_pads=True))
+        MujocoGraspBackend(world, panda, rope_config(targets, True))        # off: no box needed
+
+
+class HoldBetweenPads(unittest.TestCase):
+    LEGS = [("wire_A", f"A_{k:02d}") for k in list(range(2, 10)) + list(range(PAD_N + 2, PAD_N + 10))]
+
+    def config(self, targets, on):
+        return MultiRopeGraspAssistConfig("contact_weld_v1", tuple(targets), initial_intent="close",
+                                          weld_each_rope=("wire_A",), weld_links_between_pads=True,
+                                          hold_between_pads=on)
+
+    def run_ticks(self, world, config, ticks=12):
+        backend, manager = assisted(world, config)
+        for _ in range(ticks):
+            tick(world, manager)
+        return backend, manager, manager.hands["right"]
+
+    def active(self, world):
+        m, d = world.model, world.data
+        return sorted(tuple(m.equality(e).name.split("/")[2:]) for e in range(m.neq) if d.eq_active[e])
+
+    def test_folded_wire_is_refused_without_the_option(self):
+        """Each pad touches one leg only: no link touched by both pads, no second wire: no candidate."""
+        world, targets = folded_wire_world()
+        _, _, state = self.run_ticks(world, self.config(targets, False))
+        self.assertNotEqual(state["phase"], "holding")
+        self.assertIsNone(state["binding"])
+        self.assertEqual(self.active(world), [])
+
+    def test_option_holds_the_folded_wire(self):
+        """With the option the hand holds the two legs as one binding of their links between the pads; opening releases
+        them all."""
+        world, targets = folded_wire_world()
+        backend, manager, state = self.run_ticks(world, self.config(targets, True))
+        self.assertEqual(state["phase"], "holding")
+        self.assertEqual(sorted(tuple(p["target"]) for p in state["binding"]["parts"]),
+                         sorted((w, l) for w, l in self.LEGS))
+        welded = sorted({(w, l) for w, l in self.active(world)})
+        self.assertEqual(len(welded), 16)
+        backend.robot.gripper = .015        # an opening command releases all 16 welds
+        tick(world, manager)
+        self.assertEqual(self.active(world), [])
+
+    def test_contacts_must_lie_between_the_pads(self):
+        """The pad box widened by HOLD_BETWEEN_PADS_TOL_M: a point on a pad face is in, 2 mm beyond the face outward,
+        beyond the fingertips or beside the pads is out."""
+        from topogym.world.mujoco.grasp import HOLD_BETWEEN_PADS_TOL_M
+        world, targets = folded_wire_world()
+        backend = MujocoGraspBackend(world, Robot(world), self.config(targets, True))
+        m, d = world.model, world.data
+        tcp = d.xpos[m.body("hand").id].copy()
+        frame = d.xmat[m.body("hand").id].reshape(3, 3)
+        face = 2 * WIRE_R - 7.5e-5                  # each pad face's distance from y = 0 (pad_wires_world)
+        local = lambda x, y, z: tcp + frame @ np.array([x, y, z])
+        self.assertTrue(backend._points_between_pads("right", tcp, [local(.008, face, 0.), local(.008, -face, .005)]))
+        out = HOLD_BETWEEN_PADS_TOL_M + .0005
+        for p in (local(.008, face + out, 0.), local(.0162 + out, 0., 0.), local(.008, 0., .0107 + out)):
+            self.assertFalse(backend._points_between_pads("right", tcp, [p]))
+
+    def test_option_needs_the_pad_box(self):
+        _, targets = folded_wire_world()
+        with self.assertRaises(ValueError):
+            MultiRopeGraspAssistConfig("contact_weld_v1", tuple(targets), weld_each_rope=("wire_A",),
+                                       hold_between_pads=True)
+        with self.assertRaises(ValueError):
+            MultiRopeGraspAssistConfig("contact_weld_v1", tuple(targets), weld_each_rope=("wire_A",),
+                                       weld_links_between_pads=True, hold_between_pads=1)
+
+
 class PlainConfigurations(unittest.TestCase):
     def test_serialized_fields_and_backend_paths_unchanged(self):
         """A configuration without the opt-in classes serializes as before (its asdict is in every tick record and in
@@ -551,12 +818,78 @@ class PlainConfigurations(unittest.TestCase):
         from topogym.simulator.config import SimulatorConfig
         import json
         _, targets = wires_world("behind")
-        for config in (rope_config(targets, True, rope_max_rotation_error_rad=.6), cell_config(True), cell_config(False),
-                       weak_config()):
+        for config in (rope_config(targets, True, rope_max_rotation_error_rad=.6),
+                       rope_config(targets, True, weld_links_between_pads=True),
+                       rope_config(targets, True, weld_links_between_pads=True, hold_between_pads=True),
+                       cell_config(True), cell_config(False), weak_config()):
             read = SimulatorConfig(task_id="horseshoe_ring", grasp_assist=json.loads(json.dumps(asdict(config))))
             self.assertEqual(read.grasp_assist, config)
             self.assertIs(type(read.grasp_assist), type(config))
             self.assertEqual([type(t) for t in read.grasp_assist.targets], [type(t) for t in config.targets])
+
+
+# --------------------------------------------------------------------------------------------- the weld work guard
+class WeldWorkGuard(unittest.TestCase):
+    def hold(self, guard):
+        world, targets = wires_world("behind")
+        if guard is not None:
+            world.manifest["profile"] = dict(weld_work_guard_j=guard)
+        backend, manager = assisted(world, rope_config(targets, True))
+        for _ in range(12):
+            tick(world, manager)
+        self.assertEqual(manager.hands["right"]["phase"], "holding")
+        world.data.ctrl[:] = [world.data.qpos[world.model.joint(j).qposadr[0]] for j in ("finger_a", "finger_b")]
+        return world, backend, manager
+
+    def run_pump(self, world, manager, ticks, shake=.001, drag=20.):
+        """The welds' anchors shaken `shake` m at 40 Hz across the wires (the hand's z); each welded link braked by
+        -drag * v."""
+        m, d = world.model, world.data
+        eids = [m.equality(f"grasp/right/wire_{n}/{n}_5").id for n in "AB"]
+        links = [m.body(f"{n}_5").id for n in "AB"]
+        base = {e: m.eq_data[e, 3:6].copy() for e in eids}
+        vel = np.zeros(6)
+
+        def pump():
+            for e in eids:
+                m.eq_data[e, 3:6] = base[e] + (0., 0., shake * np.sin(2 * np.pi * 40. * d.time))
+            for b in links:
+                mujoco.mj_objectVelocity(m, d, mujoco.mjtObj.mjOBJ_BODY, b, vel, 0)
+                d.xfrc_applied[b, :3] = -drag * vel[3:]
+        for _ in range(ticks):
+            tick(world, manager, step=pump)
+            if manager.hands["right"]["phase"] != "holding":
+                break
+        return eids
+
+    def test_guard_releases_a_pumping_weld(self):
+        world, backend, manager = self.hold(.1)
+        self.assertEqual(backend.work_limit, .1)
+        eids = self.run_pump(world, manager, 400)
+        lost = [e for e in manager.events if e["event"] == "lost"]
+        self.assertEqual([e["reason"] for e in lost], ["grasp_slipped"])
+        self.assertNotEqual(manager.hands["right"]["phase"], "holding")
+        self.assertFalse(any(world.data.eq_active[e] for e in eids))
+        self.assertEqual(backend._work, {})                 # released: the books are gone
+
+    def test_without_the_field_the_pumping_weld_holds(self):
+        world, backend, manager = self.hold(None)
+        self.assertIsNone(backend.work_limit)
+        self.run_pump(world, manager, 400)
+        self.assertEqual(manager.hands["right"]["phase"], "holding")
+        self.assertNotIn("work", backend.capture_slip())    # the slip state as before the guard
+
+    def test_guard_quiet_on_a_still_hold(self):
+        world, backend, manager = self.hold(.1)
+        self.run_pump(world, manager, 400, shake=0., drag=0.)
+        self.assertEqual(manager.hands["right"]["phase"], "holding")
+        self.assertEqual(len(backend._work), 2)
+        self.assertLess(max(abs(w) for w in backend._work.values()), 1e-3)
+        state = backend.capture_slip()                      # the books go with the slip state (checkpoints)
+        self.assertEqual(state["work"], backend._work)
+        backend._work = {}
+        backend.restore_slip(state)
+        self.assertEqual(backend._work, state["work"])
 
 
 if __name__ == "__main__":

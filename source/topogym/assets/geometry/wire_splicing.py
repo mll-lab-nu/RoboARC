@@ -1,0 +1,332 @@
+"""wire_splicing: the MJCF of the family's four entities (coordinates in the ALOHA mount frame).
+
+Physical picture (runs/wire_splice_design_20261014, README_v5 sections 1-5, README_v6): a table with two terminal blocks
+at its back. Two stiff insulated wires lie naturally on the table; each one's far end is fixed at its terminal (the
+simulated power end), its stripped end lies free on the table in front. Wire A (red): 700 mm insulated + 117 mm bare;
+wire B (blue): 550 mm insulated + 290 mm bare; copper core 3.56 mm, insulation 7.0 mm (twice a BV 2.5 mm2 wire). A
+bending post stands between them: a vertical post with a horizontal rod (7.1 mm across) along -y, the mandrel for A's
+eye. Two ALOHA arms bend an eye into A's bare end round the rod, thread B through it, wind B's bare tail one and a half
+turns round A's doubled end, at least one of them round both of its strands together, and fold A's end back.
+
+Wires (wire_model.py, v5_model.py): ball-joint chains of capsule links (the last insulated link a cylinder, the strip's
+flat end), elastoplastic joints (the profile's plastic rule, MujocoWorld._plastic_return): a stiff spring, elastic up to
+0.4 deg, past its yield torque (plastic moment 0.130 N m bare, 0.156 N m insulated: copper's yield stress / 4) the rest
+orientation follows. The first link of each wire hangs on a ball joint at its terminal's front face. Links 4 or more
+apart on the same wire collide. The lay: a planar curve integrated from the terminal (heading and curvature along the
+insulated part; the bare part straight), 1.5 mm above the insulation's resting height; the task settles it under
+gravity before the birth (reset_physics_steps).
+
+Entities: wire_a (A's terminal, a static body, and A's chain), wire_b (the same for B), jig (static: the bending post),
+meter (the splice meter, visual only: meter_xml).
+Frames: the mount frame is the ALOHA's (table top z = 0, x toward the right arm, y away from the cameras, z up). The
+design's coordinates (its "scene frame") are the mount frame minus PLACE (v6_armsim.PLACE: the scene sits at
+(-0.05, +0.10) m on the mount).
+Collision geoms are in group 3 with coloured visual twins (contype 0, no mass), as bed_bolt: the renderer copies a
+collision geom of groups 0-2 into a grey visual."""
+from __future__ import annotations
+
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+ENTITIES = ("wire_a", "wire_b", "jig", "meter")
+WIRE_OF = {"wire_a": "A", "wire_b": "B"}            # entity -> the design's wire letter (body names A_000, B_000, ...)
+PLACE = np.array([-.05, .10, 0.])                   # design scene frame -> mount frame
+
+# ---------------------------------------------------------------- cross-section and material (wire_model.py)
+CORE_D = 1.78e-3 * 2.               # BV 2.5 mm2 solid core 1.78 mm, x2
+INS_D = 3.5e-3 * 2.                 # its insulation's outer diameter, x2
+R_CU, R_INS = CORE_D / 2, INS_D / 2
+RHO_CU, RHO_PVC = 8960., 1400.      # kg/m3
+SIGMA_SIM = 69e6 / 4                # Pa: annealed copper's 0.2 % yield stress / 4 (keeps the twisting torque ~0.3 N m)
+M_P_CORE = 4. / 3. * SIGMA_SIM * R_CU ** 3       # fully plastic bending moment of the bare core, N m
+M_P_INS = 1.2 * M_P_CORE            # insulated: core + PVC (an estimate)
+YIELD_DEG = .4                      # elastic give per joint (fiber_bundling v4's)
+ARMATURE = 2e-6                     # joint armature, kg m2
+FRICTION_WW = .5                    # copper on copper
+CONTACT = dict(solref=(.00125, 2.), solimp=(.9, .99, .001, .5, 2.))   # the design's geom default (wire_model.header)
+# Contact margin of the wire geoms: 0, not the design's 0.2 mm (wire_model.py). With a margin a contact acts from that
+# distance, so a pinch rests inside it at a positive distance, and contact_weld_v1 counts only contacts at zero or more
+# penetration: the ALOHA's fully closed fingers (about 18 N) left all seven finger contacts on an insulated link 0.01-0.13
+# mm short and never welded (out/l3, 2026-10-18). Without it the wires rest 0.22 mm lower and a pinch welds in 0.125 s.
+MARGIN = 0.
+DROP = .0015                        # the lay starts this far above the insulation's resting height
+
+# ---------------------------------------------------------------- layout (the design's scene frame), m
+TERM = dict(A=(-.24, .40), B=(.24, .40))             # terminal front faces (the wire roots)
+JIG = dict(x=0., y=.24, z=.15, r=CORE_D, length=.035)   # rod radius 1 d (7.12 mm across); axis along y, free end -y
+# insulated / bare length and links; the lay: heading at the terminal (deg, from +x) and the insulated part's
+# curvature kappa(s) = amplitude sin(2 pi s / period) + offset (1/m); the bare part lies straight
+WIRES = dict(
+    A=dict(l_ins=.700, n_ins=17, l_bare=.117, n_bare=46, heading0_deg=-65., kappa=(-10., .70, 4.),
+           rgba=(.80, .12, .10, 1.)),
+    B=dict(l_ins=.550, n_ins=14, l_bare=.290, n_bare=83, heading0_deg=-75., kappa=(8., .55, -5.5),
+           rgba=(.13, .30, .78, 1.)),
+)
+RGBA_CU, RGBA_SEAM = (.85, .52, .28, 1.), (.45, .25, .12, 1.)
+# The splice meter (user decision 2026-10-19; meter_xml): its reading is a documented model, the splice's equivalent
+# resistance computed from its configuration, R = R_TURN_MOHM / n, n the coil's turns round both of A's strands (no
+# path: no reading), on a logarithmic dial from DIAL_MOHM[0] to DIAL_MOHM[1]; the red band from R_TURN_MOHM / BAND_TURNS
+# (the success criterion's turns round both strands: one, user decision 2026-10-22; 10 mOhm, the dial's middle).
+# Mount frame: the dial's centre between wire A's terminal and the bending post, 2 cm in front of the terminals' faces
+# (clear of both wires' lay by 2 cm or more; 11 px left of the post in cam_high), low (its case's top 9.6 cm above the
+# table, inside cam_high's top edge), its face turned up 60 deg toward cam_high, which sees it from about 38 deg above
+# the table, 1.1 m away; 0.49 m from the left arm's base, the arms work in front of the post.
+R_TURN_MOHM = 10.
+DIAL_MOHM = (100., 1.)
+BAND_TURNS = 1.
+METER = dict(x=-.16, y=.48, z=.06, face_elevation_deg=60., r=.055, case_half=(.068, .07, .015), sweep_deg=120.,
+             rest_u=-.05, needle=.048, needle_half_width=.0025)
+
+
+def _v(values) -> str:
+    return " ".join(format(float(x), ".17g") for x in np.atleast_1d(np.asarray(values, dtype=float)))
+
+
+def n_links(wire: str) -> int:
+    return WIRES[wire]["n_ins"] + WIRES[wire]["n_bare"]
+
+
+def segments(wire: str) -> np.ndarray:
+    """Link lengths of a wire, from its terminal."""
+    w = WIRES[wire]
+    return np.array([w["l_ins"] / w["n_ins"]] * w["n_ins"] + [w["l_bare"] / w["n_bare"]] * w["n_bare"])
+
+
+def lay_curve(wire: str, z0: float) -> np.ndarray:
+    """Nodes (n + 1, 3) of the wire lying on the table, mount frame: start at the terminal, integrate the heading
+    (midpoint rule on the insulated part, v5_model.lay_curve)."""
+    w = WIRES[wire]
+    amplitude, period, offset = w["kappa"]
+    kappa = lambda s: amplitude * np.sin(2 * np.pi * s / period) + offset       # noqa: E731
+    p = [np.r_[np.asarray(TERM[wire]) + PLACE[:2], z0]]
+    s, th = 0., np.radians(w["heading0_deg"])
+    for k, length in enumerate(segments(wire)):
+        if k < w["n_ins"]:
+            th_mid = th + .5 * length * kappa(s)
+            th += length * kappa(s + .5 * length)
+        else:
+            th_mid = th
+        p.append(p[-1] + length * np.array([np.cos(th_mid), np.sin(th_mid), 0.]))
+        s += length
+    return np.array(p)
+
+
+def _link_frames(P):
+    """Rotation of every link: z along the link, x horizontal-ish (parallel transport from the first link)."""
+    Rs = []
+    for k in range(len(P) - 1):
+        z = P[k + 1] - P[k]
+        z /= np.linalg.norm(z)
+        if k == 0:
+            x = np.cross([0, 0, 1.], z)
+            x = x / np.linalg.norm(x) if np.linalg.norm(x) > 1e-9 else np.array([1., 0, 0])
+        else:
+            x = Rs[-1][:, 0] - np.dot(Rs[-1][:, 0], z) * z
+            x /= np.linalg.norm(x)
+        Rs.append(np.c_[x, np.cross(z, x), z])
+    return Rs
+
+
+def _wxyz(R) -> np.ndarray:
+    return Rotation.from_matrix(R).as_quat()[[3, 0, 1, 2]]
+
+
+def joint_stiffness(plastic_moment: float) -> float:
+    """The elastoplastic joint's spring: its plastic moment reached at the yield angle."""
+    return plastic_moment / np.radians(YIELD_DEG)
+
+
+def _header(model: str) -> list[str]:
+    return [f'<mujoco model="{model}">', '  <compiler angle="radian" autolimits="true"/>',
+            f'  <default><geom solref="{_v(CONTACT["solref"])}" solimp="{_v(CONTACT["solimp"])}"/></default>',
+            '  <worldbody>']
+
+
+def _box(pos, size, rgba, *, collide, friction=None):
+    """A collision box (group 3) and its coloured visual twin, or a visual box alone."""
+    out = []
+    fr = f' friction="{_v([friction, .005, .0001])}"' if friction is not None else ""
+    if collide:
+        out.append(f'<geom type="box" pos="{_v(pos)}" size="{_v(size)}" group="3"{fr}/>')
+    out.append(f'<geom type="box" pos="{_v(pos)}" size="{_v(size)}" rgba="{_v(rgba)}" contype="0" conaffinity="0" '
+               f'mass="0" group="1"/>')
+    return out
+
+
+def _terminal(wire: str) -> list[str]:
+    """The terminal block (v5_model.terminal_xml): a white box on the table, two screw heads and the wire's mouth."""
+    x, y = np.asarray(TERM[wire]) + PLACE[:2]
+    out = [f'<body name="terminal" pos="{_v([x, y + .016, 0.])}">']
+    out += _box((0, 0, .011), (.022, .016, .011), (.93, .93, .90, 1.), collide=True)
+    for sx in (-1., 1.):
+        out.append(f'<geom type="cylinder" pos="{_v([sx * .009, .004, .0235])}" size="{_v([.0055, .0015])}" '
+                   f'rgba="{_v([.70, .70, .72, 1.])}" contype="0" conaffinity="0" mass="0" group="1"/>')
+    out += _box((0, -.017, .0035), (.006, .001, .0035), (.3, .3, .3, 1.), collide=False)
+    out.append('</body>')
+    return out
+
+
+def wire_xml(entity: str) -> str:
+    """One wire entity: its terminal (static) and its chain, laid on the table (lay_curve, DROP above rest)."""
+    wire = WIRE_OF[entity]
+    w = WIRES[wire]
+    P = lay_curve(wire, R_INS + DROP)
+    seg = segments(wire)
+    Rs = _link_frames(P)
+    n = len(seg)
+    out, close = _header(entity) + _terminal(wire), []
+    for k in range(n):
+        insulated = k < w["n_ins"]
+        length = seg[k]
+        r = R_INS if insulated else R_CU
+        if k == 0:
+            pos, q = P[0], _wxyz(Rs[0])
+        else:
+            pos, q = np.array([0, 0, seg[k - 1]]), _wxyz(Rs[k - 1].T @ Rs[k])
+        if insulated:
+            mass = RHO_CU * np.pi * R_CU ** 2 * length + RHO_PVC * np.pi * (R_INS ** 2 - R_CU ** 2) * length
+        else:
+            mass = RHO_CU * np.pi * R_CU ** 2 * length
+        Ip, Ia = mass * (3 * r * r + length * length) / 12, mass * r * r / 2
+        k_j = joint_stiffness(M_P_INS if insulated else M_P_CORE)
+        kind = "cylinder" if (insulated and k == w["n_ins"] - 1) else "capsule"
+        rgba = w["rgba"] if insulated else RGBA_CU
+        shape = f'type="{kind}" fromto="0 0 0 0 0 {_v(length)}" size="{_v(r)}"'
+        out.append(f'<body name="{wire}_{k:03d}" pos="{_v(pos)}" quat="{_v(q)}">')
+        out.append(f'  <joint name="{wire}_j{k:03d}" type="ball" stiffness="{_v(k_j)}" '
+                   f'damping="{_v(2 * np.sqrt(k_j * ARMATURE))}" armature="{_v(ARMATURE)}"/>')
+        out.append(f'  <inertial pos="0 0 {_v(length / 2)}" mass="{_v(mass)}" diaginertia="{_v([Ip, Ip, Ia])}"/>')
+        out.append(f'  <geom name="{wire}_g{k:03d}" {shape} friction="{_v([FRICTION_WW, .005, .0001])}" '
+                   f'margin="{_v(MARGIN)}" group="3"/>')
+        out.append(f'  <geom {shape} rgba="{_v(rgba)}" contype="0" conaffinity="0" mass="0" group="1"/>')
+        if not insulated:   # a thin dark seam along the bare core, so its twist shows in renders (visual only)
+            out.append(f'  <geom type="box" pos="{_v([R_CU * .92, 0, length / 2])}" '
+                       f'size="{_v([R_CU * .12, R_CU * .25, length / 2])}" rgba="{_v(RGBA_SEAM)}" contype="0" '
+                       f'conaffinity="0" mass="0" group="1"/>')
+        close.append('</body>')
+    out += close[::-1] + ['  </worldbody>', '  <contact>']
+    out += [f'    <exclude body1="{wire}_{i:03d}" body2="{wire}_{j:03d}"/>'
+            for i in range(n) for j in range(i + 2, min(n, i + 4))]
+    out += [f'    <exclude body1="terminal" body2="{wire}_{k:03d}"/>' for k in range(2)]   # the root sits in the terminal
+    out += ['  </contact>', '</mujoco>', '']
+    return "\n".join(out)
+
+
+def jig_xml() -> str:
+    """The bending post (v5_model.jig_xml): a base plate, a vertical post and the rod along -y (friction 0.1). The rod
+    has contact priority 1, so its friction 0.1 is the one its contacts with the wires use (MuJoCo otherwise takes the
+    larger of the two geoms' frictions, the wires' 0.5; both carry the same solref / solimp). At 0.5 the bight closed
+    round the rod gripped it and the eye could not be slid off its free end (the design's runs, README_v6)."""
+    j = JIG
+    x = j["x"] + PLACE[0]
+    y0, y1 = j["y"] + .020 + PLACE[1], j["y"] - j["length"] + .020 + PLACE[1]
+    ys = y0 + .006
+    out = _header("jig") + ['<body name="jig" pos="0 0 0">']
+    out += _box((x, ys, .004), (.020, .015, .004), (.35, .35, .38, 1.), collide=True)
+    for name, a, b, r, rgba, friction in (
+            ("post", (x, ys, 0.), (x, ys, j["z"] + .006), .005, (.45, .45, .48, 1.), None),
+            ("rod", (x, ys, j["z"]), (x, y1, j["z"]), j["r"], (.75, .76, .78, 1.), .1)):
+        shape = f'type="cylinder" fromto="{_v([*a, *b])}" size="{_v(r)}"'
+        fr = f' friction="{_v([friction, .005, .0001])}" priority="1"' if friction is not None else ""
+        out.append(f'<geom name="{name}" {shape} group="3"{fr}/>')
+        out.append(f'<geom {shape} rgba="{_v(rgba)}" contype="0" conaffinity="0" mass="0" group="1"/>')
+    out += ['</body>', '  </worldbody>', '</mujoco>', '']
+    return "\n".join(out)
+
+
+def dial_position(R_mohm) -> float:
+    """Where a resistance sits on the dial, 0 at its 100 mOhm end, 1 at its 1 mOhm end (logarithmic); None (no path) is
+    the rest stop. Not clamped."""
+    if R_mohm is None:
+        return METER["rest_u"]
+    hi, lo = DIAL_MOHM
+    return float(np.log10(hi / R_mohm) / np.log10(hi / lo))
+
+
+def dial_angle(u) -> float:
+    """The needle's angle (rad, counter-clockwise seen from the front, from the dial's up) at dial position u."""
+    sweep = np.radians(METER["sweep_deg"])
+    return float(sweep / 2 - sweep * u)
+
+
+def needle_q(u) -> float:
+    """The needle hinge's position at dial position u: 0 at the rest stop (the scene's qpos0)."""
+    return dial_angle(u) - dial_angle(METER["rest_u"])
+
+
+def meter_xml() -> str:
+    """The splice meter (user decision 2026-10-19): a needle meter in a case on the table by the terminals (METER), its
+    dial turned toward cam_high. Every geom is visual (contype 0); all but the case have no mass, so the MuJoCo scene
+    drops them (Nyx draws them on their bodies); it keeps the case, colliding with nothing, for the entity's bounds. The
+    case is on the static body "panel"; the needle is the body "needle" on the hinge "needle" (axis: the dial's normal;
+    0 at the rest stop), with a light inertia whose centre lies on the hinge axis, so the task's mechanism can set it
+    every tick without moving any mass. The scale: logarithmic from 100 mOhm (left) to 1 mOhm (right) over sweep_deg,
+    decade ticks long, the others short; the red band from R_TURN_MOHM / BAND_TURNS to 1 mOhm; the rest stop a pin just
+    left of the 100 mOhm end."""
+    c = METER
+    beta = np.radians(90. - c["face_elevation_deg"])
+    Rd = Rotation.from_euler("x", beta)
+    centre = np.array([0., 0., c["z"]])
+    on_dial = lambda p: centre + Rd.apply(p)                                     # noqa: E731
+    qd = _wxyz(Rd.as_matrix())
+
+    def visual(kind, pos, size, rgba, quat=qd):
+        return (f'<geom type="{kind}" pos="{_v(pos)}" quat="{_v(quat)}" size="{_v(size)}" rgba="{_v(rgba)}" '
+                f'contype="0" conaffinity="0" mass="0" group="1"/>')
+
+    def radial_box(phi, r0, r1, half_width, z, rgba):
+        """A box on the dial from radius r0 to r1 along the direction phi (from the dial's up, counter-clockwise)."""
+        q = _wxyz((Rd * Rotation.from_euler("z", phi)).as_matrix())
+        return visual("box", on_dial([-np.sin(phi) * (r0 + r1) / 2, np.cos(phi) * (r0 + r1) / 2, z]),
+                      [half_width, (r1 - r0) / 2, .0002], rgba, q)
+
+    r, half = c["r"], c["case_half"]
+    # the case: a box behind the dial, as an inline mesh of its corners (MuJoCo builds their hull) without mass="0", so
+    # the MuJoCo scene keeps it (still colliding with nothing, on a static body) and the entity has bounds
+    corners = [on_dial(np.array([sx * half[0], half[1] - r - .01 + sy * half[1], -half[2] - .001 + sz * half[2]]))
+               for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
+    head = _header("meter")
+    out = head[:-1] + ['  <asset>', f'    <mesh name="case" vertex="{_v(np.ravel(corners))}"/>', '  </asset>', head[-1]]
+    out.append(f'<body name="panel" pos="{_v([c["x"], c["y"], 0.])}">')
+    out.append('<geom type="mesh" mesh="case" rgba=".22 .23 .25 1" contype="0" conaffinity="0" group="1"/>')
+    out.append(visual("cylinder", on_dial([0., 0., .0005]), [r, .0005], (.96, .96, .93, 1.)))                 # the dial
+    # the red band, in arcs of at most 2 deg
+    u0 = dial_position(R_TURN_MOHM / BAND_TURNS)
+    a0, a1 = dial_angle(u0), dial_angle(1.)
+    n = int(np.ceil(np.degrees(abs(a1 - a0)) / 2.))
+    rb0, rb1 = .64 * r, .97 * r
+    for k in range(n):
+        phi = a0 + (a1 - a0) * (k + .5) / n
+        half_w = (rb1 * np.tan(abs(a1 - a0) / n / 2) + .0004)
+        out.append(radial_box(phi, rb0, rb1, half_w, .0012, (.86, .08, .07, 1.)))
+    # the ticks: every 1-9 x 10^k mOhm, the decades long and wide
+    hi, lo = DIAL_MOHM
+    values = sorted({float(m * 10. ** e) for e in range(int(np.log10(lo)), int(np.log10(hi)) + 1) for m in range(1, 10)
+                     if lo - 1e-9 <= m * 10. ** e <= hi + 1e-9})
+    for value in values:
+        decade = abs(np.log10(value) - round(np.log10(value))) < 1e-9
+        phi = dial_angle(dial_position(value))
+        out.append(radial_box(phi, (.72 if decade else .84) * r, .97 * r, .0016 if decade else .0008, .0018,
+                              (.05, .05, .05, 1.)))
+    phi = dial_angle(c["rest_u"]) + np.radians(4.)                        # the rest stop: a pin
+    out.append(visual("cylinder", on_dial([-np.sin(phi) * .8 * r, np.cos(phi) * .8 * r, .003]), [.0025, .003],
+                      (.30, .30, .32, 1.)))
+    # the needle, at the rest stop at q = 0
+    qn = _wxyz((Rd * Rotation.from_euler("z", dial_angle(c["rest_u"]))).as_matrix())
+    length = c["needle"]
+    out.append(f'<body name="needle" pos="{_v(on_dial([0., 0., .004]))}" quat="{_v(qn)}">')
+    out.append('  <joint name="needle" type="hinge" axis="0 0 1"/>')
+    out.append(f'  <inertial pos="0 0 0" mass=".001" diaginertia="{_v([4e-7, 1e-8, 4e-7])}"/>')
+    out.append('  ' + visual("box", [0., (length - .012) / 2, 0.], [c["needle_half_width"], (length + .012) / 2, .0006],
+                             (.04, .04, .04, 1.), quat=(1., 0., 0., 0.)))
+    out.append('  ' + visual("cylinder", [0., 0., .001], [.006, .002], (.15, .15, .16, 1.), quat=(1., 0., 0., 0.)))
+    out += ['</body>', '</body>', '  </worldbody>', '</mujoco>', '']
+    return "\n".join(out)
+
+
+def entity_xml(name: str) -> str:
+    return jig_xml() if name == "jig" else meter_xml() if name == "meter" else wire_xml(name)
+
+
+def link_name(entity: str, k: int) -> str:
+    return f"{WIRE_OF[entity]}_{k:03d}"

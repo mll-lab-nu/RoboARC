@@ -91,6 +91,31 @@ What keeps a mechanism clean under the stress observer (docs/simulator/STRESS_VA
   (an entity's spring potential), so a changed stiffness puts its books off by 1/2 dk theta^2. bed_bolt's tilt stiffness
   step at 2 engaged turns (2e-4 -> 3 N m/rad, under a degree of tilt) reads CLEAN.
 
+### Opt-in grasp rules
+
+Two configurations change contact_weld_v1 for the families that declare them (`topogym/utils/grasp.py`; the backend's
+"parts" branches in `grasp.py` run only for them):
+
+- `ForceClosureGraspTarget`: a target is a candidate only on a force-closure pinch (controller battery design).
+- `MultiRopeGraspAssistConfig(weld_each_rope=...)`: one hand may weld several named ropes as one binding (a rope pinch:
+  each touched rope's touched link nearest the TCP); `rope_max_rotation_error_rad` loosens the rotation check of those
+  welds. With `weld_links_between_pads` (default False) a rope pinch, and a named rope held by both fingers alone, also
+  weld every other link of each touched rope whose centre lies between the two pads (`PAD_BOX_M`, per robot; ALOHA
+  only), in the same binding. Only wire_splicing uses the class. Neutrality of `weld_links_between_pads`: 12 contact-weld
+  families' -i01 references give the same birth and end hashes with and without it
+  (`runs/wire_splice_design_20261014/out/l3/weld_neutrality/`). With `hold_between_pads` (default False; needs
+  the pad box) a hand whose two fingers both touch named ropes, every such contact between the pads
+  (`HOLD_BETWEEN_PADS_TOL_M`), holds as on a rope pinch even when no link is touched by both fingers and no two ropes
+  press together: a wire folded between the pads, a loop's two sides (wire_splicing, user decision 2026-10-19).
+
+A scene profile may also set `weld_work_guard_j` (`profiles.py`; absent: off, every family but wire_splicing): each
+active assisted-grasp weld then books its net work within the hold (`efc_force . J qvel` per substep, `grasp.py`
+`_sample_work`) and is released through the slip path (reason `grasp_slipped`) once it passes the guard. A real grasp
+cannot feed energy into what it holds; wire_splicing_v5's 2 dt weld on a 0.23 g bare link could (an acceptance-round
+breakdown at 2.69 J, user decision 2026-10-22: the guard at 0.1 J; the wire reference's welds reach 0.041 J at most).
+With the field absent the slip state and every reference stay bit-identical (13 contact-weld families' -i01
+references, `runs/wire_splice_design_20261014/out/l3/guard_neutrality/`).
+
 ### Readout timing (one tick)
 
 - Kinematics (poses, velocities) come from the **end** of the tick.

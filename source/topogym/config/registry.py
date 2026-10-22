@@ -120,6 +120,7 @@ _TASKS = {
         _registration("clock_assembling", "ClockAssemblingTask", "rigid_articulated"),
         _registration("battery_replacement", "BatteryReplacementTask", "rigid_articulated"),
         _registration("caliper_sorting", "CaliperSortingTask", "rigid_articulated"),
+        _registration("wire_splicing", "WireSplicingTask", "rigid_articulated"),
     )
 }
 

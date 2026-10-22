@@ -9,10 +9,12 @@ carry the welds' slip windows (sample(), after every substep).
 
 Two opt-in rules (topogym/utils/grasp.py, 2026-10-14) run only when the configuration declares them: a
 ForceClosureGraspTarget is a candidate only on a force-closure pinch (_force_closure), and MultiRopeGraspAssistConfig
-lets one hand weld several ropes as one binding (_rope_bundle, and the "parts" branches below). A third (2026-10-18):
-a WeakHoldGraspTarget's hold that does not close force at its firm coefficient is weak, and its weak holds share a
-travel budget of weak_hold_travel_m per episode, counted from where each leaves the target's home region (2026-10-19:
-_weak, _home, _weak_spent; acquire, check_health, release; the spent budget rides in the slip state of checkpoints).
+lets one hand weld several ropes as one binding (_rope_bundle, and the "parts" branches below); with its
+weld_links_between_pads, every link of a pinched rope between the pads joins that binding (_between_pads, PAD_BOX_M).
+A third (2026-10-18): a WeakHoldGraspTarget's hold that does not close force at its firm coefficient is weak, and its
+weak holds share a travel budget of weak_hold_travel_m per episode, counted from where each leaves the target's home
+region (2026-10-19: _weak, _home, _weak_spent; acquire, check_health, release; the spent budget rides in the slip state
+of checkpoints).
 
 A task mechanism (MujocoWorld.set_mechanism) may refuse targets: when it has grasp_allowed(entity, link), a target it
 refuses is no candidate, and a binding on it is lost (reason "target_not_graspable"; bed_bolt: the bolt while its
@@ -56,6 +58,20 @@ WELD_SLIP_WINDOW_S = .020
 # the fingertips curled and buzz's references carried the wand with no finger on it for 41-65 % of their weld time.
 # A robot without an entry never lets go this way (the ALOHA: not measured).
 WELD_CONTACT_LOST_S = {"panda_robotiq": .2}
+# The space between a hand's two pads (MultiRopeGraspAssistConfig.weld_links_between_pads, opt-in), per robot, in the
+# TCP frame (x approach, y closing, z the third axis), m: x and z between the bounds, y between the two pad faces at
+# -(q1 - meet) and q2 - meet, q1 / q2 the finger joints in finger_joints order.
+#   aloha  aloha.xml's finger collision meshes as the scenes collide them (64-vertex hulls, profile robot.maxhullvert),
+#          measured at the finger joints 0.0079 and 0.0114 (2026-10-18): ahead of the TCP plane they reach the
+#          fingertips at x 16.15 mm and span z -10.09 to +10.73 mm (at x 0; 17.2 mm wide at x 5, 10.5 mm at x 15).
+#          Each finger's inner face is innermost at its tip, q - 0.0079 off y = 0 (the +y finger's 0.14 mm further),
+#          and recedes 0.087 mm per mm toward the TCP plane (1.4 mm at x 0); the left_finger_link is the -y finger.
+# A robot without an entry cannot use the rule.
+PAD_BOX_M = {"aloha": dict(x=(0., .0162), z=(-.0101, .0107), meet=.0079)}
+# hold_between_pads (opt-in): a finger's contact counts as between the pads within this of the pad box on every side:
+# the inner faces recede up to 1.4 mm off the box's y bound toward the TCP plane (above), and a contact sits on the
+# face give or take its penetration.
+HOLD_BETWEEN_PADS_TOL_M = .0015
 
 
 class MujocoGraspBackend:
@@ -96,6 +112,9 @@ class MujocoGraspBackend:
         self._slipped = set()  # active welds whose window mean exceeded the slip force
         self.contact_lost_s = WELD_CONTACT_LOST_S.get(robot.description.robot_id)
         self._untouched = {}  # active weld id -> seconds since a finger last touched its welded link (contact_lost_s)
+        # the profile's weld work guard (weld_work_guard_j, J; None: off): active weld id -> its net work in this hold
+        self.work_limit = (world.manifest.get("profile") or {}).get("weld_work_guard_j")
+        self._work = {}
         children = {}
         for b in range(1, m.nbody):
             children.setdefault(int(m.body_parentid[b]), []).append(b)
@@ -131,6 +150,20 @@ class MujocoGraspBackend:
             self._rope_links = {link.idx: key for key, (_, link) in self.targets.items() if key[0] in self._each_rope}
             limit = config.rope_max_rotation_error_rad
             self._rope_rotation = config.max_rotation_error_rad if limit is None else limit
+            # weld_links_between_pads: per named rope, its target keys, link ids and centre offsets (_between_pads)
+            self._pad_box = None
+            if config.weld_links_between_pads:
+                self._pad_box = PAD_BOX_M.get(robot.description.robot_id)
+                if self._pad_box is None:
+                    raise ValueError(f"weld_links_between_pads: no pad box for robot {robot.description.robot_id}")
+                self._rope_centres = {}
+                for rope in self._each_rope:
+                    items = [(key, link.idx, spec.center_m) for key, (spec, link) in self.targets.items()
+                             if key[0] == rope]
+                    self._rope_centres[rope] = ([k for k, _, _ in items], np.array([i for _, i, _ in items]),
+                                                np.array([c for _, _, c in items], dtype=float))
+            # hold_between_pads (opt-in, needs the pad box): both fingers on named ropes, every contact between the pads
+            self._hold_between = bool(getattr(config, "hold_between_pads", False))
 
     def _grasp_allowed(self):
         """The task mechanism's grasp_allowed(entity, link), or None (every target allowed)."""
@@ -198,6 +231,8 @@ class MujocoGraspBackend:
         first (d.ne of them, by equality id), a weld's 3 translational rows before its 3 rotational ones."""
         if self._untouched:
             self._sample_touch()
+        if self._work:
+            self._sample_work()
         if not self._window:
             return
         d = self.world.data
@@ -206,6 +241,22 @@ class MujocoGraspBackend:
             rows = np.flatnonzero(ids == eid)
             window.append(math.hypot(*force[rows[0]:rows[0] + 3]) if len(rows) else 0.)
             if sum(window) / self.slip_samples > self.slip_force:
+                self._slipped.add(eid)
+
+    def _sample_work(self):
+        """After every substep (the profile's weld_work_guard_j): each active weld's work this substep, its rows' forces
+        times their velocities (efc_force . J qvel, the step's forces and the new velocities) times the step, adds to its
+        hold's net; a net above the guard marks the grasp slipped (released at the tick's end, reason grasp_slipped). A
+        weld of a real grasp cannot feed energy into what it holds; a weld that oscillates against a light link can."""
+        import mujoco
+        m, d = self.world.model, self.world.data
+        jv = np.zeros(int(d.nefc))
+        mujoco.mj_mulJacVec(m, d, jv, d.qvel)
+        ids, force, dt = d.efc_id[:d.ne], d.efc_force, float(m.opt.timestep)
+        for eid in self._work:
+            rows = np.flatnonzero(ids == eid)
+            self._work[eid] += float(force[rows] @ jv[rows]) * dt
+            if self._work[eid] > self.work_limit:
                 self._slipped.add(eid)
 
     def _sample_touch(self):
@@ -230,6 +281,8 @@ class MujocoGraspBackend:
                      untouched=dict(self._untouched))
         if self._weak:      # opt-in WeakHoldGraspTarget: what each target's weak holds have spent
             state["weak_spent"] = sorted([*key, spent] for key, spent in self._weak_spent.items())
+        if self.work_limit is not None:       # only with the guard on: every other scene's state stays as it was
+            state["work"] = dict(self._work)
         return state
 
     def restore_slip(self, state):
@@ -237,6 +290,7 @@ class MujocoGraspBackend:
         self._slipped = set(state["slipped"])
         self._untouched = dict(state.get("untouched", {}))
         self._weak_spent = {(entity, link): spent for entity, link, spent in state.get("weak_spent", ())}
+        self._work = dict(state.get("work", {}))
 
     def candidates(self, hand):
         contacts = self.world.contacts()
@@ -308,9 +362,11 @@ class MujocoGraspBackend:
 
     def _rope_bundle(self, hand, result, contacts, fingers, tcp):
         """MultiRopeGraspAssistConfig (opt-in): the hand's candidates with its named ropes. A rope pinch (the config's
-        docstring) gives one bundle key, the sorted tuple of each touched rope's touched link nearest the TCP (acquire
-        welds each), in place of those ropes' plain candidates; without one, each named rope keeps its bilaterally
-        touched link nearest the TCP. Other candidates stay (next to a bundle the GraspManager finds them ambiguous)."""
+        docstring) gives one bundle key, the sorted tuple of each touched rope's touched link nearest the TCP (and, with
+        weld_links_between_pads, its other links between the pads; acquire welds each), in place of those ropes' plain
+        candidates; without one, each named rope keeps its bilaterally touched link nearest the TCP (with
+        weld_links_between_pads, together with its other links between the pads, as one bundle key). Other candidates
+        stay (next to a bundle the GraspManager finds them ambiguous)."""
         a, b = np.asarray(contacts["link_a"]), np.asarray(contacts["link_b"])
         depth, position = np.asarray(contacts["penetration"]), np.asarray(contacts["position"])
         rope_ids = np.fromiter(self._rope_links, dtype=np.int64)
@@ -337,11 +393,33 @@ class MujocoGraspBackend:
                 if x != y and any(np.linalg.norm(position[i] - c) <= r for c, r in regions):
                     pressed |= {x, y}
             pinch = all(rope in touched[0] and rope in touched[1] or rope in pressed for rope in ropes)
+        if not pinch and self._pad_box is not None and self._hold_between and touched[0] and touched[1]:
+            # opt-in hold_between_pads: both fingers on named ropes and every such contact on the pads, between them,
+            # holds as a rope pinch does (a wire's two legs side by side, each pad on one; a loop's two sides)
+            rows = sorted({i for side in touched for keys in side.values() for found in keys.values() for i in found})
+            pinch = self._points_between_pads(hand, tcp, position[rows])
         if not pinch:
             nearest = {}
             for k in sorted((k for k in result if k[0] in self._each_rope), key=lambda k: (self._distance[hand, k], k)):
                 nearest.setdefault(k[0], k)
-            return sorted([k for k in result if k[0] not in self._each_rope] + list(nearest.values()))
+            if self._pad_box is None or not nearest:
+                return sorted([k for k in result if k[0] not in self._each_rope] + list(nearest.values()))
+            # opt-in weld_links_between_pads: a named rope held by both fingers (its bilaterally touched link nearest
+            # the TCP, the plain candidate) welds with that link every other link of it between the pads, one binding
+            between = self._between_pads(hand, tcp, set(nearest))
+            plain, bundles = [k for k in result if k[0] not in self._each_rope], []
+            for rope, key in sorted(nearest.items()):
+                extra = sorted(between[rope] - {key})
+                if not extra:
+                    plain.append(key)
+                    continue
+                for e in extra:
+                    self._evidence[hand, e] = dict(physics_step=self.world.physics_step, source="mujoco_last_substep",
+                                                   between_pads=True, rows=[])
+                bundles.append(tuple(sorted([key] + extra)))
+            return sorted(plain) + bundles
+        if self._pad_box is not None:       # opt-in weld_links_between_pads
+            between = self._between_pads(hand, tcp, ropes)
         bundle = []
         for rope in sorted(ropes):
             rows = {}
@@ -359,7 +437,59 @@ class MujocoGraspBackend:
                     link_a=int(a[i]), link_b=int(b[i]), position_m=position[i].tolist(), penetration_m=float(depth[i]),
                     force_n=np.asarray(contacts["force"][i]).tolist()) for i in sorted(set(rows[key]))])
             bundle.append(key)
+            if self._pad_box is not None:   # opt-in weld_links_between_pads: the rope's other links between the pads
+                for extra in sorted(between[rope] - {key}):
+                    self._evidence[hand, extra] = dict(
+                        physics_step=self.world.physics_step, source="mujoco_last_substep", rope_pinch=True,
+                        between_pads=True, rows=[dict(
+                            link_a=int(a[i]), link_b=int(b[i]), position_m=position[i].tolist(),
+                            penetration_m=float(depth[i]), force_n=np.asarray(contacts["force"][i]).tolist())
+                            for i in sorted(set(rows.get(extra, ())))])
+                    bundle.append(extra)
+        if self._pad_box is not None:
+            bundle.sort()
         return sorted(k for k in result if k[0] not in self._each_rope) + [tuple(bundle)]
+
+    def _points_between_pads(self, hand, tcp, points):
+        """hold_between_pads (opt-in): whether every point (world frame) lies between the hand's two pads, in the pad box
+        (_between_pads) widened by HOLD_BETWEEN_PADS_TOL_M on every side: a contact on a pad face sits on the box's y
+        bound, give or take its penetration."""
+        parent = self.hands[hand][0]
+        group = self.robot.groups[hand]
+        box = self._pad_box
+        q = self.robot.entity.get_qpos()
+        q1, q2 = (float(q[self.robot.entity.get_joint(n).qs_idx_local[0]]) for n in group.finger_joints)
+        tol = HOLD_BETWEEN_PADS_TOL_M
+        low = np.array([box["x"][0], -(q1 - box["meet"]), box["z"][0]]) - tol
+        high = np.array([box["x"][1], q2 - box["meet"], box["z"][1]]) + tol
+        frame = (rotation(parent.get_quat()) * rotation(group.tcp_orientation_in_hand_wxyz)).as_matrix()
+        local = (np.asarray(points, dtype=float).reshape(-1, 3) - tcp) @ frame
+        return bool(len(local)) and bool(np.all((local >= low) & (local <= high)))
+
+    def _between_pads(self, hand, tcp, ropes):
+        """weld_links_between_pads (opt-in): for each of `ropes`, the set of its target keys whose centre lies between
+        the hand's two pads (MultiRopeGraspAssistConfig's docstring; PAD_BOX_M). Targets the task mechanism refuses are
+        left out."""
+        from scipy.spatial.transform import Rotation
+        parent = self.hands[hand][0]
+        group = self.robot.groups[hand]
+        box = self._pad_box
+        q = self.robot.entity.get_qpos()
+        q1, q2 = (float(q[self.robot.entity.get_joint(n).qs_idx_local[0]]) for n in group.finger_joints)
+        low = np.array([box["x"][0], -(q1 - box["meet"]), box["z"][0]])
+        high = np.array([box["x"][1], q2 - box["meet"], box["z"][1]])
+        frame = (rotation(parent.get_quat()) * rotation(group.tcp_orientation_in_hand_wxyz)).as_matrix()
+        d = self.world.data
+        allowed = self._grasp_allowed()
+        out = {}
+        for rope in ropes:
+            keys, ids, offsets = self._rope_centres[rope]
+            turn = Rotation.from_quat(np.asarray(d.xquat)[ids][:, [1, 2, 3, 0]])
+            centre = np.asarray(d.xpos)[ids] + turn.apply(offsets)
+            local = (centre - tcp) @ frame          # the centres in the TCP frame
+            inside = np.all((local >= low) & (local <= high), axis=1)
+            out[rope] = {k for k, ok in zip(keys, inside) if ok and (allowed is None or allowed(*k))}
+        return out
 
     def _bundle_health(self, binding):
         """MultiRopeGraspAssistConfig (opt-in): a rope bundle's grasp is lost on its first failing weld, each checked
@@ -416,6 +546,8 @@ class MujocoGraspBackend:
         self._slipped.discard(eid)
         if self.contact_lost_s is not None:   # acquired on a bilateral contact: touched now
             self._untouched[eid] = 0.
+        if self.work_limit is not None:       # a new hold: no work yet
+            self._work[eid] = 0.
         links = (self.hands[hand][0].idx, self.targets[tuple(target)][1].idx)
         binding = dict(hand=hand, target=tuple(target), links=links, relative_pose=reference,
                        finger_fractions=self.finger_fractions(hand), weld=int(eid),
@@ -451,6 +583,7 @@ class MujocoGraspBackend:
             key = tuple(binding["target"])
             self._weak_spent[key] = binding["weak_hold_spent_m"] + float(np.linalg.norm(
                 self.targets[key][1].get_pos() - np.asarray(binding["weak_hold_origin_m"])))
+        self._work.pop(eid, None)
 
     def verify_bindings(self, bindings):
         self.verify_current_bindings(bindings)
