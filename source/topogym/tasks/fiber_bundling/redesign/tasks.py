@@ -23,6 +23,13 @@ from topogym.tasks.base import EntitySpec, merge_parameters
 from topogym.tasks.fiber_bundling.common import FiberBundlingTask
 
 RING_PARTS = ("bundling_ring", "ring_mount_base", "ring_mount_post")
+
+
+def same_colour_strands(marked, count):
+    """The other strands drawn in the marked strand's palette colour (COLORS[i % len(COLORS)], the palette
+    strand_palette_shift rotates only past entry 0), in index order."""
+    from topogym.assets.geometry.fiber_bundling import COLORS
+    return [i for i in range(count) if i != marked and i % len(COLORS) == marked % len(COLORS)]
 PEG_COLOR = (.30, .34, .38)
 CAP_COLOR = (.18, .20, .23)
 CAP_HEIGHT_M = .006
@@ -40,7 +47,7 @@ class RedesignFiberTask(FiberBundlingTask):
     """A redesign tier: the family's scene and predicate with `redesign` fixtures and goal terms."""
     instruction = ('Manipulate only the thick sheath. Route it as the formboard pegs require, then pass every fiber '
                    'tip first through the copper ring until the roots and front sheath have passed, without sharp '
-                   'bends, with the red fiber at the stated position around the ring (seen from the entry side). Any gripper contact with a fine strand fails '
+                   'bends, with one of the two red fibers at the stated position around the ring (seen from the entry side). Any gripper contact with a fine strand fails '
                    'the task; keep the rear terminal anchored.')
     variation_id = "fiber_bundling_rd_base"
     family_id = "redesign"
@@ -125,8 +132,8 @@ class RedesignFiberTask(FiberBundlingTask):
             minutes = int(round((a / 30. % 12.) * 60.)) % 720
             clock = f"{(minutes // 60) or 12}:{minutes % 60:02d}"
             turn = "clockwise" if a > 0 else "counterclockwise"
-            out.append(f"Seen from the ring's entry side, looking through the ring in the feed direction, the red "
-                       f"fiber's root must end {abs(a):g} deg {turn} from the top of the ring (about {clock} on a clock "
+            out.append(f"Seen from the ring's entry side, looking through the ring in the feed direction, the root of "
+                       f"one of the two red fibers must end {abs(a):g} deg {turn} from the top of the ring (about {clock} on a clock "
                        f"face), within ±{tol:g} deg.")
         return out
 
@@ -166,8 +173,12 @@ class RedesignFiberTask(FiberBundlingTask):
         return out
 
     def lay_term(self, state, center, normal):
-        """The marked strand's root angle about the ring axis from the ring's top (deg, right-handed about the feed
-        direction), and whether it is within tolerance."""
+        """The marked colour's root angle about the ring axis from the ring's top (deg, right-handed about the feed
+        direction), and whether it is within tolerance. The texts name the strand by its colour ("one of the two red
+        fibers"): every strand with the marked strand's palette colour (strand i has palette entry i % len(COLORS);
+        strand_palette_shift never moves entry 0, so with 16 strands strands 0 and 8 are red) may meet the rule. The
+        marked strand itself is reported when it is within tolerance or when none is, so a trajectory that met the
+        rule with it keeps exactly its earlier record; otherwise the first other strand of that colour within tolerance."""
         lay = self.config["redesign"]["lay"]
         if not lay:
             return None
@@ -176,14 +187,25 @@ class RedesignFiberTask(FiberBundlingTask):
         up /= np.linalg.norm(up)
         left = np.cross(n, up)
         paths = self._strand_points(state)
-        root = paths[int(lay["strand"])][-1]
         axis_point = self._front_point(state)
-        v = root - axis_point
-        v -= np.dot(v, n) * n
-        angle = float(np.degrees(np.arctan2(np.dot(v, left), np.dot(v, up))))
-        err = (angle - float(lay["angle_deg"]) + 180.) % 360. - 180.
-        return dict(strand=int(lay["strand"]), angle_deg=round(angle, 2), error_deg=round(err, 2),
-                    within=bool(abs(err) <= float(lay["tolerance_deg"])))
+        marked = int(lay["strand"])
+
+        def term(i):
+            v = paths[i][-1] - axis_point
+            v -= np.dot(v, n) * n
+            angle = float(np.degrees(np.arctan2(np.dot(v, left), np.dot(v, up))))
+            err = (angle - float(lay["angle_deg"]) + 180.) % 360. - 180.
+            return dict(strand=i, angle_deg=round(angle, 2), error_deg=round(err, 2),
+                        within=bool(abs(err) <= float(lay["tolerance_deg"])))
+
+        first = term(marked)
+        if first["within"]:
+            return first
+        for i in same_colour_strands(marked, len(paths)):
+            other = term(i)
+            if other["within"]:
+                return other
+        return first
 
     def evaluate_transition(self, state, task_state):
         reached, failure, metrics, nxt = super().evaluate_transition(state, task_state)

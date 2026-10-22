@@ -2,7 +2,7 @@
 
 Family key `fiber_bundling` · 10 task bases · robot `franka-robotiq-2f85` · physics MuJoCo 3.14.0
 
-A cable lies in a fixed cradle: a thick sheath whose rear terminal is anchored, and at its front a bundle of fine fibers branching from the sheath. The robot must pass every fine fiber, and then the front sheath, through a fixed copper ring, without touching the fine fibers with the gripper. In bases 01-05 the number of fibers grows with the difficulty (2 to 16). Bases 06-10 use a formboard design with 16 fibers and add, depending on the base, a tighter ring, pegs that the sheath must be routed past, and a required end position of the red fiber.
+A cable lies in a fixed cradle: a thick sheath whose rear terminal is anchored, and at its front a bundle of fine fibers branching from the sheath. The robot must pass every fine fiber, and then the front sheath, through a fixed copper ring, without touching the fine fibers with the gripper. In bases 01-05 the number of fibers grows with the difficulty (2 to 16). Bases 06-10 use a formboard design with 16 fibers and add, depending on the base, a tighter ring, pegs that the sheath must be routed past, and a required end position of one of the two red fibers.
 
 ## Robot and grasping
 
@@ -17,7 +17,7 @@ What the grader checks, in plain words (each task's `instruction.md` states the 
 - **Passage.** Every fiber passes through the ring tip-first, followed by the rest of the fiber up to its root; the crossing history is tracked, so placing fibers on the far side or passing only the tips does not count.
 - **Through and clear.** All fiber points end beyond the exit side of the ring tube (allowing for fiber thickness), and the sheath's branching face also passes through and clears the tube. The rear terminal stays anchored.
 - **No kinks.** The angle between adjacent fiber segments is at most 60 degrees.
-- **Formboard (bases 07-10, as listed).** The red fiber's root ends at a stated clock position around the ring, within a stated tolerance; in bases 09 and 10 the sheath also passes one or two pegs on a stated side, lying beside the peg below its top.
+- **Formboard (bases 07-10, as listed).** The root of one of the two red fibers ends at a stated clock position around the ring, within a stated tolerance; in bases 09 and 10 the sheath also passes one or two pegs on a stated side, lying beside the peg below its top.
 - Holding is allowed; there is no separate release or speed condition.
 - All final conditions must hold together, continuously, for 0.5 s of simulated time.
 
