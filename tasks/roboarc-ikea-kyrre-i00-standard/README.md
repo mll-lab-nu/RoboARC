@@ -123,3 +123,9 @@ One retention weld per operation, switched on with the current relative pose onc
   Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of
   1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0
   stand.
+- 2026-10-22: RoboARC 1.2.1, the Nyx render process checks the GPU before it starts the renderer
+  (`environment/sim/nyx_direct.py`: the Vulkan extensions of the sidecar's GPU, `VK_KHR_ray_query` first): on a GPU
+  without RT cores (such as V100, A100 and H100) it reports what is missing and the sim service stops at once with that
+  error (`ikea_nyx.UnsupportedGPU`, no start-up retry), instead of the render process crashing three times. This mode
+  needs a GPU with RT cores. On a GPU with RT cores nothing changes; the images, the instruction, the scene, the
+  graders, the tooling and the reference are unchanged: results graded under 1.1.x stand.

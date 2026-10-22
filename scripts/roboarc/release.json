@@ -1,7 +1,7 @@
 {
  "name": "roboarc-r1",
  "note": "RoboARC release record (docs/benchmarks/roboarc.md), written by tools/release/release_rebuild.py --onto. release_commit: the simulator commit the image, the tooling and the instances come from; runtime: the image's installed runtime; bases: one record per task base (ported_from / template, instance, facts the texts state, evidence). version: the task set's version (the Release line of every task README; the image's version is images/roboarc/VERSION); changes: Change Log entries of every base.",
- "version": "1.2.0",
+ "version": "1.2.1",
  "changes": [
   {
    "date": "2026-10-19",
@@ -32,6 +32,11 @@
    "date": "2026-10-21",
    "mode": "both",
    "text": "RoboARC 1.2.0, three scenes per base (appearance seeds): seed 0 is the released scene, unchanged; seeds 1 and 2 are the same scene and physics in other colours, materials and textures. The task allows seeds 0, 1 and 2 (`[metadata.seeds]`); the runner picks the trial's seed and the image stages that seed's frozen instance against its own runtime binding (`runtime_binding.s<S>.json`, `stage_instance.py --seed-file`). `oracle` lists seed 0 and the seeds whose Harbor oracle run passed; the reference serves every seed (re-stamped with each seed's birth where it records one). Image `ghcr.io/mll-lab-nu/roboarc:1.2.0` (the seeds' simulator source and tooling); seed 0's birth, end state and render inputs are those of 1.1.x, so results graded under 1.1.x stand."
+  },
+  {
+   "date": "2026-10-22",
+   "mode": "both",
+   "text": "RoboARC 1.2.1, the renderer checks the GPU before it starts: `nyx_direct.py` reads the Vulkan extensions of the task's GPU and, where `VK_KHR_ray_query` is missing (GPUs without RT cores, such as V100, A100 and H100), raises `nyx_direct.UnsupportedDevice` naming what is missing, instead of letting the native renderer crash the process. There the privileged verifier grades without its replay video (`video_rendered` 0) and the agent's camera calls raise an error it can catch; standard mode needs a GPU with RT cores. On a GPU with RT cores nothing changes. The runtime binding names the new `nyx_direct.py`; the image, the instruction, the grader, the simulator tooling, the frozen instance and the reference are unchanged: results graded under 1.2.0 stand."
   }
  ],
  "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
@@ -6424,5 +6429,5 @@
   }
  },
  "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
- "nyx_direct_sha256": "8bf9cd0bd9f330c3ab2bd46151b5f8c25faad07292a1e8a5ea66cd0941e11850"
+ "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
 }

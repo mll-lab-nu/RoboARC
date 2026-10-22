@@ -38,7 +38,9 @@ VISIBLE_GROUPS = (0, 1, 2)          # mjvOption.geomgroup's default: what MuJoCo
 # (2026-10-17) 3 of 4 sidecars that started at the same moment lost it while the shared GPU was full (24478 of 24564 MiB:
 # other users' jobs plus the four render processes' scene uploads), with no output; on host B the same pressure gave a
 # SIGSEGV in the render process's build. The next start succeeded. Only the start-up is retried:
-# a render process lost in the middle of an episode stays an infrastructure error (server.py, crash recovery).
+# a render process lost in the middle of an episode stays an infrastructure error (server.py, crash recovery). A GPU that
+# cannot run Nyx at all (nyx_direct.check_device: no Vulkan ray queries, e.g. an A100 or H100) is not retried: the render
+# process says so in its ready line and UnsupportedGPU is raised at the first attempt.
 STARTUP_ATTEMPTS = 3
 STARTUP_BACKOFF_S = (10.0, 30.0)    # before the 2nd and the 3rd attempt
 READY_TIMEOUT_S = 300.0             # a ready line takes 11-16 s (build_s) on a loaded host; no line by then is a failed start
@@ -78,6 +80,12 @@ class RenderError(RuntimeError):
     """The Nyx render process failed (it died, refused or sent a short frame): the service's infrastructure, never the
     agent's doing (server.py ends the episode with reason "error", an infrastructure failure)."""
 
+
+class UnsupportedGPU(RenderError):
+    """This host's GPU cannot run Nyx (the render process's nyx_direct.UnsupportedDevice, e.g. no VK_KHR_ray_query on a
+    GPU without RT cores): a property of the host, so the start is not retried."""
+
+
 class NyxRig:
     """The render process of one scene and rig (physics-process side)."""
 
@@ -114,6 +122,10 @@ class NyxRig:
             try:
                 ready = self._spawn()
                 break
+            except UnsupportedGPU as exc:
+                code = self._reap()
+                self._note(f"start-up attempt {attempt} of {STARTUP_ATTEMPTS}: {exc}; exit code {code}; not retried")
+                raise
             except RenderError as exc:
                 code = self._reap()
                 failed.append({"error": str(exc), "exit": code})
@@ -142,6 +154,8 @@ class NyxRig:
             ready = self._line()
         except ValueError as exc:            # not a JSON line
             raise RenderError(f"Nyx render process: bad ready line ({exc})") from None
+        if ready.get("unsupported"):
+            raise UnsupportedGPU(ready["unsupported"])
         if not ready.get("ready"):
             raise RenderError(f"Nyx render process failed to start: {ready}")
         return ready
@@ -233,7 +247,13 @@ def _serve(folder: str) -> int:
     mj = mujoco.MjModel.from_binary_path(os.path.join(folder, "scene.mjb"))
     t0 = time.perf_counter()
     scene = IkeaScene(mj, spec)
-    nyx = IkeaNyx(scene, os.path.join(folder, "nyx"))
+    try:
+        nyx = IkeaNyx(scene, os.path.join(folder, "nyx"))
+    except N.UnsupportedDevice as exc:      # checked before the native renderer exists: say why, instead of crashing
+        print(f"[ikea_nyx] {exc}", file=sys.stderr, flush=True)
+        reply.write((json.dumps({"ready": False, "unsupported": str(exc)}) + "\n").encode())
+        reply.flush()
+        return 1
     reply.write((json.dumps({"ready": True, "instances": len(scene.slots), "meshes": scene.n_mesh_files,
                              "build_s": round(time.perf_counter() - t0, 2)}) + "\n").encode())
     reply.flush()

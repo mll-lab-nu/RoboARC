@@ -43,6 +43,14 @@ RIGS = json.loads((STD / "rigs.json").read_text())
 # same GPU check before the native renderer (1.2.1: check_device, UnsupportedDevice), kept here so that the IKEA tasks
 # build from their own paths
 NYX_DIRECT = STD / "nyx_direct.py"
+# Change Log entries of the standard tasks only, after the shared ones (mk_tasks.py CHANGE_LOG)
+STANDARD_CHANGES = """- 2026-10-22: RoboARC 1.2.1, the Nyx render process checks the GPU before it starts the renderer
+  (`environment/sim/nyx_direct.py`: the Vulkan extensions of the sidecar's GPU, `VK_KHR_ray_query` first): on a GPU
+  without RT cores (such as V100, A100 and H100) it reports what is missing and the sim service stops at once with that
+  error (`ikea_nyx.UnsupportedGPU`, no start-up retry), instead of the render process crashing three times. This mode
+  needs a GPU with RT cores. On a GPU with RT cores nothing changes; the images, the instruction, the scene, the
+  graders, the tooling and the reference are unchanged: results graded under 1.1.x stand.
+"""
 AGENT_S = P.AGENT_S               # the privileged twin's wall-clock cutoff (PROTOCOL v2.0 H.7): the only hard budget
 # The speed rule's numbers, for the texts: THE table is rcb_ikea.JOINT_SPEED_LIMITS_RAD_S / GRIPPER_WIDTH_SPEED_M_S (the
 # service and the grader read it); checked against its source here, so the texts cannot drift from it.
@@ -518,7 +526,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Mechanism
 {x['mechanism']}
 
-{P.CHANGE_LOG}'''
+{P.CHANGE_LOG}{STANDARD_CHANGES}'''
 
 
 def render(t: str, out: pathlib.Path, refs: pathlib.Path | None) -> None:
