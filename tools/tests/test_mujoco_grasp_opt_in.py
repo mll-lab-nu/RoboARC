@@ -415,8 +415,10 @@ class WeakHold(unittest.TestCase):
             WeakHoldGraspTarget("c", "c", friction_coefficient=1., firm_friction_coefficient=1.)
         with self.assertRaises(ValueError):
             WeakHoldGraspTarget("c", "c", weak_hold_travel_m=0.)
-        self.assertEqual(list(asdict(WeakHoldGraspTarget("c", "c")))[-3:],
-                         ["friction_coefficient", "firm_friction_coefficient", "weak_hold_travel_m"])
+        fields = list(asdict(WeakHoldGraspTarget("c", "c")))
+        i = fields.index("friction_coefficient")
+        self.assertEqual(fields[i:i + 5], ["friction_coefficient", "firm_friction_coefficient", "weak_hold_travel_m",
+                                           "home_link", "home_box_m"])
 
 
 # --------------------------------------------------------------------------------------------- the wires
