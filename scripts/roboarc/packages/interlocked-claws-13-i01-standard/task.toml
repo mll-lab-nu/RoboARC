@@ -30,9 +30,9 @@ task_type = "trajectory"
 simulator = "roboarc"
 robot = "aloha-2"
 family = "interlocked_claws"
-difficulty = "hard"
+difficulty = "untiered"
 mode = "standard"                  # RGB + proprioception only; no object poses, no success predicate, no reset
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, contacts, screws and threads are passive
 protocol = "eai-standard/2.4"
 {{ORACLE}}
 grasp = "assisted (the contact_weld_v1 pre-weld: the grippers start closed on trinity_t, trinity_b)"

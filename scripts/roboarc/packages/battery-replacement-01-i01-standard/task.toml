@@ -30,9 +30,9 @@ task_type = "trajectory"
 simulator = "roboarc"
 robot = "aloha-2"
 family = "battery_replacement"
-difficulty = "hard"
+difficulty = "untiered"
 mode = "standard"                  # RGB + proprioception only; no object poses, no success predicate, no reset
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, contacts, screws and threads are passive
 protocol = "eai-standard/2.4"
 {{ORACLE}}
 grasp = "assisted (contact_weld_v1 on every part; the cells by the central angle of the pinch: old cells plucked at 90 deg, carried at 150, new cells at 150; the grippers start empty)"

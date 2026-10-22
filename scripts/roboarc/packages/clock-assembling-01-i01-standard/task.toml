@@ -30,9 +30,9 @@ task_type = "trajectory"
 simulator = "roboarc"
 robot = "aloha-2"
 family = "clock_assembling"
-difficulty = "hard"
+difficulty = "untiered"
 mode = "standard"                  # RGB + proprioception only; no object poses, no success predicate, no reset
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
+dynamics = "dynamic"              # scene dynamics (docs/PROTOCOL.md §2): the wound mainspring drives the gear train on its own
 protocol = "eai-standard/2.4"
 {{ORACLE}}
 grasp = "assisted (contact_weld_v1 on every part; the grippers start empty)"

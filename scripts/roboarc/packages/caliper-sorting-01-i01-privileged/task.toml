@@ -14,9 +14,9 @@ task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "aloha-2"
 family = "caliper_sorting"
-difficulty = "hard"
+difficulty = "untiered"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
-dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2.14)
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, contacts, screws and threads are passive
 {{ORACLE}}
 grasp = "assisted (the contact_weld_v1 grasp regions on caliper, sleeve_0, sleeve_1, sleeve_2, sleeve_3)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision sleeves_in_labelled_bins_v2)"
