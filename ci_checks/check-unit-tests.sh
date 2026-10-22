@@ -41,8 +41,10 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
          scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
          scripts/usage_gateway/tests/test_budget_stop.py scripts/tests/test_stamp_mtimes.py \
-         scripts/tests/test_task_seed.py scripts/harbor/tests/test_runner_seeds.py \
-         scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py; do
+         scripts/tests/test_task_seed.py scripts/harbor/tests/test_runner_seeds.py tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
+         scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py \
+         scripts/roboarc/tests/test_generator_seeds.py tools/tests/test_release_seeds.py images/tests/test_pull_all.py \
+         tools/tests/test_d4_tools.py; do
   run 300 "$t"
 done
 run 120 scripts/harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials
@@ -62,6 +64,7 @@ fi
 # the cloth assist's exposure rule on the simulator source (topogym.utils.grasp: numpy + scipy)
 if python3 -c "import numpy, scipy" 2>/dev/null; then
   run 300 tools/tests/test_exposure_rule.py
+  run 300 tools/tests/test_fiber_red_lay.py   # fiber 07-10's lay rule: either red fiber
 elif [ $all -eq 1 ]; then
   echo "FAIL check-unit-tests.sh --all: numpy and scipy are needed for tools/tests/test_exposure_rule.py (pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock)"; rc=1
 else
