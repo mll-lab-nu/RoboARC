@@ -9,8 +9,9 @@
 #     dataset). Run by run_all.sh and the CI job `unit-tests` (not required; the
 #     test that enforces PROTOCOL Appendix H.5 also runs in the required job `invariants`, run_invariants.sh).
 #  2. numpy + requests (no simulator, no image, no GPU): the eai-standard/2.4 service layer on a stub simulator (its
-#     in-trial crash recovery, request checks), RoboARC's sim-service tests with stubs, and Nyx's start-up retry
-#     (tools/tests/test_nyx_startup.py). The cloth assist's exposure rule (tools/tests/test_exposure_rule.py) needs
+#     in-trial crash recovery, request checks), RoboARC's sim-service tests with stubs, Nyx's start-up retry
+#     (tools/tests/test_nyx_startup.py) and its GPU check, both nyx_direct.py copies (tools/tests/test_nyx_device_check.py).
+#     The cloth assist's exposure rule (tools/tests/test_exposure_rule.py) needs
 #     numpy + scipy and is run when they import. Run when both modules can be
 #     imported (the CI job `unit-tests` installs them), skipped with a note otherwise; `--all` makes a missing module a
 #     failure (numpy, requests, scipy).
@@ -56,6 +57,7 @@ if python3 -c "import numpy, requests" 2>/dev/null; then
     run 900 "$t"
   done
   run 300 tools/tests/test_nyx_startup.py   # Nyx's start-up retry, with a stub build (numpy only)
+  run 300 tools/tests/test_nyx_device_check.py   # Nyx's GPU check, mocked Vulkan extension lists (numpy only)
 elif [ $all -eq 1 ]; then
   echo "FAIL check-unit-tests.sh --all: numpy and requests are needed for the second tier (pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock)"; rc=1
 else
