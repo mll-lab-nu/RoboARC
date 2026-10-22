@@ -1,4 +1,4 @@
-# The RoboARC release image, ghcr.io/embodied-first-exam/roboarc:<images/roboarc/VERSION> (images/roboarc/README.md).
+# The RoboARC release image, ghcr.io/mll-lab-nu/roboarc:<images/roboarc/VERSION> (images/roboarc/README.md).
 # Built by images/roboarc/build.sh from source/ (source/.dockerignore keeps the context to the files this recipe copies),
 # with the frozen MuJoCo instances as the named build context `instances` (empty: the image without instances).
 #
@@ -89,14 +89,15 @@ RUN chmod -R a+rX /opt/topogym-assets
 ENV WARP_CACHE_PATH=/opt/warp-cache
 COPY images/roboarc/warp_precompile.py /tmp/warp_precompile.py
 RUN python /tmp/warp_precompile.py && rm /tmp/warp_precompile.py && chmod -R a+rX,a-w /opt/warp-cache
-# Every task's frozen MuJoCo instance (instance.json + instance_assets/), from the named build context `instances`; a
-# task stages its own with /opt/robotangle/stage_instance.py and checks it against its runtime_binding.json.
+# Every task's frozen MuJoCo instance (instance.json + instance_assets/), from the named build context `instances`, with
+# its appearance seeds under <base>/seeds/<S>/ (docs/RUNNING.md "Seeds"); a task stages its own (its seed's, with
+# --seed-file) with /opt/robotangle/stage_instance.py and checks it against its runtime binding.
 COPY images/roboarc/stage_instance.py /opt/robotangle/stage_instance.py
 RUN --mount=type=bind,from=instances,target=/tmp/mj-instances \
     set -e; mkdir -p /opt/robotangle/instances; for d in /tmp/mj-instances/*/; do [ -d "$d" ] || continue; b=$(basename "$d"); \
-      test -f "$d/instance.json"; \
-      python -c "import json, sys; assert json.load(open(sys.argv[1]))['simulator']['physics_engine'] == 'mujoco'" "$d/instance.json"; \
-      cp -a "$d" "/opt/robotangle/instances/$b"; echo "MuJoCo instance $b"; done; \
+      for i in "$d" "$d"seeds/*/; do [ -d "$i" ] || continue; test -f "$i/instance.json"; \
+        python -c "import json, sys; assert json.load(open(sys.argv[1]))['simulator']['physics_engine'] == 'mujoco'" "$i/instance.json"; done; \
+      cp -a "$d" "/opt/robotangle/instances/$b"; echo "MuJoCo instance $b $(ls "$d"seeds 2>/dev/null | tr '\n' ' ')"; done; \
     chmod -R a+rX /opt/robotangle
 # MuJoCo 3.14.0 + the EPA horizon-overflow fix (RoboARC 0.2.1): a 14-byte patch of the wheel's own libmujoco.so
 # (mujoco-3.14.0-epa/, docs/simulator/MUJOCO_EPA_PATCH.md, upstream 6d662aed; sha256 5e7623e3... -> 52e2a24e..., the
@@ -135,4 +136,4 @@ CMD ["python3"]
 ARG RELEASE_VERSION=dev
 LABEL org.opencontainers.image.title="RoboARC" \
       org.opencontainers.image.version="${RELEASE_VERSION}" \
-      org.opencontainers.image.source="https://github.com/Embodied-First-Exam/RoboARC"
+      org.opencontainers.image.source="https://github.com/mll-lab-nu/RoboARC"
