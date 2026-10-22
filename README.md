@@ -12,7 +12,7 @@ The tasks serve two kinds of solvers through the same simulator code:
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.2.0** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
+Version **1.2.1** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
 under `tasks/`:
 - the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories; every base
   has three scenes (appearance seeds 0, 1, 2: the same scene and physics in other looks), and the runner picks one
@@ -60,7 +60,10 @@ Each task exists in two modes, on the same frozen instance, with the same 3 h ag
   live episode; for the puzzles a fresh-process replay must confirm it.
 
 Requirements:
-- Linux x86_64 and an NVIDIA GPU with RT cores (driver >= 580; Nyx renders through Vulkan). arm64 hosts are not
+- Linux x86_64 and an NVIDIA GPU with RT cores (driver >= 580; Nyx renders through Vulkan ray queries): GeForce RTX 20-series or newer, RTX workstation GPUs, T4, L4, L40 / L40S, A10 / A10G, A40.
+  Data-centre GPUs without RT cores (V100, A100, A30, H100, H200) cannot run standard mode; there privileged tasks are graded
+  without their replay video, and such runs are unofficial because the agent sees no images
+  ([docs/RUNNING.md](docs/RUNNING.md#gpus-without-rt-cores)). There is no software fallback. arm64 hosts are not
   supported: the images are linux/amd64, Nyx needs NVIDIA on x86_64, and the standard client's hashed lock lists
   x86_64 wheels. Each puzzle task declares
   one GPU with 2 GB; IKEA's standard tasks reserve one GPU for rendering and its privileged tasks run on CPU only. See each task's resources in its `task.toml`.
@@ -83,6 +86,7 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 harbor run -p tasks -i roboarc-ikea-lack-i00-privileged -a oracle             # an IKEA task
 ```
 
+A short setup and first-run note for a collaborator: [docs/COLLABORATOR_SETUP.md](docs/COLLABORATOR_SETUP.md).
 Batch runs, agent configuration, network egress, result files and re-grading: [docs/RUNNING.md](docs/RUNNING.md). The
 task contract and scoring: [docs/PROTOCOL.md](docs/PROTOCOL.md) and [docs/STANDARD_MODE.md](docs/STANDARD_MODE.md).
 

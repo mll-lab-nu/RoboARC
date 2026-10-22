@@ -8,13 +8,32 @@ standard-mode wire protocol is [STANDARD_MODE.md](STANDARD_MODE.md); the benchma
 
 ## Requirements
 
-- Linux x86_64 with an NVIDIA GPU that has RT cores (Nyx renders through Vulkan; driver >= 580), Docker with the NVIDIA
+- Linux x86_64 with an NVIDIA GPU that has RT cores (Nyx renders through Vulkan; driver >= 580; see "GPUs without RT
+  cores" below), Docker with the NVIDIA
   Container Toolkit, Harbor 0.23 or newer, Python >= 3.11 for the repository tools. arm64 hosts are not supported (the
   images are linux/amd64, Nyx needs NVIDIA on x86_64, the standard client's lock lists x86_64 wheels).
 - The images the tasks name (`ghcr.io/mll-lab-nu/roboarc:<images/roboarc/VERSION>`; IKEA:
   `roboarc-ikea` and `roboarc-ikea-sim`), pulled or built (docs/DEVELOPING.md). The image packages are private and inherit this repository's access: a collaborator with read access to the repository logs in with `docker login ghcr.io -u <github user>` and a GitHub token with the `read:packages` scope.
 - Every trial needs one GPU. A task's minimum allocation is its `[metadata.resources]` (README "Compute resources";
   2 GB of GPU memory, measured peak about 1.1 GB).
+
+### GPUs without RT cores
+
+Nyx, the graded renderer, path-traces with Vulkan ray queries (`VK_KHR_ray_query`) and shares its frames with CUDA on
+the same GPU. NVIDIA offers ray queries only on GPUs with RT cores: GeForce RTX 20-series or newer, RTX workstation GPUs, T4, L4, L40 / L40S, A10 / A10G, A40. Data-centre GPUs without RT cores
+(V100, A100, A30, H100, H200) do not offer them, and a CPU Vulkan driver (Mesa lavapipe) cannot share memory with CUDA, so there is no
+software fallback. Before it creates the renderer, `nyx_direct.py` (IKEA standard: its render process) reads the
+GPU's Vulkan extensions and raises an error naming what is missing (`nyx_direct.UnsupportedDevice`; the check takes
+about 0.1 s) instead of letting the native renderer crash the process. On such a GPU:
+
+| mode | result |
+|---|---|
+| standard | does not run: the observations are Nyx images, and the `sim` service stops at start-up with that error |
+| privileged, verifier | graded: the verdict comes from the physics replays (MuJoCo on the CPU; blanket's cloth on CUDA, bit-identical on an A100); the replay video, evidence only, is not made (`video_rendered` 0, `media.json` status "error") |
+| privileged, agent | the physics tooling works; every camera call (`render_frame`, `render_grid`, `render_video`, `render_depth`, `VIDEO_CAMERAS`) raises `UnsupportedDevice`, which the agent's script can catch |
+
+Such runs are **unofficial**: the agent never sees the scene, so their results are not comparable with runs on a GPU
+with RT cores. IKEA's privileged tasks do not use Nyx and run on any host.
 
 ## Building task images: stamp first
 

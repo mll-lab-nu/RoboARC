@@ -161,7 +161,9 @@ Contact and safety telemetry is published in `meta["safety"]` (above).
 
 Every task declares 2 GB of GPU memory as its minimum (measured peak about 1.1 GB on 24 GB cards), and 4 or 6 CPUs and
 7 to 10 GB of memory by family class (rigid, rope / chain, cloth), with limits and caps (`scripts/task_resources.toml`; each task's README, "Compute resources").
-Every trial needs one NVIDIA GPU with RT cores (Nyx renders through Vulkan).
+Every trial needs one NVIDIA GPU with RT cores (Nyx renders through Vulkan ray queries). On a GPU without them (V100, A100, A30, H100, H200)
+standard mode does not run and privileged tasks are graded without the replay video; such runs are unofficial
+(docs/RUNNING.md, "GPUs without RT cores").
 
 ## Easy set
 

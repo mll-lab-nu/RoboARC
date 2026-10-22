@@ -50,7 +50,8 @@ state it reaches in 1.0.0 (`docs/history/GENESIS_REMOVAL.md`).
 ## Host
 
 - Linux x86_64 (not WSL: Nyx needs the NVIDIA Vulkan driver inside the container).
-- An NVIDIA GPU with RT cores (GPUs without them, e.g. A100 and H100, cannot run Nyx) and driver >= 580 with its
+- An NVIDIA GPU with RT cores (GPUs without them, e.g. A100 and H100, cannot run Nyx: nyx_direct.py raises
+  UnsupportedDevice, docs/RUNNING.md "GPUs without RT cores") and driver >= 580 with its
   graphics (GL/Vulkan) user-space libraries; Docker with the NVIDIA Container Toolkit, the default runtime left at `runc`.
 - Exactly one GPU per container: Nyx crashes when two are visible. The task compose files reserve one GPU with a
   device reservation (`count: 1`, `capabilities: [gpu]`) and no `runtime: nvidia`. `NVIDIA_DRIVER_CAPABILITIES=all`

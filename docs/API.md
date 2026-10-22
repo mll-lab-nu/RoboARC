@@ -84,8 +84,9 @@ compiles them at every start (a few seconds); the frames are not affected.
   (`ROBOARC_INSTANCES=<dir>` with `<dir>/<base>/instance.json` + `instance_assets/`) and the image's own runtime (its
   simulator source and package versions: the runtime binding checks them). `make(..., strict=False)` runs without these checks; the
   results are then not the graded ones.
-- Hardware: the MuJoCo physics runs on the CPU (one core per environment). A GPU is needed for Nyx rendering (RT cores;
-  NVIDIA driver 570 worked) and, for **blanket-flatten and blanket-fold, for the physics too**: their cloth runs on a
+- Hardware: the MuJoCo physics runs on the CPU (one core per environment). A GPU is needed for Nyx rendering (RT cores,
+  for Vulkan ray queries; NVIDIA driver 570 worked; on a GPU without them, such as a V100, A100 or H100, the renderer
+  raises `nyx_direct.UnsupportedDevice`: docs/RUNNING.md, "GPUs without RT cores") and, for **blanket-flatten and blanket-fold, for the physics too**: their cloth runs on a
   deterministic CUDA solver (Warp, built for CUDA 13: a driver for CUDA 13, or NVIDIA's CUDA forward-compatibility
   libraries `cuda-compat` on `LD_LIBRARY_PATH` with an older driver; the bit-identity runs below used driver 570 with
   them). Memory per environment (container peak, measured on full reference replays with rendering off): puzzles
@@ -275,7 +276,7 @@ Every limit clamps the command and the episode goes on; none fails it. The API a
 
 | renderer | what | needs | cost |
 |---|---|---|---|
-| `nyx` | the graded images: Nyx path tracing at the task's camera rig (puzzles: `nyx_direct.py`; IKEA: `ikea_nyx.py` in its own render process) | a GPU with RT cores, the NVIDIA container toolkit with `NVIDIA_DRIVER_CAPABILITIES=all` (Vulkan); IKEA: the `-sim` image | a control step with 4 cameras (848 x 480) and depth, physics included, on an RTX 4090: about 60 ms (puzzles and IKEA); start-up 7-10 s |
+| `nyx` | the graded images: Nyx path tracing at the task's camera rig (puzzles: `nyx_direct.py`; IKEA: `ikea_nyx.py` in its own render process) | a GPU with RT cores (Vulkan `VK_KHR_ray_query`, checked before the renderer starts), the NVIDIA container toolkit with `NVIDIA_DRIVER_CAPABILITIES=all` (Vulkan); IKEA: the `-sim` image | a control step with 4 cameras (848 x 480) and depth, physics included, on an RTX 4090: about 60 ms (puzzles and IKEA); start-up 7-10 s |
 | `mujoco` | MuJoCo's OpenGL raster of the **physics model** at the same camera poses: a quick look for debugging, **not the graded renderer** (other shapes and colours, simple lighting; a GPU cloth shows its MuJoCo stand-in) | an OpenGL context: `MUJOCO_GL=egl` (headless GPU) or `osmesa` (CPU only, needs libOSMesa) | the same step with EGL: about 40 ms (puzzles), 10-16 ms (IKEA) |
 | `none` | no images | nothing | none |
 
@@ -361,4 +362,5 @@ pass `final_check`, and no step was shortened by any limit. Rendering with Nyx l
 - The standard mode's service has more than the per-step interface: chunked submissions with interpolation, its wall
   clock, its live-episode grading and replay. The API's step is the service's control step; a policy that runs well
   here sees the same physics, observations and rules there.
-- The graded renderer needs a GPU; the `mujoco` renderer is for quick looks only.
+- The graded renderer needs a GPU with RT cores (not a V100, A100, A30, H100 or H200); the `mujoco` renderer is for
+  quick looks only.

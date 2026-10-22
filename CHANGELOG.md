@@ -4,6 +4,44 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 1.2.1 (2026-10-22)
+
+Nyx on GPUs without RT cores: a clear error instead of a crash. The same images (`roboarc:1.2.0`, the IKEA images
+1.1.0), physics, instances, references, instructions and graders: results graded under 1.2.0 stand.
+
+- **The problem** (measured on an A100 and an H100, NVIDIA driver 610.43.02): GPUs without RT cores offer the Vulkan
+  ray-tracing pipeline and acceleration structures but not `VK_KHR_ray_query`, which Nyx's path tracer uses. The
+  driver's shader compiler rejected Nyx's pipelines and the native renderer then died with a segmentation fault, which
+  no Python code can catch. So on such a GPU the privileged verifier crashed in its video pass before it wrote the
+  verdict (the trial got no reward at all), an agent's first camera call killed its Python process, and standard mode's
+  `sim` service crashed at start-up.
+- **The fix**: `nyx_direct.py` checks the GPU before it creates the native renderer. It finds the Vulkan device that is
+  the CUDA device (the same UUID) and requires `VK_KHR_ray_query`, `VK_KHR_acceleration_structure` and
+  `VK_KHR_external_memory_fd` there (`NYX_VULKAN_EXTENSIONS`). A missing extension, no Vulkan device for the CUDA GPU
+  (a CPU driver such as Mesa lavapipe) or no Vulkan driver raises `nyx_direct.UnsupportedDevice` (a `RuntimeError`)
+  naming what is missing and the GPUs Nyx runs on, at once and without the start-up retry; later builds in the same
+  process raise it without trying again. A check that cannot complete leaves the decision to the build, as before.
+  The check takes about 0.1 s and changes nothing on a GPU with RT cores.
+- **What runs where now** (docs/RUNNING.md, "GPUs without RT cores"): on GPUs with RT cores (GeForce RTX 20-series
+  or newer, RTX workstation GPUs, T4, L4, L40 / L40S, A10 / A10G, A40) everything is as in 1.2.0. On V100, A100, A30,
+  H100 or H200, standard mode does not run (its observations are Nyx images); the privileged verifier grades from the
+  physics replays as on any host, without the replay video (`video_rendered` 0, `media.json` status "error"); agents'
+  camera calls raise `UnsupportedDevice`. Such runs are unofficial: the agent sees no images. There is no software
+  fallback.
+- **IKEA**: the standard sidecar's Nyx render process (`ikea_nyx.py`, with IKEA's own copy of `nyx_direct.py`) has
+  the same check; it reports an unsupported GPU in its ready line and the service stops at once
+  (`ikea_nyx.UnsupportedGPU`, no start-up retry) instead of crashing three times. IKEA's privileged tasks do not use Nyx.
+- **Tasks**: the 202 puzzle directories re-rendered (`nyx_direct.py` copies, the runtime bindings'
+  `nyx_direct_sha256` for seeds 0, 1 and 2, the Release line "RoboARC 1.2.1", a Change Log entry, `DIGEST`), and the 12
+  IKEA standard directories (the sim's `nyx_direct.py` and `ikea_nyx.py`, a Change Log entry, `DIGEST`). The IKEA
+  privileged directories do not change. No image is rebuilt: the task tooling is not in the images (each task
+  directory carries its pinned copy).
+- **Tests**: `tools/tests/test_nyx_device_check.py` (mocked Vulkan extension lists and a stub gs-nyx, both
+  `nyx_direct.py` copies; in `ci_checks/check-unit-tests.sh`); IKEA's `test_nyx_startup.py` covers the unsupported start.
+- **Docs**: README, docs/RUNNING.md, docs/API.md, the benchmark page and the image README state the GPU requirement.
+  New `docs/COLLABORATOR_SETUP.md` (by Jianwen): machine, access, a first check and the evaluation run, for a
+  collaborator; linked from the README.
+
 ## 1.2.0 (2026-10-21)
 
 Three scenes per task base (appearance seeds), the simulator source and tooling they need, and nine new bases prepared
