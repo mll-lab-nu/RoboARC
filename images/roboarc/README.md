@@ -64,7 +64,7 @@ state it reaches in 1.0.0 (`docs/history/GENESIS_REMOVAL.md`).
 ## Build (from the repository root)
 
 ```bash
-images/roboarc/build.sh                       # instances from the HF dataset pinned in scripts/roboarc/assets.json
+images/roboarc/build.sh                       # instances from the HF dataset pinned in scripts/roboarc/assets.json (see below for 1.2.0)
 images/roboarc/build.sh --instances <dir>     # or a local copy: <dir>/<base>/instance.json + instance_assets/
 images/roboarc/build.sh --noinst              # the image without instances (to make new instances in it)
 ```
@@ -79,6 +79,10 @@ images/roboarc/build.sh --noinst              # the image without instances (to 
    (`source/.dockerignore` keeps it to the paths the recipe copies) and the instances as the named build context
    `instances`;
 3. the runtime check below; the tag is removed when the installed runtime differs from `scripts/roboarc/release.json`.
+
+1.2.0's appearance seeds (`instances/<base>/seeds/<S>/`) and the new bases' instances are pinned in `assets.json` but
+not yet in the HF dataset (one revision for the release, uploaded with the owner's approval): until then build 1.2.0
+with `--instances <dir>` from the release's instance tree; `assets.py check-instances` verifies every pinned file.
 
 It needs Docker with BuildKit (the default `docker` driver), about 25 GB of free disk and network access to Docker Hub
 (the base image), snapshot.debian.org, pypi.org and download.pytorch.org (the wheels) and dl.polyhaven.org (the studio

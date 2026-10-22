@@ -12,9 +12,11 @@ The tasks serve two kinds of solvers through the same simulator code:
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.1.1** (see [CHANGELOG.md](CHANGELOG.md); the images are `1.1.0`, in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
+Version **1.2.0** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
 under `tasks/`:
-- the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories;
+- the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories; every base
+  has three scenes (appearance seeds 0, 1, 2: the same scene and physics in other looks), and the runner picks one
+  per trial (docs/RUNNING.md "Seeds");
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
   directories. The scenes are by Xiaoyu's team (Xiaoyu, Zhen Wu).
 
@@ -65,11 +67,13 @@ Requirements:
 - Docker with the NVIDIA Container Toolkit; [Harbor](https://github.com/laude-institute/harbor) 0.23 or newer;
   Python >= 3.11 for the repository tools.
 
-The puzzle tasks run `ghcr.io/mll-lab-nu/roboarc:1.1.0`; the IKEA tasks run
+The puzzle tasks run `ghcr.io/mll-lab-nu/roboarc:1.2.0`; the IKEA tasks run
 `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.1.0`. Every task
 names its images by manifest digest ([images/pins.json](images/pins.json), [images/README.md](images/README.md)), so
 Harbor pulls exactly the validated images. Pull them, or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
 The image packages are private and inherit this repository's access: a collaborator with read access to the repository logs in with `docker login ghcr.io -u <github user>` and a GitHub token with the `read:packages` scope.
+Pre-pull all images: `bash images/pull_all.sh` (every pinned image by its digest, each checked against its
+pinned image id; it uses your existing `docker login ghcr.io`).
 
 ```bash
 python3 scripts/stamp_mtimes.py tasks   # once per checkout: fixed file times, so Harbor's build cache hits
@@ -101,9 +105,9 @@ Run it inside the task's image with the repository mounted:
 
 ```bash
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.2.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/mll-lab-nu/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
+  ghcr.io/mll-lab-nu/roboarc:1.2.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
 ```
 
 IKEA runs in `roboarc-ikea:1.1.0` (physics only) or `roboarc-ikea-sim:1.1.0` (with Nyx images). `pip install -e .`

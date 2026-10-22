@@ -18,6 +18,7 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 | the release commit named in `scripts/roboarc/release.json` (`release_commit`) | `67ed48da8514eb3cb95c2d5b64cc8639125d6b7a` | 2026-10-18 12:49 -0500 | an ancestor of 5cb4114f10. Its simulator source, robot assets and image helpers are byte-identical to `source/` (the only later change in those paths is orbits-02's `dynamics` line in `source/scripts/robotangle/package_text/`). The task READMEs name it as "simulator source `67ed48da8`" |
 | main before the rewrite | `19dcad58b5691b93d95646dd26a6115e69b2925f` | 2026-10-19 00:59 -0700 | the release history in CHANGELOG.md (0.1.0: #186 / #187, 0.2.0: #301) |
 | the shared repository's main: the usage gateway (added after 1.1.0) | `3518d6558f56d65acb93b8bd03a3b5f2d43f2a7b` | 2026-10-19 04:49 -0700 | `scripts/usage_gateway/` (`gateway.py`, `rawlog.py`, `api_paths.json`, `tests/`) and `.env.example`, byte-identical. The newest commit whose gateway takes every option the runner passes and reads `scripts/set_agent_egress.py`'s host lists from the file's text; later versions import that module, which runs nothing on import since the same change (its command line is under `if __name__ == "__main__"`) |
+| TopoGym's development line `dev/robotangle_mujoco` (for 1.2.0; prepared by Jianwen and ported onto 1.1.0) | `497a9e9d7f630c40bc315a01795a8a4beec5e7f7` | 2026-10-20 01:45 -0500 | the five new task settings and what they need: `source/topogym/` (35 files: 12 changed, 23 new), the pinned tooling's new task entries (`scripts/roboarc/shared/`), `tools/release/` (`mujoco_release.json` new bases, `release_rebuild.py`, `topogym_rules.py`), the nine new bases' references (`scripts/roboarc/oracles/`) and their builders (`tools/references/`), tests (`tools/tests/`), a stress reproducer, the development notes (`docs/simulator/families/`, `docs/simulator/MUJOCO_CORE.md`): "1.2.0 (in progress)" below |
 
 ## External inputs (pinned)
 
@@ -160,3 +161,53 @@ a hashed lock of the same versions (`--no-deps --require-hashes`).
 1.1.1 names the same four images (same digests and ids) under `ghcr.io/mll-lab-nu/` instead of
 `ghcr.io/embodied-first-exam/` (`images/pins.json`); nothing else changed. The runtime bindings and the IKEA sim
 recipe's `FROM` keep the names the images were bound and built under.
+
+## 1.2.0: appearance seeds and new task settings
+
+1.2.0 adds nine new bases (four new families: bed_bolt 01-05, caliper_sorting, clock_assembling,
+battery_replacement; and Cast Trinity, interlocked-claws-13) and appearance-only scene seeds. The source part was
+prepared by Jianwen as a three-way, per-file merge of TopoGym's development line `497a9e9d7f` onto 1.0.0 (merge base
+`a3cce97cf304f4b6d297ec3243974e1f8777791c`, 2026-10-16), then ported onto 1.1.0:
+
+- **Paths:** 1.1.0's layout (`source/scripts/robotangle/` -> `scripts/roboarc/shared/`, `scripts/roboarc/oracles/`,
+  `tools/release/`, `tools/references/`, `tools/tests/`, `tools/stress/corpus/`; `docs/families/` dev notes ->
+  `docs/simulator/families/`; `source/docs/MUJOCO_CORE.md` -> `docs/simulator/MUJOCO_CORE.md`).
+- **Merged with 1.1.0:** the Genesis-only modules 1.1.0 removed stay removed; `simulator/env.py` keeps both changes
+  (different hunks); the tooling edits apply on top of tooling v20. SOURCE.json a7487c51 (426 files) -> 2ba65d0f
+  (449 files); `rcb_topogym.py` sha256 676e1803..., `nyx_direct.py` 8bf9cd0b....
+- **Conflicts resolved:** `tools/release/mujoco_release.json` (1.1.0's text, the new bases added without
+  `package_text`, which 1.1.0 removed); `tools/release/release_rebuild.py` (1.1.0's packages rule; a new base whose
+  template is of another family is refused until its own final packages are in `scripts/roboarc/packages/`).
+- **Not carried:** the new bases' `package_text` (their final packages are written in the 1.2.0 build) and the
+  NYX_DIRECT edit of the Genesis-era generator. The usage gateway and the `set_agent_egress.py` guard of the same branch
+  were taken earlier (the source-commit row above).
+- **Released physics:** every change to the hashed source is new-family code or an opt-in branch a released
+  configuration does not take; the released references are replayed strictly in the 1.1.0 image with this source to
+  confirm it (the 1.2.0 validation repeats it for all bases).
+- **No task directories** change yet: the bindings name 1.1.0's source and tooling until the 1.2.0 re-render, so
+  `tools/release/source_hash.py --check` and `mk_tasks.py --check` do not pass on this state alone.
+
+- **Appearance seeds and the new families' source (second port):** Jianwen's later source syncs (TopoGym `622c7801c6`,
+  appearance seeds; `738231f5cb`, clock_assembling v3 and battery_replacement's controller body) applied three-way per
+  file onto this source (33 files, all clean; SOURCE.json 488fbe49, 449 files); his release tooling for seeds
+  (`tools/release/derive_seed_instance.py`, `release_rebuild.py --appearance-seeds`, goal-picture renderers in
+  `scripts/roboarc/goal_images/`); his seed data (every base's seeds 1 and 2 pinned in `scripts/roboarc/assets.json`
+  by sha256, per-seed locks, goal pictures and re-stamped references), derived on 2026-10-20 in his image of the earlier
+  layout. Those seed instances are not in the HF dataset yet; 1.2.0 derives them again in its own image, checks them,
+  and uploads one revision with the owner's approval. Not carried: his runner, results writer and `task_seed.py`
+  changes (this repository's per-trial runner replaced them), his task dirs and his image recipe.
+
+- **Batches 2 and 3 of the sync:** TopoGym `3eed5d8b33` (battery_replacement's handle shell and second-round looks,
+  caliper_sorting's second round) and `a849170272` (colour fixes: rope-threading's seed ropes, Cast Trinity's third
+  piece), 8 files, three-way per file, all clean. SOURCE.json `cacc831d…` (449 files), with this repository's own
+  change of fiber_bundling's `lay` rule (either red fiber).
+- **Seeds derived in this release's image and re-pinned:** `tools/release/release_rebuild.py --appearance-seeds` derived
+  every base's seeds 1 and 2 again in the 1.2.0 image without instances; births and `instance_assets/` equal Jianwen's
+  first derivation (220 / 220 before the later source; afterwards differing exactly where that source changed the looks
+  or the text), and the canonical `instance.json` differs from his pins only in the derive provenance
+  (`derived_from.source`, `derived_from.tool`). battery-replacement-01, caliper-sorting-01 and interlocked-claws-13
+  were made again in that image (births equal their references'). `scripts/roboarc/assets.json` pins the seeds and the
+  new bases by sha256; the HF dataset keeps revision `9f34f894a454` until the release's revision is uploaded.
+- **Not carried from his branch:** his runner and results writer (this repository's per-trial runner), his task dirs,
+  his images and his 1.2.0 version labels; his handover notes stay outside the repository (the colour table is in
+  `docs/simulator/seeds/`).

@@ -4,8 +4,85 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
-## Unreleased
+## 1.2.0 (2026-10-21)
 
+Three scenes per task base (appearance seeds), the simulator source and tooling they need, and nine new bases prepared
+as experimental. Image `ghcr.io/mll-lab-nu/roboarc:1.2.0` (manifest `sha256:a8561b77…`, id `b600616bee6c…`); the IKEA
+tasks and images are unchanged. 226 task directories (202 puzzle, 24 IKEA), every puzzle directory re-rendered.
+
+### Appearance seeds
+- Every one of the 101 bases has seeds 0, 1 and 2 (`[metadata.seeds] allowed = [0, 1, 2]`, `build = "runtime"`, both
+  twins). Seed 0 is the released scene, unchanged. Seeds 1 and 2 are the same scene and physics in other colours,
+  materials and textures (`topogym.tasks.scene_variation.appearance(cls, S)`, scene seed 0), derived from the seed-0
+  instance (`tools/release/derive_seed_instance.py`: `instance_assets/` byte for byte, the build's fields recomputed).
+- The runner picks the seed (RUNNING.md "Seeds": the K trials of a task get distinct seeds); the image holds every
+  seed's frozen instance under `/opt/robotangle/instances/<base>/seeds/<S>/` and the task stages the trial's seed
+  against its own runtime binding (`runtime_binding.s<S>.json`, `stage_instance.py --seed-file`, fail closed).
+- References: the privileged reference is re-stamped per seed (`solution/trajectory.s<S>.npz`: the same rows with the
+  seed's birth; `solve.sh` picks the seed's); rope-threading 04-08's references record no birth and serve every seed as
+  they are; the standard oracle streams the same rows for every seed. Goal pictures (blanket-fold 01-05, knot-untying
+  07/09) are rendered per seed (`tests/seeds/<S>/goal/`, copied over `environment/goal/` by `task_seed.py materialize`).
+- `[metadata.seeds] oracle` lists seed 0 and the seeds whose Harbor oracle run passed (below): `[0, 1, 2]` on 30 bases,
+  `[0]` on the other 69 with a reference.
+- Seed instances: in the image and pinned by sha256 in `scripts/roboarc/assets.json`; the HF dataset revision that
+  will hold them (and the new bases' instances) is a separate step, uploaded only with the owner's approval. Until then
+  `images/roboarc/build.sh` builds from a local instance tree (`--instances`).
+
+### Simulator source and tooling
+- Simulator source synced from TopoGym's development line (`497a9e9d7f`, `622c7801c6`, `738231f5cb`, `3eed5d8b33`,
+  `a849170272`) onto 1.1.0's source: SOURCE.json `cacc831d…` (449 files). The appearance axes of every family (their
+  defaults are the released looks), the new families' code (bed_bolt, caliper_sorting, clock_assembling,
+  battery_replacement, Cast Trinity), opt-in grasp rules (force closure, weak holds: used by battery_replacement only).
+  Task tooling v21 (`rcb_topogym.py`: the new families registered; `nyx_direct.py`: a fixed MJCF entity's visuals drawn).
+- fiber-bundling 07-10: the `lay` rule takes either red fiber (the scene has two: strands 0 and 8, 16 strands over an
+  8-colour palette); the texts say "the root of one of the two red fibers". A trajectory that met the rule with strand
+  0 is graded as before; one that failed only because the other red fiber lay at the stated position now succeeds. The
+  references reach their released end states under the new rule. Re-grading earlier results on these four bases needs
+  a replay of the trajectory with the 1.2.0 grader: `scripts/roboarc/regrade.py` does not cover this rule (it re-grades
+  the 2026-10-14 rule from the record, and the record holds only strand 0's angle); replay the trial's trajectory with
+  the 1.2.0 task's `tests/grade.py` in its verifier image (as `regrade.py --replay` does for its rule), or rerun the
+  trial.
+
+### Texts that stay right in every seed
+- interlocked-claws 06-10: the second piece is "a lock" (it was "a teal lock"; its colour changes with the seed).
+- interlocked-claws 01/02 and cast-keyhole 01-06: the pieces are also named by their object names (`piece_0` /
+  `piece_1`, `keyhole_silver` / `keyhole_gold`), so no text identifies an object by colour alone.
+- Every colour word the texts name, per seed: `docs/simulator/seeds/colour_table.md`.
+
+### New bases (experimental, untiered)
+bed-bolt-01..05, caliper-sorting-01, clock-assembling-01 (dynamic: the wound mainspring drives the train),
+battery-replacement-01 and interlocked-claws-13 (Cast Trinity): packages, records (`release.json`
+`experimental_bases`), instances (with their seeds) in the image and references, rendered only by
+`scripts/roboarc/mk_tasks.py --experimental --out <dir>`, never into `tasks/`, until the owner has reviewed their demos.
+Their texts state the grasping rules the grader applies, more than the tooling's own grasp sentence reports (an open
+item for that review). Evidence in 1.2.0's image: Harbor oracle 1 / nop 0, both modes, seeds 0-2 (108 / 108); the
+reference replays on Intel equal Zen 4 (9 / 9); reference timings at most 14.1 % of the 3 h budget; the texts' step
+times follow measured values where they were more than 25 % off.
+
+### Evidence
+- Seed instances (220 = 110 bases x seeds 1, 2), each: `instance_assets/` byte-identical to seed 0's, the physical
+  instance fields and the built MuJoCo model's physics equal, staged against its own binding + a strict Session, the
+  birth's tick record equal to seed 0's in every part but `task`, the re-stamped reference's birth = the seed's (220 /
+  220; rope-threading 04-08 unstamped, buzz-wire-3d-05 / fiber-bundling-05 without a reference). Derived again in this
+  release's image: births and `instance_assets/` equal to the first derivation's except where 1.2.0's later source
+  changed the looks (battery, caliper, Trinity, rope-threading 01-08) or the text (fiber 07-10).
+- End-state identity, 39 bases (one per family, interlocked-claws 06-10, fiber-bundling 07-10, rope-threading 01-08
+  and the 9 new bases): each seed's reference, replayed strictly in two fresh processes, succeeds and ends with the
+  same world, robot, coverage, targets and state as seed 0 (39 / 39 x seeds 0, 1, 2; only the task's instance id
+  differs; Intel CPU, the blanket bases on the GPU).
+- Released seed 0, all 101 bases: strict fresh replays in the 1.2.0 image reach 1.1.x's end states from the frozen
+  births (101 / 101; also on Intel and the blanket bases on the GPU); the render inputs are identical to 1.1.0's
+  (101 / 101: every probe built one Nyx scene from the same bytes); frames, one base per family, within the path
+  tracer's own run-to-run spread (14 / 14), state records equal. Blanket (14 bases): births, ends and render inputs
+  (cloth mesh, material map, texture) unchanged; the cloth's identity rule unchanged at seed 0.
+- Harbor, rendering off, oracle 1 / nop 0, both modes, on materialized seed copies: the required set (one base per
+  family + every touched base: interlocked-claws 06-10, fiber-bundling 07-10, rope-threading 01-08, seeds 1 and 2; the
+  three re-made new bases, seeds 0-2): 276 / 276; the rest (colour-text bases at seed 0, bed-bolt 01-05 and
+  clock-assembling 01 at seeds 0-2): 104 / 104.
+- The image: a rebuild of the recipe with the same instances reproduces every file's content (only build-time file
+  times in `.pyc` headers differ).
+
+### Repository (since 1.1.0)
 - The usage gateway ships with the repository: `scripts/usage_gateway/` (from the shared benchmark repository,
   unchanged; PROVENANCE.md) and `.env.example`. Usage recording stays optional and off by default; turn it on with
   `USAGE_GATEWAY=scripts/usage_gateway` (docs/RUNNING.md "Usage recording"). Its tests and a check that it takes
@@ -31,7 +108,9 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
   from it whenever the copy does, is kept as `copy_checksum`). `scripts/roboarc/regrade.py --replay` grades a trial with its seed's
   verifier files. New check `ci_checks/check-seed-files.py`. Every task still allows one seed: no task changes.
 
-No task directory, pinned tooling, hashed simulator file or image input changes.
+### Credit
+The appearance seeds, the derive tooling, the new families and their references are Jianwen's work (TopoGym), ported
+onto 1.1.x and validated for this release.
 
 ## 1.1.1 (2026-10-21)
 
@@ -45,7 +124,7 @@ digests)"), and the puzzles' Release line names the task set 1.1.1; each task ge
 keep the image ids and the names the images were bound under, and the IKEA sim recipe keeps its `FROM` (an input of
 the sim image). `ci_checks/check-image-pins.py` allows `ghcr.io/mll-lab-nu/` only (a task naming the former registry
 fails). No instruction, grader, tooling, binding, instance, reference, image or archive changed: results graded under
-1.1.0 stand. The repository changes listed under Unreleased above change no task.
+1.1.0 stand. The repository changes listed under 1.2.0's "Repository" above change no task.
 
 ## 1.1.0 (2026-10-20)
 

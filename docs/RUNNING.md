@@ -179,7 +179,9 @@ python3 scripts/task_seed.py materialize tasks/<task> --seed 1 --out /tmp/run1  
 harbor run -p /tmp/run1 -i <task> -a <agent> ...
 ```
 
-A task that allows its default seed only (every task before RoboARC 1.2.0) runs from a copy that is the task as it is.
+Every RoboARC puzzle task allows seeds 0, 1 and 2 from 1.2.0 (its appearance seeds: the same scene and physics in
+other looks; `[metadata.seeds] oracle` lists the seeds whose Harbor oracle run passed). A task that allows its
+default seed only (the IKEA tasks) runs from a copy that is the task as it is.
 
 ## Infrastructure failures: one full retry
 
