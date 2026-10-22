@@ -135,7 +135,16 @@ sys.path.insert(0, "/tooling")
 import rcb_topogym as rt
 job = json.load(open(sys.argv[1]))
 released = Path("/opt/robotangle/instances") / job["released"]
-inst = json.loads((released / "instance.json").read_text())
+# the released (or template) instance: read only for what a job takes from it. Since 1.1.0 the image without instances
+# carries none (no Genesis base image under it), and a new design needs nothing from its template's instance
+needs = [k for k in ("render_host", "frozen_assets", "grasp_weld_links", "released_simulator_keys", "released_task_parameters")
+         if job[k]]
+if (released / "instance.json").is_file():
+    inst = json.loads((released / "instance.json").read_text())
+elif needs:
+    raise SystemExit(f"{released}: not in this image, and the job needs it ({', '.join(needs)})")
+else:
+    inst = None
 out = Path(job["out"]).parent
 host = out / "instance_assets" / "render_host"
 if job["render_host"]:      # the released instance: the render host, and a birth source inside the new instance
@@ -532,7 +541,8 @@ def goal_command(a, base: str, seed: int, renderer: str, image: str, mujoco_env)
     (instances mounted read-only), into <work>/goal/<base>/seeds/<seed>/."""
     env = [*(f"{k}={v}" for k, v in mujoco_env), "OMP_NUM_THREADS=1", "MKL_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
            "RCB_TORCH_THREADS=1", "HOME=/tmp", "XDG_CACHE_HOME=/work/cache"]
-    return ["docker", "run", "--rm", "--network", "none", "--user", f"{os.getuid()}:{os.getgid()}", "--gpus", f"device={a.gpu}",
+    return ["docker", "run", "--rm", "--network", "none", "--user", f"{os.getuid()}:{os.getgid()}", "-w", "/tmp",
+            "--gpus", f"device={a.gpu}",
             *(x for e in env for x in ("-e", e)), "-v", f"{a.repo / 'scripts/roboarc/shared'}:/tooling:ro",
             "-v", f"{a.out / 'scripts' / a.bench / 'goal_images'}:/goal_images:ro",
             "-v", f"{a.work / 'instances'}:/instances:ro", "-v", f"{a.work}:/work", image,
@@ -670,6 +680,8 @@ def write_release(a, bases: list[dict], head: str, runtime: dict, noinst: dict, 
             lock = dict(schema_version=1, instance_sha256=canonical(inst), asset_files=assets_files, tooling_sha256=tooling,
                         creation_source=inst["topogym_source"], runtime=runtime, image=noinst)
             lock_file.write_text(json.dumps(lock, indent=2) + "\n")
+        else:                             # the lock stays; the seeds' locks are written from it
+            lock = prev_lock
         prev = rel["bases"].get(new) or {}
         no_ref = new in a.no_oracle
         if old and old != new and not new_bench:
