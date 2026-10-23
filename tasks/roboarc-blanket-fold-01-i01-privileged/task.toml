@@ -9,7 +9,7 @@ keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "traject
 
 [metadata]
 author_name = "Jianwen Lyu"
-tooling_version = "21"
+tooling_version = "22"
 task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU physics, CUDA cloth step, Nyx RGB)
 robot = "aloha-2"

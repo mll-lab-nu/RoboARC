@@ -65190,7 +65190,28 @@
   "instances/slotted-post-ring-05-i01/seeds/2/instance_assets/mujoco/meshes/slotted_chain_disc_b6a8509bed44e34b.obj": "b6a8509bed44e34bd8bda2d21938becd1fc9a0faa06ee15ed453fdde4939dfab",
   "instances/slotted-post-ring-05-i01/seeds/2/instance_assets/mujoco/scene.json": "a25fd4d2c6b3fd571a61a839cade2008359d92723c34ee9ea3ddc2b52cab9bb4",
   "instances/slotted-post-ring-05-i01/seeds/2/instance_assets/mujoco/scene.xml": "41505a18a806e09dcd9ac0fee4d5afd0c29d1f8ad5209b253f266c12c17dd7db",
-  "instances/slotted-post-ring-05-i01/seeds/2/instance_assets/mujoco_settled.npz": "5b091816be21e70a457ea9edc6ff5f644faa1935b5b9c53584e04c399ba09806"
+  "instances/slotted-post-ring-05-i01/seeds/2/instance_assets/mujoco_settled.npz": "5b091816be21e70a457ea9edc6ff5f644faa1935b5b9c53584e04c399ba09806",
+  "instances/wire-splicing-01-i01/instance.json": "fac82836f148dc2eb29276130632a8ad89d3071e4b37a36cddfdddfbd7af5b22",
+  "instances/wire-splicing-01-i01/instance_assets/mujoco/meshes/jig_post_prism32_65ac9f3eb0df276a.obj": "65ac9f3eb0df276ae79423dad741eb7c23affb85087c77b402cfa836e0b19ef4",
+  "instances/wire-splicing-01-i01/instance_assets/mujoco/meshes/jig_rod_prism32_54cdd64ed2ea09f9.obj": "54cdd64ed2ea09f9aaf9afa7333f341b6a460e24754c41528dc28399c5a06e21",
+  "instances/wire-splicing-01-i01/instance_assets/mujoco/meshes/wire_a_A_g016_prism32_37685e13ee7345e1.obj": "37685e13ee7345e1898884afd676579d593eab00b2dc01f15947abaa1e2d79dd",
+  "instances/wire-splicing-01-i01/instance_assets/mujoco/meshes/wire_b_B_g013_prism32_a0e451e7b2cdf71d.obj": "a0e451e7b2cdf71de5fe06aaff020a5ad765257c220a4d9f706a82bb5354507b",
+  "instances/wire-splicing-01-i01/instance_assets/mujoco/scene.json": "2dff81780d362172e1a484a1ef7ba84daa82cc00fb267fa0866665d5a6f31de4",
+  "instances/wire-splicing-01-i01/instance_assets/mujoco/scene.xml": "bd264d49cc63e1a5ab33f9513af33f29a24ea33480ddcb35650f8a95281f5e23",
+  "instances/wire-splicing-01-i01/seeds/1/instance.json": "0c58717554bea1c8aaeb29a163962abd56f86f3816a36e3ae13a53f7e92b5249",
+  "instances/wire-splicing-01-i01/seeds/1/instance_assets/mujoco/meshes/jig_post_prism32_65ac9f3eb0df276a.obj": "65ac9f3eb0df276ae79423dad741eb7c23affb85087c77b402cfa836e0b19ef4",
+  "instances/wire-splicing-01-i01/seeds/1/instance_assets/mujoco/meshes/jig_rod_prism32_54cdd64ed2ea09f9.obj": "54cdd64ed2ea09f9aaf9afa7333f341b6a460e24754c41528dc28399c5a06e21",
+  "instances/wire-splicing-01-i01/seeds/1/instance_assets/mujoco/meshes/wire_a_A_g016_prism32_37685e13ee7345e1.obj": "37685e13ee7345e1898884afd676579d593eab00b2dc01f15947abaa1e2d79dd",
+  "instances/wire-splicing-01-i01/seeds/1/instance_assets/mujoco/meshes/wire_b_B_g013_prism32_a0e451e7b2cdf71d.obj": "a0e451e7b2cdf71de5fe06aaff020a5ad765257c220a4d9f706a82bb5354507b",
+  "instances/wire-splicing-01-i01/seeds/1/instance_assets/mujoco/scene.json": "2dff81780d362172e1a484a1ef7ba84daa82cc00fb267fa0866665d5a6f31de4",
+  "instances/wire-splicing-01-i01/seeds/1/instance_assets/mujoco/scene.xml": "bd264d49cc63e1a5ab33f9513af33f29a24ea33480ddcb35650f8a95281f5e23",
+  "instances/wire-splicing-01-i01/seeds/2/instance.json": "c76b79b661e9b6dc6545da5b513d14074c73ceae07436448a260a02965c05683",
+  "instances/wire-splicing-01-i01/seeds/2/instance_assets/mujoco/meshes/jig_post_prism32_65ac9f3eb0df276a.obj": "65ac9f3eb0df276ae79423dad741eb7c23affb85087c77b402cfa836e0b19ef4",
+  "instances/wire-splicing-01-i01/seeds/2/instance_assets/mujoco/meshes/jig_rod_prism32_54cdd64ed2ea09f9.obj": "54cdd64ed2ea09f9aaf9afa7333f341b6a460e24754c41528dc28399c5a06e21",
+  "instances/wire-splicing-01-i01/seeds/2/instance_assets/mujoco/meshes/wire_a_A_g016_prism32_37685e13ee7345e1.obj": "37685e13ee7345e1898884afd676579d593eab00b2dc01f15947abaa1e2d79dd",
+  "instances/wire-splicing-01-i01/seeds/2/instance_assets/mujoco/meshes/wire_b_B_g013_prism32_a0e451e7b2cdf71d.obj": "a0e451e7b2cdf71de5fe06aaff020a5ad765257c220a4d9f706a82bb5354507b",
+  "instances/wire-splicing-01-i01/seeds/2/instance_assets/mujoco/scene.json": "2dff81780d362172e1a484a1ef7ba84daa82cc00fb267fa0866665d5a6f31de4",
+  "instances/wire-splicing-01-i01/seeds/2/instance_assets/mujoco/scene.xml": "bd264d49cc63e1a5ab33f9513af33f29a24ea33480ddcb35650f8a95281f5e23"
  },
  "instances": {
   "battery-replacement-01-i01": {
@@ -66456,6 +66477,17 @@
     },
     "2": {
      "instance_sha256": "de3c102bc31c0b39ba3984a469be3840063593d63d98bd5e62da0417a297acac"
+    }
+   }
+  },
+  "wire-splicing-01-i01": {
+   "instance_sha256": "a1580a5c6128c56719a19d4577bfd75a84d0bd0a9a9ad67221c3e03d987f83ac",
+   "seeds": {
+    "1": {
+     "instance_sha256": "2baf5bf992290545c28dcabba3e1f981891776c49b9792250cf1dce76ff03813"
+    },
+    "2": {
+     "instance_sha256": "6bc20e8d409d85b993344b368849184b83f2e7254d162ac70a58c57e7e75be30"
     }
    }
   }

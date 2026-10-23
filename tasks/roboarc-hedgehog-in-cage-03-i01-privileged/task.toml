@@ -9,7 +9,7 @@ keywords = ["robotics", "roboarc", "mujoco", "panda_robotiq", "code-as-policy", 
 
 [metadata]
 author_name = "Jianwen Lyu"
-tooling_version = "21"
+tooling_version = "22"
 task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "franka-robotiq-2f85"
