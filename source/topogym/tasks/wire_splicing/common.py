@@ -1,10 +1,10 @@
 """wire_splicing: splice two stiff solid-core wires, two ALOHA arms, MuJoCo only (design:
 runs/wire_splice_design_20261014, README_v5 sections 1-5, README_v6, registration_draft.md).
 
-The scene is four MJCF entities in the ALOHA mount frame (topogym.assets.geometry.wire_splicing): wire_a and wire_b
-(each its terminal block and its elastoplastic chain, laid on the table), jig (the bending post) and meter (the splice
-meter by the terminals, visual only). The wires are laid 1.5 mm above their resting height and settle under gravity
-before the birth (the family's reset_physics_steps).
+The scene is three MJCF entities in the ALOHA mount frame (topogym.assets.geometry.wire_splicing): wire_a and wire_b
+(each its terminal block and its elastoplastic chain, laid on the table) and jig (the bending post with its yellow rod).
+The wires are laid 1.5 mm above their resting height and settle under gravity before the birth (the family's
+reset_physics_steps).
 
 Goal (the design's v5_criteria.py, README_v5 5.2), from the two wires' centreline nodes: A's bare end bent into an eye
 (turned back past 150 degrees, closed at the neck), B's bare wire through the eye once (linking number +-1), B's bare
@@ -16,11 +16,8 @@ active and the splice still (its bare nodes' largest speed relative to their mea
 state at release and 2 s later; here every condition must hold for stable_duration_s (2 s) on end, with no more than
 max_turns_lost turns lost and the same linking number as at the window's first tick.
 
-The splice meter (user decision 2026-10-19; meter.SpliceMeter, the task's mechanism) shows the shape conditions as a
-modelled resistance, R = 10 mOhm / turns round both strands (the red band from 10 mOhm, one turn), no reading without an
-eye, its threading and a coil on the bare core; its
-needle is in the red band exactly when every shape condition holds (criteria.meter_reading). It only displays: the
-predicate above is computed from the nodes as before (judge), and the meter's reading goes into the metrics."""
+The splice meter of 2026-10-19 (a visual-only needle meter by the terminals) was removed on 2026-10-22 (user decision):
+the red wire passed through it when lifted. It only displayed the shape conditions; the predicate is unchanged."""
 from pathlib import Path
 
 import numpy as np
@@ -44,19 +41,17 @@ class WireSplicingTask(TaskDefinition):
     task_id = "wire_splicing"
     physics_model = "rigid_articulated"
     terminal_revision = "wire_splice_eye_wrap_v5"       # v2 (user, 2026-10-20): 3 turns; v3 (2026-10-21): 1.5; v4: the core line from the stem and the tail beside it; v5 (2026-10-22): a full turn round both strands
-    instruction = ("Splice the red and the blue wire. Bend the red wire's bare end into a small eye round the rod of the "
-                   "bending post, thread the blue wire's bare end through the eye, turn the wires so that their insulated "
-                   "parts point away from each other, wind the blue wire's bare tail tightly round the red wire's doubled "
-                   "end one and a half turns, at least one full turn of it round both strands of the doubled end "
-                   "together, fold the red wire's leftover end back over the coil, then let go. The "
-                   "needle meter on the panel by the terminals reads this splice: its needle stays in the red band "
-                   "only when the splice is complete.")
+    instruction = ("Splice the red and the blue wire. Bend the red wire's bare end into a small eye round the yellow rod "
+                   "of the bending post, thread the blue wire's bare end through the eye, turn the wires so that their "
+                   "insulated parts point away from each other, wind the blue wire's bare tail tightly round the red "
+                   "wire's doubled end one and a half turns, at least one full turn of it round both strands of the "
+                   "doubled end together, fold the red wire's leftover end back over the coil, then let go.")
     defaults = dict(stable_duration_s=2., terminal=dict(
         min_wrap_turns=1.5, min_both_turns=1., max_coil_radius_d=2., tail_fold_dot=.5, min_tail_radius_d=1.2,
         max_turns_lost=.25, max_splice_speed_m_s=.005),
-        terminal_finish="white", post_finish="steel", meter_finish="ivory", core_finish="copper", panel_finish="dark")
+        terminal_finish="white", post_finish="steel", core_finish="copper")
     # Appearance only (geo.look_colours; scene_variation.appearance): the defaults are the recorded scene's look
-    hash_when_changed = ("terminal_finish", "post_finish", "meter_finish", "core_finish", "panel_finish")
+    hash_when_changed = ("terminal_finish", "post_finish", "core_finish")
 
     def grasp_assist(self):
         """contact_weld_v1 on every link of both wires; a hand pinching both welds, of each wire, its touched link
@@ -88,8 +83,7 @@ class WireSplicingTask(TaskDefinition):
         for name in geo.ENTITIES:
             path = folder / f"{name}.xml"
             path.write_text(geo.entity_xml(name, look=geo.look_colours(
-                name, self.config["terminal_finish"], self.config["post_finish"], self.config["meter_finish"],
-                self.config["core_finish"]), panel=self.config["panel_finish"]))
+                name, self.config["terminal_finish"], self.config["post_finish"], self.config["core_finish"])))
             entities.append(EntitySpec(name, "mjcf", path, tuple(self.origin()), fixed=name == "jig"))
         return TaskSpec(tuple(entities), {}, dict(
             task_id=self.task_id, instance_id=self.instance_id, physics_engine="mujoco",
@@ -132,8 +126,8 @@ class WireSplicingTask(TaskDefinition):
     def goal_words(self):
         """(summary, success conditions) of the public goal (goal_description.describe_goal)."""
         t, d = self.config["terminal"], geo.CORE_D * 1000
-        return ("Splice the red and the blue wire: bend the red wire's bare end into an eye round the rod of the bending "
-                "post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's "
+        return ("Splice the red and the blue wire: bend the red wire's bare end into an eye round the yellow rod of the "
+                "bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's "
                 f"doubled end at least {t['min_wrap_turns']:g} turns, at least {t['min_both_turns']:g} full turn of them "
                 "round both strands of the doubled end together, fold the red wire's leftover end back over the coil, "
                 "then let go.", [
@@ -167,26 +161,16 @@ class WireSplicingTask(TaskDefinition):
                     "the threading may not change while the conditions are held, and the splice must be still: every bare "
                     "point's speed relative to the bare points' mean motion at most "
                     f"{t['max_splice_speed_m_s'] * 1000:g} mm/s.",
-                    "The needle meter on the panel by the terminals displays this splice: no reading unless the eye is "
-                    "closed, the blue wire threads it once and the coil lies on the bare core; otherwise the equivalent "
-                    "resistance 10 mOhm divided by the coil's turns round both strands, on a logarithmic dial from 100 to "
-                    f"1 mOhm. Its needle enters the red band ({10. / t['min_both_turns']:g} mOhm or less) only when every "
-                    "condition above but the stillness and the release holds. It is a display of these conditions, not a "
-                    "further one.",
                 ])
 
     def judge(self, PA, PB):
         """The measurement of the splice from the two wires' nodes and its shape conditions (the success conditions less
-        the hold, quiet and hands-off ones); the task's predicate and the splice meter (meter.SpliceMeter) use it."""
+        the hold, quiet and hands-off ones); the task's predicate uses it."""
         t = self.config["terminal"]
         m = C.measure(PA, PB, geo.WIRES["A"]["n_ins"], geo.WIRES["B"]["n_ins"], geo.CORE_D)
         return m, C.shape_checks(m, geo.CORE_D, min_turns=t["min_wrap_turns"], min_both_turns=t["min_both_turns"],
                                  max_coil_r_D=t["max_coil_radius_d"], tail_dot=t["tail_fold_dot"],
                                  min_tail_r_D=t["min_tail_radius_d"])
-
-    def mujoco_mechanism(self, world):
-        from .meter import SpliceMeter
-        return SpliceMeter(world, self.judge)
 
     def initial_task_state(self, world_state):
         return dict(hold_reference=None)
@@ -224,8 +208,6 @@ class WireSplicingTask(TaskDefinition):
             reference = None
         checks["held"] = held
         metrics = {k: v for k, v in m.items()}
-        if state.get("mechanism") is not None:      # the splice meter's reading of this tick (display only)
-            metrics["meter"] = dict(state["mechanism"])
         metrics.update(checks=checks, splice_speed_m_s=speed, evaluation_status="available",
                        goal_evaluation_complete=self.goal_complete)
         return bool(now and held), None, metrics, dict(hold_reference=reference)

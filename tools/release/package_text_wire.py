@@ -44,16 +44,13 @@ grasp_new = ("assisted grasping (contact_weld_v1): a gripper whose command moves
              "15 %, a held link drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull with more than "
              "60 N averaged over 20 ms, or a weld has fed more than 0.1 J of work into the wire) is lost, and the gripper "
              "must open before it can take hold again; that force is reached when, for example, a held wire is pulled "
-             "hard against the other hand or a fixture. The jig and the meter are fixed; the grippers start empty and "
+             "hard against the other hand or a fixture. The jig is fixed; the grippers start empty and "
              "nearly closed: open a gripper, then close it on a wire to take hold.")
 objects_priv = ("The scene objects are the task's entities (`s.objects()`: `wire_a` (red) and `wire_b` (blue), each fixed "
-                "at its terminal, `jig` (fixed: the bending post), `meter` (fixed: the needle meter by the terminals, a "
-                "display that takes no contact)). The meter's reading (conducting, resistance, turns, in the red band) is "
-                "`s.env._world.read_state()[\"mechanism\"]`.")
-objects_std = ("Objects here: `wire_a` (red) and `wire_b` (blue), each fixed at its terminal, `jig` (fixed: the bending "
-               "post with its rod), `meter` (fixed: the needle meter on the panel by the terminals, in view of cam_high). As "
-               "everywhere in this mode, nothing reports their poses or the meter's reading: what you know of them comes "
-               "from the cameras.")
+                "at its terminal, and `jig` (fixed: the bending post with its yellow rod)).")
+objects_std = ("Objects here: `wire_a` (red) and `wire_b` (blue), each fixed at its terminal, and `jig` (fixed: the "
+               "bending post with its yellow rod). As everywhere in this mode, nothing reports their poses: what you know "
+               "of them comes from the cameras.")
 predicate = inspect.getsource(WireSplicingTask.evaluate_transition)
 details_of = lambda mode: details_section("wire_splicing", inst, limited=mode == "standard").strip("\n")  # noqa: E731
 

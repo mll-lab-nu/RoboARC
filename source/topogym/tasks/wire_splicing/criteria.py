@@ -15,7 +15,6 @@ winding(Q, a0, ahat)   turns of polyline Q about the line (a0, ahat): signed ang
                        unwrapped, summed over consecutive nodes, / 2 pi.
 around_both(...)       turns of B's coil round both of A's strands together (user decision 2026-10-22): about each
                        strand's own centreline, the best contiguous run of the coil, the lesser of its two counts.
-meter_reading(m, checks)  the splice meter's reading (resistance model, needle position) from one measurement.
 """
 import numpy as np
 
@@ -236,36 +235,6 @@ def measure(PA, PB, iA, iB, D):
     zt, rt, _ = cyl(PA[-1:], c0, ahat)
     out.update(tail_dir=float(tdir @ ahat), tail_r_D=float(rt[0] / D), tail_z_from_eye_mm=float(1000 * (zt[0] - z_eye)))
     return out
-
-
-EDGE_GAP = .01                # a needle kept out of the band stops this far (dial fraction, 1.2 deg) below its edge
-
-
-def meter_reading(m, checks):
-    """The splice meter's reading (user decision 2026-10-19): a documented model, the splice's equivalent resistance
-    computed from its configuration (m: measure(); checks: shape_checks() of it), not simulated physics.
-      no path      unless A's eye is closed at the neck, B threads it once (linking number +-1) and B's coil lies on A's
-                   doubled bare section (on_bare_core): resistance_mohm None, the needle at its rest stop;
-      otherwise    R = R_TURN_MOHM / n, n = the coil's turns round both of A's strands together (both_turns: the
-                   Round-both condition's count, user decision 2026-10-22); n = 0 reads as no path;
-      in_band      every shape condition holds (eye, threading, wraps, round both, tight, on the bare core, tail
-                   folded): the instantaneous success predicate less the quiet and hands-off conditions. Out of the
-                   band the needle stops EDGE_GAP below the band's edge at most, so the needle is in the red band
-                   exactly when in_band.
-    dial_position: 0 at the dial's 100 mOhm end, 1 at its 1 mOhm end, clamped to the scale (a path above 100 mOhm reads 0;
-    the rest stop is geo.METER rest_u); needle_rad: the needle hinge's position (geo.needle_q)."""
-    conducting = bool(checks.get("eye") and checks.get("pierce") and checks.get("on_bare_core"))
-    turns = float(m.get("both_turns", 0.)) if conducting else 0.
-    resistance = geo.R_TURN_MOHM / turns if turns > 0. else None
-    in_band = bool(checks) and all(checks.values())
-    edge = geo.dial_position(geo.R_TURN_MOHM / geo.BAND_TURNS)
-    if resistance is None:
-        u = geo.METER["rest_u"]
-    else:
-        u = min(max(geo.dial_position(resistance), 0.), 1.)
-        u = max(u, edge) if in_band else min(u, edge - EDGE_GAP)
-    return dict(conducting=resistance is not None, resistance_mohm=resistance, turns=turns, in_band=in_band,
-                dial_position=float(u), needle_rad=geo.needle_q(u))
 
 
 def shape_checks(m, D, *, min_turns, min_both_turns, max_coil_r_D, tail_dot, min_tail_r_D):

@@ -33,7 +33,7 @@ See `tests/grade.py`.
 ## Details
 
 ### Goal
-Splice the red and the blue wire: bend the red wire's bare end into an eye round the rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go.
+Splice the red and the blue wire: bend the red wire's bare end into an eye round the yellow rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go.
 
 ### Success requirements
 - The red wire's bare end is turned back on itself by more than 150 degrees into an eye that is closed at its neck: the two legs touch where they first meet below the bend.
@@ -43,7 +43,6 @@ Splice the red and the blue wire: bend the red wire's bare end into an eye round
 - The coil is tight: its points lie on average at most 7.1 mm (2 core diameters) from the axis.
 - The red wire's leftover end is folded back: the direction from its fourth-last to its last point points back toward the eye (its dot product with the axis, which runs from the eye toward the strip, is at most -0.5), and its tip is at least 4.3 mm (1.2 core diameters) from the axis.
 - Let go: no hand holds a wire. The blue wire's turns may drop by at most 0.25 and the threading may not change while the conditions are held, and the splice must be still: every bare point's speed relative to the bare points' mean motion at most 5 mm/s.
-- The needle meter on the panel by the terminals displays this splice: no reading unless the eye is closed, the blue wire threads it once and the coil lies on the bare core; otherwise the equivalent resistance 10 mOhm divided by the coil's turns round both strands, on a logarithmic dial from 100 to 1 mOhm. Its needle enters the red band (10 mOhm or less) only when every condition above but the stillness and the release holds. It is a display of these conditions, not a further one.
 - Keep all final conditions satisfied together for at least 2 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.
 
 ### Task failure conditions
