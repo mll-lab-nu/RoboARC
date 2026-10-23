@@ -1,6 +1,6 @@
 # Running RoboARC: setup for a collaborator
 
-RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, and the evaluation run itself. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
+RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, and the evaluation run itself. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
 
 ## 1. Machine
 
@@ -45,24 +45,68 @@ RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get 
    python3 scripts/stamp_mtimes.py tasks   # once per checkout, so Harbor's build cache hits
    ```
 
-## 3. First check: one task
+## 3. First check: one task, both modes, no agent
 
-Start with `roboarc-interlocked-claws-01-i01`. The reference solution must score 1, and doing nothing must score 0:
+Start with `roboarc-interlocked-claws-01-i01`. In each mode the reference solution must score 1, and doing nothing must
+score 0:
 
 ```bash
-harbor run -p tasks -i roboarc-interlocked-claws-01-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-01
-harbor run -p tasks -i roboarc-interlocked-claws-01-i01-privileged -a nop    -o "$PWD/jobs" --job-name nop-claws-01
+for m in privileged standard; do
+  harbor run -p tasks -i roboarc-interlocked-claws-01-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-01-$m
+  harbor run -p tasks -i roboarc-interlocked-claws-01-i01-$m -a nop    -o "$PWD/jobs" --job-name nop-claws-01-$m
+done
 ```
 
 - The score is in `jobs/<job>/<trial>/verifier/reward.txt`: 1 or 0.
-- The oracle run of this task takes about 6 minutes on an RTX 4090 (the image already pulled). The verifier replays the
-  trajectory twice and renders a video, which lands in `verifier/replay.mp4`.
+- The privileged oracle run of this task takes about 6 minutes on an RTX 4090 (the image already pulled). The verifier
+  replays the trajectory twice and renders a video, which lands in `verifier/replay.mp4`.
 - The first run also pulls the image, so it takes longer.
+
+Then one scene other than the default, made the way the batch runner makes it: `roboarc-interlocked-claws-03-i01` at
+appearance seed 2 (its reference solution is validated at seeds 0, 1 and 2). The oracle must score 1 in both modes:
+
+```bash
+for m in privileged standard; do
+  python3 scripts/task_seed.py materialize tasks/roboarc-interlocked-claws-03-i01-$m --seed 2 --out /tmp/claws03-s2-$m
+  harbor run -p /tmp/claws03-s2-$m -i roboarc-interlocked-claws-03-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-03-s2-$m
+done
+```
+
 - If something fails, send us `jobs/<job>/` (or at least `result.json` and the `verifier/` logs) and the output of the `vulkaninfo` check above.
 
-## 4. The evaluation run
+## 4. Smoke test: the batch runner on one task
 
-Run a coding agent over the tasks with the batch runner, three trials per task and mode (`K=3`). Every puzzle task has
+Before the full run (section 5: `K=3`, both modes, every task you were given), run the batch runner once on one task
+with your real agent, model and key, one trial per mode. It checks what section 3 cannot: the agent's credentials and
+network, the runner's seeds, the summary and the result files.
+
+```bash
+AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
+  JOBS="$PWD/jobs/smoke" RESULTS=/path/outside/the/repo \
+  scripts/harbor/run_agent_batch.sh smoke roboarc-interlocked-claws-01-i01
+```
+
+- Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use.
+- The two modes run one after the other, each with at most the agent's 3 h. To run them at the same time, start the same
+  command again in a second terminal (it adds a lane).
+- It passed when:
+  - `jobs/smoke/smoke.summary.md` has a row for `roboarc-interlocked-claws-01-i01-privileged` and one for `-standard`,
+    each with a success of 0 or 1 and neither marked "not a result" (a 0 is fine here: the trial only has to give a
+    result);
+  - each job folder `jobs/smoke/smoke-<mode>-roboarc-interlocked-claws-01-i01/` has `seed.json` and
+    `<trial>/verifier/reward.txt`;
+  - `<RESULTS>/smoke/roboarc-interlocked-claws-01-i01-<mode>/<run id>/t1/` exists for both modes;
+  - `jobs/smoke/smoke.log` shows no stopped lane (the runner stops a lane when the model account fails: out of credit,
+    rate-limited, logged out).
+- The seeds the full run gives a task's three trials:
+  `python3 scripts/task_seed.py assign tasks/roboarc-interlocked-claws-01-i01-privileged --batch <batch name> --trials 3`
+  prints three different seeds (0, 1 and 2, in an order fixed by the batch name).
+- If it fails, send us `jobs/smoke/` (the runner redacts keys after each job) and the agent and provider you used.
+- Give the full run a batch name of its own: the smoke trials are not part of it.
+
+## 5. The evaluation run
+
+Start it once the smoke test (section 4) has passed. Run a coding agent over the tasks with the batch runner, three trials per task and mode (`K=3`). Every puzzle task has
 three scenes (appearance seeds 0, 1 and 2: the same physics in other colours, materials and textures), and the runner
 gives the three trials of a task different seeds, so they see three different scenes; an IKEA task has one scene. Credentials go in an env file; `.env.example` lists the variables, e.g. `OPENAI_API_KEY` for Codex or `ANTHROPIC_API_KEY` for Claude Code.
 
@@ -72,13 +116,15 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
   scripts/harbor/run_agent_batch.sh <batch name> roboarc-interlocked-claws-01-i01 roboarc-orbits-02-i01 ...
 ```
 
-- **Which tasks and modes:** list the task bases to run; ask us which ones. `MODES=privileged` or `MODES=standard` runs one mode only.
+- **Which tasks and modes:** list the task bases to run; ask us which ones (`ls tasks | sed -E 's/-(privileged|standard)$//' | sort -u`
+  lists every base). `MODES=privileged` or `MODES=standard` runs one mode only.
 - **Progress and summary:** progress is in `$JOBS/<batch>.log`, and the per-trial summary in `$JOBS/<batch>.summary.md`.
 - **Restarting:** running the same command again resumes, and it also adds a second lane.
-- **Budget:** each trial gives the agent up to 3 h. Use one API key per batch, with a spending cap.
+- **Budget:** each trial gives the agent up to 3 h; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
+  its results are ranked as a group of their own). Use one API key per batch, with a spending cap.
 - **Live view:** `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1. Keep it local: it shows unredacted output.
 - **Everything else:** `docs/RUNNING.md` has the agent options, network rules, re-grading and the result files.
 
-## 5. Questions
+## 6. Questions
 
 Send setup questions and failing job folders to Jianwen Lyu (GitHub LUIGIVAMPER). Ask Qineng Wang how to send the evaluation results back.
