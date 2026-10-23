@@ -4,24 +4,29 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
-## 1.3.0 (2026-10-22)
+## 1.3.0 (2026-10-23)
 
-The simulator source and tooling of a new family, wire_splicing, with one experimental base (wire-splicing-01, not in
-`tasks/` until the owner has reviewed its demo). Image `ghcr.io/mll-lab-nu/roboarc:1.3.0` (manifest `sha256:2bcded00…`,
+A new family, wire_splicing, with its first base wire-splicing-01-i01 (hard) in `tasks/` in both modes: 102 bases in 15
+families, 204 puzzle task directories. The owner reviewed its demo on 2026-10-23. Image `ghcr.io/mll-lab-nu/roboarc:1.3.0` (manifest `sha256:2bcded00…`,
 id `499d6f69bd81…`); the IKEA tasks and images are unchanged. Every released task's instance, physics, instruction,
 grader and reference are unchanged: results graded under 1.2.x stand.
 
-### wire_splicing (experimental)
+### wire_splicing (new family)
 - The family (by Jianwen, ported from TopoGym `cb3d05437c`): two stiff wires from their terminals, 160 ball-jointed
   links with elastoplastic joints; the agent bends an eye in the red wire's bare end round the yellow rod of a bending
   post, threads the blue wire through it, winds the blue wire's bare tail at least 1.5 turns round the red wire's
   doubled end (at least one full turn round both strands together), folds the red wire's end back and lets go.
 - wire-splicing-01-i01: packages, references (privileged; standard re-timed to the joint-speed rule), its record in
-  `release.json` `experimental_bases`, its instance and seeds 1 and 2 (other colours of the terminals, the post and one
+  `release.json` (released 2026-10-23, difficulty hard), its instance and seeds 1 and 2 (other colours of the terminals, the post and one
   bare core; the red and blue insulation and the post's yellow rod keep their colours) in the
   image and pinned in `assets.json`. Agent time 21600 s by the owner's exception (below); one control step takes about
-  0.5 s. `mk_tasks.py --experimental --out <dir>` renders it outside `tasks/`.
-- Its texts' tool-frame distance is the instance's, 6 cm (the template's 15 cm had been kept).
+  0.5 s. Task directories `tasks/roboarc-wire-splicing-01-i01-{privileged,standard}`; family page
+  `docs/families/wire_splicing.md`.
+- The `roboarc` API lists it (102 puzzle bases, 114 tasks). A reference's pin (file sha256, end hash) comes from the V3
+  freeze manifest, or for a base released later from its release record's privileged evidence
+  (`roboarc.registry.reference_pins`).
+- Its texts state the instance's own values where the bed-bolt template's had been kept: the tool-frame distance 6 cm
+  (not 15 cm) and the success hold 2 s (not 0.5 s; `stable_duration_s`), also in `tools/release/package_text_wire.py`.
 
 ### Shared code: opt-in only
 - `MultiRopeGraspAssistConfig` (`topogym/utils/grasp.py`) gains `weld_links_between_pads` (a hand welds every link of a
@@ -45,7 +50,9 @@ grader and reference are unchanged: results graded under 1.2.x stand.
   configuration results are ranked by, so its trials form their own group. The 202 task dirs did not change by it.
 
 ### Tasks
-- The 202 puzzle directories re-rendered: the tooling copies (`rcb_topogym.py`), the runtime bindings of seeds 0-2
+- New: `roboarc-wire-splicing-01-i01-privileged` and `-standard` (agent 21600 s, privileged verifier 45000 s, standard
+  collect hook 32400 s).
+- The 202 earlier puzzle directories re-rendered: the tooling copies (`rcb_topogym.py`), the runtime bindings of seeds 0-2
   (source and tooling), the image reference, `tooling_version` 22, the README's Release line and Change Log, `DIGEST`.
   Instructions, graders, instances and references are unchanged; so are the IKEA directories.
 

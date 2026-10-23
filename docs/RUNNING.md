@@ -152,7 +152,8 @@ caller's (`AGENT_CONFIG`). An API key can still request a search directly: read 
 
 ## The agent's time (the cutoff)
 
-A trial's agent gets the task's `[agent] timeout_sec` (10800 s for every RoboARC task) and nothing else. Harbor counts
+A trial's agent gets the task's `[agent] timeout_sec` (10800 s for every RoboARC task but wire-splicing-01-i01, which has 21600 s by the owner's
+exception, `scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`) and nothing else. Harbor counts
 it around the agent's run only (after the environment has been built and started and the harness installed, each under
 a timeout of its own); a standard task's `sim` service starts with the environment, and what it has not finished
 starting by then is waited out inside the agent's time. At the cutoff Harbor stops the agent (`AgentTimeoutError`),

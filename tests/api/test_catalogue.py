@@ -10,20 +10,20 @@ from roboarc.references import hash_matches, load_reference, reference_record
 
 FAMILIES = {"blanket_flatten": 9, "blanket_fold": 5, "buzz_wire_3d": 10, "cast_coil": 8, "cast_keyhole": 6,
             "fiber_bundling": 10, "hedgehog_in_cage": 8, "horseshoe_ring": 5, "interlocked_claws": 12, "knot_untying": 8,
-            "lock_picking": 5, "orbits": 2, "rope_threading": 8, "slotted_post_ring": 5}
+            "lock_picking": 5, "orbits": 2, "rope_threading": 8, "slotted_post_ring": 5, "wire_splicing": 1}
 IKEA = {"burvik", "eket", "gladom", "ikea365", "kyrre", "lack", "stegesund", "stenerik", "svallet", "uppsta", "variera",
         "vesken"}
 
 
 def test_counts():
     puzzles = roboarc.list_tasks("puzzles")
-    assert len(puzzles) == 101
+    assert len(puzzles) == 102
     fams = {}
     for t in puzzles:
         fams[t.family] = fams.get(t.family, 0) + 1
     assert fams == FAMILIES
     assert {t.name for t in roboarc.list_tasks("ikea")} == IKEA
-    assert len(roboarc.list_tasks()) == 113
+    assert len(roboarc.list_tasks()) == 114
 
 
 @pytest.mark.parametrize("alias,canonical", [
@@ -61,9 +61,10 @@ def test_metadata():
 
 
 def test_puzzle_references():
-    """99 of the 101 bases ship a reference; each is the file the freeze manifest pins, with its recorded end hash."""
+    """100 of the 102 bases ship a reference; each is the file its pin names (the freeze manifest's, or the release
+    record's for a base released later), with its recorded end hash."""
     with_ref = [t for t in roboarc.list_tasks("puzzles") if t.reference]
-    assert len(with_ref) == 99
+    assert len(with_ref) == 100
     for t in with_ref:
         rec = reference_record(t.id)
         assert rec["sha256_ok"], t.id

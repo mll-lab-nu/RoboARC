@@ -74,6 +74,9 @@ def rewrite(text, mode, kind):
     text = text.replace("`bed_bolt` / seed 0", "`wire_splicing` / seed 0")
     text = text.replace("variation bed_bolt_crossbar", "variation wire_splicing_eye_wrap")
     text = text.replace("terminal revision bed_bolt_seated_v1", f"terminal revision {task.terminal_revision}")
+    hold = f"{task.config['stable_duration_s']:g} s"      # the template's (bed_bolt) is 0.5 s
+    text = text.replace("has held continuously for 0.5 s;", f"has held continuously for {hold};")
+    text = text.replace("(all final conditions satisfied for\n  0.5 s),", f"(all final conditions satisfied for\n  {hold}),")
     text = re.sub(r"One control step takes about [0-9.]+ s of wall clock here",
                   f"One control step takes about {step_s:g} s of wall clock here", text)
     if kind == "instruction":

@@ -18,7 +18,7 @@ Contents: [Design](#design) · [Running](#running) · [Tasks](#tasks) · [make()
 
 ## Design
 
-- **One interface for both suites.** `roboarc.make(task_id)` returns a `RoboARCEnv` for any of the 101 puzzle bases and
+- **One interface for both suites.** `roboarc.make(task_id)` returns a `RoboARCEnv` for any of the 102 puzzle bases and
   the 12 IKEA MuJoCo tasks. It subclasses `gymnasium.Env` when Gymnasium is installed; without it (the published images
   do not ship Gymnasium) it has the same methods and spaces with the same attributes.
 - **No physics fork.** The environment holds the graded tooling's own session and calls it:
@@ -99,7 +99,7 @@ compiles them at every start (a few seconds); the frames are not affected.
 ## Tasks
 
 ```python
-roboarc.list_tasks()                  # 113 TaskInfo: 101 puzzle bases, 12 IKEA tasks
+roboarc.list_tasks()                  # 114 TaskInfo: 102 puzzle bases, 12 IKEA tasks
 roboarc.list_tasks("puzzles", family="orbits")
 roboarc.task_info("orbits-02")        # aliases: see below
 ```
@@ -111,8 +111,8 @@ the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment
 
 `TaskInfo` (no simulator needed): `id`, `suite` (`puzzles` | `ikea`), `family`, `name` (the tooling's task key),
 `base`, `difficulty`, `robot`, `description`, `image`, `render_image`, `max_episode_steps` (the verifier's row cap),
-`agent_time_limit_s` (the Harbor agent budget, 10800 s), `task_dirs`, `reference` (the reference trajectory, if any),
-`reference_end_hash` and, for IKEA, `reference_settled_hash`. 99 of the 101 puzzle bases ship a reference
+`agent_time_limit_s` (the Harbor agent budget: 10800 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
+`reference_end_hash` and, for IKEA, `reference_settled_hash`. 100 of the 102 puzzle bases ship a reference
 (buzz-wire-3d-05 and fiber-bundling-05 do not); every IKEA task does.
 
 ## make()
@@ -222,7 +222,7 @@ world frame stays available through `env.session` (and `env.T_world_from_robot`)
   `reset()`). An IKEA episode may be stepped on after its end, as the privileged mode's physics goes on.
   `info["infra_error"]` marks a simulator breakdown that the graders count as an infrastructure error.
 - `truncated`: `max_episode_steps` control steps (default: the verifier's row cap of the task, `TaskInfo.max_episode_steps`).
-  The Harbor agent budget is wall clock (`TaskInfo.agent_time_limit_s`, 3 h); the API does not enforce it.
+  The Harbor agent budget is wall clock (`TaskInfo.agent_time_limit_s`); the API does not enforce it.
 - `reward`: 1.0 on the step the task first succeeds, else 0.0 (sparse). Puzzles also report the task's own dense
   `info["progress"]` (0..1).
 - Other `info` keys: `control_step`, `sim_time_s`, `applied_action` (the row the simulator received after every limit),

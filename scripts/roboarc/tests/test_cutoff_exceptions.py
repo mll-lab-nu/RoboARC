@@ -3,7 +3,7 @@ generator renders for an excepted base (standard library only, about 1 s):
   1. every exception names a RoboARC base (no mode suffix) and is a whole number of seconds above the cap;
   2. cutoff_cap_for gives the exception to both modes of its base, and the cap to every other task;
   3. ci_checks/check-cutoffs.py accepts an excepted base's cutoff and refuses the same number on another base;
-  4. mk_tasks: cutoff_of is CUTOFF_SEC for a base without an exception; grading_timeouts leaves every package's
+  4. mk_tasks: cutoff_of is the base's exception, else CUTOFF_SEC; grading_timeouts leaves every package's
      grading timeouts as they are at CUTOFF_SEC, and raises them for a longer cutoff (privileged verifier
      2 x cutoff + 1800 s, standard collect hook 1.5 x cutoff), never lowering one; verifier_timeout (row_cap) follows.
 usage: python3 scripts/roboarc/tests/test_cutoff_exceptions.py"""
@@ -44,7 +44,7 @@ def main() -> int:
         assert errs and "cap" in errs[0], errs
     n = 0
     for b in sorted(M.REL["bases"]):
-        assert M.cutoff_of(b) == M.CUTOFF_SEC, b
+        assert M.cutoff_of(b) == TC.CUTOFF_EXCEPTIONS.get(f"{M.BENCH}-{b}", M.CUTOFF_SEC), b
         for mode, pat in (("privileged", PRIV), ("standard", COLLECT)):
             s = (M.PKG / f"{b}-{mode}" / "task.toml").read_text()
             assert M.grading_timeouts(s, mode, M.CUTOFF_SEC, b) == s, (b, mode)

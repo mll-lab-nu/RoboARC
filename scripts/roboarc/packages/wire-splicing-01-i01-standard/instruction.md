@@ -29,7 +29,7 @@ client and one episode. **Task:** Splice the red and the blue wire: bend the red
 
 ## Rules (real-robot rules)
 - **No reset.** The episode ends on success (all final conditions satisfied for
-  0.5 s), when your time is up, on a simulator error, or when the task's own failure predicate fires (then `meta["reason"]` is `task_failed`). Knocked-over objects stay
+  2 s), when your time is up, on a simulator error, or when the task's own failure predicate fires (then `meta["reason"]` is `task_failed`). Knocked-over objects stay
   knocked over.
 - **No privileged state.** You see what the cameras see (RGB, and depth when you ask for it) plus the robot's own state:
   joint positions, velocities and drive efforts, gripper openings, end-effector poses. Nothing tells you where the

@@ -12,9 +12,9 @@ The tasks serve two kinds of solvers through the same simulator code:
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.3.0** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
+Version **1.3.0** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 228 Harbor task directories
 under `tasks/`:
-- the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories; every base
+- the topological puzzles: 102 task bases in 15 families, each in two modes, so 204 task directories; every base
   has three scenes (appearance seeds 0, 1, 2: the same scene and physics in other looks), and the runner picks one
   per trial (docs/RUNNING.md "Seeds");
 - **IKEA MuJoCo**: 12 furniture-assembly tasks with two robot arms and physical grasps, each in two modes, so 24 task
@@ -38,14 +38,14 @@ under `tasks/`:
 | orbits | 2 | ALOHA 2 | very_easy 1, easier 1 |
 | rope-threading | 8 | ALOHA 2 | very_easy 1, easier 1, easy 2, medium 2, hard 2 |
 | slotted-post-ring | 5 | ALOHA 2 | 1 per tier |
+| wire-splicing | 1 | ALOHA 2 | hard 1 |
 
 Puzzle task directories are `tasks/roboarc-<family>-<NN>-i01-<mode>`; `<NN>` numbers the bases of a family and the
 difficulty is `[metadata].difficulty` in `task.toml`. One page per family: [docs/families/](docs/families/). The
 benchmark's rules (grading replays, safety readings, the standard service): [docs/benchmarks/roboarc.md](docs/benchmarks/roboarc.md).
 
-Ten further bases are experimental and not in `tasks/` until the owner has reviewed their demos: bed-bolt-01..05,
-caliper-sorting-01, clock-assembling-01, battery-replacement-01, interlocked-claws-13 (from 1.2.0) and
-wire-splicing-01 (from 1.3.0). Their instances are in the image and their records in `scripts/roboarc/release.json`
+Nine further bases are experimental and not in `tasks/` until the owner has reviewed their demos: bed-bolt-01..05,
+caliper-sorting-01, clock-assembling-01, battery-replacement-01 and interlocked-claws-13 (from 1.2.0). Their instances are in the image and their records in `scripts/roboarc/release.json`
 (`experimental_bases`); `python3 scripts/roboarc/mk_tasks.py --experimental --out <dir>` renders their task
 directories outside `tasks/`.
 
@@ -55,8 +55,8 @@ ALOHA 2 arms). Its page: [docs/benchmarks/ikea_mujoco.md](docs/benchmarks/ikea_m
 
 ## For coding agents (Harbor)
 
-Each task exists in two modes, on the same frozen instance, with the same 3 h agent budget (`[agent] timeout_sec` =
-10800 s):
+Each task exists in two modes, on the same frozen instance, with the same agent budget (`[agent] timeout_sec`): 3 h
+(10800 s), except wire-splicing-01 with 6 h (21600 s) by the owner's exception, whose results form their own group:
 - **privileged** (`-privileged`): the agent's container holds the simulator. The agent may reset, read the full state
   and replay as often as it likes, and delivers `/app/output/trajectory.npz`. The verifier replays it in a fresh
   process.
@@ -98,7 +98,7 @@ task contract and scoring: [docs/PROTOCOL.md](docs/PROTOCOL.md) and [docs/STANDA
 
 ## For policies (Python)
 
-The package `roboarc` exposes every task (the 101 puzzle bases and the 12 IKEA scenes) as a Gymnasium-compatible
+The package `roboarc` exposes every task (the 102 puzzle bases and the 12 IKEA scenes) as a Gymnasium-compatible
 environment, without Harbor. It runs the graded tooling itself (`rcb_topogym.Session` for the puzzles, `rcb_ikea.Session`
 for IKEA), so physics, limits and success are the graded tasks' own: `reset()` loads the task's frozen instance,
 `step()` is one control step, and a reference trajectory stepped through it ends on exactly the state hash the release
@@ -130,7 +130,7 @@ never fail), rendering and GPU needs, the wrappers and the tests: [docs/API.md](
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the 226 task directories: 202 puzzle tasks and 24 IKEA tasks (`roboarc-ikea-*`); generated, never edit them by hand |
+| `tasks/roboarc-*` | the 228 task directories: 204 puzzle tasks and 24 IKEA tasks (`roboarc-ikea-*`); generated, never edit them by hand |
 | `ikea/` | IKEA MuJoCo: the generators, references and evidence (`ikea/scripts/ikea_mujoco/`), the scenes and the two image recipes (`ikea/images/ikea-mujoco/`); see [ikea/README.md](ikea/README.md) |
 | `roboarc/`, `pyproject.toml` | the Python package `roboarc` ([docs/API.md](docs/API.md)); `examples/`, `tests/api/` its examples and tests |
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
