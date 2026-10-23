@@ -1,5 +1,6 @@
 """The task catalogue and the reference records: no simulator needed."""
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -42,6 +43,9 @@ def test_unknown_task():
         roboarc.resolve("no-such-task")
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from task_conventions import CUTOFF_EXCEPTIONS  # noqa: E402
+
 # every image by its manifest digest (images/pins.json)
 PINS = {p["name"]: p["ref"] for p in json.loads((Path(__file__).resolve().parents[2] / "images/pins.json").read_text())["images"]}
 assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.3.0@" + PINS["roboarc"].split("@")[1]
@@ -49,7 +53,8 @@ assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.3.0@" + PINS["roboarc"].
 
 def test_metadata():
     for t in roboarc.list_tasks():
-        assert t.max_episode_steps > 0 and t.agent_time_limit_s == 10800.0
+        # 3 h, or the owner's exception for the base (scripts/task_conventions.py CUTOFF_EXCEPTIONS)
+        assert t.max_episode_steps > 0 and t.agent_time_limit_s == CUTOFF_EXCEPTIONS.get(t.id, 10800.0), t.id
         assert set(t.task_dirs) == {"privileged", "standard"}
         assert t.image.startswith("ghcr.io/mll-lab-nu/roboarc")
         json.dumps(t.to_dict())
@@ -90,7 +95,7 @@ def test_hash_prefixes():
 
 def test_standard_references_obey_the_joint_speed_rule():
     """The standard references move an arm joint target at most 0.04 rad per control step (the standard rule; checked
-    between consecutive rows). 12 privileged references are faster in places: their standard reference is the re-timed
+    between consecutive rows). 13 privileged references are faster in places: their standard reference is the re-timed
     copy (blanket-flatten-06's: the same route re-recorded within the rule)."""
     over_std, over_priv = [], []
     for t in roboarc.list_tasks("puzzles"):
@@ -102,4 +107,4 @@ def test_standard_references_obey_the_joint_speed_rule():
             if np.abs(np.diff(rows[:, arm], axis=0)).max() > 0.04 + 1e-6:
                 over.append(t.base)
     assert over_std == []
-    assert len(over_priv) == 12
+    assert len(over_priv) == 13
