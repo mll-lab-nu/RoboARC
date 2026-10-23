@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from pathlib import Path
 
 import numpy as np
 
 from ._runtime import repo_root
-from .registry import resolve
+from .registry import reference_pins, resolve
 
 
 def load_reference(task_id, mode: str = "privileged") -> np.ndarray | None:
@@ -31,13 +30,12 @@ def load_reference(task_id, mode: str = "privileged") -> np.ndarray | None:
 
 
 def reference_record(task_id) -> dict:
-    """What the release records about the reference: path, sha256 (puzzles: checked against the freeze manifest),
-    expected end hash (and IKEA's settled hash)."""
+    """What the release records about the reference: path, sha256 (puzzles: checked against its pin, the freeze
+    manifest's or the release record's; registry.reference_pins), expected end hash (and IKEA's settled hash)."""
     t = resolve(task_id)
     out = {"task": t.id, "reference": t.reference, "end_hash": t.reference_end_hash, "settled_hash": t.reference_settled_hash}
     if t.reference and t.suite == "puzzles":
-        m = json.loads((repo_root() / "records" / "freeze_manifests" / "freeze_manifest.v3.json").read_text())
-        rec = m["bases"].get(t.base) or {}
+        rec = reference_pins(repo_root()).get(t.base) or {}
         sha = hashlib.sha256(Path(t.reference).read_bytes()).hexdigest()
         out.update(sha256=sha, manifest_sha256=rec.get("sha256"), sha256_ok=sha == rec.get("sha256"))
     return out

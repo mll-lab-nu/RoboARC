@@ -1,7 +1,7 @@
 # RoboARC
 
-RoboARC's topological puzzle families on MuJoCo 3.14.0 physics, run by the simulator package `topogym`: 101 task
-bases in 14 families, each in two modes, privileged and standard (202 Harbor task directories under `tasks/`). One page
+RoboARC's topological puzzle families on MuJoCo 3.14.0 physics, run by the simulator package `topogym`: 102 task
+bases in 15 families, each in two modes, privileged and standard (204 Harbor task directories under `tasks/`). One page
 per family: [../families/](../families/README.md). This page states the benchmark's own rules on top of the task protocol
 ([../PROTOCOL.md](../PROTOCOL.md)). The IKEA MuJoCo tasks have their own page
 ([ikea_mujoco.md](ikea_mujoco.md)).
@@ -67,7 +67,10 @@ the family pages list each family's robot and success rule.
 
 ## Time budget
 
-10800 s (3 h) wall clock in both modes and every family (each task's `[agent] timeout_sec`; PROTOCOL §2.12). The texts
+10800 s (3 h) wall clock in both modes and every family (each task's `[agent] timeout_sec`; PROTOCOL §2.12), except
+wire-splicing-01-i01: 21600 s (6 h) by the owner's exception (`scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`; its
+privileged verifier 45000 s, its standard collect hook 32400 s); `cutoff_s` is part of the configuration results are
+ranked by, so its trials form their own group. The texts
 say "the time limit (`## Time limit`)". The standard service's clock (`meta["time_left_s"]`, `RCB_WALL_CLOCK_S`)
 counts from the agent's first request to the service (logged in `episode.jsonl`, kept over a restart), so the
 instruction has the common closing sentence and no sentence of its own about the service's clock. The service ends the

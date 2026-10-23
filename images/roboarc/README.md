@@ -117,7 +117,7 @@ archive byte for byte with RoboARC's other images (images/README.md). For 1.1.0:
 
 | file | what | pinned |
 |---|---|---|
-| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/mll-lab-nu/roboarc:<VERSION>@<manifest digest>` (the pin of `images/pins.json`) into every task's Dockerfiles, compose files and README | changing it (or the pin) re-renders all 202 task dirs (new DIGESTs) |
+| `VERSION` | the image tag. `scripts/roboarc/mk_tasks.py` writes `ghcr.io/mll-lab-nu/roboarc:<VERSION>@<manifest digest>` (the pin of `images/pins.json`) into every task's Dockerfiles, compose files and README | changing it (or the pin) re-renders all puzzle task dirs (new DIGESTs) |
 | `build.sh` | the build (above); the archive and the push are `images/archive.sh` and `images/push_all.sh` | no (tools; not image inputs) |
 
 The recipe and its inputs are under `source/` (`source/README.md`). Up to 1.0.x the image was built on the RoboTangle

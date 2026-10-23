@@ -1,5 +1,6 @@
 """The task catalogue and the reference records: no simulator needed."""
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -10,20 +11,20 @@ from roboarc.references import hash_matches, load_reference, reference_record
 
 FAMILIES = {"blanket_flatten": 9, "blanket_fold": 5, "buzz_wire_3d": 10, "cast_coil": 8, "cast_keyhole": 6,
             "fiber_bundling": 10, "hedgehog_in_cage": 8, "horseshoe_ring": 5, "interlocked_claws": 12, "knot_untying": 8,
-            "lock_picking": 5, "orbits": 2, "rope_threading": 8, "slotted_post_ring": 5}
+            "lock_picking": 5, "orbits": 2, "rope_threading": 8, "slotted_post_ring": 5, "wire_splicing": 1}
 IKEA = {"burvik", "eket", "gladom", "ikea365", "kyrre", "lack", "stegesund", "stenerik", "svallet", "uppsta", "variera",
         "vesken"}
 
 
 def test_counts():
     puzzles = roboarc.list_tasks("puzzles")
-    assert len(puzzles) == 101
+    assert len(puzzles) == 102
     fams = {}
     for t in puzzles:
         fams[t.family] = fams.get(t.family, 0) + 1
     assert fams == FAMILIES
     assert {t.name for t in roboarc.list_tasks("ikea")} == IKEA
-    assert len(roboarc.list_tasks()) == 113
+    assert len(roboarc.list_tasks()) == 114
 
 
 @pytest.mark.parametrize("alias,canonical", [
@@ -42,6 +43,9 @@ def test_unknown_task():
         roboarc.resolve("no-such-task")
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from task_conventions import CUTOFF_EXCEPTIONS  # noqa: E402
+
 # every image by its manifest digest (images/pins.json)
 PINS = {p["name"]: p["ref"] for p in json.loads((Path(__file__).resolve().parents[2] / "images/pins.json").read_text())["images"]}
 assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.3.0@" + PINS["roboarc"].split("@")[1]
@@ -49,7 +53,8 @@ assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.3.0@" + PINS["roboarc"].
 
 def test_metadata():
     for t in roboarc.list_tasks():
-        assert t.max_episode_steps > 0 and t.agent_time_limit_s == 10800.0
+        # 3 h, or the owner's exception for the base (scripts/task_conventions.py CUTOFF_EXCEPTIONS)
+        assert t.max_episode_steps > 0 and t.agent_time_limit_s == CUTOFF_EXCEPTIONS.get(t.id, 10800.0), t.id
         assert set(t.task_dirs) == {"privileged", "standard"}
         assert t.image.startswith("ghcr.io/mll-lab-nu/roboarc")
         json.dumps(t.to_dict())
@@ -61,9 +66,10 @@ def test_metadata():
 
 
 def test_puzzle_references():
-    """99 of the 101 bases ship a reference; each is the file the freeze manifest pins, with its recorded end hash."""
+    """100 of the 102 bases ship a reference; each is the file its pin names (the freeze manifest's, or the release
+    record's for a base released later), with its recorded end hash."""
     with_ref = [t for t in roboarc.list_tasks("puzzles") if t.reference]
-    assert len(with_ref) == 99
+    assert len(with_ref) == 100
     for t in with_ref:
         rec = reference_record(t.id)
         assert rec["sha256_ok"], t.id
@@ -89,7 +95,7 @@ def test_hash_prefixes():
 
 def test_standard_references_obey_the_joint_speed_rule():
     """The standard references move an arm joint target at most 0.04 rad per control step (the standard rule; checked
-    between consecutive rows). 12 privileged references are faster in places: their standard reference is the re-timed
+    between consecutive rows). 13 privileged references are faster in places: their standard reference is the re-timed
     copy (blanket-flatten-06's: the same route re-recorded within the rule)."""
     over_std, over_priv = [], []
     for t in roboarc.list_tasks("puzzles"):
@@ -101,4 +107,4 @@ def test_standard_references_obey_the_joint_speed_rule():
             if np.abs(np.diff(rows[:, arm], axis=0)).max() > 0.04 + 1e-6:
                 over.append(t.base)
     assert over_std == []
-    assert len(over_priv) == 12
+    assert len(over_priv) == 13

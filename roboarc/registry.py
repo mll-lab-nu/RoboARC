@@ -64,9 +64,23 @@ def _env_value(dockerfile: Path, key: str) -> str | None:
     return None
 
 
+def reference_pins(root: Path) -> dict[str, dict]:
+    """Per puzzle base with a pinned reference: {"sha256", "expect"} (the privileged reference file's sha256 and its
+    recorded end hash). The V3 freeze manifest pins the bases frozen in V3; a base released later is pinned by its
+    release record's privileged evidence (scripts/roboarc/release.json: trajectory_sha256, end_state)."""
+    path = root / "records" / "freeze_manifests" / "freeze_manifest.v3.json"
+    pins = {b: {"sha256": r.get("sha256"), "expect": r.get("expect")}
+            for b, r in (json.loads(path.read_text())["bases"] if path.is_file() else {}).items() if r.get("reference")}
+    rel = root / "scripts" / "roboarc" / "release.json"
+    for b, r in (json.loads(rel.read_text())["bases"] if rel.is_file() else {}).items():
+        ev = (r.get("evidence") or {}).get("privileged") or {}
+        if b not in pins and ev.get("trajectory_sha256") and ev.get("end_state"):
+            pins[b] = {"sha256": ev["trajectory_sha256"], "expect": ev["end_state"]}
+    return pins
+
+
 def _puzzle_tasks(root: Path) -> dict[str, TaskInfo]:
-    manifest_path = root / "records" / "freeze_manifests" / "freeze_manifest.v3.json"
-    manifest = json.loads(manifest_path.read_text())["bases"] if manifest_path.is_file() else {}
+    pins = reference_pins(root)
     out = {}
     for d in sorted((root / "tasks").glob("roboarc-*-privileged")):
         if d.name.startswith("roboarc-ikea-"):
@@ -79,7 +93,7 @@ def _puzzle_tasks(root: Path) -> dict[str, TaskInfo]:
         cap = _env_value(d / "tests" / "Dockerfile", "RCB_MAX_STEPS")
         std = d.parent / d.name.replace("-privileged", "-standard")
         ref = root / "scripts" / "roboarc" / "oracles" / base / "privileged.npz"
-        expect = (manifest.get(base) or {}).get("expect") if (manifest.get(base) or {}).get("reference") else None
+        expect = (pins.get(base) or {}).get("expect")
         image = _image_of(d / "environment" / "Dockerfile")
         out[f"roboarc-{base}"] = TaskInfo(
             id=f"roboarc-{base}", suite="puzzles", family=md.get("family", name), name=name, base=base,
