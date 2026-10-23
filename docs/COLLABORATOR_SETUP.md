@@ -1,6 +1,6 @@
 # Running RoboARC: setup for a collaborator
 
-RoboARC 1.2.1 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, and the evaluation run itself. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
+RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, and the evaluation run itself. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
 
 ## 1. Machine
 
@@ -28,10 +28,10 @@ RoboARC 1.2.1 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get 
 2. Create a GitHub **classic** token with the scope `read:packages`, then log in and check that you can pull:
    ```bash
    echo <token> | docker login ghcr.io -u <your GitHub username> --password-stdin
-   docker pull ghcr.io/mll-lab-nu/roboarc:1.2.0      # access check: it must download
+   docker pull ghcr.io/mll-lab-nu/roboarc:1.3.0      # access check: it must download
    ```
    Docker uses this login to pull the task images. Every task names its image by digest (`images/pins.json`):
-   - `roboarc:1.2.0`, about 10 GB on disk, used by every puzzle task;
+   - `roboarc:1.3.0`, about 10 GB on disk, used by every puzzle task;
    - `roboarc-monitor:0.1.0`, about 0.13 GB on disk, used by every task;
    - `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`, about 1.1 GB and 7.7 GB on disk, used only by the IKEA tasks.
 

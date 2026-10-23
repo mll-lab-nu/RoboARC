@@ -2,7 +2,7 @@
 cff-version: 1.2.0
 message: "If you use RoboARC, please cite it as below (placeholder until the paper is out)."
 title: "RoboARC: topological manipulation puzzles for coding agents"
-version: 1.2.1
+version: 1.3.0
 license: MIT
 date-released: 2026-10-22
 url: "https://roboarc.embodied-first-exam.ai"

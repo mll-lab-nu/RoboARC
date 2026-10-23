@@ -35,7 +35,7 @@ old_summary = ("Drive the long bolt into the blind hole in the bed frame's corne
 GRASP_OLD = re.compile(r"assisted grasping \(contact_weld_v1\): a gripper whose command moves towards closed takes hold of a "
                        r"graspable part \(bolt, key\).*?then close it on a part to take hold\.")
 grasp_new = ("assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a wire "
-             "(wire_a, wire_b) once both fingers touch it inside its links' grasp regions, the tool frame within 15 cm of "
+             "(wire_a, wire_b) once both fingers touch it inside its links' grasp regions, the tool frame within 6 cm of "
              "it and the penetration at most 2 mm, for 0.02 s: of each wire it touches, the touched link nearest the tool "
              "frame and every other link whose centre lies between the two pads then follow the gripper rigidly. Both "
              "fingers on the wires with every contact between the pads also holds, the same way (the red wire's two legs "

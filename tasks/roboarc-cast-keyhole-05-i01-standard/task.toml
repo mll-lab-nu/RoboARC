@@ -37,7 +37,7 @@ oracle = "full"
 difficulty = "hard"
 grasp = "assisted (the contact_weld_v1 grasp regions on keyhole_gold, keyhole_silver)"
 success_rule = "task-native success (goal_complete True; frozen parameters; terminal revision cast_keyhole_placement_v4_grasp_contact_2mm); the author's qualification record for this variation matches, as metadata only (record profile: default task parameters, seed 0, ALOHA EE_ABS, CPU, 25 ms World tick / 40 substeps, bilateral-contact contact_weld_v1); this instance runs CPU 2.5 ms ticks x 4 substeps with joint-position actions and frozen contact_weld_v1 grasp assistance, which the record does not cover"
-tooling_version = "21"
+tooling_version = "22"
 instance_seed = 0
 expert_time_estimate_hours = 3
 

@@ -24,6 +24,8 @@ its own pinned copy.
 
 | version | image id | size | built from |
 |---|---|---|---|
+| 1.3.0 | `sha256:499d6f69bd81…` (manifest digest `sha256:2bcded002899…`, images/pins.json) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.2.0's libraries and instances byte for byte, the 1.3.0 simulator source and the wire-splicing-01 instance |
+| 1.2.0 | `sha256:b600616bee6c…` (manifest digest `sha256:a8561b770908…`) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.1.0's libraries, the appearance seeds and the new bases' instances |
 | 1.1.0 | `sha256:dadc2d710ad2…` (manifest digest `sha256:85ea90032a55…`, images/pins.json) | 8.7 GB | `source/images/roboarc/Dockerfile` (the Python base image) |
 | 1.0.0 | `sha256:18a821a18d2b…` | 12.2 GB | a delta on the RoboTangle 0.2.22 image (Genesis 1.2.1, libuipc), pinned by digest |
 
@@ -81,9 +83,10 @@ images/roboarc/build.sh --noinst              # the image without instances (to 
    `instances`;
 3. the runtime check below; the tag is removed when the installed runtime differs from `scripts/roboarc/release.json`.
 
-1.2.0's appearance seeds (`instances/<base>/seeds/<S>/`) and the new bases' instances are pinned in `assets.json` but
-not yet in the HF dataset (one revision for the release, uploaded with the owner's approval): until then build 1.2.0
-with `--instances <dir>` from the release's instance tree; `assets.py check-instances` verifies every pinned file.
+The appearance seeds (`instances/<base>/seeds/<S>/`, from 1.2.0) and the experimental bases' instances (from 1.2.0;
+wire-splicing-01 from 1.3.0) are pinned in `assets.json` but not yet in the HF dataset (one revision, uploaded with
+the owner's approval): until then build with `--instances <dir>` from the release's instance tree;
+`assets.py check-instances` verifies every pinned file.
 
 It needs Docker with BuildKit (the default `docker` driver), about 25 GB of free disk and network access to Docker Hub
 (the base image), snapshot.debian.org, pypi.org and download.pytorch.org (the wheels) and dl.polyhaven.org (the studio

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ADVISORY. task.toml: name matches folder, required metadata (docs/PROTOCOL.md §1, §2, docs/TAXONOMY.md), deliverable
-# dir, agent timeout cap (14400 s for every task), the task's declared scene dynamics (no central table).
+# dir, agent timeout cap (14400 s, or the owner's exception for the task's base), the task's declared scene dynamics (no central table).
 t="$1"; python3 - "$t" "$(cd "$(dirname "$0")/.." && pwd)" <<'PY'
 import sys, tomllib, pathlib
 t = pathlib.Path(sys.argv[1]); d = tomllib.load(open(t / "task.toml", "rb")); rc = 0
@@ -15,9 +15,8 @@ if m.get("task_type") not in ("trajectory", "policy"): fail("task_type must be t
 # added to the registry, §2.16) and `mode` says the same; no `tier`. The suffix is the whole mode name, longest first:
 # -standard-realtime is not -realtime. The modes: RCB_MODES_TABLE (run_all.sh) or scripts/task_conventions.py MODE_REGISTRY.
 import os
-table = os.environ.get("RCB_MODES_TABLE", "")
-if not table:
-    sys.path.insert(0, str(pathlib.Path(sys.argv[2]) / "scripts")); import task_conventions as tc; table = tc.modes_table()
+sys.path.insert(0, str(pathlib.Path(sys.argv[2]) / "scripts")); import task_conventions as tc
+table = os.environ.get("RCB_MODES_TABLE", "") or tc.modes_table()
 MODES = tuple(l.split()[0] for l in table.splitlines() if l.strip())   # longest first
 suffix = next((x for x in MODES if t.name.endswith("-" + x)), t.name.rsplit("-", 1)[-1])
 if suffix not in MODES: fail("directory name must end in " + ", ".join("-" + x for x in MODES))
@@ -29,8 +28,8 @@ if m.get("dynamics") not in ("static", "dynamic"):
 if "/app/output/" not in d.get("artifacts", []): fail('top-level artifacts must include "/app/output/"')
 if not d.get("agent", {}).get("timeout_sec"): fail("[agent].timeout_sec required")
 else:
-    # PROTOCOL D8 / §2.3: 14400 s cap, no benchmark excepted (the same cap: scripts/task_conventions.py CUTOFF_CAP)
-    if d["agent"]["timeout_sec"] > 14400:
-        fail("[agent].timeout_sec > 14400 s cap (4h, PROTOCOL §2.3)")
+    # PROTOCOL D8 / §2.3: 14400 s cap; the owner's exceptions by base: scripts/task_conventions.py CUTOFF_EXCEPTIONS
+    if d["agent"]["timeout_sec"] > tc.cutoff_cap_for(t):
+        fail("[agent].timeout_sec > 14400 s cap (4h, PROTOCOL §2.3) and the base has no owner exception")
 sys.exit(rc)
 PY

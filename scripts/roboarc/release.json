@@ -1,7 +1,7 @@
 {
  "name": "roboarc-r1",
  "note": "RoboARC release record (docs/benchmarks/roboarc.md), written by tools/release/release_rebuild.py --onto. release_commit: the simulator commit the image, the tooling and the instances come from; runtime: the image's installed runtime; bases: one record per task base (ported_from / template, instance, facts the texts state, evidence). version: the task set's version (the Release line of every task README; the image's version is images/roboarc/VERSION); changes: Change Log entries of every base.",
- "version": "1.2.1",
+ "version": "1.3.0",
  "changes": [
   {
    "date": "2026-10-19",
@@ -37,10 +37,15 @@
    "date": "2026-10-22",
    "mode": "both",
    "text": "RoboARC 1.2.1, the renderer checks the GPU before it starts: `nyx_direct.py` reads the Vulkan extensions of the task's GPU and, where `VK_KHR_ray_query` is missing (GPUs without RT cores, such as V100, A100 and H100), raises `nyx_direct.UnsupportedDevice` naming what is missing, instead of letting the native renderer crash the process. There the privileged verifier grades without its replay video (`video_rendered` 0) and the agent's camera calls raise an error it can catch; standard mode needs a GPU with RT cores. On a GPU with RT cores nothing changes. The runtime binding names the new `nyx_direct.py`; the image, the instruction, the grader, the simulator tooling, the frozen instance and the reference are unchanged: results graded under 1.2.0 stand."
+  },
+  {
+   "date": "2026-10-22",
+   "mode": "both",
+   "text": "RoboARC 1.3.0, the simulator source and tooling of a new experimental family (wire_splicing, not in tasks/ until the owner has reviewed it): the family's code, its two opt-in grasp options (welding a wire's links between the pads, holding between the pads) and an opt-in weld work guard, which only that family's scene profile turns on. Image `ghcr.io/mll-lab-nu/roboarc:1.3.0` (simulator source and tooling v22). This task's instance, physics, instruction, grader and reference are unchanged, and so are its birth and end states (seeds 0, 1 and 2): results graded under 1.2.x stand."
   }
  ],
- "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
- "template_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+ "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+ "template_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
  "runtime": {
   "dependencies": {
    "torch": "2.11.0+cu128",
@@ -52,13 +57,13 @@
   },
   "python": "3.11.15",
   "source": {
-   "sha256": "cacc831d220dedfdbaf16d3066dafca03e83ebbaedc14af4d83d2458a22c8b3f",
-   "files": 449
+   "sha256": "4d2cba2157c96903532ccb44ff7ff55fd1dc657a4c17a8e8e832d537e53e56d3",
+   "files": 454
   }
  },
  "runtime_notes": "source = the simulator source the image installs (source/topogym pruned by images/topogym/prune.py; tools/release/source_hash.py computes it from a checkout); python, dependencies: the image's installed versions (source/images/roboarc/runtime.lock, vbd-requirements.txt). Since 1.1.0 the image has no Genesis and no libuipc, and the runtime names neither.",
- "tooling_sha256": "676e1803d865bc745b0fe8e221241e1a1465fb07ffbe2f1e0a8caf74e5c15631",
- "tooling_version": "21",
+ "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+ "tooling_version": "22",
  "bases": {
   "blanket-flatten-01-i01": {
    "creation_source": "e2e2f564",
@@ -85,10 +90,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -130,10 +135,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -177,10 +182,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -224,10 +229,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -278,10 +283,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -334,10 +339,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -393,10 +398,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -452,10 +457,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -506,10 +511,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -553,10 +558,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -600,10 +605,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -659,10 +664,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -703,10 +708,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -747,10 +752,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -810,10 +815,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -841,10 +846,10 @@
    "evidence": {},
    "oracle": "none",
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -885,10 +890,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -931,10 +936,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -977,10 +982,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1025,10 +1030,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1078,10 +1083,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1124,10 +1129,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1180,10 +1185,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1224,10 +1229,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1268,10 +1273,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1312,10 +1317,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1356,10 +1361,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "v2_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1402,10 +1407,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "v2_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1448,10 +1453,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "v2_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1494,10 +1499,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1545,10 +1550,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1608,10 +1613,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1659,10 +1664,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1710,10 +1715,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1761,10 +1766,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "double_maze",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1814,10 +1819,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1858,10 +1863,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1914,10 +1919,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1958,10 +1963,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1982,10 +1987,10 @@
    "evidence": {},
    "oracle": "none",
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2026,10 +2031,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2074,10 +2079,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2146,10 +2151,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2218,10 +2223,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2290,10 +2295,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2360,10 +2365,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2404,10 +2409,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2460,10 +2465,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2504,10 +2509,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2548,10 +2553,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2592,10 +2597,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "window_change",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2638,10 +2643,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "cast_cage",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2684,10 +2689,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "owl",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2730,10 +2735,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2774,10 +2779,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2830,10 +2835,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2874,10 +2879,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2918,10 +2923,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2962,10 +2967,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3013,10 +3018,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3064,10 +3069,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3120,10 +3125,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3164,10 +3169,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3208,10 +3213,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3273,10 +3278,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3338,10 +3343,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3403,10 +3408,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3468,10 +3473,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3533,10 +3538,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "cast_abc",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3581,10 +3586,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3634,10 +3639,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3707,10 +3712,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3780,10 +3785,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3865,10 +3870,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3938,10 +3943,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4011,10 +4016,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4067,10 +4072,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4111,10 +4116,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4155,10 +4160,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4199,10 +4204,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4243,10 +4248,10 @@
     }
    },
    "family": "orbits",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4319,10 +4324,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4408,10 +4413,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4497,10 +4502,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4588,10 +4593,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4686,10 +4691,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4784,10 +4789,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4882,10 +4887,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4980,10 +4985,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5076,10 +5081,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5152,10 +5157,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5216,10 +5221,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy_chain",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5287,10 +5292,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium_chain",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5358,10 +5363,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source eb4db660; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source eb4db660; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard_chain",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5429,10 +5434,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5492,10 +5497,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5543,10 +5548,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5616,10 +5621,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5689,10 +5694,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5740,10 +5745,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5813,10 +5818,10 @@
     }
    },
    "family": "orbits",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "not_run"
    },
@@ -5887,10 +5892,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "crossbar",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -5950,10 +5955,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "torx",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6013,10 +6018,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "square",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6076,10 +6081,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "phillips",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6139,10 +6144,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "slotted",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6202,10 +6207,10 @@
     }
    },
    "family": "caliper_sorting",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py; make-instance caliper_sorting_vernier, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "vernier",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6265,10 +6270,10 @@
     }
    },
    "family": "clock_assembling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4163626d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4163626d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "gear_train",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6328,10 +6333,10 @@
     }
    },
    "family": "battery_replacement",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py; make-instance battery_replacement_xbox_aa, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "xbox_aa",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6391,10 +6396,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:1.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_cast_trinity, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
    "tier": "cast_trinity",
    "physics_engine": "mujoco",
-   "release_commit": "9ed9ace4dc3d3d14f8b27ef3dde5ed03084714bb",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.2.0 (b600616bee6c), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -6424,6 +6429,69 @@
      "harbor": "passed",
      "date": "2026-10-21",
      "image": "roboarc 1.2.0 (b600616bee6c)"
+    }
+   }
+  },
+  "wire-splicing-01-i01": {
+   "creation_source": "4d2cba21",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-23",
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle (scripts/roboarc/harbor_check.py)",
+     "trajectory_sha256": "3a547a8849503c21fdf12e6af8986342bf71410de149ab16c422daf5425dc197",
+     "end_state": "48f312d445aec62b"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-23",
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle (scripts/roboarc/harbor_check.py)",
+     "trajectory_sha256": "17e63980c2ff3c3666606b5c46842deec014ed006f10425505839c287ae39256",
+     "speed_rule": "the privileged reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 785 rows (190 runs); each run is re-timed inside a window of nearby rows of that arm: the arm follows the same joint path at an even speed within the rule and arrives at the window's last row on time; no row is added, every other row and every gripper entry is unchanged (scripts/roboarc/oracles/wire-splicing-01-i01/standard.npz, meta speed_rule; the privileged reference is unchanged).",
+     "end_state": "164567f6effde5b0"
+    }
+   },
+   "family": "wire_splicing",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py; make-instance wire_splicing_eye_wrap, scene seed 0)",
+   "tier": "eye_wrap",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-23"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "wire_splicing_eye_wrap",
+   "design": "two stiff wires from their terminals: an eye bent in the red wire's bare end round the bending post's yellow rod, the blue wire threaded through it, its bare tail wound one and a half turns round the red wire's doubled end, at least one of them round both its strands, the red wire's end folded back",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a wire (wire_a, wire_b) once both fingers touch it inside its links' grasp regions, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s: of each wire it touches, the touched link nearest the tool frame and every other link whose centre lies between the two pads then follow the gripper rigidly. Both fingers on the wires with every contact between the pads also holds, the same way (the red wire's two legs side by side, one pad on each; the eye's two sides with the blue wire beside them). Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, a held link drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull with more than 60 N averaged over 20 ms, or a weld has fed more than 0.1 J of work into the wire) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held wire is pulled hard against the other hand or a fixture. The jig is fixed; the grippers start empty and nearly closed: open a gripper, then close it on a wire to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on the links of both wires: a hand holds every link of a touched wire between its pads; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): wire_a: 63 spheres of radii 26.1 mm, 5.1 mm; wire_b: 97 spheres of radii 25.1 mm, 5.5 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): wire_a: 63 spheres of radii 26.1 mm, 5.1 mm; wire_b: 97 spheres of radii 25.1 mm, 5.5 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically."
+   },
+   "experimental": true,
+   "note": "experimental base (owner, 2026-10-22: out of tasks/ in 1.3.0 until the owner has reviewed its demo; agent time 21600 s by the owner's exception, scripts/task_conventions.py CUTOFF_EXCEPTIONS). Development record: experimental variation, no tier; reference oracles/wire-splicing-01-i01 (14882 rows, final state 48f312d445aec62b, birth 3f36d852dfc7bc65: the scene without the needle meter and with the yellow rod, 2026-10-22; the rows are the ones recorded on the earlier scene, re-stamped); ported from TopoGym jianwen/wire-splicing cb3d05437c (2026-10-22); the acceptance round (criteria v2.13b) is still to run",
+   "released": false,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-23",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-23",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
     }
    }
   }

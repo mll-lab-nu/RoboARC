@@ -4,6 +4,75 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 1.3.0 (2026-10-22)
+
+The simulator source and tooling of a new family, wire_splicing, with one experimental base (wire-splicing-01, not in
+`tasks/` until the owner has reviewed its demo). Image `ghcr.io/mll-lab-nu/roboarc:1.3.0` (manifest `sha256:2bcded00…`,
+id `499d6f69bd81…`); the IKEA tasks and images are unchanged. Every released task's instance, physics, instruction,
+grader and reference are unchanged: results graded under 1.2.x stand.
+
+### wire_splicing (experimental)
+- The family (by Jianwen, ported from TopoGym `cb3d05437c`): two stiff wires from their terminals, 160 ball-jointed
+  links with elastoplastic joints; the agent bends an eye in the red wire's bare end round the yellow rod of a bending
+  post, threads the blue wire through it, winds the blue wire's bare tail at least 1.5 turns round the red wire's
+  doubled end (at least one full turn round both strands together), folds the red wire's end back and lets go.
+- wire-splicing-01-i01: packages, references (privileged; standard re-timed to the joint-speed rule), its record in
+  `release.json` `experimental_bases`, its instance and seeds 1 and 2 (other colours of the terminals, the post and one
+  bare core; the red and blue insulation and the post's yellow rod keep their colours) in the
+  image and pinned in `assets.json`. Agent time 21600 s by the owner's exception (below); one control step takes about
+  0.5 s. `mk_tasks.py --experimental --out <dir>` renders it outside `tasks/`.
+- Its texts' tool-frame distance is the instance's, 6 cm (the template's 15 cm had been kept).
+
+### Shared code: opt-in only
+- `MultiRopeGraspAssistConfig` (`topogym/utils/grasp.py`) gains `weld_links_between_pads` (a hand welds every link of a
+  touched wire whose centre lies between its pads, one binding) and `hold_between_pads` (two fingers on the wires with
+  every contact between the pads hold as a pinch), both default off; only wire_splicing's grasp configuration builds
+  this class.
+- The MuJoCo grasp backend's weld work guard (`topogym/world/mujoco/grasp.py`): a weld whose net work within its hold
+  exceeds the scene profile's `weld_work_guard_j` lets go as a slip. It is read from the frozen scene's profile, and no
+  other family's profile names it, so it is off for every released instance; with it off, the grasp state a checkpoint
+  carries is as before.
+- New entries for the family in the registry, variation records, goal texts, appearance axes, scene profiles and the
+  tooling's task table (`rcb_topogym.py`, tooling v22); no existing entry changes. SOURCE.json `4d2cba21…` (454 files).
+- `tools/tests/test_mujoco_grasp_opt_in.py`: the WeakHold field test follows the fields battery's rule C added.
+
+### Owner exceptions to the cutoff cap
+- The protocol's 14400 s cap now admits the bases listed in `scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`, each with
+  the owner's approval; `check-cutoffs.py` and `check-task-fields.sh` read the same list. The first entry is
+  wire-splicing-01-i01 (owner, 2026-10-22: 21600 s; 160 ball-jointed links at about 0.5 s per control step). For an
+  excepted base `mk_tasks.py` writes the cutoff and raises the grading timeouts with it: the privileged verifier to 2 x
+  cutoff + 1800 s (45000 s), the standard collect hook to 1.5 x cutoff (32400 s). `cutoff_s` is part of the
+  configuration results are ranked by, so its trials form their own group. The 202 task dirs did not change by it.
+
+### Tasks
+- The 202 puzzle directories re-rendered: the tooling copies (`rcb_topogym.py`), the runtime bindings of seeds 0-2
+  (source and tooling), the image reference, `tooling_version` 22, the README's Release line and Change Log, `DIGEST`.
+  Instructions, graders, instances and references are unchanged; so are the IKEA directories.
+
+### Evidence
+- **Image:** every file outside `/opt/topogym` and the new instance is byte-identical to 1.2.0's image (path, mode, size,
+  sha256 of 104,536 entries; the numeric libraries unchanged); the 110 earlier bases' instances and seeds are 1.2.0's
+  bytes. The simulator source differs from 1.2.0's in wire_splicing's files and the shared entries above only.
+- **Released bases, seed 0:** in a 1.3.0 build that differed from this one only in wire_splicing's own files (the needle
+  meter, removed before the release; the file manifests show those files and nothing else), the strict double
+  fresh-process replay of all 101 references reached its recorded end state, with births = frozen and the instance,
+  asset and runtime-binding checks (Zen 4); render inputs 101 / 101 identical to 1.2.0. In this image: one base per
+  family again (14 / 14 ends as recorded; render inputs identical), and Nyx frames at birth and after up to 300
+  reference rows within 1.2.0's own run-to-run spread (14 / 14 families; the path tracer is not pixel-deterministic
+  between runs of the same image).
+- **Seeds 1 and 2:** the 220 seed instances pass the four checks against their 1.3.0 bindings (assets and physical fields
+  = seed 0's, strict staging, birth parts = seed 0's but `task`, the re-stamped reference); derived again in this
+  image they give the same births and `instance_assets/`, and `instance.json` differs only in `derived_from.source`.
+- **Harbor:** one base per family, oracle 1 / nop 0 in both modes at seed 0, every end as recorded (56 / 56); in the
+  earlier build also seeds 1 and 2 of the same bases (112 / 112).
+- **wire-splicing-01-i01:** Harbor oracle 1 / nop 0 in both modes at seeds 0, 1 and 2 (12 / 12; two equal replays each;
+  ends 48f312d445aec62b privileged, 164567f6effde5b0 standard); its seeds pass the four checks; Intel Xeon Gold 6230R
+  = Zen 4 on the strict replay (48f312d445aec62b); one privileged reference execution on an RTX 4090 Zen 4 host under
+  its usual shared load: 8171 s, 37.8 % of the 21600 s budget (0.55 s per control step); along the reference the task
+  succeeds only at its last row, with every condition met (no earlier state is credited).
+- **Checks:** generator, IKEA, image pins, invariants, unit tests, API tests, advisories, `run_all.sh`,
+  `source_hash.py --check`, doc paths and tooling identity pass on a fresh clone.
+
 ## 1.2.1 (2026-10-22)
 
 Nyx on GPUs without RT cores: a clear error instead of a crash. The same images (`roboarc:1.2.0`, the IKEA images

@@ -64,7 +64,8 @@ import task_conventions as TC  # noqa: E402  the protocol's conventions: every g
 # The agent's time cutoff per mode (PROTOCOL §2.12): this benchmark's own number, written into every task's `[agent]
 # timeout_sec`, the one source; normalize renders from it the instruction's closing `## Time limit`, the README row and
 # the sim service's wall clock. To change it (an owner decision; the pull request states old -> new), edit it here and
-# regenerate.
+# regenerate. A base the owner excepted (scripts/task_conventions.py CUTOFF_EXCEPTIONS) gets its own number, and its
+# grading timeouts grow with it (cutoff_of, grading_timeouts).
 CUTOFF_SEC = 10800
 
 REL = json.loads((HERE / "release.json").read_text())
@@ -169,7 +170,8 @@ def base_step(base: str) -> float:
 
 def verifier_timeout(base: str) -> float:
     toml = (PKG / f"{base}-privileged" / "task.toml").read_text()
-    return float(re.search(r"(?ms)^\[verifier\]\n.*?^timeout_sec = ([0-9.]+)", toml).group(1))
+    return max(float(re.search(r"(?ms)^\[verifier\]\n.*?^timeout_sec = ([0-9.]+)", toml).group(1)),
+               2 * cutoff_of(base) + 1800)     # as grading_timeouts renders it
 
 
 def row_cap(base: str) -> int:
@@ -186,6 +188,27 @@ def row_cap(base: str) -> int:
         rows = int(re.search(r"'shape': \((\d+),", header).group(1))
         assert 1.5 * rows <= cap, f"{base}: the reference trajectory has {rows} rows, the cap is {cap}"
     return cap
+
+
+def cutoff_of(base: str) -> int:
+    """The agent's cutoff of the base's two tasks: CUTOFF_SEC, or the owner's exception for the base."""
+    return TC.CUTOFF_EXCEPTIONS.get(f"{BENCH}-{base}", CUTOFF_SEC)
+
+
+def grading_timeouts(toml: str, mode: str, cutoff: int, name: str) -> str:
+    """The task.toml text with its grading timeouts raised to what the cutoff needs, never lowered: the privileged
+    verifier's two replays of a trajectory as long as the agent's time, 2 x cutoff + 1800 s; the standard collect hook
+    (finalize.sh: the end, then one replay of the episode), 1.5 x cutoff for a loaded host. At CUTOFF_SEC both are below
+    the packages' 45000 s and 27000 s, which stay."""
+    if mode == "privileged":
+        pat, need = r"(?ms)(^\[verifier\]\n.*?^timeout_sec = )([0-9.]+)", 2 * cutoff + 1800
+    else:
+        pat, need = r'(?ms)(^command = "sh /srv/finalize\.sh".*?\n^timeout_sec = )([0-9.]+)', int(1.5 * cutoff)
+    m = re.search(pat, toml)
+    assert m, f"{name}: no {mode} grading timeout in task.toml"
+    if float(m.group(2)) >= need:
+        return toml
+    return toml[:m.start(2)] + TC._set_number(m.group(2), need) + toml[m.end(2):]
 
 
 def time_per_call(step: float, hz: int) -> str:
@@ -642,7 +665,8 @@ def render(base: str, out: pathlib.Path, inst_src: pathlib.Path | None = None, d
         t = out / f"{BENCH}-{base}-{mode}"; up = PKG / f"{base}-{mode}"; dirs.append(t)
         values = fields(base, mode, rec)
         texts = {n: fill((up / n).read_text(), values, f"packages/{up.name}/{n}") for n in TEXTS if (up / n).is_file()}
-        texts["task.toml"] = TC.set_agent_timeout(texts["task.toml"], CUTOFF_SEC, base)
+        texts["task.toml"] = grading_timeouts(TC.set_agent_timeout(texts["task.toml"], cutoff_of(base), base), mode,
+                                              cutoff_of(base), f"packages/{up.name}")
         check_texts(base, mode, rec, texts)
         if seeds:
             seed_texts(base, mode, texts, seeds, oracle_seeds_of(base, rec, seeds))

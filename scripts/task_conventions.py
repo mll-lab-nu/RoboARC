@@ -217,7 +217,20 @@ CUTOFF_NOTE["standard-realtime"] = CUTOFF_NOTE["standard"]
 assert set(CUTOFF_NOTE) == set(MODE_REGISTRY), "every mode of MODE_REGISTRY needs its CUTOFF_NOTE (PROTOCOL §2.12)"
 CUTOFF_NOTE_START = "This is wall-clock time from the start of your session;"   # how an earlier note is recognised
 WALL_CLOCK_ENV = "RCB_WALL_CLOCK_S"              # the standard modes' sim service: what its /spec budget and time_left_s report
-CUTOFF_CAP = 14400                               # PROTOCOL D8 / §2.3, no benchmark excepted; the same cap: ci_checks/check-task-fields.sh
+CUTOFF_CAP = 14400                               # PROTOCOL D8 / §2.3; the same cap: ci_checks/check-task-fields.sh
+# The owner's exceptions to CUTOFF_CAP, by task base (the directory name without its mode), each with its approval: the
+# only tasks whose cutoff may exceed the cap. Their trials rank in their own configuration group (cutoff_s is in
+# CONFIG_KEYS), as TopoGym's 6 h packages did (docs/simulator/TOPOGYM_PROTOCOL.md, Budget).
+CUTOFF_EXCEPTIONS = {
+    "roboarc-wire-splicing-01-i01": 21600,       # owner 2026-10-22: 160 ball-jointed links, ~0.5 s per control step
+}
+
+
+def cutoff_cap_for(task: Path) -> int:
+    """The largest `[agent] timeout_sec` the task may declare: CUTOFF_CAP, or its base's owner exception."""
+    base = next((task.name[:-len(m) - 1] for m in sorted(MODE_REGISTRY, key=len, reverse=True)
+                 if task.name.endswith("-" + m)), task.name)
+    return max(CUTOFF_CAP, CUTOFF_EXCEPTIONS.get(base, 0))
 
 
 # ---------------------------------------------------------------------------------------------------------------------

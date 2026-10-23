@@ -12,7 +12,7 @@ The tasks serve two kinds of solvers through the same simulator code:
 
 Website: <https://roboarc.embodied-first-exam.ai>
 
-Version **1.2.1** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
+Version **1.3.0** (see [CHANGELOG.md](CHANGELOG.md); the images are in `ghcr.io/mll-lab-nu/`), 226 Harbor task directories
 under `tasks/`:
 - the topological puzzles: 101 task bases in 14 families, each in two modes, so 202 task directories; every base
   has three scenes (appearance seeds 0, 1, 2: the same scene and physics in other looks), and the runner picks one
@@ -43,6 +43,12 @@ Puzzle task directories are `tasks/roboarc-<family>-<NN>-i01-<mode>`; `<NN>` num
 difficulty is `[metadata].difficulty` in `task.toml`. One page per family: [docs/families/](docs/families/). The
 benchmark's rules (grading replays, safety readings, the standard service): [docs/benchmarks/roboarc.md](docs/benchmarks/roboarc.md).
 
+Ten further bases are experimental and not in `tasks/` until the owner has reviewed their demos: bed-bolt-01..05,
+caliper-sorting-01, clock-assembling-01, battery-replacement-01, interlocked-claws-13 (from 1.2.0) and
+wire-splicing-01 (from 1.3.0). Their instances are in the image and their records in `scripts/roboarc/release.json`
+(`experimental_bases`); `python3 scripts/roboarc/mk_tasks.py --experimental --out <dir>` renders their task
+directories outside `tasks/`.
+
 IKEA MuJoCo (`tasks/roboarc-ikea-<scene>-i00-<mode>`): lack, svallet, gladom, variera, eket, ikea365, vesken,
 stegesund, stenerik, burvik, uppsta and kyrre, each an IKEA product assembled by two Franka Panda arms (svallet: two
 ALOHA 2 arms). Its page: [docs/benchmarks/ikea_mujoco.md](docs/benchmarks/ikea_mujoco.md).
@@ -70,7 +76,7 @@ Requirements:
 - Docker with the NVIDIA Container Toolkit; [Harbor](https://github.com/laude-institute/harbor) 0.23 or newer;
   Python >= 3.11 for the repository tools.
 
-The puzzle tasks run `ghcr.io/mll-lab-nu/roboarc:1.2.0`; the IKEA tasks run
+The puzzle tasks run `ghcr.io/mll-lab-nu/roboarc:1.3.0`; the IKEA tasks run
 `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0`, and their standard `sim` sidecar `roboarc-ikea-sim:1.1.0`. Every task
 names its images by manifest digest ([images/pins.json](images/pins.json), [images/README.md](images/README.md)), so
 Harbor pulls exactly the validated images. Pull them, or build them ([docs/DEVELOPING.md](docs/DEVELOPING.md)).
@@ -109,9 +115,9 @@ Run it inside the task's image with the repository mounted:
 
 ```bash
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.2.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.3.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/mll-lab-nu/roboarc:1.2.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
+  ghcr.io/mll-lab-nu/roboarc:1.3.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
 ```
 
 IKEA runs in `roboarc-ikea:1.1.0` (physics only) or `roboarc-ikea-sim:1.1.0` (with Nyx images). `pip install -e .`

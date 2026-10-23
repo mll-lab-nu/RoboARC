@@ -48,6 +48,10 @@
   "blanket-flatten-06-i01": {
    "end_state": "f6f8062d4270bdcb",
    "words": "the released reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 3 rows, and re-timed in place (as buzz-wire-3d-09-i01's) its episode does not solve the task under the service; the standard reference is the released route re-recorded from the frozen instance by the family's feedback policy with the oracle rate limiter's guard-stop clamp, as blanket-fold-05-i01's reference: 7577 rows, every arm joint step at most 0.039 rad, so the service runs every row as it is (scripts/roboarc/oracles/blanket-flatten-06-i01/standard.npz, meta speed_rule; the privileged reference is unchanged)."
+  },
+  "wire-splicing-01-i01": {
+   "end_state": "164567f6effde5b0",
+   "words": "the privileged reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 785 rows (190 runs); each run is re-timed inside a window of nearby rows of that arm: the arm follows the same joint path at an even speed within the rule and arrives at the window's last row on time; no row is added, every other row and every gripper entry is unchanged (scripts/roboarc/oracles/wire-splicing-01-i01/standard.npz, meta speed_rule; the privileged reference is unchanged)."
   }
  }
 }

@@ -19,6 +19,7 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 | main before the rewrite | `19dcad58b5691b93d95646dd26a6115e69b2925f` | 2026-10-19 00:59 -0700 | the release history in CHANGELOG.md (0.1.0: #186 / #187, 0.2.0: #301) |
 | the shared repository's main: the usage gateway (added after 1.1.0) | `3518d6558f56d65acb93b8bd03a3b5f2d43f2a7b` | 2026-10-19 04:49 -0700 | `scripts/usage_gateway/` (`gateway.py`, `rawlog.py`, `api_paths.json`, `tests/`) and `.env.example`, byte-identical. The newest commit whose gateway takes every option the runner passes and reads `scripts/set_agent_egress.py`'s host lists from the file's text; later versions import that module, which runs nothing on import since the same change (its command line is under `if __name__ == "__main__"`) |
 | TopoGym's development line `dev/robotangle_mujoco` (for 1.2.0; prepared by Jianwen and ported onto 1.1.0) | `497a9e9d7f630c40bc315a01795a8a4beec5e7f7` | 2026-10-20 01:45 -0500 | the five new task settings and what they need: `source/topogym/` (35 files: 12 changed, 23 new), the pinned tooling's new task entries (`scripts/roboarc/shared/`), `tools/release/` (`mujoco_release.json` new bases, `release_rebuild.py`, `topogym_rules.py`), the nine new bases' references (`scripts/roboarc/oracles/`) and their builders (`tools/references/`), tests (`tools/tests/`), a stress reproducer, the development notes (`docs/simulator/families/`, `docs/simulator/MUJOCO_CORE.md`): "1.2.0 (in progress)" below |
+| TopoGym's `jianwen/wire-splicing` (for 1.3.0; ported by Jianwen onto 1.2.1, branch `dev/jianwen-2` `4ce9596e`) | `cb3d05437c` (the public goal of `4a2359b44b`) | 2026-10-22 | the wire_splicing family: `source/topogym/tasks/wire_splicing/`, `source/topogym/assets/geometry/wire_splicing.py`, its registry / variation / profile / goal-text entries, the two opt-in grasp options and the weld work guard (`world/mujoco/grasp.py`, `utils/grasp.py`), its appearance axis, the tooling's task entry, its packages and references, tests: "1.3.0" below |
 
 ## External inputs (pinned)
 
@@ -211,3 +212,28 @@ prepared by Jianwen as a three-way, per-file merge of TopoGym's development line
 - **Not carried from his branch:** his runner and results writer (this repository's per-trial runner), his task dirs,
   his images and his 1.2.0 version labels; his handover notes stay outside the repository (the colour table is in
   `docs/simulator/seeds/`).
+
+## 1.3.0: wire_splicing (experimental)
+
+1.3.0 adds the wire_splicing family, prepared by Jianwen as a port of TopoGym's `jianwen/wire-splicing` `cb3d05437c`
+(the 25 commits since its merge base with TopoGym's main line, `a35961e06a`): the family's own files whole, the shared
+files as hunks merged three-way onto 1.2.1's tree, both sides kept where they met (13 regions). His six commits are
+carried as he wrote them (`dev/jianwen-2` `4ce9596e`, on 1.2.1 `bcca8557`), onto the cutoff-exception change
+`686ec7fd`; the last removes the needle meter the first ones had added (it never decided success) and makes the bending
+post's rod yellow at every seed.
+
+- **Shared code, opt-in only:** `MultiRopeGraspAssistConfig` gains `weld_links_between_pads` and `hold_between_pads`
+  (default off; only wire_splicing's grasp configuration builds this class), and the MuJoCo grasp backend gains the
+  weld work guard, read from the frozen scene's profile (`weld_work_guard_j`; no released instance's profile has it,
+  so it is off for them). The registry, variation records, goal texts, appearance axes, scene profiles and the
+  tooling's task table gain wire_splicing's entries; no existing entry changes. SOURCE.json `4d2cba21…` (454 files);
+  tooling v22 (`rcb_topogym.py` `412cbe02…`).
+- **Instances:** the 110 bases of 1.2.0 with their seeds are bound into the 1.3.0 image byte for byte (the 1.2.0 image's
+  tree, every file checked against `assets.json`); wire-splicing-01-i01 is made in the 1.3.0 image without instances
+  (birth `3f36d852dfc7bc65`, its reference's) and its seeds 1 and 2 derived there (births `1436195a04dd4ed0`,
+  `1a2d05fc89ef3277`, as Jianwen's). Not in the HF dataset yet (with the 1.2.0 seeds, one revision with the owner's
+  approval).
+- **Changed against his branch:** the wire texts' tool-frame distance (6 cm, the instance's; the template's 15 cm had
+  been kept); the base's release record in `experimental_bases` (grasp rules as its texts state them); the wire's
+  standard reference recorded in `tools/release/standard_speed_rule.json`; `privileged.s1/s2.npz` rewritten by
+  `release_rebuild.py` (the same entries and bytes inside, another zip container).
