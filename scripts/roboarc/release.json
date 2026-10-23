@@ -6436,14 +6436,27 @@
    "creation_source": "4d2cba21",
    "evidence": {
     "privileged": {
-     "status": "not_run",
-     "trajectory_sha256": "3a547a8849503c21fdf12e6af8986342bf71410de149ab16c422daf5425dc197"
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-23",
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle (scripts/roboarc/harbor_check.py)",
+     "trajectory_sha256": "3a547a8849503c21fdf12e6af8986342bf71410de149ab16c422daf5425dc197",
+     "end_state": "48f312d445aec62b"
     },
     "standard": {
-     "status": "not_run",
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-23",
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle (scripts/roboarc/harbor_check.py)",
      "trajectory_sha256": "17e63980c2ff3c3666606b5c46842deec014ed006f10425505839c287ae39256",
      "speed_rule": "the privileged reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 785 rows (190 runs); each run is re-timed inside a window of nearby rows of that arm: the arm follows the same joint path at an even speed within the rule and arrives at the window's last row on time; no row is added, every other row and every gripper entry is unchanged (scripts/roboarc/oracles/wire-splicing-01-i01/standard.npz, meta speed_rule; the privileged reference is unchanged).",
-     "end_state": "PENDING"
+     "end_state": "164567f6effde5b0"
     }
    },
    "family": "wire_splicing",
@@ -6452,8 +6465,9 @@
    "physics_engine": "mujoco",
    "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
    "nop": {
-    "status": "not_run",
-    "date": "2026-10-22"
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-23"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "wire_splicing_eye_wrap",
@@ -6466,8 +6480,20 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): wire_a: 63 spheres of radii 26.1 mm, 5.1 mm; wire_b: 97 spheres of radii 25.1 mm, 5.5 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically."
    },
    "experimental": true,
-   "note": "experimental base (owner, 2026-10-22: out of tasks/ in 1.3.0 until the owner has reviewed its demo; agent time 21600 s by the owner's exception, scripts/task_conventions.py CUTOFF_EXCEPTIONS). Development record: experimental variation, no tier; reference oracles/wire-splicing-01-i01 (14882 rows, final state 3179cfc8782b2c1b, birth fd915e74b8efcc8b); ported from TopoGym jianwen/wire-splicing cb3d05437c (2026-10-22); the acceptance round (criteria v2.13b) is still to run",
-   "released": false
+   "note": "experimental base (owner, 2026-10-22: out of tasks/ in 1.3.0 until the owner has reviewed its demo; agent time 21600 s by the owner's exception, scripts/task_conventions.py CUTOFF_EXCEPTIONS). Development record: experimental variation, no tier; reference oracles/wire-splicing-01-i01 (14882 rows, final state 48f312d445aec62b, birth 3f36d852dfc7bc65: the scene without the needle meter and with the yellow rod, 2026-10-22; the rows are the ones recorded on the earlier scene, re-stamped); ported from TopoGym jianwen/wire-splicing cb3d05437c (2026-10-22); the acceptance round (criteria v2.13b) is still to run",
+   "released": false,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-23",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-23",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
   }
  },
  "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
