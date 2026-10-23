@@ -3,7 +3,7 @@ artifacts = ["/app/output/"]
 
 [task]
 name = "roboarc/roboarc-wire-splicing-01-i01-privileged"
-description = "RoboARC wire_splicing (ALOHA 2, MuJoCo): produce one replayable trajectory. Splice the red and the blue wire: bend the red wire's bare end into an eye round the rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go. Frozen scene instance (variation wire_splicing_eye_wrap, seed 0)."
+description = "RoboARC wire_splicing (ALOHA 2, MuJoCo): produce one replayable trajectory. Splice the red and the blue wire: bend the red wire's bare end into an eye round the yellow rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go. Frozen scene instance (variation wire_splicing_eye_wrap, seed 0)."
 authors = [{ name = "Jianwen Lyu" }]
 keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "trajectory", "wire_splicing"]
 

@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · wire_splicing — frozen instance
 
 You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
-**Task:** Splice the red and the blue wire: bend the red wire's bare end into an eye round the rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go.
+**Task:** Splice the red and the blue wire: bend the red wire's bare end into an eye round the yellow rod of the bending post, thread the blue wire's bare end through the eye, wind the blue wire's bare tail round the red wire's doubled end at least 1.5 turns, at least 1 full turn of them round both strands of the doubled end together, fold the red wire's leftover end back over the coil, then let go.
 
 ## Success requirements
 
@@ -12,7 +12,6 @@ You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw
 - The coil is tight: its points lie on average at most 7.1 mm (2 core diameters) from the axis.
 - The red wire's leftover end is folded back: the direction from its fourth-last to its last point points back toward the eye (its dot product with the axis, which runs from the eye toward the strip, is at most -0.5), and its tip is at least 4.3 mm (1.2 core diameters) from the axis.
 - Let go: no hand holds a wire. The blue wire's turns may drop by at most 0.25 and the threading may not change while the conditions are held, and the splice must be still: every bare point's speed relative to the bare points' mean motion at most 5 mm/s.
-- The needle meter on the panel by the terminals displays this splice: no reading unless the eye is closed, the blue wire threads it once and the coil lies on the bare core; otherwise the equivalent resistance 10 mOhm divided by the coil's turns round both strands, on a logarithmic dial from 100 to 1 mOhm. Its needle enters the red band (10 mOhm or less) only when every condition above but the stillness and the release holds. It is a display of these conditions, not a further one.
 - Keep all final conditions satisfied together for at least 2 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.
 
 ## Task failure conditions
@@ -29,7 +28,7 @@ You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw
 - Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): wire_a: 63 spheres of radii 26.1 mm, 5.1 mm; wire_b: 97 spheres of radii 25.1 mm, 5.5 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.
 - A failure is reported in `s.status()["episode_end"]` as "A task body fell below the table" or "forced_breakdown: <what>" (<what>: the readable reason); `s.safety()` reports forcing, contact depths, volume ratios and table-guard stops against these limits, and `s.status()["review"]` the deep task contacts that would hold a success for review.
 
-The scene objects are the task's entities (`s.objects()`: `wire_a` (red) and `wire_b` (blue), each fixed at its terminal, `jig` (fixed: the bending post), `meter` (fixed: the needle meter by the terminals, a display that takes no contact)). The meter's reading (conducting, resistance, turns, in the red band) is `s.env._world.read_state()["mechanism"]`.
+The scene objects are the task's entities (`s.objects()`: `wire_a` (red) and `wire_b` (blue), each fixed at its terminal, and `jig` (fixed: the bending post with its yellow rod)).
 Implementation reference: `WireSplicingEyeWrapTask.evaluate_transition` (module `topogym.tasks.wire_splicing.common`, class `WireSplicingTask`).
 This is a partial implementation excerpt; delegated helpers, passage history and the shared release/confirmation
 checks also apply. The complete public goal requirements are stated above.
@@ -56,8 +55,6 @@ checks also apply. The complete public goal requirements are stated above.
             reference = None
         checks["held"] = held
         metrics = {k: v for k, v in m.items()}
-        if state.get("mechanism") is not None:      # the splice meter's reading of this tick (display only)
-            metrics["meter"] = dict(state["mechanism"])
         metrics.update(checks=checks, splice_speed_m_s=speed, evaluation_status="available",
                        goal_evaluation_complete=self.goal_complete)
         return bool(now and held), None, metrics, dict(hold_reference=reference)
@@ -130,7 +127,7 @@ CLI equivalent of the grader:
   {{ROW_CAP}} rows ({{ROW_CAP_MIN}} min of simulated time): the verifier has to replay it twice within its own time limit, so `s.step` stops
   after that many control steps since the last reset, and a longer trajectory is rejected as invalid (reward 0). The time limit
   (`## Time limit`) is your only budget. One control step takes about 0.5 s of wall clock here, so budget your experiments.
-- Grippers: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a wire (wire_a, wire_b) once both fingers touch it inside its links' grasp regions, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s: of each wire it touches, the touched link nearest the tool frame and every other link whose centre lies between the two pads then follow the gripper rigidly. Both fingers on the wires with every contact between the pads also holds, the same way (the red wire's two legs side by side, one pad on each; the eye's two sides with the blue wire beside them). Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, a held link drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull with more than 60 N averaged over 20 ms, or a weld has fed more than 0.1 J of work into the wire) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held wire is pulled hard against the other hand or a fixture. The jig and the meter are fixed; the grippers start empty and nearly closed: open a gripper, then close it on a wire to take hold.
+- Grippers: assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a wire (wire_a, wire_b) once both fingers touch it inside its links' grasp regions, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s: of each wire it touches, the touched link nearest the tool frame and every other link whose centre lies between the two pads then follow the gripper rigidly. Both fingers on the wires with every contact between the pads also holds, the same way (the red wire's two legs side by side, one pad on each; the eye's two sides with the blue wire beside them). Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, a held link drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull with more than 60 N averaged over 20 ms, or a weld has fed more than 0.1 J of work into the wire) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held wire is pulled hard against the other hand or a fixture. The jig is fixed; the grippers start empty and nearly closed: open a gripper, then close it on a wire to take hold.
 - Tool frame (TCP, the ee pose and IK frame): a fixed point near the closed finger pads; approach axis (hand -> fingertips) = local [1.0, 0.0, -0.023], finger-closing axis = local [0.0, 1.0, 0.004]. The ee_pose action, the proprio tcp pose and the IK use this frame.
   `p["top_down_quat"](yaw)` builds a vertical approach whose fingers close along `yaw`; `p["gripper_quat"](yaw, approach)` any other.
 - The task succeeds once its predicate has held continuously for 0.5 s; that, or one of its failure predicates,

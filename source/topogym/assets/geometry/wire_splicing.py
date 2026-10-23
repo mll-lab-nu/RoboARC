@@ -16,8 +16,9 @@ apart on the same wire collide. The lay: a planar curve integrated from the term
 insulated part; the bare part straight), 1.5 mm above the insulation's resting height; the task settles it under
 gravity before the birth (reset_physics_steps).
 
-Entities: wire_a (A's terminal, a static body, and A's chain), wire_b (the same for B), jig (static: the bending post),
-meter (the splice meter, visual only: meter_xml).
+Entities: wire_a (A's terminal, a static body, and A's chain), wire_b (the same for B), jig (static: the bending post).
+No splice meter (removed 2026-10-22, user decision: a visual-only meter by the terminals, which the red wire passed
+through when lifted).
 Frames: the mount frame is the ALOHA's (table top z = 0, x toward the right arm, y away from the cameras, z up). The
 design's coordinates (its "scene frame") are the mount frame minus PLACE (v6_armsim.PLACE: the scene sits at
 (-0.05, +0.10) m on the mount).
@@ -28,7 +29,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-ENTITIES = ("wire_a", "wire_b", "jig", "meter")
+ENTITIES = ("wire_a", "wire_b", "jig")
 WIRE_OF = {"wire_a": "A", "wire_b": "B"}            # entity -> the design's wire letter (body names A_000, B_000, ...)
 PLACE = np.array([-.05, .10, 0.])                   # design scene frame -> mount frame
 
@@ -63,19 +64,9 @@ WIRES = dict(
            rgba=(.13, .30, .78, 1.)),
 )
 RGBA_CU, RGBA_SEAM = (.85, .52, .28, 1.), (.45, .25, .12, 1.)
-# The splice meter (user decision 2026-10-19; meter_xml): its reading is a documented model, the splice's equivalent
-# resistance computed from its configuration, R = R_TURN_MOHM / n, n the coil's turns round both of A's strands (no
-# path: no reading), on a logarithmic dial from DIAL_MOHM[0] to DIAL_MOHM[1]; the red band from R_TURN_MOHM / BAND_TURNS
-# (the success criterion's turns round both strands: one, user decision 2026-10-22; 10 mOhm, the dial's middle).
-# Mount frame: the dial's centre between wire A's terminal and the bending post, 2 cm in front of the terminals' faces
-# (clear of both wires' lay by 2 cm or more; 11 px left of the post in cam_high), low (its case's top 9.6 cm above the
-# table, inside cam_high's top edge), its face turned up 60 deg toward cam_high, which sees it from about 38 deg above
-# the table, 1.1 m away; 0.49 m from the left arm's base, the arms work in front of the post.
-R_TURN_MOHM = 10.
-DIAL_MOHM = (100., 1.)
-BAND_TURNS = 1.
-METER = dict(x=-.16, y=.48, z=.06, face_elevation_deg=60., r=.055, case_half=(.068, .07, .015), sweep_deg=120.,
-             rest_u=-.05, needle=.048, needle_half_width=.0025)
+# The bending post's rod: yellow at every seed (user decision 2026-10-22). In cam_high the rod points at the camera in
+# front of the post; grey like the post, the eye sliding off its free end read as a wire passing through the post.
+RGBA_ROD = (.95, .76, .10, 1.)
 
 
 def _v(values) -> str:
@@ -213,8 +204,8 @@ def wire_xml(entity: str) -> str:
 
 
 def jig_xml() -> str:
-    """The bending post (v5_model.jig_xml): a base plate, a vertical post and the rod along -y (friction 0.1). The rod
-    has contact priority 1, so its friction 0.1 is the one its contacts with the wires use (MuJoCo otherwise takes the
+    """The bending post (v5_model.jig_xml): a base plate, a vertical post and the yellow rod along -y (friction 0.1). The
+    rod has contact priority 1, so its friction 0.1 is the one its contacts with the wires use (MuJoCo otherwise takes the
     larger of the two geoms' frictions, the wires' 0.5; both carry the same solref / solimp). At 0.5 the bight closed
     round the rod gripped it and the eye could not be slid off its free end (the design's runs, README_v6)."""
     j = JIG
@@ -225,7 +216,7 @@ def jig_xml() -> str:
     out += _box((x, ys, .004), (.020, .015, .004), (.35, .35, .38, 1.), collide=True)
     for name, a, b, r, rgba, friction in (
             ("post", (x, ys, 0.), (x, ys, j["z"] + .006), .005, (.45, .45, .48, 1.), None),
-            ("rod", (x, ys, j["z"]), (x, y1, j["z"]), j["r"], (.75, .76, .78, 1.), .1)):
+            ("rod", (x, ys, j["z"]), (x, y1, j["z"]), j["r"], RGBA_ROD, .1)):
         shape = f'type="cylinder" fromto="{_v([*a, *b])}" size="{_v(r)}"'
         fr = f' friction="{_v([friction, .005, .0001])}" priority="1"' if friction is not None else ""
         out.append(f'<geom name="{name}" {shape} group="3"{fr}/>')
@@ -234,135 +225,33 @@ def jig_xml() -> str:
     return "\n".join(out)
 
 
-def dial_position(R_mohm) -> float:
-    """Where a resistance sits on the dial, 0 at its 100 mOhm end, 1 at its 1 mOhm end (logarithmic); None (no path) is
-    the rest stop. Not clamped."""
-    if R_mohm is None:
-        return METER["rest_u"]
-    hi, lo = DIAL_MOHM
-    return float(np.log10(hi / R_mohm) / np.log10(hi / lo))
-
-
-def dial_angle(u) -> float:
-    """The needle's angle (rad, counter-clockwise seen from the front, from the dial's up) at dial position u."""
-    sweep = np.radians(METER["sweep_deg"])
-    return float(sweep / 2 - sweep * u)
-
-
-def needle_q(u) -> float:
-    """The needle hinge's position at dial position u: 0 at the rest stop (the scene's qpos0)."""
-    return dial_angle(u) - dial_angle(METER["rest_u"])
-
-
-def meter_xml(panel=None) -> str:
-    """The splice meter (user decision 2026-10-19): a needle meter in a case on the table by the terminals (METER), its
-    dial turned toward cam_high. Every geom is visual (contype 0); all but the case have no mass, so the MuJoCo scene
-    drops them (Nyx draws them on their bodies); it keeps the case, colliding with nothing, for the entity's bounds. The
-    case is on the static body "panel"; the needle is the body "needle" on the hinge "needle" (axis: the dial's normal;
-    0 at the rest stop), with a light inertia whose centre lies on the hinge axis, so the task's mechanism can set it
-    every tick without moving any mass. The scale: logarithmic from 100 mOhm (left) to 1 mOhm (right) over sweep_deg,
-    decade ticks long, the others short; the red band from R_TURN_MOHM / BAND_TURNS to 1 mOhm; the rest stop a pin just
-    left of the 100 mOhm end. panel: an rgba for the case (an appearance seed's PANEL_FINISHES), drawn by a visual-only
-    box 0.3 mm over it; None keeps the recorded look (the case's own grey, no cover)."""
-    c = METER
-    beta = np.radians(90. - c["face_elevation_deg"])
-    Rd = Rotation.from_euler("x", beta)
-    centre = np.array([0., 0., c["z"]])
-    on_dial = lambda p: centre + Rd.apply(p)                                     # noqa: E731
-    qd = _wxyz(Rd.as_matrix())
-
-    def visual(kind, pos, size, rgba, quat=qd):
-        return (f'<geom type="{kind}" pos="{_v(pos)}" quat="{_v(quat)}" size="{_v(size)}" rgba="{_v(rgba)}" '
-                f'contype="0" conaffinity="0" mass="0" group="1"/>')
-
-    def radial_box(phi, r0, r1, half_width, z, rgba):
-        """A box on the dial from radius r0 to r1 along the direction phi (from the dial's up, counter-clockwise)."""
-        q = _wxyz((Rd * Rotation.from_euler("z", phi)).as_matrix())
-        return visual("box", on_dial([-np.sin(phi) * (r0 + r1) / 2, np.cos(phi) * (r0 + r1) / 2, z]),
-                      [half_width, (r1 - r0) / 2, .0002], rgba, q)
-
-    r, half = c["r"], c["case_half"]
-    # the case: a box behind the dial, as an inline mesh of its corners (MuJoCo builds their hull) without mass="0", so
-    # the MuJoCo scene keeps it (still colliding with nothing, on a static body) and the entity has bounds
-    corners = [on_dial(np.array([sx * half[0], half[1] - r - .01 + sy * half[1], -half[2] - .001 + sz * half[2]]))
-               for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
-    head = _header("meter")
-    out = head[:-1] + ['  <asset>', f'    <mesh name="case" vertex="{_v(np.ravel(corners))}"/>', '  </asset>', head[-1]]
-    out.append(f'<body name="panel" pos="{_v([c["x"], c["y"], 0.])}">')
-    out.append('<geom type="mesh" mesh="case" rgba=".22 .23 .25 1" contype="0" conaffinity="0" group="1"/>')
-    if panel is not None:
-        out.append(visual("box", on_dial([0., half[1] - r - .01, -half[2] - .001]), [h + .0003 for h in half], panel))
-    out.append(visual("cylinder", on_dial([0., 0., .0005]), [r, .0005], (.96, .96, .93, 1.)))                 # the dial
-    # the red band, in arcs of at most 2 deg
-    u0 = dial_position(R_TURN_MOHM / BAND_TURNS)
-    a0, a1 = dial_angle(u0), dial_angle(1.)
-    n = int(np.ceil(np.degrees(abs(a1 - a0)) / 2.))
-    rb0, rb1 = .64 * r, .97 * r
-    for k in range(n):
-        phi = a0 + (a1 - a0) * (k + .5) / n
-        half_w = (rb1 * np.tan(abs(a1 - a0) / n / 2) + .0004)
-        out.append(radial_box(phi, rb0, rb1, half_w, .0012, (.86, .08, .07, 1.)))
-    # the ticks: every 1-9 x 10^k mOhm, the decades long and wide
-    hi, lo = DIAL_MOHM
-    values = sorted({float(m * 10. ** e) for e in range(int(np.log10(lo)), int(np.log10(hi)) + 1) for m in range(1, 10)
-                     if lo - 1e-9 <= m * 10. ** e <= hi + 1e-9})
-    for value in values:
-        decade = abs(np.log10(value) - round(np.log10(value))) < 1e-9
-        phi = dial_angle(dial_position(value))
-        out.append(radial_box(phi, (.72 if decade else .84) * r, .97 * r, .0016 if decade else .0008, .0018,
-                              (.05, .05, .05, 1.)))
-    phi = dial_angle(c["rest_u"]) + np.radians(4.)                        # the rest stop: a pin
-    out.append(visual("cylinder", on_dial([-np.sin(phi) * .8 * r, np.cos(phi) * .8 * r, .003]), [.0025, .003],
-                      (.30, .30, .32, 1.)))
-    # the needle, at the rest stop at q = 0
-    qn = _wxyz((Rd * Rotation.from_euler("z", dial_angle(c["rest_u"]))).as_matrix())
-    length = c["needle"]
-    out.append(f'<body name="needle" pos="{_v(on_dial([0., 0., .004]))}" quat="{_v(qn)}">')
-    out.append('  <joint name="needle" type="hinge" axis="0 0 1"/>')
-    out.append(f'  <inertial pos="0 0 0" mass=".001" diaginertia="{_v([4e-7, 1e-8, 4e-7])}"/>')
-    out.append('  ' + visual("box", [0., (length - .012) / 2, 0.], [c["needle_half_width"], (length + .012) / 2, .0006],
-                             (.04, .04, .04, 1.), quat=(1., 0., 0., 0.)))
-    out.append('  ' + visual("cylinder", [0., 0., .001], [.006, .002], (.15, .15, .16, 1.), quat=(1., 0., 0., 0.)))
-    out += ['</body>', '</body>', '  </worldbody>', '</mujoco>', '']
-    return "\n".join(out)
-
-
 # Appearance seeds (user decision 2026-10-22: a colour axis, scene_variation AXES["wire_splicing"]; the task's
-# terminal_finish, post_finish, meter_finish, core_finish): visual geoms only, re-coloured by look_colours(). The texts
-# name the wires red (A) and blue (B) and the meter's red band: the insulation, the dial, its red band, ticks and the
-# black needle keep their colours. The first entry of each table is the recorded look (seed 0).
+# terminal_finish, post_finish, core_finish): visual geoms only, re-coloured by look_colours(). The texts name the wires
+# red (A) and blue (B) and the post's yellow rod: the insulation and the rod keep their colours. The first entry of each
+# table is the recorded look (seed 0).
 TERMINAL_FINISHES = dict(white=((.93, .93, .90, 1.),), black=((.14, .14, .15, 1.),), grey=((.55, .57, .60, 1.),))
-POST_FINISHES = dict(       # the base plate, the post, the rod
-    steel=((.35, .35, .38, 1.), (.45, .45, .48, 1.), (.75, .76, .78, 1.)),
-    green=((.14, .30, .18, 1.), (.18, .38, .23, 1.), (.32, .58, .38, 1.)),
-    black=((.09, .09, .10, 1.), (.12, .12, .13, 1.), (.22, .22, .24, 1.)))
-# the meter's dial face (light, so the black ticks, the red band and the black needle read)
-METER_FINISHES = dict(ivory=((.96, .96, .93, 1.),), cream=((.95, .89, .74, 1.),), pale_grey=((.83, .85, .87, 1.),))
+POST_FINISHES = dict(       # the base plate, the post
+    steel=((.35, .35, .38, 1.), (.45, .45, .48, 1.)),
+    green=((.14, .30, .18, 1.), (.18, .38, .23, 1.)),
+    black=((.09, .09, .10, 1.), (.12, .12, .13, 1.)))
 CORE_FINISHES = dict(copper=(RGBA_CU, RGBA_SEAM), tinned=((.74, .75, .77, 1.), (.42, .43, .46, 1.)))
 CORE_CHOICES = dict(copper=("copper", "copper"), b_tinned=("copper", "tinned"), a_tinned=("tinned", "copper"))
-# the meter's panel, its largest part in cam_high (user decision 2026-10-22: seeds told apart at a glance). The case
-# carries the panel's mass, so its geom is part of the physics scene and keeps its dark grey; another finish is a
-# visual-only cover box over it (meter_xml's panel). Neither red nor blue, so the wires stay the red and the blue one.
-PANEL_FINISHES = dict(dark=None, yellow=(.93, .74, .12, 1.), green=(.16, .55, .26, 1.))
 
 
-def look_colours(name, terminal="white", post="steel", meter="ivory", core="copper") -> dict:
+def look_colours(name, terminal="white", post="steel", core="copper") -> dict:
     """{a default colour as the entity's MJCF writes it: its colour in these finishes} for the entity named (entity_xml's
     look). core: which wire's bare core is tinned, if any (CORE_CHOICES), so the two cores also tell apart up close."""
     def pairs(table, finish):
         return {_v(a): _v(b) for a, b in zip(next(iter(table.values())), table[finish])}
     if name == "jig":
         return pairs(POST_FINISHES, post)
-    if name == "meter":
-        return pairs(METER_FINISHES, meter)
     wire = WIRE_OF[name]
     return {**pairs(TERMINAL_FINISHES, terminal), **pairs(CORE_FINISHES, CORE_CHOICES[core]["AB".index(wire)])}
 
 
-def entity_xml(name: str, look=None, panel="dark") -> str:
-    """The entity's MJCF; look: look_colours() (None: the recorded look), applied to visual geoms (contype 0) only;
-    panel: the meter's PANEL_FINISHES entry."""
-    xml = jig_xml() if name == "jig" else meter_xml(PANEL_FINISHES[panel]) if name == "meter" else wire_xml(name)
+def entity_xml(name: str, look=None) -> str:
+    """The entity's MJCF; look: look_colours() (None: the recorded look), applied to visual geoms (contype 0) only."""
+    xml = jig_xml() if name == "jig" else wire_xml(name)
     if not look:
         return xml
 

@@ -256,13 +256,11 @@ TASKS: dict[str, dict] = {
     # resting height and settle for 1.5 s (600 ticks) at every build, as the design's start state (v5_lay.py).
     "wire_splicing": dict(
         task_id="wire_splicing", robot="aloha",
-        text="Splice the red and the blue wire: bend the red wire's bare end into a small eye round the rod of the bending "
-             "post, thread the blue wire's bare end through the eye, turn the wires so that their insulated parts point "
-             "away from each other, wind the blue wire's bare tail tightly round the red wire's doubled end one and a "
-             "half turns, at least one full turn of it round both strands of the doubled end together, fold the red "
-             "wire's leftover end back over the coil, then let go and leave the splice still. "
-             "The needle meter on the panel by the terminals reads this splice: its needle stays in the red band only "
-             "when the splice is complete.",
+        text="Splice the red and the blue wire: bend the red wire's bare end into a small eye round the yellow rod of the "
+             "bending post, thread the blue wire's bare end through the eye, turn the wires so that their insulated parts "
+             "point away from each other, wind the blue wire's bare tail tightly round the red wire's doubled end one and "
+             "a half turns, at least one full turn of it round both strands of the doubled end together, fold the red "
+             "wire's leftover end back over the coil, then let go and leave the splice still.",
         instances=[dict(variation_id="wire_splicing_eye_wrap", seed=0)], grasp_assist="recommended",
         simulator=dict(reset_physics_steps=600)),
     "blanket_flatten": dict(

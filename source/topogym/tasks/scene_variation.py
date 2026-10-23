@@ -155,14 +155,11 @@ AXES = {
         dict(path="screw_finish", kind="choice", values=["gilt", "steel"], visual=True),
     ),
     "wire_splicing": (
-        # The texts name the wires red (A) and blue (B) and the meter's red band: the insulation, the dial, its band and
-        # the needle stay; one wire's bare core turns tinned at a time, so the two cores also tell apart up close; the
-        # meter's panel, the largest of them in cam_high, turns yellow or green (a visual cover over its case).
+        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; one
+        # wire's bare core turns tinned at a time, so the two cores also tell apart up close.
         dict(path="terminal_finish", kind="choice", values=["white", "black", "grey"], visual=True),
         dict(path="post_finish", kind="choice", values=["steel", "green", "black"], visual=True),
-        dict(path="meter_finish", kind="choice", values=["ivory", "cream", "pale_grey"], visual=True),
         dict(path="core_finish", kind="choice", values=["copper", "b_tinned", "a_tinned"], visual=True),
-        dict(path="panel_finish", kind="choice", values=["dark", "yellow", "green"], visual=True),
     ),
     "battery_replacement": (
         dict(path="controller_finish", kind="choice", values=["white", "red", "blue"], visual=True),
