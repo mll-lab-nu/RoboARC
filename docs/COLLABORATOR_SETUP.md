@@ -1,6 +1,6 @@
 # Running RoboARC: setup for a collaborator
 
-RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, and the evaluation run itself. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
+RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
 
 ## 1. Machine
 
@@ -102,6 +102,8 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   `python3 scripts/task_seed.py assign tasks/roboarc-interlocked-claws-01-i01-privileged --batch <batch name> --trials 3`
   prints three different seeds (0, 1 and 2, in an order fixed by the batch name).
 - If it fails, send us `jobs/smoke/` (the runner redacts keys after each job) and the agent and provider you used.
+- Then send the smoke batch back as section 6 describes, with the smoke's `JOBS` and `RESULTS`. It checks your token and
+  the upload before the full run.
 - Give the full run a batch name of its own: the smoke trials are not part of it.
 
 ## 5. The evaluation run
@@ -123,8 +125,51 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
 - **Budget:** each trial gives the agent up to 3 h; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
   its results are ranked as a group of their own). Use one API key per batch, with a spending cap.
 - **Live view:** `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1. Keep it local: it shows unredacted output.
+- **When it has finished:** send it back (section 6).
 - **Everything else:** `docs/RUNNING.md` has the agent options, network rules, re-grading and the result files.
 
-## 6. Questions
+## 6. Sending the results back
 
-Send setup questions and failing job folders to Jianwen Lyu (GitHub LUIGIVAMPER). Ask Qineng Wang how to send the evaluation results back.
+`scripts/send_results.sh` packs one batch and uploads it to our private Hugging Face dataset
+`eai-v2-internal/helper-uploads`. Once per host:
+
+```bash
+pip install -U huggingface_hub      # the hf CLI
+( umask 077; cat > ~/.roboarc_hf_token )   # paste the write token we sent you, press Enter, then Ctrl-D
+```
+
+The token stays in that file, not in `.env` and not in your shell history. The script reads it only for the upload, so
+it never reaches a container or the bundle.
+
+When the batch has finished, run this from the checkout, as the user that ran the batch, with the batch's own `JOBS`,
+`RESULTS` and `ENV_FILE`:
+
+```bash
+JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo ENV_FILE=$PWD/.env \
+  NOTES="<one line: crashes, OOM kills, outages, reruns; or none>" \
+  scripts/send_results.sh <batch name> <your name, lowercase>
+```
+
+- **Secret scan first.** The batch's job folders are redacted against the keys in `ENV_FILE`, then scanned again. If
+  any key is left, nothing is sent. If the batch ran with `CODEX_FORCE_AUTH_JSON=1`, set it and `CODEX_AUTH_JSON_PATH`
+  as for the batch, so the scan also looks for that login.
+- **What goes up**, to `helper-uploads/roboarc/helpers/<your name>/<batch>/<bundle id>/`:
+  ```
+  MANIFEST.md     the checkout's commit, the host, its GPUs, the image digests, the runner's settings, the trial
+                  counts (no credentials)
+  index.json      per job: its archive, size and sha256, task, mode, trial, seed, and each trial's reward
+  SHA256SUMS      every archive's sha256
+  INVENTORY.tsv   every file in the archives, with its sha256
+  batch.tar.gz    <batch>.log, <batch>.summary.md, the plan, <RESULTS>/<batch>/
+  jobs/<job>.tar.gz   one per job folder (<batch>-<mode>-<task>-t<k>), with its seed record
+  ```
+  The bundle id is the UTC time, so a later delivery never overwrites an earlier one.
+- **Dry run.** `DRY_RUN=1` does every step but the upload and needs no token. The bundle stays in
+  `../send/<batch>__<name>__<bundle id>/` for you to look at.
+- **When it ends:** the script prints the batch, the bundle id and the sha256 of `SHA256SUMS`. Send us those three.
+- **If the upload fails** (the token is refused, or the dataset is not found), nothing is lost. Tell us, and run the
+  same command again once it is fixed.
+
+## 7. Questions
+
+Send setup questions and failing job folders to Jianwen Lyu (GitHub LUIGIVAMPER).
