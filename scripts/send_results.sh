@@ -15,21 +15,25 @@
 #      with its local id and digests, the runner's settings line (agent, model, effort, run id, modes, usage gateway; no
 #      credentials), trials planned / with a verdict, the seeds;
 #   4. hf upload of the bundle (MANIFEST.md, index.json, SHA256SUMS, INVENTORY.tsv, batch.tar.gz, jobs/) into
-#      <dataset>/roboarc/helpers/<name>/<batch>/<bundle id>/. A later delivery gets a new bundle id and never overwrites
+#      <dataset>/<name>/<batch>/<bundle id>/, as one commit, or with CREATE_PR=1 as a pull request the maintainers merge
+#      (for an account without write access to the dataset). A later delivery gets a new bundle id and never overwrites
 #      an earlier one. scripts/receive_results.sh is the maintainers' side.
 # Env (defaults): JOBS (<repo>/jobs/agents, as run_agent_batch.sh), RESULTS (<repo>/../rcb_results), ENV_FILE (<repo>/.env,
 #   the file the batch used), CODEX_FORCE_AUTH_JSON / CODEX_AUTH_JSON_PATH (as for the batch), HF_TOKEN_FILE
-#   (~/.roboarc_hf_token, a write token of your own account), HF_DATASET (eai-v2-internal/helper-uploads), OUT (<repo>/../send),
-#   NOTES (one line for MANIFEST.md: crashes, OOM kills, outages, reruns), DRY_RUN=1 (everything but the upload).
+#   (~/.roboarc_hf_token, a write token of your own account), HF_DATASET (eai-v2-internal/roboarc-separate-results, public),
+#   OUT (<repo>/../send), NOTES (one line for MANIFEST.md: crashes, OOM kills, outages, reruns), CREATE_PR=1 (upload as a
+#   pull request), DRY_RUN=1 (everything but the upload).
 set -euo pipefail
 B=${1:?usage: send_results.sh <batch> <your name>}; H=${2:?usage: send_results.sh <batch> <your name>}
 [[ "$H" =~ ^[a-z0-9_-]+$ ]] || { echo "name: lowercase letters, digits, - and _ only" >&2; exit 2; }
 R=$(cd "$(dirname "$0")/.." && pwd)
 JOBS=$(cd "${JOBS:-$R/jobs/agents}" && pwd); MIRROR=${JOBS}_mirror
 RESULTS=${RESULTS:-$(dirname "$R")/rcb_results}; ENV_FILE=${ENV_FILE:-$R/.env}
-HF_TOKEN_FILE=${HF_TOKEN_FILE:-$HOME/.roboarc_hf_token}; HF_DATASET=${HF_DATASET:-eai-v2-internal/helper-uploads}
+HF_TOKEN_FILE=${HF_TOKEN_FILE:-$HOME/.roboarc_hf_token}; HF_DATASET=${HF_DATASET:-eai-v2-internal/roboarc-separate-results}
 ID=$(date -u +%Y%m%dT%H%MZ); NAME=${B}__${H}__${ID}
-OUT=${OUT:-$(dirname "$R")/send}/$NAME; mkdir -p "$OUT"
+OUT=${OUT:-$(dirname "$R")/send}/$NAME
+[ ! -e "$OUT" ] || { echo "$OUT exists (a run within the same minute): run again in a minute" >&2; exit 2; }
+mkdir -p "$OUT"
 ls -d "$JOBS/$B"-*/ >/dev/null 2>&1 || { echo "no jobs $JOBS/$B-*" >&2; exit 2; }
 [ "${DRY_RUN:-0}" = 1 ] || [ -s "$HF_TOKEN_FILE" ] || { echo "no token in $HF_TOKEN_FILE" >&2; exit 2; }
 [ "${DRY_RUN:-0}" = 1 ] || command -v hf >/dev/null || { echo "needs the hf CLI: pip install -U huggingface_hub" >&2; exit 2; }
@@ -146,7 +150,9 @@ echo "notes:      ${NOTES:-none}"
 cat "$OUT/MANIFEST.md"
 
 if [ "${DRY_RUN:-0}" = 1 ]; then echo "== 4. DRY_RUN=1: not uploaded; the bundle is in $OUT"; exit 0; fi
-echo "== 4. upload to $HF_DATASET roboarc/helpers/$H/$B/$ID/"
+PR=(); case "${CREATE_PR:-0}" in 1|true|TRUE|yes) PR=(--create-pr) ;; esac
+echo "== 4. upload to $HF_DATASET $H/$B/$ID/${PR:+ as a pull request}"
 # --private: hf upload creates a missing repo, public unless told otherwise (ignored when the dataset exists)
-HF_TOKEN=$(cat "$HF_TOKEN_FILE") hf upload "$HF_DATASET" "$OUT" "roboarc/helpers/$H/$B/$ID" --repo-type dataset --private
-echo "Sent. Tell the maintainers: batch $B, bundle $ID, SHA256SUMS sha256 $(sha256sum "$OUT/SHA256SUMS" | cut -d' ' -f1)"
+HF_TOKEN=$(cat "$HF_TOKEN_FILE") hf upload "$HF_DATASET" "$OUT" "$H/$B/$ID" --repo-type dataset --private "${PR[@]}" \
+    --commit-message "RoboARC results: $H/$B/$ID" --commit-description "$(sed -n 's/^\(runner\|trials\|notes\): *//p' "$OUT/MANIFEST.md")"
+echo "Sent. Tell the maintainers: batch $B, bundle $ID, SHA256SUMS sha256 $(sha256sum "$OUT/SHA256SUMS" | cut -d' ' -f1)${PR:+, and the pull request link above}"

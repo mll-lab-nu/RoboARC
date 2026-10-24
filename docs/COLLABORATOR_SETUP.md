@@ -130,13 +130,16 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
 
 ## 6. Sending the results back
 
-`scripts/send_results.sh` packs one batch and uploads it to our Hugging Face dataset `eai-v2-internal/helper-uploads`.
-The upload uses your own Hugging Face account:
+`scripts/send_results.sh` packs one batch and uploads it to our Hugging Face dataset
+`eai-v2-internal/roboarc-separate-results`. With `CREATE_PR=1`, as below, the upload is a pull request on the dataset,
+which we merge. Your own Hugging Face account opens it and needs no access to the dataset.
 
-1. Send us your Hugging Face username. We give your account write access to the dataset.
-2. Make a token at https://huggingface.co/settings/tokens. A fine-grained token with write access to that one dataset
-   is enough.
-3. Once per host:
+**The dataset is public: anyone can read what you send.** The secret scan removes the keys in `ENV_FILE`. Everything
+else in the job folders goes up as it is, including paths and host names in the logs.
+
+1. Make a token of the type **Write** at https://huggingface.co/settings/tokens. It can do only what your account can
+   do, and here that is opening the pull request.
+2. Once per host:
    ```bash
    pip install -U huggingface_hub      # the hf CLI
    ( umask 077; cat > ~/.roboarc_hf_token )   # paste your token, press Enter, then Ctrl-D
@@ -149,7 +152,7 @@ When the batch has finished, run this from the checkout, as the user that ran th
 `RESULTS` and `ENV_FILE`:
 
 ```bash
-JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo ENV_FILE=$PWD/.env \
+JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo ENV_FILE=$PWD/.env CREATE_PR=1 \
   NOTES="<one line: crashes, OOM kills, outages, reruns; or none>" \
   scripts/send_results.sh <batch name> <your name, lowercase>
 ```
@@ -157,7 +160,7 @@ JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo ENV_FILE=$PWD/.env \
 - **Secret scan first.** The batch's job folders are redacted against the keys in `ENV_FILE`, then scanned again. If
   any key is left, nothing is sent. If the batch ran with `CODEX_FORCE_AUTH_JSON=1`, set it and `CODEX_AUTH_JSON_PATH`
   as for the batch, so the scan also looks for that login.
-- **What goes up**, to `helper-uploads/roboarc/helpers/<your name>/<batch>/<bundle id>/`:
+- **What goes up**, to `<your name>/<batch>/<bundle id>/` in the dataset:
   ```
   MANIFEST.md     the checkout's commit, the host, its GPUs, the image digests, the runner's settings, the trial
                   counts (no credentials)
@@ -170,9 +173,12 @@ JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo ENV_FILE=$PWD/.env \
   The bundle id is the UTC time, so a later delivery never overwrites an earlier one.
 - **Dry run.** `DRY_RUN=1` does every step but the upload and needs no token. The bundle stays in
   `../send/<batch>__<name>__<bundle id>/` for you to look at.
-- **When it ends:** the script prints the batch, the bundle id and the sha256 of `SHA256SUMS`. Send us those three.
+- **Write access.** If we have given your account write access to the dataset, leave `CREATE_PR=1` out: the bundle
+  then goes in directly, as one commit.
+- **When it ends:** the script prints the batch, the bundle id and the sha256 of `SHA256SUMS`, and `hf` prints the pull
+  request's link. Send us all four.
 - **If the upload fails** (the token is refused, or the dataset is not found), nothing is lost. Tell us, and run the
-  same command again once it is fixed.
+  same command again once it is fixed. A run within the same minute as the last one stops: wait a minute.
 
 ## 7. Questions
 

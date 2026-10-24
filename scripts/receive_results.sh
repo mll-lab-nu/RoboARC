@@ -15,27 +15,30 @@
 # Unpacked: agents/ (Harbor's records: agents/<batch>-<mode>-<task>[-t<k>]/<trial>/, .seeds/, <batch>.log,
 # <batch>.summary.md, .plan/), agents_mirror/ (when the helper's mirror was clean), results/<batch>/ (<task>/<run id>/t<k>/
 # per trial and the task's trials.json), MANIFEST.md, index.json.
-# Needs the hf CLI (pip install -U huggingface_hub) with a token that can read the dataset (hf auth login, or HF_TOKEN).
-# Env (defaults): HF_DATASET (eai-v2-internal/helper-uploads; deliveries under roboarc/helpers/), DEST (~/roboarc_helper_runs),
-#   HF (hf)
+# Needs the hf CLI (pip install -U huggingface_hub); a private dataset also needs a token that can read it (hf auth login,
+# or HF_TOKEN).
+# Env (defaults): HF_DATASET (eai-v2-internal/roboarc-separate-results; deliveries at <name>/<batch>/<bundle id>/), REVISION
+#   (main; refs/pr/<n> reads a delivery sent with CREATE_PR=1 before its pull request is merged), DEST
+#   (~/roboarc_helper_runs), HF (hf)
 set -euo pipefail
-DS=${HF_DATASET:-eai-v2-internal/helper-uploads}; PRE=roboarc/helpers; DEST=${DEST:-$HOME/roboarc_helper_runs}; HF=${HF:-hf}
+DS=${HF_DATASET:-eai-v2-internal/roboarc-separate-results}; REV=${REVISION:-main}; DEST=${DEST:-$HOME/roboarc_helper_runs}
+HF=${HF:-hf}
 if [ $# -eq 0 ]; then
-    "$HF" download "$DS" --repo-type dataset --include "$PRE/*/*/*/MANIFEST.md" --local-dir "$DEST/.manifests" >/dev/null
+    "$HF" download "$DS" --repo-type dataset --revision "$REV" --include "*/*/*/MANIFEST.md" --local-dir "$DEST/.manifests" >/dev/null
     n=0
-    for m in "$DEST/.manifests/$PRE"/*/*/*/MANIFEST.md; do
+    for m in "$DEST/.manifests"/*/*/*/MANIFEST.md; do
         [ -f "$m" ] || continue
         d=${m%/MANIFEST.md}; n=$((n + 1))
-        printf '%s | %s | %s\n' "${d#$DEST/.manifests/$PRE/}" "$(sed -n 's/^trials: *//p' "$m")" "$(sed -n 's/^runner: *//p' "$m")"
+        printf '%s | %s | %s\n' "${d#$DEST/.manifests/}" "$(sed -n 's/^trials: *//p' "$m")" "$(sed -n 's/^runner: *//p' "$m")"
     done
     [ $n -gt 0 ] || echo "no deliveries in $DS"
     exit 0
 fi
 P=${1%/}; shift
 [[ "$P" =~ ^[a-z0-9_-]+/[^/]+/[0-9]{8}T[0-9]{4}Z$ ]] || { echo "usage: receive_results.sh [<name>/<batch>/<bundle id> [--jobs | <job> ...]]" >&2; exit 2; }
-B=${P#*/}; B=${B%/*}; OUT=$DEST/$P; D=$DEST/.download/$PRE/$P
-"$HF" download "$DS" "$PRE/$P/index.json" --repo-type dataset --local-dir "$DEST/.download" >/dev/null \
-    || { echo "no index.json in $PRE/$P of $DS (no such delivery, or one from before per-job archives)" >&2; exit 1; }
+B=${P#*/}; B=${B%/*}; OUT=$DEST/$P; D=$DEST/.download/$P
+"$HF" download "$DS" "$P/index.json" --repo-type dataset --revision "$REV" --local-dir "$DEST/.download" >/dev/null \
+    || { echo "no index.json in $P of $DS at $REV (no such delivery, or one from before per-job archives)" >&2; exit 1; }
 if [ "${1:-}" = --jobs ]; then
     python3 - "$D/index.json" <<'PY'
 import json, sys
@@ -58,8 +61,8 @@ else
         sel+=("jobs/$j.tar.gz")
     done
 fi
-"$HF" download "$DS" $(printf "$PRE/$P/%s " MANIFEST.md SHA256SUMS INVENTORY.tsv "${sel[@]}") --repo-type dataset \
-    --local-dir "$DEST/.download" >/dev/null
+"$HF" download "$DS" $(printf "$P/%s " MANIFEST.md SHA256SUMS INVENTORY.tsv "${sel[@]}") --repo-type dataset \
+    --revision "$REV" --local-dir "$DEST/.download" >/dev/null
 printf '%s\n' "${sel[@]}" > "$D/.selected"
 ( cd "$D" && awk 'NR == FNR {s[$0]; next} substr($0, 67) in s' .selected SHA256SUMS > .selected.sha256 \
   && [ "$(wc -l < .selected.sha256)" -eq ${#sel[@]} ] && sha256sum -c --quiet .selected.sha256 ) \
