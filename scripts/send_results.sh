@@ -2,7 +2,8 @@
 # Send one batch's records to the maintainers' Hugging Face dataset (docs/COLLABORATOR_SETUP.md, section 6).
 #   scripts/send_results.sh <batch> <your name, lowercase>
 # Steps:
-#   1. secret scan (scripts/harbor/scan_secrets.py, the runner's own scanner, with the runner's credentials): the batch's jobs are
+#   1. secret scan (scripts/harbor/scan_secrets.py, the runner's own scanner, with the runner's credentials; the bundle is
+#      scanned once more as a whole before the upload, 3b, since the dataset is public): the batch's jobs are
 #      redacted, then scanned again and must show none; the log mirror is append-only and never redacted, so a mirror
 #      that holds a secret, or that this user cannot read, is left out and MANIFEST.md says so;
 #   2. one archive per job, jobs/<job>.tar.gz: jobs/agents/<job>/, .seeds/<job>.json and the mirror's <job>/; one
@@ -121,8 +122,8 @@ b = out / "batch.tar.gz"
     "batch_archive": {"archive": b.name, "bytes": b.stat().st_size, "sha256": sums[b.name]}, "jobs": rows}, indent=1) + "\n")
 PY
 planned=$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["jobs"]))' "$JOBS/.plan/$B.json" 2>/dev/null || echo "?")
-verdicts=$(ls "$JOBS/$B"-*/*/verifier/reward.json 2>/dev/null | wc -l)
-trials=$(ls -d "$JOBS/$B"-*/*/ 2>/dev/null | wc -l)
+verdicts=$( (ls "$JOBS/$B"-*/*/verifier/reward.json 2>/dev/null || true) | wc -l)   # none yet: 0, not an exit (pipefail)
+trials=$( (ls -d "$JOBS/$B"-*/*/ 2>/dev/null || true) | wc -l)
 img() {   # img <ref as images/pins.json names it, tag@digest>: the local image id and digests (by the ref, else by its tag)
     local v f='{{.Id}} {{range .RepoDigests}}{{.}} {{end}}'
     v=$(docker image inspect --format "$f" "$1" 2>/dev/null) && { echo "$1 $v"; return; }
@@ -148,6 +149,11 @@ echo "SHA256SUMS: $(sha256sum "$OUT/SHA256SUMS" | cut -d' ' -f1)"
 echo "notes:      ${NOTES:-none}"
 } > "$OUT/MANIFEST.md"
 cat "$OUT/MANIFEST.md"
+
+echo "== 3b. secret scan of the whole bundle (every byte that would be uploaded; the scanner opens the .gz archives)"
+s=$(python3 "$R/scripts/harbor/scan_secrets.py" "$OUT" "${SCAN[@]}")
+clean "$s" || { echo "$s" >&2; echo "a secret is in the bundle $OUT (batch log, plan, results or a job): nothing is sent" >&2; exit 1; }
+echo "   bundle clean"
 
 if [ "${DRY_RUN:-0}" = 1 ]; then echo "== 4. DRY_RUN=1: not uploaded; the bundle is in $OUT"; exit 0; fi
 PR=(); case "${CREATE_PR:-0}" in 1|true|TRUE|yes) PR=(--create-pr) ;; esac

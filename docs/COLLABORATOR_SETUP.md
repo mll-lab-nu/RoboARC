@@ -1,6 +1,6 @@
 # Running RoboARC: setup for a collaborator
 
-Run RoboARC 1.3.0 from the branch `dev/jianwen-2` of `mll-lab-nu/RoboARC`. It has the same tasks as `main` (1.3.0), plus this note and the script that sends your results back (`scripts/send_results.sh`), which `main` does not have yet. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
+Run RoboARC from the branch `main` of `mll-lab-nu/RoboARC`; it has this note and the script that sends your results back (`scripts/send_results.sh`). You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
 
 ## 1. Machine
 
@@ -36,10 +36,10 @@ Run RoboARC 1.3.0 from the branch `dev/jianwen-2` of `mll-lab-nu/RoboARC`. It ha
    - `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`, about 1.1 GB and 7.7 GB on disk, used only by the IKEA tasks.
 
    The download is smaller, because the layers are compressed.
-3. Clone the branch (in an existing clone: `git fetch origin && git checkout dev/jianwen-2 && git pull`), and pre-pull
+3. Clone the branch (in an existing clone: `git fetch origin && git checkout main && git pull`), and pre-pull
    every image (each is checked against its pinned image id):
    ```bash
-   git clone -b dev/jianwen-2 git@github.com:mll-lab-nu/RoboARC.git
+   git clone -b main git@github.com:mll-lab-nu/RoboARC.git
    cd RoboARC
    bash images/pull_all.sh
    python3 scripts/stamp_mtimes.py tasks   # once per checkout, so Harbor's build cache hits
