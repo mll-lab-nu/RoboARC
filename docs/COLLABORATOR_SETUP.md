@@ -1,6 +1,6 @@
 # Running RoboARC: setup for a collaborator
 
-RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
+Run RoboARC 1.3.0 from the branch `dev/jianwen-2` of `mll-lab-nu/RoboARC`. It has the same tasks as `main` (1.3.0), plus this note and the script that sends your results back (`scripts/send_results.sh`), which `main` does not have yet. You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
 
 ## 1. Machine
 
@@ -36,10 +36,10 @@ RoboARC 1.3.0 is on `main` of `mll-lab-nu/RoboARC`; run it from `main`. You get 
    - `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`, about 1.1 GB and 7.7 GB on disk, used only by the IKEA tasks.
 
    The download is smaller, because the layers are compressed.
-3. Clone the repository, or `git pull` an existing clone, and pre-pull every image (each is checked against its pinned
-   image id):
+3. Clone the branch (in an existing clone: `git fetch origin && git checkout dev/jianwen-2 && git pull`), and pre-pull
+   every image (each is checked against its pinned image id):
    ```bash
-   git clone git@github.com:mll-lab-nu/RoboARC.git
+   git clone -b dev/jianwen-2 git@github.com:mll-lab-nu/RoboARC.git
    cd RoboARC
    bash images/pull_all.sh
    python3 scripts/stamp_mtimes.py tasks   # once per checkout, so Harbor's build cache hits
@@ -113,15 +113,32 @@ three scenes (appearance seeds 0, 1 and 2: the same physics in other colours, ma
 gives the three trials of a task different seeds, so they see three different scenes; an IKEA task has one scene. Credentials go in an env file; `.env.example` lists the variables, e.g. `OPENAI_API_KEY` for Codex or `ANTHROPIC_API_KEY` for Claude Code.
 
 ```bash
-AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
-  JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo \
-  scripts/harbor/run_agent_batch.sh <batch name> roboarc-interlocked-claws-01-i01 roboarc-orbits-02-i01 ...
+BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 114 (102 puzzle, 12 IKEA)
+mkdir -p jobs
+for lane in 1 2 3 4; do                             # 4 lanes: 4 trials at a time ("Lanes" below)
+  AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
+    JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo \
+    nohup scripts/harbor/run_agent_batch.sh <batch name> $BASES > "jobs/lane$lane.out" 2>&1 &
+done
 ```
 
-- **Which tasks and modes:** list the task bases to run; ask us which ones (`ls tasks | sed -E 's/-(privileged|standard)$//' | sort -u`
-  lists every base). `MODES=privileged` or `MODES=standard` runs one mode only.
+- **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 114 × 2 × 3 =
+  684 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
+  `MODES=standard` runs one mode only.
+- **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
+  and every trial is taken by exactly one lane. A running trial needs at least 4 CPU cores, 7 GB of memory and 2 GB of
+  GPU memory (the tasks' `[metadata.resources]`) and may use up to 24 GB of memory (its limit). Start with no more lanes
+  than cores / 4, memory in GB / 7 and GPU memory in GB / 2 allow, and add one only while the host's memory stays below
+  about 80%.
+- **Duration:** a trial gives the agent up to 3 h, plus setup and grading. If every trial used its whole budget, the
+  684 trials would take about 684 × 3 h / lanes: about 21 days on 4 lanes, 11 on 8. `nohup` keeps the lanes running
+  after you log out.
+- **More than one host:** give each host its own part of the bases and the same batch name (a trial's seed depends
+  only on the batch name, the task and the trial number), and send each host's batch back on its own (section 6).
 - **Progress and summary:** progress is in `$JOBS/<batch>.log`, and the per-trial summary in `$JOBS/<batch>.summary.md`.
-- **Restarting:** running the same command again resumes, and it also adds a second lane.
+- **Restarting** (after a reboot, or a lane stopped by a model-account failure): start the lanes again with the same
+  command. Finished trials are skipped. A trial that was cut off midway is skipped too: to run it again, move its job
+  folder and `$JOBS/.claims/<job>` out of `$JOBS` first.
 - **Budget:** each trial gives the agent up to 3 h; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
   its results are ranked as a group of their own). Use one API key per batch, with a spending cap.
 - **Live view:** `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1. Keep it local: it shows unredacted output.
