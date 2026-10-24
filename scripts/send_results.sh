@@ -20,7 +20,7 @@
 #      an earlier one. scripts/receive_results.sh is the maintainers' side.
 # Env (defaults): JOBS (<repo>/jobs/agents, as run_agent_batch.sh), RESULTS (<repo>/../rcb_results), ENV_FILE (<repo>/.env,
 #   the file the batch used), CODEX_FORCE_AUTH_JSON / CODEX_AUTH_JSON_PATH (as for the batch), HF_TOKEN_FILE
-#   (~/.roboarc_hf_token, a write token of your own account), HF_DATASET (eai-v2-internal/roboarc-separate-results, public),
+#   (~/.roboarc_hf_token, a write token of your own account), HF_DATASET (RoboARC/RoboARC-outputs, public),
 #   OUT (<repo>/../send), NOTES (one line for MANIFEST.md: crashes, OOM kills, outages, reruns), CREATE_PR=1 (upload as a
 #   pull request), DRY_RUN=1 (everything but the upload).
 set -euo pipefail
@@ -29,7 +29,7 @@ B=${1:?usage: send_results.sh <batch> <your name>}; H=${2:?usage: send_results.s
 R=$(cd "$(dirname "$0")/.." && pwd)
 JOBS=$(cd "${JOBS:-$R/jobs/agents}" && pwd); MIRROR=${JOBS}_mirror
 RESULTS=${RESULTS:-$(dirname "$R")/rcb_results}; ENV_FILE=${ENV_FILE:-$R/.env}
-HF_TOKEN_FILE=${HF_TOKEN_FILE:-$HOME/.roboarc_hf_token}; HF_DATASET=${HF_DATASET:-eai-v2-internal/roboarc-separate-results}
+HF_TOKEN_FILE=${HF_TOKEN_FILE:-$HOME/.roboarc_hf_token}; HF_DATASET=${HF_DATASET:-RoboARC/RoboARC-outputs}
 ID=$(date -u +%Y%m%dT%H%MZ); NAME=${B}__${H}__${ID}
 OUT=${OUT:-$(dirname "$R")/send}/$NAME
 [ ! -e "$OUT" ] || { echo "$OUT exists (a run within the same minute): run again in a minute" >&2; exit 2; }

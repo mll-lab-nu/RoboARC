@@ -131,7 +131,7 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
 ## 6. Sending the results back
 
 `scripts/send_results.sh` packs one batch and uploads it to our Hugging Face dataset
-`eai-v2-internal/roboarc-separate-results`. With `CREATE_PR=1`, as below, the upload is a pull request on the dataset,
+`RoboARC/RoboARC-outputs`. With `CREATE_PR=1`, as below, the upload is a pull request on the dataset,
 which we merge. Your own Hugging Face account opens it and needs no access to the dataset.
 
 **The dataset is public: anyone can read what you send.** The secret scan removes the keys in `ENV_FILE`. Everything

@@ -17,11 +17,11 @@
 # per trial and the task's trials.json), MANIFEST.md, index.json.
 # Needs the hf CLI (pip install -U huggingface_hub); a private dataset also needs a token that can read it (hf auth login,
 # or HF_TOKEN).
-# Env (defaults): HF_DATASET (eai-v2-internal/roboarc-separate-results; deliveries at <name>/<batch>/<bundle id>/), REVISION
+# Env (defaults): HF_DATASET (RoboARC/RoboARC-outputs; deliveries at <name>/<batch>/<bundle id>/), REVISION
 #   (main; refs/pr/<n> reads a delivery sent with CREATE_PR=1 before its pull request is merged), DEST
 #   (~/roboarc_helper_runs), HF (hf)
 set -euo pipefail
-DS=${HF_DATASET:-eai-v2-internal/roboarc-separate-results}; REV=${REVISION:-main}; DEST=${DEST:-$HOME/roboarc_helper_runs}
+DS=${HF_DATASET:-RoboARC/RoboARC-outputs}; REV=${REVISION:-main}; DEST=${DEST:-$HOME/roboarc_helper_runs}
 HF=${HF:-hf}
 if [ $# -eq 0 ]; then
     "$HF" download "$DS" --repo-type dataset --revision "$REV" --include "*/*/*/MANIFEST.md" --local-dir "$DEST/.manifests" >/dev/null
