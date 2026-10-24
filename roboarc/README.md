@@ -15,5 +15,6 @@ tooling (`rcb_topogym.Session` for the puzzles, `rcb_ikea.Session` for IKEA). Th
 | `references.py` | the reference trajectories and their recorded end hashes |
 | `spaces.py` | Gymnasium spaces, or a stand-in when Gymnasium is not installed |
 | `_runtime.py` | paths, the graded runtime's settings and checks |
+| `vla/` | VLA policies served the openpi way: conventions, the websocket protocol, the episode runner, a stub server ([docs/VLA.md](../docs/VLA.md)) |
 | `__main__.py` | `python -m roboarc list / info / check / replay / patch-mujoco` |
 | `data/ikea_reference_hashes.json` | the recorded end and settled hashes of the IKEA references |

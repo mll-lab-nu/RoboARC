@@ -19,6 +19,9 @@ dependencies = ["numpy"]
 puzzles = ["numpy==2.3.5", "scipy==1.17.1", "mujoco==3.14.0", "warp-lang==1.18.0", "newton==1.6.1", "pillow==11.3.0"]
 # the IKEA images ghcr.io/mll-lab-nu/roboarc-ikea(-sim):1.1.0 (Python 3.12), plus the EPA patch as above
 ikea = ["numpy==2.5.4", "mujoco==3.14.0"]
+# roboarc.vla (docs/VLA.md): openpi's websocket protocol, at the versions openpi's lock pins (openpi_client itself pins
+# numpy < 2, so it is not a dependency); Pillow is in the images already
+vla = ["msgpack==1.1.0", "websockets==15.0.1", "pillow"]
 gym = ["gymnasium>=1.0"]
 test = ["pytest>=8"]
 
@@ -26,7 +29,7 @@ test = ["pytest>=8"]
 roboarc = "roboarc.__main__:main"
 
 [tool.setuptools]
-packages = ["roboarc"]
+packages = ["roboarc", "roboarc.vla"]
 
 [tool.setuptools.package-data]
 roboarc = ["data/*.json"]
