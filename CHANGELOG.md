@@ -47,10 +47,10 @@ instances and references are unchanged: results graded under 1.3.0 stand.
   timings at most 14.1 % of the 3 h budget; each seed's reference ends with the same world, robot and state as seed 0.
 - Texts: the success hold (0.5 s) and the tool-frame distances were checked against the instances before the review.
   The texts state the grasping rules in more detail than the tooling's own grasp sentence (`Session.grasp_rules()`),
-  without contradicting it; see the benchmark page, "Grasping". One sentence is less exact than the simulator:
-  battery-replacement-01's text lets a pluck go once the cell "has moved 60 mm from where it was taken", while the
-  simulator gives each old cell one 60 mm budget per episode, shared by all its plucks and counted from where it leaves
-  the compartment (its family page states both).
+  without contradicting it; see the benchmark page, "Grasping". One sentence was less exact than the simulator and is
+  corrected: battery-replacement-01's text let a pluck go once the cell "has moved 60 mm from where it was taken"; it
+  now states the simulator's rule, one 60 mm budget per old cell and episode, shared by all its plucks and counted from
+  where the cell leaves the compartment (the grading is unchanged).
 
 ### Collaborator tooling
 - `scripts/send_results.sh` (by Jianwen): sends one batch's records to the public Hugging Face dataset

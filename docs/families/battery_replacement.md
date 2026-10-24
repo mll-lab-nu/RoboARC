@@ -36,10 +36,10 @@ mu 1 is 90 degrees, mu 0.268 is 150 degrees). The angle is decided when the hold
 
 - An old cell is taken only by a pinch of at least 90 degrees: fingertips on the top of a cell seated in its slot cannot
   take it; a cell levered up with the pry stick can be plucked.
-- A hold below 150 degrees is a pluck: it is let go once the cell has moved 60 mm from where it was taken (as a lost
-  grasp: the gripper opens before taking hold again), so an old cell is carried only when held from both sides
-  (150 degrees or more). The simulator counts these 60 mm as one budget per cell and episode, shared by all its plucks
-  and counted from where the cell leaves the compartment (`WeakHoldGraspTarget`).
+- A hold below 150 degrees is a pluck. A cell's plucks share 60 mm of travel per episode, counted from where it leaves
+  the compartment; once they have moved it 60 mm in all, the pluck is let go (as a lost grasp: the gripper opens before
+  taking hold again), so an old cell is carried only when held from both sides (150 degrees or more)
+  (`WeakHoldGraspTarget`).
 - A new cell is taken only by a pinch of at least 150 degrees.
 
 ## Success rule
