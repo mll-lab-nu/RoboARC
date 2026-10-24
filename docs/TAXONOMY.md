@@ -12,7 +12,7 @@ recommended fields and the settings a task declares. A new value is added by pul
 | `simulator` | `roboarc` (the puzzles: the `topogym` package on MuJoCo 3.14.0, CPU float64, the blanket cloth on a deterministic CUDA step, Nyx RGB) · `mujoco` (IKEA MuJoCo: plain MuJoCo 3.14.0) |
 | `robot` | `aloha-2` (ALOHA 2, two arms with parallel grippers) · `franka-robotiq-2f85` (a Franka Panda arm with a Robotiq 2F-85 gripper) · `franka-panda-bimanual` (two Franka Panda arms with their standard hands; IKEA) |
 | `family` | the puzzle family with underscores (`interlocked_claws`), shared by the family's bases; IKEA: the product (`lack`) |
-| `dynamics` | `static` · `dynamic`: whether something in the scene other than the robot does work by a force other than the robot's and gravity (PROTOCOL §2); every RoboARC task is `static` |
+| `dynamics` | `static` · `dynamic`: whether something in the scene other than the robot does work by a force other than the robot's and gravity (PROTOCOL §2); every RoboARC task is `static` but clock-assembling-01 (the wound mainspring drives its gear train) |
 | `oracle` | `full` (the reference solution scores 1) · `partial` · `none` (see PROTOCOL §4) |
 | `oracle_evidence` | required unless `oracle = "full"`: where the evidence for solvability is |
 | `expert_time_estimate_hours` | number |

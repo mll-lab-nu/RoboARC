@@ -83,8 +83,8 @@ images/roboarc/build.sh --noinst              # the image without instances (to 
    `instances`;
 3. the runtime check below; the tag is removed when the installed runtime differs from `scripts/roboarc/release.json`.
 
-The appearance seeds (`instances/<base>/seeds/<S>/`, from 1.2.0) and the experimental bases' instances (from 1.2.0;
-wire-splicing-01 from 1.3.0) are pinned in `assets.json` but not yet in the HF dataset (one revision, uploaded with
+The appearance seeds (`instances/<base>/seeds/<S>/`, from 1.2.0) and the instances of the bases added since 1.2.0 (the
+nine released in 1.4.0, from 1.2.0; wire-splicing-01 from 1.3.0) are pinned in `assets.json` but not yet in the HF dataset (one revision, uploaded with
 the owner's approval): until then build with `--instances <dir>` from the release's instance tree;
 `assets.py check-instances` verifies every pinned file.
 

@@ -237,3 +237,10 @@ post's rod yellow at every seed.
   been kept); the base's release record in `experimental_bases` (grasp rules as its texts state them); the wire's
   standard reference recorded in `tools/release/standard_speed_rule.json`; `privileged.s1/s2.npz` rewritten by
   `release_rebuild.py` (the same entries and bytes inside, another zip container).
+
+## 1.4.0: the nine bases of 1.2.0 released
+
+1.4.0 adds no source, tooling or instance: the image stays 1.3.0's. The nine bases prepared in 1.2.0 (above) move from
+`release.json` `experimental_bases` to `bases` after the owner's review (2026-10-24), with Jianwen's Harbor evidence on
+the 1.3.0 image (`dev/jianwen-2` `bc189085`, merged with his authorship). The release records, packages, references and
+instances are the ones of 1.2.0 and 1.3.0; only the packages' difficulty (`untiered` -> the owner's tier) changes.

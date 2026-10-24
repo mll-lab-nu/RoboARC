@@ -4,6 +4,76 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 1.4.0 (2026-10-24)
+
+The nine bases prepared as experimental in 1.2.0 are released into `tasks/` in both modes, after the owner's review
+(2026-10-24): four new families and a thirteenth interlocked-claws base. 111 bases in 19 families, 222 puzzle task
+directories (246 with IKEA's 24). The image is unchanged: `ghcr.io/mll-lab-nu/roboarc:1.3.0` (`images/pins.json` and
+`images/roboarc/VERSION` stay 1.3.0), so are the IKEA tasks and images. The 1.3.0 tasks' instructions, graders,
+instances and references are unchanged: results graded under 1.3.0 stand.
+
+### New bases (by Jianwen)
+| base | family | difficulty | the task |
+|---|---|---|---|
+| bed-bolt-01-i01 | bed_bolt (new) | medium | drive a bed frame's corner bolt home with an L-shaped hex key |
+| bed-bolt-02-i01 | bed_bolt | hard | the same with an L-shaped Torx key |
+| bed-bolt-03-i01 | bed_bolt | very_easy | the same with a ratcheting L-shaped square key |
+| bed-bolt-04-i01 | bed_bolt | easier | the same with a ratcheting L-shaped Phillips key |
+| bed-bolt-05-i01 | bed_bolt | easy | the same with a ratcheting L-shaped slotted key |
+| caliper-sorting-01-i01 | caliper_sorting (new) | hard | measure four look-alike sleeves with a vernier caliper that reads in its own unit, sort them into labelled bins |
+| clock-assembling-01-i01 | clock_assembling (new) | hard | assemble a watch movement's gear train, screw down its bridge, wind it and let the mainspring run it (`dynamics = "dynamic"`) |
+| battery-replacement-01-i01 | battery_replacement (new) | medium | swap a game controller's two AA cells, the old ones pried out with a pry stick, and latch the cover |
+| interlocked-claws-13-i01 | interlocked_claws | hard | Hanayama's Cast Trinity: separate three interlocked pieces |
+
+- `release.json`: each record moved from `experimental_bases` to `bases` (released 2026-10-24); `experimental_bases` is
+  empty. The packages' difficulty `untiered` became the owner's tier. Agent time 10800 s for each.
+- Family pages `docs/families/bed_bolt.md`, `caliper_sorting.md`, `clock_assembling.md`, `battery_replacement.md`;
+  `interlocked_claws.md` lists base 13.
+- The `roboarc` API lists them (111 puzzle bases, 123 tasks; 109 puzzle bases ship a reference, the nine new ones pinned by their release
+  records' privileged evidence).
+
+### Tasks
+- New: the 18 directories `tasks/roboarc-<base>-{privileged,standard}` of the nine bases. Each equals the
+  `mk_tasks.py --experimental` render the evidence below ran on, but for `task.toml`'s difficulty and `DIGEST`.
+- The 204 directories of 1.3.0 re-rendered for the version only: the README's Release line names RoboARC 1.4.0, and
+  `DIGEST`.
+
+### Evidence (the nine bases)
+- **Harbor on the 1.3.0 image** (Jianwen, 2026-10-24; image id `499d6f69bd81`, simulator source `4d2cba21`, tooling
+  `412cbe02`): oracle 1 and nop 0 in both modes at seeds 0, 1 and 2, no infrastructure error (108 / 108). Seed 0's
+  oracle ends equal the recorded end states in both modes; at seeds 1 and 2 the two replays agree and both modes reach
+  the same end. The references are unchanged (trajectory sha256 as recorded).
+- From 1.2.0 (the same instances and references): the reference replays on Intel equal Zen 4 (9 / 9); reference
+  timings at most 14.1 % of the 3 h budget; each seed's reference ends with the same world, robot and state as seed 0.
+- Texts: the success hold (0.5 s) and the tool-frame distances were checked against the instances before the review.
+  The texts state the grasping rules in more detail than the tooling's own grasp sentence (`Session.grasp_rules()`),
+  without contradicting it; see the benchmark page, "Grasping". One sentence is less exact than the simulator:
+  battery-replacement-01's text lets a pluck go once the cell "has moved 60 mm from where it was taken", while the
+  simulator gives each old cell one 60 mm budget per episode, shared by all its plucks and counted from where it leaves
+  the compartment (its family page states both).
+
+### Collaborator tooling
+- `scripts/send_results.sh` (by Jianwen): sends one batch's records to the public Hugging Face dataset
+  `RoboARC/RoboARC-outputs`: a secret scan of the batch's jobs (redacted, then scanned again), one archive per job
+  with an index and a manifest, and a scan of the whole bundle once more before the upload, since the dataset is
+  public; `CREATE_PR=1` uploads as a pull request, `DRY_RUN=1` stops before the upload. A batch without a verdict yet is
+  still sent. `scripts/receive_results.sh` is the maintainers' side.
+- `docs/COLLABORATOR_SETUP.md`: run from `main`; a first check in both modes and at another seed, a smoke test of the
+  batch runner, the full run over every base (123 bases, 738 trials) with lanes, duration, hosts and restarts, and
+  sending the results back with the collaborator's own Hugging Face account.
+
+### Docs
+- README rewritten around the interfaces: coding agents (Harbor), VLA policies (in development, openpi conventions) and
+  the Python API, on the same tasks, physics and graders; results are never pooled across interfaces.
+- Counts updated (README, `docs/API.md`, `docs/DEVELOPING.md`, `docs/benchmarks/roboarc.md`, `docs/families/`,
+  `docs/COLLABORATOR_SETUP.md`); `docs/TAXONOMY.md` names clock-assembling-01 as the one dynamic task;
+  `tools/release/mujoco_release.json` records the ten bases' releases (wire-splicing-01's 1.3.0 evidence included).
+
+### Checks
+- `mk_tasks.py --check`, the generator and seed tests, unit tests, invariants, cutoffs, doc paths, CI self-test,
+  `source_hash.py --check`, the API tests (catalogue counts, reference pins, joint-speed rule: 13 privileged references
+  faster than the standard rule, as before).
+
 ## 1.3.0 (2026-10-23)
 
 A new family, wire_splicing, with its first base wire-splicing-01-i01 (hard) in `tasks/` in both modes: 102 bases in 15

@@ -1,7 +1,7 @@
 # RoboARC
 
-RoboARC's topological puzzle families on MuJoCo 3.14.0 physics, run by the simulator package `topogym`: 102 task
-bases in 15 families, each in two modes, privileged and standard (204 Harbor task directories under `tasks/`). One page
+RoboARC's topological puzzle families on MuJoCo 3.14.0 physics, run by the simulator package `topogym`: 111 task
+bases in 19 families, each in two modes, privileged and standard (222 Harbor task directories under `tasks/`). One page
 per family: [../families/](../families/README.md). This page states the benchmark's own rules on top of the task protocol
 ([../PROTOCOL.md](../PROTOCOL.md)). The IKEA MuJoCo tasks have their own page
 ([ikea_mujoco.md](ikea_mujoco.md)).
@@ -34,7 +34,10 @@ the family pages list each family's robot and success rule.
 - **Grasping**: what the tooling grades is what the texts state: the contact-review values come from `CONTACT_RULE`,
   and the grasping rule is `Session.grasp_rules()` of the instance (the weld's slip force over 20 ms, 60 N ALOHA / 65 N
   Robotiq, and the Robotiq's release after 0.2 s without finger contact; the cloth families' assisted grasp of material
-  patches).
+  patches). The texts of bed-bolt, clock-assembling, battery-replacement and wire-splicing add what that sentence leaves
+  out and the simulator applies: the grippers start empty, the bolt is no grasp target while its thread is engaged, the
+  cells' pinch rules, the wire's welds between the pads and its 0.1 J weld work guard; clock-assembling's text names the
+  parts of its one entity. The texts' sentence is the release record's `grasp_rules`.
 
 ## Generator, instances and image
 

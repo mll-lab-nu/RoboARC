@@ -113,7 +113,7 @@ three scenes (appearance seeds 0, 1 and 2: the same physics in other colours, ma
 gives the three trials of a task different seeds, so they see three different scenes; an IKEA task has one scene. Credentials go in an env file; `.env.example` lists the variables, e.g. `OPENAI_API_KEY` for Codex or `ANTHROPIC_API_KEY` for Claude Code.
 
 ```bash
-BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 114 (102 puzzle, 12 IKEA)
+BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 123 (111 puzzle, 12 IKEA)
 mkdir -p jobs
 for lane in 1 2 3 4; do                             # 4 lanes: 4 trials at a time ("Lanes" below)
   AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
@@ -122,8 +122,8 @@ for lane in 1 2 3 4; do                             # 4 lanes: 4 trials at a tim
 done
 ```
 
-- **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 114 × 2 × 3 =
-  684 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
+- **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 123 × 2 × 3 =
+  738 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
   `MODES=standard` runs one mode only.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
   and every trial is taken by exactly one lane. A running trial needs at least 4 CPU cores, 7 GB of memory and 2 GB of
@@ -131,7 +131,7 @@ done
   than cores / 4, memory in GB / 7 and GPU memory in GB / 2 allow, and add one only while the host's memory stays below
   about 80%.
 - **Duration:** a trial gives the agent up to 3 h, plus setup and grading. If every trial used its whole budget, the
-  684 trials would take about 684 × 3 h / lanes: about 21 days on 4 lanes, 11 on 8. `nohup` keeps the lanes running
+  738 trials would take about 738 × 3 h / lanes: about 23 days on 4 lanes, 12 on 8. `nohup` keeps the lanes running
   after you log out.
 - **More than one host:** give each host its own part of the bases and the same batch name (a trial's seed depends
   only on the batch name, the task and the trial number), and send each host's batch back on its own (section 6).

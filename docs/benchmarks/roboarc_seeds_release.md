@@ -68,5 +68,6 @@ orbits-02) get their seeds the same way.
 6. The image is pushed by the owner (`images/push_all.sh`); the tasks name it by the digest in `images/pins.json`.
 
 The nine bases added with 1.2.0 (bed-bolt-01..05, caliper-sorting-01, clock-assembling-01, battery-replacement-01,
-interlocked-claws-13) are prepared with the release but stay out of `tasks/` until the owner has reviewed their demos
-(`python3 scripts/roboarc/mk_tasks.py --experimental --out <dir>` renders them).
+interlocked-claws-13) were prepared with that release but stayed out of `tasks/` until the owner had reviewed their
+demos; they are released in 1.4.0. A base still under review is a record in `release.json` `experimental_bases`, and
+`python3 scripts/roboarc/mk_tasks.py --experimental --out <dir>` renders it outside `tasks/`.
