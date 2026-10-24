@@ -76,7 +76,7 @@ Separate and place the entire removable metal ring inside the green dashed goal 
 ### Provenance
 - Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `d601866b` (MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)); bound to this release's runtime (source `4d2cba21`, tooling `412cbe02`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `9f34f894a454`, under `instances/slotted-post-ring-01-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 1.3.0, image `ghcr.io/mll-lab-nu/roboarc:1.3.0@sha256:2bcded002899b4be82dcffe5c0d15277379309ff0365522d8189f1f3a7a4873a` (images/roboarc/); simulator source `6be3abb84` (PROVENANCE.md).
+- Release: RoboARC 1.4.0, image `ghcr.io/mll-lab-nu/roboarc:1.3.0@sha256:2bcded002899b4be82dcffe5c0d15277379309ff0365522d8189f1f3a7a4873a` (images/roboarc/); simulator source `6be3abb84` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log
