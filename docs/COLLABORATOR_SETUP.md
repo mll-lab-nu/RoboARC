@@ -130,13 +130,17 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
 
 ## 6. Sending the results back
 
-`scripts/send_results.sh` packs one batch and uploads it to our private Hugging Face dataset
-`eai-v2-internal/helper-uploads`. Once per host:
+`scripts/send_results.sh` packs one batch and uploads it to our Hugging Face dataset `eai-v2-internal/helper-uploads`.
+The upload uses your own Hugging Face account:
 
-```bash
-pip install -U huggingface_hub      # the hf CLI
-( umask 077; cat > ~/.roboarc_hf_token )   # paste the write token we sent you, press Enter, then Ctrl-D
-```
+1. Send us your Hugging Face username. We give your account write access to the dataset.
+2. Make a token at https://huggingface.co/settings/tokens. A fine-grained token with write access to that one dataset
+   is enough.
+3. Once per host:
+   ```bash
+   pip install -U huggingface_hub      # the hf CLI
+   ( umask 077; cat > ~/.roboarc_hf_token )   # paste your token, press Enter, then Ctrl-D
+   ```
 
 The token stays in that file, not in `.env` and not in your shell history. The script reads it only for the upload, so
 it never reaches a container or the bundle.

@@ -1,6 +1,6 @@
 #!/bin/bash
-# The maintainers' side of scripts/send_results.sh: list, fetch, check and unpack the deliveries in the private Hugging
-# Face dataset.
+# The maintainers' side of scripts/send_results.sh: list, fetch, check and unpack the deliveries in the maintainers'
+# Hugging Face dataset.
 #   receive_results.sh                                   every delivery (only the MANIFEST.md files are downloaded), one
 #                                                        line each: <name>/<batch>/<bundle id>, its trial counts and its
 #                                                        runner line

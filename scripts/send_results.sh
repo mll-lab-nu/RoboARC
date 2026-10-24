@@ -1,5 +1,5 @@
 #!/bin/bash
-# Send one batch's records to the maintainers' private Hugging Face dataset (docs/COLLABORATOR_SETUP.md, section 6).
+# Send one batch's records to the maintainers' Hugging Face dataset (docs/COLLABORATOR_SETUP.md, section 6).
 #   scripts/send_results.sh <batch> <your name, lowercase>
 # Steps:
 #   1. secret scan (scripts/harbor/scan_secrets.py, the runner's own scanner, with the runner's credentials): the batch's jobs are
@@ -19,7 +19,7 @@
 #      an earlier one. scripts/receive_results.sh is the maintainers' side.
 # Env (defaults): JOBS (<repo>/jobs/agents, as run_agent_batch.sh), RESULTS (<repo>/../rcb_results), ENV_FILE (<repo>/.env,
 #   the file the batch used), CODEX_FORCE_AUTH_JSON / CODEX_AUTH_JSON_PATH (as for the batch), HF_TOKEN_FILE
-#   (~/.roboarc_hf_token, the write token you were sent), HF_DATASET (eai-v2-internal/helper-uploads), OUT (<repo>/../send),
+#   (~/.roboarc_hf_token, a write token of your own account), HF_DATASET (eai-v2-internal/helper-uploads), OUT (<repo>/../send),
 #   NOTES (one line for MANIFEST.md: crashes, OOM kills, outages, reruns), DRY_RUN=1 (everything but the upload).
 set -euo pipefail
 B=${1:?usage: send_results.sh <batch> <your name>}; H=${2:?usage: send_results.sh <batch> <your name>}
