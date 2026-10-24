@@ -14,7 +14,7 @@ task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "aloha-2"
 family = "clock_assembling"
-difficulty = "untiered"
+difficulty = "hard"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
 dynamics = "dynamic"              # scene dynamics (docs/PROTOCOL.md §2): the wound mainspring drives the gear train on its own
 {{ORACLE}}

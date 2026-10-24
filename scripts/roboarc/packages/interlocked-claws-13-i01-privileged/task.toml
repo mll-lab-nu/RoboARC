@@ -14,7 +14,7 @@ task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
 simulator = "roboarc"             # RoboARC on MuJoCo 3.14.0 (CPU float64 physics, Nyx RGB)
 robot = "aloha-2"
 family = "interlocked_claws"
-difficulty = "untiered"
+difficulty = "hard"
 mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
 dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, contacts, screws and threads are passive
 {{ORACLE}}

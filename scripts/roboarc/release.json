@@ -65,6 +65,372 @@
  "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
  "tooling_version": "22",
  "bases": {
+  "battery-replacement-01-i01": {
+   "creation_source": "cacc831d",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "472848140a225398975d17df4996b9b3ea84f111ae32e71ab7ad91e6855553b3",
+     "end_state": "de1cb2ee33e369ed"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "472848140a225398975d17df4996b9b3ea84f111ae32e71ab7ad91e6855553b3",
+     "end_state": "de1cb2ee33e369ed"
+    }
+   },
+   "family": "battery_replacement",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "xbox_aa",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "battery_replacement_xbox_aa",
+   "design": "a game controller's two AA cells swapped: slide the cover open, pry each old cell up with the pry stick, pluck it out with the fingertips, lay it on the controller's back and carry it to the recycling box held from both sides, seat two new cells held from both sides with the right polarity, latch the cover",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (cover, new_1, new_2, old_A, old_B, stick) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold. The cells' pinch rules, stated with a pinch's central angle: the angle around the cell's axis between the two fingers' contact points, 180 degrees when they press on opposite sides of a diameter (exactly: two contacts whose connecting line lies within atan(mu) of both contact normals, force closure at friction coefficient mu; across a cell, mu 1 is 90 degrees, mu 0.268 is 150 degrees). An old cell (old_A, old_B) is taken only by a pinch of at least 90 degrees: fingertips on the top of a cell seated in its slot cannot take it, a cell levered up with the pry stick can be plucked. A hold below 150 degrees is a pluck: it is let go once the cell has moved 60 mm from where it was taken (as a lost grasp: open the gripper before taking hold again), so an old cell is carried only when held from both sides (150 degrees or more). A new cell (new_1, new_2) is taken only by a pinch of at least 150 degrees. The angle is decided when the hold is taken",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on every part; the cells by the central angle of the pinch: old cells plucked at 90 deg, carried at 150, new cells at 150; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): cover: radius 45.1 mm; stick: radius 32.4 mm, around the stick's handle; old_A: radius 31.3 mm; old_B: radius 31.3 mm; new_1: radius 31.3 mm; new_2: radius 31.3 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): cover: radius 45.1 mm; stick: radius 32.4 mm, around the stick's handle; old_A: radius 31.3 mm; old_B: radius 31.3 mm; new_1: radius 31.3 mm; new_2: radius 31.3 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.056,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
+  "bed-bolt-01-i01": {
+   "creation_source": "95f678a5",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8",
+     "end_state": "fa027063506f37b9"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8",
+     "end_state": "fa027063506f37b9"
+    }
+   },
+   "family": "bed_bolt",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "crossbar",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "bed_bolt_crossbar",
+   "design": "a bed frame's corner bolt: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with an L-shaped hex key, its short arm in the head's socket and the long arm swung 60 degrees at a time",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.037,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
+  "bed-bolt-02-i01": {
+   "creation_source": "95f678a5",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f",
+     "end_state": "9065337a7d7b18f5"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f",
+     "end_state": "9065337a7d7b18f5"
+    }
+   },
+   "family": "bed_bolt",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "torx",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "bed_bolt_torx",
+   "design": "a bed frame's corner bolt with a Torx head: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with an L-shaped Torx key, its short arm in the head's six-lobe socket and the long arm swung 60 degrees at a time",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.035,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
+  "bed-bolt-03-i01": {
+   "creation_source": "95f678a5",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a",
+     "end_state": "478283fbcfd6f603"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a",
+     "end_state": "478283fbcfd6f603"
+    }
+   },
+   "family": "bed_bolt",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "square",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "bed_bolt_square",
+   "design": "a bed frame's corner bolt with a square socket: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with a ratcheting L-shaped square key, its tip left in the socket while the lever is swung 60 degrees and back",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.037,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
+  "bed-bolt-04-i01": {
+   "creation_source": "95f678a5",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37",
+     "end_state": "496e553fc76d49fb"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37",
+     "end_state": "496e553fc76d49fb"
+    }
+   },
+   "family": "bed_bolt",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "phillips",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "bed_bolt_phillips",
+   "design": "a bed frame's corner bolt with a cross (Phillips) recess: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with a ratcheting L-shaped Phillips key, its tip left in the recess while the lever is swung 60 degrees and back",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.039,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
+  "bed-bolt-05-i01": {
+   "creation_source": "95f678a5",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3",
+     "end_state": "9ff4432d309ee102"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3",
+     "end_state": "9ff4432d309ee102"
+    }
+   },
+   "family": "bed_bolt",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "slotted",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "bed_bolt_slotted",
+   "design": "a bed frame's corner bolt with a slotted head: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with a ratcheting L-shaped slotted key, its blade left in the slot while the lever is swung 60 degrees and back",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.034,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
   "blanket-flatten-01-i01": {
    "creation_source": "e2e2f564",
    "evidence": {
@@ -1269,6 +1635,67 @@
    },
    "released": "2026-10-14"
   },
+  "caliper-sorting-01-i01": {
+   "creation_source": "cacc831d",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "ad07d12db682283a181eca98f8fc5cf0d92370645d0fca4908c8636a03b2d0a9",
+     "end_state": "ec9ade23fc0a034c"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "ad07d12db682283a181eca98f8fc5cf0d92370645d0fca4908c8636a03b2d0a9",
+     "end_state": "ec9ade23fc0a034c"
+    }
+   },
+   "family": "caliper_sorting",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "vernier",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "caliper_sorting_vernier",
+   "design": "four look-alike sleeves of two classes measured with a vernier caliper fixed on a stand that reads in its own unit and zero (the right hand brings each sleeve to the jaws; the left hand sets the slider, turns its locking screw and reads the vernier with its wrist camera) and sorted into the bins labelled with their two readings",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (the slider link of caliper, sleeve_0, sleeve_1, sleeve_2, sleeve_3) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction)",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (the contact_weld_v1 grasp regions on caliper, sleeve_0, sleeve_1, sleeve_2, sleeve_3)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): caliper: radius 20 mm; sleeve_0: radius 40 mm; sleeve_1: radius 40 mm; sleeve_2: radius 40 mm; sleeve_3: radius 40 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): caliper: radius 20 mm; sleeve_0: radius 40 mm; sleeve_1: radius 40 mm; sleeve_2: radius 40 mm; sleeve_3: radius 40 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.066,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
+  },
   "cast-coil-01-i01": {
    "creation_source": "aae08c2e",
    "evidence": {
@@ -1958,6 +2385,67 @@
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`keyhole_silver`, the target, and `keyhole_gold`), so the text does not identify them by colour alone."
     }
    ]
+  },
+  "clock-assembling-01-i01": {
+   "creation_source": "4163626d",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "3f5b8292181f2ecfa7f828265428c25e76c42951adb35fa455df38bee1a17924",
+     "end_state": "9683cab251ece2c0"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "3f5b8292181f2ecfa7f828265428c25e76c42951adb35fa455df38bee1a17924",
+     "end_state": "9683cab251ece2c0"
+    }
+   },
+   "family": "clock_assembling",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4163626d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "gear_train",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "clock_assembling_gear_train",
+   "design": "a watch movement's gear train enlarged 8 times: the barrel, center, third and fourth wheel onto their pivots (one order only), the train bridge over them with every pivot in its hole, two screws turned two turns, then the barrel wound through its ratchet and let go: the mainspring runs the train (-450)",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (barrel, barrel_arbor, bridge, center, fourth, probe, screw1, screw2, third) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (contact_weld_v1 on every part; the grippers start empty)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): barrel: radius 65.8 mm; center: radius 42 mm; third: radius 33.8 mm; fourth: radius 33.8 mm; bridge: radius 120.6 mm; screw1: radius 20.9 mm; screw2: radius 20.9 mm; probe: radius 56.1 mm; barrel_arbor: radius 30.6 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): barrel: radius 65.8 mm; center: radius 42 mm; third: radius 33.8 mm; fourth: radius 33.8 mm; bridge: radius 120.6 mm; screw1: radius 20.9 mm; screw2: radius 20.9 mm; probe: radius 56.1 mm; barrel_arbor: radius 30.6 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.08,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
   },
   "fiber-bundling-01-i01": {
    "creation_source": "f24ccdce",
@@ -3778,6 +4266,67 @@
      "text": "roboarc 0.2.0: the standard reference (`solution/`) replaced by one within the standard service's joint-speed rule (release.json `speed_rule`); the frozen instance and the task text are unchanged."
     }
    ]
+  },
+  "interlocked-claws-13-i01": {
+   "creation_source": "cacc831d",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "6dfe3a698467f487c3784d41229c7d229da4e29b7e9b7a702c9053bcaf8beab1",
+     "end_state": "66be99300a3ceebd"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "4d2cba21",
+     "tooling": "412cbe02",
+     "date": "2026-10-24",
+     "trajectory_sha256": "6dfe3a698467f487c3784d41229c7d229da4e29b7e9b7a702c9053bcaf8beab1",
+     "end_state": "66be99300a3ceebd"
+    }
+   },
+   "family": "interlocked_claws",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
+   "tier": "cast_trinity",
+   "physics_engine": "mujoco",
+   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
+   "nop": {
+    "status": "passed",
+    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-24"
+   },
+   "template": "interlocked-claws-easy-i00",
+   "variation": "interlocked_claws_cast_trinity",
+   "design": "Hanayama's Cast Trinity: three interlocked Lambda-shaped pieces, two held from the start and the third hanging",
+   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (trinity_b, trinity_h, trinity_t) once both fingers touch the same part inside its grasp region, the tool frame within 12 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start closed on their parts and may acquire after the same bilateral-contact confirmation without another close command",
+   "physics_dt_s": 0.0025,
+   "grasp": "assisted (the contact_weld_v1 pre-weld: the grippers start closed on trinity_t, trinity_b)",
+   "grasp_regions": {
+    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): trinity_t: radius 90 mm; trinity_h: radius 90 mm; trinity_b: radius 90 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
+    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): trinity_t: radius 90 mm; trinity_h: radius 90 mm; trinity_b: radius 90 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
+   },
+   "released": "2026-10-24",
+   "step_s": 0.072,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-24",
+     "image": "roboarc 1.3.0 (499d6f69bd81)"
+    }
+   }
   },
   "knot-untying-01-i01": {
    "creation_source": "d601866b",
@@ -5925,575 +6474,7 @@
    }
   }
  },
- "experimental_bases": {
-  "bed-bolt-01-i01": {
-   "creation_source": "95f678a5",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8",
-     "end_state": "fa027063506f37b9"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8",
-     "end_state": "fa027063506f37b9"
-    }
-   },
-   "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "crossbar",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "bed_bolt_crossbar",
-   "design": "a bed frame's corner bolt: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with an L-shaped hex key, its short arm in the head's socket and the long arm swung 60 degrees at a time",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.037,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/bed-bolt-01-i01 (25325 rows, final state fa027063506f37b9, birth 0bfc2739be27db3a); the key's speed slip removed from the family (owner 2026-10-18), reference unchanged; acceptance round r4 PASS (criteria v2.13b) and Harbor PASS in both modes on 6d71d4f7c0; the owner approved the texts and demo 2026-10-18",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "bed-bolt-02-i01": {
-   "creation_source": "95f678a5",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f",
-     "end_state": "9065337a7d7b18f5"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f",
-     "end_state": "9065337a7d7b18f5"
-    }
-   },
-   "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "torx",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "bed_bolt_torx",
-   "design": "a bed frame's corner bolt with a Torx head: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with an L-shaped Torx key, its short arm in the head's six-lobe socket and the long arm swung 60 degrees at a time",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.035,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/bed-bolt-02-i01 (25277 rows, final state 9065337a7d7b18f5, birth 88e0c83081d83d55); acceptance round r2 PASS (criteria v2.13b) on c9b65a129b; Harbor PASS in both modes on the test-only fe59e40f74; the owner approved the texts and demo 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "bed-bolt-03-i01": {
-   "creation_source": "95f678a5",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a",
-     "end_state": "478283fbcfd6f603"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a",
-     "end_state": "478283fbcfd6f603"
-    }
-   },
-   "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "square",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "bed_bolt_square",
-   "design": "a bed frame's corner bolt with a square socket: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with a ratcheting L-shaped square key, its tip left in the socket while the lever is swung 60 degrees and back",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.037,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/bed-bolt-03-i01 (15540 rows, final state 478283fbcfd6f603, birth 83a09f9d160239c0); acceptance round r1 PASS (criteria v2.13b) on c9b65a129b; Harbor PASS in both modes on the test-only 9464ba6908; the owner approved the texts and demo 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "bed-bolt-04-i01": {
-   "creation_source": "95f678a5",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37",
-     "end_state": "496e553fc76d49fb"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37",
-     "end_state": "496e553fc76d49fb"
-    }
-   },
-   "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "phillips",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "bed_bolt_phillips",
-   "design": "a bed frame's corner bolt with a cross (Phillips) recess: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with a ratcheting L-shaped Phillips key, its tip left in the recess while the lever is swung 60 degrees and back",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.039,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/bed-bolt-04-i01 (15535 rows, final state 496e553fc76d49fb, birth 76964c8ef3746bfd); acceptance round r1 PASS (criteria v2.13b) on 5d8483254f; Harbor PASS in both modes on the test-only 9464ba6908; the owner approved the texts and demo 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "bed-bolt-05-i01": {
-   "creation_source": "95f678a5",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3",
-     "end_state": "9ff4432d309ee102"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3",
-     "end_state": "9ff4432d309ee102"
-    }
-   },
-   "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 95f678a5; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "slotted",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "bed_bolt_slotted",
-   "design": "a bed frame's corner bolt with a slotted head: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with a ratcheting L-shaped slotted key, its blade left in the slot while the lever is swung 60 degrees and back",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (bolt, key) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Once the thread has caught, the bolt is no longer a graspable part: a hold on it is lost at that moment, and fingers on it touch it physically (friction) only. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on the bolt and the key, the bolt no target once the thread has caught; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.034,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/bed-bolt-05-i01 (15310 rows, final state 9ff4432d309ee102, birth b920c4a58cb335e4); acceptance round r1 PASS (criteria v2.13b) on 5acdc08607; Harbor PASS in both modes on the test-only 3c3d64bf11; the owner approved the texts and demo 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "caliper-sorting-01-i01": {
-   "creation_source": "cacc831d",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "ad07d12db682283a181eca98f8fc5cf0d92370645d0fca4908c8636a03b2d0a9",
-     "end_state": "ec9ade23fc0a034c"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "ad07d12db682283a181eca98f8fc5cf0d92370645d0fca4908c8636a03b2d0a9",
-     "end_state": "ec9ade23fc0a034c"
-    }
-   },
-   "family": "caliper_sorting",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "vernier",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "caliper_sorting_vernier",
-   "design": "four look-alike sleeves of two classes measured with a vernier caliper fixed on a stand that reads in its own unit and zero (the right hand brings each sleeve to the jaws; the left hand sets the slider, turns its locking screw and reads the vernier with its wrist camera) and sorted into the bins labelled with their two readings",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (the slider link of caliper, sleeve_0, sleeve_1, sleeve_2, sleeve_3) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction)",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (the contact_weld_v1 grasp regions on caliper, sleeve_0, sleeve_1, sleeve_2, sleeve_3)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): caliper: radius 20 mm; sleeve_0: radius 40 mm; sleeve_1: radius 40 mm; sleeve_2: radius 40 mm; sleeve_3: radius 40 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): caliper: radius 20 mm; sleeve_0: radius 40 mm; sleeve_1: radius 40 mm; sleeve_2: radius 40 mm; sleeve_3: radius 40 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.066,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/caliper-sorting-01-i01 (22962 rows, final state ec9ade23fc0a034c, birth f0c67c958f7901e8 under the terminal revision sleeves_in_labelled_bins_v2: every sleeve released, a sleeve left in another class's bin fails; re-stamped from 3e9024ee5d6b1eda / 8388295a68647c29, the world part of the hash unchanged); the bin labels readable in cam_high; acceptance round r3 PASS (criteria v2.13b) on the tree of 4587f73da9 (the physics unchanged since) and Harbor PASS in both modes on d0a35aff89; sorting by relative size alone, without reading the caliper, is right in 52-57 % of random scenes, and on this one scene a fixed guess (the shared class takes the smaller label) is always right; the owner approved the family and the rules v2 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "clock-assembling-01-i01": {
-   "creation_source": "4163626d",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "3f5b8292181f2ecfa7f828265428c25e76c42951adb35fa455df38bee1a17924",
-     "end_state": "9683cab251ece2c0"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "3f5b8292181f2ecfa7f828265428c25e76c42951adb35fa455df38bee1a17924",
-     "end_state": "9683cab251ece2c0"
-    }
-   },
-   "family": "clock_assembling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4163626d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "gear_train",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "clock_assembling_gear_train",
-   "design": "a watch movement's gear train enlarged 8 times: the barrel, center, third and fourth wheel onto their pivots (one order only), the train bridge over them with every pivot in its hole, two screws turned two turns, then the barrel wound through its ratchet and let go: the mainspring runs the train (-450)",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (barrel, barrel_arbor, bridge, center, fourth, probe, screw1, screw2, third) once both fingers touch the same part inside its grasp region, the tool frame within 15 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on every part; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): barrel: radius 65.8 mm; center: radius 42 mm; third: radius 33.8 mm; fourth: radius 33.8 mm; bridge: radius 120.6 mm; screw1: radius 20.9 mm; screw2: radius 20.9 mm; probe: radius 56.1 mm; barrel_arbor: radius 30.6 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): barrel: radius 65.8 mm; center: radius 42 mm; third: radius 33.8 mm; fourth: radius 33.8 mm; bridge: radius 120.6 mm; screw1: radius 20.9 mm; screw2: radius 20.9 mm; probe: radius 56.1 mm; barrel_arbor: radius 30.6 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.08,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/clock-assembling-01-i01 (8171 rows, final state 955e65d624a1ce41, birth 62e5c06433a1de4f); acceptance round clock_r3 PASS (criteria v2.13b) and Harbor PASS in both modes on 7a88493802; the owner approved the family 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "battery-replacement-01-i01": {
-   "creation_source": "cacc831d",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "472848140a225398975d17df4996b9b3ea84f111ae32e71ab7ad91e6855553b3",
-     "end_state": "de1cb2ee33e369ed"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "472848140a225398975d17df4996b9b3ea84f111ae32e71ab7ad91e6855553b3",
-     "end_state": "de1cb2ee33e369ed"
-    }
-   },
-   "family": "battery_replacement",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "xbox_aa",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "battery_replacement_xbox_aa",
-   "design": "a game controller's two AA cells swapped: slide the cover open, pry each old cell up with the pry stick, pluck it out with the fingertips, lay it on the controller's back and carry it to the recycling box held from both sides, seat two new cells held from both sides with the right polarity, latch the cover",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (cover, new_1, new_2, old_A, old_B, stick) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, a held part is pressed hard into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start empty and nearly closed: open a gripper, then close it on a part to take hold. The cells' pinch rules, stated with a pinch's central angle: the angle around the cell's axis between the two fingers' contact points, 180 degrees when they press on opposite sides of a diameter (exactly: two contacts whose connecting line lies within atan(mu) of both contact normals, force closure at friction coefficient mu; across a cell, mu 1 is 90 degrees, mu 0.268 is 150 degrees). An old cell (old_A, old_B) is taken only by a pinch of at least 90 degrees: fingertips on the top of a cell seated in its slot cannot take it, a cell levered up with the pry stick can be plucked. A hold below 150 degrees is a pluck: it is let go once the cell has moved 60 mm from where it was taken (as a lost grasp: open the gripper before taking hold again), so an old cell is carried only when held from both sides (150 degrees or more). A new cell (new_1, new_2) is taken only by a pinch of at least 150 degrees. The angle is decided when the hold is taken",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (contact_weld_v1 on every part; the cells by the central angle of the pinch: old cells plucked at 90 deg, carried at 150, new cells at 150; the grippers start empty)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): cover: radius 45.1 mm; stick: radius 32.4 mm, around the stick's handle; old_A: radius 31.3 mm; old_B: radius 31.3 mm; new_1: radius 31.3 mm; new_2: radius 31.3 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): cover: radius 45.1 mm; stick: radius 32.4 mm, around the stick's handle; old_A: radius 31.3 mm; old_B: radius 31.3 mm; new_1: radius 31.3 mm; new_2: radius 31.3 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.056,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/battery-replacement-01-i01 (7029 rows, final state 7ac8b8d39269e320, birth ebd436acde9a62a1); acceptance round battery_r2 PASS (criteria v2.13b) and Harbor PASS in both modes on 2186292da1; the owner approved the family 2026-10-19",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  },
-  "interlocked-claws-13-i01": {
-   "creation_source": "cacc831d",
-   "evidence": {
-    "privileged": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "6dfe3a698467f487c3784d41229c7d229da4e29b7e9b7a702c9053bcaf8beab1",
-     "end_state": "66be99300a3ceebd"
-    },
-    "standard": {
-     "status": "passed",
-     "success": 1,
-     "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
-     "tooling": "412cbe02",
-     "date": "2026-10-24",
-     "trajectory_sha256": "6dfe3a698467f487c3784d41229c7d229da4e29b7e9b7a702c9053bcaf8beab1",
-     "end_state": "66be99300a3ceebd"
-    }
-   },
-   "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:1.3.0, tools/release/release_rebuild.py --instances)",
-   "tier": "cast_trinity",
-   "physics_engine": "mujoco",
-   "release_commit": "6be3abb84db96615ceb0d932b9f5666565fad346",
-   "nop": {
-    "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
-   },
-   "template": "interlocked-claws-easy-i00",
-   "variation": "interlocked_claws_cast_trinity",
-   "design": "Hanayama's Cast Trinity: three interlocked Lambda-shaped pieces, two held from the start and the third hanging",
-   "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (trinity_b, trinity_h, trinity_t) once both fingers touch the same part inside its grasp region, the tool frame within 12 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start closed on their parts and may acquire after the same bilateral-contact confirmation without another close command",
-   "physics_dt_s": 0.0025,
-   "grasp": "assisted (the contact_weld_v1 pre-weld: the grippers start closed on trinity_t, trinity_b)",
-   "grasp_regions": {
-    "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): trinity_t: radius 90 mm; trinity_h: radius 90 mm; trinity_b: radius 90 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
-    "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): trinity_t: radius 90 mm; trinity_h: radius 90 mm; trinity_b: radius 90 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
-   },
-   "released": false,
-   "step_s": 0.072,
-   "experimental": true,
-   "note": "experimental base (owner, 2026-10-21: out of tasks/ in 1.2.0, in 1.2.1 after the owner's demo review). creation_source, instance_package, release_commit, nop and the evidence's runs come from its frozen instance and the 1.2.0 runs and are filled then; difficulty is provisional (the owner decides). Development record: experimental variation, no tier; reference oracles/interlocked-claws-13-i01 (9596 rows, final state 66be99300a3ceebd); acceptance round r1 PASS (2026-10-16: on 42bda423c until 10-14, then on a7ad58b50, a text-only difference); Harbor under this base PASS (2026-10-13, test commit cd17b901b); listed under the owner's rule of 2026-10-13 (all four items done); numbered 13 in the family under the RoboARC names (2026-10-16; the owner confirms the number)",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
-  }
- },
+ "experimental_bases": {},
  "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
  "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
 }
