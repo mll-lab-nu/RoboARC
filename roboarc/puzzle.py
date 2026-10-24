@@ -40,20 +40,26 @@ def _import_tooling(root: Path):
     return rcb_topogym
 
 
-def stage_instance(task: TaskInfo, *, bind: bool = True) -> Path:
-    """The task's frozen instance in a fresh per-process directory under the cache (instance.json, instance_assets/ and,
-    with bind=True, the task's runtime_binding.json, which makes the Session check the whole runtime): staged and checked
-    by the image's stage_instance.py (as the task Dockerfiles do), or copied from ROBOARC_INSTANCES/<base>/."""
+def stage_instance(task: TaskInfo, *, bind: bool = True, seed: int = 0) -> Path:
+    """The task's frozen instance of instance seed `seed` in a fresh per-process directory under the cache (instance.json,
+    instance_assets/ and, with bind=True, the seed's runtime_binding.json, which makes the Session check the whole
+    runtime): staged and checked by the image's stage_instance.py (as the task Dockerfiles do; `--seed-file` for a seed
+    other than 0), or copied from ROBOARC_INSTANCES/<base>/ (a seed S > 0: <base>/seeds/<S>/)."""
+    seed = int(seed)
+    if seed not in task.seeds:
+        raise ValueError(f"{task.id} allows the instance seeds {list(task.seeds)}, not {seed}")
     root = cache_dir() / "instances"
     root.mkdir(parents=True, exist_ok=True)
-    dest = Path(tempfile.mkdtemp(prefix=f"{task.base}-", dir=root))
+    dest = Path(tempfile.mkdtemp(prefix=f"{task.base}-s{seed}-", dir=root))
     atexit.register(shutil.rmtree, dest, True)
-    binding = Path(task.task_dirs["privileged"]) / "environment" / "runtime_binding.json"
+    env_dir = Path(task.task_dirs["privileged"]) / "environment"
+    binding = env_dir / ("runtime_binding.json" if seed == 0 else f"runtime_binding.s{seed}.json")
+    rel = Path(task.base) if seed == 0 else Path(task.base) / "seeds" / str(seed)
     local = os.environ.get("ROBOARC_INSTANCES")
     if local:
-        src = Path(local) / task.base
+        src = Path(local) / rel
         if not (src / "instance.json").is_file():
-            raise FileNotFoundError(f"no frozen instance for {task.base} under ROBOARC_INSTANCES={local}")
+            raise FileNotFoundError(f"no frozen instance for {task.base} seed {seed} under ROBOARC_INSTANCES={local}")
         shutil.copyfile(src / "instance.json", dest / "instance.json")
         shutil.copytree(src / "instance_assets", dest / "instance_assets", symlinks=True)
         if bind:
@@ -62,14 +68,18 @@ def stage_instance(task: TaskInfo, *, bind: bool = True) -> Path:
     if not in_puzzle_image():
         raise RuntimeMismatch(f"no frozen instances here ({IMAGE_INSTANCES} is the image's): run inside "
                               f"{task.image}, or set ROBOARC_INSTANCES to a local copy (instances/<base>/ per base)")
-    cmd = [sys.executable, str(IMAGE_STAGE), task.base, str(dest)] + (["--binding", str(binding)] if bind else [])
     if not bind:     # stage_instance.py checks against a binding; without one, copy the files as it does
-        shutil.copyfile(IMAGE_INSTANCES / task.base / "instance.json", dest / "instance.json")
-        shutil.copytree(IMAGE_INSTANCES / task.base / "instance_assets", dest / "instance_assets", symlinks=True)
+        shutil.copyfile(IMAGE_INSTANCES / rel / "instance.json", dest / "instance.json")
+        shutil.copytree(IMAGE_INSTANCES / rel / "instance_assets", dest / "instance_assets", symlinks=True)
         return dest / "instance.json"
+    cmd = [sys.executable, str(IMAGE_STAGE), task.base, str(dest), "--binding", str(env_dir / "runtime_binding.json")]
+    if seed:         # the seed's instance against its own binding (runtime_binding.s<S>.json beside --binding)
+        (dest / "seed").write_text(f"{seed}\n")
+        cmd += ["--seed-file", str(dest / "seed")]
     p = subprocess.run(cmd, capture_output=True, text=True)
     if p.returncode != 0:
-        raise RuntimeMismatch(f"staging the frozen instance of {task.base} failed: {(p.stderr or p.stdout).strip()[-800:]}")
+        raise RuntimeMismatch(f"staging the frozen instance of {task.base} seed {seed} failed: "
+                              f"{(p.stderr or p.stdout).strip()[-800:]}")
     return dest / "instance.json"
 
 
@@ -106,7 +116,7 @@ class PuzzleEnv(RoboARCEnv):
     primitives(), safety(), ... are all there); stepping it directly bypasses this environment's bookkeeping."""
 
     def __init__(self, task: TaskInfo, *, renderer="nyx", cameras=None, depth=False, image_size=None, render_mode=None,
-                 rules="standard", max_episode_steps=None, strict=True):
+                 rules="standard", max_episode_steps=None, strict=True, instance_seed: int = 0):
         super().__init__(task, renderer=renderer, cameras=cameras, depth=depth, image_size=image_size,
                          render_mode=render_mode, max_episode_steps=max_episode_steps, strict=strict)
         if _SESSION_BUILT:
@@ -126,7 +136,8 @@ class PuzzleEnv(RoboARCEnv):
         else:
             os.environ["RCB_RENDER"] = "off"       # Nyx never starts; the camera rig and calibration stay
         M = self.M = _import_tooling(root)
-        instance = stage_instance(task, bind=strict)
+        self.instance_seed = int(instance_seed)
+        instance = stage_instance(task, bind=strict, seed=self.instance_seed)
         _SESSION_BUILT.append(task.id)
         S = self.session = M.Session(task.name, instance=str(instance), strict=strict, max_steps=self.max_episode_steps)
         generated = bool(getattr(S, "instance_generated", False))

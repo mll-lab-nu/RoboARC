@@ -48,9 +48,12 @@ class IkeaEnv(RoboARCEnv):
     """An IKEA MuJoCo task. `session` is the underlying rcb_ikea.Session (model, data, status(), final_check(), ...)."""
 
     def __init__(self, task: TaskInfo, *, renderer="nyx", cameras=None, depth=False, image_size=None, render_mode=None,
-                 max_episode_steps=None, strict=True, check_every: int = 40):
+                 max_episode_steps=None, strict=True, check_every: int = 40, instance_seed: int = 0):
         super().__init__(task, renderer=renderer, cameras=cameras, depth=depth, image_size=image_size,
                          render_mode=render_mode, max_episode_steps=max_episode_steps, strict=strict)
+        if int(instance_seed) not in task.seeds:
+            raise ValueError(f"{task.id} allows the instance seeds {list(task.seeds)}, not {instance_seed}")
+        self.instance_seed = int(instance_seed)
         if _SCENE_LOADED:
             raise RuntimeError("one IKEA environment per process (each scene's modules are top-level imports); use "
                                "subprocess vector environments for several")

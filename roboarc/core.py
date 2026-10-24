@@ -54,6 +54,8 @@ class RoboARCEnv(spaces.EnvBase):
         self._closed = False
         self.step_after_end = False      # IKEA: True (physics continues after the episode end, as in the privileged mode)
         self.camera_names: list[str] = []
+        self.step_images = True          # False: step() returns proprioception only; observe() renders when asked
+        self.instance_seed = 0
 
     # ---------------------------------------------------------------- subclass hooks
     def _reset_sim(self) -> None: raise NotImplementedError
@@ -122,7 +124,13 @@ class RoboARCEnv(spaces.EnvBase):
         self._terminated = bool(extra.pop("terminated"))
         self._truncated = (not self._terminated) and self._control_steps() >= self.max_episode_steps
         info = self._info({"success": success, **extra})
-        return self._observe(), reward, self._terminated, self._truncated, info
+        return self._observe(images=self.step_images), reward, self._terminated, self._truncated, info
+
+    def observe(self) -> dict:
+        """The observation of the current state (images included), without stepping: with `step_images = False` a
+        controller that looks only every few control steps (action chunks) renders only when it looks."""
+        self._check_open()
+        return self._observe()
 
     def render(self):
         """render_mode 'rgb_array': all cameras tiled into one RGB image (3 per row)."""
@@ -147,9 +155,9 @@ class RoboARCEnv(spaces.EnvBase):
         if self._closed:
             raise RuntimeError("the environment is closed")
 
-    def _observe(self) -> dict:
+    def _observe(self, images: bool = True) -> dict:
         obs = {}
-        if self.camera_names:
+        if self.camera_names and images:
             rgb, dep = self._images(self.camera_names, self.want_depth)
             obs["rgb"] = {c: _resize(np.ascontiguousarray(rgb[c][..., :3]).astype(np.uint8), self.image_size)
                           for c in self.camera_names}
@@ -164,7 +172,8 @@ class RoboARCEnv(spaces.EnvBase):
 
     def describe(self) -> dict:
         """Everything about this task that the API exposes, as plain data (spaces, layouts, rates, limits, cameras)."""
-        return {"task": self.task.to_dict(), "instruction": self.instruction, "control_hz": self.control_hz, "physics_substeps": self.physics_substeps,
+        return {"task": self.task.to_dict(), "instance_seed": self.instance_seed, "instruction": self.instruction,
+                "control_hz": self.control_hz, "physics_substeps": self.physics_substeps,
                 "action_layout": list(self.action_layout), "action_low": self.action_space.low.tolist(),
                 "action_high": self.action_space.high.tolist(), "proprio_layout": list(self.proprio_layout),
                 "proprio_groups": self.proprio_groups, "cameras": self.camera_info(),
@@ -174,7 +183,7 @@ class RoboARCEnv(spaces.EnvBase):
 
 def make(task_id: str, *, renderer: str = "nyx", cameras=None, depth: bool = False, image_size=None,
          render_mode: str | None = None, rules: str = "standard", max_episode_steps: int | None = None,
-         strict: bool = True, **kwargs) -> RoboARCEnv:
+         strict: bool = True, instance_seed: int = 0, **kwargs) -> RoboARCEnv:
     """Build the environment of one RoboARC task (see docs/API.md). One environment per process: the simulators are
     one-scene-per-process; use subprocess vector environments (gymnasium.vector.AsyncVectorEnv) for several.
 
@@ -187,6 +196,9 @@ def make(task_id: str, *, renderer: str = "nyx", cameras=None, depth: bool = Fal
                are the same.
     strict     True (default): refuse to run outside the graded runtime (image, EPA-patched libmujoco, numpy masking,
                frozen files); False only warns.
+    instance_seed  which of the task's frozen instances (TaskInfo.seeds; docs/RUNNING.md "Seeds"): 0 (default) is the
+               released one; seeds 1 and 2 of a puzzle change its looks only (colours, materials, textures), never its
+               physics. Gymnasium's reset(seed=...) does not choose it: an instance is fixed for the environment's life.
     Further keyword arguments go to the suite's environment (IkeaEnv: check_every)."""
     info = resolve(task_id)
     if rules not in RULES:
@@ -194,11 +206,13 @@ def make(task_id: str, *, renderer: str = "nyx", cameras=None, depth: bool = Fal
     if info.suite == "puzzles":
         from .puzzle import PuzzleEnv
         env = PuzzleEnv(info, renderer=renderer, cameras=cameras, depth=depth, image_size=image_size,
-                        render_mode=render_mode, rules=rules, max_episode_steps=max_episode_steps, strict=strict, **kwargs)
+                        render_mode=render_mode, rules=rules, max_episode_steps=max_episode_steps, strict=strict,
+                        instance_seed=instance_seed, **kwargs)
     else:
         from .ikea import IkeaEnv
         env = IkeaEnv(info, renderer=renderer, cameras=cameras, depth=depth, image_size=image_size,
-                      render_mode=render_mode, max_episode_steps=max_episode_steps, strict=strict, **kwargs)
+                      render_mode=render_mode, max_episode_steps=max_episode_steps, strict=strict,
+                      instance_seed=instance_seed, **kwargs)
     return env
 
 

@@ -39,6 +39,7 @@ class TaskInfo:
     reference: str | None = None    # the reference trajectory (.npz) of the privileged mode, if any
     reference_end_hash: str | None = None   # the state hash the reference ends on (recorded; prefix for IKEA)
     reference_settled_hash: str | None = None   # IKEA: after the grader's 1 s hold of the last row (recorded)
+    seeds: tuple = (0,)             # the instance seeds the task allows ([metadata.seeds] allowed; 0 = the default)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -62,6 +63,14 @@ def _env_value(dockerfile: Path, key: str) -> str | None:
                 if kv.startswith(key + "="):
                     return kv.split("=", 1)[1]
     return None
+
+
+def _seeds(md: dict) -> tuple:
+    """[metadata.seeds] allowed as a tuple of ints (docs/PROTOCOL.md §2.13; RoboARC lists them), else (default,)."""
+    given = md.get("seeds") if isinstance(md.get("seeds"), dict) else {}
+    default = int(given.get("default", md.get("instance_seed", 0)))
+    allowed = given.get("allowed", [default])
+    return tuple(int(x) for x in allowed) if isinstance(allowed, list) else (default,)
 
 
 def reference_pins(root: Path) -> dict[str, dict]:
@@ -101,7 +110,7 @@ def _puzzle_tasks(root: Path) -> dict[str, TaskInfo]:
             image=image, render_image=image, max_episode_steps=int(cap) if cap else 200_000,
             agent_time_limit_s=float(meta.get("agent", {}).get("timeout_sec", 10800.0)),
             task_dirs={"privileged": str(d), **({"standard": str(std)} if std.is_dir() else {})},
-            reference=str(ref) if ref.is_file() else None, reference_end_hash=expect)
+            reference=str(ref) if ref.is_file() else None, reference_end_hash=expect, seeds=_seeds(md))
     return out
 
 
@@ -138,7 +147,7 @@ def _ikea_tasks(root: Path) -> dict[str, TaskInfo]:
             agent_time_limit_s=float(meta.get("agent", {}).get("timeout_sec", 10800.0)),
             task_dirs={"privileged": str(d), **({"standard": str(std)} if std.is_dir() else {})},
             reference=str(ref) if ref.is_file() else None, reference_end_hash=h.get("end"),
-            reference_settled_hash=h.get("settled"))
+            reference_settled_hash=h.get("settled"), seeds=_seeds(md))
     return out
 
 
