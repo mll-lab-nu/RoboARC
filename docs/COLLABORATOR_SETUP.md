@@ -67,7 +67,7 @@ appearance seed 2 (its reference solution is validated at seeds 0, 1 and 2). The
 
 ```bash
 for m in privileged standard; do
-  python3 scripts/task_seed.py materialize tasks/roboarc-interlocked-claws-03-i01-$m --seed 2 --out /tmp/claws03-s2-$m
+  python3 scripts/task_seed.py materialize ./tasks/roboarc-interlocked-claws-03-i01-$m --seed 2 --out /tmp/claws03-s2-$m
   harbor run -p /tmp/claws03-s2-$m -i roboarc-interlocked-claws-03-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-03-s2-$m
 done
 ```
