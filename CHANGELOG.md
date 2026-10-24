@@ -74,6 +74,16 @@ instances and references are unchanged: results graded under 1.3.0 stand.
   `source_hash.py --check`, the API tests (catalogue counts, reference pins, joint-speed rule: 13 privileged references
   faster than the standard rule, as before).
 
+### VLA policies (preview)
+- `roboarc.vla` and `python -m roboarc.vla.run`: graded episodes driven by a policy server speaking openpi's websocket
+  protocol, with openpi's ALOHA layout (two-arm robots) and DROID layout (the Franka + Robotiq families; joint
+  positions, or DROID's joint velocities); the grader is the standard mode's (live success and a fresh-process replay);
+  results in their own layout with a `vla:` configuration key. A stub policy server (`roboarc.vla.stub_server`: hold,
+  or a replayed reference). Documentation: `docs/VLA.md`. Extra `.[vla]`: msgpack 1.1.0, websockets 15.0.1.
+- `roboarc.make(..., instance_seed=S)` runs a puzzle's appearance seeds 1 and 2 (staged against their own bindings, as
+  the graded tasks stage them); `TaskInfo.seeds`. `env.observe()` and `env.step_images = False` render images only
+  when asked. Graded behaviour is unchanged.
+
 ## 1.3.0 (2026-10-23)
 
 A new family, wire_splicing, with its first base wire-splicing-01-i01 (hard) in `tasks/` in both modes: 102 bases in 15

@@ -17,7 +17,7 @@ compared or pooled.
 | interface | for | the solver | status |
 |---|---|---|---|
 | [Coding agents (Harbor)](#coding-agents-harbor) | LLM coding agents (Codex, Claude Code, ...) | writes and runs code that drives the robot, in a container, within a wall-clock budget; a separate verifier grades the result | released |
-| [VLA policies](#vla-policies) | vision-language-action models | a policy server receives camera images, robot state and a language instruction and returns action chunks (openpi conventions) | in development |
+| [VLA policies](#vla-policies) | vision-language-action models | a policy server receives camera images, robot state and a language instruction and returns action chunks (openpi conventions) | preview |
 | [Python API](#python-api) | RL, imitation learning, scripted control, your own loops | `roboarc.make(task_id)`: a Gymnasium-compatible environment | released |
 
 An agent that calls a VLA policy as a tool (Harbor + VLA) is planned for later.
@@ -100,12 +100,18 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 
 ## VLA policies
 
-In development. A VLA model is served as a policy server following the conventions of Physical Intelligence's
-[openpi](https://github.com/Physical-Intelligence/openpi) (`openpi_client`, websocket): for each step RoboARC sends the
-robot's camera images, its state and the task's language instruction, executes the returned action chunk on the same
-physics, and grades the episode with the task's own grader. The ALOHA 2 tasks follow openpi's ALOHA layout; the
-single-arm Franka tasks follow its DROID layout. The command, the observation and action layouts and the results format
-will be documented here when it ships (see [CHANGELOG.md](CHANGELOG.md)).
+Preview. A VLA model served as an openpi policy server (Physical Intelligence's
+[openpi](https://github.com/Physical-Intelligence/openpi), `openpi_client`'s websocket protocol) gets the task's camera
+images, the robot's state and a one-sentence instruction, returns action chunks, and each episode is graded by the
+task's own grader. The ALOHA 2 and IKEA tasks use openpi's ALOHA layout, the single-arm Franka tasks its DROID layout.
+
+```bash
+python -m roboarc.vla.run --task roboarc-interlocked-claws-03-i01 --policy ws://POLICY_HOST:8000 \
+  --seed 0,1,2 --episodes 1 --run-id <policy name> --out <results dir>      # inside the image, with one GPU
+```
+
+Setup, observation and action layouts per robot, prompts, episodes and grading, results and GPU needs:
+[docs/VLA.md](docs/VLA.md).
 
 ## Python API
 
@@ -139,7 +145,7 @@ in [examples/](examples/).
 | path | what |
 |---|---|
 | `tasks/roboarc-*` | the Harbor task directories: 222 puzzle tasks and 24 IKEA tasks (`roboarc-ikea-*`); generated, never edit them by hand |
-| `roboarc/`, `pyproject.toml` | the Python package `roboarc` ([docs/API.md](docs/API.md)); `examples/`, `tests/api/` its examples and tests |
+| `roboarc/`, `pyproject.toml` | the Python package `roboarc` ([docs/API.md](docs/API.md)), with `roboarc.vla` for VLA policies ([docs/VLA.md](docs/VLA.md)); `examples/`, `tests/api/` its examples and tests |
 | `ikea/` | IKEA MuJoCo: the generators, references and evidence (`ikea/scripts/ikea_mujoco/`), the scenes and the two image recipes (`ikea/images/ikea-mujoco/`); see [ikea/README.md](ikea/README.md) |
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
 | `scripts/` | the task layer the Harbor tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`), build helpers (`stamp_mtimes.py`, `check_image_files.py`) and `send_results.sh` / `receive_results.sh` |

@@ -31,8 +31,9 @@ Contents: [Design](#design) · [Running](#running) · [Tasks](#tasks) · [make()
   `step(action)` is one call of that session's `step`. The substeps, timesteps, solver settings, limits, guards,
   success predicates and failure predicates are the session's; this package adds no physics and no physics settings.
 - **The graded birth.** `reset()` is the session's own reset: the frozen instance's state, whose hash
-  (`info["birth_hash"]`) is the one the graded tasks start from. `seed` is accepted and has no effect: every task is one
-  fixed instance.
+  (`info["birth_hash"]`) is the one the graded tasks start from. Gymnasium's `reset(seed=...)` is accepted and has no
+  effect on the scene; the instance is chosen once, at `make(..., instance_seed=S)`: 0 is the released instance, and the
+  puzzles' seeds 1 and 2 are the same scene and physics in other colours and materials (`TaskInfo.seeds`).
 - **Bit identity.** Stepping a task's reference trajectory through the API from `reset()` reaches exactly the state hash
   the release recorded for it ([Tests](#tests)).
 - **Thin.** No skills (grasp, place, navigate). The only optional wrapper maps end-effector poses to joint targets with
@@ -109,7 +110,8 @@ Canonical ids: `roboarc-<family>-<NN>-i01` (e.g. `roboarc-orbits-02-i01`) and `r
 the namespace of their `[task].name`, `roboarc` or 1.0.0's `robot-coding-bench`), the bases without the prefix (`orbits-02-i01`, `orbits-02`) and
 the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment: the frozen instance is the same.
 
-`TaskInfo` (no simulator needed): `id`, `suite` (`puzzles` | `ikea`), `family`, `name` (the tooling's task key),
+`TaskInfo` (no simulator needed): `id`, `suite` (`puzzles` | `ikea`), `family`, `name` (the tooling's task key), `seeds`
+(the allowed instance seeds),
 `base`, `difficulty`, `robot`, `description`, `image`, `render_image`, `max_episode_steps` (the verifier's row cap),
 `agent_time_limit_s` (the Harbor agent budget: 10800 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
 `reference_end_hash` and, for IKEA, `reference_settled_hash`. 109 of the 111 puzzle bases ship a reference
@@ -119,7 +121,7 @@ the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment
 
 ```python
 roboarc.make(task_id, *, renderer="nyx", cameras=None, depth=False, image_size=None, render_mode=None,
-             rules="standard", max_episode_steps=None, strict=True, **kwargs)
+             rules="standard", max_episode_steps=None, strict=True, instance_seed=0, **kwargs)
 ```
 
 | option | meaning |
@@ -132,6 +134,7 @@ roboarc.make(task_id, *, renderer="nyx", cameras=None, depth=False, image_size=N
 | `rules` | puzzles: `"standard"` (default) adds the standard mode's joint-speed rule to the tooling's limits; `"privileged"` applies the tooling's limits only (what privileged agents and their verifier's replays get). IKEA: one rule set |
 | `max_episode_steps` | truncation (default: the task's verifier row cap) |
 | `strict` | `True` (default): refuse to run outside the graded runtime (`roboarc.RuntimeMismatch`); `False`: warn and run |
+| `instance_seed` | which frozen instance (`TaskInfo.seeds`): 0 (default) the released one; puzzles 1, 2 the appearance seeds, staged against their own runtime bindings as the graded tasks stage them |
 | `check_every` | IKEA only: control steps between success checks (default 40 = 0.1 s) |
 
 One environment per process: both simulators are one scene per process (the tooling's rule). For several
@@ -143,6 +146,7 @@ environments use subprocess vector environments (`gymnasium.vector.AsyncVectorEn
 |---|---|
 | `reset(seed=None, options=None)` | the frozen instance -> `(obs, info)`; `info["birth_hash"]` |
 | `step(action)` | one control step -> `(obs, reward, terminated, truncated, info)` |
+| `observe()` | the observation of the current state without stepping; with `env.step_images = False`, `step()` returns proprioception only and images are rendered only when `observe()` is called (a controller that looks every few steps, as action-chunking policies do) |
 | `render()` | `render_mode="rgb_array"`: the cameras tiled (3 per row, 424 x 240 each) |
 | `get_state()` / `set_state(state)` | a snapshot of the episode and its restore (below) |
 | `close()` | release the simulator |
@@ -300,7 +304,8 @@ standard mode no `ee_pose` action.
 - `examples/replay_reference.py <task> [--video out.mp4]`: the reference through the API, checked against its recorded
   end hash.
 - `examples/vla_loop.py <task>`: where a VLA plugs in: images + proprioception + instruction in, a chunk of joint
-  targets out.
+  targets out. For policies served the openpi way, `python -m roboarc.vla.run` runs graded episodes
+  ([docs/VLA.md](VLA.md)).
 
 The command line: `python -m roboarc list | info <task> [--sim] | check | replay <task> [--traj F] [--mode privileged|standard]
 [--rules standard|privileged] [--renderer none|mujoco|nyx] | patch-mujoco`.
@@ -357,7 +362,7 @@ pass `final_check`, and no step was shortened by any limit. Rendering with Nyx l
 
 ## Limitations
 
-- Each task is one frozen instance: there is no randomisation of the scene (`seed` has no effect), as in the benchmark.
+- Each task is a few frozen instances (`instance_seed`): there is no randomisation of the scene, as in the benchmark.
 - One environment per process (use subprocess vector environments).
 - The standard mode's service has more than the per-step interface: chunked submissions with interpolation, its wall
   clock, its live-episode grading and replay. The API's step is the service's control step; a policy that runs well
