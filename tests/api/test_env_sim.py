@@ -140,7 +140,9 @@ def test_reference_reaches_success(env, tmp_path):
 
 
 def test_ee_pose_wrapper(env):
-    """EEPoseAction (puzzles): a delta of +1 cm in z per step lifts the first arm's TCP; the plan says ok."""
+    """EEPoseAction (puzzles): a delta of +1 cm in z per step lifts the first arm's TCP; the plan says ok. How fast the
+    TCP follows depends on the scene's start pose (the joint-speed rule, the arm's load), so it gets 30 steps and must
+    rise by 5 mm, never sinking on the way."""
     if env.task.suite != "puzzles":
         pytest.skip("the EE wrapper is for the puzzles")
     from roboarc.wrappers import EEPoseAction
@@ -154,10 +156,13 @@ def test_ee_pose_wrapper(env):
     for i, arm in enumerate(u.arms):
         a[8 * i + 7] = hold[u.session.robot.grip_index[arm]]
     a[2] = 0.01
-    for _ in range(10):
+    zs = [z0]
+    for _ in range(30):
         obs, r, term, trunc, info = w.step(a)
+        zs.append(float(obs["proprio"][g + 2]))
     assert info["ee_plan"][0]["status"] == "ok", info["ee_plan"]
-    assert float(obs["proprio"][g + 2]) - z0 > 0.005
+    assert all(b >= a_ - 1e-4 for a_, b in zip(zs, zs[1:])), zs
+    assert zs[-1] - z0 > 0.005, zs
 
 
 def test_camera_info_frames(env):
