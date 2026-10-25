@@ -34,6 +34,10 @@ def load_scene_config(config):
                 if isinstance(height, bool) or not isinstance(height, (int, float)) or not math.isfinite(height) or not 0 <= height <= .15:
                     raise ValueError("robot_riser_height_m must be in [0, .15]")
                 scene.robot_control.robot.base_riser_height_m = float(height)
+    if config.task_id == "orbits" and config.variation_id.endswith("_chain"):
+        # The rigid-chain settings' scaled fixture needs a longer table on its goal side; the FEM Orbits variants keep
+        # the shared table.
+        scene = OmegaConf.merge(scene, OmegaConf.load(root / "task_configs" / "orbits.yaml"))
     # Task framing is calibrated for the standard Panda scene. Keep the robot's
     # resolution, wrist mount and observation keys when merging fixed views.
     camera_profile = _TASK_CAMERA_PROFILES.get(config.task_id)

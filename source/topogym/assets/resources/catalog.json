@@ -615,6 +615,18 @@
       "path": "variations/rope_threading/rd_hard.json",
       "sha256": "41cd1061aa62006cf603aa418a08382203a8a2821116a8dc6d35c7e044582dd4",
       "source": "scripts/robotangle/redesign/rope_threading/export_runtime.py"
+    },
+    "variations/orbits/chain_k0_v3/easy.npz": {
+      "license": null,
+      "path": "variations/orbits/chain_k0_v3/easy.npz",
+      "sha256": "1ba5cd2461c9a4006c5b088c8ecc00b6d7fffb506627b542998d65ef9b3b3d81",
+      "source": "orbits rigid chain easy: the fixed state K0 on the fixture L0_bt15_r1b1_r2on20, settled in MuJoCo (k_states_L0bt15r1b1r2on20/easy/K0_settled_mujoco.npz, the frozen mj_env physics, 2026-10-09)"
+    },
+    "variations/orbits/chain_k0_v3/medium.npz": {
+      "license": null,
+      "path": "variations/orbits/chain_k0_v3/medium.npz",
+      "sha256": "9df81794e9ace757a6879523fc740d75e9bdded55328908b8ea567950f1be0f5",
+      "source": "orbits rigid chain medium: the fixed state K0 on the fixture L0_bt15_r1b1_r2on20, settled in MuJoCo (k_states_L0bt15r1b1r2on20/medium/K0_settled_mujoco.npz, the frozen mj_env physics, 2026-10-09)"
     }
   },
   "schema_version": 1

@@ -10,9 +10,11 @@ Fields:
   contact  every collision geom: solref [timeconst, dampratio] / solimp, the task bodies' and table's condim and friction
            (sliding from the task material's friction, else `friction`; torsional, rolling). The robot keeps its MJCF's
            condim and friction (ALOHA: condim 6, mu 1); margin optional.
-  weld     the assisted grasp welds' solref / solimp.
+  weld     the assisted grasp welds' solref / solimp; optional torquescale (MuJoCo's weld torquescale, default 1) and
+           anchor ("hand", the default: the weld point is the hand link's origin; "target": the grasped link's origin).
   weld_work_guard_j  optional (absent: off): an assisted grasp weld whose net work within its hold exceeds this many
            joules is released through the slip path (grasp.py MujocoGraspBackend, reason grasp_slipped).
+  diag_exact  optional False: keep MuJoCo's approximate constraint diagonal (default: mjENBL_DIAGEXACT on every model).
   mjcf_equality  optional {solref, solimp}: replaces the authored softness of an MJCF entity's <equality><connect>.
   birth_overlap_exclude  optional True: an MJCF entity's same-root, non-parent body pairs that overlap in the authored
            pose are excluded from contact (Genesis' neutral-overlap filter; mjcf_entity.py).
@@ -23,7 +25,8 @@ Fields:
            coupling: {solref, solimp} of the robot MJCF's joint couplings (equality joint: the ALOHA's second finger
            follows the driven one; MJCF default 20 ms);
            maxhullvert: the robot's collision meshes collide as convex hulls of at most this many vertices (MuJoCo's
-           maxhullvert; visual meshes are untouched), maxhullvert_skip: mesh-name prefixes that keep their full hull.
+           maxhullvert; visual meshes are untouched), maxhullvert_skip: mesh-name prefixes that keep their full hull;
+           condim: optional, every colliding robot geom's condim (instead of its MJCF's).
   static_contact  {soft, keep}, the contacts of static bodies (the table, the ground, task links fixed to the world;
            docs/rcb/MUJOCO_CORE.md has the mixing table). soft: a class (SOFT_CONTACT) the static bodies not kept carry
            with solmix 0: a robot geom with robot.self_contact (needed) touching them gets it, a grasp pad keeps its own
@@ -466,6 +469,23 @@ def _orbits(name, rings, *, ring_parts=True):
                 speed_clamp=dict(links="cord::*", v_m_s=3., w_rad_s=120., rate=.5))
 
 
+# orbits_chain_own_v1 (2026-10-12): the orbits chain settings' own physics (PROFILES below): one 2.5 ms step per tick
+# (the setting's mujoco_settings), CG with 50 iterations and line-search iterations to 1e-8, the elliptic cone at impratio
+# 10 (the ALOHA MJCF's), MuJoCo's default convex collision and approximate constraint diagonal; the table at MuJoCo's
+# default contact; the assisted grasp's weld at 5 ms, its point the grasped link's origin, torquescale 3.
+_ORBITS_OWN = dict(
+    name="orbits_chain_own_v1",
+    solver=dict(integrator="implicitfast", solver="CG", iterations=50, ls_iterations=50, tolerance=1e-8,
+                cone="elliptic", impratio=10.),
+    contact=dict(solref=[.02, 1.], solimp=[.9, .95, .001, .5, 2.], condim=3, friction=1., table_friction=1.,
+                 torsional_friction=.005, rolling_friction=.0001, margin=0.),
+    weld=dict(solref=[.005, 1.], solimp=[.9, .95, .001, .5, 2.], torquescale=3., anchor="target"),
+    robot=dict(armature=None, contact=dict(solref=[.01, 1.], solimp=[.9, .95, .001, .5, 2.]), condim=3),
+    diag_exact=False,
+    coacd=None,
+)
+
+
 # blanket_flatten on a VBD cloth: MuJoCo steps
 # the ALOHA (as claws imports it) and the table only; the cloth is Newton's VBD on the authored 51 x 41 grid
 # (cloth_vbd.py: its settings there). Selected by name (SimulatorConfig.mujoco_profile); the flex (blanket_v1) stays the
@@ -562,6 +582,12 @@ PROFILES = {
     ("orbits", "orbits_medium"): _orbits("orbits_chain_fem_v3", 3),
     ("orbits", "orbits_hard"): _orbits("orbits_chain_fem_v3", 4),
     ("orbits", "orbits_reference85"): _orbits("orbits_chain_fem_v3", 4),
+    # orbits' own chain settings (orbits_{easy,medium}_chain; tasks/orbits/chain_tiers.py): the physics of the environment
+    # their reference chains were planned and checked in (the user 10-12: kept as this setting's own profile). Its scene
+    # keeps the authored MJCF's contacts (fixture and handle 5 ms, cord links 10 ms: chain_tiers.CORD_SOLREF; the tie
+    # .005 .5 / .98 .98) and the ALOHA MJCF's own (10 ms, mu 1, its armature, damping and 20 ms finger coupling) at
+    # condim 3.
+    **{("orbits", f"orbits_{tier}_chain"): _ORBITS_OWN for tier in ("easy", "medium")},
     # very_easy .. easy, hard: the cages declare slab groups and wedges down to 0.027 mm thick (sliver hulls); they collide
     # as an exact fat re-partition (thinnest piece 1.26 mm; hard 0.32 mm, the width of an island its top rim declares).
     ("hedgehog_in_cage", None): dict(_HEDGEHOG, name="hedgehog_v4", prism_partition=dict(fatten_m=.0015)),

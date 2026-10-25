@@ -1,0 +1,17 @@
+{
+ "description": "The fixed state K0 of the rigid-chain Orbits settings on the fixture L0_bt15_r1b1_r2on20 (ring 2 and every post / ring after it 20 mm further +x; model_revision chain231_l0bt15r1b1r2on20_v1): the loop round the last post on the base, both legs along it, the handle pulled straight on the table; task-local cord points from eye 0 to eye 1, the handle position and orientation (wxyz). Settled in MuJoCo (Orbits runs only in our MuJoCo env since 2026-10-09; not checked in Genesis): the K-state start runs/oracle_dev/orbits_chain/k_states_L0bt15r1b1r2on20/<tier>/K0_settled_mujoco.npz, so the env's default start and Config.start K0 are the same state. Replaces chain_k0_v2 (fixture L0_bt15_r1b1, Genesis-settled).",
+ "files": {
+  "easy.npz": {
+   "links": 93,
+   "sha256": "1ba5cd2461c9a4006c5b088c8ecc00b6d7fffb506627b542998d65ef9b3b3d81",
+   "from_start": "k_states_L0bt15r1b1r2on20/easy/K0_settled_mujoco.npz (the same file)",
+   "settled": "generated from the K0 template and settled in MuJoCo (k_states.py, the frozen mj_env physics)"
+  },
+  "medium.npz": {
+   "links": 113,
+   "sha256": "9df81794e9ace757a6879523fc740d75e9bdded55328908b8ea567950f1be0f5",
+   "from_start": "k_states_L0bt15r1b1r2on20/medium/K0_settled_mujoco.npz (the same file)",
+   "settled": "generated from the K0 template and settled in MuJoCo (k_states.py, the frozen mj_env physics)"
+  }
+ }
+}

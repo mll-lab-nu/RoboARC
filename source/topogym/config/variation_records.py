@@ -1191,3 +1191,29 @@ RECORDS = (*RECORDS, {'task_id': 'caliper_sorting',
                       'reason': None,
                       'validation': 'not_runtime_validated',
                       'pool': 'experimental'})
+
+
+# orbits rigid-chain settings (2026-10-12; tasks/orbits/chain_tiers.py): easy and medium with the cord as a rigid capsule
+# chain on the 1.4x-scaled fixture L0_bt15_r1b1_r2on20, their own MuJoCo profile (profiles._ORBITS_OWN), MuJoCo only.
+RECORDS = (*RECORDS, {'task_id': 'orbits',
+                      'variation_id': 'orbits_easy_chain',
+                      'difficulty': None,
+                      'family_id': 'rigid_chain',
+                      'model_revision': 'chain231_l0bt15r1b1r2on20_v1',
+                      'implementation': 'topogym.tasks.orbits.orbits_easy_chain:OrbitsEasyChainTask',
+                      'aliases': [],
+                      'status': 'integrated',
+                      'reason': None,
+                      'validation': 'not_runtime_validated',
+                      'pool': 'experimental'},
+                     {'task_id': 'orbits',
+                      'variation_id': 'orbits_medium_chain',
+                      'difficulty': None,
+                      'family_id': 'rigid_chain',
+                      'model_revision': 'chain231_l0bt15r1b1r2on20_v1',
+                      'implementation': 'topogym.tasks.orbits.orbits_medium_chain:OrbitsMediumChainTask',
+                      'aliases': [],
+                      'status': 'integrated',
+                      'reason': None,
+                      'validation': 'not_runtime_validated',
+                      'pool': 'experimental'})

@@ -1,0 +1,8 @@
+# Orbits rigid-chain settings orbits_easy_chain / orbits_medium_chain only (user, 2026-10-07): the 1.4x-scaled fixture's 0.20 m
+# half-size goal zone needs the table 5 cm longer on the goal side (world -y; 3.5 cm is the least). Every other task and variant
+# keeps world_tabletop_v1's table.
+env:
+  world:
+    table:
+      pos: [-0.1356786, -0.025, 0.45982145]
+      size: [1.5, 1.45, 0.9196429]

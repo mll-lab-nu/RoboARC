@@ -537,8 +537,12 @@ class MujocoGraspBackend:
         # weld eq_data: [anchor in body2 (target), anchor in body1 (hand), body1->body2 quaternion, torquescale]
         q_rel = np.asarray(reference["quaternion_wxyz"], dtype=np.float64)
         p_rel = np.asarray(reference["position_m"], dtype=np.float64)
-        m.eq_data[eid, 0:3] = -rotation(q_rel).inv().apply(p_rel)     # the hand origin, in the target's frame
-        m.eq_data[eid, 3:6] = 0.
+        if (self.world.profile or {}).get("weld", {}).get("anchor") == "target":
+            m.eq_data[eid, 0:3] = 0.                                   # profile weld.anchor "target": the target's
+            m.eq_data[eid, 3:6] = p_rel                                # origin, in the target's and the hand's frames
+        else:
+            m.eq_data[eid, 0:3] = -rotation(q_rel).inv().apply(p_rel)     # the hand origin, in the target's frame
+            m.eq_data[eid, 3:6] = 0.
         m.eq_data[eid, 6:10] = q_rel
         d.eq_active[eid] = 1
         if self.slip_force is not None:       # a new grasp: zeros before it

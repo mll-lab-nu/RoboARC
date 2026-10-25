@@ -389,6 +389,8 @@ class SceneBuilder:
                     if collides and not own:
                         for k, v in self._contact_attrs("robot").items():
                             g.set(k, v)
+                    if collides and self.profile["robot"].get("condim") is not None:
+                        g.set("condim", str(int(self.profile["robot"]["condim"])))    # profile robot.condim
                     if collides and self_contact and (self_contact_pads or not own) and body.get("name") not in frictionless:
                         # robot-robot contacts get the robot's own class; with solmix 0 a contact with any other geom
                         # takes that geom's solref / solimp unchanged (MuJoCo mixes by solmix; friction stays the
@@ -711,7 +713,8 @@ class SceneBuilder:
                     raise ValueError(f"grasp target link {target.link} not in {target.entity}")
                 name = f"grasp/{g.name}/{target.entity}/{target.link}"
                 ET.SubElement(self.equality, "weld", name=name, body1=g.hand_link, body2=link["body"], active="false",
-                              solref=numbers(w["solref"]), solimp=numbers(w["solimp"]))
+                              solref=numbers(w["solref"]), solimp=numbers(w["solimp"]),
+                              **({"torquescale": numbers([w["torquescale"]])} if "torquescale" in w else {}))
                 self.welds.append(dict(name=name, hand=g.name, hand_body=g.hand_link, target=[target.entity, target.link],
                                        body=link["body"]))
 

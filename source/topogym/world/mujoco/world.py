@@ -240,7 +240,10 @@ class MujocoWorld:
             # The exact constraint diagonal (mjENBL_DIAGEXACT) on every model, frozen scenes included: MuJoCo's
             # approximate diagonal (body / dof inverse weights at qpos0) mis-regularised contacts on the Robotiq's
             # passive four-bar and returned energy (buzz G8-G11); the regulariser then follows each row's true A_ii.
-            self.model.opt.enableflags |= int(mujoco.mjtEnableBit.mjENBL_DIAGEXACT)
+            # A profile may keep MuJoCo's approximate diagonal (profile diag_exact False: a family's own validated
+            # physics, orbits' chain settings).
+            if self.profile.get("diag_exact", True):
+                self.model.opt.enableflags |= int(mujoco.mjtEnableBit.mjENBL_DIAGEXACT)
             # The robot's fingertip pads meet the other finger's pads, never its hull (robot.FINGER_PADS), frozen scenes
             # included: a pad driven into the other finger's hull made rows the exact diagonal no longer bounds (BL1).
             from .robot import separate_finger_pads, set_spring_refs
