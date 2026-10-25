@@ -49,6 +49,14 @@ WALL_LIMIT_MIN = 180         # a reference execution: within the 3 h agent budge
 # trial host runs it; there the limit is raised so that a slow host never fails a reference (the speed acceptance is
 # judged on the trial host). The report says when it is.
 WALL_LIMIT_MIN = float(os.environ.get("STRESS_WALL_LIMIT_MIN", WALL_LIMIT_MIN))
+sys.path.insert(0, str(_env.REPO / "scripts"))
+import task_conventions as TC  # noqa: E402  CUTOFF_EXCEPTIONS: the bases with an agent budget above the 3 h cap
+
+
+def wall_limit_min(base):
+    """A reference execution's limit for `base`: WALL_LIMIT_MIN, or the base's own agent budget where the owner excepted
+    it from the cap (wire-splicing-01-i01: 6 h, 360 min)."""
+    return max(WALL_LIMIT_MIN, TC.CUTOFF_EXCEPTIONS.get(f"roboarc-{base}", 0) / 60)
 
 
 def sha256(p):
@@ -169,7 +177,8 @@ def run_round(a):
     for name, jobs in replay_sets.items():
         if jobs:
             print(f"{name}: {len(jobs)} replays", flush=True)
-            run_jobs(jobs, res / name, a.replay_workers, echo=False)
+            limit = max([wall_limit_min(base_of(j["instance"])) for j in jobs] if name in ("refs", "refs2") else [180])
+            run_jobs(jobs, res / name, a.replay_workers, timeout=60 * limit, echo=False)
     t.join()
     # confirm every candidate in a fresh process
     cands = []
@@ -231,7 +240,7 @@ def report(out):
             v = verdict.classify(a1)["verdict"]
             det = None if a2 is None else a1.get("state_sha") == a2.get("state_sha")   # None: the second run is missing
             wall = max(x["wall_s"] for x in (a1, a2) if x) / 60
-            good = bool(a1.get("success")) and v == "CLEAN" and det is not False and wall <= WALL_LIMIT_MIN
+            good = bool(a1.get("success")) and v == "CLEAN" and det is not False and wall <= wall_limit_min(b)
             rd["checks"]["reference"] = dict(success=a1.get("success"), verdict=v, deterministic=det, state_sha=a1.get("state_sha"),
                                              wall_min=round(wall, 1), steps=a1.get("control_steps"), ok=good)
             ok &= good
@@ -290,6 +299,9 @@ def report(out):
         crit += f"; reference wall limit {WALL_LIMIT_MIN:g} min on this loaded host (the speed acceptance is the trial host's)"
     else:
         crit += "; reference wall limit 180 min (a reference finishes within the 3 h agent budget, user 2026-10-13)"
+    for b in rows:
+        if wall_limit_min(b) > WALL_LIMIT_MIN:
+            crit += f"; {b}: {wall_limit_min(b):g} min, its own agent budget (scripts/task_conventions.py CUTOFF_EXCEPTIONS)"
     if plan.get("routes_only"):
         crit += ("; references are routes only: the prefix strategy branches from their rows, but they are recorded and judged "
                  "(success, x2 sha) on their own profile, not here (a reference recorded on another profile, such as blanket's "

@@ -73,7 +73,8 @@ long routes. Name it several times to spread its share over more workers:
 of shared mechanisms (G-, B-, C-, K-series) are matched by base and simply skipped for other families.
 
 **Time:** a round takes roughly (episodes × average episode length) / procs. On ~24 cores, one 1,000-episode tier
-usually takes 1-4 h. The references' fresh replays count too: each must stay under 180 min with the observer (the 3 h agent budget, user 2026-10-13).
+usually takes 1-4 h. The references' fresh replays count too: each must stay under 180 min with the observer (the 3 h agent budget, user 2026-10-13), or under the base's own budget
+where the owner excepted it (`scripts/task_conventions.py` CUTOFF_EXCEPTIONS; wire-splicing-01-i01: 360 min).
 
 ## 3. Read the result
 
@@ -81,7 +82,7 @@ usually takes 1-4 h. The references' fresh replays count too: each must stay und
 
 | column | PASS needs |
 |---|---|
-| reference | success, CLEAN, the same hash in two fresh processes, ≤ 180 min |
+| reference | success, CLEAN, the same hash in two fresh processes, ≤ 180 min (an excepted base: its budget) |
 | nop | no success, CLEAN |
 | corpus / reproducers | no BREAKDOWN, deterministic |
 | confirmed BREAKDOWN **v2.12** | **0.** The search's candidates are replayed in fresh processes; only v2.12 decides |
