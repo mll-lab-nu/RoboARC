@@ -30,8 +30,8 @@ Inputs (Python standard library only, plus scripts/task_conventions.normalize):
                  files, tests/test.sh, environment/goal/*.png) before normalize. The values that come from another
                  source are fields, written {{NAME}} and filled by fields() below: the image (images/roboarc/VERSION, by digest: images/pins.json), the
                  agent egress (scripts/set_agent_egress.py), the tooling version, the oracle level and every record of
-                 release.json (reference solution, nop run, provenance, change log), the row cap and the standard
-                 service's time per call. check_texts() holds the facts every text must state as the pinned tooling
+                 release.json (reference solution, nop run, provenance, change log), the row cap, the standard
+                 service's time per call and its episode cap. check_texts() holds the facts every text must state as the pinned tooling
                  and release.json have them. Privileged packages also hold the instance's lock
                  (runtime_binding.upstream.json).
   release.json   the release (simulator source, runtime, tooling) and, per base, where its frozen instance comes from
@@ -85,6 +85,11 @@ GOAL_DIR = "environment/goal"   # a package's goal-state images (fold: the targe
 TIERS = ("very_easy", "easier", "easy", "medium", "hard")
 UNTIERED = "untiered"     # an experimental base's difficulty until the owner has reviewed and rated it
 MAX_STEPS = 200000        # rcb_topogym.MAX_STEPS (RCB_MAX_STEPS): the runaway guard on an episode's / a trajectory's length
+# A base whose reference is longer than MAX_STEPS / 1.5 gets its own guard (max_steps_of): the privileged row cap and the
+# standard episode cap (its package sets RCB_MAX_STEPS: "{{MAX_CONTROL_STEPS}}" in the sim service).
+MAX_STEPS_EXCEPTIONS = {
+    "orbits-04-i01": 360000,      # proposed 2026-10-25, owner approval pending: a reference of up to 240000 rows (now 228624)
+}
 MAX_CALL_WALL_S = 900     # v2_4/rcb_limited.MAX_CALL_WALL_S (RCB_MAX_CALL_WALL_S): no compose file overrides it
 CHUNK_S, WATCH_S = 10, 30  # the sim service's RCB_MAX_CHUNK_S / RCB_MAX_WATCH_S defaults
 BUILD_ALLOWANCE_S = 1800  # scene build, kernel compilation and video encoding inside the verifier's timeout
@@ -174,13 +179,17 @@ def verifier_timeout(base: str) -> float:
                2 * cutoff_of(base) + 1800)     # as grading_timeouts renders it
 
 
+def max_steps_of(base: str) -> int:
+    return MAX_STEPS_EXCEPTIONS.get(base, MAX_STEPS)
+
+
 def row_cap(base: str) -> int:
     """The longest trajectory the privileged verifier accepts: its two replays must fit [verifier] timeout_sec at 1.5 x
     the step time the instruction states (the second replay also renders the video), after BUILD_ALLOWANCE_S; rounded
     down to 1000 rows, never above rcb_topogym's own guard. By the instructions' step times knot_untying (about 1.2 s per
     step) fits about 18000 rows twice into 45000 s, and a verifier that runs out of time leaves no reward (arithmetic
     from the stated step times, not a measured run)."""
-    cap = min(MAX_STEPS, int((verifier_timeout(base) - BUILD_ALLOWANCE_S) / (3 * base_step(base))) // 1000 * 1000)
+    cap = min(max_steps_of(base), int((verifier_timeout(base) - BUILD_ALLOWANCE_S) / (3 * base_step(base))) // 1000 * 1000)
     traj = ORC / base / "privileged.npz"
     if traj.is_file():      # the reference trajectory must fit, with room
         with zipfile.ZipFile(traj) as z, z.open("actions.npy") as f:
@@ -393,7 +402,9 @@ def fields(base: str, mode: str, rec: dict) -> dict[str, str]:
         cap = row_cap(base)
         f.update(ROW_CAP=str(cap), ROW_CAP_MIN=f"{cap / control_hz(base) / 60:.1f}", VERIFIER_BUDGET_S=f"{verifier_timeout(base):.0f}")
     else:
-        f["TIME_PER_CALL"] = time_per_call(base_step(base), control_hz(base))
+        steps = max_steps_of(base)
+        f.update(TIME_PER_CALL=time_per_call(base_step(base), control_hz(base)), MAX_CONTROL_STEPS=str(steps),
+                 MAX_CONTROL_STEPS_MIN=f"{steps / control_hz(base) / 60:.0f}")
     return f
 
 

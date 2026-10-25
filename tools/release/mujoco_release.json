@@ -238,6 +238,22 @@
       "solver_substeps": 8
      },
      "design": "a cord loop with a handle, threaded through a ring between two posts with stopper balls; MuJoCo step 0.3125 ms"
+    },
+    "orbits-03-i01": {
+     "template": "horseshoe-ring-easy-i00",
+     "variation": "orbits_easy_chain",
+     "tier": "easy",
+     "gripper_space": "native",
+     "design": "a cord loop with a handle, threaded through two rings on three posts with a stopper ball; the cord a chain of 93 rigid capsule links (MuJoCo profile orbits_chain_own_v1)",
+     "note": "PREMADE instance (frozen in the TopoGym development tree; its topogym_source set to this release's source 64330fb8 after a rebuild under it gave the same scene.xml and meshes byte for byte; scene.json differs only in the name and hash of the intermediate robot MJCF); texts from orbits-02-i01's packages with the chain tier's goal, rules and grader lines (OrbitsEasyChainTask); reference: the delivered easy reference (topogym 6dc854193, 71558 rows, final state 63f4b247d608de9e, native grippers)"
+    },
+    "orbits-04-i01": {
+     "template": "horseshoe-ring-medium-i00",
+     "variation": "orbits_medium_chain",
+     "tier": "medium",
+     "gripper_space": "native",
+     "design": "a cord loop with a handle, threaded through three rings on four posts with a stopper ball; the cord a chain of 113 rigid capsule links (MuJoCo profile orbits_chain_own_v1)",
+     "note": "PREMADE instance (frozen in the TopoGym development tree; its topogym_source set to this release's source 64330fb8 after a rebuild under it gave the same scene.xml and meshes byte for byte; scene.json differs only in the name and hash of the intermediate robot MJCF); texts from orbits-02-i01's packages with the chain tier's goal, rules and grader lines (OrbitsMediumChainTask); reference not final (chosen 2026-10-26; rehearsal cq4b_m8_hk35, 228624 rows); row cap and cutoff by per-base exceptions (mk_tasks.py MAX_STEPS_EXCEPTIONS, task_conventions.py CUTOFF_EXCEPTIONS)"
     }
    }
   },

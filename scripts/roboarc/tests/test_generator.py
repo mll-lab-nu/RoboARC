@@ -18,7 +18,7 @@ import mk_tasks as M  # noqa: E402
 FIELDS = {"privileged": {"IMAGE", "AGENT_EGRESS", "TOOLING_VERSION", "ORACLE", "REFERENCE_SOLUTION", "NOP", "PROVENANCE",
                          "CHANGE_LOG", "ROW_CAP", "ROW_CAP_MIN", "VERIFIER_BUDGET_S"},
           "standard": {"IMAGE", "AGENT_EGRESS", "TOOLING_VERSION", "ORACLE", "REFERENCE_SOLUTION", "NOP", "PROVENANCE",
-                       "CHANGE_LOG", "TIME_PER_CALL"}}
+                       "CHANGE_LOG", "TIME_PER_CALL", "MAX_CONTROL_STEPS", "MAX_CONTROL_STEPS_MIN"}}
 DEV_TAG = re.compile(r"rcb-topogym:|\b(?:labv1\d\w*|hsbe2|obejw)/")
 
 
