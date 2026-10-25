@@ -1,6 +1,6 @@
 # Cast keyhole
 
-Family key `cast_keyhole` · 6 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
+Family key `cast_keyhole` · 5 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
 A gold piece and a silver keyhole piece are interlocked. The robot must free the silver keyhole piece completely and place all of it inside the green dashed goal square on the table, while the gold piece stays on the puzzle side.
 
@@ -25,13 +25,12 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-6 bases (very_easy 1, easier 1, easy 1, medium 1, hard 2). Each base is one frozen scene instance and ships as two Harbor task directories,
+5 bases (easier 1, easy 1, medium 1, hard 2). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-cast-keyhole-01-i01` | very_easy | `very_easy` |  | [privileged](../../tasks/roboarc-cast-keyhole-01-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-01-i01-standard/) |
 | `roboarc-cast-keyhole-02-i01` | easier | `easier` |  | [privileged](../../tasks/roboarc-cast-keyhole-02-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-02-i01-standard/) |
 | `roboarc-cast-keyhole-03-i01` | easy | `cast_keyhole_easy` |  | [privileged](../../tasks/roboarc-cast-keyhole-03-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-03-i01-standard/) |
 | `roboarc-cast-keyhole-04-i01` | medium | `cast_keyhole_medium` |  | [privileged](../../tasks/roboarc-cast-keyhole-04-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-04-i01-standard/) |

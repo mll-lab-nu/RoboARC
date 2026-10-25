@@ -244,3 +244,10 @@ post's rod yellow at every seed.
 `release.json` `experimental_bases` to `bases` after the owner's review (2026-10-24), with Jianwen's Harbor evidence on
 the 1.3.0 image (`dev/jianwen-2` `bc189085`, merged with his authorship). The release records, packages, references and
 instances are the ones of 1.2.0 and 1.3.0; only the packages' difficulty (`untiered` -> the owner's tier) changes.
+
+## 2.0.0: the owner's pruning
+
+2.0.0 adds no source, tooling or instance and removes none from the image: the image stays 1.3.0's. 33 puzzle bases
+leave the release by the owner's decision (2026-10-25; the list is in CHANGELOG.md). Their task dirs, packages,
+references and release records are not in this tree; the maintainers keep them on the branch
+`archive/removed-in-2.0.0` (= 1.4.0, `315c10ca`). The records of the 78 remaining bases are unchanged.

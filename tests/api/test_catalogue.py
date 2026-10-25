@@ -9,23 +9,23 @@ import pytest
 import roboarc
 from roboarc.references import hash_matches, load_reference, reference_record
 
-FAMILIES = {"battery_replacement": 1, "bed_bolt": 5, "blanket_flatten": 9, "blanket_fold": 5, "buzz_wire_3d": 10,
-            "caliper_sorting": 1, "cast_coil": 8, "cast_keyhole": 6, "clock_assembling": 1, "fiber_bundling": 10,
-            "hedgehog_in_cage": 8, "horseshoe_ring": 5, "interlocked_claws": 13, "knot_untying": 8, "lock_picking": 5,
-            "orbits": 2, "rope_threading": 8, "slotted_post_ring": 5, "wire_splicing": 1}
+FAMILIES = {"battery_replacement": 1, "bed_bolt": 5, "blanket_flatten": 5, "blanket_fold": 5, "buzz_wire_3d": 5,
+            "caliper_sorting": 1, "cast_coil": 5, "cast_keyhole": 5, "clock_assembling": 1, "fiber_bundling": 5,
+            "hedgehog_in_cage": 5, "horseshoe_ring": 5, "interlocked_claws": 8, "knot_untying": 6, "lock_picking": 3,
+            "orbits": 2, "rope_threading": 5, "slotted_post_ring": 5, "wire_splicing": 1}
 IKEA = {"burvik", "eket", "gladom", "ikea365", "kyrre", "lack", "stegesund", "stenerik", "svallet", "uppsta", "variera",
         "vesken"}
 
 
 def test_counts():
     puzzles = roboarc.list_tasks("puzzles")
-    assert len(puzzles) == 111
+    assert len(puzzles) == 78
     fams = {}
     for t in puzzles:
         fams[t.family] = fams.get(t.family, 0) + 1
     assert fams == FAMILIES
     assert {t.name for t in roboarc.list_tasks("ikea")} == IKEA
-    assert len(roboarc.list_tasks()) == 123
+    assert len(roboarc.list_tasks()) == 90
 
 
 @pytest.mark.parametrize("alias,canonical", [
@@ -67,10 +67,10 @@ def test_metadata():
 
 
 def test_puzzle_references():
-    """109 of the 111 bases ship a reference; each is the file its pin names (the freeze manifest's, or the release
+    """77 of the 78 bases ship a reference; each is the file its pin names (the freeze manifest's, or the release
     record's for a base released later), with its recorded end hash."""
     with_ref = [t for t in roboarc.list_tasks("puzzles") if t.reference]
-    assert len(with_ref) == 109
+    assert len(with_ref) == 77
     for t in with_ref:
         rec = reference_record(t.id)
         assert rec["sha256_ok"], t.id
@@ -96,7 +96,7 @@ def test_hash_prefixes():
 
 def test_standard_references_obey_the_joint_speed_rule():
     """The standard references move an arm joint target at most 0.04 rad per control step (the standard rule; checked
-    between consecutive rows). 13 privileged references are faster in places: their standard reference is the re-timed
+    between consecutive rows). 10 privileged references are faster in places: their standard reference is the re-timed
     copy (blanket-flatten-06's: the same route re-recorded within the rule)."""
     over_std, over_priv = [], []
     for t in roboarc.list_tasks("puzzles"):
@@ -108,4 +108,4 @@ def test_standard_references_obey_the_joint_speed_rule():
             if np.abs(np.diff(rows[:, arm], axis=0)).max() > 0.04 + 1e-6:
                 over.append(t.base)
     assert over_std == []
-    assert len(over_priv) == 13
+    assert len(over_priv) == 10

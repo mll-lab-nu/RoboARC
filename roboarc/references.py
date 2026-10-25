@@ -15,7 +15,7 @@ def load_reference(task_id, mode: str = "privileged") -> np.ndarray | None:
     IKEA (solution/trajectory.npz, `ctrl`; one reference for both modes). None when the task has no reference.
     mode="privileged": the privileged mode's solution (its verifier replays it with the tooling's limits only; the
     release records its end hash). mode="standard": the standard mode's reference, within the standard joint-speed rule
-    (for 12 bases re-timed from the privileged one or, for blanket-flatten-06, its route re-recorded within the rule;
+    (for 9 bases re-timed from the privileged one or, for blanket-flatten-06, its route re-recorded within the rule;
     otherwise the same file)."""
     if mode not in ("privileged", "standard"):
         raise ValueError("mode must be 'privileged' or 'standard'")

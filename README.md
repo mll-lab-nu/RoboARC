@@ -24,28 +24,28 @@ An agent that calls a VLA policy as a tool (Harbor + VLA) is planned for later.
 
 ## Tasks
 
-111 task bases in 19 families of topological puzzles, and 12 IKEA furniture scenes. Every puzzle base has three
+78 task bases in 19 families of topological puzzles, and 12 IKEA furniture scenes. Every puzzle base has three
 appearance seeds (0, 1, 2): the same scene and physics in other colours and materials.
 
 | family | bases | robot | difficulty |
 |---|---:|---|---|
 | battery-replacement | 1 | ALOHA 2 | medium 1 |
 | bed-bolt | 5 | ALOHA 2 | 1 per tier |
-| blanket-flatten | 9 | ALOHA 2 | very_easy 2, easier 1, easy 2, medium 2, hard 2 |
+| blanket-flatten | 5 | ALOHA 2 | easier 1, easy 2, medium 1, hard 1 |
 | blanket-fold | 5 | ALOHA 2 | very_easy .. hard, 1 each |
-| buzz-wire-3d | 10 | Franka + Robotiq 2F-85 | 2 per tier |
+| buzz-wire-3d | 5 | Franka + Robotiq 2F-85 | very_easy 1, easier 2, medium 1, hard 1 |
 | caliper-sorting | 1 | ALOHA 2 | hard 1 |
-| cast-coil | 8 | ALOHA 2 | very_easy 2, easier 2, easy 2, medium 1, hard 1 |
-| cast-keyhole | 6 | ALOHA 2 | very_easy 1, easier 1, easy 1, medium 1, hard 2 |
+| cast-coil | 5 | ALOHA 2 | 1 per tier |
+| cast-keyhole | 5 | ALOHA 2 | easier 1, easy 1, medium 1, hard 2 |
 | clock-assembling | 1 | ALOHA 2 | hard 1 |
-| fiber-bundling | 10 | Franka + Robotiq 2F-85 | 2 per tier |
-| hedgehog-in-cage | 8 | Franka + Robotiq 2F-85 | very_easy 1, easier 2, easy 2, medium 1, hard 2 |
+| fiber-bundling | 5 | Franka + Robotiq 2F-85 | easier 1, easy 1, medium 2, hard 1 |
+| hedgehog-in-cage | 5 | Franka + Robotiq 2F-85 | easier 2, easy 2, hard 1 |
 | horseshoe-ring | 5 | ALOHA 2 | 1 per tier |
-| interlocked-claws | 13 | ALOHA 2 | very_easy 2, easier 2, easy 2, medium 3, hard 4 |
-| knot-untying | 8 | ALOHA 2 | very_easy 2, easier 2, easy 1, medium 2, hard 1 |
-| lock-picking | 5 | Franka + Robotiq 2F-85 | 1 per tier |
+| interlocked-claws | 8 | ALOHA 2 | easier 1, easy 1, medium 2, hard 4 |
+| knot-untying | 6 | ALOHA 2 | very_easy 1, easier 2, medium 2, hard 1 |
+| lock-picking | 3 | Franka + Robotiq 2F-85 | easy 1, medium 1, hard 1 |
 | orbits | 2 | ALOHA 2 | very_easy 1, easier 1 |
-| rope-threading | 8 | ALOHA 2 | very_easy 1, easier 1, easy 2, medium 2, hard 2 |
+| rope-threading | 5 | ALOHA 2 | 1 per tier |
 | slotted-post-ring | 5 | ALOHA 2 | 1 per tier |
 | wire-splicing | 1 | ALOHA 2 | hard 1 |
 
@@ -76,7 +76,7 @@ Every interface runs the simulator in the released images:
 ## Coding agents (Harbor)
 
 Each task base ships as two [Harbor](https://github.com/laude-institute/harbor) task directories under `tasks/`,
-`roboarc-<base>-privileged` and `roboarc-<base>-standard` (246 in all: 222 puzzle tasks and 24 IKEA tasks):
+`roboarc-<base>-privileged` and `roboarc-<base>-standard` (180 in all: 156 puzzle tasks and 24 IKEA tasks):
 - **privileged**: the simulator is in the agent's container. The agent may reset, read the full state and replay as
   often as it likes, and delivers one trajectory (`/app/output/trajectory.npz`), which the verifier replays twice in a
   fresh process.
@@ -144,7 +144,7 @@ in [examples/](examples/).
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the Harbor task directories: 222 puzzle tasks and 24 IKEA tasks (`roboarc-ikea-*`); generated, never edit them by hand |
+| `tasks/roboarc-*` | the Harbor task directories: 156 puzzle tasks and 24 IKEA tasks (`roboarc-ikea-*`); generated, never edit them by hand |
 | `roboarc/`, `pyproject.toml` | the Python package `roboarc` ([docs/API.md](docs/API.md)), with `roboarc.vla` for VLA policies ([docs/VLA.md](docs/VLA.md)); `examples/`, `tests/api/` its examples and tests |
 | `ikea/` | IKEA MuJoCo: the generators, references and evidence (`ikea/scripts/ikea_mujoco/`), the scenes and the two image recipes (`ikea/images/ikea-mujoco/`); see [ikea/README.md](ikea/README.md) |
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |

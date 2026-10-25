@@ -4,6 +4,56 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 2.0.0 (2026-10-25)
+
+The owner pruned the task set: 33 puzzle bases leave the release. RoboARC 2.0.0 has 90 task bases, 78 puzzle bases in
+19 families (every family keeps at least one base) and the 12 IKEA scenes, in 180 Harbor task directories (156 puzzle,
+24 IKEA). The image is unchanged: `ghcr.io/mll-lab-nu/roboarc:1.3.0` (`images/pins.json`, `images/roboarc/VERSION`),
+so are the IKEA tasks and images.
+
+### Removed bases
+| family | removed (difficulty) | remaining (difficulty) |
+|---|---|---|
+| blanket_flatten | 01 (very_easy), 02 (very_easy), 05 (medium), 09 (hard) | 5: 03, 04, 06, 07, 08 (easier 1, easy 2, medium 1, hard 1) |
+| buzz_wire_3d | 01 (very_easy), 03 (easy), 05 (hard), 08 (easy), 09 (medium) | 5: 02, 04, 06, 07, 10 (very_easy 1, easier 2, medium 1, hard 1) |
+| cast_coil | 01 (very_easy), 02 (easier), 03 (easy) | 5: 04-08 (one per tier) |
+| cast_keyhole | 01 (very_easy) | 5: 02-06 (easier 1, easy 1, medium 1, hard 2) |
+| fiber_bundling | 01 (very_easy), 03 (easy), 06 (very_easy), 07 (easier), 10 (hard) | 5: 02, 04, 05, 08, 09 (easier 1, easy 1, medium 2, hard 1) |
+| hedgehog_in_cage | 01 (very_easy), 04 (medium), 05 (hard) | 5: 02, 03, 06, 07, 08 (easier 2, easy 2, hard 1) |
+| interlocked_claws | 01 (very_easy), 03 (easy), 04 (medium), 06 (very_easy), 07 (easier) | 8: 02, 05, 08-13 (easier 1, easy 1, medium 2, hard 4) |
+| knot_untying | 01 (very_easy), 03 (easy) | 6: 02, 04, 05, 06, 07, 09 (very_easy 1, easier 2, medium 2, hard 1) |
+| lock_picking | 01 (very_easy), 02 (easier) | 3: 03, 04, 05 (easy 1, medium 1, hard 1) |
+| rope_threading | 01 (easy), 02 (medium), 03 (hard) | 5: 04-08 (one per tier) |
+
+The other nine families are unchanged: battery_replacement 1, bed_bolt 5, blanket_fold 5, caliper_sorting 1,
+clock_assembling 1, horseshoe_ring 5, orbits 2, slotted_post_ring 5, wire_splicing 1. By difficulty, 33 removed
+(very_easy 12, easier 4, easy 7, medium 5, hard 5); 78 remain (very_easy 9, easier 17, easy 14, medium 17, hard 21).
+Base numbers are never reused: a removed base leaves a gap in its family's numbers.
+
+### Results
+- The kept tasks are unchanged but for their README's Release line ("RoboARC 2.0.0") and `DIGEST`: their instructions,
+  graders, instances, references and image are 1.4.0's, so results graded under 1.x on these tasks stand.
+- Aggregate numbers (success rates over the task set, per family or per difficulty) of 1.x and 2.0.0 are not
+  comparable: the set is different.
+- The removed tasks are kept by the maintainers, together with their packages, references and release records, on
+  the branch `archive/removed-in-2.0.0` (= RoboARC 1.4.0, `315c10ca`), and they run there on the same image.
+
+### Files
+- `scripts/roboarc/release.json`: the 33 records removed from `bases`; the version is 2.0.0 (also `pyproject.toml`,
+  `CITATION.cff`, `roboarc.__version__`). Their task dirs, packages and references are removed from the tree.
+- `tools/release/mujoco_release.json` keeps their entries, each family with a `removed` note per base;
+  `release_rebuild.py` skips those bases. Their entries in `roboarc_names.json`, `release_evidence.json` and
+  `standard_speed_rule.json` are removed. `records/` (the freeze manifests) and `scripts/roboarc/assets.json` (the
+  instance pins) are unchanged.
+- The `roboarc` API lists 78 puzzle bases and 90 tasks; 77 puzzle bases ship a reference (fiber-bundling-05 does
+  not), each pinned by the V3 freeze manifest or its release record; `reference_pins` pins only the bases of
+  `release.json`. 10 privileged references are faster than the standard joint-speed rule.
+- `docs/easy_set.toml`: the 16 removed bases' entries are gone; 15 remain.
+- Examples, quick starts, tests and the collaborator guide use kept bases (interlocked-claws-08 and -09,
+  cast-keyhole-02, cast-coil-06; the bit-identity selection and `test_vla` accordingly). `docs/COLLABORATOR_SETUP.md`:
+  a full run is 90 x 2 x 3 = 540 trials.
+- Family pages, the README table and the API documentation give the new counts.
+
 ## 1.4.0 (2026-10-24)
 
 The nine bases prepared as experimental in 1.2.0 are released into `tasks/` in both modes, after the owner's review

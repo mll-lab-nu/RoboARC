@@ -1,6 +1,6 @@
 # Hedgehog in cage
 
-Family key `hedgehog_in_cage` · 8 task bases · robot `franka-robotiq-2f85` · physics MuJoCo 3.14.0
+Family key `hedgehog_in_cage` · 5 task bases · robot `franka-robotiq-2f85` · physics MuJoCo 3.14.0
 
 A spiked ball (the hedgehog) is trapped in a fixed cage on a mount. The robot must get the whole ball, every spike included, out of the cage and into the green dashed goal square on the table; the cage stays where it is. Bases 06 and 07 use other caged objects (a six-spiked star, a wooden owl) and add a thin rod with a box handle on the table that may be used as a tool.
 
@@ -25,17 +25,14 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-8 bases (very_easy 1, easier 2, easy 2, medium 1, hard 2). Each base is one frozen scene instance and ships as two Harbor task directories,
+5 bases (easier 2, easy 2, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-hedgehog-in-cage-01-i01` | very_easy | `very_easy` |  | [privileged](../../tasks/roboarc-hedgehog-in-cage-01-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-01-i01-standard/) |
 | `roboarc-hedgehog-in-cage-02-i01` | easier | `easier` |  | [privileged](../../tasks/roboarc-hedgehog-in-cage-02-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-02-i01-standard/) |
 | `roboarc-hedgehog-in-cage-03-i01` | easy | `hedgehog_in_cage_easy` |  | [privileged](../../tasks/roboarc-hedgehog-in-cage-03-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-03-i01-standard/) |
-| `roboarc-hedgehog-in-cage-04-i01` | medium | `hedgehog_in_cage_medium` |  | [privileged](../../tasks/roboarc-hedgehog-in-cage-04-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-04-i01-standard/) |
-| `roboarc-hedgehog-in-cage-05-i01` | hard | `hedgehog_in_cage_hard` |  | [privileged](../../tasks/roboarc-hedgehog-in-cage-05-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-05-i01-standard/) |
 | `roboarc-hedgehog-in-cage-06-i01` | hard | `hedgehog_in_cage_cast_cage` | Cast Cage: a six-spiked star in a closed barrel with four side windows (Hanayama's Cast Cage at four times its real size); a rod tool on the table | [privileged](../../tasks/roboarc-hedgehog-in-cage-06-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-06-i01-standard/) |
 | `roboarc-hedgehog-in-cage-07-i01` | easy | `hedgehog_in_cage_owl` | Bird in Cage: a wooden owl in a cage; a rod tool on the table | [privileged](../../tasks/roboarc-hedgehog-in-cage-07-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-07-i01-standard/) |
 | `roboarc-hedgehog-in-cage-08-i01` | easier | `hedgehog_in_cage_window_change` | the very_easy cage with a narrower start window | [privileged](../../tasks/roboarc-hedgehog-in-cage-08-i01-privileged/) / [standard](../../tasks/roboarc-hedgehog-in-cage-08-i01-standard/) |

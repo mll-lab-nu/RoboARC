@@ -1,8 +1,8 @@
 # Rope threading
 
-Family key `rope_threading` · 8 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
+Family key `rope_threading` · 5 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
-The scene has a rope and a set of fixed rings on stands (bases 01-03), or a wall with grommets plus further rings (bases 04-08). The robot must thread the rope through the named holes in a given order along the rope (from its material start to its material end), crossing each hole in a required direction. The rope is a chain of rigid capsule links, 8 mm thick.
+The scene has a rope and a wall with grommets plus rings. The robot must thread the rope through the named holes in a given order along the rope (from its material start to its material end), crossing each hole in a required direction. The rope is a chain of rigid capsule links, 8 mm thick.
 
 ## Robot and grasping
 
@@ -23,15 +23,12 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-8 bases (very_easy 1, easier 1, easy 2, medium 2, hard 2). Each base is one frozen scene instance and ships as two Harbor task directories,
+5 bases (very_easy 1, easier 1, easy 1, medium 1, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-rope-threading-01-i01` | easy | `rope_threading_easy` | two rings | [privileged](../../tasks/roboarc-rope-threading-01-i01-privileged/) / [standard](../../tasks/roboarc-rope-threading-01-i01-standard/) |
-| `roboarc-rope-threading-02-i01` | medium | `rope_threading_medium` | three rings | [privileged](../../tasks/roboarc-rope-threading-02-i01-privileged/) / [standard](../../tasks/roboarc-rope-threading-02-i01-standard/) |
-| `roboarc-rope-threading-03-i01` | hard | `rope_threading_hard` | three smaller rings | [privileged](../../tasks/roboarc-rope-threading-03-i01-privileged/) / [standard](../../tasks/roboarc-rope-threading-03-i01-standard/) |
 | `roboarc-rope-threading-04-i01` | very_easy | `rope_threading_rd_very_easy` | wall with grommets: 4 holes | [privileged](../../tasks/roboarc-rope-threading-04-i01-privileged/) / [standard](../../tasks/roboarc-rope-threading-04-i01-standard/) |
 | `roboarc-rope-threading-05-i01` | easier | `rope_threading_rd_easier` | wall with grommets: 4 holes (smaller) | [privileged](../../tasks/roboarc-rope-threading-05-i01-privileged/) / [standard](../../tasks/roboarc-rope-threading-05-i01-standard/) |
 | `roboarc-rope-threading-06-i01` | easy | `rope_threading_rd_easy` | wall with grommets: 5 holes | [privileged](../../tasks/roboarc-rope-threading-06-i01-privileged/) / [standard](../../tasks/roboarc-rope-threading-06-i01-standard/) |

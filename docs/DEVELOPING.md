@@ -7,7 +7,7 @@ running tasks see [RUNNING.md](RUNNING.md); the task contract is [PROTOCOL.md](P
 
 | path | what |
 |---|---|
-| `tasks/roboarc-*` | the 246 task directories: 222 puzzle tasks (`scripts/roboarc/mk_tasks.py`) and 24 IKEA tasks, `roboarc-ikea-*` (`ikea/scripts/ikea_mujoco/mk_tasks.py`, `mk_standard_tasks.py`). Generated: never edit them by hand |
+| `tasks/roboarc-*` | the 180 task directories: 156 puzzle tasks (`scripts/roboarc/mk_tasks.py`) and 24 IKEA tasks, `roboarc-ikea-*` (`ikea/scripts/ikea_mujoco/mk_tasks.py`, `mk_standard_tasks.py`). Generated: never edit them by hand |
 | `scripts/roboarc/` | the generator `mk_tasks.py` and its inputs: `release.json` (one record per base), `packages/` (each task's texts as they ship, with `{{FIELD}}`s the generator fills), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`; `tests/` |
 | `scripts/` | the task layer the tasks cite and the generator renders with: `task_conventions.py` (`normalize`, the mode registry, the effective configuration), `set_agent_egress.py` (the egress allowlist), `task_resources.toml` (resource rules), `eai_standard/` (the eai-standard/2.4 client and service layer, copied into every standard task), `rcb_monitor/` (the resource-limits sidecar, copied into every task); `stamp_mtimes.py`, `check_image_files.py` (image builds) |
 | `scripts/harbor/` | the Harbor runner and its helpers (RUNNING.md) |

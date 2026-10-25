@@ -1,7 +1,7 @@
 # RoboARC
 
-RoboARC's topological puzzle families on MuJoCo 3.14.0 physics, run by the simulator package `topogym`: 111 task
-bases in 19 families, each in two modes, privileged and standard (222 Harbor task directories under `tasks/`). One page
+RoboARC's topological puzzle families on MuJoCo 3.14.0 physics, run by the simulator package `topogym`: 78 task
+bases in 19 families, each in two modes, privileged and standard (156 Harbor task directories under `tasks/`). One page
 per family: [../families/](../families/README.md). This page states the benchmark's own rules on top of the task protocol
 ([../PROTOCOL.md](../PROTOCOL.md)). The IKEA MuJoCo tasks have their own page
 ([ikea_mujoco.md](ikea_mujoco.md)).

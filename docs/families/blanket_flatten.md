@@ -1,6 +1,6 @@
 # Blanket flatten
 
-Family key `blanket_flatten` · 9 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
+Family key `blanket_flatten` · 5 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
 A cloth blanket lies on the table, folded over on itself. The robot must unfold it and spread it flat on the table without overlaps or excessive stretching, then let go and move the grippers away from it. The start state of the cloth differs from base to base.
 
@@ -8,7 +8,7 @@ A cloth blanket lies on the table, folded over on itself. The robot must unfold 
 
 Two 6-DoF ALOHA 2 (ViperX) arms with parallel-jaw grippers on a fixed base (`aloha-2`). Actions are 14-D joint-position targets (6 arm joints and one gripper target per arm) at 40 Hz; standard mode also accepts end-effector pose targets.
 
-Assisted grasping of soft material (`pbd_local_patch_v1`): a pinch with both fingers on an exposed patch of the blanket attaches that local patch to the gripper, while the rest of the cloth stays deformable. Opening the gripper releases it; the hold is also lost on excessive opening, excessive material strain or a follow error above 10 mm. The two hands may hold separate, non-overlapping patches of the blanket. In bases 02-06 a safety floor keeps the grippers from pressing the cloth into the table: apart from the finger pads, no gripper part is driven below the top of the cloth under it.
+Assisted grasping of soft material (`pbd_local_patch_v1`): a pinch with both fingers on an exposed patch of the blanket attaches that local patch to the gripper, while the rest of the cloth stays deformable. Opening the gripper releases it; the hold is also lost on excessive opening, excessive material strain or a follow error above 10 mm. The two hands may hold separate, non-overlapping patches of the blanket. In bases 03, 04 and 06 a safety floor keeps the grippers from pressing the cloth into the table: apart from the finger pads, no gripper part is driven below the top of the cloth under it.
 
 ## Success rule
 
@@ -27,21 +27,17 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-9 bases (very_easy 2, easier 1, easy 2, medium 2, hard 2). Each base is one frozen scene instance and ships as two Harbor task directories,
+5 bases (easier 1, easy 2, medium 1, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-blanket-flatten-01-i01` | very_easy | `very_easy` |  | [privileged](../../tasks/roboarc-blanket-flatten-01-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-01-i01-standard/) |
-| `roboarc-blanket-flatten-02-i01` | very_easy | `very_easy` | redesigned start state | [privileged](../../tasks/roboarc-blanket-flatten-02-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-02-i01-standard/) |
 | `roboarc-blanket-flatten-03-i01` | easier | `easier` | redesigned start state | [privileged](../../tasks/roboarc-blanket-flatten-03-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-03-i01-standard/) |
 | `roboarc-blanket-flatten-04-i01` | easy | `easy` | redesigned start state | [privileged](../../tasks/roboarc-blanket-flatten-04-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-04-i01-standard/) |
-| `roboarc-blanket-flatten-05-i01` | medium | `medium` | redesigned start state | [privileged](../../tasks/roboarc-blanket-flatten-05-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-05-i01-standard/) |
 | `roboarc-blanket-flatten-06-i01` | hard | `hard` | redesigned start state; a fixed fence stands beyond the blanket's far side | [privileged](../../tasks/roboarc-blanket-flatten-06-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-06-i01-standard/) |
 | `roboarc-blanket-flatten-07-i01` | easy | `blanket_flatten_easy` |  | [privileged](../../tasks/roboarc-blanket-flatten-07-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-07-i01-standard/) |
 | `roboarc-blanket-flatten-08-i01` | medium | `blanket_flatten_medium` |  | [privileged](../../tasks/roboarc-blanket-flatten-08-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-08-i01-standard/) |
-| `roboarc-blanket-flatten-09-i01` | hard | `blanket_flatten_hard` |  | [privileged](../../tasks/roboarc-blanket-flatten-09-i01-privileged/) / [standard](../../tasks/roboarc-blanket-flatten-09-i01-standard/) |
 
 ## Links
 

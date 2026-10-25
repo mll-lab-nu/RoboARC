@@ -18,7 +18,7 @@ Contents: [Design](#design) · [Running](#running) · [Tasks](#tasks) · [make()
 
 ## Design
 
-- **One interface for both suites.** `roboarc.make(task_id)` returns a `RoboARCEnv` for any of the 111 puzzle bases and
+- **One interface for both suites.** `roboarc.make(task_id)` returns a `RoboARCEnv` for any of the 78 puzzle bases and
   the 12 IKEA MuJoCo tasks. It subclasses `gymnasium.Env` when Gymnasium is installed; without it (the published images
   do not ship Gymnasium) it has the same methods and spaces with the same attributes.
 - **No physics fork.** The environment holds the graded tooling's own session and calls it:
@@ -101,7 +101,7 @@ compiles them at every start (a few seconds); the frames are not affected.
 ## Tasks
 
 ```python
-roboarc.list_tasks()                  # 123 TaskInfo: 111 puzzle bases, 12 IKEA tasks
+roboarc.list_tasks()                  # 90 TaskInfo: 78 puzzle bases, 12 IKEA tasks
 roboarc.list_tasks("puzzles", family="orbits")
 roboarc.task_info("orbits-02")        # aliases: see below
 ```
@@ -115,8 +115,8 @@ the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment
 (the allowed instance seeds),
 `base`, `difficulty`, `robot`, `description`, `image`, `render_image`, `max_episode_steps` (the verifier's row cap),
 `agent_time_limit_s` (the Harbor agent budget: 10800 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
-`reference_end_hash` and, for IKEA, `reference_settled_hash`. 109 of the 111 puzzle bases ship a reference
-(buzz-wire-3d-05 and fiber-bundling-05 do not); every IKEA task does.
+`reference_end_hash` and, for IKEA, `reference_settled_hash`. 77 of the 78 puzzle bases ship a reference
+(fiber-bundling-05 does not); every IKEA task does.
 
 ## make()
 
@@ -247,8 +247,8 @@ Every limit clamps the command and the episode goes on; none fails it. The API a
   most 0.04 rad per control step from the current targets (`rcb_topogym.JOINT_STEP_LIMIT_RAD`; at 40 Hz 1.6 rad/s),
   componentwise as the standard service clamps a streamed row (`environment/sim/server.py`, `run_joint_position`, a row
   of one control step held); the grippers are not limited. A farther target is reached over the following steps if it
-  is sent again. The standard mode's references obey it (`roboarc.load_reference(task, "standard")`). 13 privileged
-  references move faster in places (blanket-flatten-06, buzz-wire-3d-09, fiber-bundling-07..10, interlocked-claws-12,
+  is sent again. The standard mode's references obey it (`roboarc.load_reference(task, "standard")`). 10 privileged
+  references move faster in places (blanket-flatten-06, fiber-bundling-08..09, interlocked-claws-12,
   rope-threading-04..08, wire-splicing-01): their verifier replays them under the privileged rules, and their standard reference is a
   re-timed copy (blanket-flatten-06's: the same route re-recorded within the rule). Replay a privileged reference with
   `rules="privileged"` (`python -m roboarc replay` picks the rules of the reference's mode).
@@ -319,7 +319,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/api -m "not heavy"   # i
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/api -m heavy         # in an image: the bit-identity replays
 ```
 
-- `test_catalogue.py`, `test_spaces.py`: the 123 tasks and their metadata, the aliases, every puzzle reference against
+- `test_catalogue.py`, `test_spaces.py`: the 90 tasks and their metadata, the aliases, every puzzle reference against
   its pin (the freeze manifest's, or the release record's for a base released later), the space stand-ins. They run in CI.
 - `test_env_sim.py` (marker `sim`; one task per image: `ROBOARC_TEST_PUZZLE`, default interlocked-claws-08;
   `ROBOARC_TEST_IKEA`, default svallet): the spaces contain the observations; `reset()` gives the frozen instance's

@@ -1,6 +1,6 @@
 # Lock picking
 
-Family key `lock_picking` · 5 task bases · robot `franka-robotiq-2f85` · physics MuJoCo 3.14.0
+Family key `lock_picking` · 3 task bases · robot `franka-robotiq-2f85` · physics MuJoCo 3.14.0
 
 A two-tab key lies on a rest next to a lock: a row of rotor plates, each with a bore and slots and able to turn only between stops, followed by a final END plate. The robot must pick up the key and insert it through all rotor plates and the END plate, respecting the plates' slots and stops. The key's leading tab is longer than its second tab, which sits one plate spacing behind it.
 
@@ -26,14 +26,12 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-5 bases (very_easy 1, easier 1, easy 1, medium 1, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
+3 bases (easy 1, medium 1, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-lock-picking-01-i01` | very_easy | `lock_picking_very_easy` | two rotor plates | [privileged](../../tasks/roboarc-lock-picking-01-i01-privileged/) / [standard](../../tasks/roboarc-lock-picking-01-i01-standard/) |
-| `roboarc-lock-picking-02-i01` | easier | `lock_picking_easier` | three rotor plates | [privileged](../../tasks/roboarc-lock-picking-02-i01-privileged/) / [standard](../../tasks/roboarc-lock-picking-02-i01-standard/) |
 | `roboarc-lock-picking-03-i01` | easy | `lock_picking_easy` | three rotor plates, different rotor stops | [privileged](../../tasks/roboarc-lock-picking-03-i01-privileged/) / [standard](../../tasks/roboarc-lock-picking-03-i01-standard/) |
 | `roboarc-lock-picking-04-i01` | medium | `lock_picking_medium` | three rotor plates, different rotor stops | [privileged](../../tasks/roboarc-lock-picking-04-i01-privileged/) / [standard](../../tasks/roboarc-lock-picking-04-i01-standard/) |
 | `roboarc-lock-picking-05-i01` | hard | `lock_picking_hard` | four rotor plates, tighter shaft fit | [privileged](../../tasks/roboarc-lock-picking-05-i01-privileged/) / [standard](../../tasks/roboarc-lock-picking-05-i01-standard/) |

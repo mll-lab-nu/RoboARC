@@ -1,8 +1,8 @@
 # Cast coil
 
-Family key `cast_coil` · 8 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
+Family key `cast_coil` · 5 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
-Two rigid puzzle pieces, one gold and one silver, are on the table. The robot must assemble them into their matching interlocking configuration, then release both. In bases 01 and 02 the pieces form a cube with flush outer faces; the other bases use other piece designs (see the table).
+Two rigid puzzle pieces, one gold and one silver, are on the table. The robot must assemble them into their matching interlocking configuration, then release both. The bases use different piece designs (see the table).
 
 ## Robot and grasping
 
@@ -25,15 +25,12 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-8 bases (very_easy 2, easier 2, easy 2, medium 1, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
+5 bases (very_easy 1, easier 1, easy 1, medium 1, hard 1). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-cast-coil-01-i01` | very_easy | `very_easy` | assemble into a cube with flush outer faces | [privileged](../../tasks/roboarc-cast-coil-01-i01-privileged/) / [standard](../../tasks/roboarc-cast-coil-01-i01-standard/) |
-| `roboarc-cast-coil-02-i01` | easier | `easier` | assemble into a cube with flush outer faces | [privileged](../../tasks/roboarc-cast-coil-02-i01-privileged/) / [standard](../../tasks/roboarc-cast-coil-02-i01-standard/) |
-| `roboarc-cast-coil-03-i01` | easy | `cast_coil_easy` | Cast Coil pieces | [privileged](../../tasks/roboarc-cast-coil-03-i01-privileged/) / [standard](../../tasks/roboarc-cast-coil-03-i01-standard/) |
 | `roboarc-cast-coil-04-i01` | medium | `cast_coil_medium` | Cast Coil pieces | [privileged](../../tasks/roboarc-cast-coil-04-i01-privileged/) / [standard](../../tasks/roboarc-cast-coil-04-i01-standard/) |
 | `roboarc-cast-coil-05-i01` | hard | `cast_coil_hard` | Cast Coil pieces | [privileged](../../tasks/roboarc-cast-coil-05-i01-privileged/) / [standard](../../tasks/roboarc-cast-coil-05-i01-standard/) |
 | `roboarc-cast-coil-06-i01` | very_easy | `cast_coil_v2_very_easy` | piece design modelled on the official Cast Coil puzzle | [privileged](../../tasks/roboarc-cast-coil-06-i01-privileged/) / [standard](../../tasks/roboarc-cast-coil-06-i01-standard/) |

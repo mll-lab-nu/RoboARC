@@ -1,6 +1,6 @@
 # Interlocked claws
 
-Family key `interlocked_claws` · 13 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
+Family key `interlocked_claws` · 8 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
 Two rigid puzzle pieces (three in base 13) are hooked into each other, and the grippers start closed on them. Depending on the base, the robot must either free one piece and place it entirely in the green dashed goal square while the other stays on the puzzle side, or separate the pieces completely and hold them still. Besides the claw pair, the family includes a redesigned key-and-lock pair and three of Hanayama's cast puzzles (Cast ABC, Cast Rotor and Cast Trinity).
 
@@ -14,13 +14,13 @@ Assisted grasping of rigid parts (`contact_weld_v1`): when a closing gripper has
 
 What the grader checks, in plain words (each task's `instruction.md` states the exact rule and its limits):
 
-Placement bases (01, 02, 06-10):
+Placement bases (02, 08-10):
 
-- **Containment.** Every point of the brown claw piece (in bases 06-10 the brown key), not only its centre, lies inside the goal square, at least 1 mm inside the inner edge of the dashed green line, and within the goal volume's height above the table; it may not sink more than 1 mm below the tabletop. It need not touch the table.
+- **Containment.** Every point of the brown claw piece (in bases 08-10 the brown key), not only its centre, lies inside the goal square, at least 1 mm inside the inner edge of the dashed green line, and within the goal volume's height above the table; it may not sink more than 1 mm below the tabletop. It need not touch the table.
 - **Separation from the rest.** The other piece, and every other puzzle component, stay entirely on the puzzle side of an invisible fixed vertical plane between the puzzle and the goal square. Moving the whole puzzle into the goal does not count.
 - **At rest.** The placed piece moves at most 1 mm/s and 0.02 rad/s. Holding it is allowed.
 
-Separation bases (03-05, 11-13):
+Separation bases (05, 11-13):
 
 - **Separated.** The two complete pieces (in base 13: every two of the three pieces) are at least 10 mm apart along at least one of ten directions: the three world axes, each of the two pieces' three body axes, and the line between their centres. A gap inside the interlock does not count. The goal square plays no role.
 - **At rest.** All pieces move at most 1 mm/s and 0.02 rad/s. Holding them is allowed.
@@ -33,19 +33,14 @@ Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged
 
 ## Bases
 
-13 bases (very_easy 2, easier 2, easy 2, medium 3, hard 4). Each base is one frozen scene instance and ships as two Harbor task directories,
+8 bases (easier 1, easy 1, medium 2, hard 4). Each base is one frozen scene instance and ships as two Harbor task directories,
 `-privileged` and `-standard`, with the same scene, goal and grader. The difficulty is `[metadata].difficulty` in
-each `task.toml`.
+each `task.toml`. Numbers missing from the table are not used: base numbers are never reused, so a removed base leaves a gap.
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-interlocked-claws-01-i01` | very_easy | `very_easy` | place the brown claw piece | [privileged](../../tasks/roboarc-interlocked-claws-01-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-01-i01-standard/) |
 | `roboarc-interlocked-claws-02-i01` | easier | `easier` | place the brown claw piece | [privileged](../../tasks/roboarc-interlocked-claws-02-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-02-i01-standard/) |
-| `roboarc-interlocked-claws-03-i01` | easy | `interlocked_claws_easy` | separate both pieces | [privileged](../../tasks/roboarc-interlocked-claws-03-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-03-i01-standard/) |
-| `roboarc-interlocked-claws-04-i01` | medium | `interlocked_claws_medium` | separate both pieces | [privileged](../../tasks/roboarc-interlocked-claws-04-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-04-i01-standard/) |
 | `roboarc-interlocked-claws-05-i01` | hard | `interlocked_claws_hard` | separate both pieces | [privileged](../../tasks/roboarc-interlocked-claws-05-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-05-i01-standard/) |
-| `roboarc-interlocked-claws-06-i01` | very_easy | `interlocked_claws_rd_very_easy` | redesigned pair: brown key and teal lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-06-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-06-i01-standard/) |
-| `roboarc-interlocked-claws-07-i01` | easier | `interlocked_claws_rd_easier` | redesigned key and lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-07-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-07-i01-standard/) |
 | `roboarc-interlocked-claws-08-i01` | easy | `interlocked_claws_rd_easy` | redesigned key and lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-08-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-08-i01-standard/) |
 | `roboarc-interlocked-claws-09-i01` | medium | `interlocked_claws_rd_medium` | redesigned key and lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-09-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-09-i01-standard/) |
 | `roboarc-interlocked-claws-10-i01` | hard | `interlocked_claws_rd_hard` | redesigned key and lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-10-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-10-i01-standard/) |
