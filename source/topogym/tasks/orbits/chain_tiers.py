@@ -31,9 +31,10 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from topogym.assets.geometry.orbits_chain_tiers import (RING_SEGMENTS, chain_layout, chain_points, chain_qpos,
-                                                        eye_offsets, grasp_targets, handle_outline, links_for,
-                                                        ring_radius, scene_xml)
+from topogym.assets.geometry.orbits_chain_tiers import (CORD_RGBA, RING_SEGMENTS, chain_layout, chain_points,
+                                                        chain_qpos, eye_offsets, grasp_targets, handle_outline,
+                                                        links_for, ring_radius, scene_xml)
+from topogym.assets.scene_visuals import surface
 from topogym.evaluation.task_metrics import body_points, quiet_body
 from topogym.utils.geometry.regions import placement_measurements
 from ..base import EntitySpec, TaskSpec
@@ -85,6 +86,12 @@ class OrbitsChainTask:
         from ..base import merge_parameters
         return merge_parameters(base.defaults, {"chain": dict(CHAIN, cord_length_m=cord_length_m, **fixture)})
 
+    def cord_rgba(self):
+        """The chain links' colour (appearance only): CORD_RGBA at the default cord_finish, else the finish's."""
+        if self.config["cord_finish"] == self.defaults["cord_finish"]:
+            return CORD_RGBA
+        return " ".join(f"{v:.4g}" for v in surface(self.config["cord_finish"])["color"])
+
     def make_layout(self):
         """The FEM setting's geometry with the approved changes (orbits_chain_tiers.chain_layout)."""
         c = self.config["chain"]
@@ -134,7 +141,7 @@ class OrbitsChainTask:
             raise ValueError(f"K0 has {len(self.chain_state0['points'])-1} links, the chain {self.n}")
         path = Path(asset_dir)/f"{ENTITY}.xml"
         path.write_text(cord_contact(scene_xml(self.layout, self.n, self.link_m, self.yaw_deg,
-                                               self.config["chain"]["cord_e_pa"]), self.CORD_SOLREF))
+                                               self.config["chain"]["cord_e_pa"], self.cord_rgba()), self.CORD_SOLREF))
         self.handle_points = handle_outline(self.layout)
         self.fixture_points = self.fixture_cloud()
         self.placement_targets, self.placement_remainder = ("cord",), ("fixture",)

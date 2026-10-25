@@ -25,6 +25,7 @@ from .orbits import OrbitsLayout
 RING_SEGMENTS = 32
 CORD_KG_M3 = 650.          # the FEM cord's density
 HANDLE_KG_M3 = 700.
+CORD_RGBA = '.95 .78 .1 1'  # the default cord_finish's colour (appearance only)
 FRICTION = '.3 .005 .0001'  # the FEM cord's 0.3; Genesis takes the larger of two geoms' values (fingers: 1.0)
 SOLREF = '.005 1'           # the stiffest MuJoCo/Genesis accept at dt 2.5 ms (time constant >= 2 dt)
 # The loop's tie at eye 1 (the connect). A soft equality held under a tie force f stretches
@@ -124,8 +125,9 @@ def grasp_targets(n, link_m):
     return [(f'link_{i:03d}', (link_m/2, 0., 0.), GRASP_LINK_R) for i in range(n)]+[('handle', (0., 0., 0.), GRASP_HANDLE_R)]
 
 
-def scene_xml(lay, n, link_m, yaw_deg, E):
-    """MJCF of the fixture, the handle and the closed chain in the entity frame (local frame turned by yaw_deg).
+def scene_xml(lay, n, link_m, yaw_deg, E, cord_rgba=CORD_RGBA):
+    """MJCF of the fixture, the handle and the closed chain in the entity frame (local frame turned by yaw_deg);
+    cord_rgba colours the links (appearance only; a non-default colour on visual-only twins, as orbits_chain.py).
 
     The chain is authored straight along local x at REST_AT: both simulators pull a ball joint's spring towards its
     authored (qpos0) pose, so the rest shape is straight; a state's shape is written into the joints at run time
@@ -158,7 +160,7 @@ def scene_xml(lay, n, link_m, yaw_deg, E):
                           size=_v(lay.ring_tube_radius_m), **wood)
     # sliding friction only (condim 3): Genesis 1.2.1 has no torsional or rolling friction, so MuJoCo must not hold a
     # pinched cord against turning better than Genesis does; chain_mj adds noslip iterations for the sliding hold
-    cord = dict(type='capsule', size=_v(lay.cord_radius_m), density=_v(CORD_KG_M3), rgba='.95 .78 .1 1')
+    cord = dict(type='capsule', size=_v(lay.cord_radius_m), density=_v(CORD_KG_M3), rgba=CORD_RGBA)
     joint = dict(type='ball', stiffness=_v(link_stiffness(lay, link_m, E)), damping='2e-4', armature='1e-6')
     k = n//2
     L = _v([link_m, 0, 0])
@@ -170,6 +172,9 @@ def scene_xml(lay, n, link_m, yaw_deg, E):
         else:
             ET.SubElement(body, 'joint', name=f'bend_{i:03d}', **joint)
         ET.SubElement(body, 'geom', name=f'cord_{i:03d}', fromto=_v([0, 0, 0, link_m, 0, 0]), **cord)
+        if cord_rgba != CORD_RGBA:     # mass 0, no contact: the colliding link keeps its bytes
+            ET.SubElement(body, 'geom', name=f'cord_{i:03d}_visual', type='capsule', fromto=_v([0, 0, 0, link_m, 0, 0]),
+                          size=_v(lay.cord_radius_m*1.03), mass='0', contype='0', conaffinity='0', rgba=cord_rgba)
         return body
 
     start = np.asarray(REST_AT, float)+[(k-n/2)*link_m, 0, 0]
