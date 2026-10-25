@@ -6,7 +6,7 @@ gears, wires) and IKEA furniture assembly. Each task is one frozen scene, a robo
 with a Robotiq 2F-85, or two Franka Pandas) and a grader that decides from the simulated state whether the task was
 done.
 
-Website: <https://roboarc.embodied-first-exam.ai> · Version **1.4.0** ([CHANGELOG.md](CHANGELOG.md))
+Website: <https://roboarc.embodied-first-exam.ai> · Version **2.0.0** ([CHANGELOG.md](CHANGELOG.md))
 
 ## Interfaces
 
