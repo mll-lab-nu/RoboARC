@@ -2,7 +2,7 @@
 state hash the release recorded for it; optionally write a video of the cameras.
 
     python examples/replay_reference.py roboarc-orbits-02-i01 --renderer none
-    python examples/replay_reference.py roboarc-cast-coil-01-i01 --renderer nyx --video /tmp/cast_coil.mp4 --every 4
+    python examples/replay_reference.py roboarc-cast-coil-06-i01 --renderer nyx --video /tmp/cast_coil.mp4 --every 4
 """
 import argparse
 import time

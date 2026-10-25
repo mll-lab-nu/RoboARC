@@ -57,13 +57,14 @@ image). Run from the repository root of the checkout:
 
 ```bash
 # a puzzle task, physics only (CPU; rendering off): its reference replayed and checked against the recorded end
-# hash (about 30 s; orbits-02's 7918 rows take about 30 min on one core)
+# hash (minutes: the time grows with the reference's rows and the family; orbits-02's 7918 rows take about 30 min
+# on one core)
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/mll-lab-nu/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-03-i01
+  ghcr.io/mll-lab-nu/roboarc:1.1.0 python -m roboarc replay roboarc-interlocked-claws-08-i01
 
 # with Nyx images (one GPU, Vulkan through the NVIDIA container toolkit)
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.1.0 python examples/vla_loop.py roboarc-cast-keyhole-02-i01
 
 # an IKEA task with Nyx images
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo -e HOME=/tmp \
@@ -320,7 +321,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/api -m heavy         # i
 
 - `test_catalogue.py`, `test_spaces.py`: the 123 tasks and their metadata, the aliases, every puzzle reference against
   its pin (the freeze manifest's, or the release record's for a base released later), the space stand-ins. They run in CI.
-- `test_env_sim.py` (marker `sim`; one task per image: `ROBOARC_TEST_PUZZLE`, default interlocked-claws-03;
+- `test_env_sim.py` (marker `sim`; one task per image: `ROBOARC_TEST_PUZZLE`, default interlocked-claws-08;
   `ROBOARC_TEST_IKEA`, default svallet): the spaces contain the observations; `reset()` gives the frozen instance's
   hash every time, whatever the seed; holds are deterministic; out-of-range and too-fast actions are clamped, malformed
   ones raise; the joint-speed rule; a `get_state()` / `set_state()` round trip continues bit-identically (both restore
@@ -330,35 +331,30 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/api -m heavy         # i
 - `test_bit_identity.py` (marker `heavy`): each reference stepped through `roboarc.make()` from `reset()` in a fresh
   process (`python -m roboarc replay`) must end exactly on its recorded hash: the privileged reference under the
   privileged rules (what its verifier replays). Default selection: one base per puzzle family plus two IKEA scenes, and
-  fiber-bundling-07 (a privileged reference faster than the standard rule); `ROBOARC_BITID_TASKS` overrides it. It also
-  replays the standard references of fiber-bundling-07 and slotted-post-ring-01 under the standard rules (no step
+  fiber-bundling-08 (a privileged reference faster than the standard rule); `ROBOARC_BITID_TASKS` overrides it. It also
+  replays the standard references of fiber-bundling-08 and slotted-post-ring-01 under the standard rules (no step
   clamped, success).
 
-Results of 2026-10-19 (fresh process per task, one CPU core each, 8 at a time; rendering off unless noted; the blanket
-families with their CUDA cloth on an RTX 4090):
+Results of 2026-10-19 (1.x, the selection of that time; fresh process per task, one CPU core each, 8 at a time;
+rendering off unless noted; the blanket families with their CUDA cloth on an RTX 4090). The rows of the bases removed
+in 2.0.0 are left out; their families' bases in the 2.0.0 selection (cast-coil-06, cast-keyhole-02, fiber-bundling-02,
+hedgehog-in-cage-02, interlocked-claws-08, knot-untying-02, lock-picking-03, rope-threading-07, and fiber-bundling-08
+for the standard rule) have not been replayed through the API yet:
 
 | task | rows | end hash (recorded = API) | wall |
 |---|---:|---|---:|
 | blanket-flatten-08 | 1480 | d539d4d85d80ab0e | 741 s |
 | blanket-fold-01 | 884 | b443db6478ebfe08 | 363 s |
 | buzz-wire-3d-06 | 10424 | a28ee3880f00a88a | 256 s |
-| cast-coil-01 | 1595 | 4eb24b63a7463ca0 | 58 s |
-| cast-keyhole-01 | 5097 | 17b34a5ea8c891ee | 98 s |
-| fiber-bundling-01 | 3722 | c2d5a617ceddf9ef | 186 s |
-| hedgehog-in-cage-01 | 1923 | 65295842c0910fad | 46 s |
 | horseshoe-ring-05 | 7817 | 0284c3211ec6452f | 313 s |
-| interlocked-claws-03 | 812 | 30545aa2bfa43760 | 27 s |
-| interlocked-claws-03, Nyx frames at every step | 812 | 30545aa2bfa43760 | 54 s |
-| knot-untying-03 | 753 | 191d932660caa264 | 219 s |
-| lock-picking-01 | 4275 of 4303 | c2071db8651ca442 | 91 s |
 | orbits-01 | 3330 | 27d5ce82a052442d | 262 s |
-| rope-threading-02 | 3366 of 3386 | 740d4048045ab81d | 420 s |
 | slotted-post-ring-01 | 436 of 437 | 5a730ec14ba1b22c | 121 s |
 | IKEA lack | 67697 | 684fe3c488e01d1a, settled a4bc18f244c3687f | 395 s |
 | IKEA svallet | 69414 | 19d049469045e1a2, settled 6413de2d8af8cc39 | 200 s |
 
-All 17 match. Every puzzle reference reached `success` (the episode ends there: "x of y" rows), both IKEA references
-pass `final_check`, and no step was shortened by any limit. Rendering with Nyx leaves the hash unchanged.
+All 17 tasks of that run matched (these 8 among them). Every puzzle reference reached `success` (the episode ends
+there: "x of y" rows), both IKEA references pass `final_check`, and no step was shortened by any limit. Rendering with
+Nyx left the hash unchanged.
 
 ## Limitations
 

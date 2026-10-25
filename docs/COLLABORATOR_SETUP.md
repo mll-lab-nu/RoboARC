@@ -47,13 +47,13 @@ Run RoboARC from the branch `main` of `mll-lab-nu/RoboARC`; it has this note and
 
 ## 3. First check: one task, both modes, no agent
 
-Start with `roboarc-interlocked-claws-01-i01`. In each mode the reference solution must score 1, and doing nothing must
+Start with `roboarc-interlocked-claws-08-i01`. In each mode the reference solution must score 1, and doing nothing must
 score 0:
 
 ```bash
 for m in privileged standard; do
-  harbor run -p tasks -i roboarc-interlocked-claws-01-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-01-$m
-  harbor run -p tasks -i roboarc-interlocked-claws-01-i01-$m -a nop    -o "$PWD/jobs" --job-name nop-claws-01-$m
+  harbor run -p tasks -i roboarc-interlocked-claws-08-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-08-$m
+  harbor run -p tasks -i roboarc-interlocked-claws-08-i01-$m -a nop    -o "$PWD/jobs" --job-name nop-claws-08-$m
 done
 ```
 
@@ -62,13 +62,13 @@ done
   replays the trajectory twice and renders a video, which lands in `verifier/replay.mp4`.
 - The first run also pulls the image, so it takes longer.
 
-Then one scene other than the default, made the way the batch runner makes it: `roboarc-interlocked-claws-03-i01` at
+Then one scene other than the default, made the way the batch runner makes it: `roboarc-interlocked-claws-09-i01` at
 appearance seed 2 (its reference solution is validated at seeds 0, 1 and 2). The oracle must score 1 in both modes:
 
 ```bash
 for m in privileged standard; do
-  python3 scripts/task_seed.py materialize ./tasks/roboarc-interlocked-claws-03-i01-$m --seed 2 --out /tmp/claws03-s2-$m
-  harbor run -p /tmp/claws03-s2-$m -i roboarc-interlocked-claws-03-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-03-s2-$m
+  python3 scripts/task_seed.py materialize ./tasks/roboarc-interlocked-claws-09-i01-$m --seed 2 --out /tmp/claws09-s2-$m
+  harbor run -p /tmp/claws09-s2-$m -i roboarc-interlocked-claws-09-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-09-s2-$m
 done
 ```
 
@@ -83,23 +83,23 @@ network, the runner's seeds, the summary and the result files.
 ```bash
 AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   JOBS="$PWD/jobs/smoke" RESULTS=/path/outside/the/repo \
-  scripts/harbor/run_agent_batch.sh smoke roboarc-interlocked-claws-01-i01
+  scripts/harbor/run_agent_batch.sh smoke roboarc-interlocked-claws-08-i01
 ```
 
 - Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use.
 - The two modes run one after the other, each with at most the agent's 3 h. To run them at the same time, start the same
   command again in a second terminal (it adds a lane).
 - It passed when:
-  - `jobs/smoke/smoke.summary.md` has a row for `roboarc-interlocked-claws-01-i01-privileged` and one for `-standard`,
+  - `jobs/smoke/smoke.summary.md` has a row for `roboarc-interlocked-claws-08-i01-privileged` and one for `-standard`,
     each with a success of 0 or 1 and neither marked "not a result" (a 0 is fine here: the trial only has to give a
     result);
-  - each job folder `jobs/smoke/smoke-<mode>-roboarc-interlocked-claws-01-i01/` has `seed.json` and
+  - each job folder `jobs/smoke/smoke-<mode>-roboarc-interlocked-claws-08-i01/` has `seed.json` and
     `<trial>/verifier/reward.txt`;
-  - `<RESULTS>/smoke/roboarc-interlocked-claws-01-i01-<mode>/<run id>/t1/` exists for both modes;
+  - `<RESULTS>/smoke/roboarc-interlocked-claws-08-i01-<mode>/<run id>/t1/` exists for both modes;
   - `jobs/smoke/smoke.log` shows no stopped lane (the runner stops a lane when the model account fails: out of credit,
     rate-limited, logged out).
 - The seeds the full run gives a task's three trials:
-  `python3 scripts/task_seed.py assign tasks/roboarc-interlocked-claws-01-i01-privileged --batch <batch name> --trials 3`
+  `python3 scripts/task_seed.py assign tasks/roboarc-interlocked-claws-08-i01-privileged --batch <batch name> --trials 3`
   prints three different seeds (0, 1 and 2, in an order fixed by the batch name).
 - If it fails, send us `jobs/smoke/` (the runner redacts keys after each job) and the agent and provider you used.
 - Then send the smoke batch back as section 6 describes, with the smoke's `JOBS` and `RESULTS`. It checks your token and

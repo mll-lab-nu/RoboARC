@@ -16,8 +16,8 @@
  "lanes": 3,
  "jobs": 4,
  "bases": {
-  "interlocked-claws-01-i01": {
-   "reference": "refs/interlocked-claws-01-i01/privileged.npz",
+  "interlocked-claws-08-i01": {
+   "reference": "refs/interlocked-claws-08-i01/privileged.npz",
    "sha256": "<sha256 of that file>",
    "expect": "<end state_sha prefix>"
   }

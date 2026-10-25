@@ -111,12 +111,12 @@ Only the 94 tasks of the first release (0.1.0) are re-graded; a trial of any oth
 the reason. Standard trials are skipped too: their grading did not change.
 
 **Validation** (2026-10-14, an RTX 4090 host, the release image of the time, Harbor `-a oracle` / `-a nop`) with the
-privileged `tests/` of this rule: the privileged oracle scores 1 with `strict_goal_reached` 1 on blanket-flatten-01,
-knot-untying-01, lock-picking-01, orbits-01, rope-threading-01, slotted-post-ring-01 (one task of each family with a
-hold) and interlocked-claws-01 (a family without one), deterministic, no infra or grader errors; nop scores 0 on
-blanket-flatten-01 and slotted-post-ring-01 privileged. The rule itself, by construction: blanket-flatten-01's
-reference without its last 8 rows (a recording that stops 8 control steps before its own success; the replay confirms
-after 8 steps of hold) is graded 1 by the earlier `grade.py` (`all_success` 1, `strict_goal_reached` 0) and 0 by this
+privileged `tests/` of this rule: the privileged oracle scores 1 with `strict_goal_reached` 1 on one task of each
+family with a hold (blanket flatten, knot untying, lock picking, orbits, rope threading: tasks of the time, several
+of them removed in 2.0.0; slotted-post-ring-01) and on one interlocked-claws task (a family without one),
+deterministic, no infra or grader errors; nop scores 0 on that blanket-flatten task and slotted-post-ring-01
+privileged. The rule itself, by construction: that blanket-flatten task's reference without its last 8 rows (a
+recording that stops 8 control steps before its own success; the replay confirms after 8 steps of hold) is graded 1 by the earlier `grade.py` (`all_success` 1, `strict_goal_reached` 0) and 0 by this
 one (`all_success` 1, `success_in_hold_only` 1), both deterministic. Without its last 40 rows it fails both (the hold's
 2 s do not complete the confirmation).
 
@@ -173,5 +173,5 @@ standard mode does not run and privileged tasks are graded without the replay vi
 
 ## Easy set
 
-31 bases are in the easy set ([../easy_set.toml](../easy_set.toml)): run and reported, but apart from the headline
+15 bases are in the easy set ([../easy_set.toml](../easy_set.toml)): run and reported, but apart from the headline
 numbers (PROTOCOL §4; RUNNING.md "Results").

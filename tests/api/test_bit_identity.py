@@ -15,9 +15,9 @@ from roboarc import _runtime, registry
 
 pytestmark = pytest.mark.heavy
 
-DEFAULT = ("blanket-flatten-08", "blanket-fold-01", "buzz-wire-3d-06", "cast-coil-01", "cast-keyhole-01",
-           "fiber-bundling-01", "hedgehog-in-cage-01", "horseshoe-ring-05", "interlocked-claws-03", "knot-untying-03",
-           "lock-picking-01", "orbits-01", "rope-threading-02", "slotted-post-ring-01", "lack", "svallet")
+DEFAULT = ("blanket-flatten-08", "blanket-fold-01", "buzz-wire-3d-06", "cast-coil-06", "cast-keyhole-02",
+           "fiber-bundling-02", "hedgehog-in-cage-02", "horseshoe-ring-05", "interlocked-claws-08", "knot-untying-02",
+           "lock-picking-03", "orbits-01", "rope-threading-07", "slotted-post-ring-01", "lack", "svallet")
 TASKS = [t for t in os.environ.get("ROBOARC_BITID_TASKS", ",".join(DEFAULT)).split(",") if t]
 
 
@@ -32,10 +32,10 @@ def _replay(info, *args):
     return json.loads(lines[-1])
 
 
-@pytest.mark.parametrize("task", TASKS + ["fiber-bundling-07"])
+@pytest.mark.parametrize("task", TASKS + ["fiber-bundling-08"])
 def test_reference_end_hash(task):
     """The privileged reference with the privileged rules (what its verifier replays) ends on its recorded hash.
-    fiber-bundling-07's reference moves faster than the standard joint-speed rule in 4 rows."""
+    fiber-bundling-08's reference moves faster than the standard joint-speed rule in 28 rows."""
     info = registry.resolve(task)
     out = _replay(info, "--mode", "privileged")
     assert out["match"] is True, out
@@ -45,7 +45,7 @@ def test_reference_end_hash(task):
         assert out["episode_end"] == "success", out
 
 
-@pytest.mark.parametrize("task", ["fiber-bundling-07", "slotted-post-ring-01"])
+@pytest.mark.parametrize("task", ["fiber-bundling-08", "slotted-post-ring-01"])
 def test_standard_reference_within_the_rule(task):
     """The standard mode's reference under the standard rules: no step is clamped (it was re-timed to the rule, or is
     the privileged file itself), the task succeeds; where it is the privileged file, it ends on the recorded hash."""

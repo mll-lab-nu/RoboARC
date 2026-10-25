@@ -38,7 +38,7 @@ shared by every family in [docs/benchmarks/roboarc.md](benchmarks/roboarc.md); h
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) -e HOME=/tmp \
   -v $PWD:/repo:ro -v $PWD/.vla-lib:/vla-lib:ro -v $RESULTS:/results -w /repo \
   -e PYTHONPATH=/repo:/opt/topogym:/vla-lib ghcr.io/mll-lab-nu/roboarc:1.3.0 \
-  python -m roboarc.vla.run --task roboarc-interlocked-claws-03-i01 --policy ws://POLICY_HOST:8000 \
+  python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --policy ws://POLICY_HOST:8000 \
     --seed 0,1,2 --episodes 1 --run-id my-pi05-aloha --out /results
 ```
 
@@ -174,7 +174,7 @@ with other settings under the same id is refused.
 Nyx renders the images (one GPU with RT cores); the physics runs on one CPU core per episode (the blanket families'
 cloth on the GPU). Measured on an RTX 4090 with a loaded 32-core host:
 
-| | ALOHA 2 (interlocked-claws-03, 4 cameras) | Franka (hedgehog-in-cage-02, 3 cameras) |
+| | ALOHA 2 (an interlocked-claws base, 4 cameras) | Franka (hedgehog-in-cage-02, 3 cameras) |
 |---|---:|---:|
 | control step, physics only | 34 ms | 18 ms |
 | Nyx render of all cameras at 848 x 480 | 45 ms (22 frames/s) | 39 ms |
@@ -199,7 +199,7 @@ noise) differ from episode to episode unless their server fixes the seed.
 `roboarc.vla.stub_server` is a stand-in policy server with openpi's protocol:
 
 ```bash
-python -m roboarc.vla.run --task roboarc-interlocked-claws-03-i01 --export-reference ref.npz      # in the image
+python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --export-reference ref.npz      # in the image
 python -m roboarc.vla.stub_server --policy replay --actions ref.npz --horizon 50 --port 8000     # anywhere
 python -m roboarc.vla.stub_server --policy hold --port 8000                                     # never succeeds
 ```

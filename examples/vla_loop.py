@@ -1,7 +1,7 @@
 """Where a VLA (vision-language-action) policy plugs in: camera images + proprioception + the task's instruction in,
 a chunk of absolute joint targets out, executed one control step at a time. Replace `MyVLA` with your model.
 
-    python examples/vla_loop.py roboarc-cast-keyhole-01-i01 --renderer nyx --image-size 224 224
+    python examples/vla_loop.py roboarc-cast-keyhole-02-i01 --renderer nyx --image-size 224 224
 
 Conventions (docs/API.md): obs["rgb"][camera] is (H, W, 3) uint8; obs["proprio"] follows env.proprio_layout (the
 standard mode's layout: joint positions, TCP poses in the robot frame, the commanded targets, velocities, gripper

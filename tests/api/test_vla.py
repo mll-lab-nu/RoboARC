@@ -69,7 +69,7 @@ def test_aloha_round_trip_is_exact_on_a_reference():
     """Rows -> openpi actions (gripper normalised) -> rows gives the reference's float32 rows bit for bit: a policy that
     returns a reference reaches its recorded end state (checked end to end in the sim test and docs/VLA.md)."""
     conv = C.AlohaConvention(aloha_env())
-    rows = _ref("interlocked-claws-03")
+    rows = _ref("interlocked-claws-08")
     acts = conv.from_rows(rows.astype(np.float64))
     assert acts[:, [6, 13]].min() >= -1e-9 and acts[:, [6, 13]].max() <= 1 + 1e-9    # 0 = closed .. 1 = open
     assert np.array_equal(conv.to_rows(acts).astype(np.float32), rows)
@@ -170,8 +170,8 @@ def test_prompts_are_short_task_sentences():
         p = C.task_prompt(t)
         assert p and p[-1] in ".!?" and len(p) <= 400 and "\n" not in p, (t.id, p)
         assert C.task_prompt(t, full=True).startswith(p)
-    assert C.task_prompt(roboarc.task_info("interlocked-claws-03")) == \
-        "Completely separate the two claw pieces and briefly hold both still."
+    assert C.task_prompt(roboarc.task_info("interlocked-claws-08")) == \
+        "Separate and place the entire brown claw piece inside the green dashed goal region."
 
 
 def test_resize_with_pad_matches_openpi():
@@ -297,9 +297,9 @@ def test_verdict_is_the_standard_rule():
 
 def test_default_step_limit():
     from roboarc.vla.run import default_max_steps
-    t = roboarc.task_info("interlocked-claws-03")
-    assert default_max_steps(t) == 1700                  # 2 x 812 rows, rounded up to 100
-    assert default_max_steps(roboarc.task_info("buzz-wire-3d-05")) == 12000     # no reference
+    t = roboarc.task_info("interlocked-claws-08")
+    assert default_max_steps(t) == 8600                  # 2 x 4277 rows, rounded up to 100
+    assert default_max_steps(roboarc.task_info("fiber-bundling-05")) == 12000     # no reference
 
 
 # ------------------------------------------------------------------------------------------- end to end (simulator)

@@ -5,7 +5,7 @@
   python -m pytest tests/api -m heavy                     # inside an image: the reference bit-identity replays
 
 The sim tests build one environment per pytest process (the simulators are one scene per process): the puzzle image
-runs ROBOARC_TEST_PUZZLE (default interlocked-claws-03), an IKEA image ROBOARC_TEST_IKEA (default svallet)."""
+runs ROBOARC_TEST_PUZZLE (default interlocked-claws-08), an IKEA image ROBOARC_TEST_IKEA (default svallet)."""
 import os
 import sys
 from pathlib import Path
@@ -20,7 +20,7 @@ from roboarc import _runtime  # noqa: E402
 
 def sim_task() -> str | None:
     if _runtime.in_puzzle_image():
-        return os.environ.get("ROBOARC_TEST_PUZZLE", "interlocked-claws-03")
+        return os.environ.get("ROBOARC_TEST_PUZZLE", "interlocked-claws-08")
     if _runtime.in_ikea_image():
         return os.environ.get("ROBOARC_TEST_IKEA", "svallet")
     return None

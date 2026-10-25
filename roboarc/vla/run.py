@@ -1,6 +1,6 @@
 """Graded RoboARC episodes driven by an openpi policy server (docs/VLA.md).
 
-    python -m roboarc.vla.run --task roboarc-interlocked-claws-03-i01 --policy ws://HOST:8000 --seed 0 --episodes 1 --out DIR
+    python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --policy ws://HOST:8000 --seed 0 --episodes 1 --out DIR
     python -m roboarc.vla.run --task <task> --export-reference ref.npz     # the task's reference in the convention's units
 
 Each episode runs in a fresh process: the task's frozen instance (`--seed`: its instance seed, 0-2 for the puzzles),

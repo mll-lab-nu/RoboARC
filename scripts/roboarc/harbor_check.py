@@ -4,7 +4,7 @@ docker host, no GPU. Python >= 3.11, standard library only; docker and harbor on
 
 usage: python3 scripts/roboarc/harbor_check.py --instances <dir> --references <dir> --run <dir> [options] base ...
        python3 scripts/roboarc/harbor_check.py --tasks <dir> --image <image> --run <dir> [options] base ...
-  base          task bases under their current names, e.g. interlocked-claws-03-i01 (scripts/roboarc/release.json)
+  base          task bases under their current names, e.g. interlocked-claws-08-i01 (scripts/roboarc/release.json)
   --instances   one directory per base: a frozen MuJoCo instance (instance.json + instance_assets/)
   --references  one directory per base holding privileged.npz, the reference trajectory (the standard oracle streams
                 its rows, scripts/roboarc/mk_tasks.py)

@@ -54,8 +54,8 @@ python3 scripts/check_image_files.py <image> <context dir>         # after build
 
 ```bash
 python3 scripts/stamp_mtimes.py tasks
-harbor run -p tasks -i roboarc-interlocked-claws-03-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-03   # reward 1
-harbor run -p tasks -i roboarc-interlocked-claws-03-i01-standard -a nop -o "$PWD/jobs" --job-name nop-claws-03          # reward 0
+harbor run -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-08   # reward 1
+harbor run -p tasks -i roboarc-interlocked-claws-08-i01-standard -a nop -o "$PWD/jobs" --job-name nop-claws-08          # reward 0
 harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model> \
     --ak reasoning_effort=high --ak web_search=disabled -o "$PWD/jobs" --job-name codex-orbits-02
 ```

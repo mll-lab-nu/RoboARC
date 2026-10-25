@@ -89,8 +89,8 @@ trials form their own group. Harbor 0.23 or newer and Python >= 3.11 for the rep
 
 ```bash
 python3 scripts/stamp_mtimes.py tasks   # once per checkout: fixed file times, so Harbor's build cache hits
-harbor run -p tasks -i roboarc-interlocked-claws-03-i01-privileged -a oracle   # the reference solution: reward 1
-harbor run -p tasks -i roboarc-interlocked-claws-03-i01-standard -a nop        # does nothing: reward 0
+harbor run -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a oracle   # the reference solution: reward 1
+harbor run -p tasks -i roboarc-interlocked-claws-08-i01-standard -a nop        # does nothing: reward 0
 harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>   # a coding agent
 ```
 
@@ -106,7 +106,7 @@ images, the robot's state and a one-sentence instruction, returns action chunks,
 task's own grader. The ALOHA 2 and IKEA tasks use openpi's ALOHA layout, the single-arm Franka tasks its DROID layout.
 
 ```bash
-python -m roboarc.vla.run --task roboarc-interlocked-claws-03-i01 --policy ws://POLICY_HOST:8000 \
+python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --policy ws://POLICY_HOST:8000 \
   --seed 0,1,2 --episodes 1 --run-id <policy name> --out <results dir>      # inside the image, with one GPU
 ```
 
@@ -121,7 +121,7 @@ is one control step, and a reference trajectory stepped through it ends on exact
 
 ```python
 import roboarc                                        # before numpy: it sets the graded numpy settings
-env = roboarc.make("roboarc-cast-keyhole-01-i01")     # renderer="nyx" (GPU) | "mujoco" (quick look) | "none"
+env = roboarc.make("roboarc-cast-keyhole-02-i01")     # renderer="nyx" (GPU) | "mujoco" (quick look) | "none"
 obs, info = env.reset()                               # obs: {"rgb": {camera: (480, 848, 3) uint8}, "proprio": (P,)}
 obs, reward, terminated, truncated, info = env.step(action)   # absolute joint targets per arm + gripper
 ```
@@ -130,9 +130,9 @@ Run it inside the task's image with the repository mounted:
 
 ```bash
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.3.0 python examples/vla_loop.py roboarc-cast-keyhole-01-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:1.3.0 python examples/vla_loop.py roboarc-cast-keyhole-02-i01
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/mll-lab-nu/roboarc:1.3.0 python -m roboarc replay roboarc-interlocked-claws-03-i01     # bit-identity check
+  ghcr.io/mll-lab-nu/roboarc:1.3.0 python -m roboarc replay roboarc-interlocked-claws-08-i01     # bit-identity check
 ```
 
 IKEA runs in `roboarc-ikea:1.1.0` (physics only) or `roboarc-ikea-sim:1.1.0` (with images). `pip install -e .` installs

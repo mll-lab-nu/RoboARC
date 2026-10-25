@@ -1,7 +1,7 @@
 """A random policy: small random joint moves around the current targets (a random walk), the cheapest smoke test of
 an environment. Run inside the task's image (see docs/API.md, "Running"):
 
-    python examples/random_policy.py roboarc-interlocked-claws-03-i01 --steps 200 --renderer none
+    python examples/random_policy.py roboarc-interlocked-claws-08-i01 --steps 200 --renderer none
 """
 import argparse
 

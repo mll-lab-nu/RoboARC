@@ -2,7 +2,7 @@
 # other task, but reported apart from the main table and left OUT of the headline statistics.
 #
 # One entry per task base (the task name without its mode suffix); it covers every mode the base ships. Fields:
-#   base       e.g. "roboarc-blanket-flatten-01-i01"
+#   base       e.g. "roboarc-blanket-flatten-06-i01"
 #   benchmark  the base's label, "RoboARC" (scripts/task_conventions.py BENCHMARKS)
 #   reason     "shortcut": a success came through a goal looser than the task's text, or a grader shortcut (`note`: the
 #              observed pattern); "owner": the benchmark's maintainers judge the task too easy or not discriminative;
@@ -13,20 +13,10 @@
 # task here changes none of its files: its DIGEST and the results recorded against it stay valid. A task leaves the
 # set by deleting its entry (e.g. after a grader fix and a re-grade).
 #
-# The 31 bases below were selected on 2026-10-16 from the screening runs of the release before 1.0.0. The two
-# "shortcut" entries succeeded only within the replay hold's relaxed tolerance, which the privileged grader no longer
-# credits (docs/benchmarks/roboarc.md, "Grading replays"); they may return to the core set after a re-grade.
-
-[[task]]
-base = "roboarc-blanket-flatten-01-i01"
-benchmark = "RoboARC"
-reason = "shortcut"
-note = "privileged: passed only in the replay hold's tolerance"
-
-[[task]]
-base = "roboarc-blanket-flatten-05-i01"
-benchmark = "RoboARC"
-reason = "owner"
+# The 15 bases below remain of the 31 selected on 2026-10-16 from the screening runs of the release before 1.0.0
+# (the other 16 left main in 2.0.0, CHANGELOG.md). The "shortcut" entry succeeded only within the replay hold's
+# relaxed tolerance, which the privileged grader no longer credits (docs/benchmarks/roboarc.md, "Grading replays"); it
+# may return to the core set after a re-grade.
 
 [[task]]
 base = "roboarc-blanket-flatten-06-i01"
@@ -40,42 +30,7 @@ benchmark = "RoboARC"
 reason = "owner"
 
 [[task]]
-base = "roboarc-buzz-wire-3d-03-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-buzz-wire-3d-05-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-buzz-wire-3d-08-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-cast-coil-01-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-cast-coil-02-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-cast-coil-03-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
 base = "roboarc-cast-coil-05-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-cast-keyhole-01-i01"
 benchmark = "RoboARC"
 reason = "owner"
 
@@ -90,17 +45,7 @@ benchmark = "RoboARC"
 reason = "owner"
 
 [[task]]
-base = "roboarc-fiber-bundling-01-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
 base = "roboarc-fiber-bundling-02-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-fiber-bundling-03-i01"
 benchmark = "RoboARC"
 reason = "owner"
 
@@ -120,22 +65,12 @@ benchmark = "RoboARC"
 reason = "owner"
 
 [[task]]
-base = "roboarc-hedgehog-in-cage-04-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
 base = "roboarc-hedgehog-in-cage-08-i01"
 benchmark = "RoboARC"
 reason = "owner"
 
 [[task]]
 base = "roboarc-horseshoe-ring-04-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-interlocked-claws-04-i01"
 benchmark = "RoboARC"
 reason = "owner"
 
@@ -155,22 +90,6 @@ benchmark = "RoboARC"
 reason = "owner"
 
 [[task]]
-base = "roboarc-lock-picking-02-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
 base = "roboarc-lock-picking-03-i01"
 benchmark = "RoboARC"
 reason = "owner"
-
-[[task]]
-base = "roboarc-rope-threading-01-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
-[[task]]
-base = "roboarc-rope-threading-02-i01"
-benchmark = "RoboARC"
-reason = "owner"
-
