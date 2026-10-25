@@ -23,7 +23,7 @@ CSF = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(CSF)
 sys.path.insert(0, str(HERE.parents[2] / "tools" / "release"))
 import restamp  # noqa: E402
 
-RIGID, GOAL = "interlocked-claws-03-i01", "blanket-fold-01-i01"
+RIGID, GOAL = "interlocked-claws-08-i01", "blanket-fold-01-i01"
 
 
 def tree(d: pathlib.Path) -> dict:

@@ -374,7 +374,11 @@ def bases_of(spec: dict, families: list[str] | None) -> list[dict]:
     names = [b["new"] for b in out]
     if len(set(names)) != len(names):
         raise SystemExit(f"a base is listed twice: {sorted({n for n in names if names.count(n) > 1})}")
-    return out
+    # a family's `removed` bases (RoboARC 2.0.0) keep their entries as records but have no packages or reference: skipped
+    removed = {b for f in families or list(fam) for b in fam[f].get("removed", {})}
+    if removed - set(names):
+        raise SystemExit(f"removed names no base of its family: {sorted(removed - set(names))}")
+    return [b for b in out if b["new"] not in removed]
 
 
 def reference(b: dict, refs: pathlib.Path | None, repo: pathlib.Path, named: dict | None = None) -> pathlib.Path:
