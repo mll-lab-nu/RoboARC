@@ -1,0 +1,1164 @@
+<mujoco model="robotangle">
+  <compiler angle="radian" autolimits="true" balanceinertia="false" inertiafromgeom="auto" boundmass="0" boundinertia="0" />
+  <option timestep="0.0025000000000000001" gravity="0 0 -9.8100000000000005" integrator="implicitfast" solver="CG" iterations="50" ls_iterations="50" tolerance="1e-08" cone="elliptic" impratio="10" />
+  <size memory="256M" />
+  <default>
+    <default class="vx300s">
+      <joint axis="0 1 0" actuatorfrcrange="-35 35" />
+      <site group="4" />
+      <default class="waist">
+        <joint axis="0 0 1" range="-3.14158 3.14158" damping="5.76" />
+        <position ctrlrange="-3.14158 3.14158" kp="43" />
+      </default>
+      <default class="shoulder">
+        <joint range="-1.85005 1.25664" armature="0.395" frictionloss="2.0" damping="20.0" actuatorfrcrange="-144 144" />
+        <position ctrlrange="-1.85005 1.25664" kp="265" />
+      </default>
+      <default class="elbow">
+        <joint range="-1.76278 1.6057" armature="0.383" frictionloss="1.15" damping="18.49" actuatorfrcrange="-59 59" />
+        <position ctrlrange="-1.76278 1.6057" kp="227" />
+      </default>
+      <default class="forearm_roll">
+        <joint axis="1 0 0" range="-3.14158 3.14158" armature="0.14" damping="6.78" actuatorfrcrange="-22 22" />
+        <position ctrlrange="-3.14158 3.14158" kp="78" />
+      </default>
+      <default class="wrist_angle">
+        <joint range="-1.8675 2.23402" armature="0.008" damping="6.28" />
+        <position ctrlrange="-1.8675 2.23402" kp="37" />
+      </default>
+      <default class="wrist_rotate">
+        <joint axis="1 0 0" range="-3.14158 3.14158" damping="1.2" />
+        <position ctrlrange="-3.14158 3.14158" kp="10.4" />
+      </default>
+      <default class="finger">
+        <joint type="slide" armature="0.243" damping="40" />
+        <position ctrlrange="0.002 0.037" kp="2000" kv="124" />
+        <default class="left_finger">
+          <joint range="0 0.041" axis="0 0 -1" />
+        </default>
+        <default class="right_finger">
+          <joint range="0 0.041" axis="0 0 -1" />
+        </default>
+      </default>
+      <default class="visual">
+        <geom type="mesh" mass="0" group="2" material="black" contype="0" conaffinity="0" />
+      </default>
+      <default class="collision">
+        <geom group="3" type="mesh" condim="6" friction="1 5e-3 5e-4" solref=".01 1" />
+        <default class="sphere_collision">
+          <geom type="sphere" size="0.0006" rgba="1 0 0 1" />
+        </default>
+      </default>
+    </default>
+    <default class="orbits_chain">
+      <geom friction=".3 .005 .0001" solref=".005 1" condim="3" contype="1" conaffinity="1" />
+    </default>
+  </default>
+  <asset>
+    <material name="black" rgba="0.15 0.15 0.15 1" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_1_base.stl" scale="0.001 0.001 0.001" name="vx300s_1_base" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_2_shoulder.stl" scale="0.001 0.001 0.001" name="vx300s_2_shoulder" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_3_upper_arm.stl" scale="0.001 0.001 0.001" name="vx300s_3_upper_arm" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_4_upper_forearm.stl" scale="0.001 0.001 0.001" name="vx300s_4_upper_forearm" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_5_lower_forearm.stl" scale="0.001 0.001 0.001" name="vx300s_5_lower_forearm" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_6_wrist.stl" scale="0.001 0.001 0.001" name="vx300s_6_wrist" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_7_gripper_prop.stl" name="vx300s_7_gripper_prop" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_7_gripper_bar.stl" name="vx300s_7_gripper_bar" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_7_gripper_wrist_mount.stl" name="vx300s_7_gripper_wrist_mount" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_8_custom_finger_left.stl" name="vx300s_8_custom_finger_left" />
+    <mesh file="@robot-assets@/robots/aloha/assets/vx300s_8_custom_finger_right.stl" name="vx300s_8_custom_finger_right" />
+    <mesh file="@robot-assets@/robots/aloha/assets/d405_solid.stl" name="d405_solid" />
+    <mesh name="orbits_chain_handle_6b4e0eb8312b1415" file="meshes/orbits_chain_handle_6b4e0eb8312b1415.obj" />
+    <mesh name="goal_region_1d38657d48ff4073" file="meshes/goal_region_1d38657d48ff4073.obj" />
+  </asset>
+  <worldbody>
+    <body name="ground">
+      <geom name="ground" type="plane" size="0 0 1" solref="0.02 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" friction="1 0.0050000000000000001 0.0001" condim="3" />
+    </body>
+    <body name="table" pos="-0.13567860000000001 -0.025000000000000001 0.45982145000000002">
+      <geom name="table" type="box" size="0.75 0.72499999999999998 0.45982145000000002" rgba="0.78000000000000003 0.80000000000000004 0.81999999999999995 1" solref="0.02 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" friction="1 0.0050000000000000001 0.0001" condim="3" />
+    </body>
+    <body name="robot" pos="-0.13567860000000001 0 0.91964290000000004" quat="1 0 0 0">
+      <body name="left/base_link" childclass="vx300s" pos="-0.469 -0.019 0.0" gravcomp="1">
+        <inertial pos="-0.0534774 -0.000562575 0.0205961" quat="-0.00292324 0.712517 0.00480387 0.701633" mass="0.969034" diaginertia="0.0071633 0.00602451 0.00169819" />
+        <geom quat="1 0 0 1" class="visual" mesh="vx300s_1_base" />
+        <geom quat="1 0 0 1" mesh="vx300s_1_base" class="collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+        <body name="left/shoulder_link" pos="0 0 0.079" gravcomp="1">
+          <inertial pos="0.000259233 -3.3552e-06 0.0116129" quat="-0.476119 0.476083 0.52279 0.522826" mass="0.798614" diaginertia="0.00120156 0.00113744 0.0009388" />
+          <joint name="left/waist" class="waist" actuatorfrclimited="false" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" class="visual" mesh="vx300s_2_shoulder" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" mesh="vx300s_2_shoulder" class="collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+          <body name="left/upper_arm_link" pos="0 0 0.04805" gravcomp="1">
+            <inertial pos="0.0206949 4e-10 0.226459" quat="0 0.0728458 0 0.997343" mass="0.792592" diaginertia="0.00911338 0.008925 0.000759317" />
+            <joint name="left/shoulder" class="shoulder" actuatorfrclimited="false" />
+            <geom quat="1 0 0 1" class="visual" mesh="vx300s_3_upper_arm" />
+            <geom quat="1 0 0 1" class="collision" mesh="vx300s_3_upper_arm" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+            <body name="left/upper_forearm_link" pos="0.05955 0 0.3" gravcomp="1">
+              <inertial pos="0.105723 0 0" quat="-0.000621631 0.704724 0.0105292 0.709403" mass="0.322228" diaginertia="0.00144107 0.00134228 0.000152047" />
+              <joint name="left/elbow" class="elbow" actuatorfrclimited="false" />
+              <geom class="visual" mesh="vx300s_4_upper_forearm" />
+              <geom class="collision" mesh="vx300s_4_upper_forearm" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+              <body name="left/lower_forearm_link" pos="0.2 0 0" gravcomp="1">
+                <inertial pos="0.0513477 0.00680462 0" quat="-0.702604 -0.0796724 -0.702604 0.0796724" mass="0.414823" diaginertia="0.0005911 0.000546493 0.000155707" />
+                <joint name="left/forearm_roll" class="forearm_roll" actuatorfrclimited="false" />
+                <geom quat="0 1 0 0" class="visual" mesh="vx300s_5_lower_forearm" />
+                <geom quat="0 1 0 0" class="collision" mesh="vx300s_5_lower_forearm" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                <body name="left/wrist_link" pos="0.1 0 0" gravcomp="1">
+                  <inertial pos="0.046743 -7.6652e-06 0.010565" quat="-0.00100191 0.544586 0.0026583 0.8387" mass="0.115395" diaginertia="5.45707e-05 4.63101e-05 4.32692e-05" />
+                  <joint name="left/wrist_angle" class="wrist_angle" actuatorfrclimited="false" />
+                  <geom quat="1 0 0 1" class="visual" mesh="vx300s_6_wrist" />
+                  <geom quat="1 0 0 1" class="collision" mesh="vx300s_6_wrist" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                  <body name="left/gripper_link" pos="0.069744 0 0" gravcomp="1">
+                    <inertial pos="0.0395662 -2.56311e-07 0.00400649" quat="0.62033 0.619916 -0.339682 0.339869" mass="0.251652" diaginertia="0.000689546 0.000650316 0.000468142" />
+                    <joint name="left/wrist_rotate" class="wrist_rotate" actuatorfrclimited="false" />
+                    <site name="left/gripper" pos="0.13 0 -.003" group="5" />
+                    <body name="left/gripper_base" euler="0 1.57 -1.57" pos="0.035 0 0" gravcomp="1">
+                      <inertial pos="0.000182154 -0.0341589 -0.0106026" quat="0.435286 0.557074 -0.551539 0.442718" mass="0.42158" diaginertia="0.00110438 0.000790537 0.000469727" />
+                      <geom class="visual" mesh="vx300s_7_gripper_prop" />
+                      <geom class="collision" mesh="vx300s_7_gripper_prop" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <geom class="visual" mesh="vx300s_7_gripper_bar" />
+                      <geom class="collision" mesh="vx300s_7_gripper_bar" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <geom class="visual" pos="0 -0.03525 -0.0227" quat="0 -1 0 -1" type="mesh" mesh="vx300s_7_gripper_wrist_mount" />
+                      <geom class="collision" pos="0 -0.03525 -0.0227" quat="0 -1 0 -1" type="mesh" mesh="vx300s_7_gripper_wrist_mount" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <geom class="visual" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" />
+                      <geom class="collision" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <camera name="wrist_cam_left" pos="0 -0.0824748 -0.0095955" mode="fixed" euler="2.70525955359 0 0" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
+                      <body name="left/left_finger_link" pos="0.0191 -0.0141637 0.0211727" quat="1 -1 -1 1" gravcomp="1">
+                        <inertial pos="0.0143478 -0.0284791 0.0122897" quat="0.535486 0.458766 -0.450407 0.547651" mass="0.0862937" diaginertia="5.86848e-05 4.46887e-05 1.8397e-05" />
+                        <joint name="left/left_finger" class="left_finger" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="visual" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="collision" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="left/left_g0" pos="0.013 -0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="left/left_g1" pos="0.0222 -0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="left/left_g2" pos="0.0182 -0.0845 0.0266" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <site name="left/left_finger" pos="0.015 -0.06 0.02" />
+                      </body>
+                      <body name="left/right_finger_link" pos="-0.0191 -0.0141637 0.0211727" quat="1 1 1 1" gravcomp="1">
+                        <inertial pos="0.0143711 0.0284792 0.0121421" quat="0.461317 0.537615 -0.545478 0.447894" mass="0.0862932" diaginertia="5.86828e-05 4.46887e-05 1.83949e-05" />
+                        <joint name="left/right_finger" class="right_finger" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="visual" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="collision" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="left/right_g0" pos="0.013 0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="left/right_g1" pos="0.0222 0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="left/right_g2" pos="0.0182 0.0845 0.0266" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <site name="left/right_finger" pos="0.015 0.06 0.02" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="right/base_link" childclass="vx300s" pos="0.469 -0.019 0.0" quat="0 0 0 1" gravcomp="1">
+        <inertial pos="-0.0534774 -0.000562575 0.0205961" quat="-0.00292324 0.712517 0.00480387 0.701633" mass="0.969034" diaginertia="0.0071633 0.00602451 0.00169819" />
+        <geom quat="1 0 0 1" class="visual" mesh="vx300s_1_base" />
+        <geom quat="1 0 0 1" mesh="vx300s_1_base" class="collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+        <body name="right/shoulder_link" pos="0 0 0.079" gravcomp="1">
+          <inertial pos="0.000259233 -3.3552e-06 0.0116129" quat="-0.476119 0.476083 0.52279 0.522826" mass="0.798614" diaginertia="0.00120156 0.00113744 0.0009388" />
+          <joint name="right/waist" class="waist" actuatorfrclimited="false" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" class="visual" mesh="vx300s_2_shoulder" />
+          <geom pos="0 0 -0.003" quat="1 0 0 1" mesh="vx300s_2_shoulder" class="collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+          <body name="right/upper_arm_link" pos="0 0 0.04805" gravcomp="1">
+            <inertial pos="0.0206949 4e-10 0.226459" quat="0 0.0728458 0 0.997343" mass="0.792592" diaginertia="0.00911338 0.008925 0.000759317" />
+            <joint name="right/shoulder" class="shoulder" actuatorfrclimited="false" />
+            <geom quat="1 0 0 1" class="visual" mesh="vx300s_3_upper_arm" />
+            <geom quat="1 0 0 1" class="collision" mesh="vx300s_3_upper_arm" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+            <body name="right/upper_forearm_link" pos="0.05955 0 0.3" gravcomp="1">
+              <inertial pos="0.105723 0 0" quat="-0.000621631 0.704724 0.0105292 0.709403" mass="0.322228" diaginertia="0.00144107 0.00134228 0.000152047" />
+              <joint name="right/elbow" class="elbow" actuatorfrclimited="false" />
+              <geom class="visual" mesh="vx300s_4_upper_forearm" />
+              <geom class="collision" mesh="vx300s_4_upper_forearm" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+              <body name="right/lower_forearm_link" pos="0.2 0 0" gravcomp="1">
+                <inertial pos="0.0513477 0.00680462 0" quat="-0.702604 -0.0796724 -0.702604 0.0796724" mass="0.414823" diaginertia="0.0005911 0.000546493 0.000155707" />
+                <joint name="right/forearm_roll" class="forearm_roll" actuatorfrclimited="false" />
+                <geom quat="0 1 0 0" class="visual" mesh="vx300s_5_lower_forearm" />
+                <geom quat="0 1 0 0" class="collision" mesh="vx300s_5_lower_forearm" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                <body name="right/wrist_link" pos="0.1 0 0" gravcomp="1">
+                  <inertial pos="0.046743 -7.6652e-06 0.010565" quat="-0.00100191 0.544586 0.0026583 0.8387" mass="0.115395" diaginertia="5.45707e-05 4.63101e-05 4.32692e-05" />
+                  <joint name="right/wrist_angle" class="wrist_angle" actuatorfrclimited="false" />
+                  <geom quat="1 0 0 1" class="visual" mesh="vx300s_6_wrist" />
+                  <geom quat="1 0 0 1" class="collision" mesh="vx300s_6_wrist" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                  <body name="right/gripper_link" pos="0.069744 0 0" gravcomp="1">
+                    <inertial pos="0.0395662 -2.56311e-07 0.00400649" quat="0.62033 0.619916 -0.339682 0.339869" mass="0.251652" diaginertia="0.000689546 0.000650316 0.000468142" />
+                    <joint name="right/wrist_rotate" class="wrist_rotate" actuatorfrclimited="false" />
+                    <site name="right/gripper" pos="0.13 0 -.003" group="5" />
+                    <body name="right/gripper_base" euler="0 1.57 -1.57" pos="0.035 0 0" gravcomp="1">
+                      <inertial pos="0.000182154 -0.0341589 -0.0106026" quat="0.435286 0.557074 -0.551539 0.442718" mass="0.42158" diaginertia="0.00110438 0.000790537 0.000469727" />
+                      <geom class="visual" mesh="vx300s_7_gripper_prop" />
+                      <geom class="collision" mesh="vx300s_7_gripper_prop" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <geom class="visual" mesh="vx300s_7_gripper_bar" />
+                      <geom class="collision" mesh="vx300s_7_gripper_bar" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <geom class="visual" pos="0 -0.03525 -0.0227" quat="0 -0.707107 0 -0.707107" type="mesh" mesh="vx300s_7_gripper_wrist_mount" />
+                      <geom class="collision" pos="0 -0.03525 -0.0227" quat="0 -0.707107 0 -0.707107" type="mesh" mesh="vx300s_7_gripper_wrist_mount" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <geom class="visual" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" />
+                      <geom class="collision" pos="0 -0.0824748 -0.0095955" quat="0 0 -0.21644 -0.976296" type="mesh" mesh="d405_solid" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                      <camera name="wrist_cam_right" pos="0 -0.0824748 -0.0095955" mode="fixed" euler="2.70525955359 0 0" focal="1.93e-3 1.93e-3" resolution="1280 720" sensorsize="3896e-6 2140e-6" />
+                      <body name="right/left_finger_link" pos="0.0191 -0.0141637 0.0211727" quat="1 -1 -1 1" gravcomp="1">
+                        <inertial pos="0.0143478 -0.0284791 0.0122897" quat="0.535486 0.458766 -0.450407 0.547651" mass="0.0862937" diaginertia="5.86848e-05 4.46887e-05 1.8397e-05" />
+                        <joint name="right/left_finger" class="left_finger" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="visual" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" />
+                        <geom pos="0.0141637 0.0211727 0.06" class="collision" quat="1 1 1 -1" type="mesh" mesh="vx300s_8_custom_finger_left" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="right/left_g0" pos="0.013 -0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="right/left_g1" pos="0.0222 -0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="right/left_g2" pos="0.0182 -0.0845 0.0266" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <site name="right/left_finger" pos="0.015 -0.06 0.02" />
+                      </body>
+                      <body name="right/right_finger_link" pos="-0.0191 -0.0141637 0.0211727" quat="1 1 1 1" gravcomp="1">
+                        <inertial pos="0.0143711 0.0284792 0.0121421" quat="0.461317 0.537615 -0.545478 0.447894" mass="0.0862932" diaginertia="5.86828e-05 4.46887e-05 1.83949e-05" />
+                        <joint name="right/right_finger" class="right_finger" actuatorfrclimited="false" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="visual" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" />
+                        <geom pos="0.0141637 -0.0211727 0.0597067" class="collision" quat="1 -1 -1 -1" type="mesh" mesh="vx300s_8_custom_finger_right" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="right/right_g0" pos="0.013 0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="right/right_g1" pos="0.0222 0.0892 0.0268" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <geom name="right/right_g2" pos="0.0182 0.0845 0.0266" class="sphere_collision" solref="0.01 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" condim="3" />
+                        <site name="right/right_finger" pos="0.015 0.06 0.02" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="orbits_chain::world" pos="-0.13567860000000001 0 0.91964290000000004" quat="1 0 0 0" childclass="orbits_chain">
+      <geom name="orbits_chain::base" type="box" pos="0 0 0.00678" quat="0.707106781 0 0 0.707106781" size="0.27965 0.1071 0.00678" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::post_0" type="capsule" fromto="-3.25006688e-17 -0.14637 0.01356 -3.25006688e-17 -0.14637 0.363426" size="0.005712" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::post_1" type="capsule" fromto="-1.08335563e-17 -0.04879 0.01356 -1.08335563e-17 -0.04879 0.31178" size="0.005712" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::post_2" type="capsule" fromto="1.52744484e-17 0.06879 0.01356 1.52744484e-17 0.06879 0.23086" size="0.005712" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::post_3" type="capsule" fromto="3.69415609e-17 0.16637 0.01356 3.69415609e-17 0.16637 0.14994" size="0.005712" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::stopper_ball" type="sphere" pos="-3.25006688e-17 -0.14637 0.363426" size="0.017136" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_00" type="capsule" fromto="-1.08335563e-17 -0.04879 0.31178 -0.0172732971 -0.0504912713 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_01" type="capsule" fromto="-0.0172732971 -0.0504912713 0.31178 -0.0338827911 -0.0555297062 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_02" type="capsule" fromto="-0.0338827911 -0.0555297062 0.31178 -0.0491901884 -0.0637116805 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_03" type="capsule" fromto="-0.0491901884 -0.0637116805 0.31178 -0.0626072344 -0.0747227656 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_04" type="capsule" fromto="-0.0626072344 -0.0747227656 0.31178 -0.0736183195 -0.0881398116 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_05" type="capsule" fromto="-0.0736183195 -0.0881398116 0.31178 -0.0818002938 -0.103447209 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_06" type="capsule" fromto="-0.0818002938 -0.103447209 0.31178 -0.0868387287 -0.120056703 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_07" type="capsule" fromto="-0.0868387287 -0.120056703 0.31178 -0.08854 -0.13733 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_08" type="capsule" fromto="-0.08854 -0.13733 0.31178 -0.0868387287 -0.154603297 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_09" type="capsule" fromto="-0.0868387287 -0.154603297 0.31178 -0.0818002938 -0.171212791 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_10" type="capsule" fromto="-0.0818002938 -0.171212791 0.31178 -0.0736183195 -0.186520188 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_11" type="capsule" fromto="-0.0736183195 -0.186520188 0.31178 -0.0626072344 -0.199937234 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_12" type="capsule" fromto="-0.0626072344 -0.199937234 0.31178 -0.0491901884 -0.210948319 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_13" type="capsule" fromto="-0.0491901884 -0.210948319 0.31178 -0.0338827911 -0.219130294 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_14" type="capsule" fromto="-0.0338827911 -0.219130294 0.31178 -0.0172732971 -0.224168729 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_15" type="capsule" fromto="-0.0172732971 -0.224168729 0.31178 -6.09962377e-17 -0.22587 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_16" type="capsule" fromto="-6.09962377e-17 -0.22587 0.31178 0.0172732971 -0.224168729 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_17" type="capsule" fromto="0.0172732971 -0.224168729 0.31178 0.0338827911 -0.219130294 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_18" type="capsule" fromto="0.0338827911 -0.219130294 0.31178 0.0491901884 -0.210948319 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_19" type="capsule" fromto="0.0491901884 -0.210948319 0.31178 0.0626072344 -0.199937234 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_20" type="capsule" fromto="0.0626072344 -0.199937234 0.31178 0.0736183195 -0.186520188 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_21" type="capsule" fromto="0.0736183195 -0.186520188 0.31178 0.0818002938 -0.171212791 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_22" type="capsule" fromto="0.0818002938 -0.171212791 0.31178 0.0868387287 -0.154603297 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_23" type="capsule" fromto="0.0868387287 -0.154603297 0.31178 0.08854 -0.13733 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_24" type="capsule" fromto="0.08854 -0.13733 0.31178 0.0868387287 -0.120056703 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_25" type="capsule" fromto="0.0868387287 -0.120056703 0.31178 0.0818002938 -0.103447209 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_26" type="capsule" fromto="0.0818002938 -0.103447209 0.31178 0.0736183195 -0.0881398116 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_27" type="capsule" fromto="0.0736183195 -0.0881398116 0.31178 0.0626072344 -0.0747227656 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_28" type="capsule" fromto="0.0626072344 -0.0747227656 0.31178 0.0491901884 -0.0637116805 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_29" type="capsule" fromto="0.0491901884 -0.0637116805 0.31178 0.0338827911 -0.0555297062 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_30" type="capsule" fromto="0.0338827911 -0.0555297062 0.31178 0.0172732971 -0.0504912713 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_1_31" type="capsule" fromto="0.0172732971 -0.0504912713 0.31178 1.08524892e-17 -0.04879 0.31178" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_00" type="capsule" fromto="1.52744484e-17 0.06879 0.23086 -0.0153223939 0.0672808759 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_01" type="capsule" fromto="-0.0153223939 0.0672808759 0.23086 -0.0300559568 0.0628114985 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_02" type="capsule" fromto="-0.0300559568 0.0628114985 0.23086 -0.0436344861 0.0555536234 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_03" type="capsule" fromto="-0.0436344861 0.0555536234 0.23086 -0.0555361666 0.0457861666 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_04" type="capsule" fromto="-0.0555361666 0.0457861666 0.23086 -0.0653036234 0.0338844861 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_05" type="capsule" fromto="-0.0653036234 0.0338844861 0.23086 -0.0725614985 0.0203059568 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_06" type="capsule" fromto="-0.0725614985 0.0203059568 0.23086 -0.0770308759 0.00557239389 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_07" type="capsule" fromto="-0.0770308759 0.00557239389 0.23086 -0.07854 -0.00975 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_08" type="capsule" fromto="-0.07854 -0.00975 0.23086 -0.0770308759 -0.0250723939 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_09" type="capsule" fromto="-0.0770308759 -0.0250723939 0.23086 -0.0725614985 -0.0398059568 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_10" type="capsule" fromto="-0.0725614985 -0.0398059568 0.23086 -0.0653036234 -0.0533844861 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_11" type="capsule" fromto="-0.0653036234 -0.0533844861 0.23086 -0.0555361666 -0.0652861666 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_12" type="capsule" fromto="-0.0555361666 -0.0652861666 0.23086 -0.0436344861 -0.0750536234 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_13" type="capsule" fromto="-0.0436344861 -0.0750536234 0.23086 -0.0300559568 -0.0823114985 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_14" type="capsule" fromto="-0.0300559568 -0.0823114985 0.23086 -0.0153223939 -0.0867808759 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_15" type="capsule" fromto="-0.0153223939 -0.0867808759 0.23086 -2.92226941e-17 -0.08829 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_16" type="capsule" fromto="-2.92226941e-17 -0.08829 0.23086 0.0153223939 -0.0867808759 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_17" type="capsule" fromto="0.0153223939 -0.0867808759 0.23086 0.0300559568 -0.0823114985 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_18" type="capsule" fromto="0.0300559568 -0.0823114985 0.23086 0.0436344861 -0.0750536234 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_19" type="capsule" fromto="0.0436344861 -0.0750536234 0.23086 0.0555361666 -0.0652861666 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_20" type="capsule" fromto="0.0555361666 -0.0652861666 0.23086 0.0653036234 -0.0533844861 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_21" type="capsule" fromto="0.0653036234 -0.0533844861 0.23086 0.0725614985 -0.0398059568 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_22" type="capsule" fromto="0.0725614985 -0.0398059568 0.23086 0.0770308759 -0.0250723939 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_23" type="capsule" fromto="0.0770308759 -0.0250723939 0.23086 0.07854 -0.00975 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_24" type="capsule" fromto="0.07854 -0.00975 0.23086 0.0770308759 0.00557239389 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_25" type="capsule" fromto="0.0770308759 0.00557239389 0.23086 0.0725614985 0.0203059568 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_26" type="capsule" fromto="0.0725614985 0.0203059568 0.23086 0.0653036234 0.0338844861 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_27" type="capsule" fromto="0.0653036234 0.0338844861 0.23086 0.0555361666 0.0457861666 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_28" type="capsule" fromto="0.0555361666 0.0457861666 0.23086 0.0436344861 0.0555536234 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_29" type="capsule" fromto="0.0436344861 0.0555536234 0.23086 0.0300559568 0.0628114985 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_30" type="capsule" fromto="0.0300559568 0.0628114985 0.23086 0.0153223939 0.0672808759 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_2_31" type="capsule" fromto="0.0153223939 0.0672808759 0.23086 3.45112003e-17 0.06879 0.23086" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_00" type="capsule" fromto="3.69415609e-17 0.16637 0.14994 -0.0153223939 0.164860876 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_01" type="capsule" fromto="-0.0153223939 0.164860876 0.14994 -0.0300559568 0.160391498 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_02" type="capsule" fromto="-0.0300559568 0.160391498 0.14994 -0.0436344861 0.153133623 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_03" type="capsule" fromto="-0.0436344861 0.153133623 0.14994 -0.0555361666 0.143366167 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_04" type="capsule" fromto="-0.0555361666 0.143366167 0.14994 -0.0653036234 0.131464486 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_05" type="capsule" fromto="-0.0653036234 0.131464486 0.14994 -0.0725614985 0.117885957 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_06" type="capsule" fromto="-0.0725614985 0.117885957 0.14994 -0.0770308759 0.103152394 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_07" type="capsule" fromto="-0.0770308759 0.103152394 0.14994 -0.07854 0.08783 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_08" type="capsule" fromto="-0.07854 0.08783 0.14994 -0.0770308759 0.0725076061 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_09" type="capsule" fromto="-0.0770308759 0.0725076061 0.14994 -0.0725614985 0.0577740432 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_10" type="capsule" fromto="-0.0725614985 0.0577740432 0.14994 -0.0653036234 0.0441955139 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_11" type="capsule" fromto="-0.0653036234 0.0441955139 0.14994 -0.0555361666 0.0322938334 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_12" type="capsule" fromto="-0.0555361666 0.0322938334 0.14994 -0.0436344861 0.0225263766 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_13" type="capsule" fromto="-0.0436344861 0.0225263766 0.14994 -0.0300559568 0.0152685015 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_14" type="capsule" fromto="-0.0300559568 0.0152685015 0.14994 -0.0153223939 0.0107991241 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_15" type="capsule" fromto="-0.0153223939 0.0107991241 0.14994 -7.55558158e-18 0.00929 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_16" type="capsule" fromto="-7.55558158e-18 0.00929 0.14994 0.0153223939 0.0107991241 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_17" type="capsule" fromto="0.0153223939 0.0107991241 0.14994 0.0300559568 0.0152685015 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_18" type="capsule" fromto="0.0300559568 0.0152685015 0.14994 0.0436344861 0.0225263766 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_19" type="capsule" fromto="0.0436344861 0.0225263766 0.14994 0.0555361666 0.0322938334 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_20" type="capsule" fromto="0.0555361666 0.0322938334 0.14994 0.0653036234 0.0441955139 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_21" type="capsule" fromto="0.0653036234 0.0441955139 0.14994 0.0725614985 0.0577740432 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_22" type="capsule" fromto="0.0725614985 0.0577740432 0.14994 0.0770308759 0.0725076061 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_23" type="capsule" fromto="0.0770308759 0.0725076061 0.14994 0.07854 0.08783 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_24" type="capsule" fromto="0.07854 0.08783 0.14994 0.0770308759 0.103152394 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_25" type="capsule" fromto="0.0770308759 0.103152394 0.14994 0.0725614985 0.117885957 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_26" type="capsule" fromto="0.0725614985 0.117885957 0.14994 0.0653036234 0.131464486 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_27" type="capsule" fromto="0.0653036234 0.131464486 0.14994 0.0555361666 0.143366167 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_28" type="capsule" fromto="0.0555361666 0.143366167 0.14994 0.0436344861 0.153133623 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_29" type="capsule" fromto="0.0436344861 0.153133623 0.14994 0.0300559568 0.160391498 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_30" type="capsule" fromto="0.0300559568 0.160391498 0.14994 0.0153223939 0.164860876 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+      <geom name="orbits_chain::ring_3_31" type="capsule" fromto="0.0153223939 0.164860876 0.14994 5.61783128e-17 0.16637 0.14994" size="0.00952" rgba=".55 .35 .18 1" />
+    </body>
+    <body name="orbits_chain::link_056" pos="-0.13567860000000001 -0.011504424799999999 1.9196428999999999" quat="0.70710678118654768 0 0 0.70710678118654746" childclass="orbits_chain">
+      <freejoint name="orbits_chain::root" />
+      <geom name="orbits_chain::cord_056" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+      <body name="orbits_chain::link_057" pos="0.0230088496 0 0">
+        <joint name="orbits_chain::bend_057" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+        <geom name="orbits_chain::cord_057" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+        <body name="orbits_chain::link_058" pos="0.0230088496 0 0">
+          <joint name="orbits_chain::bend_058" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+          <geom name="orbits_chain::cord_058" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+          <body name="orbits_chain::link_059" pos="0.0230088496 0 0">
+            <joint name="orbits_chain::bend_059" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+            <geom name="orbits_chain::cord_059" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+            <body name="orbits_chain::link_060" pos="0.0230088496 0 0">
+              <joint name="orbits_chain::bend_060" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+              <geom name="orbits_chain::cord_060" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+              <body name="orbits_chain::link_061" pos="0.0230088496 0 0">
+                <joint name="orbits_chain::bend_061" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                <geom name="orbits_chain::cord_061" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                <body name="orbits_chain::link_062" pos="0.0230088496 0 0">
+                  <joint name="orbits_chain::bend_062" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                  <geom name="orbits_chain::cord_062" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                  <body name="orbits_chain::link_063" pos="0.0230088496 0 0">
+                    <joint name="orbits_chain::bend_063" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                    <geom name="orbits_chain::cord_063" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                    <body name="orbits_chain::link_064" pos="0.0230088496 0 0">
+                      <joint name="orbits_chain::bend_064" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                      <geom name="orbits_chain::cord_064" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                      <body name="orbits_chain::link_065" pos="0.0230088496 0 0">
+                        <joint name="orbits_chain::bend_065" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                        <geom name="orbits_chain::cord_065" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                        <body name="orbits_chain::link_066" pos="0.0230088496 0 0">
+                          <joint name="orbits_chain::bend_066" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                          <geom name="orbits_chain::cord_066" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                          <body name="orbits_chain::link_067" pos="0.0230088496 0 0">
+                            <joint name="orbits_chain::bend_067" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                            <geom name="orbits_chain::cord_067" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                            <body name="orbits_chain::link_068" pos="0.0230088496 0 0">
+                              <joint name="orbits_chain::bend_068" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                              <geom name="orbits_chain::cord_068" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                              <body name="orbits_chain::link_069" pos="0.0230088496 0 0">
+                                <joint name="orbits_chain::bend_069" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                <geom name="orbits_chain::cord_069" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                <body name="orbits_chain::link_070" pos="0.0230088496 0 0">
+                                  <joint name="orbits_chain::bend_070" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                  <geom name="orbits_chain::cord_070" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                  <body name="orbits_chain::link_071" pos="0.0230088496 0 0">
+                                    <joint name="orbits_chain::bend_071" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                    <geom name="orbits_chain::cord_071" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                    <body name="orbits_chain::link_072" pos="0.0230088496 0 0">
+                                      <joint name="orbits_chain::bend_072" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                      <geom name="orbits_chain::cord_072" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                      <body name="orbits_chain::link_073" pos="0.0230088496 0 0">
+                                        <joint name="orbits_chain::bend_073" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                        <geom name="orbits_chain::cord_073" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                        <body name="orbits_chain::link_074" pos="0.0230088496 0 0">
+                                          <joint name="orbits_chain::bend_074" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                          <geom name="orbits_chain::cord_074" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                          <body name="orbits_chain::link_075" pos="0.0230088496 0 0">
+                                            <joint name="orbits_chain::bend_075" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                            <geom name="orbits_chain::cord_075" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                            <body name="orbits_chain::link_076" pos="0.0230088496 0 0">
+                                              <joint name="orbits_chain::bend_076" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                              <geom name="orbits_chain::cord_076" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                              <body name="orbits_chain::link_077" pos="0.0230088496 0 0">
+                                                <joint name="orbits_chain::bend_077" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                <geom name="orbits_chain::cord_077" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                <body name="orbits_chain::link_078" pos="0.0230088496 0 0">
+                                                  <joint name="orbits_chain::bend_078" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                  <geom name="orbits_chain::cord_078" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                  <body name="orbits_chain::link_079" pos="0.0230088496 0 0">
+                                                    <joint name="orbits_chain::bend_079" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                    <geom name="orbits_chain::cord_079" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                    <body name="orbits_chain::link_080" pos="0.0230088496 0 0">
+                                                      <joint name="orbits_chain::bend_080" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                      <geom name="orbits_chain::cord_080" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                      <body name="orbits_chain::link_081" pos="0.0230088496 0 0">
+                                                        <joint name="orbits_chain::bend_081" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                        <geom name="orbits_chain::cord_081" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                        <body name="orbits_chain::link_082" pos="0.0230088496 0 0">
+                                                          <joint name="orbits_chain::bend_082" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                          <geom name="orbits_chain::cord_082" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                          <body name="orbits_chain::link_083" pos="0.0230088496 0 0">
+                                                            <joint name="orbits_chain::bend_083" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                            <geom name="orbits_chain::cord_083" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                            <body name="orbits_chain::link_084" pos="0.0230088496 0 0">
+                                                              <joint name="orbits_chain::bend_084" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                              <geom name="orbits_chain::cord_084" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                              <body name="orbits_chain::link_085" pos="0.0230088496 0 0">
+                                                                <joint name="orbits_chain::bend_085" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                <geom name="orbits_chain::cord_085" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                <body name="orbits_chain::link_086" pos="0.0230088496 0 0">
+                                                                  <joint name="orbits_chain::bend_086" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                  <geom name="orbits_chain::cord_086" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                  <body name="orbits_chain::link_087" pos="0.0230088496 0 0">
+                                                                    <joint name="orbits_chain::bend_087" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                    <geom name="orbits_chain::cord_087" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                    <body name="orbits_chain::link_088" pos="0.0230088496 0 0">
+                                                                      <joint name="orbits_chain::bend_088" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                      <geom name="orbits_chain::cord_088" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                      <body name="orbits_chain::link_089" pos="0.0230088496 0 0">
+                                                                        <joint name="orbits_chain::bend_089" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                        <geom name="orbits_chain::cord_089" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                        <body name="orbits_chain::link_090" pos="0.0230088496 0 0">
+                                                                          <joint name="orbits_chain::bend_090" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                          <geom name="orbits_chain::cord_090" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                          <body name="orbits_chain::link_091" pos="0.0230088496 0 0">
+                                                                            <joint name="orbits_chain::bend_091" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                            <geom name="orbits_chain::cord_091" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                            <body name="orbits_chain::link_092" pos="0.0230088496 0 0">
+                                                                              <joint name="orbits_chain::bend_092" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                              <geom name="orbits_chain::cord_092" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                              <body name="orbits_chain::link_093" pos="0.0230088496 0 0">
+                                                                                <joint name="orbits_chain::bend_093" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                <geom name="orbits_chain::cord_093" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                <body name="orbits_chain::link_094" pos="0.0230088496 0 0">
+                                                                                  <joint name="orbits_chain::bend_094" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                  <geom name="orbits_chain::cord_094" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                  <body name="orbits_chain::link_095" pos="0.0230088496 0 0">
+                                                                                    <joint name="orbits_chain::bend_095" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                    <geom name="orbits_chain::cord_095" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                    <body name="orbits_chain::link_096" pos="0.0230088496 0 0">
+                                                                                      <joint name="orbits_chain::bend_096" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                      <geom name="orbits_chain::cord_096" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                      <body name="orbits_chain::link_097" pos="0.0230088496 0 0">
+                                                                                        <joint name="orbits_chain::bend_097" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                        <geom name="orbits_chain::cord_097" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                        <body name="orbits_chain::link_098" pos="0.0230088496 0 0">
+                                                                                          <joint name="orbits_chain::bend_098" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                          <geom name="orbits_chain::cord_098" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                          <body name="orbits_chain::link_099" pos="0.0230088496 0 0">
+                                                                                            <joint name="orbits_chain::bend_099" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                            <geom name="orbits_chain::cord_099" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                            <body name="orbits_chain::link_100" pos="0.0230088496 0 0">
+                                                                                              <joint name="orbits_chain::bend_100" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                              <geom name="orbits_chain::cord_100" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                              <body name="orbits_chain::link_101" pos="0.0230088496 0 0">
+                                                                                                <joint name="orbits_chain::bend_101" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                <geom name="orbits_chain::cord_101" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                <body name="orbits_chain::link_102" pos="0.0230088496 0 0">
+                                                                                                  <joint name="orbits_chain::bend_102" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                  <geom name="orbits_chain::cord_102" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                  <body name="orbits_chain::link_103" pos="0.0230088496 0 0">
+                                                                                                    <joint name="orbits_chain::bend_103" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                    <geom name="orbits_chain::cord_103" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                    <body name="orbits_chain::link_104" pos="0.0230088496 0 0">
+                                                                                                      <joint name="orbits_chain::bend_104" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                      <geom name="orbits_chain::cord_104" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                      <body name="orbits_chain::link_105" pos="0.0230088496 0 0">
+                                                                                                        <joint name="orbits_chain::bend_105" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                        <geom name="orbits_chain::cord_105" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                        <body name="orbits_chain::link_106" pos="0.0230088496 0 0">
+                                                                                                          <joint name="orbits_chain::bend_106" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                          <geom name="orbits_chain::cord_106" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                          <body name="orbits_chain::link_107" pos="0.0230088496 0 0">
+                                                                                                            <joint name="orbits_chain::bend_107" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                            <geom name="orbits_chain::cord_107" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                            <body name="orbits_chain::link_108" pos="0.0230088496 0 0">
+                                                                                                              <joint name="orbits_chain::bend_108" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                              <geom name="orbits_chain::cord_108" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                              <body name="orbits_chain::link_109" pos="0.0230088496 0 0">
+                                                                                                                <joint name="orbits_chain::bend_109" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                <geom name="orbits_chain::cord_109" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                <body name="orbits_chain::link_110" pos="0.0230088496 0 0">
+                                                                                                                  <joint name="orbits_chain::bend_110" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                  <geom name="orbits_chain::cord_110" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                  <body name="orbits_chain::link_111" pos="0.0230088496 0 0">
+                                                                                                                    <joint name="orbits_chain::bend_111" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                    <geom name="orbits_chain::cord_111" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                    <body name="orbits_chain::link_112" pos="0.0230088496 0 0">
+                                                                                                                      <joint name="orbits_chain::bend_112" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                      <geom name="orbits_chain::cord_112" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                      <site name="orbits_chain::cord_end" pos="0.0230088496 0 0" size=".001" />
+                                                                                                                    </body>
+                                                                                                                  </body>
+                                                                                                                </body>
+                                                                                                              </body>
+                                                                                                            </body>
+                                                                                                          </body>
+                                                                                                        </body>
+                                                                                                      </body>
+                                                                                                    </body>
+                                                                                                  </body>
+                                                                                                </body>
+                                                                                              </body>
+                                                                                            </body>
+                                                                                          </body>
+                                                                                        </body>
+                                                                                      </body>
+                                                                                    </body>
+                                                                                  </body>
+                                                                                </body>
+                                                                              </body>
+                                                                            </body>
+                                                                          </body>
+                                                                        </body>
+                                                                      </body>
+                                                                    </body>
+                                                                  </body>
+                                                                </body>
+                                                              </body>
+                                                            </body>
+                                                          </body>
+                                                        </body>
+                                                      </body>
+                                                    </body>
+                                                  </body>
+                                                </body>
+                                              </body>
+                                            </body>
+                                          </body>
+                                        </body>
+                                      </body>
+                                    </body>
+                                  </body>
+                                </body>
+                              </body>
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="orbits_chain::link_055" pos="0 0 0" quat="0 0 0 1">
+        <joint name="orbits_chain::bend_055" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+        <geom name="orbits_chain::cord_055" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+        <body name="orbits_chain::link_054" pos="0.0230088496 0 0">
+          <joint name="orbits_chain::bend_054" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+          <geom name="orbits_chain::cord_054" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+          <body name="orbits_chain::link_053" pos="0.0230088496 0 0">
+            <joint name="orbits_chain::bend_053" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+            <geom name="orbits_chain::cord_053" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+            <body name="orbits_chain::link_052" pos="0.0230088496 0 0">
+              <joint name="orbits_chain::bend_052" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+              <geom name="orbits_chain::cord_052" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+              <body name="orbits_chain::link_051" pos="0.0230088496 0 0">
+                <joint name="orbits_chain::bend_051" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                <geom name="orbits_chain::cord_051" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                <body name="orbits_chain::link_050" pos="0.0230088496 0 0">
+                  <joint name="orbits_chain::bend_050" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                  <geom name="orbits_chain::cord_050" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                  <body name="orbits_chain::link_049" pos="0.0230088496 0 0">
+                    <joint name="orbits_chain::bend_049" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                    <geom name="orbits_chain::cord_049" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                    <body name="orbits_chain::link_048" pos="0.0230088496 0 0">
+                      <joint name="orbits_chain::bend_048" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                      <geom name="orbits_chain::cord_048" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                      <body name="orbits_chain::link_047" pos="0.0230088496 0 0">
+                        <joint name="orbits_chain::bend_047" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                        <geom name="orbits_chain::cord_047" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                        <body name="orbits_chain::link_046" pos="0.0230088496 0 0">
+                          <joint name="orbits_chain::bend_046" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                          <geom name="orbits_chain::cord_046" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                          <body name="orbits_chain::link_045" pos="0.0230088496 0 0">
+                            <joint name="orbits_chain::bend_045" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                            <geom name="orbits_chain::cord_045" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                            <body name="orbits_chain::link_044" pos="0.0230088496 0 0">
+                              <joint name="orbits_chain::bend_044" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                              <geom name="orbits_chain::cord_044" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                              <body name="orbits_chain::link_043" pos="0.0230088496 0 0">
+                                <joint name="orbits_chain::bend_043" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                <geom name="orbits_chain::cord_043" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                <body name="orbits_chain::link_042" pos="0.0230088496 0 0">
+                                  <joint name="orbits_chain::bend_042" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                  <geom name="orbits_chain::cord_042" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                  <body name="orbits_chain::link_041" pos="0.0230088496 0 0">
+                                    <joint name="orbits_chain::bend_041" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                    <geom name="orbits_chain::cord_041" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                    <body name="orbits_chain::link_040" pos="0.0230088496 0 0">
+                                      <joint name="orbits_chain::bend_040" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                      <geom name="orbits_chain::cord_040" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                      <body name="orbits_chain::link_039" pos="0.0230088496 0 0">
+                                        <joint name="orbits_chain::bend_039" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                        <geom name="orbits_chain::cord_039" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                        <body name="orbits_chain::link_038" pos="0.0230088496 0 0">
+                                          <joint name="orbits_chain::bend_038" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                          <geom name="orbits_chain::cord_038" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                          <body name="orbits_chain::link_037" pos="0.0230088496 0 0">
+                                            <joint name="orbits_chain::bend_037" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                            <geom name="orbits_chain::cord_037" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                            <body name="orbits_chain::link_036" pos="0.0230088496 0 0">
+                                              <joint name="orbits_chain::bend_036" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                              <geom name="orbits_chain::cord_036" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                              <body name="orbits_chain::link_035" pos="0.0230088496 0 0">
+                                                <joint name="orbits_chain::bend_035" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                <geom name="orbits_chain::cord_035" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                <body name="orbits_chain::link_034" pos="0.0230088496 0 0">
+                                                  <joint name="orbits_chain::bend_034" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                  <geom name="orbits_chain::cord_034" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                  <body name="orbits_chain::link_033" pos="0.0230088496 0 0">
+                                                    <joint name="orbits_chain::bend_033" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                    <geom name="orbits_chain::cord_033" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                    <body name="orbits_chain::link_032" pos="0.0230088496 0 0">
+                                                      <joint name="orbits_chain::bend_032" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                      <geom name="orbits_chain::cord_032" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                      <body name="orbits_chain::link_031" pos="0.0230088496 0 0">
+                                                        <joint name="orbits_chain::bend_031" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                        <geom name="orbits_chain::cord_031" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                        <body name="orbits_chain::link_030" pos="0.0230088496 0 0">
+                                                          <joint name="orbits_chain::bend_030" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                          <geom name="orbits_chain::cord_030" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                          <body name="orbits_chain::link_029" pos="0.0230088496 0 0">
+                                                            <joint name="orbits_chain::bend_029" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                            <geom name="orbits_chain::cord_029" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                            <body name="orbits_chain::link_028" pos="0.0230088496 0 0">
+                                                              <joint name="orbits_chain::bend_028" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                              <geom name="orbits_chain::cord_028" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                              <body name="orbits_chain::link_027" pos="0.0230088496 0 0">
+                                                                <joint name="orbits_chain::bend_027" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                <geom name="orbits_chain::cord_027" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                <body name="orbits_chain::link_026" pos="0.0230088496 0 0">
+                                                                  <joint name="orbits_chain::bend_026" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                  <geom name="orbits_chain::cord_026" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                  <body name="orbits_chain::link_025" pos="0.0230088496 0 0">
+                                                                    <joint name="orbits_chain::bend_025" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                    <geom name="orbits_chain::cord_025" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                    <body name="orbits_chain::link_024" pos="0.0230088496 0 0">
+                                                                      <joint name="orbits_chain::bend_024" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                      <geom name="orbits_chain::cord_024" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                      <body name="orbits_chain::link_023" pos="0.0230088496 0 0">
+                                                                        <joint name="orbits_chain::bend_023" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                        <geom name="orbits_chain::cord_023" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                        <body name="orbits_chain::link_022" pos="0.0230088496 0 0">
+                                                                          <joint name="orbits_chain::bend_022" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                          <geom name="orbits_chain::cord_022" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                          <body name="orbits_chain::link_021" pos="0.0230088496 0 0">
+                                                                            <joint name="orbits_chain::bend_021" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                            <geom name="orbits_chain::cord_021" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                            <body name="orbits_chain::link_020" pos="0.0230088496 0 0">
+                                                                              <joint name="orbits_chain::bend_020" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                              <geom name="orbits_chain::cord_020" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                              <body name="orbits_chain::link_019" pos="0.0230088496 0 0">
+                                                                                <joint name="orbits_chain::bend_019" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                <geom name="orbits_chain::cord_019" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                <body name="orbits_chain::link_018" pos="0.0230088496 0 0">
+                                                                                  <joint name="orbits_chain::bend_018" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                  <geom name="orbits_chain::cord_018" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                  <body name="orbits_chain::link_017" pos="0.0230088496 0 0">
+                                                                                    <joint name="orbits_chain::bend_017" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                    <geom name="orbits_chain::cord_017" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                    <body name="orbits_chain::link_016" pos="0.0230088496 0 0">
+                                                                                      <joint name="orbits_chain::bend_016" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                      <geom name="orbits_chain::cord_016" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                      <body name="orbits_chain::link_015" pos="0.0230088496 0 0">
+                                                                                        <joint name="orbits_chain::bend_015" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                        <geom name="orbits_chain::cord_015" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                        <body name="orbits_chain::link_014" pos="0.0230088496 0 0">
+                                                                                          <joint name="orbits_chain::bend_014" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                          <geom name="orbits_chain::cord_014" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                          <body name="orbits_chain::link_013" pos="0.0230088496 0 0">
+                                                                                            <joint name="orbits_chain::bend_013" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                            <geom name="orbits_chain::cord_013" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                            <body name="orbits_chain::link_012" pos="0.0230088496 0 0">
+                                                                                              <joint name="orbits_chain::bend_012" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                              <geom name="orbits_chain::cord_012" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                              <body name="orbits_chain::link_011" pos="0.0230088496 0 0">
+                                                                                                <joint name="orbits_chain::bend_011" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                <geom name="orbits_chain::cord_011" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                <body name="orbits_chain::link_010" pos="0.0230088496 0 0">
+                                                                                                  <joint name="orbits_chain::bend_010" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                  <geom name="orbits_chain::cord_010" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                  <body name="orbits_chain::link_009" pos="0.0230088496 0 0">
+                                                                                                    <joint name="orbits_chain::bend_009" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                    <geom name="orbits_chain::cord_009" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                    <body name="orbits_chain::link_008" pos="0.0230088496 0 0">
+                                                                                                      <joint name="orbits_chain::bend_008" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                      <geom name="orbits_chain::cord_008" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                      <body name="orbits_chain::link_007" pos="0.0230088496 0 0">
+                                                                                                        <joint name="orbits_chain::bend_007" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                        <geom name="orbits_chain::cord_007" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                        <body name="orbits_chain::link_006" pos="0.0230088496 0 0">
+                                                                                                          <joint name="orbits_chain::bend_006" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                          <geom name="orbits_chain::cord_006" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                          <body name="orbits_chain::link_005" pos="0.0230088496 0 0">
+                                                                                                            <joint name="orbits_chain::bend_005" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                            <geom name="orbits_chain::cord_005" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                            <body name="orbits_chain::link_004" pos="0.0230088496 0 0">
+                                                                                                              <joint name="orbits_chain::bend_004" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                              <geom name="orbits_chain::cord_004" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                              <body name="orbits_chain::link_003" pos="0.0230088496 0 0">
+                                                                                                                <joint name="orbits_chain::bend_003" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                <geom name="orbits_chain::cord_003" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                <body name="orbits_chain::link_002" pos="0.0230088496 0 0">
+                                                                                                                  <joint name="orbits_chain::bend_002" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                  <geom name="orbits_chain::cord_002" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                  <body name="orbits_chain::link_001" pos="0.0230088496 0 0">
+                                                                                                                    <joint name="orbits_chain::bend_001" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                    <geom name="orbits_chain::cord_001" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                    <body name="orbits_chain::link_000" pos="0.0230088496 0 0">
+                                                                                                                      <joint name="orbits_chain::bend_000" type="ball" stiffness="0.00160351692" damping="2e-4" armature="1e-6" />
+                                                                                                                      <geom name="orbits_chain::cord_000" fromto="0 0 0 0.0230088496 0 0" type="capsule" size="0.002618" density="650" rgba=".95 .78 .1 1" solref=".01 1" />
+                                                                                                                      <body name="orbits_chain::handle" pos="0.0468088496 0.00833 0.00119">
+                                                                                                                        <joint name="orbits_chain::handle_eye" type="ball" pos="-0.0238 -0.00833 -0.00119" damping="1e-5" armature="1e-6" />
+                                                                                                                        <geom name="orbits_chain::handle" type="mesh" mesh="orbits_chain_handle_6b4e0eb8312b1415" density="700" rgba=".62 .42 .22 1" />
+                                                                                                                        <site name="orbits_chain::eye_1" pos="-0.0238 0.00833 -0.00119" size=".001" />
+                                                                                                                      </body>
+                                                                                                                    </body>
+                                                                                                                  </body>
+                                                                                                                </body>
+                                                                                                              </body>
+                                                                                                            </body>
+                                                                                                          </body>
+                                                                                                        </body>
+                                                                                                      </body>
+                                                                                                    </body>
+                                                                                                  </body>
+                                                                                                </body>
+                                                                                              </body>
+                                                                                            </body>
+                                                                                          </body>
+                                                                                        </body>
+                                                                                      </body>
+                                                                                    </body>
+                                                                                  </body>
+                                                                                </body>
+                                                                              </body>
+                                                                            </body>
+                                                                          </body>
+                                                                        </body>
+                                                                      </body>
+                                                                    </body>
+                                                                  </body>
+                                                                </body>
+                                                              </body>
+                                                            </body>
+                                                          </body>
+                                                        </body>
+                                                      </body>
+                                                    </body>
+                                                  </body>
+                                                </body>
+                                              </body>
+                                            </body>
+                                          </body>
+                                        </body>
+                                      </body>
+                                    </body>
+                                  </body>
+                                </body>
+                              </body>
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="goal_region" pos="0 0 0" quat="1 0 0 0">
+      <geom type="mesh" mesh="goal_region_1d38657d48ff4073" contype="0" conaffinity="0" group="2" />
+    </body>
+  </worldbody>
+  <contact>
+    <exclude body1="left/base_link" body2="left/shoulder_link" />
+    <exclude body1="right/base_link" body2="right/shoulder_link" />
+    <exclude body1="orbits_chain::link_056" body2="orbits_chain::link_057" />
+    <exclude body1="orbits_chain::link_057" body2="orbits_chain::link_058" />
+    <exclude body1="orbits_chain::link_058" body2="orbits_chain::link_059" />
+    <exclude body1="orbits_chain::link_059" body2="orbits_chain::link_060" />
+    <exclude body1="orbits_chain::link_060" body2="orbits_chain::link_061" />
+    <exclude body1="orbits_chain::link_061" body2="orbits_chain::link_062" />
+    <exclude body1="orbits_chain::link_062" body2="orbits_chain::link_063" />
+    <exclude body1="orbits_chain::link_063" body2="orbits_chain::link_064" />
+    <exclude body1="orbits_chain::link_064" body2="orbits_chain::link_065" />
+    <exclude body1="orbits_chain::link_065" body2="orbits_chain::link_066" />
+    <exclude body1="orbits_chain::link_066" body2="orbits_chain::link_067" />
+    <exclude body1="orbits_chain::link_067" body2="orbits_chain::link_068" />
+    <exclude body1="orbits_chain::link_068" body2="orbits_chain::link_069" />
+    <exclude body1="orbits_chain::link_069" body2="orbits_chain::link_070" />
+    <exclude body1="orbits_chain::link_070" body2="orbits_chain::link_071" />
+    <exclude body1="orbits_chain::link_071" body2="orbits_chain::link_072" />
+    <exclude body1="orbits_chain::link_072" body2="orbits_chain::link_073" />
+    <exclude body1="orbits_chain::link_073" body2="orbits_chain::link_074" />
+    <exclude body1="orbits_chain::link_074" body2="orbits_chain::link_075" />
+    <exclude body1="orbits_chain::link_075" body2="orbits_chain::link_076" />
+    <exclude body1="orbits_chain::link_076" body2="orbits_chain::link_077" />
+    <exclude body1="orbits_chain::link_077" body2="orbits_chain::link_078" />
+    <exclude body1="orbits_chain::link_078" body2="orbits_chain::link_079" />
+    <exclude body1="orbits_chain::link_079" body2="orbits_chain::link_080" />
+    <exclude body1="orbits_chain::link_080" body2="orbits_chain::link_081" />
+    <exclude body1="orbits_chain::link_081" body2="orbits_chain::link_082" />
+    <exclude body1="orbits_chain::link_082" body2="orbits_chain::link_083" />
+    <exclude body1="orbits_chain::link_083" body2="orbits_chain::link_084" />
+    <exclude body1="orbits_chain::link_084" body2="orbits_chain::link_085" />
+    <exclude body1="orbits_chain::link_085" body2="orbits_chain::link_086" />
+    <exclude body1="orbits_chain::link_086" body2="orbits_chain::link_087" />
+    <exclude body1="orbits_chain::link_087" body2="orbits_chain::link_088" />
+    <exclude body1="orbits_chain::link_088" body2="orbits_chain::link_089" />
+    <exclude body1="orbits_chain::link_089" body2="orbits_chain::link_090" />
+    <exclude body1="orbits_chain::link_090" body2="orbits_chain::link_091" />
+    <exclude body1="orbits_chain::link_091" body2="orbits_chain::link_092" />
+    <exclude body1="orbits_chain::link_092" body2="orbits_chain::link_093" />
+    <exclude body1="orbits_chain::link_093" body2="orbits_chain::link_094" />
+    <exclude body1="orbits_chain::link_094" body2="orbits_chain::link_095" />
+    <exclude body1="orbits_chain::link_095" body2="orbits_chain::link_096" />
+    <exclude body1="orbits_chain::link_096" body2="orbits_chain::link_097" />
+    <exclude body1="orbits_chain::link_097" body2="orbits_chain::link_098" />
+    <exclude body1="orbits_chain::link_098" body2="orbits_chain::link_099" />
+    <exclude body1="orbits_chain::link_099" body2="orbits_chain::link_100" />
+    <exclude body1="orbits_chain::link_100" body2="orbits_chain::link_101" />
+    <exclude body1="orbits_chain::link_101" body2="orbits_chain::link_102" />
+    <exclude body1="orbits_chain::link_102" body2="orbits_chain::link_103" />
+    <exclude body1="orbits_chain::link_103" body2="orbits_chain::link_104" />
+    <exclude body1="orbits_chain::link_104" body2="orbits_chain::link_105" />
+    <exclude body1="orbits_chain::link_105" body2="orbits_chain::link_106" />
+    <exclude body1="orbits_chain::link_106" body2="orbits_chain::link_107" />
+    <exclude body1="orbits_chain::link_107" body2="orbits_chain::link_108" />
+    <exclude body1="orbits_chain::link_108" body2="orbits_chain::link_109" />
+    <exclude body1="orbits_chain::link_109" body2="orbits_chain::link_110" />
+    <exclude body1="orbits_chain::link_110" body2="orbits_chain::link_111" />
+    <exclude body1="orbits_chain::link_111" body2="orbits_chain::link_112" />
+    <exclude body1="orbits_chain::link_056" body2="orbits_chain::link_055" />
+    <exclude body1="orbits_chain::link_055" body2="orbits_chain::link_054" />
+    <exclude body1="orbits_chain::link_054" body2="orbits_chain::link_053" />
+    <exclude body1="orbits_chain::link_053" body2="orbits_chain::link_052" />
+    <exclude body1="orbits_chain::link_052" body2="orbits_chain::link_051" />
+    <exclude body1="orbits_chain::link_051" body2="orbits_chain::link_050" />
+    <exclude body1="orbits_chain::link_050" body2="orbits_chain::link_049" />
+    <exclude body1="orbits_chain::link_049" body2="orbits_chain::link_048" />
+    <exclude body1="orbits_chain::link_048" body2="orbits_chain::link_047" />
+    <exclude body1="orbits_chain::link_047" body2="orbits_chain::link_046" />
+    <exclude body1="orbits_chain::link_046" body2="orbits_chain::link_045" />
+    <exclude body1="orbits_chain::link_045" body2="orbits_chain::link_044" />
+    <exclude body1="orbits_chain::link_044" body2="orbits_chain::link_043" />
+    <exclude body1="orbits_chain::link_043" body2="orbits_chain::link_042" />
+    <exclude body1="orbits_chain::link_042" body2="orbits_chain::link_041" />
+    <exclude body1="orbits_chain::link_041" body2="orbits_chain::link_040" />
+    <exclude body1="orbits_chain::link_040" body2="orbits_chain::link_039" />
+    <exclude body1="orbits_chain::link_039" body2="orbits_chain::link_038" />
+    <exclude body1="orbits_chain::link_038" body2="orbits_chain::link_037" />
+    <exclude body1="orbits_chain::link_037" body2="orbits_chain::link_036" />
+    <exclude body1="orbits_chain::link_036" body2="orbits_chain::link_035" />
+    <exclude body1="orbits_chain::link_035" body2="orbits_chain::link_034" />
+    <exclude body1="orbits_chain::link_034" body2="orbits_chain::link_033" />
+    <exclude body1="orbits_chain::link_033" body2="orbits_chain::link_032" />
+    <exclude body1="orbits_chain::link_032" body2="orbits_chain::link_031" />
+    <exclude body1="orbits_chain::link_031" body2="orbits_chain::link_030" />
+    <exclude body1="orbits_chain::link_030" body2="orbits_chain::link_029" />
+    <exclude body1="orbits_chain::link_029" body2="orbits_chain::link_028" />
+    <exclude body1="orbits_chain::link_028" body2="orbits_chain::link_027" />
+    <exclude body1="orbits_chain::link_027" body2="orbits_chain::link_026" />
+    <exclude body1="orbits_chain::link_026" body2="orbits_chain::link_025" />
+    <exclude body1="orbits_chain::link_025" body2="orbits_chain::link_024" />
+    <exclude body1="orbits_chain::link_024" body2="orbits_chain::link_023" />
+    <exclude body1="orbits_chain::link_023" body2="orbits_chain::link_022" />
+    <exclude body1="orbits_chain::link_022" body2="orbits_chain::link_021" />
+    <exclude body1="orbits_chain::link_021" body2="orbits_chain::link_020" />
+    <exclude body1="orbits_chain::link_020" body2="orbits_chain::link_019" />
+    <exclude body1="orbits_chain::link_019" body2="orbits_chain::link_018" />
+    <exclude body1="orbits_chain::link_018" body2="orbits_chain::link_017" />
+    <exclude body1="orbits_chain::link_017" body2="orbits_chain::link_016" />
+    <exclude body1="orbits_chain::link_016" body2="orbits_chain::link_015" />
+    <exclude body1="orbits_chain::link_015" body2="orbits_chain::link_014" />
+    <exclude body1="orbits_chain::link_014" body2="orbits_chain::link_013" />
+    <exclude body1="orbits_chain::link_013" body2="orbits_chain::link_012" />
+    <exclude body1="orbits_chain::link_012" body2="orbits_chain::link_011" />
+    <exclude body1="orbits_chain::link_011" body2="orbits_chain::link_010" />
+    <exclude body1="orbits_chain::link_010" body2="orbits_chain::link_009" />
+    <exclude body1="orbits_chain::link_009" body2="orbits_chain::link_008" />
+    <exclude body1="orbits_chain::link_008" body2="orbits_chain::link_007" />
+    <exclude body1="orbits_chain::link_007" body2="orbits_chain::link_006" />
+    <exclude body1="orbits_chain::link_006" body2="orbits_chain::link_005" />
+    <exclude body1="orbits_chain::link_005" body2="orbits_chain::link_004" />
+    <exclude body1="orbits_chain::link_004" body2="orbits_chain::link_003" />
+    <exclude body1="orbits_chain::link_003" body2="orbits_chain::link_002" />
+    <exclude body1="orbits_chain::link_002" body2="orbits_chain::link_001" />
+    <exclude body1="orbits_chain::link_001" body2="orbits_chain::link_000" />
+    <exclude body1="orbits_chain::link_000" body2="orbits_chain::handle" />
+    <exclude body1="orbits_chain::handle" body2="orbits_chain::link_001" />
+    <exclude body1="orbits_chain::handle" body2="orbits_chain::link_002" />
+    <exclude body1="orbits_chain::handle" body2="orbits_chain::link_110" />
+    <exclude body1="orbits_chain::handle" body2="orbits_chain::link_111" />
+    <exclude body1="orbits_chain::handle" body2="orbits_chain::link_112" />
+  </contact>
+  <equality>
+    <joint joint1="left/left_finger" joint2="left/right_finger" polycoef="0 1 0 0 0" />
+    <joint joint1="right/left_finger" joint2="right/right_finger" polycoef="0 1 0 0 0" />
+    <connect name="orbits_chain::eye_1" site1="orbits_chain::cord_end" site2="orbits_chain::eye_1" solref=".005 .5" solimp=".98 .98 .001 .5 2" class="orbits_chain" />
+    <weld name="grasp/left/orbits_chain/link_000" body1="left/gripper_link" body2="orbits_chain::link_000" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_001" body1="left/gripper_link" body2="orbits_chain::link_001" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_002" body1="left/gripper_link" body2="orbits_chain::link_002" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_003" body1="left/gripper_link" body2="orbits_chain::link_003" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_004" body1="left/gripper_link" body2="orbits_chain::link_004" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_005" body1="left/gripper_link" body2="orbits_chain::link_005" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_006" body1="left/gripper_link" body2="orbits_chain::link_006" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_007" body1="left/gripper_link" body2="orbits_chain::link_007" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_008" body1="left/gripper_link" body2="orbits_chain::link_008" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_009" body1="left/gripper_link" body2="orbits_chain::link_009" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_010" body1="left/gripper_link" body2="orbits_chain::link_010" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_011" body1="left/gripper_link" body2="orbits_chain::link_011" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_012" body1="left/gripper_link" body2="orbits_chain::link_012" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_013" body1="left/gripper_link" body2="orbits_chain::link_013" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_014" body1="left/gripper_link" body2="orbits_chain::link_014" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_015" body1="left/gripper_link" body2="orbits_chain::link_015" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_016" body1="left/gripper_link" body2="orbits_chain::link_016" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_017" body1="left/gripper_link" body2="orbits_chain::link_017" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_018" body1="left/gripper_link" body2="orbits_chain::link_018" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_019" body1="left/gripper_link" body2="orbits_chain::link_019" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_020" body1="left/gripper_link" body2="orbits_chain::link_020" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_021" body1="left/gripper_link" body2="orbits_chain::link_021" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_022" body1="left/gripper_link" body2="orbits_chain::link_022" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_023" body1="left/gripper_link" body2="orbits_chain::link_023" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_024" body1="left/gripper_link" body2="orbits_chain::link_024" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_025" body1="left/gripper_link" body2="orbits_chain::link_025" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_026" body1="left/gripper_link" body2="orbits_chain::link_026" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_027" body1="left/gripper_link" body2="orbits_chain::link_027" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_028" body1="left/gripper_link" body2="orbits_chain::link_028" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_029" body1="left/gripper_link" body2="orbits_chain::link_029" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_030" body1="left/gripper_link" body2="orbits_chain::link_030" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_031" body1="left/gripper_link" body2="orbits_chain::link_031" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_032" body1="left/gripper_link" body2="orbits_chain::link_032" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_033" body1="left/gripper_link" body2="orbits_chain::link_033" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_034" body1="left/gripper_link" body2="orbits_chain::link_034" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_035" body1="left/gripper_link" body2="orbits_chain::link_035" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_036" body1="left/gripper_link" body2="orbits_chain::link_036" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_037" body1="left/gripper_link" body2="orbits_chain::link_037" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_038" body1="left/gripper_link" body2="orbits_chain::link_038" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_039" body1="left/gripper_link" body2="orbits_chain::link_039" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_040" body1="left/gripper_link" body2="orbits_chain::link_040" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_041" body1="left/gripper_link" body2="orbits_chain::link_041" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_042" body1="left/gripper_link" body2="orbits_chain::link_042" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_043" body1="left/gripper_link" body2="orbits_chain::link_043" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_044" body1="left/gripper_link" body2="orbits_chain::link_044" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_045" body1="left/gripper_link" body2="orbits_chain::link_045" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_046" body1="left/gripper_link" body2="orbits_chain::link_046" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_047" body1="left/gripper_link" body2="orbits_chain::link_047" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_048" body1="left/gripper_link" body2="orbits_chain::link_048" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_049" body1="left/gripper_link" body2="orbits_chain::link_049" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_050" body1="left/gripper_link" body2="orbits_chain::link_050" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_051" body1="left/gripper_link" body2="orbits_chain::link_051" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_052" body1="left/gripper_link" body2="orbits_chain::link_052" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_053" body1="left/gripper_link" body2="orbits_chain::link_053" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_054" body1="left/gripper_link" body2="orbits_chain::link_054" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_055" body1="left/gripper_link" body2="orbits_chain::link_055" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_056" body1="left/gripper_link" body2="orbits_chain::link_056" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_057" body1="left/gripper_link" body2="orbits_chain::link_057" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_058" body1="left/gripper_link" body2="orbits_chain::link_058" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_059" body1="left/gripper_link" body2="orbits_chain::link_059" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_060" body1="left/gripper_link" body2="orbits_chain::link_060" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_061" body1="left/gripper_link" body2="orbits_chain::link_061" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_062" body1="left/gripper_link" body2="orbits_chain::link_062" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_063" body1="left/gripper_link" body2="orbits_chain::link_063" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_064" body1="left/gripper_link" body2="orbits_chain::link_064" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_065" body1="left/gripper_link" body2="orbits_chain::link_065" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_066" body1="left/gripper_link" body2="orbits_chain::link_066" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_067" body1="left/gripper_link" body2="orbits_chain::link_067" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_068" body1="left/gripper_link" body2="orbits_chain::link_068" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_069" body1="left/gripper_link" body2="orbits_chain::link_069" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_070" body1="left/gripper_link" body2="orbits_chain::link_070" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_071" body1="left/gripper_link" body2="orbits_chain::link_071" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_072" body1="left/gripper_link" body2="orbits_chain::link_072" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_073" body1="left/gripper_link" body2="orbits_chain::link_073" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_074" body1="left/gripper_link" body2="orbits_chain::link_074" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_075" body1="left/gripper_link" body2="orbits_chain::link_075" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_076" body1="left/gripper_link" body2="orbits_chain::link_076" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_077" body1="left/gripper_link" body2="orbits_chain::link_077" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_078" body1="left/gripper_link" body2="orbits_chain::link_078" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_079" body1="left/gripper_link" body2="orbits_chain::link_079" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_080" body1="left/gripper_link" body2="orbits_chain::link_080" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_081" body1="left/gripper_link" body2="orbits_chain::link_081" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_082" body1="left/gripper_link" body2="orbits_chain::link_082" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_083" body1="left/gripper_link" body2="orbits_chain::link_083" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_084" body1="left/gripper_link" body2="orbits_chain::link_084" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_085" body1="left/gripper_link" body2="orbits_chain::link_085" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_086" body1="left/gripper_link" body2="orbits_chain::link_086" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_087" body1="left/gripper_link" body2="orbits_chain::link_087" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_088" body1="left/gripper_link" body2="orbits_chain::link_088" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_089" body1="left/gripper_link" body2="orbits_chain::link_089" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_090" body1="left/gripper_link" body2="orbits_chain::link_090" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_091" body1="left/gripper_link" body2="orbits_chain::link_091" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_092" body1="left/gripper_link" body2="orbits_chain::link_092" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_093" body1="left/gripper_link" body2="orbits_chain::link_093" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_094" body1="left/gripper_link" body2="orbits_chain::link_094" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_095" body1="left/gripper_link" body2="orbits_chain::link_095" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_096" body1="left/gripper_link" body2="orbits_chain::link_096" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_097" body1="left/gripper_link" body2="orbits_chain::link_097" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_098" body1="left/gripper_link" body2="orbits_chain::link_098" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_099" body1="left/gripper_link" body2="orbits_chain::link_099" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_100" body1="left/gripper_link" body2="orbits_chain::link_100" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_101" body1="left/gripper_link" body2="orbits_chain::link_101" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_102" body1="left/gripper_link" body2="orbits_chain::link_102" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_103" body1="left/gripper_link" body2="orbits_chain::link_103" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_104" body1="left/gripper_link" body2="orbits_chain::link_104" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_105" body1="left/gripper_link" body2="orbits_chain::link_105" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_106" body1="left/gripper_link" body2="orbits_chain::link_106" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_107" body1="left/gripper_link" body2="orbits_chain::link_107" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_108" body1="left/gripper_link" body2="orbits_chain::link_108" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_109" body1="left/gripper_link" body2="orbits_chain::link_109" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_110" body1="left/gripper_link" body2="orbits_chain::link_110" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_111" body1="left/gripper_link" body2="orbits_chain::link_111" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/link_112" body1="left/gripper_link" body2="orbits_chain::link_112" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/left/orbits_chain/handle" body1="left/gripper_link" body2="orbits_chain::handle" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_000" body1="right/gripper_link" body2="orbits_chain::link_000" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_001" body1="right/gripper_link" body2="orbits_chain::link_001" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_002" body1="right/gripper_link" body2="orbits_chain::link_002" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_003" body1="right/gripper_link" body2="orbits_chain::link_003" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_004" body1="right/gripper_link" body2="orbits_chain::link_004" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_005" body1="right/gripper_link" body2="orbits_chain::link_005" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_006" body1="right/gripper_link" body2="orbits_chain::link_006" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_007" body1="right/gripper_link" body2="orbits_chain::link_007" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_008" body1="right/gripper_link" body2="orbits_chain::link_008" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_009" body1="right/gripper_link" body2="orbits_chain::link_009" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_010" body1="right/gripper_link" body2="orbits_chain::link_010" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_011" body1="right/gripper_link" body2="orbits_chain::link_011" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_012" body1="right/gripper_link" body2="orbits_chain::link_012" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_013" body1="right/gripper_link" body2="orbits_chain::link_013" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_014" body1="right/gripper_link" body2="orbits_chain::link_014" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_015" body1="right/gripper_link" body2="orbits_chain::link_015" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_016" body1="right/gripper_link" body2="orbits_chain::link_016" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_017" body1="right/gripper_link" body2="orbits_chain::link_017" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_018" body1="right/gripper_link" body2="orbits_chain::link_018" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_019" body1="right/gripper_link" body2="orbits_chain::link_019" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_020" body1="right/gripper_link" body2="orbits_chain::link_020" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_021" body1="right/gripper_link" body2="orbits_chain::link_021" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_022" body1="right/gripper_link" body2="orbits_chain::link_022" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_023" body1="right/gripper_link" body2="orbits_chain::link_023" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_024" body1="right/gripper_link" body2="orbits_chain::link_024" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_025" body1="right/gripper_link" body2="orbits_chain::link_025" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_026" body1="right/gripper_link" body2="orbits_chain::link_026" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_027" body1="right/gripper_link" body2="orbits_chain::link_027" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_028" body1="right/gripper_link" body2="orbits_chain::link_028" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_029" body1="right/gripper_link" body2="orbits_chain::link_029" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_030" body1="right/gripper_link" body2="orbits_chain::link_030" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_031" body1="right/gripper_link" body2="orbits_chain::link_031" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_032" body1="right/gripper_link" body2="orbits_chain::link_032" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_033" body1="right/gripper_link" body2="orbits_chain::link_033" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_034" body1="right/gripper_link" body2="orbits_chain::link_034" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_035" body1="right/gripper_link" body2="orbits_chain::link_035" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_036" body1="right/gripper_link" body2="orbits_chain::link_036" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_037" body1="right/gripper_link" body2="orbits_chain::link_037" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_038" body1="right/gripper_link" body2="orbits_chain::link_038" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_039" body1="right/gripper_link" body2="orbits_chain::link_039" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_040" body1="right/gripper_link" body2="orbits_chain::link_040" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_041" body1="right/gripper_link" body2="orbits_chain::link_041" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_042" body1="right/gripper_link" body2="orbits_chain::link_042" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_043" body1="right/gripper_link" body2="orbits_chain::link_043" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_044" body1="right/gripper_link" body2="orbits_chain::link_044" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_045" body1="right/gripper_link" body2="orbits_chain::link_045" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_046" body1="right/gripper_link" body2="orbits_chain::link_046" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_047" body1="right/gripper_link" body2="orbits_chain::link_047" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_048" body1="right/gripper_link" body2="orbits_chain::link_048" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_049" body1="right/gripper_link" body2="orbits_chain::link_049" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_050" body1="right/gripper_link" body2="orbits_chain::link_050" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_051" body1="right/gripper_link" body2="orbits_chain::link_051" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_052" body1="right/gripper_link" body2="orbits_chain::link_052" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_053" body1="right/gripper_link" body2="orbits_chain::link_053" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_054" body1="right/gripper_link" body2="orbits_chain::link_054" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_055" body1="right/gripper_link" body2="orbits_chain::link_055" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_056" body1="right/gripper_link" body2="orbits_chain::link_056" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_057" body1="right/gripper_link" body2="orbits_chain::link_057" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_058" body1="right/gripper_link" body2="orbits_chain::link_058" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_059" body1="right/gripper_link" body2="orbits_chain::link_059" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_060" body1="right/gripper_link" body2="orbits_chain::link_060" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_061" body1="right/gripper_link" body2="orbits_chain::link_061" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_062" body1="right/gripper_link" body2="orbits_chain::link_062" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_063" body1="right/gripper_link" body2="orbits_chain::link_063" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_064" body1="right/gripper_link" body2="orbits_chain::link_064" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_065" body1="right/gripper_link" body2="orbits_chain::link_065" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_066" body1="right/gripper_link" body2="orbits_chain::link_066" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_067" body1="right/gripper_link" body2="orbits_chain::link_067" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_068" body1="right/gripper_link" body2="orbits_chain::link_068" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_069" body1="right/gripper_link" body2="orbits_chain::link_069" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_070" body1="right/gripper_link" body2="orbits_chain::link_070" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_071" body1="right/gripper_link" body2="orbits_chain::link_071" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_072" body1="right/gripper_link" body2="orbits_chain::link_072" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_073" body1="right/gripper_link" body2="orbits_chain::link_073" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_074" body1="right/gripper_link" body2="orbits_chain::link_074" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_075" body1="right/gripper_link" body2="orbits_chain::link_075" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_076" body1="right/gripper_link" body2="orbits_chain::link_076" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_077" body1="right/gripper_link" body2="orbits_chain::link_077" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_078" body1="right/gripper_link" body2="orbits_chain::link_078" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_079" body1="right/gripper_link" body2="orbits_chain::link_079" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_080" body1="right/gripper_link" body2="orbits_chain::link_080" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_081" body1="right/gripper_link" body2="orbits_chain::link_081" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_082" body1="right/gripper_link" body2="orbits_chain::link_082" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_083" body1="right/gripper_link" body2="orbits_chain::link_083" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_084" body1="right/gripper_link" body2="orbits_chain::link_084" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_085" body1="right/gripper_link" body2="orbits_chain::link_085" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_086" body1="right/gripper_link" body2="orbits_chain::link_086" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_087" body1="right/gripper_link" body2="orbits_chain::link_087" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_088" body1="right/gripper_link" body2="orbits_chain::link_088" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_089" body1="right/gripper_link" body2="orbits_chain::link_089" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_090" body1="right/gripper_link" body2="orbits_chain::link_090" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_091" body1="right/gripper_link" body2="orbits_chain::link_091" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_092" body1="right/gripper_link" body2="orbits_chain::link_092" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_093" body1="right/gripper_link" body2="orbits_chain::link_093" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_094" body1="right/gripper_link" body2="orbits_chain::link_094" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_095" body1="right/gripper_link" body2="orbits_chain::link_095" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_096" body1="right/gripper_link" body2="orbits_chain::link_096" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_097" body1="right/gripper_link" body2="orbits_chain::link_097" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_098" body1="right/gripper_link" body2="orbits_chain::link_098" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_099" body1="right/gripper_link" body2="orbits_chain::link_099" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_100" body1="right/gripper_link" body2="orbits_chain::link_100" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_101" body1="right/gripper_link" body2="orbits_chain::link_101" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_102" body1="right/gripper_link" body2="orbits_chain::link_102" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_103" body1="right/gripper_link" body2="orbits_chain::link_103" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_104" body1="right/gripper_link" body2="orbits_chain::link_104" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_105" body1="right/gripper_link" body2="orbits_chain::link_105" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_106" body1="right/gripper_link" body2="orbits_chain::link_106" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_107" body1="right/gripper_link" body2="orbits_chain::link_107" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_108" body1="right/gripper_link" body2="orbits_chain::link_108" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_109" body1="right/gripper_link" body2="orbits_chain::link_109" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_110" body1="right/gripper_link" body2="orbits_chain::link_110" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_111" body1="right/gripper_link" body2="orbits_chain::link_111" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/link_112" body1="right/gripper_link" body2="orbits_chain::link_112" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+    <weld name="grasp/right/orbits_chain/handle" body1="right/gripper_link" body2="orbits_chain::handle" active="false" solref="0.0050000000000000001 1" solimp="0.90000000000000002 0.94999999999999996 0.001 0.5 2" torquescale="3" />
+  </equality>
+  <actuator>
+    <general name="left/drive/waist" joint="left/waist" gaintype="fixed" gainprm="43" biastype="affine" biasprm="0 -43 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="left/drive/shoulder" joint="left/shoulder" gaintype="fixed" gainprm="265" biastype="affine" biasprm="0 -265 -0" ctrllimited="true" ctrlrange="-1.85005 1.25664" forcelimited="true" forcerange="-144 144" />
+    <general name="left/drive/elbow" joint="left/elbow" gaintype="fixed" gainprm="227" biastype="affine" biasprm="0 -227 -0" ctrllimited="true" ctrlrange="-1.76278 1.6056999999999999" forcelimited="true" forcerange="-59 59" />
+    <general name="left/drive/forearm_roll" joint="left/forearm_roll" gaintype="fixed" gainprm="78" biastype="affine" biasprm="0 -78 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-22 22" />
+    <general name="left/drive/wrist_angle" joint="left/wrist_angle" gaintype="fixed" gainprm="37" biastype="affine" biasprm="0 -37 -0" ctrllimited="true" ctrlrange="-1.8674999999999999 2.2340200000000001" forcelimited="true" forcerange="-35 35" />
+    <general name="left/drive/wrist_rotate" joint="left/wrist_rotate" gaintype="fixed" gainprm="10.4" biastype="affine" biasprm="0 -10.4 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="left/drive/left_finger" joint="left/left_finger" gaintype="fixed" gainprm="2000" biastype="affine" biasprm="0 -2000 -124" ctrllimited="true" ctrlrange="0.002 0.036999999999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/waist" joint="right/waist" gaintype="fixed" gainprm="43" biastype="affine" biasprm="0 -43 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/shoulder" joint="right/shoulder" gaintype="fixed" gainprm="265" biastype="affine" biasprm="0 -265 -0" ctrllimited="true" ctrlrange="-1.85005 1.25664" forcelimited="true" forcerange="-144 144" />
+    <general name="right/drive/elbow" joint="right/elbow" gaintype="fixed" gainprm="227" biastype="affine" biasprm="0 -227 -0" ctrllimited="true" ctrlrange="-1.76278 1.6056999999999999" forcelimited="true" forcerange="-59 59" />
+    <general name="right/drive/forearm_roll" joint="right/forearm_roll" gaintype="fixed" gainprm="78" biastype="affine" biasprm="0 -78 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-22 22" />
+    <general name="right/drive/wrist_angle" joint="right/wrist_angle" gaintype="fixed" gainprm="37" biastype="affine" biasprm="0 -37 -0" ctrllimited="true" ctrlrange="-1.8674999999999999 2.2340200000000001" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/wrist_rotate" joint="right/wrist_rotate" gaintype="fixed" gainprm="10.4" biastype="affine" biasprm="0 -10.4 -0" ctrllimited="true" ctrlrange="-3.1415799999999998 3.1415799999999998" forcelimited="true" forcerange="-35 35" />
+    <general name="right/drive/left_finger" joint="right/left_finger" gaintype="fixed" gainprm="2000" biastype="affine" biasprm="0 -2000 -124" ctrllimited="true" ctrlrange="0.002 0.036999999999999998" forcelimited="true" forcerange="-35 35" />
+  </actuator>
+</mujoco>

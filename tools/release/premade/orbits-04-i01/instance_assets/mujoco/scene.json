@@ -1,0 +1,3989 @@
+{
+ "entities": {
+  "goal_region": {
+   "collision": false,
+   "free_joint": null,
+   "joints": [],
+   "kind": "static",
+   "links": [
+    {
+     "body": "goal_region",
+     "name": "goal_region",
+     "parent": null
+    }
+   ],
+   "root": "goal_region"
+  },
+  "ground": {
+   "collision": true,
+   "free_joint": null,
+   "joints": [],
+   "kind": "static",
+   "links": [
+    {
+     "body": "ground",
+     "name": "ground",
+     "parent": null
+    }
+   ],
+   "root": "ground"
+  },
+  "orbits_chain": {
+   "adjacent_exclusions": 113,
+   "authored_exclusions": 5,
+   "collision": true,
+   "dropped_geoms": 0,
+   "equalities": [
+    "orbits_chain::eye_1"
+   ],
+   "free_joint": null,
+   "geoms": {
+    "base": "orbits_chain::base",
+    "cord_000": "orbits_chain::cord_000",
+    "cord_001": "orbits_chain::cord_001",
+    "cord_002": "orbits_chain::cord_002",
+    "cord_003": "orbits_chain::cord_003",
+    "cord_004": "orbits_chain::cord_004",
+    "cord_005": "orbits_chain::cord_005",
+    "cord_006": "orbits_chain::cord_006",
+    "cord_007": "orbits_chain::cord_007",
+    "cord_008": "orbits_chain::cord_008",
+    "cord_009": "orbits_chain::cord_009",
+    "cord_010": "orbits_chain::cord_010",
+    "cord_011": "orbits_chain::cord_011",
+    "cord_012": "orbits_chain::cord_012",
+    "cord_013": "orbits_chain::cord_013",
+    "cord_014": "orbits_chain::cord_014",
+    "cord_015": "orbits_chain::cord_015",
+    "cord_016": "orbits_chain::cord_016",
+    "cord_017": "orbits_chain::cord_017",
+    "cord_018": "orbits_chain::cord_018",
+    "cord_019": "orbits_chain::cord_019",
+    "cord_020": "orbits_chain::cord_020",
+    "cord_021": "orbits_chain::cord_021",
+    "cord_022": "orbits_chain::cord_022",
+    "cord_023": "orbits_chain::cord_023",
+    "cord_024": "orbits_chain::cord_024",
+    "cord_025": "orbits_chain::cord_025",
+    "cord_026": "orbits_chain::cord_026",
+    "cord_027": "orbits_chain::cord_027",
+    "cord_028": "orbits_chain::cord_028",
+    "cord_029": "orbits_chain::cord_029",
+    "cord_030": "orbits_chain::cord_030",
+    "cord_031": "orbits_chain::cord_031",
+    "cord_032": "orbits_chain::cord_032",
+    "cord_033": "orbits_chain::cord_033",
+    "cord_034": "orbits_chain::cord_034",
+    "cord_035": "orbits_chain::cord_035",
+    "cord_036": "orbits_chain::cord_036",
+    "cord_037": "orbits_chain::cord_037",
+    "cord_038": "orbits_chain::cord_038",
+    "cord_039": "orbits_chain::cord_039",
+    "cord_040": "orbits_chain::cord_040",
+    "cord_041": "orbits_chain::cord_041",
+    "cord_042": "orbits_chain::cord_042",
+    "cord_043": "orbits_chain::cord_043",
+    "cord_044": "orbits_chain::cord_044",
+    "cord_045": "orbits_chain::cord_045",
+    "cord_046": "orbits_chain::cord_046",
+    "cord_047": "orbits_chain::cord_047",
+    "cord_048": "orbits_chain::cord_048",
+    "cord_049": "orbits_chain::cord_049",
+    "cord_050": "orbits_chain::cord_050",
+    "cord_051": "orbits_chain::cord_051",
+    "cord_052": "orbits_chain::cord_052",
+    "cord_053": "orbits_chain::cord_053",
+    "cord_054": "orbits_chain::cord_054",
+    "cord_055": "orbits_chain::cord_055",
+    "cord_056": "orbits_chain::cord_056",
+    "cord_057": "orbits_chain::cord_057",
+    "cord_058": "orbits_chain::cord_058",
+    "cord_059": "orbits_chain::cord_059",
+    "cord_060": "orbits_chain::cord_060",
+    "cord_061": "orbits_chain::cord_061",
+    "cord_062": "orbits_chain::cord_062",
+    "cord_063": "orbits_chain::cord_063",
+    "cord_064": "orbits_chain::cord_064",
+    "cord_065": "orbits_chain::cord_065",
+    "cord_066": "orbits_chain::cord_066",
+    "cord_067": "orbits_chain::cord_067",
+    "cord_068": "orbits_chain::cord_068",
+    "cord_069": "orbits_chain::cord_069",
+    "cord_070": "orbits_chain::cord_070",
+    "cord_071": "orbits_chain::cord_071",
+    "cord_072": "orbits_chain::cord_072",
+    "cord_073": "orbits_chain::cord_073",
+    "cord_074": "orbits_chain::cord_074",
+    "cord_075": "orbits_chain::cord_075",
+    "cord_076": "orbits_chain::cord_076",
+    "cord_077": "orbits_chain::cord_077",
+    "cord_078": "orbits_chain::cord_078",
+    "cord_079": "orbits_chain::cord_079",
+    "cord_080": "orbits_chain::cord_080",
+    "cord_081": "orbits_chain::cord_081",
+    "cord_082": "orbits_chain::cord_082",
+    "cord_083": "orbits_chain::cord_083",
+    "cord_084": "orbits_chain::cord_084",
+    "cord_085": "orbits_chain::cord_085",
+    "cord_086": "orbits_chain::cord_086",
+    "cord_087": "orbits_chain::cord_087",
+    "cord_088": "orbits_chain::cord_088",
+    "cord_089": "orbits_chain::cord_089",
+    "cord_090": "orbits_chain::cord_090",
+    "cord_091": "orbits_chain::cord_091",
+    "cord_092": "orbits_chain::cord_092",
+    "cord_093": "orbits_chain::cord_093",
+    "cord_094": "orbits_chain::cord_094",
+    "cord_095": "orbits_chain::cord_095",
+    "cord_096": "orbits_chain::cord_096",
+    "cord_097": "orbits_chain::cord_097",
+    "cord_098": "orbits_chain::cord_098",
+    "cord_099": "orbits_chain::cord_099",
+    "cord_100": "orbits_chain::cord_100",
+    "cord_101": "orbits_chain::cord_101",
+    "cord_102": "orbits_chain::cord_102",
+    "cord_103": "orbits_chain::cord_103",
+    "cord_104": "orbits_chain::cord_104",
+    "cord_105": "orbits_chain::cord_105",
+    "cord_106": "orbits_chain::cord_106",
+    "cord_107": "orbits_chain::cord_107",
+    "cord_108": "orbits_chain::cord_108",
+    "cord_109": "orbits_chain::cord_109",
+    "cord_110": "orbits_chain::cord_110",
+    "cord_111": "orbits_chain::cord_111",
+    "cord_112": "orbits_chain::cord_112",
+    "handle": "orbits_chain::handle",
+    "post_0": "orbits_chain::post_0",
+    "post_1": "orbits_chain::post_1",
+    "post_2": "orbits_chain::post_2",
+    "post_3": "orbits_chain::post_3",
+    "ring_1_00": "orbits_chain::ring_1_00",
+    "ring_1_01": "orbits_chain::ring_1_01",
+    "ring_1_02": "orbits_chain::ring_1_02",
+    "ring_1_03": "orbits_chain::ring_1_03",
+    "ring_1_04": "orbits_chain::ring_1_04",
+    "ring_1_05": "orbits_chain::ring_1_05",
+    "ring_1_06": "orbits_chain::ring_1_06",
+    "ring_1_07": "orbits_chain::ring_1_07",
+    "ring_1_08": "orbits_chain::ring_1_08",
+    "ring_1_09": "orbits_chain::ring_1_09",
+    "ring_1_10": "orbits_chain::ring_1_10",
+    "ring_1_11": "orbits_chain::ring_1_11",
+    "ring_1_12": "orbits_chain::ring_1_12",
+    "ring_1_13": "orbits_chain::ring_1_13",
+    "ring_1_14": "orbits_chain::ring_1_14",
+    "ring_1_15": "orbits_chain::ring_1_15",
+    "ring_1_16": "orbits_chain::ring_1_16",
+    "ring_1_17": "orbits_chain::ring_1_17",
+    "ring_1_18": "orbits_chain::ring_1_18",
+    "ring_1_19": "orbits_chain::ring_1_19",
+    "ring_1_20": "orbits_chain::ring_1_20",
+    "ring_1_21": "orbits_chain::ring_1_21",
+    "ring_1_22": "orbits_chain::ring_1_22",
+    "ring_1_23": "orbits_chain::ring_1_23",
+    "ring_1_24": "orbits_chain::ring_1_24",
+    "ring_1_25": "orbits_chain::ring_1_25",
+    "ring_1_26": "orbits_chain::ring_1_26",
+    "ring_1_27": "orbits_chain::ring_1_27",
+    "ring_1_28": "orbits_chain::ring_1_28",
+    "ring_1_29": "orbits_chain::ring_1_29",
+    "ring_1_30": "orbits_chain::ring_1_30",
+    "ring_1_31": "orbits_chain::ring_1_31",
+    "ring_2_00": "orbits_chain::ring_2_00",
+    "ring_2_01": "orbits_chain::ring_2_01",
+    "ring_2_02": "orbits_chain::ring_2_02",
+    "ring_2_03": "orbits_chain::ring_2_03",
+    "ring_2_04": "orbits_chain::ring_2_04",
+    "ring_2_05": "orbits_chain::ring_2_05",
+    "ring_2_06": "orbits_chain::ring_2_06",
+    "ring_2_07": "orbits_chain::ring_2_07",
+    "ring_2_08": "orbits_chain::ring_2_08",
+    "ring_2_09": "orbits_chain::ring_2_09",
+    "ring_2_10": "orbits_chain::ring_2_10",
+    "ring_2_11": "orbits_chain::ring_2_11",
+    "ring_2_12": "orbits_chain::ring_2_12",
+    "ring_2_13": "orbits_chain::ring_2_13",
+    "ring_2_14": "orbits_chain::ring_2_14",
+    "ring_2_15": "orbits_chain::ring_2_15",
+    "ring_2_16": "orbits_chain::ring_2_16",
+    "ring_2_17": "orbits_chain::ring_2_17",
+    "ring_2_18": "orbits_chain::ring_2_18",
+    "ring_2_19": "orbits_chain::ring_2_19",
+    "ring_2_20": "orbits_chain::ring_2_20",
+    "ring_2_21": "orbits_chain::ring_2_21",
+    "ring_2_22": "orbits_chain::ring_2_22",
+    "ring_2_23": "orbits_chain::ring_2_23",
+    "ring_2_24": "orbits_chain::ring_2_24",
+    "ring_2_25": "orbits_chain::ring_2_25",
+    "ring_2_26": "orbits_chain::ring_2_26",
+    "ring_2_27": "orbits_chain::ring_2_27",
+    "ring_2_28": "orbits_chain::ring_2_28",
+    "ring_2_29": "orbits_chain::ring_2_29",
+    "ring_2_30": "orbits_chain::ring_2_30",
+    "ring_2_31": "orbits_chain::ring_2_31",
+    "ring_3_00": "orbits_chain::ring_3_00",
+    "ring_3_01": "orbits_chain::ring_3_01",
+    "ring_3_02": "orbits_chain::ring_3_02",
+    "ring_3_03": "orbits_chain::ring_3_03",
+    "ring_3_04": "orbits_chain::ring_3_04",
+    "ring_3_05": "orbits_chain::ring_3_05",
+    "ring_3_06": "orbits_chain::ring_3_06",
+    "ring_3_07": "orbits_chain::ring_3_07",
+    "ring_3_08": "orbits_chain::ring_3_08",
+    "ring_3_09": "orbits_chain::ring_3_09",
+    "ring_3_10": "orbits_chain::ring_3_10",
+    "ring_3_11": "orbits_chain::ring_3_11",
+    "ring_3_12": "orbits_chain::ring_3_12",
+    "ring_3_13": "orbits_chain::ring_3_13",
+    "ring_3_14": "orbits_chain::ring_3_14",
+    "ring_3_15": "orbits_chain::ring_3_15",
+    "ring_3_16": "orbits_chain::ring_3_16",
+    "ring_3_17": "orbits_chain::ring_3_17",
+    "ring_3_18": "orbits_chain::ring_3_18",
+    "ring_3_19": "orbits_chain::ring_3_19",
+    "ring_3_20": "orbits_chain::ring_3_20",
+    "ring_3_21": "orbits_chain::ring_3_21",
+    "ring_3_22": "orbits_chain::ring_3_22",
+    "ring_3_23": "orbits_chain::ring_3_23",
+    "ring_3_24": "orbits_chain::ring_3_24",
+    "ring_3_25": "orbits_chain::ring_3_25",
+    "ring_3_26": "orbits_chain::ring_3_26",
+    "ring_3_27": "orbits_chain::ring_3_27",
+    "ring_3_28": "orbits_chain::ring_3_28",
+    "ring_3_29": "orbits_chain::ring_3_29",
+    "ring_3_30": "orbits_chain::ring_3_30",
+    "ring_3_31": "orbits_chain::ring_3_31",
+    "stopper_ball": "orbits_chain::stopper_ball"
+   },
+   "joints": [
+    {
+     "mj": "orbits_chain::root",
+     "name": "root"
+    },
+    {
+     "mj": "orbits_chain::bend_057",
+     "name": "bend_057"
+    },
+    {
+     "mj": "orbits_chain::bend_058",
+     "name": "bend_058"
+    },
+    {
+     "mj": "orbits_chain::bend_059",
+     "name": "bend_059"
+    },
+    {
+     "mj": "orbits_chain::bend_060",
+     "name": "bend_060"
+    },
+    {
+     "mj": "orbits_chain::bend_061",
+     "name": "bend_061"
+    },
+    {
+     "mj": "orbits_chain::bend_062",
+     "name": "bend_062"
+    },
+    {
+     "mj": "orbits_chain::bend_063",
+     "name": "bend_063"
+    },
+    {
+     "mj": "orbits_chain::bend_064",
+     "name": "bend_064"
+    },
+    {
+     "mj": "orbits_chain::bend_065",
+     "name": "bend_065"
+    },
+    {
+     "mj": "orbits_chain::bend_066",
+     "name": "bend_066"
+    },
+    {
+     "mj": "orbits_chain::bend_067",
+     "name": "bend_067"
+    },
+    {
+     "mj": "orbits_chain::bend_068",
+     "name": "bend_068"
+    },
+    {
+     "mj": "orbits_chain::bend_069",
+     "name": "bend_069"
+    },
+    {
+     "mj": "orbits_chain::bend_070",
+     "name": "bend_070"
+    },
+    {
+     "mj": "orbits_chain::bend_071",
+     "name": "bend_071"
+    },
+    {
+     "mj": "orbits_chain::bend_072",
+     "name": "bend_072"
+    },
+    {
+     "mj": "orbits_chain::bend_073",
+     "name": "bend_073"
+    },
+    {
+     "mj": "orbits_chain::bend_074",
+     "name": "bend_074"
+    },
+    {
+     "mj": "orbits_chain::bend_075",
+     "name": "bend_075"
+    },
+    {
+     "mj": "orbits_chain::bend_076",
+     "name": "bend_076"
+    },
+    {
+     "mj": "orbits_chain::bend_077",
+     "name": "bend_077"
+    },
+    {
+     "mj": "orbits_chain::bend_078",
+     "name": "bend_078"
+    },
+    {
+     "mj": "orbits_chain::bend_079",
+     "name": "bend_079"
+    },
+    {
+     "mj": "orbits_chain::bend_080",
+     "name": "bend_080"
+    },
+    {
+     "mj": "orbits_chain::bend_081",
+     "name": "bend_081"
+    },
+    {
+     "mj": "orbits_chain::bend_082",
+     "name": "bend_082"
+    },
+    {
+     "mj": "orbits_chain::bend_083",
+     "name": "bend_083"
+    },
+    {
+     "mj": "orbits_chain::bend_084",
+     "name": "bend_084"
+    },
+    {
+     "mj": "orbits_chain::bend_085",
+     "name": "bend_085"
+    },
+    {
+     "mj": "orbits_chain::bend_086",
+     "name": "bend_086"
+    },
+    {
+     "mj": "orbits_chain::bend_087",
+     "name": "bend_087"
+    },
+    {
+     "mj": "orbits_chain::bend_088",
+     "name": "bend_088"
+    },
+    {
+     "mj": "orbits_chain::bend_089",
+     "name": "bend_089"
+    },
+    {
+     "mj": "orbits_chain::bend_090",
+     "name": "bend_090"
+    },
+    {
+     "mj": "orbits_chain::bend_091",
+     "name": "bend_091"
+    },
+    {
+     "mj": "orbits_chain::bend_092",
+     "name": "bend_092"
+    },
+    {
+     "mj": "orbits_chain::bend_093",
+     "name": "bend_093"
+    },
+    {
+     "mj": "orbits_chain::bend_094",
+     "name": "bend_094"
+    },
+    {
+     "mj": "orbits_chain::bend_095",
+     "name": "bend_095"
+    },
+    {
+     "mj": "orbits_chain::bend_096",
+     "name": "bend_096"
+    },
+    {
+     "mj": "orbits_chain::bend_097",
+     "name": "bend_097"
+    },
+    {
+     "mj": "orbits_chain::bend_098",
+     "name": "bend_098"
+    },
+    {
+     "mj": "orbits_chain::bend_099",
+     "name": "bend_099"
+    },
+    {
+     "mj": "orbits_chain::bend_100",
+     "name": "bend_100"
+    },
+    {
+     "mj": "orbits_chain::bend_101",
+     "name": "bend_101"
+    },
+    {
+     "mj": "orbits_chain::bend_102",
+     "name": "bend_102"
+    },
+    {
+     "mj": "orbits_chain::bend_103",
+     "name": "bend_103"
+    },
+    {
+     "mj": "orbits_chain::bend_104",
+     "name": "bend_104"
+    },
+    {
+     "mj": "orbits_chain::bend_105",
+     "name": "bend_105"
+    },
+    {
+     "mj": "orbits_chain::bend_106",
+     "name": "bend_106"
+    },
+    {
+     "mj": "orbits_chain::bend_107",
+     "name": "bend_107"
+    },
+    {
+     "mj": "orbits_chain::bend_108",
+     "name": "bend_108"
+    },
+    {
+     "mj": "orbits_chain::bend_109",
+     "name": "bend_109"
+    },
+    {
+     "mj": "orbits_chain::bend_110",
+     "name": "bend_110"
+    },
+    {
+     "mj": "orbits_chain::bend_111",
+     "name": "bend_111"
+    },
+    {
+     "mj": "orbits_chain::bend_112",
+     "name": "bend_112"
+    },
+    {
+     "mj": "orbits_chain::bend_055",
+     "name": "bend_055"
+    },
+    {
+     "mj": "orbits_chain::bend_054",
+     "name": "bend_054"
+    },
+    {
+     "mj": "orbits_chain::bend_053",
+     "name": "bend_053"
+    },
+    {
+     "mj": "orbits_chain::bend_052",
+     "name": "bend_052"
+    },
+    {
+     "mj": "orbits_chain::bend_051",
+     "name": "bend_051"
+    },
+    {
+     "mj": "orbits_chain::bend_050",
+     "name": "bend_050"
+    },
+    {
+     "mj": "orbits_chain::bend_049",
+     "name": "bend_049"
+    },
+    {
+     "mj": "orbits_chain::bend_048",
+     "name": "bend_048"
+    },
+    {
+     "mj": "orbits_chain::bend_047",
+     "name": "bend_047"
+    },
+    {
+     "mj": "orbits_chain::bend_046",
+     "name": "bend_046"
+    },
+    {
+     "mj": "orbits_chain::bend_045",
+     "name": "bend_045"
+    },
+    {
+     "mj": "orbits_chain::bend_044",
+     "name": "bend_044"
+    },
+    {
+     "mj": "orbits_chain::bend_043",
+     "name": "bend_043"
+    },
+    {
+     "mj": "orbits_chain::bend_042",
+     "name": "bend_042"
+    },
+    {
+     "mj": "orbits_chain::bend_041",
+     "name": "bend_041"
+    },
+    {
+     "mj": "orbits_chain::bend_040",
+     "name": "bend_040"
+    },
+    {
+     "mj": "orbits_chain::bend_039",
+     "name": "bend_039"
+    },
+    {
+     "mj": "orbits_chain::bend_038",
+     "name": "bend_038"
+    },
+    {
+     "mj": "orbits_chain::bend_037",
+     "name": "bend_037"
+    },
+    {
+     "mj": "orbits_chain::bend_036",
+     "name": "bend_036"
+    },
+    {
+     "mj": "orbits_chain::bend_035",
+     "name": "bend_035"
+    },
+    {
+     "mj": "orbits_chain::bend_034",
+     "name": "bend_034"
+    },
+    {
+     "mj": "orbits_chain::bend_033",
+     "name": "bend_033"
+    },
+    {
+     "mj": "orbits_chain::bend_032",
+     "name": "bend_032"
+    },
+    {
+     "mj": "orbits_chain::bend_031",
+     "name": "bend_031"
+    },
+    {
+     "mj": "orbits_chain::bend_030",
+     "name": "bend_030"
+    },
+    {
+     "mj": "orbits_chain::bend_029",
+     "name": "bend_029"
+    },
+    {
+     "mj": "orbits_chain::bend_028",
+     "name": "bend_028"
+    },
+    {
+     "mj": "orbits_chain::bend_027",
+     "name": "bend_027"
+    },
+    {
+     "mj": "orbits_chain::bend_026",
+     "name": "bend_026"
+    },
+    {
+     "mj": "orbits_chain::bend_025",
+     "name": "bend_025"
+    },
+    {
+     "mj": "orbits_chain::bend_024",
+     "name": "bend_024"
+    },
+    {
+     "mj": "orbits_chain::bend_023",
+     "name": "bend_023"
+    },
+    {
+     "mj": "orbits_chain::bend_022",
+     "name": "bend_022"
+    },
+    {
+     "mj": "orbits_chain::bend_021",
+     "name": "bend_021"
+    },
+    {
+     "mj": "orbits_chain::bend_020",
+     "name": "bend_020"
+    },
+    {
+     "mj": "orbits_chain::bend_019",
+     "name": "bend_019"
+    },
+    {
+     "mj": "orbits_chain::bend_018",
+     "name": "bend_018"
+    },
+    {
+     "mj": "orbits_chain::bend_017",
+     "name": "bend_017"
+    },
+    {
+     "mj": "orbits_chain::bend_016",
+     "name": "bend_016"
+    },
+    {
+     "mj": "orbits_chain::bend_015",
+     "name": "bend_015"
+    },
+    {
+     "mj": "orbits_chain::bend_014",
+     "name": "bend_014"
+    },
+    {
+     "mj": "orbits_chain::bend_013",
+     "name": "bend_013"
+    },
+    {
+     "mj": "orbits_chain::bend_012",
+     "name": "bend_012"
+    },
+    {
+     "mj": "orbits_chain::bend_011",
+     "name": "bend_011"
+    },
+    {
+     "mj": "orbits_chain::bend_010",
+     "name": "bend_010"
+    },
+    {
+     "mj": "orbits_chain::bend_009",
+     "name": "bend_009"
+    },
+    {
+     "mj": "orbits_chain::bend_008",
+     "name": "bend_008"
+    },
+    {
+     "mj": "orbits_chain::bend_007",
+     "name": "bend_007"
+    },
+    {
+     "mj": "orbits_chain::bend_006",
+     "name": "bend_006"
+    },
+    {
+     "mj": "orbits_chain::bend_005",
+     "name": "bend_005"
+    },
+    {
+     "mj": "orbits_chain::bend_004",
+     "name": "bend_004"
+    },
+    {
+     "mj": "orbits_chain::bend_003",
+     "name": "bend_003"
+    },
+    {
+     "mj": "orbits_chain::bend_002",
+     "name": "bend_002"
+    },
+    {
+     "mj": "orbits_chain::bend_001",
+     "name": "bend_001"
+    },
+    {
+     "mj": "orbits_chain::bend_000",
+     "name": "bend_000"
+    },
+    {
+     "mj": "orbits_chain::handle_eye",
+     "name": "handle_eye"
+    }
+   ],
+   "kind": "articulated",
+   "links": [
+    {
+     "body": "orbits_chain::world",
+     "name": "world",
+     "parent": null
+    },
+    {
+     "body": "orbits_chain::link_056",
+     "name": "link_056",
+     "parent": null
+    },
+    {
+     "body": "orbits_chain::link_057",
+     "name": "link_057",
+     "parent": "link_056"
+    },
+    {
+     "body": "orbits_chain::link_058",
+     "name": "link_058",
+     "parent": "link_057"
+    },
+    {
+     "body": "orbits_chain::link_059",
+     "name": "link_059",
+     "parent": "link_058"
+    },
+    {
+     "body": "orbits_chain::link_060",
+     "name": "link_060",
+     "parent": "link_059"
+    },
+    {
+     "body": "orbits_chain::link_061",
+     "name": "link_061",
+     "parent": "link_060"
+    },
+    {
+     "body": "orbits_chain::link_062",
+     "name": "link_062",
+     "parent": "link_061"
+    },
+    {
+     "body": "orbits_chain::link_063",
+     "name": "link_063",
+     "parent": "link_062"
+    },
+    {
+     "body": "orbits_chain::link_064",
+     "name": "link_064",
+     "parent": "link_063"
+    },
+    {
+     "body": "orbits_chain::link_065",
+     "name": "link_065",
+     "parent": "link_064"
+    },
+    {
+     "body": "orbits_chain::link_066",
+     "name": "link_066",
+     "parent": "link_065"
+    },
+    {
+     "body": "orbits_chain::link_067",
+     "name": "link_067",
+     "parent": "link_066"
+    },
+    {
+     "body": "orbits_chain::link_068",
+     "name": "link_068",
+     "parent": "link_067"
+    },
+    {
+     "body": "orbits_chain::link_069",
+     "name": "link_069",
+     "parent": "link_068"
+    },
+    {
+     "body": "orbits_chain::link_070",
+     "name": "link_070",
+     "parent": "link_069"
+    },
+    {
+     "body": "orbits_chain::link_071",
+     "name": "link_071",
+     "parent": "link_070"
+    },
+    {
+     "body": "orbits_chain::link_072",
+     "name": "link_072",
+     "parent": "link_071"
+    },
+    {
+     "body": "orbits_chain::link_073",
+     "name": "link_073",
+     "parent": "link_072"
+    },
+    {
+     "body": "orbits_chain::link_074",
+     "name": "link_074",
+     "parent": "link_073"
+    },
+    {
+     "body": "orbits_chain::link_075",
+     "name": "link_075",
+     "parent": "link_074"
+    },
+    {
+     "body": "orbits_chain::link_076",
+     "name": "link_076",
+     "parent": "link_075"
+    },
+    {
+     "body": "orbits_chain::link_077",
+     "name": "link_077",
+     "parent": "link_076"
+    },
+    {
+     "body": "orbits_chain::link_078",
+     "name": "link_078",
+     "parent": "link_077"
+    },
+    {
+     "body": "orbits_chain::link_079",
+     "name": "link_079",
+     "parent": "link_078"
+    },
+    {
+     "body": "orbits_chain::link_080",
+     "name": "link_080",
+     "parent": "link_079"
+    },
+    {
+     "body": "orbits_chain::link_081",
+     "name": "link_081",
+     "parent": "link_080"
+    },
+    {
+     "body": "orbits_chain::link_082",
+     "name": "link_082",
+     "parent": "link_081"
+    },
+    {
+     "body": "orbits_chain::link_083",
+     "name": "link_083",
+     "parent": "link_082"
+    },
+    {
+     "body": "orbits_chain::link_084",
+     "name": "link_084",
+     "parent": "link_083"
+    },
+    {
+     "body": "orbits_chain::link_085",
+     "name": "link_085",
+     "parent": "link_084"
+    },
+    {
+     "body": "orbits_chain::link_086",
+     "name": "link_086",
+     "parent": "link_085"
+    },
+    {
+     "body": "orbits_chain::link_087",
+     "name": "link_087",
+     "parent": "link_086"
+    },
+    {
+     "body": "orbits_chain::link_088",
+     "name": "link_088",
+     "parent": "link_087"
+    },
+    {
+     "body": "orbits_chain::link_089",
+     "name": "link_089",
+     "parent": "link_088"
+    },
+    {
+     "body": "orbits_chain::link_090",
+     "name": "link_090",
+     "parent": "link_089"
+    },
+    {
+     "body": "orbits_chain::link_091",
+     "name": "link_091",
+     "parent": "link_090"
+    },
+    {
+     "body": "orbits_chain::link_092",
+     "name": "link_092",
+     "parent": "link_091"
+    },
+    {
+     "body": "orbits_chain::link_093",
+     "name": "link_093",
+     "parent": "link_092"
+    },
+    {
+     "body": "orbits_chain::link_094",
+     "name": "link_094",
+     "parent": "link_093"
+    },
+    {
+     "body": "orbits_chain::link_095",
+     "name": "link_095",
+     "parent": "link_094"
+    },
+    {
+     "body": "orbits_chain::link_096",
+     "name": "link_096",
+     "parent": "link_095"
+    },
+    {
+     "body": "orbits_chain::link_097",
+     "name": "link_097",
+     "parent": "link_096"
+    },
+    {
+     "body": "orbits_chain::link_098",
+     "name": "link_098",
+     "parent": "link_097"
+    },
+    {
+     "body": "orbits_chain::link_099",
+     "name": "link_099",
+     "parent": "link_098"
+    },
+    {
+     "body": "orbits_chain::link_100",
+     "name": "link_100",
+     "parent": "link_099"
+    },
+    {
+     "body": "orbits_chain::link_101",
+     "name": "link_101",
+     "parent": "link_100"
+    },
+    {
+     "body": "orbits_chain::link_102",
+     "name": "link_102",
+     "parent": "link_101"
+    },
+    {
+     "body": "orbits_chain::link_103",
+     "name": "link_103",
+     "parent": "link_102"
+    },
+    {
+     "body": "orbits_chain::link_104",
+     "name": "link_104",
+     "parent": "link_103"
+    },
+    {
+     "body": "orbits_chain::link_105",
+     "name": "link_105",
+     "parent": "link_104"
+    },
+    {
+     "body": "orbits_chain::link_106",
+     "name": "link_106",
+     "parent": "link_105"
+    },
+    {
+     "body": "orbits_chain::link_107",
+     "name": "link_107",
+     "parent": "link_106"
+    },
+    {
+     "body": "orbits_chain::link_108",
+     "name": "link_108",
+     "parent": "link_107"
+    },
+    {
+     "body": "orbits_chain::link_109",
+     "name": "link_109",
+     "parent": "link_108"
+    },
+    {
+     "body": "orbits_chain::link_110",
+     "name": "link_110",
+     "parent": "link_109"
+    },
+    {
+     "body": "orbits_chain::link_111",
+     "name": "link_111",
+     "parent": "link_110"
+    },
+    {
+     "body": "orbits_chain::link_112",
+     "name": "link_112",
+     "parent": "link_111"
+    },
+    {
+     "body": "orbits_chain::link_055",
+     "name": "link_055",
+     "parent": "link_056"
+    },
+    {
+     "body": "orbits_chain::link_054",
+     "name": "link_054",
+     "parent": "link_055"
+    },
+    {
+     "body": "orbits_chain::link_053",
+     "name": "link_053",
+     "parent": "link_054"
+    },
+    {
+     "body": "orbits_chain::link_052",
+     "name": "link_052",
+     "parent": "link_053"
+    },
+    {
+     "body": "orbits_chain::link_051",
+     "name": "link_051",
+     "parent": "link_052"
+    },
+    {
+     "body": "orbits_chain::link_050",
+     "name": "link_050",
+     "parent": "link_051"
+    },
+    {
+     "body": "orbits_chain::link_049",
+     "name": "link_049",
+     "parent": "link_050"
+    },
+    {
+     "body": "orbits_chain::link_048",
+     "name": "link_048",
+     "parent": "link_049"
+    },
+    {
+     "body": "orbits_chain::link_047",
+     "name": "link_047",
+     "parent": "link_048"
+    },
+    {
+     "body": "orbits_chain::link_046",
+     "name": "link_046",
+     "parent": "link_047"
+    },
+    {
+     "body": "orbits_chain::link_045",
+     "name": "link_045",
+     "parent": "link_046"
+    },
+    {
+     "body": "orbits_chain::link_044",
+     "name": "link_044",
+     "parent": "link_045"
+    },
+    {
+     "body": "orbits_chain::link_043",
+     "name": "link_043",
+     "parent": "link_044"
+    },
+    {
+     "body": "orbits_chain::link_042",
+     "name": "link_042",
+     "parent": "link_043"
+    },
+    {
+     "body": "orbits_chain::link_041",
+     "name": "link_041",
+     "parent": "link_042"
+    },
+    {
+     "body": "orbits_chain::link_040",
+     "name": "link_040",
+     "parent": "link_041"
+    },
+    {
+     "body": "orbits_chain::link_039",
+     "name": "link_039",
+     "parent": "link_040"
+    },
+    {
+     "body": "orbits_chain::link_038",
+     "name": "link_038",
+     "parent": "link_039"
+    },
+    {
+     "body": "orbits_chain::link_037",
+     "name": "link_037",
+     "parent": "link_038"
+    },
+    {
+     "body": "orbits_chain::link_036",
+     "name": "link_036",
+     "parent": "link_037"
+    },
+    {
+     "body": "orbits_chain::link_035",
+     "name": "link_035",
+     "parent": "link_036"
+    },
+    {
+     "body": "orbits_chain::link_034",
+     "name": "link_034",
+     "parent": "link_035"
+    },
+    {
+     "body": "orbits_chain::link_033",
+     "name": "link_033",
+     "parent": "link_034"
+    },
+    {
+     "body": "orbits_chain::link_032",
+     "name": "link_032",
+     "parent": "link_033"
+    },
+    {
+     "body": "orbits_chain::link_031",
+     "name": "link_031",
+     "parent": "link_032"
+    },
+    {
+     "body": "orbits_chain::link_030",
+     "name": "link_030",
+     "parent": "link_031"
+    },
+    {
+     "body": "orbits_chain::link_029",
+     "name": "link_029",
+     "parent": "link_030"
+    },
+    {
+     "body": "orbits_chain::link_028",
+     "name": "link_028",
+     "parent": "link_029"
+    },
+    {
+     "body": "orbits_chain::link_027",
+     "name": "link_027",
+     "parent": "link_028"
+    },
+    {
+     "body": "orbits_chain::link_026",
+     "name": "link_026",
+     "parent": "link_027"
+    },
+    {
+     "body": "orbits_chain::link_025",
+     "name": "link_025",
+     "parent": "link_026"
+    },
+    {
+     "body": "orbits_chain::link_024",
+     "name": "link_024",
+     "parent": "link_025"
+    },
+    {
+     "body": "orbits_chain::link_023",
+     "name": "link_023",
+     "parent": "link_024"
+    },
+    {
+     "body": "orbits_chain::link_022",
+     "name": "link_022",
+     "parent": "link_023"
+    },
+    {
+     "body": "orbits_chain::link_021",
+     "name": "link_021",
+     "parent": "link_022"
+    },
+    {
+     "body": "orbits_chain::link_020",
+     "name": "link_020",
+     "parent": "link_021"
+    },
+    {
+     "body": "orbits_chain::link_019",
+     "name": "link_019",
+     "parent": "link_020"
+    },
+    {
+     "body": "orbits_chain::link_018",
+     "name": "link_018",
+     "parent": "link_019"
+    },
+    {
+     "body": "orbits_chain::link_017",
+     "name": "link_017",
+     "parent": "link_018"
+    },
+    {
+     "body": "orbits_chain::link_016",
+     "name": "link_016",
+     "parent": "link_017"
+    },
+    {
+     "body": "orbits_chain::link_015",
+     "name": "link_015",
+     "parent": "link_016"
+    },
+    {
+     "body": "orbits_chain::link_014",
+     "name": "link_014",
+     "parent": "link_015"
+    },
+    {
+     "body": "orbits_chain::link_013",
+     "name": "link_013",
+     "parent": "link_014"
+    },
+    {
+     "body": "orbits_chain::link_012",
+     "name": "link_012",
+     "parent": "link_013"
+    },
+    {
+     "body": "orbits_chain::link_011",
+     "name": "link_011",
+     "parent": "link_012"
+    },
+    {
+     "body": "orbits_chain::link_010",
+     "name": "link_010",
+     "parent": "link_011"
+    },
+    {
+     "body": "orbits_chain::link_009",
+     "name": "link_009",
+     "parent": "link_010"
+    },
+    {
+     "body": "orbits_chain::link_008",
+     "name": "link_008",
+     "parent": "link_009"
+    },
+    {
+     "body": "orbits_chain::link_007",
+     "name": "link_007",
+     "parent": "link_008"
+    },
+    {
+     "body": "orbits_chain::link_006",
+     "name": "link_006",
+     "parent": "link_007"
+    },
+    {
+     "body": "orbits_chain::link_005",
+     "name": "link_005",
+     "parent": "link_006"
+    },
+    {
+     "body": "orbits_chain::link_004",
+     "name": "link_004",
+     "parent": "link_005"
+    },
+    {
+     "body": "orbits_chain::link_003",
+     "name": "link_003",
+     "parent": "link_004"
+    },
+    {
+     "body": "orbits_chain::link_002",
+     "name": "link_002",
+     "parent": "link_003"
+    },
+    {
+     "body": "orbits_chain::link_001",
+     "name": "link_001",
+     "parent": "link_002"
+    },
+    {
+     "body": "orbits_chain::link_000",
+     "name": "link_000",
+     "parent": "link_001"
+    },
+    {
+     "body": "orbits_chain::handle",
+     "name": "handle",
+     "parent": "link_000"
+    }
+   ],
+   "root": "orbits_chain::world",
+   "source": "orbits_chain.xml",
+   "source_sha256": "07caf77dba27da0cb34c54a2ed1b52a95c1a0e3d7d0c0439cff9cf3fdd9e7eec"
+  },
+  "robot": {
+   "collision": true,
+   "free_joint": null,
+   "home": {
+    "left": [
+     0.0,
+     -0.96,
+     1.16,
+     0.0,
+     -0.3,
+     0.0,
+     0.0084,
+     0.0084
+    ],
+    "right": [
+     0.0,
+     -0.96,
+     1.16,
+     0.0,
+     -0.3,
+     0.0,
+     0.0084,
+     0.0084
+    ]
+   },
+   "joints": [
+    {
+     "mj": "left/waist",
+     "name": "left/waist"
+    },
+    {
+     "mj": "left/shoulder",
+     "name": "left/shoulder"
+    },
+    {
+     "mj": "left/elbow",
+     "name": "left/elbow"
+    },
+    {
+     "mj": "left/forearm_roll",
+     "name": "left/forearm_roll"
+    },
+    {
+     "mj": "left/wrist_angle",
+     "name": "left/wrist_angle"
+    },
+    {
+     "mj": "left/wrist_rotate",
+     "name": "left/wrist_rotate"
+    },
+    {
+     "mj": "left/left_finger",
+     "name": "left/left_finger"
+    },
+    {
+     "mj": "left/right_finger",
+     "name": "left/right_finger"
+    },
+    {
+     "mj": "right/waist",
+     "name": "right/waist"
+    },
+    {
+     "mj": "right/shoulder",
+     "name": "right/shoulder"
+    },
+    {
+     "mj": "right/elbow",
+     "name": "right/elbow"
+    },
+    {
+     "mj": "right/forearm_roll",
+     "name": "right/forearm_roll"
+    },
+    {
+     "mj": "right/wrist_angle",
+     "name": "right/wrist_angle"
+    },
+    {
+     "mj": "right/wrist_rotate",
+     "name": "right/wrist_rotate"
+    },
+    {
+     "mj": "right/left_finger",
+     "name": "right/left_finger"
+    },
+    {
+     "mj": "right/right_finger",
+     "name": "right/right_finger"
+    }
+   ],
+   "kind": "robot",
+   "links": [
+    {
+     "body": "robot",
+     "name": "robot",
+     "parent": null
+    },
+    {
+     "body": "left/base_link",
+     "name": "left/base_link",
+     "parent": "robot"
+    },
+    {
+     "body": "right/base_link",
+     "name": "right/base_link",
+     "parent": "robot"
+    },
+    {
+     "body": "left/shoulder_link",
+     "name": "left/shoulder_link",
+     "parent": "left/base_link"
+    },
+    {
+     "body": "left/upper_arm_link",
+     "name": "left/upper_arm_link",
+     "parent": "left/shoulder_link"
+    },
+    {
+     "body": "left/upper_forearm_link",
+     "name": "left/upper_forearm_link",
+     "parent": "left/upper_arm_link"
+    },
+    {
+     "body": "left/lower_forearm_link",
+     "name": "left/lower_forearm_link",
+     "parent": "left/upper_forearm_link"
+    },
+    {
+     "body": "left/wrist_link",
+     "name": "left/wrist_link",
+     "parent": "left/lower_forearm_link"
+    },
+    {
+     "body": "left/gripper_link",
+     "name": "left/gripper_link",
+     "parent": "left/wrist_link"
+    },
+    {
+     "body": "left/gripper_base",
+     "name": "left/gripper_base",
+     "parent": "left/gripper_link"
+    },
+    {
+     "body": "left/left_finger_link",
+     "name": "left/left_finger_link",
+     "parent": "left/gripper_base"
+    },
+    {
+     "body": "left/right_finger_link",
+     "name": "left/right_finger_link",
+     "parent": "left/gripper_base"
+    },
+    {
+     "body": "right/shoulder_link",
+     "name": "right/shoulder_link",
+     "parent": "right/base_link"
+    },
+    {
+     "body": "right/upper_arm_link",
+     "name": "right/upper_arm_link",
+     "parent": "right/shoulder_link"
+    },
+    {
+     "body": "right/upper_forearm_link",
+     "name": "right/upper_forearm_link",
+     "parent": "right/upper_arm_link"
+    },
+    {
+     "body": "right/lower_forearm_link",
+     "name": "right/lower_forearm_link",
+     "parent": "right/upper_forearm_link"
+    },
+    {
+     "body": "right/wrist_link",
+     "name": "right/wrist_link",
+     "parent": "right/lower_forearm_link"
+    },
+    {
+     "body": "right/gripper_link",
+     "name": "right/gripper_link",
+     "parent": "right/wrist_link"
+    },
+    {
+     "body": "right/gripper_base",
+     "name": "right/gripper_base",
+     "parent": "right/gripper_link"
+    },
+    {
+     "body": "right/left_finger_link",
+     "name": "right/left_finger_link",
+     "parent": "right/gripper_base"
+    },
+    {
+     "body": "right/right_finger_link",
+     "name": "right/right_finger_link",
+     "parent": "right/gripper_base"
+    }
+   ],
+   "root": "robot"
+  },
+  "table": {
+   "collision": true,
+   "free_joint": null,
+   "joints": [],
+   "kind": "static",
+   "links": [
+    {
+     "body": "table",
+     "name": "table",
+     "parent": null
+    }
+   ],
+   "root": "table"
+  }
+ },
+ "files": {
+  "meshes/goal_region_1d38657d48ff4073.obj": "1d38657d48ff40731ceb19e76589e0d60a6d0c6dbd0d13cfd038415fccb37a22",
+  "meshes/orbits_chain_handle_6b4e0eb8312b1415.obj": "6b4e0eb8312b1415faadc5ad158a14270a50b6314c4a2909115ddb2ca7a89263",
+  "scene.xml": "7ef25f1be54aee379f03cd44633cc3411c75561df2797a8822b3e5ab7ae5acfc"
+ },
+ "format": "robotangle-mujoco-scene/1",
+ "hulls": [],
+ "mujoco_version": "3.14.0",
+ "profile": {
+  "coacd": null,
+  "contact": {
+   "condim": 3,
+   "friction": 1.0,
+   "margin": 0.0,
+   "rolling_friction": 0.0001,
+   "solimp": [
+    0.9,
+    0.95,
+    0.001,
+    0.5,
+    2.0
+   ],
+   "solref": [
+    0.02,
+    1.0
+   ],
+   "table_friction": 1.0,
+   "torsional_friction": 0.005
+  },
+  "diag_exact": false,
+  "name": "orbits_chain_own_v1",
+  "robot": {
+   "armature": null,
+   "condim": 3,
+   "contact": {
+    "solimp": [
+     0.9,
+     0.95,
+     0.001,
+     0.5,
+     2.0
+    ],
+    "solref": [
+     0.01,
+     1.0
+    ]
+   }
+  },
+  "solver": {
+   "cone": "elliptic",
+   "impratio": 10.0,
+   "integrator": "implicitfast",
+   "iterations": 50,
+   "ls_iterations": 50,
+   "solver": "CG",
+   "tolerance": 1e-08
+  },
+  "weld": {
+   "anchor": "target",
+   "solimp": [
+    0.9,
+    0.95,
+    0.001,
+    0.5,
+    2.0
+   ],
+   "solref": [
+    0.005,
+    1.0
+   ],
+   "torquescale": 3.0
+  }
+ },
+ "robot": {
+  "actuators": [
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/waist",
+    "kp": 43.0,
+    "kv": 0.0,
+    "name": "left/drive/waist"
+   },
+   {
+    "force": 144.0,
+    "group": "left",
+    "joint": "left/shoulder",
+    "kp": 265.0,
+    "kv": 0.0,
+    "name": "left/drive/shoulder"
+   },
+   {
+    "force": 59.0,
+    "group": "left",
+    "joint": "left/elbow",
+    "kp": 227.0,
+    "kv": 0.0,
+    "name": "left/drive/elbow"
+   },
+   {
+    "force": 22.0,
+    "group": "left",
+    "joint": "left/forearm_roll",
+    "kp": 78.0,
+    "kv": 0.0,
+    "name": "left/drive/forearm_roll"
+   },
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/wrist_angle",
+    "kp": 37.0,
+    "kv": 0.0,
+    "name": "left/drive/wrist_angle"
+   },
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/wrist_rotate",
+    "kp": 10.4,
+    "kv": 0.0,
+    "name": "left/drive/wrist_rotate"
+   },
+   {
+    "force": 35.0,
+    "group": "left",
+    "joint": "left/left_finger",
+    "kp": 2000.0,
+    "kv": 124.0,
+    "name": "left/drive/left_finger"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/waist",
+    "kp": 43.0,
+    "kv": 0.0,
+    "name": "right/drive/waist"
+   },
+   {
+    "force": 144.0,
+    "group": "right",
+    "joint": "right/shoulder",
+    "kp": 265.0,
+    "kv": 0.0,
+    "name": "right/drive/shoulder"
+   },
+   {
+    "force": 59.0,
+    "group": "right",
+    "joint": "right/elbow",
+    "kp": 227.0,
+    "kv": 0.0,
+    "name": "right/drive/elbow"
+   },
+   {
+    "force": 22.0,
+    "group": "right",
+    "joint": "right/forearm_roll",
+    "kp": 78.0,
+    "kv": 0.0,
+    "name": "right/drive/forearm_roll"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/wrist_angle",
+    "kp": 37.0,
+    "kv": 0.0,
+    "name": "right/drive/wrist_angle"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/wrist_rotate",
+    "kp": 10.4,
+    "kv": 0.0,
+    "name": "right/drive/wrist_rotate"
+   },
+   {
+    "force": 35.0,
+    "group": "right",
+    "joint": "right/left_finger",
+    "kp": 2000.0,
+    "kv": 124.0,
+    "name": "right/drive/left_finger"
+   }
+  ],
+  "mount_body": "robot",
+  "source_sha256": "30e16650d1ef2409ef9ec9dd5e70b3dd7d208c25bd1d7ce9e76b6ef601f16582",
+  "source_xml": "aloha_tabletop_d89a4d634db253d4.xml"
+ },
+ "welds": [
+  {
+   "body": "orbits_chain::link_000",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_000",
+   "target": [
+    "orbits_chain",
+    "link_000"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_001",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_001",
+   "target": [
+    "orbits_chain",
+    "link_001"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_002",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_002",
+   "target": [
+    "orbits_chain",
+    "link_002"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_003",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_003",
+   "target": [
+    "orbits_chain",
+    "link_003"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_004",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_004",
+   "target": [
+    "orbits_chain",
+    "link_004"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_005",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_005",
+   "target": [
+    "orbits_chain",
+    "link_005"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_006",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_006",
+   "target": [
+    "orbits_chain",
+    "link_006"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_007",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_007",
+   "target": [
+    "orbits_chain",
+    "link_007"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_008",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_008",
+   "target": [
+    "orbits_chain",
+    "link_008"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_009",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_009",
+   "target": [
+    "orbits_chain",
+    "link_009"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_010",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_010",
+   "target": [
+    "orbits_chain",
+    "link_010"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_011",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_011",
+   "target": [
+    "orbits_chain",
+    "link_011"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_012",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_012",
+   "target": [
+    "orbits_chain",
+    "link_012"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_013",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_013",
+   "target": [
+    "orbits_chain",
+    "link_013"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_014",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_014",
+   "target": [
+    "orbits_chain",
+    "link_014"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_015",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_015",
+   "target": [
+    "orbits_chain",
+    "link_015"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_016",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_016",
+   "target": [
+    "orbits_chain",
+    "link_016"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_017",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_017",
+   "target": [
+    "orbits_chain",
+    "link_017"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_018",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_018",
+   "target": [
+    "orbits_chain",
+    "link_018"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_019",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_019",
+   "target": [
+    "orbits_chain",
+    "link_019"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_020",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_020",
+   "target": [
+    "orbits_chain",
+    "link_020"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_021",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_021",
+   "target": [
+    "orbits_chain",
+    "link_021"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_022",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_022",
+   "target": [
+    "orbits_chain",
+    "link_022"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_023",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_023",
+   "target": [
+    "orbits_chain",
+    "link_023"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_024",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_024",
+   "target": [
+    "orbits_chain",
+    "link_024"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_025",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_025",
+   "target": [
+    "orbits_chain",
+    "link_025"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_026",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_026",
+   "target": [
+    "orbits_chain",
+    "link_026"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_027",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_027",
+   "target": [
+    "orbits_chain",
+    "link_027"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_028",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_028",
+   "target": [
+    "orbits_chain",
+    "link_028"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_029",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_029",
+   "target": [
+    "orbits_chain",
+    "link_029"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_030",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_030",
+   "target": [
+    "orbits_chain",
+    "link_030"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_031",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_031",
+   "target": [
+    "orbits_chain",
+    "link_031"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_032",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_032",
+   "target": [
+    "orbits_chain",
+    "link_032"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_033",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_033",
+   "target": [
+    "orbits_chain",
+    "link_033"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_034",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_034",
+   "target": [
+    "orbits_chain",
+    "link_034"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_035",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_035",
+   "target": [
+    "orbits_chain",
+    "link_035"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_036",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_036",
+   "target": [
+    "orbits_chain",
+    "link_036"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_037",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_037",
+   "target": [
+    "orbits_chain",
+    "link_037"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_038",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_038",
+   "target": [
+    "orbits_chain",
+    "link_038"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_039",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_039",
+   "target": [
+    "orbits_chain",
+    "link_039"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_040",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_040",
+   "target": [
+    "orbits_chain",
+    "link_040"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_041",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_041",
+   "target": [
+    "orbits_chain",
+    "link_041"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_042",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_042",
+   "target": [
+    "orbits_chain",
+    "link_042"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_043",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_043",
+   "target": [
+    "orbits_chain",
+    "link_043"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_044",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_044",
+   "target": [
+    "orbits_chain",
+    "link_044"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_045",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_045",
+   "target": [
+    "orbits_chain",
+    "link_045"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_046",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_046",
+   "target": [
+    "orbits_chain",
+    "link_046"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_047",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_047",
+   "target": [
+    "orbits_chain",
+    "link_047"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_048",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_048",
+   "target": [
+    "orbits_chain",
+    "link_048"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_049",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_049",
+   "target": [
+    "orbits_chain",
+    "link_049"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_050",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_050",
+   "target": [
+    "orbits_chain",
+    "link_050"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_051",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_051",
+   "target": [
+    "orbits_chain",
+    "link_051"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_052",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_052",
+   "target": [
+    "orbits_chain",
+    "link_052"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_053",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_053",
+   "target": [
+    "orbits_chain",
+    "link_053"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_054",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_054",
+   "target": [
+    "orbits_chain",
+    "link_054"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_055",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_055",
+   "target": [
+    "orbits_chain",
+    "link_055"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_056",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_056",
+   "target": [
+    "orbits_chain",
+    "link_056"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_057",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_057",
+   "target": [
+    "orbits_chain",
+    "link_057"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_058",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_058",
+   "target": [
+    "orbits_chain",
+    "link_058"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_059",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_059",
+   "target": [
+    "orbits_chain",
+    "link_059"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_060",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_060",
+   "target": [
+    "orbits_chain",
+    "link_060"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_061",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_061",
+   "target": [
+    "orbits_chain",
+    "link_061"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_062",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_062",
+   "target": [
+    "orbits_chain",
+    "link_062"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_063",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_063",
+   "target": [
+    "orbits_chain",
+    "link_063"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_064",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_064",
+   "target": [
+    "orbits_chain",
+    "link_064"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_065",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_065",
+   "target": [
+    "orbits_chain",
+    "link_065"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_066",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_066",
+   "target": [
+    "orbits_chain",
+    "link_066"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_067",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_067",
+   "target": [
+    "orbits_chain",
+    "link_067"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_068",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_068",
+   "target": [
+    "orbits_chain",
+    "link_068"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_069",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_069",
+   "target": [
+    "orbits_chain",
+    "link_069"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_070",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_070",
+   "target": [
+    "orbits_chain",
+    "link_070"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_071",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_071",
+   "target": [
+    "orbits_chain",
+    "link_071"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_072",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_072",
+   "target": [
+    "orbits_chain",
+    "link_072"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_073",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_073",
+   "target": [
+    "orbits_chain",
+    "link_073"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_074",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_074",
+   "target": [
+    "orbits_chain",
+    "link_074"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_075",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_075",
+   "target": [
+    "orbits_chain",
+    "link_075"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_076",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_076",
+   "target": [
+    "orbits_chain",
+    "link_076"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_077",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_077",
+   "target": [
+    "orbits_chain",
+    "link_077"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_078",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_078",
+   "target": [
+    "orbits_chain",
+    "link_078"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_079",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_079",
+   "target": [
+    "orbits_chain",
+    "link_079"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_080",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_080",
+   "target": [
+    "orbits_chain",
+    "link_080"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_081",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_081",
+   "target": [
+    "orbits_chain",
+    "link_081"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_082",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_082",
+   "target": [
+    "orbits_chain",
+    "link_082"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_083",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_083",
+   "target": [
+    "orbits_chain",
+    "link_083"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_084",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_084",
+   "target": [
+    "orbits_chain",
+    "link_084"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_085",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_085",
+   "target": [
+    "orbits_chain",
+    "link_085"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_086",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_086",
+   "target": [
+    "orbits_chain",
+    "link_086"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_087",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_087",
+   "target": [
+    "orbits_chain",
+    "link_087"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_088",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_088",
+   "target": [
+    "orbits_chain",
+    "link_088"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_089",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_089",
+   "target": [
+    "orbits_chain",
+    "link_089"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_090",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_090",
+   "target": [
+    "orbits_chain",
+    "link_090"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_091",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_091",
+   "target": [
+    "orbits_chain",
+    "link_091"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_092",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_092",
+   "target": [
+    "orbits_chain",
+    "link_092"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_093",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_093",
+   "target": [
+    "orbits_chain",
+    "link_093"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_094",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_094",
+   "target": [
+    "orbits_chain",
+    "link_094"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_095",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_095",
+   "target": [
+    "orbits_chain",
+    "link_095"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_096",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_096",
+   "target": [
+    "orbits_chain",
+    "link_096"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_097",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_097",
+   "target": [
+    "orbits_chain",
+    "link_097"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_098",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_098",
+   "target": [
+    "orbits_chain",
+    "link_098"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_099",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_099",
+   "target": [
+    "orbits_chain",
+    "link_099"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_100",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_100",
+   "target": [
+    "orbits_chain",
+    "link_100"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_101",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_101",
+   "target": [
+    "orbits_chain",
+    "link_101"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_102",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_102",
+   "target": [
+    "orbits_chain",
+    "link_102"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_103",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_103",
+   "target": [
+    "orbits_chain",
+    "link_103"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_104",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_104",
+   "target": [
+    "orbits_chain",
+    "link_104"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_105",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_105",
+   "target": [
+    "orbits_chain",
+    "link_105"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_106",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_106",
+   "target": [
+    "orbits_chain",
+    "link_106"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_107",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_107",
+   "target": [
+    "orbits_chain",
+    "link_107"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_108",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_108",
+   "target": [
+    "orbits_chain",
+    "link_108"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_109",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_109",
+   "target": [
+    "orbits_chain",
+    "link_109"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_110",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_110",
+   "target": [
+    "orbits_chain",
+    "link_110"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_111",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_111",
+   "target": [
+    "orbits_chain",
+    "link_111"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_112",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/link_112",
+   "target": [
+    "orbits_chain",
+    "link_112"
+   ]
+  },
+  {
+   "body": "orbits_chain::handle",
+   "hand": "left",
+   "hand_body": "left/gripper_link",
+   "name": "grasp/left/orbits_chain/handle",
+   "target": [
+    "orbits_chain",
+    "handle"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_000",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_000",
+   "target": [
+    "orbits_chain",
+    "link_000"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_001",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_001",
+   "target": [
+    "orbits_chain",
+    "link_001"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_002",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_002",
+   "target": [
+    "orbits_chain",
+    "link_002"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_003",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_003",
+   "target": [
+    "orbits_chain",
+    "link_003"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_004",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_004",
+   "target": [
+    "orbits_chain",
+    "link_004"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_005",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_005",
+   "target": [
+    "orbits_chain",
+    "link_005"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_006",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_006",
+   "target": [
+    "orbits_chain",
+    "link_006"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_007",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_007",
+   "target": [
+    "orbits_chain",
+    "link_007"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_008",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_008",
+   "target": [
+    "orbits_chain",
+    "link_008"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_009",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_009",
+   "target": [
+    "orbits_chain",
+    "link_009"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_010",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_010",
+   "target": [
+    "orbits_chain",
+    "link_010"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_011",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_011",
+   "target": [
+    "orbits_chain",
+    "link_011"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_012",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_012",
+   "target": [
+    "orbits_chain",
+    "link_012"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_013",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_013",
+   "target": [
+    "orbits_chain",
+    "link_013"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_014",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_014",
+   "target": [
+    "orbits_chain",
+    "link_014"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_015",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_015",
+   "target": [
+    "orbits_chain",
+    "link_015"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_016",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_016",
+   "target": [
+    "orbits_chain",
+    "link_016"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_017",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_017",
+   "target": [
+    "orbits_chain",
+    "link_017"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_018",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_018",
+   "target": [
+    "orbits_chain",
+    "link_018"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_019",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_019",
+   "target": [
+    "orbits_chain",
+    "link_019"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_020",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_020",
+   "target": [
+    "orbits_chain",
+    "link_020"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_021",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_021",
+   "target": [
+    "orbits_chain",
+    "link_021"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_022",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_022",
+   "target": [
+    "orbits_chain",
+    "link_022"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_023",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_023",
+   "target": [
+    "orbits_chain",
+    "link_023"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_024",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_024",
+   "target": [
+    "orbits_chain",
+    "link_024"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_025",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_025",
+   "target": [
+    "orbits_chain",
+    "link_025"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_026",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_026",
+   "target": [
+    "orbits_chain",
+    "link_026"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_027",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_027",
+   "target": [
+    "orbits_chain",
+    "link_027"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_028",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_028",
+   "target": [
+    "orbits_chain",
+    "link_028"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_029",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_029",
+   "target": [
+    "orbits_chain",
+    "link_029"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_030",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_030",
+   "target": [
+    "orbits_chain",
+    "link_030"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_031",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_031",
+   "target": [
+    "orbits_chain",
+    "link_031"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_032",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_032",
+   "target": [
+    "orbits_chain",
+    "link_032"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_033",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_033",
+   "target": [
+    "orbits_chain",
+    "link_033"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_034",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_034",
+   "target": [
+    "orbits_chain",
+    "link_034"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_035",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_035",
+   "target": [
+    "orbits_chain",
+    "link_035"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_036",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_036",
+   "target": [
+    "orbits_chain",
+    "link_036"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_037",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_037",
+   "target": [
+    "orbits_chain",
+    "link_037"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_038",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_038",
+   "target": [
+    "orbits_chain",
+    "link_038"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_039",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_039",
+   "target": [
+    "orbits_chain",
+    "link_039"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_040",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_040",
+   "target": [
+    "orbits_chain",
+    "link_040"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_041",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_041",
+   "target": [
+    "orbits_chain",
+    "link_041"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_042",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_042",
+   "target": [
+    "orbits_chain",
+    "link_042"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_043",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_043",
+   "target": [
+    "orbits_chain",
+    "link_043"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_044",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_044",
+   "target": [
+    "orbits_chain",
+    "link_044"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_045",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_045",
+   "target": [
+    "orbits_chain",
+    "link_045"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_046",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_046",
+   "target": [
+    "orbits_chain",
+    "link_046"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_047",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_047",
+   "target": [
+    "orbits_chain",
+    "link_047"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_048",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_048",
+   "target": [
+    "orbits_chain",
+    "link_048"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_049",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_049",
+   "target": [
+    "orbits_chain",
+    "link_049"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_050",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_050",
+   "target": [
+    "orbits_chain",
+    "link_050"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_051",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_051",
+   "target": [
+    "orbits_chain",
+    "link_051"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_052",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_052",
+   "target": [
+    "orbits_chain",
+    "link_052"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_053",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_053",
+   "target": [
+    "orbits_chain",
+    "link_053"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_054",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_054",
+   "target": [
+    "orbits_chain",
+    "link_054"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_055",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_055",
+   "target": [
+    "orbits_chain",
+    "link_055"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_056",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_056",
+   "target": [
+    "orbits_chain",
+    "link_056"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_057",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_057",
+   "target": [
+    "orbits_chain",
+    "link_057"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_058",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_058",
+   "target": [
+    "orbits_chain",
+    "link_058"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_059",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_059",
+   "target": [
+    "orbits_chain",
+    "link_059"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_060",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_060",
+   "target": [
+    "orbits_chain",
+    "link_060"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_061",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_061",
+   "target": [
+    "orbits_chain",
+    "link_061"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_062",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_062",
+   "target": [
+    "orbits_chain",
+    "link_062"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_063",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_063",
+   "target": [
+    "orbits_chain",
+    "link_063"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_064",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_064",
+   "target": [
+    "orbits_chain",
+    "link_064"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_065",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_065",
+   "target": [
+    "orbits_chain",
+    "link_065"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_066",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_066",
+   "target": [
+    "orbits_chain",
+    "link_066"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_067",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_067",
+   "target": [
+    "orbits_chain",
+    "link_067"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_068",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_068",
+   "target": [
+    "orbits_chain",
+    "link_068"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_069",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_069",
+   "target": [
+    "orbits_chain",
+    "link_069"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_070",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_070",
+   "target": [
+    "orbits_chain",
+    "link_070"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_071",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_071",
+   "target": [
+    "orbits_chain",
+    "link_071"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_072",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_072",
+   "target": [
+    "orbits_chain",
+    "link_072"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_073",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_073",
+   "target": [
+    "orbits_chain",
+    "link_073"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_074",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_074",
+   "target": [
+    "orbits_chain",
+    "link_074"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_075",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_075",
+   "target": [
+    "orbits_chain",
+    "link_075"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_076",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_076",
+   "target": [
+    "orbits_chain",
+    "link_076"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_077",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_077",
+   "target": [
+    "orbits_chain",
+    "link_077"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_078",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_078",
+   "target": [
+    "orbits_chain",
+    "link_078"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_079",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_079",
+   "target": [
+    "orbits_chain",
+    "link_079"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_080",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_080",
+   "target": [
+    "orbits_chain",
+    "link_080"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_081",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_081",
+   "target": [
+    "orbits_chain",
+    "link_081"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_082",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_082",
+   "target": [
+    "orbits_chain",
+    "link_082"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_083",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_083",
+   "target": [
+    "orbits_chain",
+    "link_083"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_084",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_084",
+   "target": [
+    "orbits_chain",
+    "link_084"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_085",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_085",
+   "target": [
+    "orbits_chain",
+    "link_085"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_086",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_086",
+   "target": [
+    "orbits_chain",
+    "link_086"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_087",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_087",
+   "target": [
+    "orbits_chain",
+    "link_087"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_088",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_088",
+   "target": [
+    "orbits_chain",
+    "link_088"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_089",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_089",
+   "target": [
+    "orbits_chain",
+    "link_089"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_090",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_090",
+   "target": [
+    "orbits_chain",
+    "link_090"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_091",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_091",
+   "target": [
+    "orbits_chain",
+    "link_091"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_092",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_092",
+   "target": [
+    "orbits_chain",
+    "link_092"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_093",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_093",
+   "target": [
+    "orbits_chain",
+    "link_093"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_094",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_094",
+   "target": [
+    "orbits_chain",
+    "link_094"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_095",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_095",
+   "target": [
+    "orbits_chain",
+    "link_095"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_096",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_096",
+   "target": [
+    "orbits_chain",
+    "link_096"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_097",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_097",
+   "target": [
+    "orbits_chain",
+    "link_097"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_098",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_098",
+   "target": [
+    "orbits_chain",
+    "link_098"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_099",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_099",
+   "target": [
+    "orbits_chain",
+    "link_099"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_100",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_100",
+   "target": [
+    "orbits_chain",
+    "link_100"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_101",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_101",
+   "target": [
+    "orbits_chain",
+    "link_101"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_102",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_102",
+   "target": [
+    "orbits_chain",
+    "link_102"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_103",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_103",
+   "target": [
+    "orbits_chain",
+    "link_103"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_104",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_104",
+   "target": [
+    "orbits_chain",
+    "link_104"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_105",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_105",
+   "target": [
+    "orbits_chain",
+    "link_105"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_106",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_106",
+   "target": [
+    "orbits_chain",
+    "link_106"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_107",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_107",
+   "target": [
+    "orbits_chain",
+    "link_107"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_108",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_108",
+   "target": [
+    "orbits_chain",
+    "link_108"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_109",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_109",
+   "target": [
+    "orbits_chain",
+    "link_109"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_110",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_110",
+   "target": [
+    "orbits_chain",
+    "link_110"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_111",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_111",
+   "target": [
+    "orbits_chain",
+    "link_111"
+   ]
+  },
+  {
+   "body": "orbits_chain::link_112",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/link_112",
+   "target": [
+    "orbits_chain",
+    "link_112"
+   ]
+  },
+  {
+   "body": "orbits_chain::handle",
+   "hand": "right",
+   "hand_body": "right/gripper_link",
+   "name": "grasp/right/orbits_chain/handle",
+   "target": [
+    "orbits_chain",
+    "handle"
+   ]
+  }
+ ],
+ "xml": "scene.xml"
+}

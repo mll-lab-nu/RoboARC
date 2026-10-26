@@ -1,0 +1,1383 @@
+{
+ "task": "orbits",
+ "topogym_task": "orbits",
+ "variation_id": "orbits_medium_chain",
+ "seed": 0,
+ "eval_index": null,
+ "text": "Separate and place the entire cord and wooden handle together inside the green dashed goal region. Keep the rings, posts and fixed assembly on the puzzle/system side.\n\n## Success requirements\n\n- Put every part of the entire cord and wooden handle together inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.\n- Keep the target above the tabletop (contact tolerance 1 mm below the surface) and within the goal volume's height. It need not touch the table. The goal volume extends 170 mm above the tabletop.\n- Keep the rings, posts and fixed assembly, and every other remaining puzzle component, entirely on the system side of the fixed separator. Moving the whole puzzle into the goal is not completion.\n- Keep each target rigid part's linear speed at most 1 mm/s and angular speed at most 0.02 rad/s. Every point of the target cord must also move at most 1 mm/s. Holding the target with the gripper is allowed; release is not required.\n- Keep all final conditions satisfied together for at least 0.5 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.",
+ "simulator": {
+  "task_id": "orbits",
+  "robot_id": "aloha",
+  "variation_id": "orbits_medium_chain",
+  "task_parameters": {},
+  "compute_backend": "cpu",
+  "precision": "64",
+  "physics_dt_s": 0.0025,
+  "solver_substeps": 1,
+  "terminal_contract_version": 1,
+  "control_decimation": 10,
+  "max_physics_steps": null,
+  "history_storage": "segment",
+  "reset_physics_steps": 0,
+  "rigid_options": {},
+  "ipc_options": {},
+  "ipc_settled_state": null,
+  "enable_rgb": true,
+  "enable_depth": true,
+  "observation_mode": "JOINT",
+  "control_mode": "JOINT_ABS",
+  "enable_privileged": true,
+  "seed": 0,
+  "render_backend": "nyx",
+  "asset_root": null,
+  "work_dir": null,
+  "grasp_assist": {
+   "model": "contact_weld_v1",
+   "targets": [
+    {
+     "entity": "orbits_chain",
+     "link": "link_000",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_001",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_002",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_003",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_004",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_005",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_006",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_007",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_008",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_009",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_010",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_011",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_012",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_013",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_014",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_015",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_016",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_017",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_018",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_019",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_020",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_021",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_022",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_023",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_024",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_025",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_026",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_027",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_028",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_029",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_030",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_031",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_032",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_033",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_034",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_035",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_036",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_037",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_038",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_039",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_040",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_041",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_042",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_043",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_044",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_045",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_046",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_047",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_048",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_049",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_050",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_051",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_052",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_053",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_054",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_055",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_056",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_057",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_058",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_059",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_060",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_061",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_062",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_063",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_064",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_065",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_066",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_067",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_068",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_069",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_070",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_071",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_072",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_073",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_074",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_075",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_076",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_077",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_078",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_079",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_080",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_081",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_082",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_083",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_084",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_085",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_086",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_087",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_088",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_089",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_090",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_091",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_092",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_093",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_094",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_095",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_096",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_097",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_098",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_099",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_100",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_101",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_102",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_103",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_104",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_105",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_106",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_107",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_108",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_109",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_110",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_111",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "link_112",
+     "center_m": [
+      0.011504424778761062,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.008
+    },
+    {
+     "entity": "orbits_chain",
+     "link": "handle",
+     "center_m": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "radius_m": 0.045
+    }
+   ],
+   "stable_time_s": 0.02,
+   "max_tcp_distance_m": 0.06,
+   "max_penetration_m": 0.002,
+   "max_translation_error_m": 0.01,
+   "max_rotation_error_rad": 0.15,
+   "max_finger_opening_fraction": 0.15,
+   "intent_deadband": 0.002,
+   "initial_intent": "open"
+  },
+  "physics_engine": "mujoco",
+  "mujoco_scene": "instance_assets/mujoco",
+  "mujoco_birth": null,
+  "mujoco_settled_state": null,
+  "mujoco_profile": null
+ },
+ "state_sha": "6be24b9b60f50e22",
+ "action_dim": 14,
+ "action_layout": [
+  "left/waist",
+  "left/shoulder",
+  "left/elbow",
+  "left/forearm_roll",
+  "left/wrist_angle",
+  "left/wrist_rotate",
+  "left_native_gripper",
+  "right/waist",
+  "right/shoulder",
+  "right/elbow",
+  "right/forearm_roll",
+  "right/wrist_angle",
+  "right/wrist_rotate",
+  "right_native_gripper"
+ ],
+ "gripper_space": "native",
+ "control_hz": 40.0,
+ "backend": "cuda",
+ "reset_joint_targets": [
+  0.0,
+  -0.96,
+  1.16,
+  0.0,
+  -0.3,
+  0.0,
+  0.0084,
+  0.0,
+  -0.96,
+  1.16,
+  0.0,
+  -0.3,
+  0.0,
+  0.0084
+ ],
+ "objects": {
+  "goal_region": {
+   "position": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "orientation_wxyz": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bounds": [
+    [
+     -0.33668,
+     -0.71565,
+     0.91984
+    ],
+    [
+     0.06532,
+     -0.31365,
+     0.92004
+    ]
+   ],
+   "size": [
+    0.402,
+    0.402,
+    0.0002
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": true
+  },
+  "orbits_chain": {
+   "position": [
+    -0.13568,
+    0.0,
+    0.91964
+   ],
+   "orientation_wxyz": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "euler_xyz": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bounds": [
+    [
+     -0.69057,
+     -0.27965,
+     0.91892
+    ],
+    [
+     0.41742,
+     0.44864,
+     1.3002
+    ]
+   ],
+   "size": [
+    1.108,
+    0.72829,
+    0.38128
+   ],
+   "velocity": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fixed": false
+  }
+ },
+ "instance_contract_version": 2,
+ "soft_state": {},
+ "asset_identity": {
+  "goal_region.obj": "3e2ca08e875df62cc9205affa9a78fda7e26f80c23c06e77e70f9f1dea209527",
+  "orbits_chain.xml": "07caf77dba27da0cb34c54a2ed1b52a95c1a0e3d7d0c0439cff9cf3fdd9e7eec",
+  "scene_preset.json": "bef06664d55de8c5df3d55e4b880152daa4bd0595e9b374f103a81d7cab64584"
+ },
+ "physics_engine": "mujoco",
+ "mujoco_version": "3.14.0",
+ "topogym_source": {
+  "sha256": "64330fb8e172a640ea362b4e16b79c6e4b0f88dd80626f451bc3bf20d560da35",
+  "files": 462
+ },
+ "resolved_variation_id": "orbits_medium_chain",
+ "scene_variation": null,
+ "effective_task_parameters": {
+  "geometry": {
+   "ring_count": 3,
+   "bight_radius_m": 0.028,
+   "handle_bend_radius_m": 0.02
+  },
+  "stable_duration_s": 0.5,
+  "cord_profile": "compact_external_handle_v1",
+  "cord_finish": "golden_rope",
+  "cord_model": "fem",
+  "linear_scale": 0.85,
+  "yaw_deg": 90.0,
+  "placement_anchor": "base_center",
+  "base_center_xy_m": [
+   -0.1356786,
+   0.0
+  ],
+  "center_xy_m": [
+   -0.1356786,
+   -0.24
+  ],
+  "scene_preset_id": "lab_tasks_v1",
+  "chain": {
+   "fixture_scale": 1.4,
+   "ball_scale": 0.6,
+   "cord_radius_m": 0.002618,
+   "link_m": 0.0231,
+   "cord_e_pa": 1000000.0,
+   "base_drop_m": 0.015,
+   "ring1_grow_m": 0.01,
+   "ring2_dx_m": 0.02,
+   "ring_drop_m": 0.0,
+   "ring_stack_cut_m": 0.0,
+   "cord_length_m": 2.6
+  }
+ },
+ "public_goal": {
+  "schema_version": 1,
+  "task_id": "orbits",
+  "variation_id": "orbits_medium_chain",
+  "seed": 0,
+  "terminal_revision": "placement_region_v2_default_success",
+  "summary": "Separate and place the entire cord and wooden handle together inside the green dashed goal region. Keep the rings, posts and fixed assembly on the puzzle/system side.",
+  "stable_duration_s": 0.5,
+  "success_conditions": [
+   "Put every part of the entire cord and wooden handle together inside the fixed goal volume, leaving at least 1 mm inside its horizontal border. The centre alone is insufficient; no tip, spike, ring segment or cord segment may remain outside.",
+   "Keep the target above the tabletop (contact tolerance 1 mm below the surface) and within the goal volume's height. It need not touch the table. The goal volume extends 170 mm above the tabletop.",
+   "Keep the rings, posts and fixed assembly, and every other remaining puzzle component, entirely on the system side of the fixed separator. Moving the whole puzzle into the goal is not completion.",
+   "Keep each target rigid part's linear speed at most 1 mm/s and angular speed at most 0.02 rad/s. Every point of the target cord must also move at most 1 mm/s. Holding the target with the gripper is allowed; release is not required."
+  ],
+  "failure_conditions": []
+ },
+ "evaluable_for_task_success": true,
+ "success_rule": "task-native success (goal_complete True; frozen parameters; terminal revision placement_region_v2_default_success)"
+}
