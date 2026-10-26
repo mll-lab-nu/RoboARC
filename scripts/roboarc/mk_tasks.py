@@ -88,7 +88,7 @@ MAX_STEPS = 200000        # rcb_topogym.MAX_STEPS (RCB_MAX_STEPS): the runaway g
 # A base whose reference is longer than MAX_STEPS / 1.5 gets its own guard (max_steps_of): the privileged row cap and the
 # standard episode cap (its package sets RCB_MAX_STEPS: "{{MAX_CONTROL_STEPS}}" in the sim service).
 MAX_STEPS_EXCEPTIONS = {
-    "orbits-04-i01": 360000,      # proposed 2026-10-25, owner approval pending: a reference of up to 240000 rows (now 228624)
+    "orbits-04-i01": 360000,      # proposed 2026-10-25, owner approval pending: a reference of up to 240000 rows (now 223358)
 }
 MAX_CALL_WALL_S = 900     # v2_4/rcb_limited.MAX_CALL_WALL_S (RCB_MAX_CALL_WALL_S): no compose file overrides it
 CHUNK_S, WATCH_S = 10, 30  # the sim service's RCB_MAX_CHUNK_S / RCB_MAX_WATCH_S defaults
