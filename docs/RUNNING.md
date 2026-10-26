@@ -4,7 +4,8 @@ How to run RoboARC's tasks with [Harbor](https://github.com/laude-institute/harb
 is configured and recorded. The task contract is [PROTOCOL.md](PROTOCOL.md) (its Appendix H binds every run); the
 standard-mode wire protocol is [STANDARD_MODE.md](STANDARD_MODE.md); the benchmark's own rules are in
 [benchmarks/roboarc.md](benchmarks/roboarc.md). The sections from "Official runs" on are the runner's rules:
-`scripts/harbor/run_agent_batch.sh` applies them by default.
+`scripts/harbor/run_agent_batch.sh` applies them by default. A collaborator running an evaluation for the maintainers
+follows [COLLABORATOR_SETUP.md](COLLABORATOR_SETUP.md) alone: it has everything from setup to sending the results back.
 
 ## Requirements
 
