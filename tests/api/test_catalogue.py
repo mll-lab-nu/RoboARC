@@ -49,7 +49,7 @@ from task_conventions import CUTOFF_EXCEPTIONS  # noqa: E402
 
 # every image by its manifest digest (images/pins.json)
 PINS = {p["name"]: p["ref"] for p in json.loads((Path(__file__).resolve().parents[2] / "images/pins.json").read_text())["images"]}
-assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.3.0@" + PINS["roboarc"].split("@")[1]
+assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:2.1.0@" + PINS["roboarc"].split("@")[1]
 
 
 def test_metadata():

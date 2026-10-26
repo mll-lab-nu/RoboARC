@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "d3cfb76f5eb6b155d5407096382d21f736e1fc8abd9ef07d42e4cefab9fad106",
+  "instance_sha256": "b7a76ba3fa7cc1e2d0354632a663967a80d878fcde6ae693a24df13ef79a96b5",
   "asset_files": {
     "instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
     "instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
@@ -25,13 +25,13 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "4d2cba2157c96903532ccb44ff7ff55fd1dc657a4c17a8e8e832d537e53e56d3",
+      "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
       "files": 454
     }
   },
   "image": {
-    "reference": "eai-roboarc:0.2.1-noinst",
-    "id": "sha256:cd2ac87464fd0840be7d5a71da4311eb483a8f29075b87802333be1caa569986",
+    "reference": "roboarc-b1:2.1.0-noinst",
+    "id": "sha256:ecad5301f34b9e6e19350118e27feffc1ab323d05898b1aeef93a745155ef1e6",
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",

@@ -124,7 +124,7 @@
   "instances/battery-replacement-01-i01/seeds/2/instance_assets/mujoco/meshes/old_A_nub_prism32_6def0b4e56bf0528.obj": "6def0b4e56bf0528d8f3cc394b9d2f32c78dd967b014190f0a2e6798e11d67e0",
   "instances/battery-replacement-01-i01/seeds/2/instance_assets/mujoco/scene.json": "17b92f514524a74736ec9379b2ab4d8e9b1aa1636bd7f63bf6d52bc196a339ea",
   "instances/battery-replacement-01-i01/seeds/2/instance_assets/mujoco/scene.xml": "1aae4e803e928b1eabac2b94c22cd63a9fcaa3d8ea0dfca1a849e75a36704479",
-  "instances/bed-bolt-01-i01/instance.json": "929d18ffcd2bb05bc3db914ac8eb646416055942248b414c0f7c075ab5617ea5",
+  "instances/bed-bolt-01-i01/instance.json": "df6bc8c9a98ef95e8ec16c6089370589c3c6689ea1b3775a830fa2ed94d37566",
   "instances/bed-bolt-01-i01/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-01-i01/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-01-i01/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -133,9 +133,9 @@
   "instances/bed-bolt-01-i01/instance_assets/mujoco/meshes/key_key_long_tip_m_33e1dfe91ca31689.obj": "33e1dfe91ca316896de88484e93e7d9300af094a11456385d4e67aac2a46aef5",
   "instances/bed-bolt-01-i01/instance_assets/mujoco/meshes/key_key_short_m_ebba21255bb25b8b.obj": "ebba21255bb25b8b639fc3a49c9489a76567e815550e5c5b9326e48a1480c7b7",
   "instances/bed-bolt-01-i01/instance_assets/mujoco/meshes/key_key_short_tip_m_0e76a0819d634e1f.obj": "0e76a0819d634e1f5958f31fe9ee861b6dd20f89d285e0f7878cdc94f6327e62",
-  "instances/bed-bolt-01-i01/instance_assets/mujoco/scene.json": "beaaf91e13e83b597888fd5c1ba3c27f2ac5f468dc2bb7d8cd0801a86e502019",
+  "instances/bed-bolt-01-i01/instance_assets/mujoco/scene.json": "f9e77239f2a39801a18620a75b3401d728c2d4522a8b17ef425949894a828135",
   "instances/bed-bolt-01-i01/instance_assets/mujoco/scene.xml": "9b65dc102aed2964e9716ddb303bbeb3e256585ae96793cf8770253ce4525f00",
-  "instances/bed-bolt-01-i01/seeds/1/instance.json": "f84ef7e229c5f1062258952006de0a55b8635434052e5a1d40747ee335593443",
+  "instances/bed-bolt-01-i01/seeds/1/instance.json": "77c49916aa64c49e602c022e519e651344e9c9736e055a94a0afa5bb1a70f9c7",
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -144,9 +144,9 @@
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/meshes/key_key_long_tip_m_33e1dfe91ca31689.obj": "33e1dfe91ca316896de88484e93e7d9300af094a11456385d4e67aac2a46aef5",
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_m_ebba21255bb25b8b.obj": "ebba21255bb25b8b639fc3a49c9489a76567e815550e5c5b9326e48a1480c7b7",
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_m_0e76a0819d634e1f.obj": "0e76a0819d634e1f5958f31fe9ee861b6dd20f89d285e0f7878cdc94f6327e62",
-  "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/scene.json": "beaaf91e13e83b597888fd5c1ba3c27f2ac5f468dc2bb7d8cd0801a86e502019",
+  "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/scene.json": "f9e77239f2a39801a18620a75b3401d728c2d4522a8b17ef425949894a828135",
   "instances/bed-bolt-01-i01/seeds/1/instance_assets/mujoco/scene.xml": "9b65dc102aed2964e9716ddb303bbeb3e256585ae96793cf8770253ce4525f00",
-  "instances/bed-bolt-01-i01/seeds/2/instance.json": "5f6d618fa51163701741d882304ec0533d810aa5ea4045d360816a50d7db9fac",
+  "instances/bed-bolt-01-i01/seeds/2/instance.json": "8118e661d8721c160c6c780dc97e3b0607ac3faf63b219fcb4b3e3a3c972ac01",
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -155,9 +155,9 @@
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/meshes/key_key_long_tip_m_33e1dfe91ca31689.obj": "33e1dfe91ca316896de88484e93e7d9300af094a11456385d4e67aac2a46aef5",
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_m_ebba21255bb25b8b.obj": "ebba21255bb25b8b639fc3a49c9489a76567e815550e5c5b9326e48a1480c7b7",
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_m_0e76a0819d634e1f.obj": "0e76a0819d634e1f5958f31fe9ee861b6dd20f89d285e0f7878cdc94f6327e62",
-  "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/scene.json": "beaaf91e13e83b597888fd5c1ba3c27f2ac5f468dc2bb7d8cd0801a86e502019",
+  "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/scene.json": "f9e77239f2a39801a18620a75b3401d728c2d4522a8b17ef425949894a828135",
   "instances/bed-bolt-01-i01/seeds/2/instance_assets/mujoco/scene.xml": "9b65dc102aed2964e9716ddb303bbeb3e256585ae96793cf8770253ce4525f00",
-  "instances/bed-bolt-02-i01/instance.json": "bf521e84e165ef31a23eaf500e631eb20aac2dc9f33087de97f586723d3c4686",
+  "instances/bed-bolt-02-i01/instance.json": "51d66ad5c235f7eadd7e33bc5064e753521744031a5a4674b8695b7d04d20b06",
   "instances/bed-bolt-02-i01/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-02-i01/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-02-i01/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -184,9 +184,9 @@
   "instances/bed-bolt-02-i01/instance_assets/mujoco/meshes/key_key_short_tip_lobe_3_m_28ca7194c593d8e9.obj": "28ca7194c593d8e92fa607364439b1865d238597d060770408868448e0e003c2",
   "instances/bed-bolt-02-i01/instance_assets/mujoco/meshes/key_key_short_tip_lobe_4_m_7312a2609fe41ffd.obj": "7312a2609fe41ffd49665255be44145238ed3815790a918bdce8ea082681a4e5",
   "instances/bed-bolt-02-i01/instance_assets/mujoco/meshes/key_key_short_tip_lobe_5_m_a980911ba4b3011e.obj": "a980911ba4b3011e60d0594d704ae1c48a3be1527e2003dce5ca7b58b0c414c8",
-  "instances/bed-bolt-02-i01/instance_assets/mujoco/scene.json": "0992eb672aec6cd6727f73bb998a9a242bb8173204601c1fa067e726862a8f87",
+  "instances/bed-bolt-02-i01/instance_assets/mujoco/scene.json": "03950bb9ed2862d66ac5969fae643cfcac3b7b3306aca8275cab3cad3e5e3e5b",
   "instances/bed-bolt-02-i01/instance_assets/mujoco/scene.xml": "33a87b9535eee1d824a9f283189d2c542657372a62f8e65982e831fc867cee3f",
-  "instances/bed-bolt-02-i01/seeds/1/instance.json": "5f5057f53bed273f146c16d7ef4caac213f8c6f2444cd858f8010b38c4c4d83b",
+  "instances/bed-bolt-02-i01/seeds/1/instance.json": "dc41f2f3eb35ec0c3663b672f5738e269e7c63a23e71e048553d170df693a7e4",
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -213,9 +213,9 @@
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_lobe_3_m_28ca7194c593d8e9.obj": "28ca7194c593d8e92fa607364439b1865d238597d060770408868448e0e003c2",
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_lobe_4_m_7312a2609fe41ffd.obj": "7312a2609fe41ffd49665255be44145238ed3815790a918bdce8ea082681a4e5",
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_lobe_5_m_a980911ba4b3011e.obj": "a980911ba4b3011e60d0594d704ae1c48a3be1527e2003dce5ca7b58b0c414c8",
-  "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/scene.json": "0992eb672aec6cd6727f73bb998a9a242bb8173204601c1fa067e726862a8f87",
+  "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/scene.json": "03950bb9ed2862d66ac5969fae643cfcac3b7b3306aca8275cab3cad3e5e3e5b",
   "instances/bed-bolt-02-i01/seeds/1/instance_assets/mujoco/scene.xml": "33a87b9535eee1d824a9f283189d2c542657372a62f8e65982e831fc867cee3f",
-  "instances/bed-bolt-02-i01/seeds/2/instance.json": "ac8254b788cf1e0866f73af9c261b82d32857e5cb6209b4733ecd90e5631ff8d",
+  "instances/bed-bolt-02-i01/seeds/2/instance.json": "7d42fdd96e23227f9f9a8e46204c0019438b10a6d0f492056c1ff165fc80e71b",
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -242,9 +242,9 @@
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_lobe_3_m_28ca7194c593d8e9.obj": "28ca7194c593d8e92fa607364439b1865d238597d060770408868448e0e003c2",
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_lobe_4_m_7312a2609fe41ffd.obj": "7312a2609fe41ffd49665255be44145238ed3815790a918bdce8ea082681a4e5",
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_lobe_5_m_a980911ba4b3011e.obj": "a980911ba4b3011e60d0594d704ae1c48a3be1527e2003dce5ca7b58b0c414c8",
-  "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/scene.json": "0992eb672aec6cd6727f73bb998a9a242bb8173204601c1fa067e726862a8f87",
+  "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/scene.json": "03950bb9ed2862d66ac5969fae643cfcac3b7b3306aca8275cab3cad3e5e3e5b",
   "instances/bed-bolt-02-i01/seeds/2/instance_assets/mujoco/scene.xml": "33a87b9535eee1d824a9f283189d2c542657372a62f8e65982e831fc867cee3f",
-  "instances/bed-bolt-03-i01/instance.json": "e324bdae21e6def5fb3b938e55238eb239f165df9debd17641fb05b0c5456b4a",
+  "instances/bed-bolt-03-i01/instance.json": "8f404584a8af9a8e01cc9fa73ccc5a3efaf624702e38b4c743d634baf0b59244",
   "instances/bed-bolt-03-i01/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-03-i01/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-03-i01/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -258,9 +258,9 @@
   "instances/bed-bolt-03-i01/instance_assets/mujoco/meshes/key_key_ratchet_house_prism32_dfd565c819a0084f.obj": "dfd565c819a0084ff3fba9223573a81f034c424c4a888ca87ef5547803f270b1",
   "instances/bed-bolt-03-i01/instance_assets/mujoco/meshes/key_key_short_m_9c0f05e248e55cf9.obj": "9c0f05e248e55cf9bb07307dc802932266e26b8fafd3a36c8099e5ab831a26e4",
   "instances/bed-bolt-03-i01/instance_assets/mujoco/meshes/key_key_short_tip_m_02b7b20753336105.obj": "02b7b207533361054124efbc3b5179476139aedd1e0c6e08d05ab87330ebb351",
-  "instances/bed-bolt-03-i01/instance_assets/mujoco/scene.json": "3baf960128386c4874266afdfa6c505e03b6e3838dc8c2baf1d987512f697d3a",
+  "instances/bed-bolt-03-i01/instance_assets/mujoco/scene.json": "d5667497b1ac1fb7a2a4b0f7897f34a3733f72c558a25a20c1a50d98a3f9e769",
   "instances/bed-bolt-03-i01/instance_assets/mujoco/scene.xml": "7a75423602284392e4e6aa0510a3ea38643e1352ab95e944305cfc8f3f2407da",
-  "instances/bed-bolt-03-i01/seeds/1/instance.json": "db0e0fd67363ebb7282b54d2c7f0f0729624101297bb5055f75fed709d4ed5ba",
+  "instances/bed-bolt-03-i01/seeds/1/instance.json": "2d724a908cc1f9f0b937b91a078983cbd4b5596b1daf8027359ec9f984d8f331",
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -274,9 +274,9 @@
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/meshes/key_key_ratchet_house_prism32_dfd565c819a0084f.obj": "dfd565c819a0084ff3fba9223573a81f034c424c4a888ca87ef5547803f270b1",
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_m_9c0f05e248e55cf9.obj": "9c0f05e248e55cf9bb07307dc802932266e26b8fafd3a36c8099e5ab831a26e4",
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_m_02b7b20753336105.obj": "02b7b207533361054124efbc3b5179476139aedd1e0c6e08d05ab87330ebb351",
-  "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/scene.json": "3baf960128386c4874266afdfa6c505e03b6e3838dc8c2baf1d987512f697d3a",
+  "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/scene.json": "d5667497b1ac1fb7a2a4b0f7897f34a3733f72c558a25a20c1a50d98a3f9e769",
   "instances/bed-bolt-03-i01/seeds/1/instance_assets/mujoco/scene.xml": "7a75423602284392e4e6aa0510a3ea38643e1352ab95e944305cfc8f3f2407da",
-  "instances/bed-bolt-03-i01/seeds/2/instance.json": "72ad900aa35658cf47ced294e748ab7906ae6e772c4ef796efa3f3f615856dc2",
+  "instances/bed-bolt-03-i01/seeds/2/instance.json": "61be420d55c3d800594cfd254a2f57731df555e6484aa9c3363a509ed20f33a7",
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -290,9 +290,9 @@
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/meshes/key_key_ratchet_house_prism32_dfd565c819a0084f.obj": "dfd565c819a0084ff3fba9223573a81f034c424c4a888ca87ef5547803f270b1",
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_m_9c0f05e248e55cf9.obj": "9c0f05e248e55cf9bb07307dc802932266e26b8fafd3a36c8099e5ab831a26e4",
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_m_02b7b20753336105.obj": "02b7b207533361054124efbc3b5179476139aedd1e0c6e08d05ab87330ebb351",
-  "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/scene.json": "3baf960128386c4874266afdfa6c505e03b6e3838dc8c2baf1d987512f697d3a",
+  "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/scene.json": "d5667497b1ac1fb7a2a4b0f7897f34a3733f72c558a25a20c1a50d98a3f9e769",
   "instances/bed-bolt-03-i01/seeds/2/instance_assets/mujoco/scene.xml": "7a75423602284392e4e6aa0510a3ea38643e1352ab95e944305cfc8f3f2407da",
-  "instances/bed-bolt-04-i01/instance.json": "e4c255a46d21c070f79614a60a5d5523c0a987d1a8a9d70f0c590390cfa0729d",
+  "instances/bed-bolt-04-i01/instance.json": "ab64368b5953e7a7e1ec5f35225720c9a894c8b6d5b053a32ea50e7fbdd73187",
   "instances/bed-bolt-04-i01/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-04-i01/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-04-i01/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -313,9 +313,9 @@
   "instances/bed-bolt-04-i01/instance_assets/mujoco/meshes/key_key_short_tip_wing_m1_4d90c076112a7177.obj": "4d90c076112a71777652f5afddebb99415b849d5ba4c775fd6bb8a4ba08c71e4",
   "instances/bed-bolt-04-i01/instance_assets/mujoco/meshes/key_key_short_tip_wing_m2_4398acb5aeae8776.obj": "4398acb5aeae87761f20cdbfdbc42651feda16afd15c3173b8ecfda7659fcb43",
   "instances/bed-bolt-04-i01/instance_assets/mujoco/meshes/key_key_short_tip_wing_m3_ca13f27153f6fd8d.obj": "ca13f27153f6fd8db3f9c32749c4d867688856efe9e97cc567b3422d85e7be72",
-  "instances/bed-bolt-04-i01/instance_assets/mujoco/scene.json": "1e380caad3a8839585b9bd11e0705dd9c1fa8801a70da4920de72bebf5932fe5",
+  "instances/bed-bolt-04-i01/instance_assets/mujoco/scene.json": "b3e81d9f2a2aaf8b42572a96b6b007b0ab9f5f15f30ceef724e0bc5defcf8802",
   "instances/bed-bolt-04-i01/instance_assets/mujoco/scene.xml": "2fb79afea4e62e32dddc8b782cd25acdcf23216411c729f367beb81ede932921",
-  "instances/bed-bolt-04-i01/seeds/1/instance.json": "841cca17ad7cf9667cdc6397d90c03d2c9a51b24d87ae789ecdbff58d03f6a4e",
+  "instances/bed-bolt-04-i01/seeds/1/instance.json": "44440140b1c98ed6c13ab1de79d284b8904cb71939a13ceaedd8648ca8305296",
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -336,9 +336,9 @@
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_wing_m1_4d90c076112a7177.obj": "4d90c076112a71777652f5afddebb99415b849d5ba4c775fd6bb8a4ba08c71e4",
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_wing_m2_4398acb5aeae8776.obj": "4398acb5aeae87761f20cdbfdbc42651feda16afd15c3173b8ecfda7659fcb43",
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_wing_m3_ca13f27153f6fd8d.obj": "ca13f27153f6fd8db3f9c32749c4d867688856efe9e97cc567b3422d85e7be72",
-  "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/scene.json": "1e380caad3a8839585b9bd11e0705dd9c1fa8801a70da4920de72bebf5932fe5",
+  "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/scene.json": "b3e81d9f2a2aaf8b42572a96b6b007b0ab9f5f15f30ceef724e0bc5defcf8802",
   "instances/bed-bolt-04-i01/seeds/1/instance_assets/mujoco/scene.xml": "2fb79afea4e62e32dddc8b782cd25acdcf23216411c729f367beb81ede932921",
-  "instances/bed-bolt-04-i01/seeds/2/instance.json": "30f3ff260b4c2ebd90bb215368d4a64f8941dec2d7ef85763446bd50b8c9eb39",
+  "instances/bed-bolt-04-i01/seeds/2/instance.json": "79148cd790bc7eac961a143a66280913bf11bd58e53f2181e79edfd0fbb0b2ed",
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -359,9 +359,9 @@
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_wing_m1_4d90c076112a7177.obj": "4d90c076112a71777652f5afddebb99415b849d5ba4c775fd6bb8a4ba08c71e4",
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_wing_m2_4398acb5aeae8776.obj": "4398acb5aeae87761f20cdbfdbc42651feda16afd15c3173b8ecfda7659fcb43",
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_wing_m3_ca13f27153f6fd8d.obj": "ca13f27153f6fd8db3f9c32749c4d867688856efe9e97cc567b3422d85e7be72",
-  "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/scene.json": "1e380caad3a8839585b9bd11e0705dd9c1fa8801a70da4920de72bebf5932fe5",
+  "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/scene.json": "b3e81d9f2a2aaf8b42572a96b6b007b0ab9f5f15f30ceef724e0bc5defcf8802",
   "instances/bed-bolt-04-i01/seeds/2/instance_assets/mujoco/scene.xml": "2fb79afea4e62e32dddc8b782cd25acdcf23216411c729f367beb81ede932921",
-  "instances/bed-bolt-05-i01/instance.json": "71fc6ec13044edf35f24a925c79564b3e3e8c0b3caf98c6c7cdf6e8bdd5959ea",
+  "instances/bed-bolt-05-i01/instance.json": "ba6c95a7bd86d036b435160fc48daace7e66bf7e7b42f190fe55c940cb309a00",
   "instances/bed-bolt-05-i01/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-05-i01/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_7f52dff7f9fea41e.obj": "7f52dff7f9fea41eca23b2b060e11af37dd91440550860954c8065bc11b2a8da",
   "instances/bed-bolt-05-i01/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -373,9 +373,9 @@
   "instances/bed-bolt-05-i01/instance_assets/mujoco/meshes/key_key_ratchet_house_prism32_dfd565c819a0084f.obj": "dfd565c819a0084ff3fba9223573a81f034c424c4a888ca87ef5547803f270b1",
   "instances/bed-bolt-05-i01/instance_assets/mujoco/meshes/key_key_short_m_9c0f05e248e55cf9.obj": "9c0f05e248e55cf9bb07307dc802932266e26b8fafd3a36c8099e5ab831a26e4",
   "instances/bed-bolt-05-i01/instance_assets/mujoco/meshes/key_key_short_tip_m_314062df0008458e.obj": "314062df0008458e2ef65287fe95725072cad45ca1b12e251ca3c0c347424dcc",
-  "instances/bed-bolt-05-i01/instance_assets/mujoco/scene.json": "b72ac7eb3011755c949330c0a2b9621300ee5a3ff4f3f4aad174a4eb85771869",
+  "instances/bed-bolt-05-i01/instance_assets/mujoco/scene.json": "6820f7acb73e3f80536ba6a1ee7277e80b1d858adb2ddda532e222b001fe30db",
   "instances/bed-bolt-05-i01/instance_assets/mujoco/scene.xml": "73851d1815313b50e7a18f9b5a0a5c8c66186f02c35893bf95579c773b112ae1",
-  "instances/bed-bolt-05-i01/seeds/1/instance.json": "6b6ce14ef92bfbe8178de8555e196633bfccb48fb8c1da7f40303ace1483fd1f",
+  "instances/bed-bolt-05-i01/seeds/1/instance.json": "8befc99266a85ea9e25667d0cc84703874e96d6a9a86c7feb0f6e9ad831a842d",
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_7f52dff7f9fea41e.obj": "7f52dff7f9fea41eca23b2b060e11af37dd91440550860954c8065bc11b2a8da",
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -387,9 +387,9 @@
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/meshes/key_key_ratchet_house_prism32_dfd565c819a0084f.obj": "dfd565c819a0084ff3fba9223573a81f034c424c4a888ca87ef5547803f270b1",
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_m_9c0f05e248e55cf9.obj": "9c0f05e248e55cf9bb07307dc802932266e26b8fafd3a36c8099e5ab831a26e4",
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/meshes/key_key_short_tip_m_314062df0008458e.obj": "314062df0008458e2ef65287fe95725072cad45ca1b12e251ca3c0c347424dcc",
-  "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/scene.json": "b72ac7eb3011755c949330c0a2b9621300ee5a3ff4f3f4aad174a4eb85771869",
+  "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/scene.json": "6820f7acb73e3f80536ba6a1ee7277e80b1d858adb2ddda532e222b001fe30db",
   "instances/bed-bolt-05-i01/seeds/1/instance_assets/mujoco/scene.xml": "73851d1815313b50e7a18f9b5a0a5c8c66186f02c35893bf95579c773b112ae1",
-  "instances/bed-bolt-05-i01/seeds/2/instance.json": "433b8035cd3b3a765db53847fe12026662de22f3882b287e7f72bb17bf78f5ca",
+  "instances/bed-bolt-05-i01/seeds/2/instance.json": "7975788db33c76f9095fe7f9687f53c16943dff866c082fc26fabae199aed931",
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_head_prism32_7f52dff7f9fea41e.obj": "7f52dff7f9fea41eca23b2b060e11af37dd91440550860954c8065bc11b2a8da",
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/meshes/bolt_bolt_shank_prism32_b3a3d1d0bf21f453.obj": "b3a3d1d0bf21f45329918c40b3c230c5a4419915f8c53d950207af66efb72330",
@@ -401,7 +401,7 @@
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/meshes/key_key_ratchet_house_prism32_dfd565c819a0084f.obj": "dfd565c819a0084ff3fba9223573a81f034c424c4a888ca87ef5547803f270b1",
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_m_9c0f05e248e55cf9.obj": "9c0f05e248e55cf9bb07307dc802932266e26b8fafd3a36c8099e5ab831a26e4",
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/meshes/key_key_short_tip_m_314062df0008458e.obj": "314062df0008458e2ef65287fe95725072cad45ca1b12e251ca3c0c347424dcc",
-  "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/scene.json": "b72ac7eb3011755c949330c0a2b9621300ee5a3ff4f3f4aad174a4eb85771869",
+  "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/scene.json": "6820f7acb73e3f80536ba6a1ee7277e80b1d858adb2ddda532e222b001fe30db",
   "instances/bed-bolt-05-i01/seeds/2/instance_assets/mujoco/scene.xml": "73851d1815313b50e7a18f9b5a0a5c8c66186f02c35893bf95579c773b112ae1",
   "instances/blanket-flatten-01-i01/instance.json": "71debdd2bfead3df950615c2fd266f1d7ace9478976d81c006acedd60502df83",
   "instances/blanket-flatten-01-i01/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
@@ -445,42 +445,42 @@
   "instances/blanket-flatten-02-i01/seeds/2/instance_assets/mujoco/scene.json": "1ea5ee4437cff0b3db4e59216c0b187ff506739c3197c8751f7e533dd75d217a",
   "instances/blanket-flatten-02-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-02-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "756fe4139ce41981faf19a6e4ba307f8395fad104ad8ed5fba09ae4e01e1432d",
-  "instances/blanket-flatten-03-i01/instance.json": "59ff445ae95f866798263c7ed0138828d33233f4dc251f100164ebabba7b60c6",
+  "instances/blanket-flatten-03-i01/instance.json": "054948302d679fbc47d9c8ffcd2f62164129f3cd2789ca95d9775b576a492519",
   "instances/blanket-flatten-03-i01/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-flatten-03-i01/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
   "instances/blanket-flatten-03-i01/instance_assets/mujoco/cloth_vbd_blanket.npz": "fd0770c30f23208fa7f0bcfbc1ebbc3d2ab6e3e974388b2d870fec9fb378e7fd",
   "instances/blanket-flatten-03-i01/instance_assets/mujoco/scene.json": "8a20c12e0c07090181a609f3e49215a6e7e08aef3129d86c452425c3be30ea57",
   "instances/blanket-flatten-03-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-03-i01/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-flatten-03-i01/seeds/1/instance.json": "60d55c3db45cc60dce32cfe34a868f69a681d5b1f0404a47f1e1204cb49b1abf",
+  "instances/blanket-flatten-03-i01/seeds/1/instance.json": "7cea98c94c422c07cb84ba870531048b3ec23f8ea3dc4e5bf046c0271b4ac040",
   "instances/blanket-flatten-03-i01/seeds/1/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-flatten-03-i01/seeds/1/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
   "instances/blanket-flatten-03-i01/seeds/1/instance_assets/mujoco/cloth_vbd_blanket.npz": "fd0770c30f23208fa7f0bcfbc1ebbc3d2ab6e3e974388b2d870fec9fb378e7fd",
   "instances/blanket-flatten-03-i01/seeds/1/instance_assets/mujoco/scene.json": "8a20c12e0c07090181a609f3e49215a6e7e08aef3129d86c452425c3be30ea57",
   "instances/blanket-flatten-03-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-03-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-flatten-03-i01/seeds/2/instance.json": "200a7517d3c533fadd2d70e987e2ce41e269ddc78824bcf92f80790e0e737133",
+  "instances/blanket-flatten-03-i01/seeds/2/instance.json": "b41a1fd4c80cceca40b02f84485a2b1fc751b9875f6b50f892e7eb031e71de14",
   "instances/blanket-flatten-03-i01/seeds/2/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-flatten-03-i01/seeds/2/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
   "instances/blanket-flatten-03-i01/seeds/2/instance_assets/mujoco/cloth_vbd_blanket.npz": "fd0770c30f23208fa7f0bcfbc1ebbc3d2ab6e3e974388b2d870fec9fb378e7fd",
   "instances/blanket-flatten-03-i01/seeds/2/instance_assets/mujoco/scene.json": "8a20c12e0c07090181a609f3e49215a6e7e08aef3129d86c452425c3be30ea57",
   "instances/blanket-flatten-03-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-03-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-flatten-04-i01/instance.json": "79011226f8c135a443fb85e5d1f0a0d4b6cd90961264233743170dd3669a268b",
+  "instances/blanket-flatten-04-i01/instance.json": "10f42d7e8d872b9eaa18717418f96100183e0c9b624565d99577f000e0c771f9",
   "instances/blanket-flatten-04-i01/instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
   "instances/blanket-flatten-04-i01/instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
   "instances/blanket-flatten-04-i01/instance_assets/mujoco/cloth_vbd_blanket.npz": "e071fdb6acd51045c993ab91b887d74af048aafb4527a652cad91c1388cabb70",
   "instances/blanket-flatten-04-i01/instance_assets/mujoco/scene.json": "fb0c5e753a1e180673e76d61780f231d29a77deab93688a78ca9e5f8167f07ce",
   "instances/blanket-flatten-04-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-04-i01/instance_assets/mujoco_birth/settled_birth.json": "cd3b6d602365f5e95e3fe30ce242fcdaa1471de14f9ec99159a7b1da8238ac0e",
-  "instances/blanket-flatten-04-i01/seeds/1/instance.json": "541408250f405269986b932e75c6deea8fad69139a037111a18cb862e606c4f3",
+  "instances/blanket-flatten-04-i01/seeds/1/instance.json": "72fbf920381f97cd5afe304478780dd1444c8e174e8f340805d5b2566908f62d",
   "instances/blanket-flatten-04-i01/seeds/1/instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
   "instances/blanket-flatten-04-i01/seeds/1/instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
   "instances/blanket-flatten-04-i01/seeds/1/instance_assets/mujoco/cloth_vbd_blanket.npz": "e071fdb6acd51045c993ab91b887d74af048aafb4527a652cad91c1388cabb70",
   "instances/blanket-flatten-04-i01/seeds/1/instance_assets/mujoco/scene.json": "fb0c5e753a1e180673e76d61780f231d29a77deab93688a78ca9e5f8167f07ce",
   "instances/blanket-flatten-04-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-04-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "cd3b6d602365f5e95e3fe30ce242fcdaa1471de14f9ec99159a7b1da8238ac0e",
-  "instances/blanket-flatten-04-i01/seeds/2/instance.json": "bd2832268b9b7b23430ecbee67d023207bab0f25225033e6c98c807f98bc2a2b",
+  "instances/blanket-flatten-04-i01/seeds/2/instance.json": "570e632c896876a02820b3a55d78edc15bc9e3b2d3453fdd3bf90073b8a56ad8",
   "instances/blanket-flatten-04-i01/seeds/2/instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
   "instances/blanket-flatten-04-i01/seeds/2/instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
   "instances/blanket-flatten-04-i01/seeds/2/instance_assets/mujoco/cloth_vbd_blanket.npz": "e071fdb6acd51045c993ab91b887d74af048aafb4527a652cad91c1388cabb70",
@@ -508,63 +508,63 @@
   "instances/blanket-flatten-05-i01/seeds/2/instance_assets/mujoco/scene.json": "51e9be7fd7c9efbbd67e177d86c5f1bccfe8a10598bacf526afe409fc3cc295a",
   "instances/blanket-flatten-05-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-05-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "98c5b89af0f6c8d8c84acc7c44a3e886b88b1640f01a014e4865184e15bb3735",
-  "instances/blanket-flatten-06-i01/instance.json": "7b8aa354ef2c6298fddf1d82b9c4bf2dc021f089cce894135595c82f6ab327bc",
+  "instances/blanket-flatten-06-i01/instance.json": "3842686bdcb9221cca20b6761717ba27f2f2dd32e577f3ad39268ec76883c92c",
   "instances/blanket-flatten-06-i01/instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
   "instances/blanket-flatten-06-i01/instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
   "instances/blanket-flatten-06-i01/instance_assets/mujoco/cloth_vbd_blanket.npz": "92b35ed0a4b822dfe6e8a882193f0cace01769478abd314f245a265944378d12",
   "instances/blanket-flatten-06-i01/instance_assets/mujoco/scene.json": "3d87e2396227936c59252617c887d717f2f96d35810043c6ccd9371142972569",
   "instances/blanket-flatten-06-i01/instance_assets/mujoco/scene.xml": "dd9376a606a5bd4ce760ef1c559c0a7ccfec9dc790e1def0b319c377d9fa19ae",
   "instances/blanket-flatten-06-i01/instance_assets/mujoco_birth/settled_birth.json": "1d47043c313b115cdc20a5c6cd97230688e65082d1519d5a7ba407a0a5f73c99",
-  "instances/blanket-flatten-06-i01/seeds/1/instance.json": "17cdd6e0f4288553ac6d9d7e1c3853b848e5c7b229e0f8ae898caef7c9d9f77e",
+  "instances/blanket-flatten-06-i01/seeds/1/instance.json": "d2d4a5f042902e53d44dbea1e7da2168e1db56d5f45962d72680eb265ba3e51f",
   "instances/blanket-flatten-06-i01/seeds/1/instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
   "instances/blanket-flatten-06-i01/seeds/1/instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
   "instances/blanket-flatten-06-i01/seeds/1/instance_assets/mujoco/cloth_vbd_blanket.npz": "92b35ed0a4b822dfe6e8a882193f0cace01769478abd314f245a265944378d12",
   "instances/blanket-flatten-06-i01/seeds/1/instance_assets/mujoco/scene.json": "3d87e2396227936c59252617c887d717f2f96d35810043c6ccd9371142972569",
   "instances/blanket-flatten-06-i01/seeds/1/instance_assets/mujoco/scene.xml": "dd9376a606a5bd4ce760ef1c559c0a7ccfec9dc790e1def0b319c377d9fa19ae",
   "instances/blanket-flatten-06-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "1d47043c313b115cdc20a5c6cd97230688e65082d1519d5a7ba407a0a5f73c99",
-  "instances/blanket-flatten-06-i01/seeds/2/instance.json": "25528bb21e6cfe94f502710d633bbf561d4bbd8905da3f61941a816393a7502f",
+  "instances/blanket-flatten-06-i01/seeds/2/instance.json": "e98ca5a4ef2f14443fd215972828a679fb6e617747ec70b2a632046e152a16b2",
   "instances/blanket-flatten-06-i01/seeds/2/instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
   "instances/blanket-flatten-06-i01/seeds/2/instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
   "instances/blanket-flatten-06-i01/seeds/2/instance_assets/mujoco/cloth_vbd_blanket.npz": "92b35ed0a4b822dfe6e8a882193f0cace01769478abd314f245a265944378d12",
   "instances/blanket-flatten-06-i01/seeds/2/instance_assets/mujoco/scene.json": "3d87e2396227936c59252617c887d717f2f96d35810043c6ccd9371142972569",
   "instances/blanket-flatten-06-i01/seeds/2/instance_assets/mujoco/scene.xml": "dd9376a606a5bd4ce760ef1c559c0a7ccfec9dc790e1def0b319c377d9fa19ae",
   "instances/blanket-flatten-06-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "1d47043c313b115cdc20a5c6cd97230688e65082d1519d5a7ba407a0a5f73c99",
-  "instances/blanket-flatten-07-i01/instance.json": "fb9d3e022da4c9a44b1968517b23335e22162eb3ae8dd15b7f16ce8f64a0f65f",
+  "instances/blanket-flatten-07-i01/instance.json": "038b491dffa29779fad1cb22590799fe586d57ce8ceb3370001a79e56942058a",
   "instances/blanket-flatten-07-i01/instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
   "instances/blanket-flatten-07-i01/instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
   "instances/blanket-flatten-07-i01/instance_assets/mujoco/cloth_vbd_blanket.npz": "09cd3c1c650ce0fc616cabe131c4cd9a0dea80ba401d66c03917c985923e17bc",
   "instances/blanket-flatten-07-i01/instance_assets/mujoco/scene.json": "f1400f8d7987cce85d8e4b1fa6b4f1d5ac5d0c93301fd9d9bf3185c45602c274",
   "instances/blanket-flatten-07-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-07-i01/instance_assets/mujoco_birth/settled_birth.json": "ee58a27f9bb6bcc96a5b1472faaf7d835c2a930655cebd5e1bfcdff15427fe87",
-  "instances/blanket-flatten-07-i01/seeds/1/instance.json": "51442f622adb7b78fee474b5cb693b570569a79262a3c03454a51a0ab0a1b1c2",
+  "instances/blanket-flatten-07-i01/seeds/1/instance.json": "937e3d3f85a3d1c00af4a0b6d0e9c6c606f8921adb9e893424e40643e91ff435",
   "instances/blanket-flatten-07-i01/seeds/1/instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
   "instances/blanket-flatten-07-i01/seeds/1/instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
   "instances/blanket-flatten-07-i01/seeds/1/instance_assets/mujoco/cloth_vbd_blanket.npz": "09cd3c1c650ce0fc616cabe131c4cd9a0dea80ba401d66c03917c985923e17bc",
   "instances/blanket-flatten-07-i01/seeds/1/instance_assets/mujoco/scene.json": "f1400f8d7987cce85d8e4b1fa6b4f1d5ac5d0c93301fd9d9bf3185c45602c274",
   "instances/blanket-flatten-07-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-07-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "ee58a27f9bb6bcc96a5b1472faaf7d835c2a930655cebd5e1bfcdff15427fe87",
-  "instances/blanket-flatten-07-i01/seeds/2/instance.json": "c742c33ab57ae3076af3ee64b5ecaff5f6058ae85e8cee9c493714272adc0f73",
+  "instances/blanket-flatten-07-i01/seeds/2/instance.json": "641900efedf97b6fd0a341e70ee0f15cf674326caf5a549ff76f33cef35016d5",
   "instances/blanket-flatten-07-i01/seeds/2/instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
   "instances/blanket-flatten-07-i01/seeds/2/instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",
   "instances/blanket-flatten-07-i01/seeds/2/instance_assets/mujoco/cloth_vbd_blanket.npz": "09cd3c1c650ce0fc616cabe131c4cd9a0dea80ba401d66c03917c985923e17bc",
   "instances/blanket-flatten-07-i01/seeds/2/instance_assets/mujoco/scene.json": "f1400f8d7987cce85d8e4b1fa6b4f1d5ac5d0c93301fd9d9bf3185c45602c274",
   "instances/blanket-flatten-07-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-07-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "ee58a27f9bb6bcc96a5b1472faaf7d835c2a930655cebd5e1bfcdff15427fe87",
-  "instances/blanket-flatten-08-i01/instance.json": "157aeafc085987aaf18418d22f0389ffb4c60bf32b401f9ff9aedccba6568061",
+  "instances/blanket-flatten-08-i01/instance.json": "230010c865c77fbfe28fa09305f046923e1bc061f4e3ffeb0e60dc0e22af304f",
   "instances/blanket-flatten-08-i01/instance_assets/initial_state/arrays.npz": "f4238c7d0712ddba243cc27dabe75ccec63c76583aeb06d05d46af6a47bd2c4a",
   "instances/blanket-flatten-08-i01/instance_assets/initial_state/manifest.json": "0c65613086a9c0501a6de3b1a1f78ce1724fefb208bacece62050948c2472172",
   "instances/blanket-flatten-08-i01/instance_assets/mujoco/cloth_vbd_blanket.npz": "831b8a98f01ec7e45b7c10df8a695e6bb10034111754756914f533e0462331d3",
   "instances/blanket-flatten-08-i01/instance_assets/mujoco/scene.json": "d17d8e381697f9b6d73cdffd1b59065158f6663a2004214378fd7d20e832534d",
   "instances/blanket-flatten-08-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-08-i01/instance_assets/mujoco_birth/settled_birth.json": "29446c1cb632a35402c2e13ddf7dbafd1f633ff777ef906eac91be3c2a30589a",
-  "instances/blanket-flatten-08-i01/seeds/1/instance.json": "2b2eb3ab66d277a4c38124895059509b6255ed71c12f237d151d60053d81a6f2",
+  "instances/blanket-flatten-08-i01/seeds/1/instance.json": "4be616b3d06299e0cf817f28b077f0400d145cd86357bd0b2b48f22bfe00e105",
   "instances/blanket-flatten-08-i01/seeds/1/instance_assets/initial_state/arrays.npz": "f4238c7d0712ddba243cc27dabe75ccec63c76583aeb06d05d46af6a47bd2c4a",
   "instances/blanket-flatten-08-i01/seeds/1/instance_assets/initial_state/manifest.json": "0c65613086a9c0501a6de3b1a1f78ce1724fefb208bacece62050948c2472172",
   "instances/blanket-flatten-08-i01/seeds/1/instance_assets/mujoco/cloth_vbd_blanket.npz": "831b8a98f01ec7e45b7c10df8a695e6bb10034111754756914f533e0462331d3",
   "instances/blanket-flatten-08-i01/seeds/1/instance_assets/mujoco/scene.json": "d17d8e381697f9b6d73cdffd1b59065158f6663a2004214378fd7d20e832534d",
   "instances/blanket-flatten-08-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-08-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "29446c1cb632a35402c2e13ddf7dbafd1f633ff777ef906eac91be3c2a30589a",
-  "instances/blanket-flatten-08-i01/seeds/2/instance.json": "34c2ef69eaf35568292e7c603bc1780fe158a92266aa5c48674e14e114449b0d",
+  "instances/blanket-flatten-08-i01/seeds/2/instance.json": "ebbf358ed5ce485e69cc370c0f6821ded951a98965968985581b21cbda7a5dc0",
   "instances/blanket-flatten-08-i01/seeds/2/instance_assets/initial_state/arrays.npz": "f4238c7d0712ddba243cc27dabe75ccec63c76583aeb06d05d46af6a47bd2c4a",
   "instances/blanket-flatten-08-i01/seeds/2/instance_assets/initial_state/manifest.json": "0c65613086a9c0501a6de3b1a1f78ce1724fefb208bacece62050948c2472172",
   "instances/blanket-flatten-08-i01/seeds/2/instance_assets/mujoco/cloth_vbd_blanket.npz": "831b8a98f01ec7e45b7c10df8a695e6bb10034111754756914f533e0462331d3",
@@ -592,7 +592,7 @@
   "instances/blanket-flatten-09-i01/seeds/2/instance_assets/mujoco/scene.json": "0575581abd3021852636920a0d7a9648b1650e9659502f1fa4a0a92e0116955a",
   "instances/blanket-flatten-09-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-flatten-09-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "cc3818be304469560e95c09c5f86c91b072cce301f4293c56b27b4ee2f2b3bb2",
-  "instances/blanket-fold-01-i01/instance.json": "bf01fab351ca3606f4e90ff9f55e6bde22de33f5e6b8cec298812a59442247d6",
+  "instances/blanket-fold-01-i01/instance.json": "29dedd832ee6166d5269e183f876cd4f796362e269a77a751679da118594a20b",
   "instances/blanket-fold-01-i01/instance_assets/fold_target/blanket_fold_very_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
   "instances/blanket-fold-01-i01/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-01-i01/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -600,7 +600,7 @@
   "instances/blanket-fold-01-i01/instance_assets/mujoco/scene.json": "efe48edf06aa88123b08af9ec19de331bff8fc405038c7584327deb166bd4f5d",
   "instances/blanket-fold-01-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-01-i01/instance_assets/mujoco_birth/settled_birth.json": "fe74b6ccc74a2864e6bd7090071c48c98462f004ccb5b3e9952ee35161add4d4",
-  "instances/blanket-fold-01-i01/seeds/1/instance.json": "15923e1a4b7dfa9aea690275a68e7aebe79d06b329c9c1a7e6fc685cd94d221e",
+  "instances/blanket-fold-01-i01/seeds/1/instance.json": "b4b7a80e9303f8fdced7b81aef6001685071548b09fe6c59568eaeeaf78c0a76",
   "instances/blanket-fold-01-i01/seeds/1/instance_assets/fold_target/blanket_fold_very_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
   "instances/blanket-fold-01-i01/seeds/1/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-01-i01/seeds/1/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -608,7 +608,7 @@
   "instances/blanket-fold-01-i01/seeds/1/instance_assets/mujoco/scene.json": "efe48edf06aa88123b08af9ec19de331bff8fc405038c7584327deb166bd4f5d",
   "instances/blanket-fold-01-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-01-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "fe74b6ccc74a2864e6bd7090071c48c98462f004ccb5b3e9952ee35161add4d4",
-  "instances/blanket-fold-01-i01/seeds/2/instance.json": "30ef3a207d28e87f76582471ce6adb232f3282b09ddd8f77a1242cb532de54b8",
+  "instances/blanket-fold-01-i01/seeds/2/instance.json": "476e11d23b3afc616574946b8d2194a510d0968afeecfee24ffbf3a257f5b879",
   "instances/blanket-fold-01-i01/seeds/2/instance_assets/fold_target/blanket_fold_very_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
   "instances/blanket-fold-01-i01/seeds/2/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-01-i01/seeds/2/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -616,7 +616,7 @@
   "instances/blanket-fold-01-i01/seeds/2/instance_assets/mujoco/scene.json": "efe48edf06aa88123b08af9ec19de331bff8fc405038c7584327deb166bd4f5d",
   "instances/blanket-fold-01-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-01-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "fe74b6ccc74a2864e6bd7090071c48c98462f004ccb5b3e9952ee35161add4d4",
-  "instances/blanket-fold-02-i01/instance.json": "21efc76a18abdc6d930a27ec49554dcc1723eb8d33a9b0a4db8c7ee1cf2c4064",
+  "instances/blanket-fold-02-i01/instance.json": "c178171749ab83dd1cc6d9aaf5266e275f4dc723621ea5cdf65cbb360bd937dc",
   "instances/blanket-fold-02-i01/instance_assets/fold_target/blanket_fold_easier_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-02-i01/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-02-i01/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -624,7 +624,7 @@
   "instances/blanket-fold-02-i01/instance_assets/mujoco/scene.json": "8b378113d94cffdfefe9254bedb10b2fbbaeefab35423bbffc3dbdf1cb646e08",
   "instances/blanket-fold-02-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-02-i01/instance_assets/mujoco_birth/settled_birth.json": "98c7de05528ae1b9b4b2ee2c3d77b6bccc2a5dd541bfb923f1eb9ea0ca81233c",
-  "instances/blanket-fold-02-i01/seeds/1/instance.json": "05bc842592668fea97dc478b2dbaf518e533e626a38ca567951e01d621fd2083",
+  "instances/blanket-fold-02-i01/seeds/1/instance.json": "e7ff7463ad75298ca829c2b74e0a1f76807afc5c6dd897ffa31686ee95a19e75",
   "instances/blanket-fold-02-i01/seeds/1/instance_assets/fold_target/blanket_fold_easier_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-02-i01/seeds/1/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-02-i01/seeds/1/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -632,7 +632,7 @@
   "instances/blanket-fold-02-i01/seeds/1/instance_assets/mujoco/scene.json": "8b378113d94cffdfefe9254bedb10b2fbbaeefab35423bbffc3dbdf1cb646e08",
   "instances/blanket-fold-02-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-02-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "98c7de05528ae1b9b4b2ee2c3d77b6bccc2a5dd541bfb923f1eb9ea0ca81233c",
-  "instances/blanket-fold-02-i01/seeds/2/instance.json": "b677fed47666d86049fbf882a1de6773d8b8eedb66c268303ff78309ba1d5843",
+  "instances/blanket-fold-02-i01/seeds/2/instance.json": "73cdca53b87b249a52cce03189baec80ed51f94e22290296120fafa0eb3f52d7",
   "instances/blanket-fold-02-i01/seeds/2/instance_assets/fold_target/blanket_fold_easier_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-02-i01/seeds/2/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-02-i01/seeds/2/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -640,7 +640,7 @@
   "instances/blanket-fold-02-i01/seeds/2/instance_assets/mujoco/scene.json": "8b378113d94cffdfefe9254bedb10b2fbbaeefab35423bbffc3dbdf1cb646e08",
   "instances/blanket-fold-02-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-02-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "98c7de05528ae1b9b4b2ee2c3d77b6bccc2a5dd541bfb923f1eb9ea0ca81233c",
-  "instances/blanket-fold-03-i01/instance.json": "991c48a5bef0fd9a321d93ae948d309e477d82c8aeddc4094e2aa571eabe55c7",
+  "instances/blanket-fold-03-i01/instance.json": "b51e828d76bd52a41263546cd87a62289bbc8fa7018b50b01fa8bfe4bd2d9a62",
   "instances/blanket-fold-03-i01/instance_assets/fold_target/blanket_fold_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
   "instances/blanket-fold-03-i01/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-03-i01/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -648,7 +648,7 @@
   "instances/blanket-fold-03-i01/instance_assets/mujoco/scene.json": "b0678c95aeb3db383a286ceb58f418ab00307fd412a1a98385f21f7255216000",
   "instances/blanket-fold-03-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-03-i01/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-fold-03-i01/seeds/1/instance.json": "7a6164d3f1f8f310a876f7dee654f84281dbf907e341453d7f60215faf77739c",
+  "instances/blanket-fold-03-i01/seeds/1/instance.json": "b8400c658e26ed359394a27ad6621c388a313aeb61152a8b743602ad9821d460",
   "instances/blanket-fold-03-i01/seeds/1/instance_assets/fold_target/blanket_fold_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
   "instances/blanket-fold-03-i01/seeds/1/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-03-i01/seeds/1/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -656,7 +656,7 @@
   "instances/blanket-fold-03-i01/seeds/1/instance_assets/mujoco/scene.json": "b0678c95aeb3db383a286ceb58f418ab00307fd412a1a98385f21f7255216000",
   "instances/blanket-fold-03-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-03-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-fold-03-i01/seeds/2/instance.json": "34f5b7cac1eefdd7decca5efa794a46d33935c366cdce47a64c51301e31c48b8",
+  "instances/blanket-fold-03-i01/seeds/2/instance.json": "27ba55676d7462b54db43b9d966ab8d81e118bbed6986156a77d0a0ddce1ba3c",
   "instances/blanket-fold-03-i01/seeds/2/instance_assets/fold_target/blanket_fold_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
   "instances/blanket-fold-03-i01/seeds/2/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-03-i01/seeds/2/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -664,7 +664,7 @@
   "instances/blanket-fold-03-i01/seeds/2/instance_assets/mujoco/scene.json": "b0678c95aeb3db383a286ceb58f418ab00307fd412a1a98385f21f7255216000",
   "instances/blanket-fold-03-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-03-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-fold-04-i01/instance.json": "69023fd6e599a3c80352fabd5d7600ee8f54ec0baa8a75669548b6ba45f6a4bb",
+  "instances/blanket-fold-04-i01/instance.json": "0664604ac8f93ed423f003160a1d473990faa3a92cd3baf273cd36c7cca9e2fc",
   "instances/blanket-fold-04-i01/instance_assets/fold_target/blanket_fold_medium_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-04-i01/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-04-i01/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -672,7 +672,7 @@
   "instances/blanket-fold-04-i01/instance_assets/mujoco/scene.json": "b0678c95aeb3db383a286ceb58f418ab00307fd412a1a98385f21f7255216000",
   "instances/blanket-fold-04-i01/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-04-i01/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-fold-04-i01/seeds/1/instance.json": "02b323c71107ec70ced48d5060c3ea0c71790a4bbbadb0029aec730e42dccec2",
+  "instances/blanket-fold-04-i01/seeds/1/instance.json": "cdb70a5f8c486355c98ee17e73fc29c8962ad04dc7c1ee5006d8b7ba471289b3",
   "instances/blanket-fold-04-i01/seeds/1/instance_assets/fold_target/blanket_fold_medium_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-04-i01/seeds/1/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-04-i01/seeds/1/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -680,7 +680,7 @@
   "instances/blanket-fold-04-i01/seeds/1/instance_assets/mujoco/scene.json": "b0678c95aeb3db383a286ceb58f418ab00307fd412a1a98385f21f7255216000",
   "instances/blanket-fold-04-i01/seeds/1/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-04-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-fold-04-i01/seeds/2/instance.json": "d7522c23ae099c0111cebb86b23135ca86939e73edf9e3624cbe0ba6bce60f6a",
+  "instances/blanket-fold-04-i01/seeds/2/instance.json": "9f40a56df6833a387b0ba2a743801ad6104cb95137182b1eff5d1716437c3f3a",
   "instances/blanket-fold-04-i01/seeds/2/instance_assets/fold_target/blanket_fold_medium_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-04-i01/seeds/2/instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
   "instances/blanket-fold-04-i01/seeds/2/instance_assets/initial_state/manifest.json": "1a45b373aa43cd57b33f4d4f8a7012cd2c85c55586705799fcc3f2d92a0b9bbd",
@@ -688,7 +688,7 @@
   "instances/blanket-fold-04-i01/seeds/2/instance_assets/mujoco/scene.json": "b0678c95aeb3db383a286ceb58f418ab00307fd412a1a98385f21f7255216000",
   "instances/blanket-fold-04-i01/seeds/2/instance_assets/mujoco/scene.xml": "0a2523507c864ca815d5874e1def84cf98e3a841cc107f5f0cfd0c70be60d9cc",
   "instances/blanket-fold-04-i01/seeds/2/instance_assets/mujoco_birth/settled_birth.json": "7519910ca27ea61287df3d0c8287033be78b886130f2d141454ef361dfbc60ce",
-  "instances/blanket-fold-05-i01/instance.json": "079e1b7d5c24f56b5692dd3bd7bc0383d4eac3d62179c288d310d9be859e8c7a",
+  "instances/blanket-fold-05-i01/instance.json": "e14ce60a01aba7c402614c6a26b8d9685a526dd4fda7e18f890485639e4818aa",
   "instances/blanket-fold-05-i01/instance_assets/fold_target/blanket_fold_hard_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-05-i01/instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
   "instances/blanket-fold-05-i01/instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
@@ -696,7 +696,7 @@
   "instances/blanket-fold-05-i01/instance_assets/mujoco/scene.json": "4a1bf903ade910445989e930edc68726188bab5edbacc6b8a3a8e75ae6628970",
   "instances/blanket-fold-05-i01/instance_assets/mujoco/scene.xml": "dd9376a606a5bd4ce760ef1c559c0a7ccfec9dc790e1def0b319c377d9fa19ae",
   "instances/blanket-fold-05-i01/instance_assets/mujoco_birth/settled_birth.json": "1d47043c313b115cdc20a5c6cd97230688e65082d1519d5a7ba407a0a5f73c99",
-  "instances/blanket-fold-05-i01/seeds/1/instance.json": "45ec733f80627c788b29d63ea10fd5d488237204cef567e1be9d64ef909c0b2a",
+  "instances/blanket-fold-05-i01/seeds/1/instance.json": "abdb7d46a163abd088b4b4e4564803eab414cceaa80c1b5c85ad7ef6812ac275",
   "instances/blanket-fold-05-i01/seeds/1/instance_assets/fold_target/blanket_fold_hard_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-05-i01/seeds/1/instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
   "instances/blanket-fold-05-i01/seeds/1/instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
@@ -704,7 +704,7 @@
   "instances/blanket-fold-05-i01/seeds/1/instance_assets/mujoco/scene.json": "4a1bf903ade910445989e930edc68726188bab5edbacc6b8a3a8e75ae6628970",
   "instances/blanket-fold-05-i01/seeds/1/instance_assets/mujoco/scene.xml": "dd9376a606a5bd4ce760ef1c559c0a7ccfec9dc790e1def0b319c377d9fa19ae",
   "instances/blanket-fold-05-i01/seeds/1/instance_assets/mujoco_birth/settled_birth.json": "1d47043c313b115cdc20a5c6cd97230688e65082d1519d5a7ba407a0a5f73c99",
-  "instances/blanket-fold-05-i01/seeds/2/instance.json": "580d7cf90d3928d18f35ebfbd821a6d372f05a04b2095c155c89d5cd207d4363",
+  "instances/blanket-fold-05-i01/seeds/2/instance.json": "c01bd5b8c0e2a8aef295d3587c7cc1a15162cd319ba084a2b320cc847e8583ed",
   "instances/blanket-fold-05-i01/seeds/2/instance_assets/fold_target/blanket_fold_hard_target.npz": "c58da861e993ee32181a1d32209b60362c3e398c7874207c6f0f9f759bb9e351",
   "instances/blanket-fold-05-i01/seeds/2/instance_assets/initial_state/arrays.npz": "75662c1f2b5608d550c6d942ddaa8949099cb85aa7bc6811d8595845c90c0d26",
   "instances/blanket-fold-05-i01/seeds/2/instance_assets/initial_state/manifest.json": "ad206d92c9560a880827cffa2ba2a130acabace6bbc0ace8e1afe53b5b4fe35b",
@@ -65226,57 +65226,57 @@
    }
   },
   "bed-bolt-01-i01": {
-   "instance_sha256": "e534167ef7a656d2db70dc7e4fdfaae0f7da6cd96bb376200d4da96b9014d241",
+   "instance_sha256": "7fba33fb4396fbf323c07366db3eb241b2ad45825609449813b629f7d11fc3e4",
    "seeds": {
     "1": {
-     "instance_sha256": "54ff7256913d8904e8b8022d84d8fb1c35688f16cc2cd4c7f920fdff7d1fe945"
+     "instance_sha256": "06951c025a0fc23156fd348a5f6a4ce9e2beffdcc5ac9a676ff406ef83ab6d05"
     },
     "2": {
-     "instance_sha256": "0e63445aea0d08a59bfafd6f82fdd40f6bfb217759d9b2ee6b3ece32caead43b"
+     "instance_sha256": "58efe62fe18564f40ef0f08f3072044dc81f672e0353f4dfbeb92f08c4c3fd3c"
     }
    }
   },
   "bed-bolt-02-i01": {
-   "instance_sha256": "aea2aed11ee8f95854a341e6d590335b0131cf1f46fb5d97d69a7bdc7c4bfc69",
+   "instance_sha256": "5c9cdbee5be9a5e21f830441c019821f2db82774dfb1cb58e4875c84cbdf5ec4",
    "seeds": {
     "1": {
-     "instance_sha256": "8b5cd995cb3d3fcb008e31c4ca194e19f409809744e9804dcb3fc55b6d305d21"
+     "instance_sha256": "785954f0c4e7ed7578f5721e41610738ff45d386fa91f0ee492df86c660d94df"
     },
     "2": {
-     "instance_sha256": "f0bebf97bf4e56bb3f7da4888ed52351cbee23767af2f5fd6de63a4f925e41ae"
+     "instance_sha256": "f4364a743a5c59ba2221bde467ffc573b0b3c3e468156d43f4ed604d96d9b8c6"
     }
    }
   },
   "bed-bolt-03-i01": {
-   "instance_sha256": "26fa9be2642f67dc1ed3885e9fb12b3134b55637af6ee8dc679465e6e72f53e4",
+   "instance_sha256": "994ce3b185d62ba78762a79995286a474a26931cc1ca1a3b23980e9b82465729",
    "seeds": {
     "1": {
-     "instance_sha256": "22f34881362819391c0b84fa6a19046bd0d680ce1c7c89d5e3eb99cafd345e98"
+     "instance_sha256": "50fb5486c391f86e9ebe59b59534d81836b4d2c8f0b470738a271bd231f191d9"
     },
     "2": {
-     "instance_sha256": "a8b2b452f0d7ba5db0f97866eb7d915279c32425ccd1e3f819578e143a6e9dd5"
+     "instance_sha256": "772040a6850058baac06df7b9a889a604110dcee3ec8a710cefbf1dc439c0d1c"
     }
    }
   },
   "bed-bolt-04-i01": {
-   "instance_sha256": "d7c4af1f4fd819dde2ec6e84fd09bc6213ecf34656b0a59c34f7026f0f10845e",
+   "instance_sha256": "e7263addb92bc48eed5b7c1ad694aae50caab5f78c52b49debc9bc57c16e3c6c",
    "seeds": {
     "1": {
-     "instance_sha256": "ef610a7a8e7864053439224cea98964a159c95a9f86f321ca11a53d516e0f913"
+     "instance_sha256": "052a73f41cd069b1ae6f72989dc3ee960c3e009a2b6d6a87b23eff1418390741"
     },
     "2": {
-     "instance_sha256": "fbd4f32a25bed6acd509b5239d6e1e7fca4effd62e12d03a550e118555aa1b85"
+     "instance_sha256": "5e5c8538a06d9fd9e3fb304ea56dca430dcfed3d8542c8b131a9012312310374"
     }
    }
   },
   "bed-bolt-05-i01": {
-   "instance_sha256": "2a4a3713c33bbad9605aa6d33cbe3167c54ae1d45fd1e132b2aab50056797c09",
+   "instance_sha256": "d7e3e85ca519733c02b461b81f40ead2eda4b32f2f6ae57e733bdb11971ce4f1",
    "seeds": {
     "1": {
-     "instance_sha256": "36b1476fe9c86c35ce2523a3adb63db48ad31818777318ba0f90ea5b1be55df3"
+     "instance_sha256": "e617f46410f8e4088f8239cd892f4289e3cb7f6291f24f0a49d7344cb3e2a066"
     },
     "2": {
-     "instance_sha256": "17fc49e7625cc88bc9cf4893094e43e37d3fc779f3a5f322babadb32354b6553"
+     "instance_sha256": "84d58fb16c7c1a853722d2bca8f745b71c5e98ed05284ee2f1bb3eb5f08d5bb1"
     }
    }
   },
@@ -65303,24 +65303,24 @@
    }
   },
   "blanket-flatten-03-i01": {
-   "instance_sha256": "8a0d8fabdb9aae1dcbb0c61666c82c7870c5748678616183006cb49b688d60f3",
+   "instance_sha256": "2adac28b8af10f3d283508dd680cf0a8b1e6c86bd3884e96a4409b5318490da0",
    "seeds": {
     "1": {
-     "instance_sha256": "5dadf6e9dcbf3cfcbea122f9d6d5a5bbd12b73036dd4a0b33f29074e229cbd72"
+     "instance_sha256": "e7a781e29e4372cb88ccf33f9d1547ff839f3324f28b82afde9b2b4af5c5564b"
     },
     "2": {
-     "instance_sha256": "7e826067bc2629b213a2c5bc35fe29a5031c468d8d31feac5b846c41d9fa64b6"
+     "instance_sha256": "769d37e0c1dec967f03da5f78d57fa8f65f95de1308bcc10851e1e2b48835159"
     }
    }
   },
   "blanket-flatten-04-i01": {
-   "instance_sha256": "e81215e7483e23eb20206d87daabb01e985dd61874fcd89d720208f13cec6e13",
+   "instance_sha256": "007688f2b072f90035d75ffa6db467597aa81dc410cc5fa0403993e9f26222c3",
    "seeds": {
     "1": {
-     "instance_sha256": "b4cc009195263d9ed4a5f2edfb39be7157ebbed2dad7ad518c0b1167380da8d7"
+     "instance_sha256": "ae88c25038beae6981cbe3829ae6d3ef7c03a34ce01cfe8c1b330af2623a0d58"
     },
     "2": {
-     "instance_sha256": "74908809ed4a658738d42fa74b0f4141bb4e1f317a1008421af7cee0052eda55"
+     "instance_sha256": "26da430b649bfb7a28f30ca7e1af635a45c8d1b335253ccda1e174dfd1858568"
     }
    }
   },
@@ -65336,35 +65336,35 @@
    }
   },
   "blanket-flatten-06-i01": {
-   "instance_sha256": "7167b0581345e8e1185abac4e1948f8436295f657aa3bdb0ca83d8b27743510b",
+   "instance_sha256": "0d5240fc311a3131adbb3d5c750cf106a92aba22ecb7715875ae1d9e80f63419",
    "seeds": {
     "1": {
-     "instance_sha256": "d58d14af3315334dfaf997e12889fbe5deaff97f49bbb95cd67466ba3d09c1f1"
+     "instance_sha256": "587305c27c631b3400dfe0979120d408305ecb708f7414c63cb1236c700bffa8"
     },
     "2": {
-     "instance_sha256": "28e859a0d028a92fde16b885fc8ecb69d8ac0b79528c51a17ec4db218a2e73ef"
+     "instance_sha256": "6d2b73bef14e5c518147032f0ce30416116a2a9655cd3de1d50f550982fde841"
     }
    }
   },
   "blanket-flatten-07-i01": {
-   "instance_sha256": "26063cd7e761ae6aac5232cc2afbcc698601bc10676f513d02d0a266819069ff",
+   "instance_sha256": "f523f4915e942ecf3c14903f355647b4a1610b25c72e07a0e17b93b540c38eaa",
    "seeds": {
     "1": {
-     "instance_sha256": "bcd8a4e3f153fea9295d8f1c9e192c59e36fe09d3eba6b219f786dbb96ecf152"
+     "instance_sha256": "78fa16f9bab14c16b9de3745c190f921c0fea7d859e6c81e1d2306a531b27117"
     },
     "2": {
-     "instance_sha256": "d3cfb76f5eb6b155d5407096382d21f736e1fc8abd9ef07d42e4cefab9fad106"
+     "instance_sha256": "b7a76ba3fa7cc1e2d0354632a663967a80d878fcde6ae693a24df13ef79a96b5"
     }
    }
   },
   "blanket-flatten-08-i01": {
-   "instance_sha256": "592b163ebf0ed4eaaeb79fcb5f520d31adf633e67c721fd8d22f7839b43a368e",
+   "instance_sha256": "b12f909e9dd817051cc87012f1be3c525ab806847f1ac7ef529e58b0a63447cc",
    "seeds": {
     "1": {
-     "instance_sha256": "19ee8fc4b29a51dfcf19e1be32489aa7f75fdb504672153641390006c9cd11ec"
+     "instance_sha256": "ca51bc53e01c26f00bbba1304b4685db28d6bc423034ec89677179374f8a338e"
     },
     "2": {
-     "instance_sha256": "57b02207495a88800a97eba38231138b97ed1e39d5cb9cc34ec8f0dcaeea61dc"
+     "instance_sha256": "ab604daf2ae8e7f9f50e25e2a6a33c960964ecbf533ee92c48035d2a786703d2"
     }
    }
   },
@@ -65380,17 +65380,17 @@
    }
   },
   "blanket-fold-01-i01": {
-   "instance_sha256": "8a988bf31238aa4e7fd99826505ddb4a3c5de09b7275756feb58727ad933554f",
+   "instance_sha256": "2441caf64c85c69ecb2f4c5350497c371afac599741bf82b6ed122e7fbe54e17",
    "seeds": {
     "1": {
-     "instance_sha256": "c438443e204d57db668aa8e1d27bfbf1116793ff1d3ce793d5cabe837923b397",
+     "instance_sha256": "5d4053b7b58ea729b71d2947b40d6602884b3775b3c7434179a1c3c4c08a30c9",
      "goal": {
       "target_cam_high.png": "883f62e9ec1e82f6da510b5a6f1d1dd1753d5d8ac3df78eaf0bd2510760c3568",
       "target_cam_low.png": "da4e063ac5af20e4c9c3c7a7f157aec26e68986d6fd0079cac65aa18c826b45e"
      }
     },
     "2": {
-     "instance_sha256": "587cadb10e4665bfe6592c6f409159918efb5b4b9d98e45f122d7d79d0b76657",
+     "instance_sha256": "fb8c5e537f1768f46ca185843bc3a148165adb4bc71cb1c9fdc9adf4ad52e16c",
      "goal": {
       "target_cam_high.png": "9df0891773045cb6913a590a800be65d8da64e71671f4fda2133acf096b59b17",
       "target_cam_low.png": "ab3e1f3659107b68b3fcdbbb90737d10c9b2e8197d269ea3c0c4b707fe3f8f66"
@@ -65399,17 +65399,17 @@
    }
   },
   "blanket-fold-02-i01": {
-   "instance_sha256": "1ba119d9db110f665ca6657e69976749eb20840a6fe029b6ed06ffacf84e7624",
+   "instance_sha256": "027f0aed44c92574125de66d1fd12f0ee05cb6ad358ced3c1909d5c108889b0c",
    "seeds": {
     "1": {
-     "instance_sha256": "d8aabbfc9281b8e360787b6b1d987bf55855e7b0ae59d310d620d7ec072edd74",
+     "instance_sha256": "fd9c17d27263f23a5708f5363713cc08ccebfedeae20ab5b38e44a9857da2490",
      "goal": {
       "target_cam_high.png": "6fa80806d0b9a812634a72cb0d4320c1533b4951341b645c9a595c9009b2d64c",
       "target_cam_low.png": "84c575bbead4da372e21b7e2415cf378e718079dd1e27fbf42843b1056c3dc6f"
      }
     },
     "2": {
-     "instance_sha256": "33e1d9cda035b6063130cbd394d9737d8edfd771afc4c8a26823542098c3a229",
+     "instance_sha256": "c569a4ea15725df1988f4ffc5cc0712d57d24b90f7e07b87d73ff6d39be9c950",
      "goal": {
       "target_cam_high.png": "eb1db39611657ea6d654a28d3971ad5291d9f50f2072d67363f860d48f80a895",
       "target_cam_low.png": "27f26e0b2550e86cbc548e92280bda32113faed5c1a0c19a82ba0233ad9b1f61"
@@ -65418,17 +65418,17 @@
    }
   },
   "blanket-fold-03-i01": {
-   "instance_sha256": "0d48f5dca3e27faeb557162bc12c2e9ec763cb168fce59e25d88f706c2dc2be1",
+   "instance_sha256": "ce83aa3e59e28561abcba1dc6a0cdd6898af79ad3ad7b6a05286efe82c7bb493",
    "seeds": {
     "1": {
-     "instance_sha256": "26342346e138db4797328d8badd3ce936a8e664cf345cef108ce49f2ffe6f740",
+     "instance_sha256": "e6d59557a41627ad024c2c03b4f676d681be4c0f907003ace15f7b5df4a3bd8d",
      "goal": {
       "target_cam_high.png": "cd18e2fb3733767248316a2f35cb3dfa177c91336e9e5b0043aba93bf0f7e142",
       "target_cam_low.png": "5919edb80cbfd263151da065d51f0d065ce0864664aed981e6cfd41b040941d0"
      }
     },
     "2": {
-     "instance_sha256": "e75eab3d9febb63b3f3726de05d05b6d6a2af4779c3904b83963db64727c3d6b",
+     "instance_sha256": "860e81a5c608930824928a7458b2716a5fdff580b62dbf3f0a12c74b4d49fefd",
      "goal": {
       "target_cam_high.png": "d6d010be844ec9f79d0385396bd73af26f7e70a419dfd6946bbc91c76755a51e",
       "target_cam_low.png": "9a0a4dd441cd37c637c00a4b358906454f7b9ebc54fad983eefe8fb9facaebdc"
@@ -65437,17 +65437,17 @@
    }
   },
   "blanket-fold-04-i01": {
-   "instance_sha256": "621d81448b12f67b238e049b34a10596b8d5a9b42692cadec8612543f247c22a",
+   "instance_sha256": "4f30cae5e7706c98ea7817d187aa6fb2acaa76af0cb24f0daecf40899053efa8",
    "seeds": {
     "1": {
-     "instance_sha256": "5b7bca15ef5c43f65796ee1ec48cdf9663a14293b2880d274165c362387aed93",
+     "instance_sha256": "bd01daa350f1173e7a3876a37c9d4c94215a85891cd1fe876c6eb459d70e2199",
      "goal": {
       "target_cam_high.png": "292a0d866a69670b9e6412ed70bca519d431086a78d02d4e10639ddc8a361b96",
       "target_cam_low.png": "100e8ee2dee697a500b992db6425466f6ebc65bd5df24e7c23478fe3c157c972"
      }
     },
     "2": {
-     "instance_sha256": "8d4a338c11bf3e62224f3fd40c48121844f6b5bb6c831bc705571d59738a37ab",
+     "instance_sha256": "813bad259da0e31630d05b928a6809ee98d8afbfe877e60355c1611cdaae62a7",
      "goal": {
       "target_cam_high.png": "c13c300446f9f6f01a7663bd24b6f6c9ec15ed6873bdc5780d973f0e4f5a5f8b",
       "target_cam_low.png": "3257587c0b4d74bb00a50ccde0988782e8f0cfd7886fb6385eccb262d02cddca"
@@ -65456,17 +65456,17 @@
    }
   },
   "blanket-fold-05-i01": {
-   "instance_sha256": "b85a2ddaf2a68130b603f4da3fdf4b53c7a3fc972c4037972339878ee6f03f04",
+   "instance_sha256": "1b3a9ac9797816503766a867cf29edb68e2689054dd41e4dd57bfb477cb55de7",
    "seeds": {
     "1": {
-     "instance_sha256": "0fd75d29ad60cb48e9f9f1e880ba0e5145172ccdb5df9351f63c02c7a32a7d98",
+     "instance_sha256": "d349557c6b02166da171a1993f4f8e94564e0e598255bd9b3f0aede92ec0c6da",
      "goal": {
       "target_cam_high.png": "fbbc87d4b952b6fa9cb295aeb8768d889a710d589ced273e0eefa196a294c526",
       "target_cam_low.png": "a24a71e3063f589e4ea91f9e7942e67cd22ea86860a1cfbdde57b35667ed1b92"
      }
     },
     "2": {
-     "instance_sha256": "a7454bb188800f42f5236aed78100efcff4756de353dac2861b13e4db578cd6c",
+     "instance_sha256": "556510b0f0ca413585c2b292d7e16ef6119e098e3014cc3ceec6662e20d0e7fc",
      "goal": {
       "target_cam_high.png": "133bb348292a7888ff5dec80892464f0fce0f8f505bd0464c599d5032004a376",
       "target_cam_low.png": "e02caf661713ada195861c22dac2c871b211edccb9db5fc0a787fd68c1bdcbd6"

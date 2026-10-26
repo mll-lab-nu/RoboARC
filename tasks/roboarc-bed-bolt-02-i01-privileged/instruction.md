@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · bed_bolt — frozen instance
 
 You control a simulated robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**; RoboARC on MuJoCo 3.14.0 physics, Nyx rendering) via Python.
-**Task:** Drive the long bolt into the blind hole in the bed frame's corner block with the L-shaped Torx key (a six-lobe star tip) until its head is within 1.5 mm of the block face.
+**Task:** Drive the long bolt into the blind hole in the bed frame's corner block with the L-shaped Torx key (a six-lobe star tip) until its head is within 1.5 mm of the block face. A white card lying flat on the table between the key's stand and the bolt's cradle shows the bolt's head and its recess, drawn 4.5 times their size.
 
 ## Success requirements
 
