@@ -23,7 +23,7 @@ the privileged task to measure the cost of losing resets, privileged state and t
 Same scene, instance and success rule as `roboarc-blanket-flatten-08-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image roboarc 1.1.0 (2026-10-21; simulator source a7487c51, tooling cae5375e).
+`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py) (2026-10-26; simulator source cf508cee, tooling 412cbe02).
 
 ## Verification
 See `tests/grade.py`.

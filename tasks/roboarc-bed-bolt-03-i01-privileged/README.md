@@ -18,7 +18,7 @@ RoboARC bed_bolt (ALOHA 2, MuJoCo): produce one replayable trajectory. Drive the
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (contact_weld_v1).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `2f4d66f1b1aa9bc3…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py) (2026-10-24; simulator source 4d2cba21, tooling 412cbe02).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `2f4d66f1b1aa9bc3…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py); seed 0 also with rendering on (the replay video) (2026-10-26; simulator source cf508cee, tooling 412cbe02).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
@@ -28,7 +28,7 @@ replay (two passes, no separate video replay). The physics runs on the CPU and i
 A trajectory may have at most 200000 rows (`RCB_MAX_STEPS`: two replays must fit the verifier's timeout; a longer one is
 `bad_trajectory`).
 
-`nop` scored 0 on this base in both modes (the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-24).
+`nop` scored 0 on this base in both modes (the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-26).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.

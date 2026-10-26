@@ -251,3 +251,20 @@ instances are the ones of 1.2.0 and 1.3.0; only the packages' difficulty (`untie
 leave the release by the owner's decision (2026-10-25; the list is in CHANGELOG.md). Their task dirs, packages,
 references and release records are not in this tree; the maintainers keep them on the branch
 `archive/removed-in-2.0.0` (= 1.4.0, `315c10ca`). The records of the 78 remaining bases are unchanged.
+
+## 2.1.0: the bed-bolt drive card, a wire_splicing grader fix, the blanket release check
+
+- Three commits by Jianwen, merged with his authorship and hashes (`e762c138` merges `6c24f636`): a card on the table in
+  the five bed-bolt scenes with the bolt's head and its recess drawn 4.5 times their size (`6c24f636`, visual only: the
+  MuJoCo scene, the births and the references are unchanged), a fix of wire_splicing's coil count on a one-node strand
+  found by his v2.13b stress round (`2b765e6a`; the reference never takes that branch), and the stress round's wall
+  limit following the owner's agent-time exception (`097a3123`).
+- The buzz-wire 06, 07 and 10 texts state their own loop opening (`04c7dd90`; text only).
+- The blanket families' release check leaves out the world-fixed arm bases (`active_parts_clearance_v1`, terminal
+  revision `release_settling_v2_active_parts`), from the failure analysis of blanket-flatten-07. The revision changes the
+  ten blanket instances' identity, not their physics: `tools/release/refresh_instance.py` rebuilt them with their assets
+  byte for byte, and their references are re-stamped.
+- The image `roboarc:2.1.0` is 1.3.0's but for those source files (and `SOURCE.json`, and `.pyc` files whose only
+  difference is their 4-byte source-mtime field) and the fifteen re-made or refreshed instances with their seeds; it
+  still carries the instances of the 33 bases removed in 2.0.0, as 1.3.0 does. The bed-bolt instructions gain one
+  sentence about the card, the blanket texts state the new release rule.

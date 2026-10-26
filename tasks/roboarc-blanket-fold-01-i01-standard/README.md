@@ -23,12 +23,12 @@ the privileged task to measure the cost of losing resets, privileged state and t
 Same scene, instance and success rule as `roboarc-blanket-fold-01-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
 
 ## Reference solution
-`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image eai-roboarc 0.1.0 (2026-10-14; simulator source 37aa7ac0, tooling d8692e15).
+`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py) (2026-10-26; simulator source cf508cee, tooling 412cbe02).
 
 ## Verification
 See `tests/grade.py`.
 
-`nop` scored 0 on this base in both modes (the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-14).
+`nop` scored 0 on this base in both modes (the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-26).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.

@@ -24,6 +24,7 @@ its own pinned copy.
 
 | version | image id | size | built from |
 |---|---|---|---|
+| 2.1.0 | `sha256:c813b33cff3f…` (manifest digest `sha256:ccc3a47a5d9e…`, images/pins.json) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.3.0's libraries and instances byte for byte, the 2.1.0 simulator source (bed_bolt's drive card, wire_splicing's coil-count fix, the blanket release check) with the five re-made bed-bolt instances and the ten refreshed blanket instances, with their seeds |
 | 1.3.0 | `sha256:499d6f69bd81…` (manifest digest `sha256:2bcded002899…`, images/pins.json) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.2.0's libraries and instances byte for byte, the 1.3.0 simulator source and the wire-splicing-01 instance |
 | 1.2.0 | `sha256:b600616bee6c…` (manifest digest `sha256:a8561b770908…`) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.1.0's libraries, the appearance seeds and the new bases' instances |
 | 1.1.0 | `sha256:dadc2d710ad2…` (manifest digest `sha256:85ea90032a55…`, images/pins.json) | 8.7 GB | `source/images/roboarc/Dockerfile` (the Python base image) |
@@ -84,7 +85,7 @@ images/roboarc/build.sh --noinst              # the image without instances (to 
 3. the runtime check below; the tag is removed when the installed runtime differs from `scripts/roboarc/release.json`.
 
 The appearance seeds (`instances/<base>/seeds/<S>/`, from 1.2.0) and the instances of the bases added since 1.2.0 (the
-nine released in 1.4.0, from 1.2.0; wire-splicing-01 from 1.3.0) are pinned in `assets.json` but not yet in the HF dataset (one revision, uploaded with
+nine released in 1.4.0, from 1.2.0; wire-splicing-01 from 1.3.0; bed-bolt 01-05 re-made and the ten blanket bases refreshed in 2.1.0) are pinned in `assets.json` but not yet in the HF dataset (one revision, uploaded with
 the owner's approval): until then build with `--instances <dir>` from the release's instance tree;
 `assets.py check-instances` verifies every pinned file.
 

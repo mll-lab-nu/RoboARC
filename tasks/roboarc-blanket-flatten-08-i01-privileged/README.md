@@ -18,7 +18,7 @@ RoboARC blanket_flatten (ALOHA 2, MuJoCo): produce one replayable trajectory. Un
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (pbd_local_patch_v1).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `f2b8fd196557ef1f…`) to `/app/output/`: the MuJoCo reference (the released route re-recorded on MuJoCo with a held tail), which the verifier scored 1 in two fresh-process replays on the release image roboarc 1.1.0 (2026-10-21; simulator source a7487c51, tooling cae5375e).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `f2b8fd196557ef1f…`) to `/app/output/`: the MuJoCo reference (the released route re-recorded on MuJoCo with a held tail), which the verifier scored 1 in two fresh-process replays on the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py) (2026-10-26; simulator source cf508cee, tooling 412cbe02).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the

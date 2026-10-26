@@ -21,7 +21,7 @@ What the grader checks, in plain words (each task's `instruction.md` states the 
 - **Outline.** After the best rigid top-view fit, the covered area overlaps the target's with an intersection over union of at least 0.85.
 - **Flat and placed.** The folded cloth lies flat on the table (each point within 35 mm of its height in the target fold) and where the target images show it: within 40 mm and 5 degrees. In base 05, cloth resting on the block does not count.
 - **Material.** No point more than 8 mm below the tabletop; no edge stretched beyond 1.15 times its length.
-- **Released and at rest.** All grasps released, the robot withdrawn to at least 5 mm of clearance, every cloth point at most 30 mm/s and at most 3 mm of drift during the confirmation.
+- **Released and at rest.** All grasps released, the robot's moving parts withdrawn to at least 5 mm of clearance (the fixed arm bases are not counted, since 2.1.0), every cloth point at most 30 mm/s and at most 3 mm of drift during the confirmation.
 - All final conditions must hold together, continuously, for 0.5 s of simulated time.
 
 The episode fails if any cloth point falls more than 100 mm below the tabletop. The cloth is simulated on the GPU with a deterministic solver.

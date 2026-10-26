@@ -22,7 +22,7 @@ shared by every family in [docs/benchmarks/roboarc.md](benchmarks/roboarc.md); h
    it on `PYTHONPATH`, or build a derived image:
 
    ```bash
-   docker run --rm -u $(id -u):$(id -g) -v $PWD/.vla-lib:/lib ghcr.io/mll-lab-nu/roboarc:1.3.0 \
+   docker run --rm -u $(id -u):$(id -g) -v $PWD/.vla-lib:/lib ghcr.io/mll-lab-nu/roboarc:2.1.0 \
      python -m pip install --target /lib msgpack==1.1.0 websockets==15.0.1
    ```
 
@@ -37,7 +37,7 @@ shared by every family in [docs/benchmarks/roboarc.md](benchmarks/roboarc.md); h
 ```bash
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) -e HOME=/tmp \
   -v $PWD:/repo:ro -v $PWD/.vla-lib:/vla-lib:ro -v $RESULTS:/results -w /repo \
-  -e PYTHONPATH=/repo:/opt/topogym:/vla-lib ghcr.io/mll-lab-nu/roboarc:1.3.0 \
+  -e PYTHONPATH=/repo:/opt/topogym:/vla-lib ghcr.io/mll-lab-nu/roboarc:2.1.0 \
   python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --policy ws://POLICY_HOST:8000 \
     --seed 0,1,2 --episodes 1 --run-id my-pi05-aloha --out /results
 ```

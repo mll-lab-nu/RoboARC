@@ -138,10 +138,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py); seed 0 also with rendering on (the replay video)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8",
      "end_state": "fa027063506f37b9"
     },
@@ -149,10 +149,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "bd3033a462f5e74cf9f279ad90793fab72c4179e420934285cd1d999e2f775a8",
      "end_state": "fa027063506f37b9"
     }
@@ -164,8 +164,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_crossbar",
@@ -182,13 +182,13 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    },
    "changes": [
@@ -206,10 +206,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py); seed 0 also with rendering on (the replay video)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f",
      "end_state": "9065337a7d7b18f5"
     },
@@ -217,10 +217,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "7b713e5fc76ac84daf08573aa3a9cd7c7bd3d2ff8bed9d5513ced15b0d882d1f",
      "end_state": "9065337a7d7b18f5"
     }
@@ -232,8 +232,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_torx",
@@ -250,13 +250,13 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    },
    "changes": [
@@ -274,10 +274,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py); seed 0 also with rendering on (the replay video)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a",
      "end_state": "478283fbcfd6f603"
     },
@@ -285,10 +285,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "2f4d66f1b1aa9bc36c5b013a530d3e235cc78deb8addcdc8631b8e61aca4225a",
      "end_state": "478283fbcfd6f603"
     }
@@ -300,8 +300,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_square",
@@ -318,13 +318,13 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    },
    "changes": [
@@ -342,10 +342,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py); seed 0 also with rendering on (the replay video)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37",
      "end_state": "496e553fc76d49fb"
     },
@@ -353,10 +353,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "5e2802cc87369837dbc01fbbef826b72d252f29a95b1eea366bd6347dbc86a37",
      "end_state": "496e553fc76d49fb"
     }
@@ -368,8 +368,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_phillips",
@@ -386,13 +386,13 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    },
    "changes": [
@@ -410,10 +410,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py); seed 0 also with rendering on (the replay video)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3",
      "end_state": "9ff4432d309ee102"
     },
@@ -421,10 +421,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
-     "source": "4d2cba21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-24",
+     "date": "2026-10-26",
      "trajectory_sha256": "e51f985a3d0f38710139fe4c976644140418fdf8fa7b77fa3abc11f86881d9a3",
      "end_state": "9ff4432d309ee102"
     }
@@ -436,8 +436,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-24"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "bed_bolt_slotted",
@@ -454,13 +454,13 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    },
    "changes": [
@@ -476,23 +476,25 @@
    "evidence": {
     "privileged": {
      "status": "passed",
-     "image": "an earlier build of this benchmark's image (2026-10-13) that holds the same frozen instance",
-     "date": "2026-10-13",
-     "source": "d601866b",
-     "tooling": "fde662d5",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "date": "2026-10-26",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
      "success": 1,
      "deterministic": 1,
-     "trajectory_sha256": "4470fa3b9a917097ae403f1edbdcdf98ca1c65db13476997752edd2f6fa3a155"
+     "trajectory_sha256": "4470fa3b9a917097ae403f1edbdcdf98ca1c65db13476997752edd2f6fa3a155",
+     "end_state": "ae0de8a7f72980da"
     },
     "standard": {
      "status": "passed",
-     "image": "an earlier build of this benchmark's image (2026-10-13) that holds the same frozen instance",
-     "date": "2026-10-13",
-     "source": "d601866b",
-     "tooling": "fde662d5",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "date": "2026-10-26",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
      "success": 1,
      "deterministic": 1,
-     "trajectory_sha256": "4470fa3b9a917097ae403f1edbdcdf98ca1c65db13476997752edd2f6fa3a155"
+     "trajectory_sha256": "4470fa3b9a917097ae403f1edbdcdf98ca1c65db13476997752edd2f6fa3a155",
+     "end_state": "ae0de8a7f72980da"
     }
    },
    "family": "blanket_flatten",
@@ -502,8 +504,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "easier",
@@ -532,21 +534,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
-     "trajectory_sha256": "67f6f63fef4bd14358f2338bfe503439e0c5fc5b5614580468601c38ea446a26"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "67f6f63fef4bd14358f2338bfe503439e0c5fc5b5614580468601c38ea446a26",
+     "end_state": "16b47d948f2d3bef"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-20",
-     "trajectory_sha256": "67f6f63fef4bd14358f2338bfe503439e0c5fc5b5614580468601c38ea446a26"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "67f6f63fef4bd14358f2338bfe503439e0c5fc5b5614580468601c38ea446a26",
+     "end_state": "16b47d948f2d3bef"
     }
    },
    "family": "blanket_flatten",
@@ -556,8 +560,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "easy",
@@ -591,23 +595,24 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-20",
-     "trajectory_sha256": "8a0b7fc1aed971afc2661f065ca2054350087bcf360421f6db9ba8407d25c9e3"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "8a0b7fc1aed971afc2661f065ca2054350087bcf360421f6db9ba8407d25c9e3",
+     "end_state": "b6cfff8f49230b1e"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
      "trajectory_sha256": "223959971194fe7577bca649b4763242d0277908cd77517e501e35ee230dfc6b",
      "speed_rule": "the released reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 3 rows, and re-timed in place (as a buzz-wire-3d reference was) its episode does not solve the task under the service; the standard reference is the released route re-recorded from the frozen instance by the family's feedback policy with the oracle rate limiter's guard-stop clamp, as blanket-fold-05-i01's reference: 7577 rows, every arm joint step at most 0.039 rad, so the service runs every row as it is (scripts/roboarc/oracles/blanket-flatten-06-i01/standard.npz, meta speed_rule; the privileged reference is unchanged).",
-     "end_state": "f6f8062d4270bdcb"
+     "end_state": "92af7ba8410de53e"
     }
    },
    "family": "blanket_flatten",
@@ -617,8 +622,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "hard",
@@ -657,21 +662,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
-     "trajectory_sha256": "52955a1adb8dcce0ef5e987debf504470b15a393253f6a28c588c633b8b7d9f3"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "52955a1adb8dcce0ef5e987debf504470b15a393253f6a28c588c633b8b7d9f3",
+     "end_state": "f5d0e25af62ae55c"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
-     "trajectory_sha256": "52955a1adb8dcce0ef5e987debf504470b15a393253f6a28c588c633b8b7d9f3"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "52955a1adb8dcce0ef5e987debf504470b15a393253f6a28c588c633b8b7d9f3",
+     "end_state": "f5d0e25af62ae55c"
     }
    },
    "family": "blanket_flatten",
@@ -680,7 +687,9 @@
    "physics_engine": "mujoco",
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
-    "status": "not_run"
+    "status": "not_run",
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "ported_from": "blanket-flatten-easy-i00",
    "grasp_rules": "assisted grasping (pbd_local_patch_v1): closing intent and bilateral finger proximity to a material patch of blanket must persist for 0.03 s, with penetration at most 2 mm and the TCP within 6 cm. The admitted patch follows through a local kinematic PBD attachment; the rest remains deformable. Opening by more than 0.2 % of gripper travel releases it. A hold is lost on excessive opening, material strain, invalid volume or follow error above 10 mm; a lost hand must open before reacquiring. Two hands may hold disjoint material patches of the same object; overlapping patches are rejected. Patch radii, strain limits and the exposed-patch requirement are declared in grasp_assist.targets",
@@ -707,14 +716,14 @@
    ],
    "seeds": {
     "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "harbor": "passed (privileged oracle)",
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "harbor": "passed (privileged oracle)",
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    }
   },
@@ -725,21 +734,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
-     "trajectory_sha256": "f2b8fd196557ef1f8ed3e2e2eaccfab45e29a7d760230d31176b3b70a76ba145"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "f2b8fd196557ef1f8ed3e2e2eaccfab45e29a7d760230d31176b3b70a76ba145",
+     "end_state": "46b88b559f29160e"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
-     "trajectory_sha256": "f2b8fd196557ef1f8ed3e2e2eaccfab45e29a7d760230d31176b3b70a76ba145"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "f2b8fd196557ef1f8ed3e2e2eaccfab45e29a7d760230d31176b3b70a76ba145",
+     "end_state": "46b88b559f29160e"
     }
    },
    "family": "blanket_flatten",
@@ -748,7 +759,9 @@
    "physics_engine": "mujoco",
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
-    "status": "not_run"
+    "status": "not_run",
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "ported_from": "blanket-flatten-medium-i00",
    "grasp_rules": "assisted grasping (pbd_local_patch_v1): closing intent and bilateral finger proximity to a material patch of blanket must persist for 0.03 s, with penetration at most 2 mm and the TCP within 6 cm. The admitted patch follows through a local kinematic PBD attachment; the rest remains deformable. Opening by more than 0.2 % of gripper travel releases it. A hold is lost on excessive opening, material strain, invalid volume or follow error above 10 mm; a lost hand must open before reacquiring. Two hands may hold disjoint material patches of the same object; overlapping patches are rejected. Patch radii, strain limits and the exposed-patch requirement are declared in grasp_assist.targets",
@@ -781,21 +794,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.1.0",
-     "source": "37aa7ac0",
-     "tooling": "d8692e15",
-     "date": "2026-10-14",
-     "trajectory_sha256": "f800c53e641eec044c1094a8cef61fba48aed9ad46fcacb591ccbd3daa7201c8"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "f800c53e641eec044c1094a8cef61fba48aed9ad46fcacb591ccbd3daa7201c8",
+     "end_state": "5a61368b58e62c84"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.1.0",
-     "source": "37aa7ac0",
-     "tooling": "d8692e15",
-     "date": "2026-10-14",
-     "trajectory_sha256": "f800c53e641eec044c1094a8cef61fba48aed9ad46fcacb591ccbd3daa7201c8"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "f800c53e641eec044c1094a8cef61fba48aed9ad46fcacb591ccbd3daa7201c8",
+     "end_state": "5a61368b58e62c84"
     }
    },
    "family": "blanket_fold",
@@ -805,8 +820,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "blanket_fold_very_easy",
@@ -822,14 +837,14 @@
    "released": "2026-10-14",
    "seeds": {
     "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "harbor": "passed (privileged oracle)",
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     },
     "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "harbor": "passed (privileged oracle)",
+     "date": "2026-10-26",
+     "image": "roboarc 2.1.0 (c813b33cff3f)"
     }
    },
    "changes": [
@@ -847,21 +862,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "a release-candidate build of this benchmark's image (2026-10-13) that holds the same frozen instance",
-     "source": "7d0e5039",
-     "tooling": "646f914f",
-     "date": "2026-10-13",
-     "trajectory_sha256": "bb1714b8f8996e5b00423c84464346be1a93971f61a3241044ee1bcbf6de0d3f"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "bb1714b8f8996e5b00423c84464346be1a93971f61a3241044ee1bcbf6de0d3f",
+     "end_state": "47a95e63cdafb7d6"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image roboarc 1.1.0",
-     "source": "a7487c51",
-     "tooling": "cae5375e",
-     "date": "2026-10-21",
-     "trajectory_sha256": "bb1714b8f8996e5b00423c84464346be1a93971f61a3241044ee1bcbf6de0d3f"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "bb1714b8f8996e5b00423c84464346be1a93971f61a3241044ee1bcbf6de0d3f",
+     "end_state": "47a95e63cdafb7d6"
     }
    },
    "family": "blanket_fold",
@@ -871,8 +888,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "blanket_fold_easier",
@@ -906,21 +923,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.1.0",
-     "source": "37aa7ac0",
-     "tooling": "d8692e15",
-     "date": "2026-10-14",
-     "trajectory_sha256": "e5a60d8b59c3123ebba5f239cd3ab345d1e0470ed085d4f32ef3feaab323c874"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "e5a60d8b59c3123ebba5f239cd3ab345d1e0470ed085d4f32ef3feaab323c874",
+     "end_state": "badb9e92906fca94"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.1.0",
-     "source": "37aa7ac0",
-     "tooling": "d8692e15",
-     "date": "2026-10-14",
-     "trajectory_sha256": "e5a60d8b59c3123ebba5f239cd3ab345d1e0470ed085d4f32ef3feaab323c874"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "e5a60d8b59c3123ebba5f239cd3ab345d1e0470ed085d4f32ef3feaab323c874",
+     "end_state": "badb9e92906fca94"
     }
    },
    "family": "blanket_fold",
@@ -930,8 +949,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "blanket_fold_easy",
@@ -960,21 +979,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.1.0",
-     "source": "37aa7ac0",
-     "tooling": "d8692e15",
-     "date": "2026-10-14",
-     "trajectory_sha256": "7a4f4bfb6d9203373c33ef920f8cff5cea379cd57894ffbb61dfb25fd39ac977"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "7a4f4bfb6d9203373c33ef920f8cff5cea379cd57894ffbb61dfb25fd39ac977",
+     "end_state": "82667da9b88d06f0"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.1.0",
-     "source": "37aa7ac0",
-     "tooling": "d8692e15",
-     "date": "2026-10-14",
-     "trajectory_sha256": "7a4f4bfb6d9203373c33ef920f8cff5cea379cd57894ffbb61dfb25fd39ac977"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "7a4f4bfb6d9203373c33ef920f8cff5cea379cd57894ffbb61dfb25fd39ac977",
+     "end_state": "82667da9b88d06f0"
     }
    },
    "family": "blanket_fold",
@@ -984,8 +1005,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "blanket_fold_medium",
@@ -1014,21 +1035,23 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.2.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.1 differs only by the EPA-patched libmujoco.so; every reference reaches its recorded end state on it)",
-     "source": "c9171f79",
-     "tooling": "d8692e15",
-     "date": "2026-10-18",
-     "trajectory_sha256": "70f24c5d76898d1c1f9b1d04b2442bdb27038b7783d9df2004272a91ee916a6e"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "70f24c5d76898d1c1f9b1d04b2442bdb27038b7783d9df2004272a91ee916a6e",
+     "end_state": "85283f67e0c8d0dc"
     },
     "standard": {
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "image": "the release image eai-roboarc 0.2.0, which holds the same frozen instance and reference rows (eai-roboarc 0.2.1 differs only by the EPA-patched libmujoco.so; every reference reaches its recorded end state on it)",
-     "source": "c9171f79",
-     "tooling": "d8692e15",
-     "date": "2026-10-18",
-     "trajectory_sha256": "70f24c5d76898d1c1f9b1d04b2442bdb27038b7783d9df2004272a91ee916a6e"
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "cf508cee",
+     "tooling": "412cbe02",
+     "date": "2026-10-26",
+     "trajectory_sha256": "70f24c5d76898d1c1f9b1d04b2442bdb27038b7783d9df2004272a91ee916a6e",
+     "end_state": "85283f67e0c8d0dc"
     }
    },
    "family": "blanket_fold",
@@ -1038,8 +1061,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "blanket-flatten-very-easy-i00",
    "variation": "blanket_fold_hard",
@@ -4677,10 +4700,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "source": "4d2cba21",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-23",
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle (scripts/roboarc/harbor_check.py)",
+     "date": "2026-10-26",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0 (seeds 1 and 2: roboarc 1.3.0, before the grader fix); harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
      "trajectory_sha256": "3a547a8849503c21fdf12e6af8986342bf71410de149ab16c422daf5425dc197",
      "end_state": "48f312d445aec62b"
     },
@@ -4688,10 +4711,10 @@
      "status": "passed",
      "success": 1,
      "deterministic": 1,
-     "source": "4d2cba21",
+     "source": "cf508cee",
      "tooling": "412cbe02",
-     "date": "2026-10-23",
-     "image": "the release image roboarc 1.3.0 (ghcr.io/mll-lab-nu/roboarc:1.3.0, sha256:499d6f69bd81), seeds 0, 1 and 2; harbor run -a oracle (scripts/roboarc/harbor_check.py)",
+     "date": "2026-10-26",
+     "image": "the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seed 0 (seeds 1 and 2: roboarc 1.3.0, before the grader fix); harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
      "trajectory_sha256": "17e63980c2ff3c3666606b5c46842deec014ed006f10425505839c287ae39256",
      "speed_rule": "the privileged reference moved an arm joint target more than the standard service's joint-speed rule (0.04 rad per control step) in 785 rows (190 runs); each run is re-timed inside a window of nearby rows of that arm: the arm follows the same joint path at an even speed within the rule and arrives at the window's last row on time; no row is added, every other row and every gripper entry is unchanged (scripts/roboarc/oracles/wire-splicing-01-i01/standard.npz, meta speed_rule; the privileged reference is unchanged).",
      "end_state": "164567f6effde5b0"
@@ -4704,8 +4727,8 @@
    "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
    "nop": {
     "status": "passed",
-    "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-23"
+    "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-10-26"
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "wire_splicing_eye_wrap",
@@ -4729,7 +4752,14 @@
      "date": "2026-10-23",
      "image": "roboarc 1.3.0 (499d6f69bd81)"
     }
-   }
+   },
+   "changes": [
+    {
+     "date": "2026-10-26",
+     "mode": "both",
+     "text": "roboarc 2.1.0: the grader no longer faults when the tail of the first wire is pulled straight out past the eye (the coil count round both strands treats a one-node return strand as reaching no station, adding no turn; before, the simulator raised inside the task's step). The reference never takes that branch: its end state, the frozen instance and the task text are unchanged."
+    }
+   ]
   }
  },
  "experimental_bases": {},

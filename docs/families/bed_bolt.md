@@ -8,7 +8,10 @@ must carry the bolt to the hole, push its tip in until the thread catches, then 
 head seats on the block. A cross board in front of the block face closes a bay round the hole, too short for the key's
 long arm along the bolt: the key's short arm goes into the bolt's head and the long arm stands up as a lever, swung
 60 degrees at a time. The bases differ in the drive: a hex or Torx key that comes out of the head between swings, or a
-ratcheting key (square, Phillips or slotted tip) whose tip stays in the head while its handle swings back. The family
+ratcheting key (square, Phillips or slotted tip) whose tip stays in the head while its handle swings back. Since 2.1.0
+a white card lies flat on the table between the key's stand and the bolt's cradle, with the bolt's head and its
+recess drawn 4.5 times their size, so the five drives tell apart at a glance in the cameras; it is drawn only (no
+collision, no mass) and the same at every appearance seed. The family
 was designed by Jianwen; its bases came to RoboARC as experimental bases in 1.2.0 and were released in 1.4.0.
 
 ## Robot and grasping

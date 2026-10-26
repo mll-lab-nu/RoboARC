@@ -18,7 +18,7 @@ RoboARC blanket_flatten (ALOHA 2, MuJoCo): produce one replayable trajectory. Un
 Two 6-dof aloha (viperx) arms with parallel-jaw grippers on a fixed base with a 14-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 0.5 s. Grasping: assisted grasping (pbd_local_patch_v1).
 
 ## Reference solution
-`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `4470fa3b9a917097…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on an earlier build of this benchmark's image (2026-10-13) that holds the same frozen instance (2026-10-13; simulator source d601866b, tooling fde662d5).
+`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `4470fa3b9a917097…`) to `/app/output/`: the MuJoCo reference (this design's oracle, recorded on MuJoCo), which the verifier scored 1 in two fresh-process replays on the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py) (2026-10-26; simulator source cf508cee, tooling 412cbe02).
 
 ## Verification
 Open-loop replay of `/app/output/trajectory.npz` from the frozen instance (`/tests/instance.json`, staged from the image and checked against `tests/runtime_binding.json`) in a fresh process, twice; pass iff the
@@ -31,7 +31,7 @@ reach the goal with the instance's own thresholds within the trajectory's rows.
 A trajectory may have at most 37000 rows (`RCB_MAX_STEPS`: two replays must fit the verifier's timeout; a longer one is
 `bad_trajectory`).
 
-`nop` scored 0 on this base in both modes (the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-14).
+`nop` scored 0 on this base in both modes (the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-26).
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.

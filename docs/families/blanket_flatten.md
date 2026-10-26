@@ -17,7 +17,7 @@ What the grader checks, in plain words (each task's `instruction.md` states the 
 - **Coverage.** The blanket covers at least 95 % of its unfolded area in the top-down view (overlapping layers count once, holes do not count).
 - **Flat on the table.** Every cloth point is at most 30 mm above the tabletop and no more than 8 mm below it. In base 06, cloth resting on the fence does not count as lying flat.
 - **No stretching.** No material edge is stretched beyond 1.15 times its original length.
-- **Released.** All grasps are released and the robot has withdrawn to at least 5 mm of clearance from the cloth.
+- **Released.** All grasps are released and the robot's moving parts (arm links, wrists, grippers, fingers) have withdrawn to at least 5 mm of clearance from the cloth. The two arm bases are fixed to the world and are not counted (since 2.1.0): the cloth may lie against them.
 - **At rest.** Every cloth point moves at most 30 mm/s and drifts at most 3 mm during the confirmation.
 - All final conditions must hold together, continuously, for 0.5 s of simulated time.
 
