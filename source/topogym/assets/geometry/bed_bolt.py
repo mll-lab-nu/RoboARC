@@ -970,6 +970,7 @@ def _dress(world, asset, entity, drive, look):
                 g.set("rgba", _v(rgba))
     if entity == "bed_frame":
         _dress_frame(world, asset, DRIVES[drive].get("stand_hole_y", .005), look["block"])
+        _dress_sign(world, asset, drive)
     elif entity == "bolt":
         _dress_head(world, asset)
     elif entity == "key" and not DRIVES[drive].get("ratchet"):
@@ -979,6 +980,43 @@ def _dress(world, asset, entity, drive, look):
 
 
 INSERT_T = .0003                # the insert's flange: in the block face, this thick
+# The drive's sign (the user, 2026-10-25: the five drives look alike in the cameras, their tips and recesses a few pixels
+# wide): a white card lying flat on the table in front of the key's stand and the bolt's cradle, between them, where the
+# reference never goes, with the bolt's head drawn on it `scale` times its size and the head's recess (DRIVES) in black.
+# Visual only, on the holders body as the other looks: the physics scene and the frozen instances are unchanged.
+SIGN = dict(xy=(-.01, -.29), card=(.06, .045), scale=4.5, t=.0005)
+SIGN_CARD, SIGN_RECESS = (.94, .94, .92, 1), (.05, .05, .06, 1)
+
+
+def _dress_sign(world, asset, drive, s=SIGN):
+    """The sign (SIGN): the card, the head as ZINC and its recess in SIGN_RECESS, each a flat piece t thick laid on the one
+    below it."""
+    holders, (x, y), k, t = world.find("body[@name='holders']"), s["xy"], s["scale"], s["t"]
+    c = DRIVES[drive]
+
+    def piece(name, V, rgba, layer, at=(0., 0.)):
+        ET.SubElement(asset, "mesh", name=f"sign_{name}_m", vertex=_v(V))
+        _look_geom(holders, f"sign_{name}", f"sign_{name}_m", rgba, pos=(x + at[0], y + at[1], t * (layer + .5)))
+
+    hz, r = t / 2, k * BOLT["head_d"] / 2
+    piece("card", _box_corners((*s["card"], hz)), SIGN_CARD, 0)
+    piece("head", _prism_corners(r, hz), ZINC, 1)
+    if drive == "hex":
+        piece("recess", _prism_corners(k * SOCKET_AF / np.sqrt(3), hz, n=6), SIGN_RECESS, 2)
+    elif drive == "torx":                    # the lobes' circle, the head's six bumps between them drawn over it
+        piece("recess", _prism_corners(k * c["A"] / 2, hz), SIGN_RECESS, 2)
+        for i in range(6):
+            a = np.radians(30 + 60 * i)
+            piece(f"bump_{i}", _prism_corners(k * c["bump_r"], hz, n=24), ZINC, 3,
+                  at=k * c["bump_c"] * np.array([np.cos(a), np.sin(a)]))
+    elif drive == "square":
+        piece("recess", _box_corners((k * c["AF"] / 2, k * c["AF"] / 2, hz)), SIGN_RECESS, 2)
+    elif drive == "phillips":
+        piece("recess_x", _box_corners((k * c["R_face"], k * c["w"] / 2, hz)), SIGN_RECESS, 2)
+        piece("recess_y", _box_corners((k * c["w"] / 2, k * c["R_face"], hz)), SIGN_RECESS, 2)
+    elif drive == "slotted":                 # across the whole head, its ends on the head's circle
+        w = k * c["w"] / 2
+        piece("recess", _box_corners((np.sqrt(r * r - w * w), w, hz)), SIGN_RECESS, 2)
 
 
 def _dress_frame(world, asset, hole_y, block, h=HOLD):
