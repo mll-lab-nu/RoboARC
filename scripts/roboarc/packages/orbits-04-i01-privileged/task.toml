@@ -24,7 +24,7 @@ instance_seed = 0                 # scene = environment/instance.json (variation
 expert_time_estimate_hours = 5.0
 
 [verifier]
-timeout_sec = 81800.0              # two replays of a 360000-row trajectory at 1.5 x 0.074 s per step + 1800 s (mk_tasks.py row_cap; MAX_STEPS_EXCEPTIONS)
+timeout_sec = 88200.0              # 2 x the 43200 s cutoff + 1800 s (mk_tasks.py grading_timeouts); row_cap() still gives MAX_STEPS_EXCEPTIONS' 360000
 environment_mode = "separate"     # verifier runs in its own sandbox (tests/Dockerfile); the agent container is gone by then
 network_mode = "no-network"
 
