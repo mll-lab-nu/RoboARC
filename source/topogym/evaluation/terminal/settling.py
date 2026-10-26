@@ -4,6 +4,11 @@ Collision bounding boxes provide a conservative clearance certificate: overlap
 means clearance is unconfirmed, not that the surfaces necessarily touch. FEM
 volumes can refine this certificate using robot convex covers and all tetrahedra.
 Task-specific placement/support requirements remain with the task.
+
+Robot contact policies: all_parts_clearance (every robot collision box keeps clearance_m from every target box);
+fixed_contact_active_clearance_v1 (FEM targets: the exact solids, world-fixed bases may touch; robot_contact.py);
+active_parts_clearance_v1 (RoboARC 2.1.0, the blanket families): as all_parts_clearance, but the boxes of robot links
+fixed to the world (the arm bases, which cannot be withdrawn) are left out; it needs the geometry's robot_fixed flags.
 """
 from dataclasses import dataclass, asdict
 from collections.abc import Mapping
@@ -30,9 +35,10 @@ class SettlingSpec:
         names = self.targets
         if not names or len(set(names)) != len(names) or any(not isinstance(n, str) or not n for n in names):
             raise ValueError("Settling requires distinct named targets")
-        if self.robot_contact_policy not in {"all_parts_clearance", "fixed_contact_active_clearance_v1"}:
+        if self.robot_contact_policy not in {"all_parts_clearance", "fixed_contact_active_clearance_v1",
+                                             "active_parts_clearance_v1"}:
             raise ValueError("Unknown robot release contact policy")
-        if self.robot_contact_policy != "all_parts_clearance" and (self.rigid_targets or self.particle_targets):
+        if self.robot_contact_policy == "fixed_contact_active_clearance_v1" and (self.rigid_targets or self.particle_targets):
             raise ValueError("Exact robot contact policy currently requires FEM targets")
         for key, value in asdict(self).items():
             if key.endswith("targets") or key == "robot_contact_policy":
@@ -162,7 +168,21 @@ def evaluate_settling(state, spec, reference=None):
                 if not len(target_boxes[name]):
                     raise ValueError("Missing target collision bounds")
             clear = True
-            if spec.robot_contact_policy != "all_parts_clearance":
+            exempt = None
+            if spec.robot_contact_policy == "active_parts_clearance_v1":   # the world-fixed boxes are left out
+                fixed = geometry.get("robot_fixed")
+                if fixed is None:
+                    missing.append("robot_fixed_flags")
+                    clear = False
+                else:
+                    if len(fixed) != len(robot) or any(type(f) is not bool for f in fixed):
+                        raise ValueError("Invalid robot fixed flags")
+                    keep = ~np.asarray(fixed, dtype=bool)
+                    exempt = int((~keep).sum())
+                    robot = robot[keep]
+                    if planes is not None:
+                        planes = [pl for pl, k in zip(planes, keep) if k]
+            if spec.robot_contact_policy == "fixed_contact_active_clearance_v1":
                 from .robot_contact import evaluate_robot_contact
                 if geometry["schema_version"] != 3 or set(topology) != set(spec.fem_targets):
                     missing.append("exact_robot_contact_geometry")
@@ -171,7 +191,8 @@ def evaluate_settling(state, spec, reference=None):
                     clear, contact_metrics = evaluate_robot_contact(current, topology, geometry, spec.clearance_m)
                     clearance = contact_metrics["active_clearance_lower_bound_m"]
                     refined = list(spec.fem_targets)
-            for name, boxes in (target_boxes.items() if spec.robot_contact_policy == "all_parts_clearance" else ()):
+            for name, boxes in (target_boxes.items() if spec.robot_contact_policy != "fixed_contact_active_clearance_v1"
+                                and "robot_fixed_flags" not in missing else ()):
                 if len(robot):
                     gaps = np.maximum(np.maximum(boxes[:, None, 0]-robot[None, :, 1],
                                                  robot[None, :, 0]-boxes[:, None, 1]), 0.)
@@ -195,7 +216,9 @@ def evaluate_settling(state, spec, reference=None):
         sampling_scope="physics_tick_end", coarse_clearance_lower_bound_m=coarse_clearance,
         refined_fem_targets=refined,
         clearance_method="conservative_convex_volume_bounds" if refined else "conservative_collision_bounds")
-    if spec.robot_contact_policy != "all_parts_clearance":
+    if spec.robot_contact_policy == "fixed_contact_active_clearance_v1":
         metrics.update(contact_metrics, robot_contact_policy=spec.robot_contact_policy,
                        clearance_method="volume_bounds_then_native_solid_geometry")
+    elif spec.robot_contact_policy == "active_parts_clearance_v1":
+        metrics.update(robot_contact_policy=spec.robot_contact_policy, fixed_robot_boxes_exempt=exempt)
     return reached, metrics, (current if reference is None else reference) if reached else None

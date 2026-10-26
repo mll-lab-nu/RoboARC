@@ -378,9 +378,10 @@ def grader_details(fam, inst, *, limited):
             (f"The blanket is {L:g} m x {W:g} m ({L * W:.3f} m^2), so the coverage needs at least {cov * L * W:.4f} m^2 of "
              "its area in the top view. Heights are measured at the cloth particles' centres." if fam == "blanket_flatten" else
              f"The blanket is {L:g} m x {W:g} m. Heights are measured at the cloth particles' centres."),
-            f"The release clearance is measured from one box around all cloth particles, grown by {_mm(pad, 0)}: every robot "
-            f"collision box must stay at least 5 mm from it, i.e. at least {_mm(pad + .005, 0)} outside the cloth's bounding "
-            "box, above its highest point too.",
+            f"The release clearance is measured from one box around all cloth particles, grown by {_mm(pad, 0)}: the collision "
+            f"box of every robot part that can move (arm links, wrists, grippers, fingers) must stay at least 5 mm from it, i.e. "
+            f"at least {_mm(pad + .005, 0)} outside the cloth's bounding box, above its highest point too. The two arm bases are "
+            "fixed to the world and are not counted: the cloth may lie against them.",
         ]
     g = grasp_regions(fam, inst, limited=limited)
     if g:

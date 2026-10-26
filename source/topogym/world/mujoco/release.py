@@ -7,6 +7,9 @@ conservative world box, the geom's local bounding box (model.geom_aabb: a mesh's
 primitive, in the world. A capped collision hull (maxhullvert) lies inside its mesh's vertices, so both stay conservative.
 Rope (FEM) targets with the exact robot contact policy (knot_untying's terminal v5) read schema 3: also every robot geom's
 native solid and pose, and the ropes' tetrahedra over their skinned vertices (rope_chain.py).
+With fixed_flags (the active-parts policy, settling.py active_parts_clearance_v1: the blanket families since RoboARC 2.1.0)
+the read also carries robot_fixed, one flag per robot box: True for a geom of a link fixed to the world (the arm bases),
+which the policy leaves out of the clearance. Without it the read is unchanged.
 """
 from __future__ import annotations
 
@@ -16,7 +19,7 @@ from topogym.evaluation.terminal.clearance import convex_cover_planes
 
 
 class MujocoReleaseGeometry:
-    def __init__(self, world, rigid_targets, *, exact_robot_contact=False, ropes=None):
+    def __init__(self, world, rigid_targets, *, exact_robot_contact=False, ropes=None, fixed_flags=False):
         import mujoco
         ropes = dict(ropes or {})
         if exact_robot_contact and not ropes:
@@ -36,6 +39,11 @@ class MujocoReleaseGeometry:
             self.rows[name] = np.arange(len(ids), len(ids) + len(own))
             ids += own
         self.ids = np.asarray(ids, dtype=np.int64)
+        # per robot box: is its link fixed to the world (a base that cannot be withdrawn)? Read only with fixed_flags
+        self.robot_fixed = None
+        if fixed_flags and self.robot_present:
+            fixed = {int(link.idx): bool(link.is_fixed) for link in world.entities["robot"].links}
+            self.robot_fixed = [fixed[int(m.geom_bodyid[int(self.ids[row])])] for row in self.rows["robot"]]
         aabb = np.asarray(m.geom_aabb, dtype=np.float64)[self.ids].reshape(-1, 6)
         self.centers, self.halves = aabb[:, :3].copy(), aabb[:, 3:].copy()
         if not np.isfinite(aabb).all() or np.any(self.halves < 0):
@@ -99,6 +107,8 @@ class MujocoReleaseGeometry:
                    robot_present=self.robot_present, robot_bounds_m=bounds[robot].reshape(-1, 2, 3),
                    target_bounds_m={name: bounds[self.rows[name]].reshape(-1, 2, 3) for name in self.targets},
                    robot_convex_planes_m=[planes[int(i)] for i in robot], fem_elements=dict(self.fem_elements))
+        if self.robot_fixed is not None:
+            out["robot_fixed"] = list(self.robot_fixed)
         if self.exact:
             out.update(robot_solids=self.robot_solids,
                        robot_solid_poses=[dict(position_m=p[int(i)].copy(), rotation=r[int(i)].copy()) for i in robot])

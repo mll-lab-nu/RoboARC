@@ -338,6 +338,11 @@ def describe_goal(task):
                        "of verified clearance between the rope and grippers or other robot links that can move. "
                        "World-fixed bases may touch the rope normally. Interior overlap with any robot part is forbidden; "
                        "ambiguous bounding-volume overlaps require a native-solid geometry check.")
+        elif settling.robot_contact_policy == "active_parts_clearance_v1":
+            release = (f"Release all target parts and disengage any assisted grasp. Withdraw the robot's moving parts until there is "
+                       f"at least {mm(settling.clearance_m)} of verified clearance between every target part and the grippers and "
+                       "arm links; the world-fixed arm bases are not counted. Opening the fingers while still touching or "
+                       "surrounding the target is insufficient.")
         rules += [
             release,
             f"During confirmation, every target point or rigid body's linear speed must be at most {mm(settling.maximum_speed_m_s)}/s "

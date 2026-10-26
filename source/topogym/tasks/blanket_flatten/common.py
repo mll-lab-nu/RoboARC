@@ -21,7 +21,8 @@ from topogym.tasks.base import EntitySpec, InitialStateSpec, TaskDefinition, Tas
 
 class BlanketFlattenTask(TaskDefinition):
     task_id = "blanket_flatten"
-    terminal_revision = "release_settling_v1"
+    # v2 (RoboARC 2.1.0): the release clearance leaves out the world-fixed arm bases (active_parts_clearance_v1)
+    terminal_revision = "release_settling_v2_active_parts"
     physics_model = "pbd_cloth"
     defaults = dict(
         length_m=0.60,
@@ -67,7 +68,8 @@ class BlanketFlattenTask(TaskDefinition):
     def final_settling_spec(self):
         from topogym.evaluation.terminal import SettlingSpec
         return SettlingSpec(particle_targets=("blanket",), particle_radius_m=self.config["particle_size_m"],
-            maximum_speed_m_s=self.config["maximum_speed_m_s"], maximum_drift_m=self.config["maximum_drift_m"])
+            maximum_speed_m_s=self.config["maximum_speed_m_s"], maximum_drift_m=self.config["maximum_drift_m"],
+            robot_contact_policy="active_parts_clearance_v1")
 
     def identity_config(self):
         # The prepared state is pinned by initial_state_sha256 (checked in frozen_initial_state); its location differs per
