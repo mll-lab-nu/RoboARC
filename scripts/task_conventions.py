@@ -223,7 +223,7 @@ CUTOFF_CAP = 14400                               # PROTOCOL D8 / §2.3; the same
 # CONFIG_KEYS), as TopoGym's 6 h packages did (docs/simulator/TOPOGYM_PROTOCOL.md, Budget).
 CUTOFF_EXCEPTIONS = {
     "roboarc-wire-splicing-01-i01": 21600,       # owner 2026-10-22: 160 ball-jointed links, ~0.5 s per control step
-    "roboarc-orbits-04-i01": 43200,              # proposed 2026-10-26, owner approval pending: the 223358-row reference ran 17195 s as the agent on Harbor (0.077 s per step), 2.5 x below
+    "roboarc-orbits-04-i01": 43200,              # proposed 2026-10-26, owner approval pending: the 223358-row reference ran 17195-21448 s as the agent on Harbor (0.077-0.096 s per step), 2.0 x below
 }
 
 
