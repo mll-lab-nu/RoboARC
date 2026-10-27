@@ -49,7 +49,7 @@ from task_conventions import CUTOFF_EXCEPTIONS  # noqa: E402
 
 # every image by its manifest digest (images/pins.json)
 PINS = {p["name"]: p["ref"] for p in json.loads((Path(__file__).resolve().parents[2] / "images/pins.json").read_text())["images"]}
-assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:1.3.0@" + PINS["roboarc"].split("@")[1]
+assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:2.1.0@" + PINS["roboarc"].split("@")[1]
 
 
 def test_metadata():
@@ -68,7 +68,7 @@ def test_metadata():
 
 def test_puzzle_references():
     """77 of the 78 bases ship a reference; each is the file its pin names (the freeze manifest's, or the release
-    record's for a base released later), with its recorded end hash."""
+    record's for a base released or re-stamped later), with its recorded end hash."""
     with_ref = [t for t in roboarc.list_tasks("puzzles") if t.reference]
     assert len(with_ref) == 77
     for t in with_ref:

@@ -4,6 +4,102 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## 2.1.0 (2026-10-25)
+
+The owner's decision on the five bed-bolt bases (hex, Torx, square, Phillips and slotted keys): change only the
+appearance, so that the drives tell apart at a glance. A grading change for the blanket families (their release check
+no longer counts the fixed arm bases), a grader fix for wire_splicing from the family's stress round, and text fixes. A
+new image, `ghcr.io/mll-lab-nu/roboarc:2.1.0`, because the simulator source and fifteen frozen instances change. The
+task set is 2.0.0's: 90 bases, 180 task directories.
+
+### Blanket flatten and blanket fold: the release check counts only the moving robot parts (grading change)
+- Before 2.1.0 the release check measured the cloth's bounding box (grown by 8 mm) against every robot collision box,
+  the two arm bases' among them. The bases are fixed to the world and cannot be withdrawn, so a fully spread sheet also
+  had to fit between them: an x-span of at most 0.7075 m and centred, which a sheet turned more than about 15 degrees
+  cannot meet. The texts never said so. blanket-flatten-07's reference passed with 0.9 mm to spare.
+- Now the check leaves out the boxes of robot links fixed to the world (policy `active_parts_clearance_v1`, terminal
+  revision `release_settling_v2_active_parts`); every arm link, wrist, gripper and finger keeps the 5 mm clearance. This
+  is the rule knot_untying already uses for its rope (world-fixed bases may touch). The instructions say so (both modes).
+- Blanket successes can only increase: every state that passed before passes now. A state that failed only because the
+  cloth came near a base now passes, for example flatten-07's spread sheet turned 20 degrees with the hands away
+  (old check: 0 mm to a base, failed; new: 62.8 mm to the nearest moving part, passed).
+- Earlier blanket failures whose only failing gate was the release clearance against a base can be re-graded from their
+  trajectories with the new grader (`scripts/roboarc/regrade.py` where it applies); nothing has been re-graded.
+- The terminal revision is part of the task's identity, so the ten blanket instances are refreshed
+  (`tools/release/refresh_instance.py`: their scenes and archives byte for byte) and their references re-stamped
+  (`instance_sha` only). Their birth and end state hashes change in the task part (the instance id and the release
+  metrics) and in the release geometry's new fixed flags only; the physics and the rows are unchanged.
+- The other families with a release check are unchanged: cast_coil and buzz_wire_3d keep `all_parts_clearance`,
+  knot_untying its exact policy; their state is byte-identical.
+
+### Buzz wire 3D 06, 07 and 10: the loop opening in the texts (`04c7dd90`)
+- Their texts now state their own usable loop opening (8.77, 8.27 and 6.77 mm) instead of the first tiers' 12.67 mm;
+  `tools/release/topogym_rules.py` computes it. Text only; the grader is unchanged.
+
+### Collaborator note (Jianwen, `eba9248c`)
+- `docs/COLLABORATOR_SETUP.md` is a collaborator's one note (agent logins, the settings of an official run, which trials
+  may run again); `docs/RUNNING.md` points to it. It names the 2.1.0 image and 2.0.0's task set (90 bases, 540 trials).
+
+### Bed bolt: the drive card (Jianwen, `6c24f636`)
+- A white card lies flat on the table between the key's stand and the bolt's cradle, in front of them, with the bolt's
+  head drawn on it 4.5 times its size (zinc) and the head's recess in black: hexagon, six-lobe star, square, cross or
+  slot, from the recess's own dimensions. In `cam_high` the drawn head is about 50 px across.
+- Visual only: drawn geoms (no collision, no mass) on the bed frame's static body, which the MuJoCo scene drops. The
+  physics scene (`scene.xml` and every mesh), the births, the references and the grading are unchanged. The card is the
+  same at every appearance seed.
+- Clear of the references: replayed row by row, no robot, bolt or key surface comes within 87 mm of the card (the
+  nearest is the left gripper's finger as it takes the key). It covers only the table in every camera: the key, the bolt
+  and the hole are seen as before.
+- Each bed-bolt instruction (both modes) says in one sentence: "A white card lying flat on the table between the key's
+  stand and the bolt's cradle shows the bolt's head and its recess, drawn 4.5 times their size."
+- No per-type handle colours (the appearance seeds already vary the key's finish).
+
+### Wire splicing: the coil count on a straight tail (Jianwen, `2b765e6a`)
+- The grader faulted (an exception inside the task's step, reported as a simulator breakdown) when the tail of the
+  first wire was pulled straight out past the eye: its return strand was a single node. It now counts no turn there.
+  The reference never takes that branch; its end state is the recorded one. `tools/tests/test_wire_splicing_criteria.py`
+  (run by `check-unit-tests.sh`).
+- `tools/stress/round.py` (`097a3123`): a reference's wall limit in the stress round follows the base's agent budget
+  where the owner excepted it (`CUTOFF_EXCEPTIONS`).
+
+### Instances, hashes and results
+- The five bed-bolt instances and their seeds 1 and 2 are re-made in the image (`release_rebuild.py`,
+  `derive_seed_instance.py`). They differ from 2.0.0's only in the bed frame's drawn parts: `instance.json`
+  `asset_identity` (`bed_frame.xml`) and `topogym_source`, and `scene.json`'s record of the bed frame file (its hash,
+  the number of dropped visual geoms) and of the robot file's cache name. The state hash covers no drawn geometry:
+  every birth (seeds 0, 1 and 2) is unchanged, so the references keep their bytes (no re-stamp), and every end state is
+  the recorded one.
+- Results graded under 2.0.0 stand for every task but the blanket ones, whose grading is looser now (above). The
+  bed-bolt tasks look different and their instruction has one more sentence; their physics and grading are unchanged.
+  The other tasks change only in their README's Release line, their Change Log and their image pin (and the buzz-wire
+  texts above).
+
+### Image
+- `roboarc:2.1.0` (`sha256:c813b33cff3f...`, manifest `sha256:ccc3a47a5d9e...`, `images/pins.json`): every file is
+  1.3.0's but the changed source files (`geometry/bed_bolt.py`, `tasks/wire_splicing/criteria.py`,
+  `evaluation/terminal/settling.py`, `world/mujoco/release.py`, `world/mujoco/world.py` and its `.pyc`,
+  `simulator/env.py`, `tasks/blanket_flatten/common.py`, `tasks/goal_description.py`), `SOURCE.json`, 15 `.pyc` (their
+  4-byte source-mtime field only) and the fifteen re-made or refreshed instances with their seeds. The numeric
+  libraries are byte-identical. It still carries the instances of the 33 bases removed in 2.0.0, as 1.3.0 does
+  (`assets.json` pins them). The IKEA images are unchanged.
+
+### Evidence (2.1.0 image)
+- Harbor, bed-bolt 01-05, both modes, seeds 0, 1 and 2: oracle 1 and nop 0 in all 60 trials, no infrastructure error;
+  every oracle end (two replays, or the live episode and its replay) is the recorded one of its seed. The privileged
+  oracle at seed 0 ran with rendering on (its replay video shows the card).
+- Harbor, wire-splicing-01, seed 0, both modes: oracle 1 and nop 0; ends the recorded 48f312d445aec62b (privileged, two
+  replays) and 164567f6effde5b0 (standard, live and replay).
+- Harbor, the ten blanket bases, seed 0, both modes, oracle and nop, and seeds 1 and 2 privileged oracle: oracle 1 and
+  nop 0 in all 60 trials, no infrastructure error (two runs were repeated: a GPU lost to new processes after a host
+  service reload, and a standard oracle that ran out of agent time on an overloaded GPU). Every oracle's two ends are
+  equal; at seed 0 the new ends are the refreshed instances' (task part) of the recorded physics: a leaf-by-leaf
+  comparison of birth and end records, 1.3.0 image and 2.0.0 instance against 2.1.0, differs only in the instance id,
+  the release metrics and the new fixed flags. blanket-flatten-06's privileged reference reaches success on these hosts.
+- One base per other family (15 bases on the CPU; the blanket and wire families by their Harbor runs above): strict
+  replays in two fresh processes, as the verifier grades, end on the recorded states; the renderer's scene inputs
+  equal 1.3.0's for one base of every family but bed_bolt, whose scene adds the card.
+- The release image archive is byte-identical when made twice; the CI checks pass on a fresh clone.
+
 ## 2.0.0 (2026-10-25)
 
 The owner pruned the task set: 33 puzzle bases leave the release. RoboARC 2.0.0 has 90 task bases, 78 puzzle bases in

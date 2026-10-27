@@ -302,7 +302,7 @@ These are forensic triggers. They are listed with their causal partner and are n
 ### Legitimate motion, determinism, speed
 
 - **References** succeed on the tested build. Their envelope is CLEAN, and two fresh processes end on the same state
-  hash. One reference execution, with the observer, takes at most **180 min**: it finishes within the 3 h agent budget (user 2026-10-13; 120 min under the 2 h budget from 2026-10-12, 72 min, 20 % of the former 6 h budget, before).
+  hash. One reference execution, with the observer, takes at most **180 min**: it finishes within the 3 h agent budget (a base with an owner's budget exception, CUTOFF_EXCEPTIONS in scripts/task_conventions.py: within that budget, wire-splicing-01-i01 360 min; user 2026-10-13; 120 min under the 2 h budget from 2026-10-12, 72 min, 20 % of the former 6 h budget, before).
 - **nop** (400 hold controls) does not succeed and stays CLEAN.
 - **Reproducers** of mechanisms fixed earlier replay without BREAKDOWN, deterministically.
 
@@ -641,7 +641,7 @@ A fixed build must replay every reproducer without BREAKDOWN.
 | column | what it says |
 |---|---|
 | corpus | streams replayed and how many broke down (any BREAKDOWN fails the instance) |
-| reference | success, CLEAN, two fresh processes with the same hash, and the wall time (≤ 180 min, reported per tier) |
+| reference | success, CLEAN, two fresh processes with the same hash, and the wall time (≤ 180 min, an excepted base its budget, reported per tier) |
 | nop | 400 hold controls: no success, CLEAN |
 | reproducers | each earlier mechanism's verdict now; BREAKDOWN or nondeterminism fails |
 | search | controls, episodes and grasp slips of the fixed-size search; a second table splits them by strategy |

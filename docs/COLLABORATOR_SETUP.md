@@ -1,6 +1,6 @@
 # Running RoboARC: setup for a collaborator
 
-Run RoboARC from the branch `main` of `mll-lab-nu/RoboARC`; it has this note and the script that sends your results back (`scripts/send_results.sh`). You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note covers what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. The repository's `README.md` and `docs/RUNNING.md` are the full reference.
+Run RoboARC from the branch `main` of `mll-lab-nu/RoboARC`; it has this note and the script that sends your results back (`scripts/send_results.sh`). You get read access to the repository as a collaborator. The four container images on GHCR (`ghcr.io/mll-lab-nu/...`) inherit the repository's access, so the same invitation covers them. This note is all you need, from your machine to sending the results back: what your machine needs, how to log in, a first check, a smoke test of the batch runner, the evaluation run itself, and how to send its results back. `docs/RUNNING.md` explains the runner's rules in full; you do not need it to follow this note.
 
 ## 1. Machine
 
@@ -28,10 +28,10 @@ Run RoboARC from the branch `main` of `mll-lab-nu/RoboARC`; it has this note and
 2. Create a GitHub **classic** token with the scope `read:packages`, then log in and check that you can pull:
    ```bash
    echo <token> | docker login ghcr.io -u <your GitHub username> --password-stdin
-   docker pull ghcr.io/mll-lab-nu/roboarc:1.3.0      # access check: it must download
+   docker pull ghcr.io/mll-lab-nu/roboarc:2.1.0      # access check: it must download
    ```
    Docker uses this login to pull the task images. Every task names its image by digest (`images/pins.json`):
-   - `roboarc:1.3.0`, about 10 GB on disk, used by every puzzle task;
+   - `roboarc:2.1.0`, about 10 GB on disk, used by every puzzle task;
    - `roboarc-monitor:0.1.0`, about 0.13 GB on disk, used by every task;
    - `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`, about 1.1 GB and 7.7 GB on disk, used only by the IKEA tasks.
 
@@ -86,7 +86,8 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   scripts/harbor/run_agent_batch.sh smoke roboarc-interlocked-claws-08-i01
 ```
 
-- Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use.
+- Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use (credentials: the table in
+  section 5).
 - The two modes run one after the other, each with at most the agent's 3 h. To run them at the same time, start the same
   command again in a second terminal (it adds a lane).
 - It passed when:
@@ -110,7 +111,21 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
 
 Start it once the smoke test (section 4) has passed. Run a coding agent over the tasks with the batch runner, three trials per task and mode (`K=3`). Every puzzle task has
 three scenes (appearance seeds 0, 1 and 2: the same physics in other colours, materials and textures), and the runner
-gives the three trials of a task different seeds, so they see three different scenes; an IKEA task has one scene. Credentials go in an env file; `.env.example` lists the variables, e.g. `OPENAI_API_KEY` for Codex or `ANTHROPIC_API_KEY` for Claude Code.
+gives the three trials of a task different seeds, so they see three different scenes; an IKEA task has one scene.
+
+Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's agents read them:
+
+| account | what to set |
+|---|---|
+| OpenAI API key (Codex) | `OPENAI_API_KEY` |
+| Anthropic API key (Claude Code) | `ANTHROPIC_API_KEY` |
+| OpenRouter | Codex: `OPENAI_API_KEY=<OpenRouter key>` and `OPENAI_BASE_URL=https://openrouter.ai/api/v1`; Claude Code: `ANTHROPIC_API_KEY=<OpenRouter key>` and `ANTHROPIC_BASE_URL=https://openrouter.ai/api`. For a long Codex run, declare OpenRouter as a provider of its own in a Codex `config.toml` given as `AGENT_CONFIG=<file>` (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
+| ChatGPT login (Codex) | `CODEX_FORCE_AUTH_JSON=1` on the command line, beside `AGENT` (not only in the env file, so the runner's key scan also covers the login): Harbor copies `~/.codex/auth.json` into each trial |
+| Claude subscription (Claude Code) | `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) |
+| Azure OpenAI (Codex) | `AGENT_CONFIG=<config.toml with the Azure provider>` and the key variable it names; retries in the same file (`request_max_retries`, `stream_max_retries`) |
+
+The agent's container reaches only these providers and the package registries (PyPI, apt). Another provider does not
+answer: ask us first.
 
 ```bash
 BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 90 (78 puzzle, 12 IKEA)
@@ -125,6 +140,10 @@ done
 - **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 90 × 2 × 3 =
   540 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
   `MODES=standard` runs one mode only.
+- **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
+  `claude-code`), with no adapter and no proxy that holds the credentials or changes the requests; web search off
+  (leave `WEB_SEARCH` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
+  its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
   and every trial is taken by exactly one lane. A running trial needs at least 4 CPU cores, 7 GB of memory and 2 GB of
   GPU memory (the tasks' `[metadata.resources]`) and may use up to 24 GB of memory (its limit). Start with no more lanes
@@ -137,13 +156,18 @@ done
   only on the batch name, the task and the trial number), and send each host's batch back on its own (section 6).
 - **Progress and summary:** progress is in `$JOBS/<batch>.log`, and the per-trial summary in `$JOBS/<batch>.summary.md`.
 - **Restarting** (after a reboot, or a lane stopped by a model-account failure): start the lanes again with the same
-  command. Finished trials are skipped. A trial that was cut off midway is skipped too: to run it again, move its job
-  folder and `$JOBS/.claims/<job>` out of `$JOBS` first.
+  command. Finished trials are skipped. A trial the reboot interrupted is skipped too: to run it again, move its job
+  folder and `$JOBS/.claims/<job>` out of `$JOBS` first. It gets the same seed, and this is its one rerun (next item).
+- **"not a result"** in `<batch>.summary.md` marks an infrastructure failure: the grader's `infra_error` or
+  `grader_error`, no `reward.json`, a Harbor exception other than the agent's time limit, or a model-account failure.
+  Such a trial may run once more, the same way: move its job folder and its claim out of `$JOBS`, start the command
+  again; it gets the same seed. Once only: a rerun that fails again stays as it is. Name every rerun in `NOTES`
+  (section 6). A trial the agent ended itself, or that reached its time limit, is a result (0 or 1): never run it
+  again.
 - **Budget:** each trial gives the agent up to 3 h; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
   its results are ranked as a group of their own). Use one API key per batch, with a spending cap.
 - **Live view:** `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1. Keep it local: it shows unredacted output.
 - **When it has finished:** send it back (section 6).
-- **Everything else:** `docs/RUNNING.md` has the agent options, network rules, re-grading and the result files.
 
 ## 6. Sending the results back
 

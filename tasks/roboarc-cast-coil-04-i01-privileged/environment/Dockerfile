@@ -1,5 +1,5 @@
 # Base image = the RoboARC release image (images/roboarc/). Everything task-specific is copied here.
-FROM ghcr.io/mll-lab-nu/roboarc:1.3.0@sha256:2bcded002899b4be82dcffe5c0d15277379309ff0365522d8189f1f3a7a4873a
+FROM ghcr.io/mll-lab-nu/roboarc:2.1.0@sha256:ccc3a47a5d9e9ee94485b896070b93d737004d0cb132dc27b93bd2f19a8c917e
 # MuJoCo task: numpy / OpenBLAS SIMD masking, so every CPU class generates the frozen bytes
 ENV NPY_DISABLE_CPU_FEATURES=AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_SPR OPENBLAS_CORETYPE=Haswell
 COPY runtime_binding.json runtime_binding.s1.json runtime_binding.s2.json seed /tmp/rcb-seed/

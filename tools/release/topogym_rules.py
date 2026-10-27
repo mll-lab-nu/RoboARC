@@ -127,6 +127,17 @@ def claws_separation_words(minimum_separation_m=.01, three=False):
             "a separator plane is checked.")
 
 
+def buzz_aperture_mm(inst):
+    """buzz_wire_3d: (loop inner radius, wire radius, usable opening) in mm, from the base's own layout, as the grader has
+    it (BuzzWire3DTask.evaluate_transition: aperture = loop_radius - loop_tube_radius - wire_radius). The redesigned
+    tiers (rd_*) have smaller loops than the first five; until 2.0.1 this text stated the first five's 12.67 mm for all."""
+    from topogym.config.registry import task_definition
+    task = task_definition("buzz_wire_3d", inst["variation_id"], 0)(None, seed=0)
+    lay = task.build_layout()
+    inner = (lay.loop_radius_m - lay.loop_tube_radius_m) * 1e3
+    return inner, lay.wire_radius_m * 1e3, inner - lay.wire_radius_m * 1e3
+
+
 def grader_details(fam, inst, *, limited):
     """Bullet lines (without the leading "- ") for one instance."""
     tp = inst.get("effective_task_parameters", {}) or {}
@@ -220,11 +231,12 @@ def grader_details(fam, inst, *, limited):
                    + ("pieces" if fam == "cast_coil" else "tool") + ", so the true gap usually has to be larger than 5 mm.")
     if fam == "buzz_wire_3d":
         term = tp.get("terminal", {}) or {}
+        inner, wire, usable = buzz_aperture_mm(inst)
         out += [
-            "The loop's usable opening: the wire's centreline must cross the loop's disk less than 12.67 mm from the loop's "
-            "centre (loop inner radius 14.14 mm minus the 1.47 mm wire radius).",
+            f"The loop's usable opening: the wire's centreline must cross the loop's disk less than {usable:.2f} mm from the "
+            f"loop's centre (loop inner radius {inner:.2f} mm minus the {wire:.2f} mm wire radius).",
             "Continuous traversal: from one physics tick to the next, the crossing point may move along the wire by at most "
-            "twice the loop's own motion in that tick (its displacement plus 12.67 mm times its rotation angle) plus "
+            f"twice the loop's own motion in that tick (its displacement plus {usable:.2f} mm times its rotation angle) plus "
             f"{_mm(term.get('route_progress_tolerance_m', .003))}. A larger jump, no crossing, two crossings or a tangency "
             "cancels the traversal; it must then start again within "
             f"{_mm(term.get('start_route_tolerance_m', .01))} of the starting end, the end where the tool rests at the start.",
@@ -366,9 +378,10 @@ def grader_details(fam, inst, *, limited):
             (f"The blanket is {L:g} m x {W:g} m ({L * W:.3f} m^2), so the coverage needs at least {cov * L * W:.4f} m^2 of "
              "its area in the top view. Heights are measured at the cloth particles' centres." if fam == "blanket_flatten" else
              f"The blanket is {L:g} m x {W:g} m. Heights are measured at the cloth particles' centres."),
-            f"The release clearance is measured from one box around all cloth particles, grown by {_mm(pad, 0)}: every robot "
-            f"collision box must stay at least 5 mm from it, i.e. at least {_mm(pad + .005, 0)} outside the cloth's bounding "
-            "box, above its highest point too.",
+            f"The release clearance is measured from one box around all cloth particles, grown by {_mm(pad, 0)}: the collision "
+            f"box of every robot part that can move (arm links, wrists, grippers, fingers) must stay at least 5 mm from it, i.e. "
+            f"at least {_mm(pad + .005, 0)} outside the cloth's bounding box, above its highest point too. The two arm bases are "
+            "fixed to the world and are not counted: the cloth may lie against them.",
         ]
     g = grasp_regions(fam, inst, limited=limited)
     if g:

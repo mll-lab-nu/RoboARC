@@ -67,6 +67,8 @@ fi
 if python3 -c "import numpy, scipy" 2>/dev/null; then
   run 300 tools/tests/test_exposure_rule.py
   run 300 tools/tests/test_fiber_red_lay.py   # fiber 07-10's lay rule: either red fiber
+  run 300 tools/tests/test_wire_splicing_criteria.py   # wire_splicing's around_both on a one-node strand
+  run 300 tools/tests/test_active_parts_clearance.py   # the blanket families' release clearance policy
 elif [ $all -eq 1 ]; then
   echo "FAIL check-unit-tests.sh --all: numpy and scipy are needed for tools/tests/test_exposure_rule.py (pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock)"; rc=1
 else

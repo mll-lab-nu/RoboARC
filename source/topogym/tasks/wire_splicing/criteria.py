@@ -172,6 +172,8 @@ def around_both(PA, iA, k1, k2, c0, ahat, Q):
     n = np.arange(len(Q))
     th = np.full((2, len(Q)), np.nan)
     for s, S in enumerate((PA[iA:ka + 1], PA[ka:kf + 1])):
+        if len(S) < 2:      # one node, no segment: a tail that never comes back toward the strip reaches no station
+            continue
         zs = (S - c0) @ ahat
         a, b = zs[:-1, None] - zq[None], zs[1:, None] - zq[None]               # (strand segments, nodes of Q)
         hit = (a != b) & (((a <= 0) & (b >= 0)) | ((b <= 0) & (a >= 0)))

@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · bed_bolt — STANDARD MODE (robot as a service, eai-standard/2.4)
 
 You control a robot (**two 6-DoF ALOHA (ViperX) arms with parallel-jaw grippers on a fixed base**) **as if it were real hardware**: the simulator runs in a service you cannot open. You get one
-client and one episode. **Task:** Drive the long bolt into the blind hole in the bed frame's corner block with the L-shaped hex key until its head is within 1.5 mm of the block face.
+client and one episode. **Task:** Drive the long bolt into the blind hole in the bed frame's corner block with the L-shaped hex key until its head is within 1.5 mm of the block face. A white card lying flat on the table between the key's stand and the bolt's cradle shows the bolt's head and its recess, drawn 4.5 times their size.
 
 ## Success requirements
 

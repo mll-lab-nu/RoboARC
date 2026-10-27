@@ -447,7 +447,8 @@ class Env:
             settling = self._task.final_settling_spec()
             if settling is not None:
                 self._world.configure_final_settling(settling.rigid_targets,
-                    exact_robot_contact=settling.robot_contact_policy != "all_parts_clearance")
+                    exact_robot_contact=settling.robot_contact_policy == "fixed_contact_active_clearance_v1",
+                    **({"fixed_flags": True} if settling.robot_contact_policy == "active_parts_clearance_v1" else {}))
             self._task.initialize(self._world.read_state())
             self._sensors = (self._sensor_factory or SensorSuite)(
                 self._world, self._robot, enable_rgb=self.config.enable_rgb,

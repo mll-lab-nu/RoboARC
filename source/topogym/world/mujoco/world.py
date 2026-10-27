@@ -390,12 +390,13 @@ class MujocoWorld:
         self._mechanism = mechanism
         self._state_changed()
 
-    def configure_final_settling(self, rigid_targets, *, exact_robot_contact=False):
-        """Read-only release-confirmation evidence (release.py) for tasks that require release."""
+    def configure_final_settling(self, rigid_targets, *, exact_robot_contact=False, fixed_flags=False):
+        """Read-only release-confirmation evidence (release.py) for tasks that require release; fixed_flags: the robot
+        boxes' world-fixed flags too (the active-parts policy)."""
         self._require_built()
         from .release import MujocoReleaseGeometry
         self._release_geometry = MujocoReleaseGeometry(self, rigid_targets, exact_robot_contact=exact_robot_contact,
-                                                       ropes=self._ropes)
+                                                       ropes=self._ropes, fixed_flags=fixed_flags)
 
     def restore_cloth_births(self, declaration):
         """A declared frozen initial state (the task's InitialStateSpec: the PBD archive) on MuJoCo: every cloth at the

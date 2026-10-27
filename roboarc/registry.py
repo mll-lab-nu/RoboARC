@@ -75,9 +75,10 @@ def _seeds(md: dict) -> tuple:
 
 def reference_pins(root: Path) -> dict[str, dict]:
     """Per puzzle base with a pinned reference: {"sha256", "expect"} (the privileged reference file's sha256 and its
-    recorded end hash). The V3 freeze manifest pins the bases frozen in V3; a base released later is pinned by its
-    release record's privileged evidence (scripts/roboarc/release.json: trajectory_sha256, end_state). Only the bases
-    of the release are pinned: the manifest is a record and keeps the bases removed since (2.0.0)."""
+    recorded end hash). The V3 freeze manifest pins the bases frozen in V3; a base released later, or one whose reference
+    a later release re-stamped (2.1.0: the blanket bases' new terminal revision), is pinned by its release record's
+    privileged evidence (scripts/roboarc/release.json: trajectory_sha256 and end_state, both given). Only the bases of
+    the release are pinned: the manifest is a record and keeps the bases removed since (2.0.0)."""
     path = root / "records" / "freeze_manifests" / "freeze_manifest.v3.json"
     rel = root / "scripts" / "roboarc" / "release.json"
     released = json.loads(rel.read_text())["bases"] if rel.is_file() else {}
@@ -86,7 +87,7 @@ def reference_pins(root: Path) -> dict[str, dict]:
             if r.get("reference") and (b in released or not rel.is_file())}
     for b, r in released.items():
         ev = (r.get("evidence") or {}).get("privileged") or {}
-        if b not in pins and ev.get("trajectory_sha256") and ev.get("end_state"):
+        if ev.get("trajectory_sha256") and ev.get("end_state"):
             pins[b] = {"sha256": ev["trajectory_sha256"], "expect": ev["end_state"]}
     return pins
 
