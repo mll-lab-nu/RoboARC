@@ -222,24 +222,40 @@ def annulus_mesh(name, r_in, r_out, z0, z1, n=64):
 
 # The appearance parameters (ClockAssemblingTask defaults movement_finish, stand_finish, screw_finish; the user,
 # 2026-10-20: a seed varies appearance only): each replaces the colours of the visual geoms drawn in the first entry's
-# colours (the look above) and no colliding geom's (those are drawn "1 1 1 0"). Movement: the plate and its pillars, the
-# bridge, their bevels and the jewels' chatons, the center and third wheels (barrel and fourth stay steel); stand: the
-# stands, the cups, the tray, the posts, the bridge's rack (the movement holder stays grey).
+# colours (the look above) and no colliding geom's (those are drawn "1 1 1 0"). 2026-10-27 (the user: seeds 1 and 2
+# differ from seed 0 and from each other in colour and material, CIEDE2000 >= 20 between any two seeds' colours of a part;
+# the parts on the table >= 15 from every table top of topogym.world.look): a column is (rgba, roughness, metallic); the
+# recorded look's set none (its file stays as it was), the others draw them as a material (entity_xml). Movement: the
+# plate and its pillars, the bridge, its bevels, the jewels' chatons, the center, third, barrel and fourth wheels, and,
+# in their own colours, the steel arbors and pinions, the polished snails and click, the ruby jewels (steel, steel and
+# ruby in a real movement too); seed 1 a ruthenium plate under rhodium bridges, seed 2 the reverse. Stand: the stands,
+# the cups, the tray, the posts, the bridge's rack, the movement holder, the probe's handle and its shaft.
+_PLAIN = lambda *colours: tuple((c, None, None) for c in colours)     # noqa: E731   the recorded look's columns
 MOVEMENT_FINISHES = dict(
-    rose_gilt=(C["plate"], C["bridge"], C["bevel"], C["chaton"], COLORS["center"], COLORS["third"]),
-    rhodium=((.80, .81, .83, 1), (.84, .85, .87, 1), (.93, .94, .95, 1), (.88, .89, .91, 1), COLORS["center"],
-             COLORS["third"]),
-    gilt=((.84, .70, .40, 1), (.87, .73, .44, 1), (.97, .90, .66, 1), (.90, .78, .45, 1), (.78, .45, .30, 1),
-          (.82, .48, .32, 1)))
-STAND_FINISHES = dict(beech=(C["wood"],), walnut=((.38, .26, .17, 1),), white_plastic=((.86, .86, .84, 1),))
-SCREW_FINISHES = dict(blued=(C["screw"],), steel=((.72, .73, .76, 1),), gilt=((.85, .70, .38, 1),))
+    rose_gilt=_PLAIN(C["plate"], C["bridge"], C["bevel"], C["chaton"], COLORS["center"], COLORS["third"],
+                     COLORS["barrel"], COLORS["fourth"], C["steel"], C["polish"], C["ruby"]),
+    ruthenium=(((.12, .12, .13, 1), .5, 1.), ((.66, .70, .80, 1), .35, 1.), ((.50, .55, .66, 1), .1, 1.),
+               ((.82, .86, .94, 1), .2, 1.), ((.80, .81, .84, 1), .3, 1.), ((.80, .81, .84, 1), .3, 1.),
+               ((.85, .66, .25, 1), .3, 1.), ((.86, .68, .22, 1), .3, 1.), (C["steel"], .2, 1.), (C["polish"], .1, 1.),
+               (C["ruby"], .1, 0.)),
+    rhodium=(((.66, .70, .80, 1), .5, 1.), ((.14, .14, .15, 1), .35, 1.), ((.06, .06, .065, 1), .1, 1.),
+             ((.20, .20, .22, 1), .2, 1.), ((.18, .18, .20, 1), .3, 1.), ((.18, .18, .20, 1), .3, 1.),
+             ((.16, .16, .18, 1), .3, 1.), ((.18, .18, .20, 1), .3, 1.), (C["steel"], .4, 1.), (C["polish"], .25, 1.),
+             (C["ruby"], .3, 0.)))
+STAND_FINISHES = dict(      # the stands and their parts, the movement holder, the probe's handle, its shaft
+    beech=_PLAIN(C["wood"], C["holder"], C["handle"], C["tool"]),
+    walnut=(((.24, .14, .08, 1), .5, 0.), ((.10, .25, .60, 1), .4, 0.), ((.55, .06, .05, 1), .45, 0.),
+            ((.08, .08, .09, 1), .4, .7)),                                          # a black-oxide probe
+    blue_plastic=(((.08, .22, .55, 1), .4, 0.), ((.05, .05, .055, 1), .5, 0.), ((.04, .04, .045, 1), .6, 0.),
+                  ((.78, .60, .30, 1), .3, 1.)))                                    # a brass probe
+SCREW_FINISHES = dict(blued=_PLAIN(C["screw"]), gilt=(((.85, .68, .30, 1), .25, 1.),), steel=(((.72, .73, .76, 1), .2, 1.),))
 
 
 def finish_colours(movement="rose_gilt", stand="beech", screw="blued") -> dict:
-    """{default look colour: its colour in these finishes} (entity_xml's look)."""
+    """{default look colour: (its colour in these finishes, roughness, metallic)} (entity_xml's look)."""
     out = {}
     for table, name in ((MOVEMENT_FINISHES, movement), (STAND_FINISHES, stand), (SCREW_FINISHES, screw)):
-        out.update({_v(a): _v(b) for a, b in zip(next(iter(table.values())), table[name])})
+        out.update({_v(a[0]): (_v(b[0]), b[1], b[2]) for a, b in zip(next(iter(table.values())), table[name])})
     return out
 
 
@@ -653,9 +669,17 @@ def entity_xml(spins=None, look=None) -> str:
                   solref=WELD_SOLREF)
     for s in ("screw1", "screw2"):
         ET.SubElement(eq, "weld", name=f"{s}_fix", body1="bridge", body2=s, active="false", solref=WELD_SOLREF)
+    materials = {}
     for g in root.iter("geom"):                 # visual geoms only: no colliding geom changes
         if look and g.get("contype") == "0" and g.get("rgba") in look:
-            g.set("rgba", look[g.get("rgba")])
+            colour, roughness, metallic = look[g.get("rgba")]
+            g.set("rgba", colour)
+            if roughness is not None:           # the finish's material (the recorded look sets none)
+                if (colour, roughness, metallic) not in materials:
+                    materials[colour, roughness, metallic] = f"look_{len(materials)}"
+                    ET.SubElement(asset, "material", name=materials[colour, roughness, metallic], rgba=colour,
+                                  roughness=_v(roughness), metallic=_v(metallic))
+                g.set("material", materials[colour, roughness, metallic])
     ET.indent(root)
     return ET.tostring(root, encoding="unicode")
 

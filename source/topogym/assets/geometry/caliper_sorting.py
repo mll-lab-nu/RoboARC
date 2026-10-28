@@ -122,20 +122,39 @@ RACK_BASE, RACK_VBLOCK = (0.25, 0.42, 0.55), (0.45, 0.47, 0.50)
 VBLOCK = dict(angle_deg=20.0, apex_z=2.5, base_z=2.0, half_w=40.0)   # mm: the groove's flanks, its apex and the base top
 SCALE_BG, VERNIER_BG, INK = (205, 208, 212), (222, 224, 228), (12, 12, 12)
 # The appearance parameters (CaliperSortingTask defaults fixture_finish, bin_finish, sleeve_finish; the user, 2026-10-20:
-# a seed varies appearance only; re-attached to the look above, 2026-10-21): the first entry of each is that look.
-# fixture_finish: the vise's body, the rack's base plate, dividers and curbs, and its V-blocks (the vise's cast-iron base
-# and its steel jaw plates, screw and handle keep theirs); bin_finish: the bins (the label cards stay white); sleeve_finish:
-# all four sleeves (they stay alike). The caliper and its scale keep theirs.
-FIXTURE_FINISHES = dict(slate_blue=dict(vise=VISE_BODY, rack=RACK_BASE, vblock=RACK_VBLOCK),
-                        forest_green=dict(vise=(0.18, 0.34, 0.24), rack=(0.20, 0.40, 0.28), vblock=(0.20, 0.20, 0.22)),
-                        safety_orange=dict(vise=(0.78, 0.38, 0.10), rack=(0.85, 0.45, 0.12), vblock=(0.62, 0.63, 0.66)),
-                        wood=dict(vise=(0.33, 0.34, 0.36), rack=(0.62, 0.47, 0.32), vblock=RACK_VBLOCK))
-# The bins of appearance seeds 1 and 2 (the user, 2026-10-21: any colours, as long as the seeds tell apart, the bins
-# show clearly on the white table and their labels read): dark plastics of hues far from the grey-blue and from the
-# same seed's vise and rack (seed 1 forest_green: dark red; seed 2 safety_orange: dark green). Were pale_blue and
-# pale_yellow, whose edges hardly showed on the white table.
-BIN_FINISHES = dict(grey_blue=BIN_RGB, dark_red=(0.45, 0.10, 0.09), dark_green=(0.14, 0.36, 0.22))
-SLEEVE_FINISHES = dict(steel=SLEEVE_RGB, brass=(0.80, 0.64, 0.32), black_oxide=(0.18, 0.18, 0.20))
+# a seed varies appearance only; re-attached to the look above, 2026-10-21): the first entry of each is that look, the
+# others those of appearance seeds 1 and 2 (scene_variation AXES["caliper_sorting"]), each a colour and a material (the
+# GLB's metallic and roughness factors; the user, 2026-10-27: seeds 1 and 2 differ from seed 0 and from each other by
+# CIEDE2000 >= 20 in every part, >= 20 from the knob's white line and the white labels, and every part on the table stays
+# visible on every table top of topogym.world.look).
+# fixture_finish: the measuring station: the vise's body, base and steel parts (jaw plates, screw, handle), the rack's
+# base plate, dividers and curbs, and its V-blocks, with the vise's and the rack's material, and the caliper clamped in
+# the vise (CALIPER_LOOK: its body, the roller's neck, the roller and the knob, their knurls, the GLBs' material; the
+# printed scale, the vernier and the knob's white line keep their colours, as the texts and the readings need); bin_finish:
+# the bins (the label cards stay white); sleeve_finish: all four sleeves (they stay alike).
+CALIPER_LOOK = dict(body=STEEL, dark=DARK, roller=ROLLER_RGB, knurl=KNURL, metallic=0.3, roughness=0.45,
+                    knob_roughness=0.5)
+FIXTURE_FINISHES = dict(
+    slate_blue=dict(vise=VISE_BODY, base=VISE_BASE, steel=VISE_STEEL, rack=RACK_BASE, vblock=RACK_VBLOCK, metallic=0.0,
+                    roughness=0.6, caliper=CALIPER_LOOK),
+    # machine green hammer paint, black-oxide V-blocks and vise steel; a black-coated caliper
+    forest_green=dict(vise=(0.10, 0.28, 0.14), base=(0.04, 0.10, 0.05), steel=(0.06, 0.06, 0.07), rack=(0.12, 0.32, 0.17),
+                      vblock=(0.05, 0.05, 0.06), metallic=0.3, roughness=0.45,
+                      caliper=dict(body=(0.06, 0.06, 0.07), dark=(0.35, 0.35, 0.37), roller=(0.10, 0.10, 0.11),
+                                   knurl=(0.03, 0.03, 0.035), metallic=0.2, roughness=0.55, knob_roughness=0.6)),
+    # red powder coat, blue anodised V-blocks, brass vise screw and jaw plates; a gold (titanium nitride) coated caliper
+    vise_red=dict(vise=(0.50, 0.05, 0.04), base=(0.25, 0.02, 0.02), steel=(0.78, 0.60, 0.30), rack=(0.58, 0.07, 0.05),
+                  vblock=(0.06, 0.18, 0.55), metallic=0.1, roughness=0.3,
+                  caliper=dict(body=(0.72, 0.55, 0.20), dark=(0.30, 0.20, 0.05), roller=(0.55, 0.40, 0.12),
+                               knurl=(0.40, 0.28, 0.08), metallic=0.9, roughness=0.4, knob_roughness=0.45)))
+# The bins (the user, 2026-10-21: any colours, as long as the seeds tell apart, the bins show clearly on the white table
+# and their labels read): dark plastics of hues far from the grey-blue and from the same seed's vise and rack (seed 1:
+# dark red, a satin plastic; seed 2: dark green, a matte one). (colour, metallic, roughness)
+BIN_FINISHES = dict(grey_blue=(BIN_RGB, 0.0, 0.6), dark_red=((0.45, 0.10, 0.09), 0.0, 0.4),
+                    dark_green=((0.14, 0.36, 0.22), 0.0, 0.8))
+# The sleeves: turned steel; polished brass; black oxide. (colour, metallic, roughness)
+SLEEVE_FINISHES = dict(steel=(SLEEVE_RGB, SLEEVE_METALLIC, SLEEVE_ROUGHNESS), brass=((0.80, 0.64, 0.32), 1.0, 0.25),
+                       black_oxide=((0.18, 0.18, 0.20), 0.6, 0.5))
 
 
 # ================================================================ scenario
@@ -595,10 +614,12 @@ def _box_corners(lo, hi):
     return np.array([[(hi if i & 1 else lo)[0], (hi if i & 2 else lo)[1], (hi if i & 4 else lo)[2]] for i in range(8)])
 
 
-def build_caliper(folder: Path, k: float, b: float):
+def build_caliper(folder: Path, k: float, b: float, look=CALIPER_LOOK):
     """caliper.urdf: link beam (frame C), link slider on the prismatic joint slider, link screw (the locking screw's
     knob) on the revolute joint screw; the scale and the vernier in the caliper's unit (k mm per unit, b units at closed
-    jaws). Returns (path, beam vertices in C (m), grasp regions {link: (centre (m), radius (m))})."""
+    jaws), the body in the finish look (CALIPER_LOOK). Returns (path, beam vertices in C (m), grasp regions {link:
+    (centre (m), radius (m))})."""
+    body, dark, roller, knurl = look["body"], look["dark"], look["roller"], look["knurl"]
     B, J, I, S, Rr, Kn = BEAM, OUT_JAW, IN_JAW, SLIDER, ROLLER, KNOB
     hw, ht = B["half_w"], B["half_t"]
     jaw_root_y = -hw - (J["depth"] - J["tip_len"])
@@ -643,51 +664,51 @@ def build_caliper(folder: Path, k: float, b: float):
         c = Canvas(third, 2 * hw, scale.ppm, SCALE_BG)
         c.img[:] = scale.img[:, int(round(k * third * scale.ppm)):int(round(k * third * scale.ppm)) + c.w]
         pieces.append(c)
-    atlas = Atlas([STEEL], pieces)
+    atlas = Atlas([body], pieces)
     vm = VisualMesh(atlas)
     for lo, hi in beam_boxes:
-        vm.box(lo, hi, STEEL)
-    vm.mesh(_cylinder(EDGE_R, I["tip_y1"] - I["root_y1"], 12, "y", (EDGE_R, (I["root_y1"] + I["tip_y1"]) / 2, 0)), STEEL)
+        vm.box(lo, hi, body)
+    vm.mesh(_cylinder(EDGE_R, I["tip_y1"] - I["root_y1"], 12, "y", (EDGE_R, (I["root_y1"] + I["tip_y1"]) / 2, 0)), body)
     for k in range(3):
         vm.quad_up(B["x0"] + k * third, B["x0"] + (k + 1) * third, -hw, hw, ht + 0.01, k, 0.0, hw)
-    vm.export(folder / "caliper_beam.glb", metallic=0.3, roughness=0.45)
+    vm.export(folder / "caliper_beam.glb", metallic=look["metallic"], roughness=look["roughness"])
     beam.visual = folder / "caliper_beam.glb"
 
     vern = vernier_canvas(k)
-    atlas = Atlas([STEEL, DARK, KNURL, ROLLER_RGB], [vern])
+    atlas = Atlas([body, dark, knurl, roller], [vern])
     vm = VisualMesh(atlas)
     for lo, hi in slider_boxes[:-1]:
-        vm.box(lo, hi, STEEL)
-    vm.box(*slider_boxes[-1], DARK)
-    vm.mesh(_cylinder(EDGE_R, I["tip_y1"] - I["root_y1"], 12, "y", (-EDGE_R, (I["root_y1"] + I["tip_y1"]) / 2, 0)), STEEL)
-    vm.mesh(_cylinder(Rr["r"], 2 * Rr["half_h"], 40, "z", (Rr["x"], Rr["y"], 0.0)), ROLLER_RGB)
+        vm.box(lo, hi, body)
+    vm.box(*slider_boxes[-1], dark)
+    vm.mesh(_cylinder(EDGE_R, I["tip_y1"] - I["root_y1"], 12, "y", (-EDGE_R, (I["root_y1"] + I["tip_y1"]) / 2, 0)), body)
+    vm.mesh(_cylinder(Rr["r"], 2 * Rr["half_h"], 40, "z", (Rr["x"], Rr["y"], 0.0)), roller)
     import trimesh
     for k in range(20):                                         # knurls on the roller (drawn only)
         a = 2 * math.pi * k / 20
-        knurl = trimesh.creation.box(extents=(0.7, 1.0, 2 * Rr["half_h"]))
+        knurl_box = trimesh.creation.box(extents=(0.7, 1.0, 2 * Rr["half_h"]))
         T = np.eye(4)
         T[:3, :3] = [[math.cos(a), -math.sin(a), 0], [math.sin(a), math.cos(a), 0], [0, 0, 1]]
         T[:3, 3] = (Rr["x"] + Rr["r"] * math.cos(a), Rr["y"] + Rr["r"] * math.sin(a), 0.0)
-        vm.mesh(knurl, KNURL, T)
-    vm.box((S["x1"], -1.0, -ht - 1.0), (B["x1"], 1.0, -ht - 0.05), STEEL)          # depth bar (drawn only)
+        vm.mesh(knurl_box, knurl, T)
+    vm.box((S["x1"], -1.0, -ht - 1.0), (B["x1"], 1.0, -ht - 0.05), body)           # depth bar (drawn only)
     vx0 = Z0 - 6.0
     vm.quad_up(vx0, vx0 + vern.w / vern.ppm, -10.0, 0.0, S["z_top"] + 0.01, 0, 0.0, 0.0)
-    vm.export(folder / "caliper_slider.glb", metallic=0.3, roughness=0.45)
+    vm.export(folder / "caliper_slider.glb", metallic=look["metallic"], roughness=look["roughness"])
     slider.visual = folder / "caliper_slider.glb"
 
     # the knob: a knurled cylinder (24 ribs) with a white index line on its top from the axis to the rim (link +x)
-    atlas = Atlas([ROLLER_RGB, KNURL, KNOB_MARK])
+    atlas = Atlas([roller, knurl, KNOB_MARK])
     vm = VisualMesh(atlas)
-    vm.mesh(_cylinder(Kn["r"] - 0.15, Kn["h"], 40, "z", (0.0, 0.0, Kn["h"] / 2)), ROLLER_RGB)
+    vm.mesh(_cylinder(Kn["r"] - 0.15, Kn["h"], 40, "z", (0.0, 0.0, Kn["h"] / 2)), roller)
     for j in range(24):
         a = 2 * math.pi * j / 24
         rib = trimesh.creation.box(extents=(0.45, 0.6, Kn["h"] - 1.0))
         T = np.eye(4)
         T[:3, :3] = [[math.cos(a), -math.sin(a), 0], [math.sin(a), math.cos(a), 0], [0, 0, 1]]
         T[:3, 3] = ((Kn["r"] - 0.2) * math.cos(a), (Kn["r"] - 0.2) * math.sin(a), Kn["h"] / 2)
-        vm.mesh(rib, KNURL, T)
+        vm.mesh(rib, knurl, T)
     vm.box((0.0, -0.45, Kn["h"]), (Kn["r"] - 0.3, 0.45, Kn["h"] + 0.06), KNOB_MARK)
-    vm.export(folder / "caliper_screw.glb", metallic=0.3, roughness=0.5)
+    vm.export(folder / "caliper_screw.glb", metallic=look["metallic"], roughness=look["knob_roughness"])
     knob.visual = folder / "caliper_screw.glb"
 
     path = folder / "caliper.urdf"
@@ -712,9 +733,10 @@ def build_caliper(folder: Path, k: float, b: float):
     return path, verts, regions
 
 
-def build_sleeve(folder: Path, index: int, id_mm: float, od_mm: float, rgb=SLEEVE_RGB):
-    """sleeve_<index>.urdf: one link `sleeve` (axis local z), 192-box ring collision, drawn in rgb. Returns (path, drawn
-    vertices (m))."""
+def build_sleeve(folder: Path, index: int, id_mm: float, od_mm: float, rgb=SLEEVE_RGB, metallic=SLEEVE_METALLIC,
+                 roughness=SLEEVE_ROUGHNESS):
+    """sleeve_<index>.urdf: one link `sleeve` (axis local z), 192-box ring collision, drawn in rgb with that metallic and
+    roughness. Returns (path, drawn vertices (m))."""
     ro, ri = od_mm / 2, id_mm / 2
     half_t = math.tan(math.pi / SLEEVE_N_BOX) * ro
     rc = (ro + ri) / 2
@@ -730,17 +752,18 @@ def build_sleeve(folder: Path, index: int, id_mm: float, od_mm: float, rgb=SLEEV
     atlas = Atlas([rgb])
     vm = VisualMesh(atlas)
     vm.mesh(tube, rgb)
-    vm.export(folder / f"sleeve_{index}.glb", metallic=SLEEVE_METALLIC, roughness=SLEEVE_ROUGHNESS)
+    vm.export(folder / f"sleeve_{index}.glb", metallic=metallic, roughness=roughness)
     link.visual = folder / f"sleeve_{index}.glb"
     path = folder / f"sleeve_{index}.urdf"
     write_urdf(path, f"sleeve_{index}", [link])
     return path, np.asarray(tube.vertices) * MM
 
 
-def build_fixture(folder: Path, name: str, boxes, rgb, extra=None, draw_boxes=True, swatches=()):
-    """A fixed one-link URDF of boxes (mm, in the fixture's own frame), drawn in one colour; extra(vm) adds drawn-only
-    parts (and the atlas images they need: extra = (canvases, callable)); draw_boxes False: only extra draws (it must
-    cover the boxes), in the colours `swatches` (and rgb)."""
+def build_fixture(folder: Path, name: str, boxes, rgb, extra=None, draw_boxes=True, swatches=(), metallic=0.0,
+                  roughness=0.6):
+    """A fixed one-link URDF of boxes (mm, in the fixture's own frame), drawn in one colour (its GLB of that metallic and
+    roughness); extra(vm) adds drawn-only parts (and the atlas images they need: extra = (canvases, callable));
+    draw_boxes False: only extra draws (it must cover the boxes), in the colours `swatches` (and rgb)."""
     link = Link(name)
     for lo, hi in boxes:
         link.box(lo, hi)
@@ -751,7 +774,7 @@ def build_fixture(folder: Path, name: str, boxes, rgb, extra=None, draw_boxes=Tr
         vm.box(lo, hi, rgb)
     if draw is not None:
         draw(vm)
-    vm.export(folder / f"{name}.glb", metallic=0.0, roughness=0.6)
+    vm.export(folder / f"{name}.glb", metallic=metallic, roughness=roughness)
     link.visual = folder / f"{name}.glb"
     path = folder / f"{name}.urdf"
     write_urdf(path, name, [link])
@@ -813,32 +836,33 @@ def _rack_drawer(base_rgb=RACK_BASE, vblock_rgb=RACK_VBLOCK):
     return draw
 
 
-def _vise_drawer(body_rgb=VISE_BODY):
+def _vise_drawer(body_rgb=VISE_BODY, base_rgb=VISE_BASE, steel_rgb=VISE_STEEL):
     """The caliper's stand drawn as a small bench vise clamping the beam's tail (caliper frame C, mm; drawn only, the
     collision is stand_boxes(), which the vise covers): a cast-iron base plate on the table, the body under the beam
     (body_rgb: blue-grey in the recorded look), two jaws beside the beam (0.6 mm clear of it) with steel jaw plates
-    rising 2 mm above its face, the screw and its T-handle on the -C y side (away from the observation cameras)."""
+    rising 2 mm above its face, the screw and its T-handle on the -C y side (away from the observation cameras); the base
+    in base_rgb, the jaw plates, screw and handle in steel_rgb."""
     S, Bm = STAND, BEAM
     z_t, z_u = -S["height"], -Bm["half_t"]
     x0, x1 = S["x0"], S["x1"]
     gap = Bm["half_w"] + 0.6
 
     def draw(vm):
-        vm.box((x0 - 15.0, -30.0, z_t), (x1 + 15.0, 30.0, z_t + 6.0), VISE_BASE)
+        vm.box((x0 - 15.0, -30.0, z_t), (x1 + 15.0, 30.0, z_t + 6.0), base_rgb)
         vm.box((x0, -S["half_w"], z_t + 6.0), (x1, S["half_w"], -20.0), body_rgb)
         vm.box((x0, -gap, -20.0), (x1, gap, z_u), body_rgb)
         for side in (-1, 1):
             vm.box((x0, min(side * gap, side * 20.0), -20.0), (x1, max(side * gap, side * 20.0), Bm["half_t"] - 3.0),
                    body_rgb)
             vm.box((x0 + 3.0, min(side * gap, side * (gap + 1.6)), Bm["half_t"] - 3.0),
-                   (x1 - 3.0, max(side * gap, side * (gap + 1.6)), Bm["half_t"] + 2.0), VISE_STEEL)
+                   (x1 - 3.0, max(side * gap, side * (gap + 1.6)), Bm["half_t"] + 2.0), steel_rgb)
             vm.box((x0 + 3.0, min(side * (gap + 1.6), side * 20.0), Bm["half_t"] - 3.0),
                    (x1 - 3.0, max(side * (gap + 1.6), side * 20.0), Bm["half_t"] - 1.0), body_rgb)
         xm = (x0 + x1) / 2
-        vm.mesh(_cylinder(3.5, 26.0, 20, "y", (xm, -33.0, -10.0)), VISE_STEEL)
-        vm.mesh(_cylinder(2.2, 44.0, 16, "x", (xm, -46.0, -10.0)), VISE_STEEL)
+        vm.mesh(_cylinder(3.5, 26.0, 20, "y", (xm, -33.0, -10.0)), steel_rgb)
+        vm.mesh(_cylinder(2.2, 44.0, 16, "x", (xm, -46.0, -10.0)), steel_rgb)
         for sx in (-1, 1):
-            vm.mesh(_cylinder(3.0, 4.0, 16, "x", (xm + sx * 22.0, -46.0, -10.0)), VISE_STEEL)
+            vm.mesh(_cylinder(3.0, 4.0, 16, "x", (xm + sx * 22.0, -46.0, -10.0)), steel_rgb)
     return draw
 
 
@@ -919,34 +943,39 @@ def build_caliper_sorting(folder, seed: int, fixture_finish="slate_blue", bin_fi
     scen = scenario(seed)
     L = layout(scen)
     ents, local, regions = [], {}, {}
-    cal_path, cal_verts, cal_regions = build_caliper(folder, scen["unit_mm"], scen["zero_reading"])
+    fx = FIXTURE_FINISHES[fixture_finish]
+    cal_path, cal_verts, cal_regions = build_caliper(folder, scen["unit_mm"], scen["zero_reading"], fx["caliper"])
     ents.append(SimpleNamespace(name="caliper", path=cal_path, pos=tuple(float(v) for v in L["caliper"]), quat=CALIPER_QUAT_WXYZ,
                                 fixed=True, joints={"mount": 0.0, "slider": 0.0, "screw": math.radians(KNOB_TRAVEL_DEG)},
                                 options={"joint_equalities": [caliper_lock_equality()]}))
     local["caliper"] = cal_verts
     regions.update({("caliper", k): v for k, v in cal_regions.items()})
     for k, s in enumerate(scen["sleeves"]):
-        path, verts = build_sleeve(folder, k, s["id_mm"], s["od_mm"], SLEEVE_FINISHES[sleeve_finish])
+        path, verts = build_sleeve(folder, k, s["id_mm"], s["od_mm"], *SLEEVE_FINISHES[sleeve_finish])
         rx, ry = L["rack"][s["slot"]]
         ents.append(SimpleNamespace(name=f"sleeve_{k}", path=path, pos=(float(rx), float(ry), (RACK["floor"] + s["od_mm"] / 2) * MM),
                                     quat=SLEEVE_QUAT_WXYZ, fixed=False, joints={}, options={}))
         local[f"sleeve_{k}"] = verts
         regions[(f"sleeve_{k}", "sleeve")] = (np.zeros(3), SLEEVE_GRASP_RADIUS_M)
     rx, ry = L["rack"][0]
-    fx = FIXTURE_FINISHES[fixture_finish]
     ents.append(SimpleNamespace(name="sleeve_rack", path=build_fixture(folder, "sleeve_rack", rack_boxes(), fx["rack"],
                                                                         extra=((), _rack_drawer(fx["rack"], fx["vblock"])),
-                                                                        draw_boxes=False, swatches=(fx["vblock"],)),
+                                                                        draw_boxes=False, swatches=(fx["vblock"],),
+                                                                        metallic=fx["metallic"], roughness=fx["roughness"]),
                                 pos=(float(rx), float(ry), 0.0), quat=(1.0, 0.0, 0.0, 0.0), fixed=True, joints={}, options={}))
     ents.append(SimpleNamespace(name="caliper_stand", path=build_fixture(folder, "caliper_stand", stand_boxes(), fx["vise"],
-                                                                          extra=((), _vise_drawer(fx["vise"])), draw_boxes=False,
-                                                                          swatches=(VISE_BASE, VISE_STEEL)),
+                                                                          extra=((), _vise_drawer(fx["vise"], fx["base"], fx["steel"])),
+                                                                          draw_boxes=False,
+                                                                          swatches=(fx["base"], fx["steel"]),
+                                                                          metallic=fx["metallic"], roughness=fx["roughness"]),
                                 pos=tuple(float(v) for v in L["caliper"]), quat=CALIPER_QUAT_WXYZ, fixed=True, joints={},
                                 options={}))
     for k, cls in enumerate(scen["bins"]):
         bx, by = L["bins"][k]
-        path = build_fixture(folder, f"bin_{k}", bin_boxes(), BIN_FINISHES[bin_finish],
-                             extra=([label_canvas(label_lines(scen, cls))], _label_drawer(back=k // 2 == 0)))
+        rgb, metallic, roughness = BIN_FINISHES[bin_finish]
+        path = build_fixture(folder, f"bin_{k}", bin_boxes(), rgb,
+                             extra=([label_canvas(label_lines(scen, cls))], _label_drawer(back=k // 2 == 0)),
+                             metallic=metallic, roughness=roughness)
         ents.append(SimpleNamespace(name=f"bin_{k}", path=path, pos=(float(bx), float(by), 0.0), quat=(1.0, 0.0, 0.0, 0.0),
                                     fixed=True, joints={}, options={}))
     return SimpleNamespace(entities=ents, scenario=scen, layout=L, local_vertices=local, grasp_regions=regions,

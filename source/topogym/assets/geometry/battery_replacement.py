@@ -538,14 +538,6 @@ def _quat(T):
     return Rotation.from_matrix(T[:3, :3]).as_quat()[[3, 0, 1, 2]]
 
 
-def _repaint(line, look):
-    """A visual geom's line with its colour replaced as look ({colour: colour}) says."""
-    for a, b in look.items():
-        if f'rgba="{a}"' in line:
-            return line.replace(f'rgba="{a}"', f'rgba="{b}"')
-    return line
-
-
 def _visual_twins(lines):
     """Every colliding geom outside group 3 moved to group 3 and followed by its visual twin (contype 0, no mass, its
     colour): the renderer (nyx_direct, as Genesis) draws a colliding geom of groups 0-2 grey and only visual geoms in
@@ -567,46 +559,56 @@ def _visual_twins(lines):
 # user, 2026-10-20: a seed varies appearance only): each replaces the colours of the visual geoms drawn in the first
 # entry's colours (as written above) and no colliding geom's. Controller: the Xbox outer body (BODY_RGBA, which the
 # compartment's walls share, as on the real controller, whose battery bay is the body's colour), its bumpers and triggers
-# (TRIM_RGBA), the cover, its ridge, its arrow (the compartment's floor, its marks and contacts, the sticks and the
-# buttons keep theirs); tray: the tray; box: the recycling bin (its label keeps its colours); props: the cradle and its rim
+# (TRIM_RGBA), the cover, its ridge, its arrow and, since 2026-10-27, the compartment's floor (its marks and contacts, the
+# sticks and the buttons keep theirs); tray: the tray; box: the recycling bin (its label keeps its colours); props: the cradle and its rim
 # band, the stick's holder, the cover's pad and, in the stick entity alone (STICK_FINISHES, the same names), the pry
 # stick's blade, shaft, handle and grip bands. Since 2026-10-21 the defaults are the props' realistic look of 2026-10-20
 # (the tray dark, the bin navy, the props grey with a black nylon stick); the other finishes differ from it in every part.
 # The cells and the red "+" marks keep their colours: the texts name them (the stick's are no longer named).
 # 2026-10-21 (the user, after the migration session's colour table): the red "+" marks on the compartment's rim stay red
-# and must read on the body, which the rim shares; so the coloured finishes are the real coloured controllers (Pulse Red,
+# and must read on the body, which the rim shares; so the coloured finishes were the real coloured controllers (Pulse Red,
 # Shock Blue: a coloured front and a white back, battery door included), face down showing the white back with the
 # coloured bumpers and triggers; and the rim's white "-" marks (the sixth column) turn dark on a white back.
-CONTROLLER_FINISHES = dict(   # body (and the compartment's walls and rim), bumpers and triggers, cover, ridge, arrow, rim "-"
-    black=(BODY_RGBA, TRIM_RGBA, "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1", "0.92 0.92 0.92 1"),
-    white=("0.86 0.87 0.88 1", "0.80 0.81 0.82 1", "0.84 0.85 0.86 1", "0.76 0.77 0.78 1", "0.68 0.69 0.70 1",
-           "0.12 0.12 0.13 1"),
-    red=("0.90 0.90 0.91 1", "0.66 0.07 0.09 1", "0.88 0.88 0.89 1", "0.80 0.80 0.81 1", "0.62 0.62 0.64 1",
-         "0.12 0.12 0.13 1"),
-    blue=("0.90 0.90 0.91 1", "0.12 0.30 0.70 1", "0.88 0.88 0.89 1", "0.80 0.80 0.81 1", "0.62 0.62 0.64 1",
-          "0.12 0.12 0.13 1"))
-TRAY_FINISHES = dict(dark=(TRAY_RGBA,), white=("0.85 0.85 0.83 1",), grey=("0.60 0.62 0.64 1",))
-BOX_FINISHES = dict(navy=(BIN_RGBA,), blue=("0.30 0.55 0.85 1",), green=("0.20 0.50 0.25 1",))
-PROPS_FINISHES = dict(      # the cradle, its rim band, the stick's holder, the cover's pad
-    grey=(CRADLE_RGBA, CRADLE_RIM_RGBA, STAND_RGBA, PAD_RGBA),
-    wood=("0.55 0.40 0.26 1", "0.68 0.52 0.35 1", "0.60 0.45 0.30 1", "0.74 0.62 0.46 1"),       # a cork pad
-    black=("0.10 0.10 0.11 1", "0.32 0.32 0.34 1", "0.09 0.09 0.10 1", "0.40 0.40 0.42 1"))      # a grey pad
+# 2026-10-27 (the user: seeds 1 and 2 differ from seed 0 and from each other in colour and material, CIEDE2000 >= 20 between
+# any two seeds' colours of a part, >= 20 from every colour the texts name (the cells' grey, tan, black and copper, the red
+# "+"), and every part on the table >= 15 from every table top of topogym.world.look): no white, grey, black, brown or
+# orange part at seeds 1 and 2, so the coloured controllers are Design Lab's single-colour ones (Shock Blue, Electric
+# Volt: back, cover, compartment and its floor in the one colour, the bumpers and triggers darker); the red "+" marks
+# read on either. A finish is (its colours, column by column, roughness, metallic): the recorded look's set no roughness
+# or metallic (its files stay as they were), the others draw them as a material of each colour (entity_xml).
+CONTROLLER_FINISHES = dict(   # body (and the compartment's walls and rim), bumpers and triggers, cover, ridge, arrow, rim
+    # "-", the compartment's floor, the red "+" marks (their red stays, printed on the body's plastic)
+    black=((BODY_RGBA, TRIM_RGBA, "0.13 0.13 0.14 1", "0.2 0.2 0.21 1", "0.35 0.35 0.37 1", "0.92 0.92 0.92 1",
+            "0.62 0.62 0.60 1", "0.85 0.1 0.1 1"), None, None),
+    shock_blue=(("0.08 0.22 0.58 1", "0.03 0.10 0.34 1", "0.076 0.21 0.55 1", "0.05 0.15 0.42 1", "0.20 0.42 0.95 1",
+                 "0.92 0.92 0.92 1", "0.08 0.22 0.58 1", "0.85 0.1 0.1 1"), .65, 0.),   # textured matte
+    electric_volt=(("0.45 0.70 0.05 1", "0.04 0.30 0.10 1", "0.43 0.665 0.05 1", "0.32 0.50 0.035 1", "0.62 0.85 0.20 1",
+                    "0.12 0.12 0.13 1", "0.45 0.70 0.05 1", "0.85 0.1 0.1 1"), .35, 0.))  # glossy
+TRAY_FINISHES = dict(dark=((TRAY_RGBA,), None, None), lime=(("0.45 0.70 0.05 1",), .35, 0.),
+                     pink=(("0.85 0.22 0.55 1",), .6, 0.))
+BOX_FINISHES = dict(navy=((BIN_RGBA,), None, None), yellow=(("0.92 0.78 0.02 1",), .5, 0.),
+                    green=(("0.05 0.40 0.15 1",), .35, 0.))
+PROPS_FINISHES = dict(      # the cradle, its rim band, the stick's holder, the cover's pad: rubber mats and a holder
+    grey=((CRADLE_RGBA, CRADLE_RIM_RGBA, STAND_RGBA, PAD_RGBA), None, None),
+    green_mat=(("0.08 0.24 0.13 1", "0.16 0.38 0.22 1", "0.06 0.20 0.10 1", "0.10 0.28 0.15 1"), .8, 0.),
+    blue_mat=(("0.06 0.16 0.42 1", "0.10 0.24 0.66 1", "0.05 0.13 0.36 1", "0.08 0.19 0.46 1"), .7, 0.))
 STICK_FINISHES = dict(      # the stick's blade, foot and shaft, its handle, its grip bands, keyed by props_finish's names
     # but always a nylon spudger's colour, as the texts call it (2026-10-21: the "wood" props drew it in wood's tan)
-    grey=(STICK_RGBA, HANDLE_RGBA, GRIP_RGBA),                                                    # black nylon
-    wood=("0.88 0.40 0.08 1", "0.72 0.31 0.06 1", "0.95 0.56 0.22 1"),                             # orange nylon
-    black=("0.14 0.24 0.48 1", "0.10 0.17 0.36 1", "0.22 0.33 0.58 1"))                            # blue nylon
+    grey=((STICK_RGBA, HANDLE_RGBA, GRIP_RGBA), None, None),                                       # black nylon
+    green_mat=(("0.06 0.20 0.62 1", "0.04 0.14 0.46 1", "0.14 0.32 0.78 1"), .55, 0.),             # blue nylon
+    blue_mat=(("0.90 0.76 0.02 1", "0.82 0.66 0.01 1", "0.95 0.88 0.05 1"), .45, 0.))              # yellow nylon
 
 
 def finish_colours(controller="black", tray="dark", box="navy", props="grey", entity=None) -> dict:
-    """{default look colour: its colour in these finishes} (entity_xml's look) for the entity named (None: as for every
-    entity but the stick): the stick takes STICK_FINISHES alone (its handle's colour is the bumpers' too), every other
-    entity the controller's, tray's, box's and props' tables."""
+    """{default look colour: (its colour in these finishes, roughness, metallic)} (entity_xml's look) for the entity named
+    (None: as for every entity but the stick): the stick takes STICK_FINISHES alone (its handle's colour is the bumpers'
+    too), every other entity the controller's, tray's, box's and props' tables."""
     tables = ((STICK_FINISHES, props),) if entity == "stick" else (
         (CONTROLLER_FINISHES, controller), (TRAY_FINISHES, tray), (BOX_FINISHES, box), (PROPS_FINISHES, props))
     out = {}
     for table, name in tables:
-        out.update(zip(next(iter(table.values())), table[name]))
+        colours, roughness, metallic = table[name]
+        out.update((a, (b, roughness, metallic)) for a, b in zip(next(iter(table.values()))[0], colours))
     return out
 
 
@@ -640,7 +642,24 @@ def entity_xml(name, polarity="+-", look=None) -> str:
         raise ValueError(f"battery_replacement has no entity {name!r}")
     body = _visual_twins(body)
     if look:                                    # visual geoms only: no colliding geom changes
-        body = [_repaint(line, look) if 'contype="0"' in line else line for line in body]
+        # materials go in the entity's <asset>, which only an entity with meshes has at seed 0 (the cover and the cells
+        # have none: an added <asset> would change their files' physics content), so the cover changes colour only
+        materials, with_materials = {}, bool(meshes)
+
+        def repaint(line):
+            """A visual geom's line in its colour as look says, with a material when the finish sets roughness and
+            metallic."""
+            for a, (b, roughness, metallic) in look.items():
+                if f'rgba="{a}"' in line:
+                    line = line.replace(f'rgba="{a}"', f'rgba="{b}"')
+                    if roughness is not None and with_materials:
+                        material = materials.setdefault((b, roughness, metallic), f"look_{len(materials)}")
+                        line = line[:-2].rstrip() + f' material="{material}"/>'
+                    return line
+            return line
+        body = [repaint(line) if 'contype="0"' in line else line for line in body]
+        meshes += [f'<material name="{n}" rgba="{b}" roughness="{r:g}" metallic="{m:g}"/>'
+                   for (b, r, m), n in materials.items()]
     lines = [f'<mujoco model="{name}">', '<compiler angle="radian" autolimits="true"/>']
     if meshes:
         lines += ["<asset>", *meshes, "</asset>"]

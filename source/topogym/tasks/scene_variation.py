@@ -139,33 +139,48 @@ AXES = {
     # the knob's white line; Trinity's green goal region). Battery's pry stick follows props_finish since 2026-10-21 (its
     # texts no longer name its colours).
     "bed_bolt": (
-        dict(path="wood_finish", kind="choice", values=["walnut", "white_painted", "white_oak"], visual=True),
-        dict(path="bolt_finish", kind="choice", values=["zinc", "yellow_zinc"], visual=True),
-        dict(path="key_finish", kind="choice", values=["black_oxide", "blue_coated"], visual=True),
+        # Colour and material together (geo.WOOD_FINISHES, BOLT_FINISHES, KEY_FINISHES; the user, 2026-10-27): seed 1 a
+        # black-painted frame with brass screws, an antique-brass bolt and a red key; seed 2 a mahogany frame with black
+        # screws, a blue anodised bolt and a black-oxide key (the ratcheting key: a black handle, a gold head). The sign's
+        # card stays white.
+        dict(path="wood_finish", kind="choice", values=["black_painted", "mahogany"], visual=True),
+        dict(path="bolt_finish", kind="choice", values=["antique_brass", "blue_anodised"], visual=True),
+        dict(path="key_finish", kind="choice", values=["red_coated", "black_oxide"], visual=True),
     ),
     "caliper_sorting": (
         # The four sleeves stay alike (one finish for all); bins keep the white label cards.
-        dict(path="fixture_finish", kind="choice", values=["forest_green", "safety_orange", "wood"], visual=True),
+        # Colour and material together (geo.FIXTURE_FINISHES, BIN_FINISHES, SLEEVE_FINISHES; the user, 2026-10-27): seed
+        # 1 a green vise and rack with black V-blocks and a black-coated caliper, dark red bins, brass sleeves; seed 2 a
+        # red vise and rack with blue V-blocks and a gold-coated caliper, dark green bins, black-oxide sleeves. The
+        # caliper's scale, vernier and knob line keep their colours.
+        dict(path="fixture_finish", kind="choice", values=["forest_green", "vise_red"], visual=True),
         dict(path="bin_finish", kind="choice", values=["dark_red", "dark_green"], visual=True),
         dict(path="sleeve_finish", kind="choice", values=["brass", "black_oxide"], visual=True),
     ),
     "clock_assembling": (
-        dict(path="movement_finish", kind="choice", values=["rhodium", "gilt"], visual=True),
-        dict(path="stand_finish", kind="choice", values=["walnut", "white_plastic"], visual=True),
+        # Colour and material together (geo.MOVEMENT_FINISHES, STAND_FINISHES, SCREW_FINISHES; the user, 2026-10-27): seed
+        # 1 a ruthenium plate under rhodium bridges, walnut stands, gilt screws; seed 2 a rhodium plate under ruthenium
+        # bridges and wheels, blue plastic stands, steel screws.
+        dict(path="movement_finish", kind="choice", values=["ruthenium", "rhodium"], visual=True),
+        dict(path="stand_finish", kind="choice", values=["walnut", "blue_plastic"], visual=True),
         dict(path="screw_finish", kind="choice", values=["gilt", "steel"], visual=True),
     ),
     "wire_splicing": (
-        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; one
-        # wire's bare core turns tinned at a time, so the two cores also tell apart up close.
-        dict(path="terminal_finish", kind="choice", values=["white", "black", "grey"], visual=True),
-        dict(path="post_finish", kind="choice", values=["steel", "green", "black"], visual=True),
-        dict(path="core_finish", kind="choice", values=["copper", "b_tinned", "a_tinned"], visual=True),
+        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; the
+        # bare cores turn tinned and aged, one of each per seed, so the two cores also tell apart up close
+        # (geo.TERMINAL_FINISHES, POST_FINISHES, CORE_FINISHES; the user, 2026-10-27).
+        dict(path="terminal_finish", kind="choice", values=["white", "green", "black"], visual=True),
+        dict(path="post_finish", kind="choice", values=["steel", "black", "green"], visual=True),
+        dict(path="core_finish", kind="choice", values=["copper", "tinned_aged", "aged_tinned"], visual=True),
     ),
     "battery_replacement": (
-        dict(path="controller_finish", kind="choice", values=["white", "red", "blue"], visual=True),
-        dict(path="tray_finish", kind="choice", values=["grey", "white"], visual=True),
-        dict(path="box_finish", kind="choice", values=["blue", "green"], visual=True),
-        dict(path="props_finish", kind="choice", values=["wood", "black"], visual=True),
+        # Colour and material together (geo.CONTROLLER_FINISHES ... STICK_FINISHES; the user, 2026-10-27): seed 1 a Shock
+        # Blue controller, a lime tray, a yellow box, green mats and a blue nylon stick; seed 2 an Electric Volt
+        # controller, a pink tray, a green box, blue mats and a yellow nylon stick.
+        dict(path="controller_finish", kind="choice", values=["shock_blue", "electric_volt"], visual=True),
+        dict(path="tray_finish", kind="choice", values=["lime", "pink"], visual=True),
+        dict(path="box_finish", kind="choice", values=["yellow", "green"], visual=True),
+        dict(path="props_finish", kind="choice", values=["green_mat", "blue_mat"], visual=True),
     ),
 }
 

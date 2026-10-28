@@ -228,19 +228,27 @@ def jig_xml() -> str:
 # Appearance seeds (user decision 2026-10-22: a colour axis, scene_variation AXES["wire_splicing"]; the task's
 # terminal_finish, post_finish, core_finish): visual geoms only, re-coloured by look_colours(). The texts name the wires
 # red (A) and blue (B) and the post's yellow rod: the insulation and the rod keep their colours. The first entry of each
-# table is the recorded look (seed 0).
-TERMINAL_FINISHES = dict(white=((.93, .93, .90, 1.),), black=((.14, .14, .15, 1.),), grey=((.55, .57, .60, 1.),))
+# table is the recorded look (seed 0). 2026-10-27 (the user: seeds 1 and 2 differ from seed 0 and from each other by
+# CIEDE2000 >= 20 in every part, >= 20 from the red, blue and yellow the texts name): the bare cores of seeds 1 and 2 are
+# tinned (silver) and aged (tarnished dark copper), one wire each, so the two cores also tell apart up close. Colours
+# only: these entities have no <asset> at seed 0 for a material to go in (the physics content of their files stays seed
+# 0's).
+TERMINAL_FINISHES = dict(   # the block, its two screw heads
+    white=((.93, .93, .90, 1.), (.70, .70, .72, 1.)),
+    green=((.05, .35, .15, 1.), (.06, .06, .065, 1.)),      # terminal-block green, black-oxide screws
+    black=((.14, .14, .15, 1.), (.40, .27, .10, 1.)))       # black, brass screws
 POST_FINISHES = dict(       # the base plate, the post
     steel=((.35, .35, .38, 1.), (.45, .45, .48, 1.)),
     green=((.14, .30, .18, 1.), (.18, .38, .23, 1.)),
     black=((.09, .09, .10, 1.), (.12, .12, .13, 1.)))
-CORE_FINISHES = dict(copper=(RGBA_CU, RGBA_SEAM), tinned=((.74, .75, .77, 1.), (.42, .43, .46, 1.)))
-CORE_CHOICES = dict(copper=("copper", "copper"), b_tinned=("copper", "tinned"), a_tinned=("tinned", "copper"))
+CORE_FINISHES = dict(copper=(RGBA_CU, RGBA_SEAM), tinned=((.74, .75, .77, 1.), (.42, .43, .46, 1.)),
+                     aged=((.30, .14, .07, 1.), (.08, .04, .02, 1.)))
+CORE_CHOICES = dict(copper=("copper", "copper"), tinned_aged=("tinned", "aged"), aged_tinned=("aged", "tinned"))
 
 
 def look_colours(name, terminal="white", post="steel", core="copper") -> dict:
     """{a default colour as the entity's MJCF writes it: its colour in these finishes} for the entity named (entity_xml's
-    look). core: which wire's bare core is tinned, if any (CORE_CHOICES), so the two cores also tell apart up close."""
+    look). core: each wire's bare core (CORE_CHOICES: wire A's, wire B's)."""
     def pairs(table, finish):
         return {_v(a): _v(b) for a, b in zip(next(iter(table.values())), table[finish])}
     if name == "jig":
