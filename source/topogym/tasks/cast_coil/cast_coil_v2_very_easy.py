@@ -27,13 +27,14 @@ class CastCoilV2VeryEasyTask(CastCoilTask):
     model_revision = "coil_design_6_v1"
     difficulty = "very_easy"
     fixed_parameters = ("objective",)
-    # piece_tint (appearance only, CastCoilTask's): at its default it stays out of instance_id
-    hash_when_changed = ("piece_tint",)
+    # piece_finish (appearance only, CastCoilTask's): at its default it stays out of instance_id. No piece_tint: the frozen
+    # instances of these tiers were made without it, and piece_finish sets both pieces' colours.
+    hash_when_changed = ("piece_finish",)
     geometry_resource = "variations/cast_coil/design_6.json"
     defaults = dict(objective="assemble", stable_duration_s=.5,
                     terminal=dict(release_clearance_m=.005, maximum_drift_m=.001, table_clearance_m=.003),
                     gold_center_xy_m=[.03, .12], silver_center_xy_m=[-.30, .12], initial_floor_clearance_m=.0005,
-                    friction=.35, piece_tint=dict(gold=1., silver=1.))
+                    friction=.35, piece_finish="cast")
 
     def solution(self):
         """The pieces' record, without the route."""
@@ -57,13 +58,10 @@ class CastCoilV2VeryEasyTask(CastCoilTask):
             raise ValueError("Invalid initial floor clearance")
         record = self.solution()
         report = generate_assets(Path(asset_dir), record)
-        if cfg["piece_tint"] != self.defaults["piece_tint"]:
-            # Appearance only, as CastCoilTask: rescale each piece's visual GLB colour and its URDF material colour (the
-            # URDF colliders stay).
-            from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color
+        if cfg["piece_finish"] != self.defaults["piece_finish"]:
+            from topogym.assets.scene_visuals import refinish_cast_piece
             for body in report["bodies"].values():
-                scale_glb_color(Path(body["urdf"]).with_suffix(".glb"), cfg["piece_tint"][body["piece"]])
-                scale_urdf_color(body["urdf"], cfg["piece_tint"][body["piece"]])
+                refinish_cast_piece(body["urdf"], body["piece"], cfg["piece_finish"])
         centre = block_centre_cells(record)*float(record["cell_m"])
         self.local_vertices, self.body_origins = {}, {}
         entities, bodies = [], {}

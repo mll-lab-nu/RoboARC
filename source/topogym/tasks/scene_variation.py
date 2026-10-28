@@ -35,9 +35,9 @@ AXES = {
         # silver piece (already at y ~ 0.23) away from both arms, so y only decreases.
         dict(path="center_xy_m", kind="offset", range=[[-.03, .03], [-.03, 0.]]),
         dict(path="yaw_deg", kind="offset", range=[-10., 10.]),
-        # Brightness of each metal; hue stays because the instruction names gold and silver.
-        dict(path="piece_tint.gold", kind="offset", range=[-.1, .1], visual=True),
-        dict(path="piece_tint.silver", kind="offset", range=[-.1, .1], visual=True),
+        # Both pieces' colour and material (scene_visuals.CAST_PIECE_FINISHES): red and blue anodised aluminium, then
+        # black and orange powder coat.
+        dict(path="piece_finish", kind="choice", values=["cast", "anodised", "powder_coat"], visual=True),
     ),
     "cast_keyhole": (
         # Inside the reference policy's IK tolerance (+-20 mm); goal region pinned to +y.
