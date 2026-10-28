@@ -6,6 +6,18 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### Each trial's record names the machine it ran on
+- A trial's results recorded only the index of its GPU (`gpu` in config.json). The GPU's name and driver, the CPU
+  model, the memory and the docker and harbor versions were written only by `scripts/send_results.sh` into the
+  bundle's MANIFEST.md, at upload time and of the machine that sent it, so a batch copied or uploaded any other way had
+  no hardware record.
+- `scripts/harbor/host_info.py` (new) reads the machine: CPU model and count, memory, every GPU nvidia-smi lists
+  (index, name, driver, memory), docker and harbor. The batch runner logs it when a lane starts, as MANIFEST.md's
+  `host:`, `GPUs:` and `software:` lines (each GPU with its memory), and writes it into every job folder as
+  `host.json`; `write_task_results.py` copies it into each trial's config.json as `host`, with the name and driver of
+  the job's GPU (`gpu_name`, `gpu_driver`). A missing tool leaves its field empty and never stops a run.
+- Tests: scripts/harbor/tests/test_host_info.py (new), scripts/harbor/tests/test_runner_seeds.py.
+
 ### One list of the family classes; five families get their class's resources (task change: 18 task directories)
 - `scripts/task_resources.toml` gave the rigid, rope / chain and cloth values by regular expressions that named the
   families; a task they did not name kept the generic rules' values without notice. The five families released after

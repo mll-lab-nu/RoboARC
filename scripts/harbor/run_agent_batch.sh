@@ -113,7 +113,9 @@
 # user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
 # with redaction (scan_secrets.py), the task results, the summary table $JOBS/<batch>.summary.md, and a lane stop on
 # structured model-account failures (account_failure_check.py). Progress: $JOBS/<batch>.log; in a browser, every
-# trial's state (pending / running / done) with scripts/harbor/live_board.py --jobs $JOBS.
+# trial's state (pending / running / done) with scripts/harbor/live_board.py --jobs $JOBS. The machine (host_info.py:
+# CPU model and count, memory, each GPU's name, driver and memory, docker and harbor) is logged when a lane starts and
+# written into every job folder as host.json, which each trial's results config.json carries as `host`.
 set -u
 H="$(cd "$(dirname "$0")" && pwd)"          # scripts/harbor/: the runner's tools
 R="$(cd "$H/../.." && pwd)"                 # the repository: tasks/, scripts/ (the task layer)
@@ -221,6 +223,9 @@ else
   sched="GPU scheduling off"
 fi
 log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}, $sched"
+# the machine, as MANIFEST.md writes it (host:, GPUs:, software:), and as JSON for every job's host.json
+HOST_INFO="$(python3 "$H/host_info.py" 2>/dev/null)" || HOST_INFO=""
+python3 "$H/host_info.py" --lines 2>/dev/null | while IFS= read -r l; do log "$l"; done
 # on exit (also a signal): the usage gateway stopped, and this runner's GPU slots released (a lane killed with SIGKILL
 # leaves them to gpu_slots.py, which drops the slots of runners that have ended)
 gw_pid=""
@@ -620,6 +625,7 @@ run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed 
   (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
   log "done $job (harbor rc=$?)"
   [ -d "$JOBS/$job" ] && cp "$JOBS/.seeds/$job.json" "$JOBS/$job/seed.json"
+  [ -d "$JOBS/$job" ] && [ -n "$HOST_INFO" ] && printf '%s\n' "$HOST_INFO" > "$JOBS/$job/host.json"
   [ -d "$JOBS/$job" ] && [ -n "$JOB_SLOT" ] && placement "$job"
   rm -rf "$root"
   return 0

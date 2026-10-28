@@ -15,6 +15,9 @@ trial (`trial`, `trials`) and how its seed is known (`seed_source`: "runner" fro
 (`success`, `fail` or `not_a_result` with the reason) and whether it is counted. Results are ranked only within one
 comparable configuration (task_conventions.config_key), validated and unvalidated tasks together.
 Usage recording is optional (PROTOCOL H.6, RUNNING.md "Usage recording"); config.json says what the result has:
+The machine the trial ran on, from the batch runner's <job>/host.json (scripts/harbor/host_info.py): `host` (cpu_model,
+cpus, memory_gb, gpus [{index, name, driver, memory_mib}], docker, harbor; null for a job without it) and, when the runner
+placed the job on a GPU (`gpu`, its index), that GPU's name and driver (`gpu_name`, `gpu_driver`).
 `usage_gateway` (true / false: whether the runner routed the trial through the usage gateway, from
 <job>/usage_recording.json; null when the job has no such record, e.g. a plain `harbor run`), `usage_source` (where the
 token counts come from: "usage gateway" (<trial>/gateway/totals.json), "harness" (Harbor's result.json agent_result), or
@@ -170,6 +173,11 @@ def trial_config(trial, task, r):
     place = load_json(trial.parent / "placement.json")    # the runner's GPU and reservation for the job (GPU_SCHED=1)
     if place:
         cfg["gpu"] = place.get("gpu")
+    host = load_json(trial.parent / "host.json")          # the machine the runner ran the job on (host_info.py)
+    cfg["host"] = host or None
+    g = next((g for g in (host.get("gpus") or []) if g.get("index") == cfg.get("gpu")), None) if host else None
+    if g:
+        cfg["gpu_name"], cfg["gpu_driver"] = g.get("name"), g.get("driver")
     if cfg["digest_match"] is False and source in ("default", "runner"):   # another version of the task
         for key in ("cutoff_s", "reset_budget", "slowdown", "network", "validated", "oracle", "service_protocol"):
             cfg[key] = "legacy"

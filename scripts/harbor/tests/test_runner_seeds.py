@@ -13,7 +13,9 @@ seed only.
 - SEQ=0: one job per mode and trial, every task of it from its own seed;
 - K=1: the job name is the one of the runner before seeds;
 - GPU_SCHED=1 (the default): each job's copy has every NVIDIA device pinned to the GPU the host's ledger gave it, and
-  <job>/placement.json records it (a task without a GPU device: none); GPU_SCHED=0 leaves the copies as they are.
+  <job>/placement.json records it (a task without a GPU device: none); GPU_SCHED=0 leaves the copies as they are;
+- the machine (host_info.py, a fake nvidia-smi): logged as host:, GPUs:, software: lines, written into every job as
+  host.json, and in each result's config.json as `host`, with the name and driver of the job's GPU.
 """
 import json
 import os
@@ -34,6 +36,9 @@ FAKE_HARBOR = '''#!{py}
 (no reward.json, an infrastructure failure, when the job is $FAKE_INFRA_JOB)."""
 import json, os, pathlib, re, sys, uuid
 a = sys.argv[1:]
+if a == ["--version"]:
+    print("0.0.0-fake")
+    sys.exit(0)
 val = lambda k: a[a.index(k) + 1]
 tasks = [a[i + 1] for i, x in enumerate(a) if x == "-i"]
 jobs, job, root = pathlib.Path(val("-o")), val("--job-name"), pathlib.Path(val("-p"))
@@ -54,6 +59,9 @@ for t in tasks:
     if os.environ.get("FAKE_INFRA_JOB") != job:
         (d / "verifier" / "reward.json").write_text(json.dumps({{"success": 0}}))
 '''
+
+
+FAKE_NVIDIA_SMI = "#!/bin/sh\nprintf '0, NVIDIA Fake GPU, 580.95.05, 46068\\n1, NVIDIA Fake GPU, 580.95.05, 46068\\n'\n"
 
 
 def pair_bases():
@@ -122,6 +130,8 @@ class RunnerSeeds(unittest.TestCase):
         harbor = bin_dir / "harbor"
         harbor.write_text(FAKE_HARBOR.format(py=sys.executable))
         harbor.chmod(0o755)
+        (bin_dir / "nvidia-smi").write_text(FAKE_NVIDIA_SMI)
+        (bin_dir / "nvidia-smi").chmod(0o755)
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
                     if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_", "FAKE_"))}
@@ -245,6 +255,20 @@ class RunnerSeeds(unittest.TestCase):
             self.assertEqual(self.result(task, 1)["gpu"], place["gpu"])
         state = json.loads((slots / "state.json").read_text())
         self.assertEqual(list(state["holds"]), ["other"])          # every job's slot released
+
+    def test_host_record(self):
+        self.run_batch(self.multi, MODES="privileged")
+        (c,) = self.calls()
+        log = (self.root / "jobs" / "b.log").read_text()
+        self.assertIn("GPUs:       0, NVIDIA Fake GPU, 580.95.05, 46068 MiB; 1, NVIDIA Fake GPU, 580.95.05, 46068 MiB", log)
+        self.assertRegex(log, r"(?m)^\[[^]]+\] host:\s+.+, \d+ CPUs, \d+ GB RAM$")
+        self.assertRegex(log, r"(?m)^\[[^]]+\] software:\s+.*; harbor 0\.0\.0-fake$")
+        host = json.loads((self.root / "jobs" / c["job"] / "host.json").read_text())
+        self.assertEqual([g["name"] for g in host["gpus"]], ["NVIDIA Fake GPU"] * 2)
+        cfg = self.result(f"{self.multi}-privileged", 1)
+        self.assertEqual(cfg["host"], host)
+        self.assertIn(cfg["gpu"], ("0", "1"))
+        self.assertEqual((cfg["gpu_name"], cfg["gpu_driver"]), ("NVIDIA Fake GPU", "580.95.05"))
 
     def test_gpu_sched_off(self):
         self.run_batch(self.multi, MODES="privileged", GPU_SCHED="0")

@@ -109,7 +109,10 @@ the same command again adds a lane: every job is claimed by exactly one runner (
 a GPU ("GPUs and lanes" below); a job that already has its `result.json` is skipped. Each job runs from its own stamped
 copy of the task, made from the trial's seed (`$JOBS/.tasks/<job>/`, removed afterwards; a CPU cap above the host's
 count is clamped in that copy, `scripts/harbor/clamp_cpus.py`, and its GPU devices are pinned,
-`scripts/harbor/pin_gpu.py`). The batch's plan (every job, its trial and seeds) is `$JOBS/.plan/<batch>.json`. The
+`scripts/harbor/pin_gpu.py`). The batch's plan (every job, its trial and seeds) is `$JOBS/.plan/<batch>.json`. Each
+lane logs the machine when it starts, in the `host:`, `GPUs:` and `software:` lines of MANIFEST.md (CPU model and count,
+memory, each GPU's index, name, driver and memory, the docker and harbor versions; `scripts/harbor/host_info.py`), and
+writes it into every job folder as `host.json`, so a trial's record names its hardware wherever it is copied. The
 header of the script lists every variable; the main ones:
 
 | what | how |
@@ -288,8 +291,10 @@ writes one folder per trial, `<dir>/<task>/<run id>/t<k>/` (k = 1..K, the trial'
   `slowdown`, `seed`, `network`, `validated`, `set`, `oracle`, `service_protocol`, `digest`); its trial (`trial`,
   `trials`, the Harbor trial directory `trial_dir` and job `job`) and how its seed is known (`seed_source`: `runner`,
   from the job's `seed.json`; `default` for a job without one); the result and whether it counts (`result`, `counted`,
-  `attempts`, `attempts_over_cap`); and the usage recording (`usage_gateway`, `usage_source`, `usage_recorded`,
-  `token_budget`, see "Usage recording");
+  `attempts`, `attempts_over_cap`); the usage recording (`usage_gateway`, `usage_source`, `usage_recorded`,
+  `token_budget`, see "Usage recording"); and the machine it ran on (`host`, from the job's `host.json`: `cpu_model`,
+  `cpus`, `memory_gb`, `gpus` with each GPU's `index`, `name`, `driver` and `memory_mib`, `docker`, `harbor`; `gpu`,
+  the GPU the runner placed the job on, with its `gpu_name` and `gpu_driver`);
 - `attempts.json`: every attempt of this trial (the infrastructure retry above).
 
 Next to the trials, `<dir>/<task>/<run id>/trials.json` and `README.md` list the task's trials in the run: number,
