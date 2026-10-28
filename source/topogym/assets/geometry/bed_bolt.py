@@ -876,8 +876,10 @@ def _shade(rgba, f):
 WOOD_FINISHES = dict(
     pine=dict(boards=(PINE, None, None), slats=(BIRCH, None, None), block=(HARDWOOD, None, None),
               hardware=(ZINC, None, None), card=(SIGN_CARD, None, None)),
-    black_painted=dict(boards=((.05, .05, .055, 1), .55, 0.), slats=((.08, .08, .085, 1), .55, 0.),
-                       block=((.035, .035, .04, 1), .55, 0.), hardware=((.70, .52, .22, 1), .3, 1.),       # brass screws
+    # charcoal, not black: the frame fills a third of cam_high, and a black one under a dim seed's light darkened the
+    # whole frame below the seeds' exposure floor (bed-bolt-03 seed 1: mean luma 0.30, 2026-10-28)
+    charcoal_painted=dict(boards=((.16, .16, .17, 1), .55, 0.), slats=((.20, .20, .21, 1), .55, 0.),
+                       block=((.12, .12, .13, 1), .55, 0.), hardware=((.70, .52, .22, 1), .3, 1.),       # brass screws
                        card=((.90, .90, .87, 1), .85, 0.)),
     mahogany=dict(boards=((.36, .13, .07, 1), .3, 0.), slats=((.48, .20, .10, 1), .3, 0.),                  # lacquered
                   block=((.26, .09, .05, 1), .3, 0.), hardware=((.06, .06, .065, 1), .45, .6),              # black oxide

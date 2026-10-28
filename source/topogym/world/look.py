@@ -52,7 +52,11 @@ TABLE_FINISHES = {
     "granite_tiles": _texture("stone", "granite_tile_03", 1.8, lum=.38),
 }
 # Table tops a family's seeds never draw: those its objects would not stand out from (task_id -> names).
-TABLE_EXCLUDED: dict[str, tuple] = {}
+TABLE_EXCLUDED: dict[str, tuple] = {
+    # its wrist cameras look down onto the table at close range past dark wooden parts (the owl): the darkest top
+    # left hedgehog-07's seed 1 wrist view below the exposure floor (0.338, 2026-10-28)
+    "hedgehog_in_cage": ("coated_pine",),
+}
 # Floors; the first is compact_lab's blue-grey tiles (seed 0's), its grout lines staying under every floor. Seeds 1 and 2
 # draw two different classes.
 FLOOR_FINISHES = {

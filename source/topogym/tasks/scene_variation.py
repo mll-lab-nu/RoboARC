@@ -161,7 +161,7 @@ AXES = {
         # black-painted frame with brass screws, an antique-brass bolt and a red key; seed 2 a mahogany frame with black
         # screws, a blue anodised bolt and a black-oxide key (the ratcheting key: a black handle, a gold head). The sign's
         # card stays white.
-        dict(path="wood_finish", kind="choice", values=["black_painted", "mahogany"], visual=True),
+        dict(path="wood_finish", kind="choice", values=["charcoal_painted", "mahogany"], visual=True),
         dict(path="bolt_finish", kind="choice", values=["antique_brass", "blue_anodised"], visual=True),
         dict(path="key_finish", kind="choice", values=["red_coated", "black_oxide"], visual=True),
     ),
