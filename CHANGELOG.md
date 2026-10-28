@@ -4,6 +4,201 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased (appearance seeds v2)
+
+Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the
+table top's material, the table's frame and the floor change too, and the task's objects change colour and material,
+family by family. The green dashed goal marker is 5 mm wide (it was 2 mm) and drawn glowing at every seed. The IKEA
+tasks get seeds 0, 1 and 2, which light the standard mode's camera images differently. The physics, the graders and the
+reference rows are unchanged. Not released yet: the image, the instances and the task directories are still to be made
+(below).
+
+### What an appearance seed changes (`64a5c387`, `446feb71`, `b2dbcdc5`)
+- Seed 0 is the released look, except the goal marker (below). Seeds 1 and 2 carry a task parameter `scene_look`
+  (`source/topogym/world/look.py`, drawn by `scene_variation.scene_look`) besides the family's own appearance parameters
+  (`scene_variation.appearance(cls, S)`). `scene_look` changes the renderer's configuration only:
+  - lighting: the four ceiling lights keep their x, y; one of lights 1-3 is the key light (three times as bright as the
+    others, the only one casting shadows; seed 0's key light is light 0); all four hang at 1.9-2.4 m (seed 0: 2.40 m);
+    their light is white of a warm (3600-4300 K) or a cool (8000-10000 K) colour temperature (seed 0: about 6000 K); a
+    brightness factor scales them and the environment map, which takes the lights' colour as its tint: 1.25-1.50 on one
+    seed, 0.65-0.78 on the other. Of seeds 1 and 2, one is warm and one cool, one bright and one dim, and the one with
+    the darker table top takes the brighter light. A dim seed on a dark table top (terrazzo, brushed concrete, coated
+    pine) dims to 0.85 at least (`23a52adb`), bed_bolt's dim seed to 0.9 at least (`5f131070`);
+  - the table top: wood (ash veneer, cherry veneer, coated pine), metal (brushed steel, satin aluminium) or stone
+    (terrazzo, brushed concrete), never seed 0's grey plastic laminate; seeds 1 and 2 take two different classes
+    (hedgehog_in_cage never takes coated pine; granite tiles were dropped as too dark, `2c454edc`);
+  - the floor: wood parquet, tiles (beige or terracotta), concrete or carpet, two different classes, never seed 0's
+    blue-grey tiles;
+  - the table top's rim and apron: light wood, black powder coat, aluminium, white edge band, grey rubber or blue
+    painted steel, two different ones, never seed 0's dark wood;
+  - Nyx also draws the roughness and metalness that MJCF materials and mesh surfaces declare (`renderer.pbr_materials`,
+    the robot excepted); seed 0 is drawn as released, without them.
+  Each base draws, once for both seeds, which seed is warm and which bright, the order of the key lights and of the
+  table's and the floor's classes, and one finish per class. The draw is keyed by the task class: blanket-flatten 04 and
+  07 (one class) have the same looks.
+- The task's objects, per family (seed 1, then seed 2; the families' finish tables and `scene_variation.AXES`):
+  - battery_replacement: a Shock Blue controller (back, cover, compartment and its floor; matte), a lime tray, a yellow
+    recycling box, green mats and holder, a blue nylon pry stick; an Electric Volt controller (glossy), a pink tray, a
+    green box, blue mats and holder, a yellow nylon stick. The cover changes colour only;
+  - bed_bolt: a charcoal-painted frame and holders with brass screws, an antique-brass bolt, a red powder-coated key (the
+    ratcheting key: a red handle, a black-oxide head); a lacquered mahogany frame with black-oxide hardware, a blue
+    anodised bolt, a black-oxide key (ratcheting: a black rubber handle, a gold TiN head);
+  - blanket_flatten, blanket_fold: a red wool in a buffalo check with charcoal; a green sateen striped mustard (seed 0:
+    the blue cotton with a hairline grid). The hard tiers' fence (released in Nyx's default white): yellow plastic;
+    walnut;
+  - buzz_wire_3d: the deck, its wooden obstacles and the wire's end blocks blue paint, walnut stain (seed 0 pale wood);
+    the wire brass, stainless steel (copper); the loop gunmetal, polished copper (stainless steel); the handle walnut,
+    ebony (pale wood; the wood texture kept); the sleeves red, blue rubber (black);
+  - caliper_sorting: a green vise and rack, black-oxide V-blocks, a black-coated caliper, dark red bins, brass sleeves; a
+    red vise and rack, blue anodised V-blocks, a gold (TiN) coated caliper, dark green bins, black-oxide sleeves;
+  - cast_coil, cast_keyhole: the piece that is gold at seed 0 turns red and the silver one blue (anodised aluminium);
+    then black and orange (powder coat);
+  - clock_assembling: a ruthenium plate under rhodium bridges, walnut stands, gilt screws; a rhodium plate under
+    ruthenium bridges and wheels, blue plastic stands, steel screws (the arbors, pinions, snails and jewels keep their
+    colours and change material only);
+  - fiber_bundling: the jacket glossy blue PVC, matte orange PUR; the other strands of the palette take other colours;
+    the ring teal, black anodised (seed 0 copper); the rear terminal, cable cradle, ring mount and pegs re-coloured as
+    an orange enclosure, then a black one;
+  - hedgehog_in_cage: the mount black anodised, blue powder coat; the cage and ball of 02, 03 and 08 crimson enamel and
+    cobalt anodised, gunmetal and red lacquer; the Cast Cage (06) cobalt anodised, gold plated, its star gold plated,
+    black nickel, its push rod black oxide, cobalt anodised; the owl's cage (07) cobalt paint, black iron, the owl
+    wenge, beech (wood at every seed), its rod yellow, cobalt;
+  - horseshoe_ring: the ring red painted, dark coated metal (seed 0 copper); the horseshoes and chain links black oxide,
+    bronze (steel);
+  - interlocked_claws: anodised (the target piece purple, the other red; Cast Trinity's T red, H blue, B black); powder
+    coat (yellow, blue; Trinity blue, yellow, red); seed 0 brown and teal (Trinity gold, silver, copper);
+  - knot_untying: the rope blue nylon, black polyester (seed 0 orange polypropylene); in 06, 07 and 09 the posts and curb
+    oiled walnut, blue powder coat, the clamp black oxide, red powder coat;
+  - lock_picking: the base teak, green powder coat; the stop frames and key tray blue painted, plywood; the rotor plates
+    red, green, white and blue acrylic with an orange END plate, sky blue, pink, lime and teal anodised with a natural
+    aluminium END plate; the key brass, gunmetal (seed 0 silver);
+  - orbits: the base and posts walnut stained, black lacquer; the stopper ball and rings dark wood, red paint; the cord
+    orange polypropylene, blue nylon; the wooden handle another wood, lacquered ebony, oiled mahogany (seed 0 light
+    wood; `102100ff`);
+  - rope_threading: the rope blue braided nylon, black polyester (seed 0 hemp); the rings and grommets glossy, matte
+    powder coat at 90 % shade, their hues kept; the bulkhead, pedestals, posts and stands olive drab, steel blue;
+  - slotted_post_ring: the cord blue, red nylon (seed 0 hemp); the post and base oiled cherry, navy lacquer, the beads
+    black, teal, the end discs pink, yellow, the metal ring violet, pink anodised;
+  - wire_splicing: the terminal blocks green with black-oxide screws, black with brass screws (seed 0 white); the
+    bending post's base plate and post black, green (steel); the bare cores: wire A's tinned and wire B's aged
+    (tarnished copper), then the other way round (seed 0 copper). Colours only.
+- Parts whose colour the texts need to tell parts apart keep their hue: rope-threading's rings and grommets (cyan,
+  green, purple, amber, red), wire-splicing's red and blue insulation and the post's yellow rod, fiber-bundling's red
+  fibers (strands 0 and 8; 90 % shade at seed 2), battery-replacement's cells (grey with a tan band, black with a copper
+  band) and red "+" marks, caliper-sorting's printed scale, vernier, the knob's white line and the bins' white label
+  cards, bed-bolt's drive card (white: matte paper, then coated card; its drawing unchanged), and the green goal marker.
+  The parts the texts name by material keep it (the metal wire and loop, the wooden handles, the rubber sleeves, the
+  nylon pry stick, slotted-post-ring's metal ring, the cloth). `docs/simulator/seeds/colour_table.md` lists them.
+
+### The goal marker: 5 mm wide and glowing, at every seed (`b2dbcdc5`)
+- The green dashed line round the goal square is 5 mm wide instead of 2 mm and drawn glowing (an emissive surface, 2.5
+  times its green; `nyx_direct.py` draws a mesh entity's emission), so it stands out on every table top and under every
+  light. The dashes (20 mm, gaps 10 mm) and the colour are as before.
+- The stripes grew outward: each stripe's inner edge, the containment limit the texts name, is where it was, so the
+  goal and the grading are unchanged. The marker is a drawn mesh (no collision); the grader reads the goal region, not
+  the marker.
+- This is every seed, seed 0 included: the frozen scenes of the 30 bases that draw the marker are made again
+  (cast-keyhole 02-06, hedgehog-in-cage 02, 03, 06-08, horseshoe-ring 01-05, interlocked-claws 02, 05, 08-13, orbits
+  01-02, slotted-post-ring 01-05). Their birth states are unchanged (cast-keyhole-02's stays `aad47b14b8722c9e`).
+- knot-untying 07 and 09 draw no marker in the scene; their goal pictures paint 5 mm dashes (`8b2c00e4`).
+
+### Texts (`810302a8` and the families' commits)
+- The colour words for parts whose colour now changes are gone; the parts are named by shape or role:
+  - cast-keyhole 02-05: "the keyhole plate" and "the fork plate", with a sentence on their shapes (a closed, stepped
+    hole; a stepped slot open at one end); 06: "the right-hand plate" and "the left-hand plate" (the hand that holds it
+    at the start). Was "the silver keyhole piece" and "the gold piece";
+  - cast-coil 04-08: "the two Cast Coil pieces" (was "the gold and silver Cast Coil pieces");
+  - interlocked-claws 02: "the cross piece" and "the frame piece", 08-10: "the key piece" and "the lock piece", each
+    with a sentence on their shapes (was "the brown claw piece" and "the other claw piece"); the release design string of
+    06-10 says "a key and a lock";
+  - fiber-bundling 02, 04, 05, 08, 09: "the fixed ring" (was "the fixed copper ring");
+  - buzz-wire-3d 06, 07, 10: "Rubber sleeves on the wire are insulated" (was "Black rubber sleeves").
+- Object names stay as they were: `keyhole_silver` / `keyhole_gold` and `coil_silver` / `coil_gold` are identifiers,
+  and a text that shows them says once "(the names are identifiers, not colours)".
+- "the inner edge of the 2 mm wide dashed green line" became "5 mm wide" in the texts of the 28 bases that state it
+  (the 30 marker bases but interlocked-claws 05 and 11-13, which only say the square is not part of their goal; and
+  knot-untying 07 and 09).
+- The same words in the catalog texts (`scripts/roboarc/shared/rcb_topogym.py` `TASKS`) and in the release tooling
+  (`tools/release/topogym_rules.py`, `tools/release/mujoco_release.json`).
+- The rules, limits and numbers the texts state are unchanged.
+
+### IKEA: seeds 0, 1 and 2 (`791a168c`, `897288c2`)
+- The 24 IKEA task directories allow seeds 0, 1 and 2 (`[metadata.seeds] build = "runtime"`, `oracle = [0]`); they
+  allowed seed 0 only. Each carries the files `seed` (0) that `scripts/task_seed.py materialize` overwrites.
+- A seed changes the standard mode's Nyx lighting only, by the puzzles' rule with IKEA's own bands: one of lights 1-3 is
+  the key light; the lights hang at a height drawn in 1.9-2.4 m above RoboARC's floor (0.98-1.48 m above the work
+  surface; seed 0: 1.48 m); their light is warm (3600-4300 K) or cool (9000-10500 K); the brightness factor is
+  1.35-1.60 on one seed and 0.85-0.92 on the other (vesken 1.00-1.05, svallet 1.05-1.10, uppsta 1.10-1.15, whose
+  released frames are already near the exposure floor). `environment/sim/rig.json` holds every seed's lights (`seeds`),
+  and the sim service picks them by `environment/sim/seed`. Seed 0 is unchanged.
+- The privileged mode shows the agent no images and its replay video keeps the scene's own lights: there every seed is
+  the same task. The scenes, physics, instructions, graders, tooling and references are unchanged, and so are the IKEA
+  images: the render process and its rig are files of the task directory.
+- `roboarc.make(..., instance_seed=S)` passes the seed to an IKEA environment's Nyx renderer.
+  `ci_checks/check-seed-files.py` checks an IKEA standard task's rig for every allowed seed's lighting (no per-seed
+  bindings or staging).
+
+### New visual assets
+- Nine CC0 textures from Poly Haven (https://polyhaven.com), each its colour, OpenGL normal and ARM (ambient occlusion,
+  roughness, metalness) maps at 1k, JPEG: `ash_veneer`, `cherry_veneer`, `coated_pine`, `terrazzo_tiles`,
+  `brushed_concrete` (table tops; the light wood frame uses the ash veneer's maps), `diagonal_parquet`,
+  `interior_tiles`, `terracotta_floor_tiles`, `poly_wool_herringbone` (floors; the concrete floor uses
+  `brushed_concrete`). They are visual assets, read from the renderer's visual asset root
+  (`topogym.assets.library.visual_asset_path`), not files of this repository.
+- An image built from this source needs them in its visual asset root. The recipe fetches only the studio HDRI and the
+  `wood_table_001` maps so far (`source/images/roboarc/prepare_nyx_studio.py`), and `LICENSES/THIRD_PARTY.md` does not
+  list the new textures yet.
+
+### Physics unchanged
+- Every appearance parameter re-colours or re-finishes drawn geometry (visual geoms, GLB materials, MJCF materials,
+  textures) or sets the renderer's lights; no colliding geom, mass, joint or contact parameter is one of them.
+- `tools/release/derive_seed_instance.py` makes each seed from the seed-0 instance as in 1.2.0: `instance_assets/` byte
+  for byte, and it stops unless the seed's physical fields equal seed 0's, its task parameters differ only in
+  `appearance(cls, S)`'s keys and its birth differs from seed 0's in the task's instance id only. The references are
+  reused: the same rows, re-stamped with each seed's new birth.
+- `tools/tests/test_appearance_seeds.py`: for nine settings of eight families, seeds 1 and 2 leave the declared scene
+  and the physics content of every generated file as seed 0's; for three, a `scene_look` changes the renderer's
+  configuration only; for every base, the two looks differ as above.
+
+### What a release must redo
+- The image, built from this source (the simulator source hash in `SOURCE.json`, so the runtime every puzzle task is
+  bound to, changes) with the nine textures in its visual asset root. The IKEA images stay.
+- The seed-0 instances of the 30 marker bases (their scenes; the births and seed-0 references stay). The seed-0
+  instances of the other 48 bases stay as they are.
+- Every seed instance: seeds 1 and 2 of all 78 bases, derived again (`tools/release/release_rebuild.py
+  --appearance-seeds 1,2`), and the seeds' references re-stamped (rope-threading 04-08's unstamped references serve
+  every seed as before).
+- The goal pictures: blanket-fold 01-05 at seeds 1 and 2, knot-untying 07 and 09 at seeds 0, 1 and 2.
+- Every puzzle task directory, rendered again (`scripts/roboarc/mk_tasks.py`): the new texts (`tasks/` holds the 5 mm
+  sentence but not yet the reworded colour sentences of 22 bases), the tooling copies (`rcb_topogym.py`,
+  `nyx_direct.py`), the runtime bindings, the seeds' bindings and references, `DIGEST`. The IKEA task directories are
+  rendered already.
+- The pins (`scripts/roboarc/assets.json`, `images/pins.json`), `[metadata.seeds] oracle` from the new Harbor runs, and
+  the release checks (`docs/benchmarks/roboarc_seeds_release.md`).
+
+### Results
+- The grading is unchanged everywhere (graders, success rules, physics, reference rows; the containment limit has not
+  moved): results graded under 2.1.0 stand as graded.
+- Seed 0 of 33 puzzle bases looks and reads as in 2.1.0 (battery-replacement-01, bed-bolt 01-05, blanket-flatten 03,
+  04, 06-08, blanket-fold 01-05, buzz-wire-3d 02 and 04, caliper-sorting-01, clock-assembling-01, knot-untying 02 and
+  04-06, lock-picking 03-05, rope-threading 04-08, wire-splicing-01; the release checks their frames, Evidence);
+  results there are comparable with earlier ones.
+- Seed 0 of the other 45 shows the agent the wider glowing marker (30 bases), a reworded text (22 bases) or redrawn
+  goal pictures (knot-untying 07 and 09); the scene's physics and the grading are the same.
+- Seeds 1 and 2 are other scenes than 1.2.0-2.1.0's seeds 1 and 2: results at those seeds, and aggregates over a
+  task's seeds, are not comparable with earlier ones.
+- IKEA: the privileged tasks are the same at every seed; the standard tasks' seed 0 is unchanged, and their seeds 1 and
+  2 are new, so the trials of a run with K > 1 now see different lightings.
+
+### Evidence
+To be filled after the release checks:
+- seed instances (156): the derive checks, strict loads in fresh processes;
+- seed 0 of the 30 marker bases: births and reference ends;
+- the seeds' references: strict fresh replays, end states against seed 0's;
+- rendered frames: seed 0 of the unchanged bases against 2.1.0, the exposure checks of seeds 1 and 2;
+- Harbor: oracle 1 and nop 0, both modes, per seed;
+- the image: its build, archive and pin.
+
 ## 2.1.0 (2026-10-25)
 
 The owner's decision on the five bed-bolt bases (hex, Torx, square, Phillips and slotted keys): change only the
