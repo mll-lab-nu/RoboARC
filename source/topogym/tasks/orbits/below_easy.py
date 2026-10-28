@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from topogym.assets.geometry.orbits import OrbitsLayout, generate_assets, make_meshes
+from topogym.assets.geometry.orbits import FIXTURE_FINISHES, OrbitsLayout, generate_assets, make_meshes
 from topogym.assets.geometry.orbits_chain import CORD_RGBA, chain_polyline, resample_links, write_cord_assembly
 from topogym.assets.geometry.orbits_initial import natural_working_state, resample
 from topogym.assets.scene_visuals import surface, visual_collision_urdf
@@ -39,7 +39,7 @@ class OrbitsBelowEasyTask(OrbitsTask):
         },
     }
     # fixture_finish: the looks of appearance seeds 1 and 2 (orbits.FIXTURE_FINISHES: the base, posts, stopper ball and
-    # rings); "released" keeps the wood of the released scenes.
+    # rings, and the wooden handle's wood); "released" keeps the wood of the released scenes.
     defaults = merge_parameters(OrbitsTask.defaults, {**variant_parameters, "fixture_finish": "released"})
     hash_when_changed = (*OrbitsTask.hash_when_changed, "fixture_finish")
     fixed_parameters = ('linear_scale', 'cord_profile', 'geometry')
@@ -65,7 +65,8 @@ class OrbitsBelowEasyTask(OrbitsTask):
         folder = Path(asset_dir)
         xml, self.link_names, self.link_lengths, self.tie_link = write_cord_assembly(
             folder, self.layout, roots, radius_m=self.CHAIN_RADIUS_M, joint_damping=self.JOINT_DAMPING,
-            young_modulus_pa=self.YOUNG_MODULUS_PA, armature=self.JOINT_ARMATURE, cord_rgba=self.cord_rgba())
+            young_modulus_pa=self.YOUNG_MODULUS_PA, armature=self.JOINT_ARMATURE, cord_rgba=self.cord_rgba(),
+            handle_finish=None if finish == "released" else FIXTURE_FINISHES[finish]["handle"])
         self.link_roots = roots
         parts, _ = make_meshes(self.layout, initial_cord=cord)
         yaw = float(self.config["yaw_deg"])
