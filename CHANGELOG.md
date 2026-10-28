@@ -186,9 +186,11 @@ reference rows are unchanged. Not released yet: the image, the instances and the
   - buzz-wire-3d 06, 07, 10: "Rubber sleeves on the wire are insulated" (was "Black rubber sleeves").
 - Object names stay as they were: `keyhole_silver` / `keyhole_gold` and `coil_silver` / `coil_gold` are identifiers,
   and a text that shows them says once "(the names are identifiers, not colours)".
-- "the inner edge of the 2 mm wide dashed green line" became "5 mm wide" in the texts of the 28 bases that state it
-  (the 30 marker bases but interlocked-claws 05 and 11-13, which only say the square is not part of their goal; and
-  knot-untying 07 and 09).
+- "the inner edge of the 2 mm wide dashed green line" became "the inner edge of the dashed green line" in the texts of
+  the 28 bases that state it (the 30 marker bases but interlocked-claws 05 and 11-13, which only say the square is not
+  part of their goal; and knot-untying 07 and 09). The texts state no width: until the release renders the tasks and
+  the image again, the committed tasks still draw the 2 mm line (image 2.1.0), and the containment limit, the line's
+  inner edge, and the square's size are the same for both lines. The width was "5 mm" in between (`810302a8`).
 - The same sentence said "the region's border runs along the middle of the line", true of the 2 mm line only. It now
   says "the whole line lies outside it".
 - The same words in the catalog texts (`scripts/roboarc/shared/rcb_topogym.py` `TASKS`) and in the release tooling

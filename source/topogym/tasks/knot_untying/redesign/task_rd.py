@@ -321,7 +321,7 @@ class KnotUntyingRedesignTask(KnotUntyingTask):
                 where = "the green dashed goal region" if one else "its green dashed goal region"
                 shape = (f"it encloses a rectangle {w:.6g} mm wide (left to right in cam_high's image) and {d:.6g} mm "
                          "deep" if rect else f"it encloses an outline {w:.6g} mm wide and {d:.6g} mm deep at most")
-                rules.append(f"Put the whole centre line of {whom} inside {where}: the inner edge of the 5 mm wide dashed "
+                rules.append(f"Put the whole centre line of {whom} inside {where}: the inner edge of the dashed "
                              f"green line is the containment limit; {shape}. Every point of the centre line counts; the "
                              "rope's own thickness may reach over the line.")
         if len(names) > 1:
