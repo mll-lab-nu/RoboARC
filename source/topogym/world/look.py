@@ -57,6 +57,9 @@ TABLE_EXCLUDED: dict[str, tuple] = {
     # left hedgehog-07's seed 1 wrist view below the exposure floor (0.338, 2026-10-28)
     "hedgehog_in_cage": ("coated_pine",),
 }
+# The dim seed's lowest brightness per family where its own parts fill much of the frame (default 0.65): bed_bolt's
+# frame takes a third of cam_high, and a charcoal frame on brushed concrete under 0.74 stayed at mean luma 0.315.
+DIM_FLOOR: dict[str, float] = {"bed_bolt": .9}
 # Floors; the first is compact_lab's blue-grey tiles (seed 0's), its grout lines staying under every floor. Seeds 1 and 2
 # draw two different classes.
 FLOOR_FINISHES = {
