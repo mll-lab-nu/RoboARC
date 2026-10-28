@@ -169,10 +169,13 @@ AXES = {
         dict(path="core_finish", kind="choice", values=["copper", "b_tinned", "a_tinned"], visual=True),
     ),
     "battery_replacement": (
-        dict(path="controller_finish", kind="choice", values=["white", "red", "blue"], visual=True),
-        dict(path="tray_finish", kind="choice", values=["grey", "white"], visual=True),
-        dict(path="box_finish", kind="choice", values=["blue", "green"], visual=True),
-        dict(path="props_finish", kind="choice", values=["wood", "black"], visual=True),
+        # Colour and material together (geo.CONTROLLER_FINISHES ... STICK_FINISHES; the user, 2026-10-27): seed 1 a Shock
+        # Blue controller, a lime tray, a yellow box, green mats and a blue nylon stick; seed 2 an Electric Volt
+        # controller, a pink tray, a green box, blue mats and a yellow nylon stick.
+        dict(path="controller_finish", kind="choice", values=["shock_blue", "electric_volt"], visual=True),
+        dict(path="tray_finish", kind="choice", values=["lime", "pink"], visual=True),
+        dict(path="box_finish", kind="choice", values=["yellow", "green"], visual=True),
+        dict(path="props_finish", kind="choice", values=["green_mat", "blue_mat"], visual=True),
     ),
 }
 
