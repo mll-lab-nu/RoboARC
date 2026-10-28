@@ -49,7 +49,7 @@ docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) 
 |---|---|
 | `--task` | a task id or alias (`roboarc.list_tasks()`, `python -m roboarc list`) |
 | `--policy` | the server: `ws://host:port` or `host:port`; an API key from `OPENPI_API_KEY` |
-| `--seed` | instance seeds: `0`, `0,1,2` or `all` (the puzzles allow 0-2: the same scene in other colours and materials; IKEA: 0) |
+| `--seed` | instance seeds: `0`, `0,1,2` or `all` (every task allows 0-2: a puzzle's seeds 1 and 2 are the same scene and physics in another look, lighting, table and objects' colours and materials; an IKEA task's the same scene under other lighting) |
 | `--episodes` | episodes per seed (a deterministic policy repeats itself; for sampling policies) |
 | `--run-id` | the policy's name in the results tree |
 | `--convention` | `aloha`, `droid` or `droid-velocity` (default: by robot, below) |

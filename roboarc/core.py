@@ -197,9 +197,10 @@ def make(task_id: str, *, renderer: str = "nyx", cameras=None, depth: bool = Fal
     strict     True (default): refuse to run outside the graded runtime (image, EPA-patched libmujoco, numpy masking,
                frozen files); False only warns.
     instance_seed  which of the task's frozen instances (TaskInfo.seeds; docs/RUNNING.md "Seeds"): 0 (default) is the
-               released one; seeds 1 and 2 of a puzzle change its looks only (colours, materials, textures), never its
-               physics; those of an IKEA task change its Nyx lighting only. Gymnasium's reset(seed=...) does not
-               choose it: an instance is fixed for the environment's life.
+               released one; seeds 1 and 2 of a puzzle change its looks only (the room's lighting, the table top, its
+               frame and the floor, the objects' colours, materials and textures), never its physics; those of an IKEA
+               task change its Nyx lighting only. Gymnasium's reset(seed=...) does not choose it: an instance is fixed
+               for the environment's life.
     Further keyword arguments go to the suite's environment (IkeaEnv: check_every)."""
     info = resolve(task_id)
     if rules not in RULES:

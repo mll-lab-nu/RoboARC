@@ -202,9 +202,19 @@ python3 scripts/task_seed.py materialize tasks/<task> --seed 1 --out /tmp/run1  
 harbor run -p /tmp/run1 -i <task> -a <agent> ...
 ```
 
-Every RoboARC puzzle task allows seeds 0, 1 and 2 from 1.2.0 (its appearance seeds: the same scene and physics in
-other looks; `[metadata.seeds] oracle` lists the seeds whose Harbor oracle run passed). A task that allows its
-default seed only (the IKEA tasks) runs from a copy that is the task as it is.
+Every RoboARC task allows seeds 0, 1 and 2: the puzzles since 1.2.0, the IKEA tasks since the appearance seeds v2
+(CHANGELOG, "Unreleased"). Seed 0 is the released scene. `[metadata.seeds] oracle` lists the seeds whose Harbor oracle
+run passed (IKEA: 0).
+- A puzzle's seeds 1 and 2 are its appearance seeds: the same scene and physics in another look. The room's lighting
+  changes (which light is the key light, the lights' height, a warm or a cool white, a dim or a bright scene), the table
+  top takes another material (wood, metal or stone), the table's frame and the floor change, and so do the colours and
+  materials of the task's objects. Parts whose colour the texts name keep it, as does the green goal marker
+  ([simulator/seeds/colour_table.md](simulator/seeds/colour_table.md)).
+- An IKEA task's three seeds share its one frozen scene: seeds 1 and 2 light the standard mode's camera images
+  differently (`environment/sim/rig.json` `seeds`). The privileged mode shows the agent no images, so there every seed
+  is the same task.
+
+A task that allows its default seed only runs from a copy that is the task as it is.
 
 ## Infrastructure failures: one full retry
 
