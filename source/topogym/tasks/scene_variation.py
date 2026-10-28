@@ -51,7 +51,21 @@ AXES = {
         # Panda base at x = -0.57: +x/+y moves away from it (reach proxy), so both lean negative.
         dict(path="center_xy_m", kind="offset", range=[[-.03, .01], [-.02, .01]]),
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
-        dict(path="wood_tint", kind="offset", range=[-.15, 0.], visual=True),
+        # Every part's colour and material (hedgehog_in_cage.common.FINISHES; the user, 2026-10-27). No text names a
+        # part's colour; the owl is "wooden" (README), so it stays wood and changes its wood (owl.OWL_FINISHES).
+        # Each axis exists only where its design defines it: the mount everywhere; cage and ball in the CLASSIC designs
+        # (easy and the ones built on it); the Cast Cage's cage, star and push rod; the owl's cage, owl and rod.
+        dict(path="mount_finish", kind="choice", values=["coated_metal", "black_anodised", "blue_powder_coat"],
+             visual=True),
+        dict(path="cage_finish", kind="choice", values=["dark_wood", "crimson_enamel", "gunmetal"], visual=True),
+        dict(path="ball_finish", kind="choice", values=["light_wood", "cobalt_anodised", "red_lacquer"], visual=True),
+        dict(path="cast_cage_finish", kind="choice", values=["black_cast", "cobalt_anodised", "gold_plated"],
+             visual=True),
+        dict(path="star_finish", kind="choice", values=["copper_cast", "gold_plated", "black_nickel"], visual=True),
+        dict(path="push_rod_finish", kind="choice", values=["steel", "black_oxide", "cobalt_anodised"], visual=True),
+        dict(path="birdcage_finish", kind="choice", values=["light_wood", "cobalt_paint", "black_iron"], visual=True),
+        dict(path="owl_finish", kind="choice", values=["wood", "wenge", "beech"], visual=True),
+        dict(path="rod_finish", kind="choice", values=["red", "yellow", "cobalt"], visual=True),
     ),
     "buzz_wire_3d": (
         # -y pushes the finish-side IK past tolerance and the far corner is 0.88 m from

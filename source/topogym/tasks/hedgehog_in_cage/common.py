@@ -37,14 +37,55 @@ def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
                             max_tcp_distance_m=max(.06, target.radius_m+.03))
 
 
+# The finishes of the family's parts at appearance seeds 1 and 2 (scene_variation's hedgehog_in_cage axes; the user,
+# 2026-10-27: a seed changes the colour and the material of every part no text names): linear RGB albedo, metalness,
+# roughness. A part at its released finish (the axis default: the woods' textures, the Cast Cage's black and copper,
+# the coated mount) is not refinished and keeps its files byte for byte. No colour here is near the green goal region,
+# and each stands apart from every table top of topogym.world.look (CIEDE2000 >= 15).
+FINISHES = dict(
+    black_anodised=dict(color=(.03, .03, .035, 1.), metallic=.5, roughness=.4),
+    blue_powder_coat=dict(color=(.02, .04, .30, 1.), metallic=.3, roughness=.45),
+    crimson_enamel=dict(color=(.40, .03, .03, 1.), metallic=.3, roughness=.4),
+    gunmetal=dict(color=(.10, .10, .11, 1.), metallic=1., roughness=.35),
+    cobalt_anodised=dict(color=(.04, .10, .45, 1.), metallic=.7, roughness=.3),
+    red_lacquer=dict(color=(.55, .05, .04, 1.), metallic=0., roughness=.25),
+    gold_plated=dict(color=(.80, .55, .03, 1.), metallic=1., roughness=.15),
+    black_nickel=dict(color=(.035, .035, .04, 1.), metallic=1., roughness=.25),
+    black_oxide=dict(color=(.035, .035, .04, 1.), metallic=.6, roughness=.5),
+    cobalt_paint=dict(color=(.04, .10, .45, 1.), metallic=.3, roughness=.4),
+    black_iron=dict(color=(.035, .035, .04, 1.), metallic=.4, roughness=.55),
+    yellow_paint=dict(color=(.80, .55, .03, 1.), metallic=.3, roughness=.35),
+    black_plastic=dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.6),
+    orange_plastic=dict(color=(.80, .25, .03, 1.), metallic=0., roughness=.5),
+)
+
+
+def finish(name):
+    """A FINISHES entry (a fresh dict, as scene_visuals.surface)."""
+    if name not in FINISHES:
+        raise ValueError(f"Unknown hedgehog_in_cage finish: {name!r}")
+    return dict(FINISHES[name])
+
+
+def refinish_body(folder, name, look):
+    """Paint a written body (write_body's or write_rod's <name>.glb and <name>.urdf) in a FINISHES look: the GLB's base
+    colour, metalness and roughness (its wood texture dropped) and the URDF visual's colour, which Nyx draws."""
+    from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color
+    scale_glb_color(folder / f"{name}.glb", 1., color=look["color"], metallic=look["metallic"],
+                    roughness=look["roughness"], texture=False)
+    scale_urdf_color(folder / f"{name}.urdf", 1., color=look["color"])
+
+
 class HedgehogInCageTask(PlacementGoalMixin, RigidTaskDefinition):
     task_id = "hedgehog_in_cage"
     placement_description = 'the hedgehog ball including every spike'
     goal_side = (1, -1)  # -y, the nominal scene's side; pose variation cannot flip it
     defaults = defaults(task_id, scale=3., center_xy_m=[-.1356786, .05], yaw_deg=0.,
                     mount_height_m=.04, mount_width_m=.25, stable_duration_s=2.,
-                    minimum_separation_m=.01, wood_tint=1.)
-    hash_when_changed = ("wood_tint",)
+                    minimum_separation_m=.01, wood_tint=1., mount_finish="coated_metal")
+    hash_when_changed = ("wood_tint", "mount_finish")
+    # config key -> a body written by build_assets that the key's finish paints (refinish_body); none here
+    finish_bodies = {}
 
     asset_resource = None
 
@@ -94,6 +135,9 @@ class HedgehogInCageTask(PlacementGoalMixin, RigidTaskDefinition):
             for path in sorted(folder.glob("*.urdf")):
                 if '<material name="wood"' in path.read_text():
                     scale_urdf_color(path, cfg["wood_tint"])
+        for key, body in self.finish_bodies.items():
+            if cfg[key] != self.defaults[key]:
+                refinish_body(folder, body, finish(cfg[key]))
         xy = np.asarray(cfg["center_xy_m"], dtype=float)
         if xy.shape != (2,) or not np.isfinite(xy).all():
             raise ValueError("Invalid Hedgehog center_xy_m")
@@ -109,8 +153,7 @@ class HedgehogInCageTask(PlacementGoalMixin, RigidTaskDefinition):
         options = {"convexify": True, "decimate": False, "merge_fixed_links": False}
         entities = (
             EntitySpec("hedgehog_mount", "box", None,
-                (*xy, self.table_height_m+pad/2), fixed=True,
-                surface=surface("coated_metal"),
+                (*xy, self.table_height_m+pad/2), fixed=True, surface=self.mount_surface(),
                 morph_options={"size": (cfg["mount_width_m"], cfg["mount_width_m"], pad)}),
             EntitySpec("hedgehog_cage", "urdf", folder/"cage.urdf", tuple(origin),
                 tuple(rotation.as_quat()[[3, 0, 1, 2]]), fixed=True,
@@ -129,6 +172,10 @@ class HedgehogInCageTask(PlacementGoalMixin, RigidTaskDefinition):
         return TaskSpec(entities, {"rigid": {"enable_self_collision": True, "iterations": 100,
             "max_collision_pairs": 8192, "constraint_timeconst": .00125}}, dict(**preset, task_id=self.task_id, instance_id=self.instance_id,
             asset_report=report, required_control_review="cage reachability and suitable gripper"))
+
+    def mount_surface(self):
+        name = self.config["mount_finish"]
+        return surface("coated_metal") if name == self.defaults["mount_finish"] else finish(name)
 
     def evaluate_goal_region(self, state, region):
         """Measure the fixed placement rule; physical qualification is separate."""

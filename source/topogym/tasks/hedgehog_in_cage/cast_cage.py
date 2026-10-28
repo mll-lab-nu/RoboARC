@@ -60,7 +60,12 @@ class HedgehogCastCageTask(HedgehogInCageTask):
                       "quaternion_wxyz": [0.902177, -0.333163, 0.218527, -0.165302]},
         "rod_pose": {"grip_xy_m": [-.25, .25], "yaw_deg": 46.2},
         "robot_home_q": [0.5235987756, 0.3926990817, 0., -1.9634954085, 0., 2.3561944902, -0.7853981634],
+        # the cage's, the star's and the rod's finishes at appearance seeds 1 and 2 (common.FINISHES); the defaults name
+        # the released black cage, copper star and steel rod
+        "cast_cage_finish": "black_cast", "star_finish": "copper_cast", "push_rod_finish": "steel",
     })
+    hash_when_changed = (*HedgehogInCageTask.hash_when_changed, "cast_cage_finish", "star_finish", "push_rod_finish")
+    finish_bodies = {"cast_cage_finish": "cage", "star_finish": "hedgehog", "push_rod_finish": "push_rod"}
     fixed_parameters = ("scale", "center_xy_m", "yaw_deg", "mount_height_m", "mount_width_m", "ball_pose", "rod_pose",
                         "robot_home_q")
 
