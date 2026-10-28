@@ -60,6 +60,8 @@ TABLE_EXCLUDED: dict[str, tuple] = {
 # The dim seed's lowest brightness per family where its own parts fill much of the frame (default 0.65): bed_bolt's
 # frame takes a third of cam_high, and a charcoal frame on brushed concrete under 0.74 stayed at mean luma 0.315.
 DIM_FLOOR: dict[str, float] = {"bed_bolt": .9}
+# A table top whose lum is below this is dark: a dim seed drawn on it dims to 0.85-0.93 only (all families).
+DARK_TOP_LUM = .45
 # Floors; the first is compact_lab's blue-grey tiles (seed 0's), its grout lines staying under every floor. Seeds 1 and 2
 # draw two different classes.
 FLOOR_FINISHES = {

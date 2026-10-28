@@ -331,8 +331,8 @@ def scene_look(task_class, seed):
     strongly tinted scenes (renders of cast-keyhole-02, 2026-10-27: below 3600 K the green goal dashes turn yellow,
     6500-7000 K is not told from seed 0, brightness moves the frame little under the Reinhard tone mapper): warm
     3600-4300 K or cool 8000-10000 K, brightness 0.65-0.78 or 1.25-1.50, height 1.9-2.4 m."""
-    from topogym.world.look import (DIM_FLOOR, FLOOR_FINISHES, FRAME_FINISHES, SCENE_LOOK_VERSION, TABLE_EXCLUDED,
-                                    TABLE_FINISHES)
+    from topogym.world.look import (DARK_TOP_LUM, DIM_FLOOR, FLOOR_FINISHES, FRAME_FINISHES, SCENE_LOOK_VERSION,
+                                    TABLE_EXCLUDED, TABLE_FINISHES)
     if seed < 1:
         raise ValueError("seed 0 has no scene_look: it is the released look")
     name = f"visual/scene_look/{task_class.task_id}/{task_class.variation_id}"
@@ -358,6 +358,10 @@ def scene_look(task_class, seed):
     dim = DIM_FLOOR.get(task_class.task_id, .65)
     if seed in lum and lum[1] != lum[2]:
         bright = lum[seed] < lum[3 - seed]          # of seeds 1 and 2, the darker table top takes the brighter light
+    if TABLE_FINISHES[table_at(seed)]["lum"] < DARK_TOP_LUM:
+        # both seeds drew dark tops: the dim one dims little (interlocked-claws-02's seed 1 on granite tiles under 0.73
+        # fell to mean luma 0.287, 2026-10-28)
+        dim = max(dim, .85)
     lighting = dict(key=int(keys[(seed - 1) % 3]),
                     height_m=round(float(own.uniform(1.9, 2.4)), 3),
                     cct_k=round(float(own.uniform(3600., 4300.) if warm else own.uniform(8000., 10000.))),
