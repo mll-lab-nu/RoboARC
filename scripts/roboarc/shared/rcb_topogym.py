@@ -286,7 +286,7 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="buzz_wire_3d_easy", seed=0)], grasp_assist="recommended"),
     "cast_coil": dict(
         task_id="cast_coil", robot="aloha",
-        text="Assemble the separated gold and silver Cast Coil pieces into their interlocking, alternating four-layer "
+        text="Assemble the two separated Cast Coil pieces into their interlocking, alternating four-layer "
              "target configuration. Align both pieces fully; contact or grasping alone is not completion. Release both "
              "pieces, withdraw the grippers and leave the assembled puzzle stable on the table.",
         instances=[dict(variation_id="cast_coil_easy", seed=0)], grasp_assist="recommended"),

@@ -231,10 +231,10 @@ def describe_goal(task):
         failures.append("Invalid rope volume ends the episode in failure.")
     elif name == "cast_coil":
         assembling = cfg["objective"] == "assemble"
-        summary = ("Assemble the gold and silver Cast Coil pieces into their matching interlocking configuration, then release both." if assembling else
-                   "Separate the gold and silver Cast Coil pieces completely, then release both on the table.")
+        summary = ("Assemble the two Cast Coil pieces into their matching interlocking configuration, then release both." if assembling else
+                   "Separate the two Cast Coil pieces completely, then release both on the table.")
         if assembling and getattr(task, "geometry_resource", None) and task.family_id in ("coil_design_1", "coil_design_2"):
-            summary = "Assemble the gold and silver pieces into a cube with flush outer faces, then release both on the table."
+            summary = "Assemble the two pieces into a cube with flush outer faces, then release both on the table."
         rules += [
             ("Align the pieces' matching assembly frames with relative position error below 1 mm and relative angular error below 0.02 rad." if assembling else
              "Separate the pieces' complete bounding extents by more than 10 mm along at least one axis."),
