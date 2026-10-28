@@ -4,94 +4,15 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
-## Unreleased
-
-### Each trial's record names the machine it ran on
-- A trial's results recorded only the index of its GPU (`gpu` in config.json). The GPU's name and driver, the CPU
-  model, the memory and the docker and harbor versions were written only by `scripts/send_results.sh` into the
-  bundle's MANIFEST.md, at upload time and of the machine that sent it, so a batch copied or uploaded any other way had
-  no hardware record.
-- `scripts/harbor/host_info.py` (new) reads the machine: CPU model and count, memory, every GPU nvidia-smi lists
-  (index, name, driver, memory), docker and harbor. The batch runner logs it when a lane starts, as MANIFEST.md's
-  `host:`, `GPUs:` and `software:` lines (each GPU with its memory), and writes it into every job folder as
-  `host.json`; `write_task_results.py` copies it into each trial's config.json as `host`, with the name and driver of
-  the job's GPU (`gpu_name`, `gpu_driver`). A missing tool leaves its field empty and never stops a run.
-- Tests: scripts/harbor/tests/test_host_info.py (new), scripts/harbor/tests/test_runner_seeds.py.
-
-### One list of the family classes; five families get their class's resources (task change: 18 task directories)
-- `scripts/task_resources.toml` gave the rigid, rope / chain and cloth values by regular expressions that named the
-  families; a task they did not name kept the generic rules' values without notice. The five families released after
-  the classes (2026-10-23 / 24) were not named: wire_splicing, bed_bolt, battery_replacement, caliper_sorting and
-  clock_assembling declared 2 CPUs, and their privileged tasks had a main container of 4 CPUs / 20 GB where their class
-  has 16 CPUs / 30 GB (rigid) or 40 GB (rope / chain). The batch runner reserved 2 CPUs for each of their trials.
-- The file now lists the classes once (`[class.rigid]`, `[class.rope_chain]`, `[class.cloth]`: `families`), and the
-  class rules name their class (`class = "rigid"`) instead of the families. bed_bolt, battery_replacement,
-  caliper_sorting and clock_assembling are rigid, wire_splicing rope / chain. `scripts/task_conventions.py` refuses a
-  task that `classes_required` finds (every RoboARC task but IKEA's) whose family is in no class, or a family in two
-  classes, so CI's `--check` stops a new family without a class. It also writes `[environment].cpus` from the main
-  cap, as the generator (`mk_tasks.py` `main_cpus`) does.
-- The 18 task directories of those nine bases are rendered again: `[metadata.resources]`, its limits and caps,
-  `[environment]` cpus / memory_mb, the standard sim's cap (16 → 8 GB, its class's), the README's resources, the
-  privileged `instruction.md` resource limits (GPU memory 16 → 12 GiB, memory 16 → 24 GiB, 32 for wire_splicing) and
-  `DIGEST`. Their `measured` strings say these are the class's values, not the family's own peaks. Earlier results of
-  these bases no longer match the task digests (`digest_match` false). The other 162 task directories are unchanged.
-- `scripts/harbor/gpu_slots.py` reads the deformable families (the classes with `own_gpu`: rope / chain and cloth)
-  from the same file instead of its own list; `DEFORMABLE_FAMILIES` is empty by default and still replaces them when
-  set. A RoboARC task whose family has no class is not classified, so the runner does not start it. The deformable set
-  is unchanged.
-- Tests: scripts/tests/test_task_resources.py (new), scripts/harbor/tests/test_gpu_slots.py.
-- docs/COLLABORATOR_SETUP.md's GPU-hour estimate counted the 36 IKEA privileged trials, which take no GPU, as a
-  quarter of a GPU each: 837 GPU-hours, not 864.
-- Known issue, not changed here: wire_splicing's `instruction.md` states the rigid contact-penetration rules (a success
-  with a task contact deeper than 3 mm, or 2 mm for 0.25 s, held for review; deeper than 10 mm a simulator breakdown),
-  from `tools/release/topogym_rules.py` `RIGID`. The grader installs those rules only for a task with
-  `rigid_measurements` (`rcb_topogym._install_rules`), and `WireSplicingTask` is a `TaskDefinition`, not a
-  `RigidTaskDefinition`: its successes are credited without that review.
-
-### The batch runner places each trial on one GPU (runner change; no task, image or result changes)
-- Docker gives a container that reserves `count: 1` GPU the host's first GPU: on a host with several GPUs every trial
-  of `scripts/harbor/run_agent_batch.sh` ran on GPU 0 and the other GPUs stayed idle.
-- With `GPU_SCHED=1` (the default, `SEQ=1`) each lane places a trial through a ledger the host's lanes and batches
-  share (`scripts/harbor/gpu_slots.py`): up to `GPU_SHARE` (4) rigid-task trials per GPU, a deformable-task trial on a
-  GPU of its own (`DEFORMABLE_FAMILIES`: the blanket, fiber, knot, orbits, rope, slotted-post-ring and wire families),
-  no GPU for a task without one (IKEA privileged). A trial starts when the CPUs and memory its task declares
-  (`[metadata.resources]`) fit beside the trials running; else the lane tries the plan's next job.
-- The job's copy has its containers pinned to that GPU (`device_ids`, `scripts/harbor/pin_gpu.py`), and
-  `<job>/placement.json` (in config.json as `gpu`) records it. The copy is all that changes: task digests,
-  `digest_match` and earlier results are untouched, and no image is rebuilt.
-- docs/RUNNING.md "GPUs and lanes"; docs/COLLABORATOR_SETUP.md starts 4 lanes per GPU. `GPU_SCHED=0` is the old
-  behaviour.
-
-### DSH, the DeepSeek Harness, in the batch runner: `AGENT=dsh` (runner change)
-- `scripts/harbor/agents/dsh_acp.py`, a Harbor agent of RoboARC's own: Harbor's ACP agent with `@deepseek-ai/dsh`
-  0.2.1-rc.2 installed during setup and started as `dsh --profile acp`. That version is the release line of the exam's
-  DSH runs (2026-10-15 to 10-18); it picks models from its built-in catalog, where DeepSeek-V4.1-Flash is
-  `deepseek-flash`, so `MODEL=deepseek/deepseek-v4.1-flash` gives the exam's run id, `dsh-deepseek_v4_1_flash-high`.
-- Its instruction travels in a file (`dsh/acp_prompt_file.py`), never on a command line, so an agent's
-  `pkill -f <a word of the task>` cannot kill its harness. The session's `reasoning_effort` is set from `EFFORT`. The
-  model is requested as dsh's own option value (`["deepseek-official","deepseek-flash"]`), the only form Harbor's
-  runner matches, and the prompt goes out only when the session runs that model (dsh's ACP default is
-  deepseek-v4-flash, DeepSeek-V4-Flash); both are recorded in the trial's `agent/dsh-session.json`. Token counts:
-  dsh reports none over ACP, so the trial's come from dsh's own session records (`agent/dsh-home/`, kept with the
-  trial), every session's provider-reported usage summed in Harbor's convention, per session in `agent/dsh-usage.json`;
-  a trial stopped at its cutoff keeps them too, less the request in flight when it was stopped (the usage gateway
-  counts that one: a 15-min smoke through it had 39 requests, dsh 38, the difference exactly the 39th's usage).
-  `WEB_SEARCH=disabled` turns dsh's web_search and web_fetch off (`dsh/roboarc.patch.yml`).
-- Credentials: `DEEPSEEK_API_KEY` (`.env.example`; `scripts/harbor/scan_secrets.py` scans for it). Egress: the job adds
-  `api.deepseek.com`, or, with `USAGE_GATEWAY`, dsh's `DEEPSEEK_BASE_URL` points at the gateway, whose `api_paths.json`
-  now forwards DeepSeek's Messages API (`POST /anthropic/v1/messages`; pending the owner's approval).
-- DshAcp is not a Harbor built-in: whether its results are official is the owner's call (PROTOCOL D11). Tests:
-  `scripts/harbor/tests/test_dsh_acp.py`, DSH cases in `test_usage_gateway_option.py`, `test_paths.py` and
-  `account_failure_check.py --selftest`.
-
-## Unreleased (appearance seeds v2)
+## 2.2.0 (2026-10-28)
 
 Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the
 table top's material, the table's frame and the floor change too, and the task's objects change colour and material,
 family by family. The green dashed goal marker is 5 mm wide (it was 2 mm) and drawn glowing at every seed. The IKEA
 tasks get seeds 0, 1 and 2, which light the standard mode's camera images differently. The physics, the graders and the
-reference rows are unchanged. Not released yet: the image, the instances and the task directories are still to be made
-(below).
+reference rows are unchanged. A new image, `ghcr.io/mll-lab-nu/roboarc:2.2.0`, because the simulator source, the
+30 goal-marker bases' frozen scenes and every seed instance change. The task set is 2.1.0's: 90 bases, 180 task
+directories. The release also carries the runner and resource changes listed at the end of this section.
 
 ### What an appearance seed changes (`64a5c387`, `446feb71`, `b2dbcdc5`)
 - Seed 0 is the released look, except the goal marker (below). Seeds 1 and 2 carry a task parameter `scene_look`
@@ -247,7 +168,7 @@ reference rows are unchanged. Not released yet: the image, the instances and the
   and the physics content of every generated file as seed 0's; for three, a `scene_look` changes the renderer's
   configuration only; for every base, the two looks differ as above.
 
-### What a release must redo
+### What the release redid
 - The image, built from this source (the simulator source hash in `SOURCE.json`, so the runtime every puzzle task is
   bound to, changes) with the nine textures in its visual asset root. The IKEA images stay.
 - The seed-0 instances of the 30 marker bases (their scenes; the births and seed-0 references stay), made again even
@@ -286,6 +207,84 @@ To be filled after the release checks:
 - rendered frames: seed 0 of the unchanged bases against 2.1.0, the exposure checks of seeds 1 and 2;
 - Harbor: oracle 1 and nop 0, both modes, per seed;
 - the image: its build, archive and pin.
+
+### Each trial's record names the machine it ran on
+- A trial's results recorded only the index of its GPU (`gpu` in config.json). The GPU's name and driver, the CPU
+  model, the memory and the docker and harbor versions were written only by `scripts/send_results.sh` into the
+  bundle's MANIFEST.md, at upload time and of the machine that sent it, so a batch copied or uploaded any other way had
+  no hardware record.
+- `scripts/harbor/host_info.py` (new) reads the machine: CPU model and count, memory, every GPU nvidia-smi lists
+  (index, name, driver, memory), docker and harbor. The batch runner logs it when a lane starts, as MANIFEST.md's
+  `host:`, `GPUs:` and `software:` lines (each GPU with its memory), and writes it into every job folder as
+  `host.json`; `write_task_results.py` copies it into each trial's config.json as `host`, with the name and driver of
+  the job's GPU (`gpu_name`, `gpu_driver`). A missing tool leaves its field empty and never stops a run.
+- Tests: scripts/harbor/tests/test_host_info.py (new), scripts/harbor/tests/test_runner_seeds.py.
+
+### One list of the family classes; five families get their class's resources (task change: 18 task directories)
+- `scripts/task_resources.toml` gave the rigid, rope / chain and cloth values by regular expressions that named the
+  families; a task they did not name kept the generic rules' values without notice. The five families released after
+  the classes (2026-10-23 / 24) were not named: wire_splicing, bed_bolt, battery_replacement, caliper_sorting and
+  clock_assembling declared 2 CPUs, and their privileged tasks had a main container of 4 CPUs / 20 GB where their class
+  has 16 CPUs / 30 GB (rigid) or 40 GB (rope / chain). The batch runner reserved 2 CPUs for each of their trials.
+- The file now lists the classes once (`[class.rigid]`, `[class.rope_chain]`, `[class.cloth]`: `families`), and the
+  class rules name their class (`class = "rigid"`) instead of the families. bed_bolt, battery_replacement,
+  caliper_sorting and clock_assembling are rigid, wire_splicing rope / chain. `scripts/task_conventions.py` refuses a
+  task that `classes_required` finds (every RoboARC task but IKEA's) whose family is in no class, or a family in two
+  classes, so CI's `--check` stops a new family without a class. It also writes `[environment].cpus` from the main
+  cap, as the generator (`mk_tasks.py` `main_cpus`) does.
+- The 18 task directories of those nine bases are rendered again: `[metadata.resources]`, its limits and caps,
+  `[environment]` cpus / memory_mb, the standard sim's cap (16 → 8 GB, its class's), the README's resources, the
+  privileged `instruction.md` resource limits (GPU memory 16 → 12 GiB, memory 16 → 24 GiB, 32 for wire_splicing) and
+  `DIGEST`. Their `measured` strings say these are the class's values, not the family's own peaks. Earlier results of
+  these bases no longer match the task digests (`digest_match` false). The other 162 task directories are unchanged.
+- `scripts/harbor/gpu_slots.py` reads the deformable families (the classes with `own_gpu`: rope / chain and cloth)
+  from the same file instead of its own list; `DEFORMABLE_FAMILIES` is empty by default and still replaces them when
+  set. A RoboARC task whose family has no class is not classified, so the runner does not start it. The deformable set
+  is unchanged.
+- Tests: scripts/tests/test_task_resources.py (new), scripts/harbor/tests/test_gpu_slots.py.
+- docs/COLLABORATOR_SETUP.md's GPU-hour estimate counted the 36 IKEA privileged trials, which take no GPU, as a
+  quarter of a GPU each: 837 GPU-hours, not 864.
+- Known issue, not changed here: wire_splicing's `instruction.md` states the rigid contact-penetration rules (a success
+  with a task contact deeper than 3 mm, or 2 mm for 0.25 s, held for review; deeper than 10 mm a simulator breakdown),
+  from `tools/release/topogym_rules.py` `RIGID`. The grader installs those rules only for a task with
+  `rigid_measurements` (`rcb_topogym._install_rules`), and `WireSplicingTask` is a `TaskDefinition`, not a
+  `RigidTaskDefinition`: its successes are credited without that review.
+
+### The batch runner places each trial on one GPU (runner change; no task, image or result changes)
+- Docker gives a container that reserves `count: 1` GPU the host's first GPU: on a host with several GPUs every trial
+  of `scripts/harbor/run_agent_batch.sh` ran on GPU 0 and the other GPUs stayed idle.
+- With `GPU_SCHED=1` (the default, `SEQ=1`) each lane places a trial through a ledger the host's lanes and batches
+  share (`scripts/harbor/gpu_slots.py`): up to `GPU_SHARE` (4) rigid-task trials per GPU, a deformable-task trial on a
+  GPU of its own (`DEFORMABLE_FAMILIES`: the blanket, fiber, knot, orbits, rope, slotted-post-ring and wire families),
+  no GPU for a task without one (IKEA privileged). A trial starts when the CPUs and memory its task declares
+  (`[metadata.resources]`) fit beside the trials running; else the lane tries the plan's next job.
+- The job's copy has its containers pinned to that GPU (`device_ids`, `scripts/harbor/pin_gpu.py`), and
+  `<job>/placement.json` (in config.json as `gpu`) records it. The copy is all that changes: task digests,
+  `digest_match` and earlier results are untouched, and no image is rebuilt.
+- docs/RUNNING.md "GPUs and lanes"; docs/COLLABORATOR_SETUP.md starts 4 lanes per GPU. `GPU_SCHED=0` is the old
+  behaviour.
+
+### DSH, the DeepSeek Harness, in the batch runner: `AGENT=dsh` (runner change)
+- `scripts/harbor/agents/dsh_acp.py`, a Harbor agent of RoboARC's own: Harbor's ACP agent with `@deepseek-ai/dsh`
+  0.2.1-rc.2 installed during setup and started as `dsh --profile acp`. That version is the release line of the exam's
+  DSH runs (2026-10-15 to 10-18); it picks models from its built-in catalog, where DeepSeek-V4.1-Flash is
+  `deepseek-flash`, so `MODEL=deepseek/deepseek-v4.1-flash` gives the exam's run id, `dsh-deepseek_v4_1_flash-high`.
+- Its instruction travels in a file (`dsh/acp_prompt_file.py`), never on a command line, so an agent's
+  `pkill -f <a word of the task>` cannot kill its harness. The session's `reasoning_effort` is set from `EFFORT`. The
+  model is requested as dsh's own option value (`["deepseek-official","deepseek-flash"]`), the only form Harbor's
+  runner matches, and the prompt goes out only when the session runs that model (dsh's ACP default is
+  deepseek-v4-flash, DeepSeek-V4-Flash); both are recorded in the trial's `agent/dsh-session.json`. Token counts:
+  dsh reports none over ACP, so the trial's come from dsh's own session records (`agent/dsh-home/`, kept with the
+  trial), every session's provider-reported usage summed in Harbor's convention, per session in `agent/dsh-usage.json`;
+  a trial stopped at its cutoff keeps them too, less the request in flight when it was stopped (the usage gateway
+  counts that one: a 15-min smoke through it had 39 requests, dsh 38, the difference exactly the 39th's usage).
+  `WEB_SEARCH=disabled` turns dsh's web_search and web_fetch off (`dsh/roboarc.patch.yml`).
+- Credentials: `DEEPSEEK_API_KEY` (`.env.example`; `scripts/harbor/scan_secrets.py` scans for it). Egress: the job adds
+  `api.deepseek.com`, or, with `USAGE_GATEWAY`, dsh's `DEEPSEEK_BASE_URL` points at the gateway, whose `api_paths.json`
+  now forwards DeepSeek's Messages API (`POST /anthropic/v1/messages`; pending the owner's approval).
+- DshAcp is not a Harbor built-in: whether its results are official is the owner's call (PROTOCOL D11). Tests:
+  `scripts/harbor/tests/test_dsh_acp.py`, DSH cases in `test_usage_gateway_option.py`, `test_paths.py` and
+  `account_failure_check.py --selftest`.
 
 ## 2.1.0 (2026-10-25)
 

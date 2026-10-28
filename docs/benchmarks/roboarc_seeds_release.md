@@ -1,7 +1,7 @@
 # RoboARC appearance seeds: release runbook
 
 The steps of a seeded release, as RoboARC 1.2.0 was made (first written from Jianwen's seeded release run of
-2026-10-20, then used for 1.2.0), with what the appearance seeds v2 (CHANGELOG, "Unreleased") add.
+2026-10-20, then used for 1.2.0), with what the appearance seeds v2 (2.2.0) add.
 
 A seeded release gives every base three scenes: seed 0 is the frozen instance as released, seeds 1 and 2 change the
 looks only (`topogym.tasks.scene_variation.appearance(cls, S)`, the scene seed stays 0): the room's lighting, the table

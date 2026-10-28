@@ -268,3 +268,20 @@ references and release records are not in this tree; the maintainers keep them o
   difference is their 4-byte source-mtime field) and the fifteen re-made or refreshed instances with their seeds; it
   still carries the instances of the 33 bases removed in 2.0.0, as 1.3.0 does. The bed-bolt instructions gain one
   sentence about the card, the blanket texts state the new release rule.
+
+## 2.2.0: appearance seeds v2
+
+- Jianwen's appearance seeds v2 (his commits up to `aaec2712`, kept with his authorship and hashes): seeds 1 and 2
+  change the room's lighting, the table top, its frame and the floor, and the task's objects' colours and finishes; the
+  goal marker is 5 mm wide and emissive at every seed; texts no longer name parts by a colour that now changes; IKEA
+  tasks allow seeds 0-2 (standard-mode lighting only). His branch also carries runner changes (each trial's host record,
+  one list of the family classes for task resources, GPU placement, DSH).
+- The image `roboarc:2.2.0` is built by `tools/release/release_rebuild.py` from that source: the nine CC0 Poly Haven
+  texture sets are downloaded at build and sha256-checked; the 30 goal-marker bases' seed-0 instances are made again in
+  it (their births and references unchanged); the other 48 bases' seed-0 instances are 2.1.0's; seeds 1 and 2 of all 78
+  bases are derived again (`tools/release/derive_seed_instance.py`: `instance_assets/` byte for byte, physical fields
+  and birth equal to seed 0's but for the task's instance id), and their references re-stamped. Like 2.1.0 it still
+  carries the instances of the 33 bases removed in 2.0.0. The IKEA images are unchanged.
+- The release records keep their 2.1.0 fields but for the instance package, release commit, the re-made bases'
+  creation source and the colourless design strings; the seeds' Harbor records are this release's (CHANGELOG, 2.2.0,
+  Evidence).

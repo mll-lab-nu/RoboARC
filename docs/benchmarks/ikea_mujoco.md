@@ -47,7 +47,7 @@ Hand; ALOHA 2 with ViperX 300 s arms). The standard cameras' studio lighting use
 ## Seeds
 
 Every IKEA task allows seeds 0, 1 and 2 (`[metadata.seeds]`: `default = 0`, `allowed = [0, 1, 2]`, `oracle = [0]`,
-`build = "runtime"`; seed 0 only before the appearance seeds v2, CHANGELOG "Unreleased"). The runner picks a trial's
+`build = "runtime"`; seed 0 only before 2.2.0). The runner picks a trial's
 seed ([RUNNING.md](../RUNNING.md) "Seeds") and writes it into the task's files `seed`. The scene is the one frozen
 instance at every seed; a seed changes the standard mode's Nyx lighting only:
 - seed 0 is the released lighting;

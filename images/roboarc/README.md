@@ -25,6 +25,7 @@ its own pinned copy.
 
 | version | image id | size | built from |
 |---|---|---|---|
+| 2.2.0 | `sha256:f8fdee211ec5…` (manifest digest `sha256:96a0a895c0e4…`, images/pins.json) | 10.0 GB | `source/images/roboarc/Dockerfile`; the 2.2.0 simulator source (appearance seeds v2: the seeds' lighting, table, floor and finishes; the 5 mm emissive goal marker) and the nine CC0 Poly Haven texture sets, with the 30 re-made goal-marker instances, every base's seeds 1 and 2 derived again, and the other instances as 2.1.0 has them |
 | 2.1.0 | `sha256:c813b33cff3f…` (manifest digest `sha256:ccc3a47a5d9e…`, images/pins.json) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.3.0's libraries and instances byte for byte, the 2.1.0 simulator source (bed_bolt's drive card, wire_splicing's coil-count fix, the blanket release check) with the five re-made bed-bolt instances and the ten refreshed blanket instances, with their seeds |
 | 1.3.0 | `sha256:499d6f69bd81…` (manifest digest `sha256:2bcded002899…`, images/pins.json) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.2.0's libraries and instances byte for byte, the 1.3.0 simulator source and the wire-splicing-01 instance |
 | 1.2.0 | `sha256:b600616bee6c…` (manifest digest `sha256:a8561b770908…`) | 10.0 GB | `source/images/roboarc/Dockerfile`; 1.1.0's libraries, the appearance seeds and the new bases' instances |
