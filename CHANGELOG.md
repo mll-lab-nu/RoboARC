@@ -29,7 +29,10 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
   `pkill -f <a word of the task>` cannot kill its harness. The session's `reasoning_effort` is set from `EFFORT`. The
   model is requested as dsh's own option value (`["deepseek-official","deepseek-flash"]`), the only form Harbor's
   runner matches, and the prompt goes out only when the session runs that model (dsh's ACP default is
-  deepseek-v4-flash, DeepSeek-V4-Flash); both are recorded in the trial's `agent/dsh-session.json`.
+  deepseek-v4-flash, DeepSeek-V4-Flash); both are recorded in the trial's `agent/dsh-session.json`. Token counts:
+  dsh reports none over ACP, so the trial's come from dsh's own session records (`agent/dsh-home/`, kept with the
+  trial), every session's provider-reported usage summed in Harbor's convention, per session in `agent/dsh-usage.json`;
+  a trial stopped at its cutoff keeps them too.
   `WEB_SEARCH=disabled` turns dsh's web_search and web_fetch off (`dsh/roboarc.patch.yml`).
 - Credentials: `DEEPSEEK_API_KEY` (`.env.example`; `scripts/harbor/scan_secrets.py` scans for it). Egress: the job adds
   `api.deepseek.com`, or, with `USAGE_GATEWAY`, dsh's `DEEPSEEK_BASE_URL` points at the gateway, whose `api_paths.json`

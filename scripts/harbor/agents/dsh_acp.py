@@ -26,6 +26,12 @@ and turns them into agent/trajectory.json; this class adds what DSH needs:
 - reasoning_effort: Harbor's runner sets only the model; acp_prompt_file.py sets the session's `reasoning_effort` option
   (dsh advertises it per model) after the session is created and after each model change, recorded with the model
   check in agent/dsh-session.json.
+- token counts: dsh 0.2.1-rc.2 reports none over ACP (its prompt response carries the stop reason only; usage_update is
+  the context's occupancy), so Harbor's ACP agent leaves them empty. dsh's own data (DSH_HOME: its session log, with the
+  provider-reported usage of every request) lives in agent/dsh-home/, which Harbor keeps, and the trial's counts are
+  its sessions' usage totals (dsh's session projections; a subagent's session counts its own requests), summed in
+  Harbor's convention (input = uncached + cache read + cache write, cached = cache read), per session in
+  agent/dsh-usage.json. With the usage gateway its totals.json counts the same requests on the wire.
 Credentials: DEEPSEEK_API_KEY from Harbor's environment (its --env-file); DEEPSEEK_BASE_URL, when set there (the usage
 gateway), points dsh at another Messages root.
 """
@@ -47,6 +53,7 @@ from harbor.models.agent.context import AgentContext
 from harbor.models.trial.paths import EnvironmentPaths
 
 HERE = Path(__file__).resolve().parent / "dsh"
+BUCKETS = ("uncachedInputTokens", "cacheReadTokens", "cacheWriteTokens", "outputTokens")   # dsh-token-meter's totals
 PACKAGE = "@deepseek-ai/dsh"
 VERSION = "0.2.1-rc.2"
 LAUNCHER = "/installed-agent/dsh-acp.sh"
@@ -115,6 +122,29 @@ class DshAcp(AcpAgent):
         model = MODEL_IDS.get(model.lower(), model)
         return json.dumps([provider, model], separators=(",", ":"))   # JSON.stringify's form
 
+    def populate_context_post_run(self, context: AgentContext) -> None:
+        super().populate_context_post_run(context)
+        if context.n_input_tokens is not None:
+            return
+        sessions = []
+        for path in sorted((self.logs_dir / "dsh-home" / "storages" / "session_projcache" / "sessions").glob("*.json")):
+            try:
+                record = json.loads(path.read_text())["record"]
+                totals = record["rows"]["tokenUsage"]["val"]["totals"]
+                sessions.append({"session": path.stem, **{b: int(totals[b]) for b in BUCKETS},
+                                 "inherited_events": record.get("identity", {}).get("inheritedEventCount", 0)})
+            except (OSError, ValueError, KeyError, TypeError) as e:
+                self.logger.warning(f"dsh session record {path.name} not read: {e}")
+        if not sessions:
+            return
+        total = {b: sum(s[b] for s in sessions) for b in BUCKETS}
+        context.n_input_tokens = total["uncachedInputTokens"] + total["cacheReadTokens"] + total["cacheWriteTokens"]
+        context.n_cache_tokens = total["cacheReadTokens"]
+        context.n_output_tokens = total["outputTokens"]
+        (self.logs_dir / "dsh-usage.json").write_text(json.dumps(
+            {"source": "dsh-home/storages/session_projcache/sessions/*.json, rows.tokenUsage.val.totals",
+             "total": total, "sessions": sessions}, indent=1) + "\n")
+
     @with_prompt_template
     async def run(self, instruction: str, environment: BaseEnvironment, context: AgentContext) -> None:
         key = os.environ.get("DEEPSEEK_API_KEY") or self._extra_env.get("DEEPSEEK_API_KEY")
@@ -136,6 +166,7 @@ class DshAcp(AcpAgent):
             "HARBOR_ACP_AGENT_VERSION": agent_version,
             "DEEPSEEK_API_KEY": key,
             "DSH_TELEMETRY_DISABLED": "1",
+            "DSH_HOME": (EnvironmentPaths.agent_dir / "dsh-home").as_posix(),
         }
         # --ae (the usage gateway's route) wins over the environment's own
         base_url = self._extra_env.get("DEEPSEEK_BASE_URL") or os.environ.get("DEEPSEEK_BASE_URL")

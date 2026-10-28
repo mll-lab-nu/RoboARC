@@ -10,7 +10,8 @@ docker, no model, no network.
   the session's reasoning_effort is set after session/new and after a model change (skipped, and recorded, when the
   session does not offer the value); the prompt goes out only when the session's model is the one requested;
 - with Harbor importable (HARBOR_PYTHON, or the interpreter of `harbor` on PATH): DshAcp's registry entry, pinned version,
-  model value (one Harbor's runner matches among dsh's own option values) and launcher.
+  model value (one Harbor's runner matches among dsh's own option values) and launcher; the trial's token counts from
+  dsh's own session records (every session's, in Harbor's convention: input = uncached + cache read + cache write).
 """
 import json
 import os
@@ -229,6 +230,39 @@ class HarborClass(unittest.TestCase):
         self.assertIn("- id: tool-web", patch)
         self.assertIn("search: false", patch)
         self.assertIn("fetch: false", patch)
+
+    def test_tokens_from_dsh_sessions(self):
+        py = harbor_python()
+        if not py or subprocess.run([py, "-c", "import harbor"], capture_output=True).returncode != 0:
+            self.skipTest("Harbor is not importable (set HARBOR_PYTHON to its interpreter)")
+        code = textwrap.dedent(f"""
+            import json, sys, tempfile, pathlib
+            sys.path.insert(0, {str(REPO / 'scripts' / 'harbor' / 'agents')!r})
+            from dsh_acp import DshAcp
+            from harbor.models.agent.context import AgentContext
+            d = pathlib.Path(tempfile.mkdtemp())
+            cache = d / "dsh-home" / "storages" / "session_projcache" / "sessions"
+            cache.mkdir(parents=True)
+            # dsh's session projections as a trial stopped at its cutoff leaves them: the main session and a subagent's
+            for sid, t in (("main", (76196, 51974, 1724288, 0)), ("sub", (1000, 200, 3000, 10))):
+                (cache / f"{{sid}}.json").write_text(json.dumps({{"version": 7, "record": {{
+                    "identity": {{"formatVersion": 4, "inheritedEventCount": 0}}, "rows": {{"tokenUsage": {{"ver": 2, "val": {{
+                    "totals": dict(zip(("uncachedInputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"), t)),
+                    "last": None}}}}}}}}}}))
+            a = DshAcp(logs_dir=d, model_name="deepseek/deepseek-v4.1-flash")
+            c = AgentContext()
+            a.populate_context_post_run(c)
+            empty = AgentContext()
+            DshAcp(logs_dir=pathlib.Path(tempfile.mkdtemp()), model_name="deepseek/deepseek-v4.1-flash").populate_context_post_run(empty)
+            print(json.dumps({{"tokens": [c.n_input_tokens, c.n_cache_tokens, c.n_output_tokens],
+                               "usage": json.loads((d / "dsh-usage.json").read_text()), "empty": empty.n_input_tokens}}))
+        """)
+        p = subprocess.run([py, "-c", code], capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        out = json.loads(p.stdout.strip().splitlines()[-1])
+        self.assertEqual(out["tokens"], [76196 + 1724288 + 0 + 1000 + 3000 + 10, 1724288 + 3000, 51974 + 200])
+        self.assertEqual([x["session"] for x in out["usage"]["sessions"]], ["main", "sub"])
+        self.assertIsNone(out["empty"])                          # no dsh records: no numbers made up
 
 
 if __name__ == "__main__":
