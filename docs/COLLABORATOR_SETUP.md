@@ -82,12 +82,13 @@ network, the runner's seeds, the summary and the result files.
 
 ```bash
 AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
+  USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0 \
   JOBS="$PWD/jobs/smoke" RESULTS=/path/outside/the/repo \
   scripts/harbor/run_agent_batch.sh smoke roboarc-interlocked-claws-08-i01
 ```
 
 - Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use (credentials: the table in
-  section 5).
+  section 5), and the usage gateway as above (section 5, "Usage gateway").
 - The two modes run one after the other, each with at most the agent's 3 h. To run them at the same time, start the same
   command again in a second terminal (it adds a lane).
 - It passed when:
@@ -97,6 +98,10 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   - each job folder `jobs/smoke/smoke-<mode>-roboarc-interlocked-claws-08-i01/` has `seed.json` and
     `<trial>/verifier/reward.txt`;
   - `<RESULTS>/smoke/roboarc-interlocked-claws-08-i01-<mode>/<run id>/t1/` exists for both modes;
+  - `jobs/smoke/smoke.summary.md` has the column `usage gateway in / out`, with two numbers in both rows: the agent's
+    model calls went through the usage gateway. Without that column, or with `-` in a row, the agent's container did
+    not reach the gateway. The gateway listens on the Docker bridge address (172.17.0.1), and a host firewall that
+    blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
   - `jobs/smoke/smoke.log` shows no stopped lane (the runner stops a lane when the model account fails: out of credit,
     rate-limited, logged out).
 - The seeds the full run gives a task's three trials:
@@ -126,8 +131,9 @@ Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's age
 | Azure OpenAI (Codex) | `AGENT_CONFIG=<config.toml with the Azure provider>` and the key variable it names; retries in the same file (`request_max_retries`, `stream_max_retries`) |
 | DeepSeek API key (DSH) | `DEEPSEEK_API_KEY`, with `AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash`: DSH, the DeepSeek Harness, through `scripts/harbor/agents/dsh_acp.py` |
 
-The agent's container reaches only these providers (with `AGENT=dsh` also DeepSeek's API) and the package registries
-(PyPI, apt). Another provider does not answer: ask us first.
+The agent's container reaches only these providers (with `AGENT=dsh` also DeepSeek's API), and with the usage gateway
+on (below) only through it, and the package registries (PyPI, apt). Another provider does not answer: ask us first.
+An Azure AI Foundry endpoint (`*.services.ai.azure.com`) also needs `GATEWAY_EXTRA_HOSTS="*.services.ai.azure.com"`.
 
 ```bash
 BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 90 (78 puzzle, 12 IKEA)
@@ -135,6 +141,7 @@ mkdir -p jobs
 LANES=$((4 * $(nvidia-smi -L | wc -l)))             # 4 lanes per GPU ("Lanes" below)
 for lane in $(seq 1 $LANES); do
   AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
+    USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0 \
     JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo \
     nohup scripts/harbor/run_agent_batch.sh <batch name> $BASES > "jobs/lane$lane.out" 2>&1 &
 done
@@ -143,9 +150,20 @@ done
 - **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 90 × 2 × 3 =
   540 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
   `MODES=standard` runs one mode only.
+- **Usage gateway** (`USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0`, as in the commands; keep it on). The runner
+  routes the agent's model calls through a usage gateway on your host (docs/RUNNING.md "Usage recording").
+  - It forwards the calls unchanged; the agent keeps its own credentials.
+  - It records each trial's tokens per request in `<trial>/gateway/` (`usage.jsonl`, `totals.json`). The token counts
+    in the results then come from the gateway, the same way for every agent and provider.
+  - It enforces each trial's token budget: 100M input tokens (cache included) and 10M output tokens (reasoning
+    included). Past it, every further request is refused and the trial counts as failed.
+  - `GATEWAY_RAW=0`: it keeps no request or response bodies, which hold the whole conversation. The dataset the results
+    go to is public (section 6).
+  - The runner checks the gateway before each job and restarts it if needed. A trial is "not a result", never the
+    agent's 0, if the gateway went down during its job or if its last model calls failed at the gateway.
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
   `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), with no
-  adapter and no proxy that holds the credentials or changes the requests; web search off
+  adapter and no proxy that holds the credentials or changes the requests (the usage gateway below is neither); web search off
   (leave `WEB_SEARCH` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
   its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
@@ -217,7 +235,8 @@ JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo ENV_FILE=$PWD/.env CREATE
   SHA256SUMS      every archive's sha256
   INVENTORY.tsv   every file in the archives, with its sha256
   batch.tar.gz    <batch>.log, <batch>.summary.md, the plan, <RESULTS>/<batch>/
-  jobs/<job>.tar.gz   one per job folder (<batch>-<mode>-<task>-t<k>), with its seed record
+  jobs/<job>.tar.gz   one per job folder (<batch>-<mode>-<task>-t<k>), with its seed record and each trial's
+                      gateway/ (token counts per request; no request bodies with GATEWAY_RAW=0)
   ```
   The bundle id is the UTC time, so a later delivery never overwrites an earlier one.
 - **Dry run.** `DRY_RUN=1` does every step but the upload and needs no token. The bundle stays in
