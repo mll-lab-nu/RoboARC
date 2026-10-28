@@ -19,9 +19,40 @@ from scipy.spatial.transform import Rotation
 
 from topogym.assets.geometry import hedgehog_owl as geometry
 from topogym.tasks.base import EntitySpec, TaskSpec, merge_parameters
-from topogym.assets.scene_visuals import surface
 from ..scene_presets import record_preset
-from .common import HedgehogInCageTask
+from .common import HedgehogInCageTask, finish
+
+# The owl at appearance seeds 1 and 2 (owl_finish): the texts call it wooden, so it stays wood and changes its wood
+# (the user, 2026-10-27): oiled wenge (dark) or raw beech (pale), the released woods' colours (body and tail, wings,
+# pegs: beak, legs and eyes) in that order, the pegs in a contrasting wood. Body and wings differ from the released
+# and from each other by CIEDE2000 >= 20. The rod (rod_finish): its shaft's and its handle's common.FINISHES.
+OWL_FINISHES = dict(wenge=dict(colors=((.10, .06, .035, 1.), (.14, .085, .05, 1.), (.80, .66, .42, 1.)), metallic=0.,
+                               roughness=.45),
+                    beech=dict(colors=((.80, .62, .42, 1.), (.94, .79, .58, 1.), (.30, .18, .10, 1.)), metallic=0.,
+                               roughness=.7))
+ROD_FINISHES = dict(yellow=("yellow_paint", "black_plastic"), cobalt=("cobalt_anodised", "orange_plastic"))
+
+
+def paint_visual_geoms(path, looks):
+    """Give the visual-only geoms of an MJCF file (the drawn twins; the colliding geoms keep their bytes) a material:
+    looks = {released rgba text: (rgba, metallic, roughness)}. Nyx draws a geom's material's colour, metalness and
+    roughness (renderer.pbr_materials) instead of its rgba."""
+    import re
+    names = {}
+
+    def paint(match):
+        geom = match.group(0)
+        rgba = re.search(r'rgba="([^"]+)"', geom)
+        if 'contype="0" conaffinity="0" mass="0"' not in geom or rgba is None or rgba.group(1) not in looks:
+            return geom
+        names.setdefault(rgba.group(1), f"look_{len(names)}")
+        return geom.replace(rgba.group(0), f'material="{names[rgba.group(1)]}"')
+    text = re.sub(r"<geom\b[^>]*/>", paint, path.read_text())
+    # appended right before </asset>, no whitespace: the file without its materials and visual geoms (what the physics
+    # reads) keeps its bytes
+    materials = "".join(f'<material name="{name}" rgba="{geometry._rgba(looks[key][0])}" metallic="{looks[key][1]:g}" '
+                        f'roughness="{looks[key][2]:g}"/>' for key, name in names.items())
+    path.write_text(text.replace("</asset>", materials + "</asset>", 1))
 
 
 class HedgehogOwlTask(HedgehogInCageTask):
@@ -44,7 +75,11 @@ class HedgehogOwlTask(HedgehogInCageTask):
                      "quaternion_wxyz": [0.0, 0.025658, -0.0, 0.999671], "wing_rad": 4.720585},
         # World xy of the handle box's centre; yaw_deg: the direction from the handle to the tip (0: world +x).
         "rod_pose": {"handle_xy_m": [-0.31, 0.24], "yaw_deg": 0.},
+        # the finishes at appearance seeds 1 and 2: the cage's (common.FINISHES), the owl's (OWL_FINISHES) and the rod's
+        # (ROD_FINISHES); the defaults name the released light wood cage, wooden owl and red rod
+        "birdcage_finish": "light_wood", "owl_finish": "wood", "rod_finish": "red",
     })
+    hash_when_changed = (*HedgehogInCageTask.hash_when_changed, "birdcage_finish", "owl_finish", "rod_finish")
     fixed_parameters = ("scale", "owl_pose")
 
     def owl_rotation(self, rotation):
@@ -79,6 +114,20 @@ class HedgehogOwlTask(HedgehogInCageTask):
                 return re.sub(r'rgba="([^"]+)"', darker, geom) if 'contype="0" conaffinity="0" mass="0"' in geom else geom
             owl = folder / "owl.xml"
             owl.write_text(re.sub(r"<geom\b[^>]*/>", visual, owl.read_text()))
+        if cfg["birdcage_finish"] != self.defaults["birdcage_finish"]:
+            from topogym.assets.scene_visuals import scale_glb_color
+            look = finish(cfg["birdcage_finish"])
+            scale_glb_color(folder / "owl_cage_meshes" / "visual.glb", 1., color=look["color"], metallic=look["metallic"],
+                            roughness=look["roughness"], texture=False)
+        if cfg["owl_finish"] != self.defaults["owl_finish"]:
+            look = OWL_FINISHES[cfg["owl_finish"]]
+            paint_visual_geoms(folder / "owl.xml", {geometry._rgba(c): (wood, look["metallic"], look["roughness"])
+                                                    for c, wood in zip((geometry.WOOD_D, geometry.WOOD_W, geometry.PEG),
+                                                                       look["colors"])})
+        if cfg["rod_finish"] != self.defaults["rod_finish"]:
+            shaft, handle = (finish(name) for name in ROD_FINISHES[cfg["rod_finish"]])
+            paint_visual_geoms(folder / "rod.xml", {geometry._rgba(c): (look["color"], look["metallic"], look["roughness"])
+                                                    for c, look in ((geometry.ROD_RGBA, shaft), (geometry.HANDLE_RGBA, handle))})
         if report["initial_pose"]["clearance_to_cage_m"] < -TASK_CONTACT_PENETRATION_M:
             raise ValueError(f"{self.variation_id}: the owl starts deeper in the cage than the task allows")
         xy = np.asarray(cfg["center_xy_m"], dtype=float)
@@ -99,7 +148,7 @@ class HedgehogOwlTask(HedgehogInCageTask):
         wxyz = lambda r: tuple(r.as_quat()[[3, 0, 1, 2]])
         entities = (
             EntitySpec("hedgehog_mount", "box", None, (*xy, self.table_height_m + pad / 2), fixed=True,
-                       surface=surface("coated_metal"), morph_options={"size": (cfg["mount_width_m"], cfg["mount_width_m"], pad)}),
+                       surface=self.mount_surface(), morph_options={"size": (cfg["mount_width_m"], cfg["mount_width_m"], pad)}),
             EntitySpec("owl_cage", "urdf", folder / "owl_cage.urdf", tuple(origin), wxyz(rotation), fixed=True,
                        material={"friction": .4},
                        morph_options={"convexify": True, "decimate": False, "merge_fixed_links": False}),

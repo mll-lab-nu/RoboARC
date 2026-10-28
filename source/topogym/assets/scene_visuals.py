@@ -64,8 +64,10 @@ def finish_generated_urdf(path, role):
     return dict(role=role, files=files, surface=options)
 
 
-def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
+def scale_glb_color(path, rgb_scale, *, materials=None, color=None, metallic=None, roughness=None, texture=True):
     """Rescale (or with ``color`` replace) GLB base colours in place; buffers stay byte-identical.
+    ``metallic`` / ``roughness`` replace the factors; ``texture=False`` drops the base colour texture (a painted or
+    metal finish over a wood mesh).
 
     Only the glTF JSON chunk is rewritten, so textures and geometry are untouched.
     ``materials`` limits the edit to materials whose name contains one of the
@@ -89,6 +91,12 @@ def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
         base = list(color) if color is not None else list(pbr.get("baseColorFactor", [1., 1., 1., 1.]))
         scale = [float(rgb_scale)]*3 if isinstance(rgb_scale, (int, float)) else [float(v) for v in rgb_scale]
         pbr["baseColorFactor"] = [min(1., float(base[i])*scale[i]) for i in range(3)] + [float(base[3])]
+        if metallic is not None:
+            pbr["metallicFactor"] = float(metallic)
+        if roughness is not None:
+            pbr["roughnessFactor"] = float(roughness)
+        if not texture:
+            pbr.pop("baseColorTexture", None)
     chunk = json.dumps(document, separators=(",", ":")).encode()
     chunk += b" "*(-len(chunk) % 4)
     rest = data[20+length:]
@@ -96,8 +104,8 @@ def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
                      + struct.pack("<I4s", len(chunk), b"JSON") + chunk + rest)
 
 
-def scale_urdf_color(path, rgb_scale):
-    """Rescale a URDF's visual material colours in place, as scale_glb_color does a GLB's.
+def scale_urdf_color(path, rgb_scale, *, color=None):
+    """Rescale (or with ``color`` replace) a URDF's visual material colours in place, as scale_glb_color does a GLB's.
 
     A URDF visual's own ``<material><color>`` is the colour Nyx draws for its mesh,
     not the mesh file's baseColorFactor, so a tint must change both. Only the
@@ -109,6 +117,8 @@ def scale_urdf_color(path, rgb_scale):
 
     def colour(match):
         base = [float(v) for v in match.group(2).split()]
+        if color is not None:
+            base[:3] = color[:3]
         return match.group(1) + " ".join(str(min(1., base[i]*float(rgb_scale))) for i in range(3)) \
             + f" {base[3]:g}" + match.group(3)
 
