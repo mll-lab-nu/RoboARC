@@ -76,9 +76,15 @@ AXES = {
     ),
     "lock_picking": (
         # The chain lock (2026-10-10, it replaced the original tiers): each tier's geometry, stops and key tray are one
-        # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move; its
-        # rotor count differs by tier (3 or 4), so the rotor colours keep their order. Only the base's finish varies.
-        dict(path="base_finish", kind="choice", values=["coated_metal", "engineering_plastic", "silver"], visual=True),
+        # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move. No text names a colour:
+        # seed 1 a teak base, blue painted frames and tray, acrylic plates (red, green, white, blue; an orange END
+        # plate) and a brass key; seed 2 a green powder-coated base, plywood frames and tray, anodised plates (sky blue,
+        # pink, lime, teal; a natural aluminium END plate) and a gunmetal key.
+        dict(path="base_finish", kind="choice", values=["coated_metal", "teak", "green_powder_coat"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["engineering_plastic", "blue_painted", "plywood"],
+             visual=True),
+        dict(path="plate_finish", kind="choice", values=["painted", "acrylic", "anodised"], visual=True),
+        dict(path="key_finish", kind="choice", values=["silver", "brass", "gunmetal"], visual=True),
     ),
     "orbits": (
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
