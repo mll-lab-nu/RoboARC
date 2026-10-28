@@ -154,8 +154,11 @@ AXES = {
         dict(path="sleeve_finish", kind="choice", values=["brass", "black_oxide"], visual=True),
     ),
     "clock_assembling": (
-        dict(path="movement_finish", kind="choice", values=["rhodium", "gilt"], visual=True),
-        dict(path="stand_finish", kind="choice", values=["walnut", "white_plastic"], visual=True),
+        # Colour and material together (geo.MOVEMENT_FINISHES, STAND_FINISHES, SCREW_FINISHES; the user, 2026-10-27): seed
+        # 1 a ruthenium plate under rhodium bridges, walnut stands, gilt screws; seed 2 a rhodium plate under ruthenium
+        # bridges and wheels, blue plastic stands, steel screws.
+        dict(path="movement_finish", kind="choice", values=["ruthenium", "rhodium"], visual=True),
+        dict(path="stand_finish", kind="choice", values=["walnut", "blue_plastic"], visual=True),
         dict(path="screw_finish", kind="choice", values=["gilt", "steel"], visual=True),
     ),
     "wire_splicing": (
