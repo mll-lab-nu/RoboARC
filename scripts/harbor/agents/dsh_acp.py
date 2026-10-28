@@ -31,7 +31,9 @@ and turns them into agent/trajectory.json; this class adds what DSH needs:
   provider-reported usage of every request) lives in agent/dsh-home/, which Harbor keeps, and the trial's counts are
   its sessions' usage totals (dsh's session projections; a subagent's session counts its own requests), summed in
   Harbor's convention (input = uncached + cache read + cache write, cached = cache read), per session in
-  agent/dsh-usage.json. With the usage gateway its totals.json counts the same requests on the wire.
+  agent/dsh-usage.json. With the usage gateway its totals.json counts the same requests on the wire; dsh records a
+  response when it commits it, so a trial cut at its cutoff lacks the one in flight (the 2026-10-28 gateway smoke:
+  dsh 38 requests, the gateway 39, the difference exactly the 39th's usage).
 Credentials: DEEPSEEK_API_KEY from Harbor's environment (its --env-file); DEEPSEEK_BASE_URL, when set there (the usage
 gateway), points dsh at another Messages root.
 """
