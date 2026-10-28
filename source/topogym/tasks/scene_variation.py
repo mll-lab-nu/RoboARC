@@ -27,8 +27,11 @@ AXES = {
         # Goal region pinned to -y; bounds keep the reach proxy within +2 cm (historical scene-variation geometry audit).
         dict(path="center_xy_m", kind="offset", range=[[-.03, .04], [-.01, .03]]),
         dict(path="yaw_deg", kind="offset", range=[-10., 10.]),
-        # Silver would match the horseshoes; keep the ring distinguishable.
-        dict(path="target_ring_finish", kind="choice", values=["copper", "coated_metal", "brass"], visual=True),
+        # The ring, the horseshoes and the chains (no text names their colours): seed 1 a red painted ring on black
+        # oxide horseshoes, seed 2 a dark coated ring on bronze ones; every ring stands apart from the horseshoes at
+        # its seed (brass, 18 CIEDE2000 from the copper ring, left the ring values on 2026-10-27).
+        dict(path="target_ring_finish", kind="choice", values=["copper", "red_painted", "coated_metal"], visual=True),
+        dict(path="shoe_finish", kind="choice", values=["steel", "black_oxide", "bronze"], visual=True),
     ),
     "cast_coil": (
         # Both pieces move together; the silver offset stays in world XY. +y moves the
