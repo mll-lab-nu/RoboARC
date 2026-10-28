@@ -26,6 +26,10 @@ repository: <head> gives the simulator source (source/), the release inputs (too
   --instances     made instance directories, <dir>/<new base>/ (instance.json + instance_assets/): used instead of
                   making them (a family's own make, a dry run); the report marks them, and an instance made on another
                   source than the image's is allowed only here
+  --remake        these new bases (comma-separated; manifest "remake": a list) are made in this run even when
+                  --instances or the manifest holds an instance of theirs: the bases whose frozen scene the head's source
+                  changes (e.g. the goal-marker bases when the marker changed), the others coming premade from the
+                  released tree
   --gpu           the GPU (device index) for the make-instance runs and the Harbor trials of a base on a GPU profile
                   (mujoco_release.json gpu_profiles, e.g. blanket_vbd_gpu; default 0)
   --version       the image version: images/<bench>/VERSION, the image label (RELEASE_VERSION, as images/<bench>/build.sh
@@ -56,9 +60,11 @@ repository: <head> gives the simulator source (source/), the release inputs (too
                   (the owner, 2026-10-20: a seed varies appearance only, one reference serves every seed). Written to
                   instances/<base>/seeds/<S>/ (instance.json + instance_assets/), which the image copies with its base
                   (/opt/robotangle/instances/<base>/seeds/<S>/) and assets.json pins (files under
-                  instances/<base>/seeds/<S>/, instances[<base>].seeds[<S>] instance_sha256); a premade base that brings
-                  its own seeds/<S>/ keeps them. Seed 0 is the base instance itself, made as without this option. For
-                  each seed S the release files also get (write_seed_files):
+                  instances/<base>/seeds/<S>/, instances[<base>].seeds[<S>] instance_sha256); a premade base's own
+                  seeds/<S>/ are kept when derived_from names that base instance (its canonical sha256) and this run's
+                  source, else derived again (a released tree's seeds carry the released appearance()). Seed 0 is the
+                  base instance itself, made as without this option. For each seed S the release files also get
+                  (write_seed_files):
                   packages/<base>-privileged/runtime_binding.s<S>.upstream.json, the seed instance's lock (mk_tasks.py:
                   runtime_binding.s<S>.json), and oracles/<base>/privileged.s<S>.npz, the reference re-stamped (restamp:
                   the same rows, instance_sha = seed S's birth; mk_tasks.py: solution/trajectory.s<S>.npz); and, for a
@@ -68,6 +74,10 @@ repository: <head> gives the simulator source (source/), the release inputs (too
   --goal-pictures the appearance seeds' goal pictures rendered elsewhere, <dir>/<base>/seeds/<S>/ (the renderer's
                   pictures and its record *_images.json; manifest "goal_pictures"), used instead of rendering them in
                   this run (the render tree's scripts/<bench>/goal_images/<renderer>, in the release image on --gpu)
+  --seed0-goal-pictures  these bases' seed-0 goal pictures too (comma-separated; manifest "seed0_goal_pictures": a
+                  list), rendered as a seed's (or from --goal-pictures <dir>/<base>/seeds/0/) from the base instance and
+                  written over packages/<base>-<mode>/environment/goal/ (not pinned: seed 0's pictures are the
+                  packages'): for a change of what the pictures draw, e.g. the knot region tiers' dashed line 5 mm wide
   --no-harbor     stop after the checks
 A manifest base with "reference": null has no reference solution (user 2026-10-13): no oracles/ copy, release.json
 evidence {} and oracle "none" (its texts say so), no birth comparison, and Harbor runs nop only for it (harbor_nop/).
@@ -487,13 +497,23 @@ def derive_seeds(a, bases: list[dict], image: str) -> dict:
     """--appearance-seeds: each base's seeds derived from its instance in <work>/instances/<base>/ (made in this run or
     premade) in the image without instances, as make-instance runs (derive_seed_instance.py: instance_assets/ byte for
     byte, appearance(cls, S) task parameters, the build's fields recomputed; it stops unless the birth is the base's but
-    for task.instance_id). A premade base's own seeds/<S>/ are kept. A GPU-profile instance derives on --gpu.
+    for task.instance_id). A premade base's own seeds/<S>/ are kept when derived from that base instance on this run's
+    source (a.source_sha), else derived again: a seed derived from another seed 0 (a re-made base) or by another source
+    (another appearance()) is not this release's. A GPU-profile instance derives on --gpu.
     {<base>/seeds/<S>: wall seconds of the base's derivation per seed}."""
     dsi = module(pathlib.Path(__file__).resolve().parent / "derive_seed_instance.py")
 
+    def current(d: pathlib.Path, s: int) -> bool:
+        p = d / "seeds" / str(s) / "instance.json"
+        if not p.is_file():
+            return False
+        got = json.loads(p.read_text()).get("derived_from") or {}
+        return (got.get("instance_sha256") == canonical(json.loads((d / "instance.json").read_text()))
+                and (got.get("source") or {}).get("sha256") == a.source_sha)
+
     def one(b: dict) -> dict:
         d = a.work / "instances" / b["new"]
-        todo = [s for s in a.appearance_seeds if not (d / "seeds" / str(s) / "instance.json").is_file()]
+        todo = [s for s in a.appearance_seeds if not current(d, s)]
         if not todo:
             return {}
         gpu = (json.loads((d / "instance.json").read_text())["simulator"].get("mujoco_profile") or "") in a.gpu_profiles
@@ -542,7 +562,7 @@ GOAL_RENDERERS = {"blanket_fold": "fold_target_images.py", "knot_untying": "regi
 
 def goal_command(a, base: str, seed: int, renderer: str, image: str, mujoco_env) -> list[str]:
     """The render of one seed's goal pictures: in the release image on --gpu, from a writable copy of the seed's instance
-    (instances mounted read-only), into <work>/goal/<base>/seeds/<seed>/."""
+    (instances mounted read-only; seed 0: the base instance), into <work>/goal/<base>/seeds/<seed>/."""
     env = [*(f"{k}={v}" for k, v in mujoco_env), "OMP_NUM_THREADS=1", "MKL_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
            "RCB_TORCH_THREADS=1", "HOME=/tmp", "XDG_CACHE_HOME=/work/cache"]
     return ["docker", "run", "--rm", "--network", "none", "--user", f"{os.getuid()}:{os.getgid()}", "-w", "/tmp",
@@ -551,7 +571,8 @@ def goal_command(a, base: str, seed: int, renderer: str, image: str, mujoco_env)
             "-v", f"{a.out / 'scripts' / a.bench / 'goal_images'}:/goal_images:ro",
             "-v", f"{a.work / 'instances'}:/instances:ro", "-v", f"{a.work}:/work", image,
             "sh", "-c", 'cp -a "$1" /tmp/instance && exec python "/goal_images/$2" /tmp/instance/instance.json "$3" --tooling /tooling',
-            "render", f"/instances/{base}/seeds/{seed}", renderer, f"/work/goal/{base}/seeds/{seed}"]
+            "render", f"/instances/{base}" + (f"/seeds/{seed}" if seed else ""), renderer,
+            f"/work/goal/{base}/seeds/{seed}"]
 
 
 def seed_goal_pictures(a, bases: list[dict], image: str, mujoco_env) -> None:
@@ -560,7 +581,9 @@ def seed_goal_pictures(a, bases: list[dict], image: str, mujoco_env) -> None:
     scripts/task_seed.py materialize copies over environment/goal/). They come from --goal-pictures <dir>/<base>/seeds/<S>/,
     or are rendered in this run into <work>/goal/<base>/seeds/<S>/ (goal_command; a picture already there is used again).
     The run stops when a picture is missing or its renderer's record names another birth than the seed's. Written to
-    packages/<base>-<mode>/tests/seeds/<S>/goal/ and pinned in assets.json, instances[<base>].seeds[<S>].goal."""
+    packages/<base>-<mode>/tests/seeds/<S>/goal/ and pinned in assets.json, instances[<base>].seeds[<S>].goal. A base of
+    --seed0-goal-pictures gets seed 0's too, the same way from its base instance, written over the packages'
+    environment/goal/ (seed 0's pictures, which assets.json does not pin)."""
     rb = a.out / "scripts" / a.bench
     assets = json.loads((rb / "assets.json").read_text())
     for b in bases:
@@ -568,13 +591,16 @@ def seed_goal_pictures(a, bases: list[dict], image: str, mujoco_env) -> None:
         pkgs = [rb / "packages" / f"{new}-{m}" for m in ("privileged", "standard")]
         names = [sorted(p.name for p in (q / "environment/goal").glob("*") if p.is_file()) for q in pkgs]
         if not any(names):
+            if new in a.seed0_goal_pictures:
+                raise SystemExit(f"--seed0-goal-pictures {new}: its packages show no goal pictures (environment/goal/)")
             continue
         if names[0] != names[1]:
             raise SystemExit(f"{new}: the twins show other goal pictures ({names[0]} / {names[1]})")
         renderer = GOAL_RENDERERS.get(b["task"])
         script = rb / "goal_images" / (renderer or "")
-        for s in a.appearance_seeds:
-            birth = json.loads((a.work / "instances" / new / "seeds" / str(s) / "instance.json").read_text())["state_sha"]
+        for s in ([0] if new in a.seed0_goal_pictures else []) + a.appearance_seeds:
+            inst = a.work / "instances" / new / (f"seeds/{s}" if s else "")
+            birth = json.loads((inst / "instance.json").read_text())["state_sha"]
             src = (a.goal_pictures or a.work / "goal") / new / "seeds" / str(s)
             cmd = goal_command(a, new, s, renderer or "<renderer>", image, mujoco_env)
             if not a.goal_pictures and not all((src / n).is_file() for n in names[0]):
@@ -591,10 +617,12 @@ def seed_goal_pictures(a, bases: list[dict], image: str, mujoco_env) -> None:
                                  + (f", it names {records[0].get('state_sha')}" if len(records) == 1 else ""))
                                  + f"; render them with: {' '.join(cmd)}")
             for q in pkgs:
-                (q / "tests/seeds" / str(s) / "goal").mkdir(parents=True, exist_ok=True)
+                dst = q / "environment/goal" if s == 0 else q / "tests/seeds" / str(s) / "goal"
+                dst.mkdir(parents=True, exist_ok=True)
                 for n in names[0]:
-                    shutil.copyfile(src / n, q / "tests/seeds" / str(s) / "goal" / n)
-            assets["instances"][new]["seeds"][str(s)]["goal"] = {n: sha((src / n).read_bytes()) for n in names[0]}
+                    shutil.copyfile(src / n, dst / n)
+            if s:
+                assets["instances"][new]["seeds"][str(s)]["goal"] = {n: sha((src / n).read_bytes()) for n in names[0]}
     (rb / "assets.json").write_text(json.dumps(assets, indent=1, ensure_ascii=False) + "\n")
 
 
@@ -892,6 +920,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--jobs", type=int)
     ap.add_argument("--appearance-seeds")
     ap.add_argument("--goal-pictures", type=pathlib.Path)
+    ap.add_argument("--seed0-goal-pictures")
+    ap.add_argument("--remake")
     ap.add_argument("--harbor", default="harbor")
     ap.add_argument("--host-label", default=socket.gethostname().split(".")[0])
     ap.add_argument("--replace-tag", action="store_true")
@@ -902,11 +932,15 @@ def main(argv: list[str]) -> int:
     m = json.loads(a.manifest.read_text()) if a.manifest else {}
     mdir = a.manifest.resolve().parent if a.manifest else pathlib.Path.cwd()
     for k, default in (("head", None), ("version", None), ("onto", None), ("bench", BENCH), ("families", None), ("only", None), ("hf_revision", None),
-                       ("gpu", "0"), ("lanes", 3), ("jobs", 4), ("appearance_seeds", None)):
+                       ("gpu", "0"), ("lanes", 3), ("jobs", 4), ("appearance_seeds", None),
+                       ("seed0_goal_pictures", None), ("remake", None)):
         if getattr(a, k) is None:
             v = m.get(k, default)
-            setattr(a, k, ",".join(map(str, v)) if k in ("families", "only", "appearance_seeds") and isinstance(v, list) else v)
+            setattr(a, k, ",".join(map(str, v)) if k in ("families", "only", "appearance_seeds", "seed0_goal_pictures",
+                                                          "remake") and isinstance(v, list) else v)
     a.appearance_seeds = sorted({int(x) for x in (a.appearance_seeds or "").split(",") if x.strip()})
+    a.seed0_goal_pictures, a.remake = ({x.strip() for x in (v or "").split(",") if x.strip()}
+                                       for v in (a.seed0_goal_pictures, a.remake))
     if any(x < 1 for x in a.appearance_seeds):
         ap.error("--appearance-seeds: seeds >= 1 (seed 0 is the base instance)")
     if not a.head or not a.version:
@@ -926,6 +960,8 @@ def main(argv: list[str]) -> int:
     a.premade = {b: path(r["instance"]) for b, r in per.items() if r.get("instance")}
     if a.instances:
         a.premade.update({d.name: d.resolve() for d in a.instances.iterdir() if (d / "instance.json").is_file()})
+    for b in a.remake:                   # made in this run whatever --instances / the manifest hold for it
+        a.premade.pop(b, None)
     a.step_s = {b: float(r["step_s"]) for b, r in per.items() if r.get("step_s")}
     if a.goal_pictures is None and m.get("goal_pictures"):
         a.goal_pictures = path(m["goal_pictures"])
@@ -966,9 +1002,11 @@ def main(argv: list[str]) -> int:
     a.gpu_profiles = set(spec.get("gpu_profiles", [])) | set(json.loads(
         (here / "tools/release/mujoco_release.json").read_text()).get("gpu_profiles", []))
     bases = bases_of(spec, a.families.split(",") if a.families else None)
-    unknown = (set(a.premade) | set(a.ref_paths) | set(a.step_s)) - {b["new"] for b in bases}
+    unknown = ((set(a.premade) | set(a.ref_paths) | set(a.step_s) | a.remake | a.seed0_goal_pictures)
+               - {b["new"] for b in bases})
     if unknown:
-        raise SystemExit(f"the manifest / --instances name bases that are not being rebuilt: {sorted(unknown)}")
+        raise SystemExit(f"the manifest / --instances / --remake / --seed0-goal-pictures name bases that are not being "
+                         f"rebuilt: {sorted(unknown)}")
     if a.only:
         missing = set(a.only.split(",")) - {b["new"] for b in bases}
         if missing:
@@ -979,6 +1017,8 @@ def main(argv: list[str]) -> int:
             for k in set(d) - keep:
                 del d[k]
         a.no_oracle &= keep
+        a.remake &= keep
+        a.seed0_goal_pictures &= keep
         a.expect = {k: v for k, v in a.expect.items() if k in keep} if a.expect else a.expect
     # the render tree: the --onto worktree with <head>'s tooling laid over it, or <head>'s own
     a.out, out_branch = a.repo, branch
@@ -1032,6 +1072,7 @@ def main(argv: list[str]) -> int:
         return json.loads(out.strip().splitlines()[-1])
 
     rt = installed(noinst_tag)
+    a.source_sha = rt["runtime"]["source"]["sha256"]     # the source the instances are made and the seeds derived on
 
     # 2. the instances, made inside it (or, with --hf-revision, the uploaded ones of the previous run); the release image
     walls = {} if a.hf_revision else make_instances(a, bases, noinst_tag, mk.MUJOCO_ENV)
@@ -1104,8 +1145,9 @@ def main(argv: list[str]) -> int:
     # 3. the release files, every task dir rendered; 4. the checks
     done = write_release(a, bases, head, runtime, noinst, facts)
     report.update(packages_written=done["written"], unchanged_bases=done["kept"])
-    if a.appearance_seeds:               # the seeds' goal pictures (rendered in the release image); the report names
-        seed_goal_pictures(a, bases, image, mk.MUJOCO_ENV)       # their re-stamped references and pictures
+    if a.appearance_seeds or a.seed0_goal_pictures:   # the seeds' goal pictures (rendered in the release image); the
+        seed_goal_pictures(a, bases, image, mk.MUJOCO_ENV)    # report names their re-stamped references and pictures
+        report.update(seed0_goal_pictures=sorted(a.seed0_goal_pictures))
         rb = a.out / "scripts" / a.bench
         pins = json.loads((rb / "assets.json").read_text())
         for b in bases:

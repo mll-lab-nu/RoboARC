@@ -8,7 +8,9 @@ without docker, a GPU or numpy:
     (the same tree as with seeds, less the seed files and pins);
   - seed_goal_pictures: pictures from --goal-pictures or rendered (the docker command, faked here) go to both packages'
     tests/seeds/<S>/goal/ and are pinned under instances[<base>].seeds[<S>].goal; a missing picture, a record of another
-    birth or a family without a renderer stops the run;
+    birth or a family without a renderer stops the run; --seed0-goal-pictures: seed 0's from the base instance, over
+    environment/goal/, not pinned;
+  - derive_seeds: a premade seed is kept only when derived from that base instance on this run's source;
   - assets.py pin keeps the seeds (and a seed's goal pins while its instance is unchanged); check verifies them;
   - source/images/roboarc/stage_instance.py --seed-file stages seeds/<S>/ with runtime_binding.s<S>.json, else the default."""
 import hashlib
@@ -88,7 +90,8 @@ def tree(td: Path, seeds: list[int]):
     ref.write_bytes(reference("aaaaaaaaaaaaaaaa"))
     a = types.SimpleNamespace(out=out, repo=repo, work=work, bench="roboarc", version="9.9.9", host_label="test",
                               no_oracle=set(), references=None, ref_paths={NEW: ref}, step_s={}, hf_revision=None,
-                              appearance_seeds=seeds, goal_pictures=None, gpu="0",
+                              appearance_seeds=seeds, goal_pictures=None, gpu="0", seed0_goal_pictures=set(),
+                              source_sha="5" * 64, gpu_profiles=set(), jobs=1,
                               premade={})   # RoboARC copy: its write_release names premade instances
     b = dict(family="blanket_fold", tier="easy", old=OLD, new=NEW, variation="blanket_fold_easy", released_simulator_keys=[],
              simulator_overrides={}, render_host=False, frozen_assets=False, released_task_parameters=False,
@@ -185,8 +188,8 @@ class GoalPictures(unittest.TestCase):
     def tearDown(self):
         self.td.cleanup()
 
-    def pictures(self, root: Path, birth_of=None):
-        for s, birth in self.births.items():
+    def pictures(self, root: Path, birth_of=None, seed0=False):
+        for s, birth in (({0: "aaaaaaaaaaaaaaaa"} if seed0 else {}) | self.births).items():
             d = root / NEW / "seeds" / str(s)
             d.mkdir(parents=True, exist_ok=True)
             (d / "target_cam_high.png").write_bytes(f"\x89PNG seed {s}".encode())
@@ -251,6 +254,31 @@ class GoalPictures(unittest.TestCase):
         finally:
             rr.run = run
 
+    def test_seed0_pictures(self):
+        self.a.goal_pictures = Path(self.td.name) / "rendered"
+        self.pictures(self.a.goal_pictures, seed0=True)
+        pins = json.loads((self.rb / "assets.json").read_text())["instances"][NEW]
+        rr.seed_goal_pictures(self.a, [self.b], "img:1", ())
+        for m in ("privileged", "standard"):          # without the option, seed 0's pictures stay the packages'
+            self.assertEqual(files(self.rb / "packages" / f"{NEW}-{m}" / "environment/goal"),
+                             {"target_cam_high.png": b"\x89PNG seed 0"})
+        self.a.seed0_goal_pictures = {NEW}
+        rr.seed_goal_pictures(self.a, [self.b], "img:1", ())
+        self.placed()
+        for m in ("privileged", "standard"):
+            self.assertEqual(files(self.rb / "packages" / f"{NEW}-{m}" / "environment/goal"),
+                             {"target_cam_high.png": "\x89PNG seed 0".encode()})
+        after = json.loads((self.rb / "assets.json").read_text())["instances"][NEW]
+        self.assertEqual(sorted(after["seeds"]), sorted(pins["seeds"]))     # seed 0's pictures are not pinned
+        self.assertEqual(rr.goal_command(self.a, NEW, 0, "r.py", "img:1", ())[-3], f"/instances/{NEW}")
+        self.pictures(self.a.goal_pictures, birth_of={0: "dddddddddddddddd"}, seed0=True)
+        with self.assertRaisesRegex(SystemExit, "seed 0: .*names dddddddddddddddd"):
+            rr.seed_goal_pictures(self.a, [self.b], "img:1", ())
+        for m in ("privileged", "standard"):
+            shutil.rmtree(self.rb / "packages" / f"{NEW}-{m}" / "environment/goal")
+        with self.assertRaisesRegex(SystemExit, "shows? no goal pictures"):
+            rr.seed_goal_pictures(self.a, [self.b], "img:1", ())
+
     def test_no_renderer_stops(self):
         with self.assertRaisesRegex(SystemExit, "need a renderer"):
             rr.seed_goal_pictures(self.a, [self.b], "img:1", ())
@@ -264,6 +292,35 @@ class GoalPictures(unittest.TestCase):
         before = files(self.a.out)
         rr.seed_goal_pictures(self.a, [self.b], "img:1", ())
         self.assertEqual(files(self.a.out), before)
+
+
+class DeriveSeeds(unittest.TestCase):
+    def test_premade_seeds_kept_only_when_current(self):
+        with tempfile.TemporaryDirectory() as td:
+            a, b, _ = tree(Path(td), [1, 2])
+            d = a.work / "instances" / NEW
+            canon0 = rr.canonical(json.loads((d / "instance.json").read_text()))
+            for s, (inst, src) in {1: (canon0, a.source_sha), 2: (canon0, "6" * 64)}.items():
+                p = d / "seeds" / str(s) / "instance.json"
+                p.write_text(json.dumps(dict(json.loads(p.read_text()), derived_from=dict(
+                    instance_sha256=inst, source=dict(sha256=src)))))
+            calls, module = [], rr.module
+            rr.module = lambda path: types.SimpleNamespace(   # noqa: E731  (the docker derivation, faked)
+                docker_derive=lambda image, tooling, src, out, seeds, log, gpu=None: calls.append(list(seeds)) or 1.0)
+            try:
+                self.assertEqual(sorted(rr.derive_seeds(a, [b], "noinst")), [f"{NEW}/seeds/2"])
+                self.assertEqual(calls, [[2]])           # seed 1 is current; seed 2 was derived by another source
+                (d / "instance.json").write_text(json.dumps(dict(json.loads((d / "instance.json").read_text()),
+                                                                 state_sha="eeeeeeeeeeeeeeee")))   # a re-made seed 0
+                calls.clear()
+                rr.derive_seeds(a, [b], "noinst")
+                self.assertEqual(calls, [[1, 2]])
+                shutil.rmtree(d / "seeds")
+                calls.clear()
+                rr.derive_seeds(a, [b], "noinst")
+                self.assertEqual(calls, [[1, 2]])
+            finally:
+                rr.module = module
 
 
 class AssetsPin(unittest.TestCase):
