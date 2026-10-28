@@ -132,7 +132,18 @@ AXES = {
         # area / 0.288 m^2, independent of position; -y would crowd the home grippers.
         dict(path="color", kind="choice", visual=True, values=[
             [.22, .46, .70], [.70, .20, .18], [.22, .52, .30], [.80, .62, .18], [.45, .47, .50]]),
-        dict(path="texture.pattern", kind="choice", values=["grid", "stripes"], visual=True),
+        # The fabric (the texture and its roughness; Nyx draws no sheen): the released cotton with a hairline grid, a
+        # matte wool in a buffalo check with charcoal, a smooth sateen striped mustard (the user, 2026-10-27). Seeds 1
+        # and 2 take red wool and green sateen. The same look gives the static boxes (the hard tiers' fence) yellow plastic
+        # or walnut (obstacle_finish; the released fence keeps Nyx's default white).
+        dict(path="texture", kind="choice", visual=True, values=[
+            dict(pattern="grid", accent_color=[.76, .84, .87], stripe_pitch_m=.06, thread_pitch_m=.002),
+            dict(pattern="check", accent_color=[.15, .15, .16], stripe_pitch_m=.05, thread_pitch_m=.003,
+                 thread_shading=.35, fibre_noise=.08, roughness=.92,
+                 obstacle_finish=dict(color=[.80, .55, .03], metallic=0., roughness=.45)),
+            dict(pattern="stripes", accent_color=[.80, .62, .18], stripe_pitch_m=.04, thread_pitch_m=.002,
+                 thread_shading=.25, roughness=.5,
+                 obstacle_finish=dict(color=[.26, .15, .09], metallic=0., roughness=.55))]),
         dict(path="center_xy_m", kind="offset", range=[[-.04, .04], [0., .03]]),
     ),
     "blanket_fold": (
@@ -140,7 +151,15 @@ AXES = {
         # start and target put it, so there is no centre axis.
         dict(path="color", kind="choice", visual=True, values=[
             [.22, .46, .70], [.70, .20, .18], [.22, .52, .30], [.80, .62, .18], [.45, .47, .50]]),
-        dict(path="texture.pattern", kind="choice", values=["grid", "stripes"], visual=True),
+        # The fabric, as blanket_flatten's.
+        dict(path="texture", kind="choice", visual=True, values=[
+            dict(pattern="grid", accent_color=[.76, .84, .87], stripe_pitch_m=.06, thread_pitch_m=.002),
+            dict(pattern="check", accent_color=[.15, .15, .16], stripe_pitch_m=.05, thread_pitch_m=.003,
+                 thread_shading=.35, fibre_noise=.08, roughness=.92,
+                 obstacle_finish=dict(color=[.80, .55, .03], metallic=0., roughness=.45)),
+            dict(pattern="stripes", accent_color=[.80, .62, .18], stripe_pitch_m=.04, thread_pitch_m=.002,
+                 thread_shading=.25, roughness=.5,
+                 obstacle_finish=dict(color=[.26, .15, .09], metallic=0., roughness=.55))]),
     ),
     "knot_untying": (
         # The knot sits at world x = 0, 13.6 cm right of the table centre: shift leans -x.

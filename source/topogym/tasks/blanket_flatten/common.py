@@ -108,7 +108,8 @@ class BlanketFlattenTask(TaskDefinition):
         return InitialStateSpec(path, digest,
             acceptance=cfg.get("initial_state_acceptance", "released_stable"))
 
-    def _obstacle_entities(self):
+    def _obstacle_entities(self, surface=None):
+        """The static boxes; ``surface``: their finish under an appearance seed's texture (obstacle_finish)."""
         from scipy.spatial.transform import Rotation
         out = []
         for spec in self.config["obstacles"] or ():
@@ -122,7 +123,7 @@ class BlanketFlattenTask(TaskDefinition):
             q = Rotation.from_euler("z", float(spec.get("yaw_deg", 0.)), degrees=True).as_quat()[[3, 0, 1, 2]]
             out.append(EntitySpec(str(spec["name"]), "box", None, (*xy, self.table_height_m+half[2]), tuple(q),
                                   fixed=True, material={"friction": float(spec.get("friction", .5))},
-                                  morph_options={"size": tuple(2*half)}))
+                                  morph_options={"size": tuple(2*half)}, **({"surface": dict(surface)} if surface else {})))
         return out
 
     def declare(self, asset_dir, table_height_m):
@@ -157,9 +158,13 @@ class BlanketFlattenTask(TaskDefinition):
         vertices = vertices + [*center, self.table_height_m]
         path = Path(asset_dir) / "blanket.obj"
         write_obj(path, vertices, faces, uv, self.layout)
-        surface = dict(color=tuple(cfg["color"]))
+        surface, obstacle_surface = dict(color=tuple(cfg["color"])), None
         if cfg["texture"] is not None:
             texture_options = dict(cfg["texture"])
+            # An appearance seed's texture also names the fabric's roughness and the static boxes' finish (the released
+            # texture names neither): looks only, which the frozen birth's identity reads at their nominal values.
+            roughness = texture_options.pop("roughness", ROLE_ROUGHNESS["deformable"])
+            obstacle_surface = texture_options.pop("obstacle_finish", None)
             reserved = {
                 "color",
                 "size_m",
@@ -189,7 +194,7 @@ class BlanketFlattenTask(TaskDefinition):
             )
             surface = dict(
                 diffuse_texture_path=str(texture_path.resolve()),
-                roughness=ROLE_ROUGHNESS["deformable"],
+                roughness=roughness,
                 vis_mode="visual",
             )
         self.birth_vertices, self.birth_uv, self.birth_panels = vertices, uv, panels
@@ -216,7 +221,7 @@ class BlanketFlattenTask(TaskDefinition):
             material_map_path=material_map,
         )
         return TaskSpec(
-            (entity, *self._obstacle_entities()),
+            (entity, *self._obstacle_entities(obstacle_surface)),
             {
                 **({"pbd_table_friction": {"entity_names": ("blanket",), **dict(cfg["table_friction"])}}
                    if cfg["table_friction"] is not None else {}),
