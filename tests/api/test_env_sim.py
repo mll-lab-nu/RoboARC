@@ -1,12 +1,18 @@
 """One task's environment end to end, inside its image (marker sim): spaces, reset determinism (the graded birth
-state), clamping instead of failing, state snapshots, the success predicate on the reference, the deliverable."""
+state), clamping instead of failing, state snapshots, the success predicate on the reference, the deliverable. Also
+strict=False on the rope bases, whose instances carry frozen generated assets."""
 import json
+import os
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 
 import numpy as np
 import pytest
 
 import roboarc
+from roboarc import _runtime
 from roboarc.references import load_reference
 
 from conftest import sim_task
@@ -186,3 +192,32 @@ def test_camera_info_frames(env):
                 assert pc[2] > 0, name
                 u, w = (K @ (pc / pc[2]))[:2]
                 assert 0 <= u < W and 0 <= w < H, (name, u, w)
+
+
+@pytest.mark.parametrize("base", ["rope-threading-04", "knot-untying-04"])
+def test_unbound_instance_builds_from_its_frozen_assets(base, tmp_path):
+    """strict=False stages the instance without its runtime binding, and the Session installs an instance's frozen
+    generated assets (instance_assets/frozen_assets: the rope's volume mesh, which tetgen meshes differently on another CPU
+    class) only when it reads a binding: the environment installs them, so the rope is built from the frozen volume (on
+    another CPU class: "MuJoCo rope chain of rope was built from another volume") and the birth is the frozen one. In a
+    fresh process (one environment per process), from a copy of the instance (ROBOARC_INSTANCES)."""
+    if not _runtime.in_puzzle_image():
+        pytest.skip("needs the puzzle image's frozen instances")
+    src, dst = _runtime.IMAGE_INSTANCES / f"{base}-i01", tmp_path / "instances" / f"{base}-i01"
+    dst.mkdir(parents=True)
+    shutil.copyfile(src / "instance.json", dst / "instance.json")
+    shutil.copytree(src / "instance_assets", dst / "instance_assets", symlinks=True)
+    code = ("import json, sys, roboarc\n"
+            "u = roboarc.make(sys.argv[1], strict=False, renderer='none').unwrapped\n"
+            "print(json.dumps({'birth': u.birth_hash, 'instance': str(u.instance_path),\n"
+            "                  'frozen': {k: str(v) for k, v in u.M._FROZEN_ASSETS.items()}}))\n")
+    repo = str(Path(__file__).resolve().parents[2])
+    env = dict(os.environ, ROBOARC_INSTANCES=str(tmp_path / "instances"), ROBOARC_CACHE=str(tmp_path / "cache"),
+               PYTHONPATH=os.pathsep.join(p for p in (repo, os.environ.get("PYTHONPATH")) if p))
+    p = subprocess.run([sys.executable, "-c", code, base], capture_output=True, text=True, env=env, cwd=tmp_path)
+    assert p.returncode == 0, (p.stdout + p.stderr)[-2000:]
+    out = json.loads(p.stdout.strip().splitlines()[-1])
+    folder = Path(out["instance"]).parent / "instance_assets" / "frozen_assets"
+    assert out["frozen"] == {"rope_volume.npz": str(folder / "rope_volume.npz")}
+    frozen = json.loads((dst / "instance.json").read_text())["state_sha"]
+    assert frozen.startswith(out["birth"]) or out["birth"].startswith(frozen)

@@ -138,6 +138,8 @@ class PuzzleEnv(RoboARCEnv):
         M = self.M = _import_tooling(root)
         self.instance_seed = int(instance_seed)
         instance = stage_instance(task, bind=strict, seed=self.instance_seed)
+        if not strict:   # the Session installs the frozen generated assets (rope volumes) only when it reads a binding
+            M._install_frozen_assets(instance.parent, json.loads(instance.read_text()).get("asset_identity") or {})
         _SESSION_BUILT.append(task.id)
         S = self.session = M.Session(task.name, instance=str(instance), strict=strict, max_steps=self.max_episode_steps)
         generated = bool(getattr(S, "instance_generated", False))

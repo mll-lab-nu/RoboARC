@@ -268,9 +268,8 @@ def finished_obj(source, rgba, roughness, metallic):
     with the colour, roughness and metallic (MTL's PBR extension Pr / Pm, with Ns and Ks for readers without it); its path.
     Nyx draws the material (renders of interlocked-claws-13, 2026-10-27; the entity surface's roughness and metallic do
     not reach a URDF entity). A GLB copy would round the vertices to float32, and the placement and separation rules
-    read the visual meshes' vertices (task_metrics.rigid_asset_vertices). The copy's suffix is ".OBJ" (Nyx and trimesh
-    read it as OBJ): it marks a visual-only mesh, apart from the ".obj" files the colliders use, which
-    tools/tests/test_appearance_seeds.py compares as physics content."""
+    read the visual meshes' vertices (task_metrics.rigid_asset_vertices). Only the URDF's <visual> names the copy, so
+    tools/tests/test_appearance_seeds.py compares its geometry (without the material lines) and not its name."""
     name = f"{source.stem}_finish"
     r, g, b = (float(c) for c in rgba[:3])
     specular = [.04 + (c - .04) * float(metallic) for c in (r, g, b)]
@@ -278,7 +277,7 @@ def finished_obj(source, rgba, roughness, metallic):
     (source.parent / f"{name}.mtl").write_text(
         f"newmtl finish\nKd {r} {g} {b}\nKs {specular[0]} {specular[1]} {specular[2]}\nNs {max(1., shininess)}\n"
         f"Pr {float(roughness)}\nPm {float(metallic)}\n")
-    target = source.with_name(f"{name}.OBJ")
+    target = source.with_name(f"{name}.obj")
     target.write_text(f"mtllib {name}.mtl\nusemtl finish\n" + source.read_text())
     return target
 
