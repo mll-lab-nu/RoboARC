@@ -71,9 +71,13 @@ AXES = {
         # -y pushes the finish-side IK past tolerance and the far corner is 0.88 m from
         # the Panda base, so the fixture only moves -x/+y. No yaw: route frames are unrotated.
         dict(path="center_xy_m", kind="offset", range=[[-.015, 0.], [0., .015]]),
-        dict(path="wood_tint", kind="offset", range=[-.2, 0.], visual=True),
-        # Copper or brass; the steel loop stays distinct from either.
-        dict(path="rail_rgb", kind="choice", values=[[.72, .33, .16], [.78, .60, .25]], visual=True),
+        # Every part's colour and material (buzz_wire_3d.common.FINISHES; the user, 2026-10-27): the parts the texts name
+        # by material keep it (metal wire and loop, wooden handle, rubber sleeves); the deck is named by none.
+        dict(path="deck_finish", kind="choice", values=["pale_wood", "blue_paint", "walnut_stain"], visual=True),
+        dict(path="wire_finish", kind="choice", values=["copper", "brass", "stainless_steel"], visual=True),
+        dict(path="loop_finish", kind="choice", values=["stainless", "gunmetal", "polished_copper"], visual=True),
+        dict(path="handle_finish", kind="choice", values=["pale_wood", "walnut", "ebony"], visual=True),
+        dict(path="sleeve_finish", kind="choice", values=["black_rubber", "red_rubber", "blue_rubber"], visual=True),
     ),
     "fiber_bundling": (
         # The scene sits near x ~ 0.2, ~0.8 m from the Panda base: no +x.

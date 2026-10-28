@@ -33,7 +33,7 @@ See `tests/grade.py`.
 ## Details
 
 ### Goal
-Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well.
+Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well.
 
 ### Success requirements
 - Start within 10 mm along the wire from its starting end and traverse continuously until within 10 mm of its finishing end. Keep one unambiguous wire crossing inside the loop. Skipping branches or taking the loop off the route before completing traversal does not count; restart from the beginning if tracking is lost.

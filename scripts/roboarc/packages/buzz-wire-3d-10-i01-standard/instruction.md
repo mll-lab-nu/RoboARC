@@ -1,7 +1,7 @@
 # RoboARC (simulator package `topogym`) · buzz_wire_3d — STANDARD MODE (robot as a service, eai-standard/2.4)
 
 You control a robot (**a 7-DoF Franka Panda arm with a Robotiq 2F-85 parallel gripper on a fixed base**) **as if it were real hardware**: the simulator runs in a service you cannot open. You get one
-client and one episode. **Task:** Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well.
+client and one episode. **Task:** Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well.
 
 ## Success requirements
 

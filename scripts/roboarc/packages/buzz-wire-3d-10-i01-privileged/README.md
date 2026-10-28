@@ -12,7 +12,7 @@
 | Base image | `{{IMAGE}}` |
 
 ## Task
-RoboARC buzz_wire_3d (Franka Panda + Robotiq 2F-85, MuJoCo): produce one replayable trajectory. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well. Frozen scene instance (variation buzz_wire_3d_rd_hard, seed 0).
+RoboARC buzz_wire_3d (Franka Panda + Robotiq 2F-85, MuJoCo): produce one replayable trajectory. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well. Frozen scene instance (variation buzz_wire_3d_rd_hard, seed 0).
 
 ## Difficulty
 A 7-dof franka panda arm with a robotiq 2f-85 parallel gripper on a fixed base with a 8-D joint-target action space at 40 Hz; success needs the task's predicate (above) held for 1 s. Grasping: assisted grasping (contact_weld_v1).
@@ -37,7 +37,7 @@ A trajectory may have at most {{ROW_CAP}} rows (`RCB_MAX_STEPS`: two replays mus
 | Success rule | task-native success (goal_complete True; frozen parameters; terminal revision terminal_v4_traversal_then_deck_release) |
 
 ### Goal
-Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well.
+Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well.
 
 ### Success requirements
 - Start within 10 mm along the wire from its starting end and traverse continuously until within 10 mm of its finishing end. Keep one unambiguous wire crossing inside the loop. Skipping branches or taking the loop off the route before completing traversal does not count; restart from the beginning if tracking is lost.
