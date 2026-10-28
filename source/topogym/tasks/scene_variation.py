@@ -162,11 +162,12 @@ AXES = {
         dict(path="screw_finish", kind="choice", values=["gilt", "steel"], visual=True),
     ),
     "wire_splicing": (
-        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; one
-        # wire's bare core turns tinned at a time, so the two cores also tell apart up close.
-        dict(path="terminal_finish", kind="choice", values=["white", "black", "grey"], visual=True),
-        dict(path="post_finish", kind="choice", values=["steel", "green", "black"], visual=True),
-        dict(path="core_finish", kind="choice", values=["copper", "b_tinned", "a_tinned"], visual=True),
+        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; the
+        # bare cores turn tinned and aged, one of each per seed, so the two cores also tell apart up close
+        # (geo.TERMINAL_FINISHES, POST_FINISHES, CORE_FINISHES; the user, 2026-10-27).
+        dict(path="terminal_finish", kind="choice", values=["white", "green", "black"], visual=True),
+        dict(path="post_finish", kind="choice", values=["steel", "black", "green"], visual=True),
+        dict(path="core_finish", kind="choice", values=["copper", "tinned_aged", "aged_tinned"], visual=True),
     ),
     "battery_replacement": (
         # Colour and material together (geo.CONTROLLER_FINISHES ... STICK_FINISHES; the user, 2026-10-27): seed 1 a Shock
