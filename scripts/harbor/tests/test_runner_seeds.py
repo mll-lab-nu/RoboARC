@@ -11,7 +11,9 @@ seed only.
 - a trial voided for infrastructure, moved aside and run again, gets its seed again and is recorded as the second
   attempt of the same trial;
 - SEQ=0: one job per mode and trial, every task of it from its own seed;
-- K=1: the job name is the one of the runner before seeds.
+- K=1: the job name is the one of the runner before seeds;
+- GPU_SCHED=1 (the default): each job's copy has every NVIDIA device pinned to the GPU the host's ledger gave it, and
+  <job>/placement.json records it (a task without a GPU device: none); GPU_SCHED=0 leaves the copies as they are.
 """
 import json
 import os
@@ -30,7 +32,7 @@ import task_seed  # noqa: E402
 FAKE_HARBOR = '''#!{py}
 """A stand-in for `harbor run`: records its arguments and each task copy's seed files, writes one finished trial per task
 (no reward.json, an infrastructure failure, when the job is $FAKE_INFRA_JOB)."""
-import json, os, pathlib, sys, uuid
+import json, os, pathlib, re, sys, uuid
 a = sys.argv[1:]
 val = lambda k: a[a.index(k) + 1]
 tasks = [a[i + 1] for i, x in enumerate(a) if x == "-i"]
@@ -38,8 +40,10 @@ jobs, job, root = pathlib.Path(val("-o")), val("--job-name"), pathlib.Path(val("
 seeds = {{}}
 for t in tasks:
     seeds[t] = {{str(p.relative_to(root / t)): p.read_text().strip() for p in sorted((root / t).rglob("seed")) if p.is_file()}}
+devices = {{t: sorted(m.group(0).strip() for d in ("environment", "tests") for p in sorted((root / t / d).glob("*compose*.y*ml"))
+                     for m in re.finditer(r"(?m)^[ \\t]*(count|device_ids):.*$", p.read_text())) for t in tasks}}
 with open(os.environ["FAKE_HARBOR_LOG"], "a") as f:
-    f.write(json.dumps({{"argv": a, "job": job, "seeds": seeds}}) + "\\n")
+    f.write(json.dumps({{"argv": a, "job": job, "seeds": seeds, "devices": devices}}) + "\\n")
 for t in tasks:
     d = jobs / job / f"{{t[:32]}}__{{uuid.uuid4().hex[:7]}}"
     (d / "verifier").mkdir(parents=True)
@@ -114,7 +118,8 @@ class RunnerSeeds(unittest.TestCase):
                     if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "FAKE_"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high",
-                        JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"))
+                        JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),
+                        SLOTS_DIR=str(self.root / "slots"), GPUS="0,1", HOST_CPUS="64", MEM_HEADROOM_GB="0")
         self.run_id = "codex-test_model-high"
 
     def tearDown(self):
@@ -202,6 +207,44 @@ class RunnerSeeds(unittest.TestCase):
         for k in (1, 2):
             self.assertEqual(self.result(f"{self.multi}-privileged", k)["seed"], want[k - 1])
             self.assertEqual(self.result(f"{self.single}-privileged", k)["attempts_over_cap"], False)
+
+    def test_gpu_placement(self):
+        sys.path.insert(0, str(REPO / "scripts" / "harbor"))
+        import gpu_slots
+        slots = self.root / "slots"
+        slots.mkdir()
+        me = os.getpid()                                           # GPU 0 taken whole by a trial of another live runner
+        (slots / "state.json").write_text(json.dumps({"holds": {"other": {
+            "pid": me, "start": gpu_slots.proc_start(me), "gpu": "0", "units": 4, "cpus": 0, "mem_gb": 0}},
+            "waiting": {}, "draining": []}))
+        self.run_batch(self.multi, self.single)
+        calls = self.calls()
+        self.assertEqual(len(calls), 4)
+        deform = set(gpu_slots.DEFORMABLE.split())
+        for c in calls:
+            (task,) = c["devices"]
+            units = gpu_slots.classify(self.repo / "tasks" / task, deform, 4)[0]
+            place = json.loads((self.root / "jobs" / c["job"] / "placement.json").read_text())
+            self.assertEqual(place["units"], units)
+            if units == 0:                                         # IKEA privileged: no GPU device, none given
+                self.assertIsNone(place["gpu"])
+                self.assertEqual(c["devices"][task], [])
+            else:
+                self.assertEqual(place["gpu"], "1")
+                self.assertTrue(c["devices"][task])
+                self.assertEqual(set(c["devices"][task]), {'device_ids: ["1"]'})
+            self.assertIs(self.result(task, 1)["digest_match"], True)      # the pin is in the copy only
+            self.assertEqual(self.result(task, 1)["gpu"], place["gpu"])
+        state = json.loads((slots / "state.json").read_text())
+        self.assertEqual(list(state["holds"]), ["other"])          # every job's slot released
+
+    def test_gpu_sched_off(self):
+        self.run_batch(self.multi, MODES="privileged", GPU_SCHED="0")
+        (c,) = self.calls()
+        (devs,) = c["devices"].values()
+        self.assertTrue(devs)
+        self.assertTrue(all(d.startswith("count:") for d in devs))         # the task's own reservation, as before
+        self.assertFalse((self.root / "jobs" / c["job"] / "placement.json").exists())
 
     def test_k1_job_name_unchanged(self):
         self.run_batch(self.single, MODES="privileged")

@@ -4,6 +4,22 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+### The batch runner places each trial on one GPU (runner change; no task, image or result changes)
+- Docker gives a container that reserves `count: 1` GPU the host's first GPU: on a host with several GPUs every trial
+  of `scripts/harbor/run_agent_batch.sh` ran on GPU 0 and the other GPUs stayed idle.
+- With `GPU_SCHED=1` (the default, `SEQ=1`) each lane places a trial through a ledger the host's lanes and batches
+  share (`scripts/harbor/gpu_slots.py`): up to `GPU_SHARE` (4) rigid-task trials per GPU, a deformable-task trial on a
+  GPU of its own (`DEFORMABLE_FAMILIES`: the blanket, fiber, knot, orbits, rope, slotted-post-ring and wire families),
+  no GPU for a task without one (IKEA privileged). A trial starts when the CPUs and memory its task declares
+  (`[metadata.resources]`) fit beside the trials running; else the lane tries the plan's next job.
+- The job's copy has its containers pinned to that GPU (`device_ids`, `scripts/harbor/pin_gpu.py`), and
+  `<job>/placement.json` (in config.json as `gpu`) records it. The copy is all that changes: task digests,
+  `digest_match` and earlier results are untouched, and no image is rebuilt.
+- docs/RUNNING.md "GPUs and lanes"; docs/COLLABORATOR_SETUP.md starts 4 lanes per GPU. `GPU_SCHED=0` is the old
+  behaviour.
+
 ## 2.1.0 (2026-10-25)
 
 The owner's decision on the five bed-bolt bases (hex, Torx, square, Phillips and slotted keys): change only the

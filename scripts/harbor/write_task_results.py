@@ -166,7 +166,10 @@ def trial_config(trial, task, r):
     have = cfg.get("digest", "").removeprefix("sha256:")
     cfg["digest_match"] = (want == have) if want and have else None
     if source == "runner" and copy_sum:
-        cfg["copy_checksum"] = "sha256:" + copy_sum      # Harbor's digest of the runner's copy (seed, egress, CPU caps)
+        cfg["copy_checksum"] = "sha256:" + copy_sum      # Harbor's digest of the runner's copy (seed, egress, CPU caps, GPU pin)
+    place = load_json(trial.parent / "placement.json")    # the runner's GPU and reservation for the job (GPU_SCHED=1)
+    if place:
+        cfg["gpu"] = place.get("gpu")
     if cfg["digest_match"] is False and source in ("default", "runner"):   # another version of the task
         for key in ("cutoff_s", "reset_budget", "slowdown", "network", "validated", "oracle", "service_protocol"):
             cfg[key] = "legacy"

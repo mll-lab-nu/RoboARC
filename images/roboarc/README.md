@@ -57,7 +57,9 @@ state it reaches in 1.0.0 (`docs/history/GENESIS_REMOVAL.md`).
   UnsupportedDevice, docs/RUNNING.md "GPUs without RT cores") and driver >= 580 with its
   graphics (GL/Vulkan) user-space libraries; Docker with the NVIDIA Container Toolkit, the default runtime left at `runc`.
 - Exactly one GPU per container: Nyx crashes when two are visible. The task compose files reserve one GPU with a
-  device reservation (`count: 1`, `capabilities: [gpu]`) and no `runtime: nvidia`. `NVIDIA_DRIVER_CAPABILITIES=all`
+  device reservation (`count: 1`, `capabilities: [gpu]`) and no `runtime: nvidia`. Docker maps `count: 1` to the host's
+  first GPU; the batch runner pins each trial's copy to the GPU it places the trial on (`device_ids`, docs/RUNNING.md
+  "GPUs and lanes"). `NVIDIA_DRIVER_CAPABILITIES=all`
   makes the toolkit mount the driver's graphics libraries, and the image's Vulkan ICD and EGL vendor files point the
   loaders at them. `VK_ICD_FILENAMES` names the image's ICD file: a toolkit in CDI mode also mounts the host's
   `/etc/vulkan/icd.d/nvidia_icd.json`, which would list the GPU twice.

@@ -15,8 +15,9 @@ follows [COLLABORATOR_SETUP.md](COLLABORATOR_SETUP.md) alone: it has everything 
   images are linux/amd64, Nyx needs NVIDIA on x86_64, the standard client's lock lists x86_64 wheels).
 - The images the tasks name (`ghcr.io/mll-lab-nu/roboarc:<images/roboarc/VERSION>`; IKEA:
   `roboarc-ikea` and `roboarc-ikea-sim`), pulled or built (docs/DEVELOPING.md). The image packages are private and inherit this repository's access: a collaborator with read access to the repository logs in with `docker login ghcr.io -u <github user>` and a GitHub token with the `read:packages` scope.
-- Every trial needs one GPU. A task's minimum allocation is its `[metadata.resources]` (README "Compute resources";
-  2 GB of GPU memory, measured peak about 1.1 GB).
+- Every trial needs one GPU (IKEA privileged trials none). A task's minimum allocation is its `[metadata.resources]`
+  (README "Compute resources"; 2 GB of GPU memory, measured peak about 1.1 GB). The batch runner places each trial on
+  one GPU of the host ("GPUs and lanes" below).
 
 ### GPUs without RT cores
 
@@ -99,10 +100,11 @@ MODEL=openai/<model> EFFORT=high JOBS="$PWD/jobs/agents" RESULTS=/path/outside/t
 It runs one Harbor-native agent over `<base>-privileged` and `<base>-standard` of every task base given (`MODES` picks
 the modes), `K` trials of each (default 1), one Harbor job per task, mode and trial: `$JOBS/<batch>-<mode>-<task>/`, or
 `$JOBS/<batch>-<mode>-<task>-t<k>/` (k = 1..K) when K > 1. Each trial runs from its own seed ("Seeds" below). Starting
-the same command again adds a lane: every job is claimed by exactly one runner (`$JOBS/.claims/<job>`); a job that
-already has its `result.json` is skipped. Each job runs from its own stamped copy of the task, made from the trial's
-seed (`$JOBS/.tasks/<job>/`, removed afterwards; a CPU cap above the host's count is clamped in that copy,
-`scripts/harbor/clamp_cpus.py`). The batch's plan (every job, its trial and seeds) is `$JOBS/.plan/<batch>.json`. The
+the same command again adds a lane: every job is claimed by exactly one runner (`$JOBS/.claims/<job>`) and placed on
+a GPU ("GPUs and lanes" below); a job that already has its `result.json` is skipped. Each job runs from its own stamped
+copy of the task, made from the trial's seed (`$JOBS/.tasks/<job>/`, removed afterwards; a CPU cap above the host's
+count is clamped in that copy, `scripts/harbor/clamp_cpus.py`, and its GPU devices are pinned,
+`scripts/harbor/pin_gpu.py`). The batch's plan (every job, its trial and seeds) is `$JOBS/.plan/<batch>.json`. The
 header of the script lists every variable; the main ones:
 
 | what | how |
@@ -114,7 +116,40 @@ header of the script lists every variable; the main ones:
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
 | usage recording | `USAGE_GATEWAY=<dir>`: route the agent's model-API calls through the usage gateway installed in `<dir>` (the repository's: `USAGE_GATEWAY=scripts/usage_gateway`; "Usage recording" below). Empty (default) = off |
+| GPUs | `GPU_SCHED=1` (default): each trial placed on one GPU and admitted by CPUs and memory; `GPUS` (default every GPU), `GPU_SHARE` (4), `DEFORMABLE_FAMILIES`, `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1), `MEM_HEADROOM_GB`, `SLOTS_DIR` ("GPUs and lanes" below); `GPU_SCHED=0`: every container on GPU 0 |
 | optional host tools | `LOG_MIRROR=1`: an append-only mirror of every trial's `agent/` record in a root-owned container (`rcb-log-mirror`, `scripts/harbor/log_mirror.py`), so neither the agent nor the host user can delete it. `MEM_GUARD=1`: `scripts/harbor/mem_guard.py` keeps 2 GiB of host memory available by killing the largest running RoboARC trial container (names `roboarc-*` only). Both are off by default |
+
+### GPUs and lanes
+
+Docker gives a container that reserves `count: 1` GPU the host's first GPU, so on a host with several GPUs every trial
+would run on GPU 0. With `GPU_SCHED=1` (the default; `SEQ=1` only) each lane places a trial before it starts, through a
+ledger that every lane and batch of the host shares (`scripts/harbor/gpu_slots.py`, in `SLOTS_DIR`, default
+`/tmp/roboarc-slots-<uid>`):
+
+- **GPU.** A GPU takes up to `GPU_SHARE` (4) trials of rigid tasks. A trial of a deformable task has a GPU of its own
+  (`DEFORMABLE_FAMILIES`, matched against task.toml's `[metadata] family`: blanket_flatten, blanket_fold,
+  fiber_bundling, knot_untying, orbits, rope_threading, slotted_post_ring, wire_splicing). A task whose compose files
+  reserve no GPU (IKEA privileged) takes none. Rigid trials go to the fullest GPU that has room, so that whole GPUs
+  stay free; while a deformable trial waits, the empty GPUs are kept for it and one busy GPU takes no new rigid trial
+  until it is empty. On one GPU this alternates: up to four rigid trials, then a deformable trial alone.
+- **CPUs and memory.** A trial reserves the most its task declares for the agent's or the verifier's phase
+  (`[metadata.resources]` `min_cpus` / `verifier_min_cpus` and `min_memory_gb` / `verifier_min_memory_gb`: 4 CPUs and
+  7 GB for a rigid puzzle, 4 CPUs and 10 GB for blanket privileged, 3 and 3 for IKEA privileged, for example), times
+  `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1). It starts when the CPUs reserved by the trials running plus its own
+  are at most `HOST_CPUS`, and their memory plus its own at most the host's total less `MEM_HEADROOM_GB` (default the
+  larger of 4 GB and 10 %). With nothing else running it always starts. These are the tasks' minimums, three to five
+  times the measured peaks: on a host with little memory for its GPUs, memory rather than GPUs bounds the trials at a
+  time (32 rigid trials on 8 GPUs reserve about 224 GB and 128 CPUs).
+- A job that does not fit is left for a later pass and the lane tries the plan's next one; a lane that can start
+  nothing waits 30 s and logs, at most every 10 minutes, what the host lacks for the first job that waits.
+- The job's copy has every NVIDIA device of its compose files pinned to that GPU (`device_ids`,
+  `scripts/harbor/pin_gpu.py`: main or sim, rcb_monitor and the verifier all see the same one GPU), and
+  `<job>/placement.json` records the GPU and the reservation (each result's config.json has it as `gpu`). A job's slot
+  is released when the job ends, a runner's when it exits, and a killed runner's at the next placement by any lane.
+- Start up to `GPU_SHARE` × GPUs lanes (32 on 8 GPUs); lanes beyond what fits only wait. `GPUS=0,1` limits the runner
+  to some GPUs, for example on a host shared with other work, where `MEM_GUARD=1` helps too: the ledger counts only
+  the trials placed through it. `GPU_SCHED=0` turns placement off (every container on GPU 0, no admission), as runners
+  before this option did; `SEQ=0` does not place trials.
 
 After each job the runner scans the job for keys and redacts them (`scripts/harbor/scan_secrets.py`), writes the
 per-task results (`scripts/harbor/write_task_results.py`), rewrites `$JOBS/<batch>.summary.md` (one table per

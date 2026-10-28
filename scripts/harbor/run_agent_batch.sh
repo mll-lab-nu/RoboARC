@@ -55,6 +55,21 @@
 #   LOG_MIRROR   0 (default); 1 = start the append-only agent-record mirror below (a root container) if none runs
 #   MEM_GUARD    0 (default); 1 = start the memory guard below if none runs: while host memory is short it kills the
 #                running RoboARC trial container that uses the most memory (only containers named roboarc-*)
+#   GPU_SCHED    1 (default) = every trial (SEQ=1) is placed on one GPU and admitted by CPUs and memory, through the
+#                host's slot ledger (scripts/harbor/gpu_slots.py, docs/RUNNING.md "GPUs and lanes"): a GPU takes up to
+#                GPU_SHARE trials of rigid tasks, a trial of a deformable task (DEFORMABLE_FAMILIES) has a GPU of its own,
+#                a task whose compose reserves no GPU takes none; a trial starts when the CPUs and memory its task
+#                declares ([metadata.resources] min_* and verifier_min_*, times RESERVE_CPU_SCALE / RESERVE_MEM_SCALE)
+#                fit beside the trials already running (memory: the host's total less MEM_HEADROOM_GB, default the larger
+#                of 4 GB and 10 %; CPUs: HOST_CPUS), else the lane tries the plan's next job and, when none fits, waits
+#                30 s; the job's copy has its containers pinned to that GPU (scripts/harbor/pin_gpu.py; Docker maps
+#                `count: 1` to GPU 0) and <job>/placement.json records it. Start up to GPU_SHARE x GPUs lanes.
+#                0 = as before: no placement, no admission, every container on GPU 0
+#   GPUS         the GPUs to use, comma-separated (default every GPU nvidia-smi lists; 0 without nvidia-smi)
+#   GPU_SHARE    rigid-task trials per GPU (4)
+#   DEFORMABLE_FAMILIES  the families whose trials have a GPU of their own (task.toml [metadata] family; default
+#                blanket_flatten blanket_fold fiber_bundling knot_untying orbits rope_threading slotted_post_ring wire_splicing)
+#   SLOTS_DIR    the ledger (/tmp/roboarc-slots-<uid>): every lane and batch on the host that should share GPUs uses one
 #   USAGE_GATEWAY  usage recording, optional (PROTOCOL H.6, docs/RUNNING.md "Usage recording"). Empty (default) = off:
 #                the agent calls its API directly, as Harbor runs it, and nothing below about the gateway runs; the
 #                token counts in the results are the harness's own (Harbor's result.json). <dir> = on: route the agent's
@@ -105,6 +120,12 @@ AGENT_CONFIG="${AGENT_CONFIG:-}"; ENV_FILE="${ENV_FILE:-}"
 MODES="${MODES:-privileged standard}"; SEQ="${SEQ:-1}"; N_P="${N_P:-2}"; N_S="${N_S:-2}"; K="${K:-1}"; WAIT_FOR="${WAIT_FOR:-}"
 JOBS="${JOBS:-$R/jobs/agents}"; RESULTS="${RESULTS-$(dirname "$R")/rcb_results}"; LABEL="${LABEL:-$AGENT + $MODEL ($EFFORT)}"
 LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
+GPU_SCHED="${GPU_SCHED:-1}"; GPU_SHARE="${GPU_SHARE:-4}"; SLOTS_DIR="${SLOTS_DIR:-/tmp/roboarc-slots-$(id -u)}"
+DEFORMABLE_FAMILIES="${DEFORMABLE_FAMILIES:-blanket_flatten blanket_fold fiber_bundling knot_untying orbits rope_threading slotted_post_ring wire_splicing}"
+RESERVE_CPU_SCALE="${RESERVE_CPU_SCALE:-1}"; RESERVE_MEM_SCALE="${RESERVE_MEM_SCALE:-1}"; MEM_HEADROOM_GB="${MEM_HEADROOM_GB:-}"
+if [ -z "${GPUS:-}" ]; then
+  GPUS="$(nvidia-smi --query-gpu=index --format=csv,noheader 2>/dev/null | tr -d ' ' | paste -sd, -)"; GPUS="${GPUS:-0}"
+fi
 USAGE_GATEWAY="${USAGE_GATEWAY:-}"
 GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
 GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
@@ -119,6 +140,13 @@ if [ -n "$USAGE_GATEWAY" ]; then
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
 [[ "$K" =~ ^[1-9][0-9]*$ ]] || { echo "K must be a positive integer (trials per task and mode)" >&2; exit 2; }
+case "$GPU_SCHED" in 0|1) ;; *) echo "GPU_SCHED must be 0 or 1" >&2; exit 2 ;; esac
+[[ "$GPUS" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "GPUS must be GPU indices, comma-separated (e.g. 0,1,2)" >&2; exit 2; }
+[[ "$GPU_SHARE" =~ ^[1-9][0-9]*$ ]] || { echo "GPU_SHARE must be a positive integer (rigid-task trials per GPU)" >&2; exit 2; }
+for v in RESERVE_CPU_SCALE RESERVE_MEM_SCALE; do
+  [[ "${!v}" =~ ^[0-9]*\.?[0-9]+$ ]] && [[ "${!v}" =~ [1-9] ]] || { echo "$v must be a positive number" >&2; exit 2; }
+done
+[ -z "$MEM_HEADROOM_GB" ] || [[ "$MEM_HEADROOM_GB" =~ ^[0-9]*\.?[0-9]+$ ]] || { echo "MEM_HEADROOM_GB must be a number of GB (0 or more)" >&2; exit 2; }
 # absolute paths: with the gateway on, Harbor is started from the job's own copy of the task (run_job), not from the repository
 abspath() { case "$1" in ""|/*) printf '%s' "$1" ;; *) printf '%s/%s' "$PWD" "$1" ;; esac; }
 JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(abspath "$AGENT_CONFIG")"
@@ -172,7 +200,21 @@ mkdir -p "$JOBS"
 LOG="$JOBS/$batch.log"
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 if [ -n "$ENV_FILE" ] && [ ! -f "$ENV_FILE" ]; then log "no env file $ENV_FILE"; exit 2; fi
-log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}"
+if [ "$GPU_SCHED" = 1 ]; then
+  sched="GPUs $GPUS ($GPU_SHARE rigid-task trials per GPU, a deformable-task trial alone; CPUs and memory as the tasks declare x $RESERVE_CPU_SCALE / x $RESERVE_MEM_SCALE)"
+else
+  sched="GPU scheduling off"
+fi
+log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}, $sched"
+# on exit (also a signal): the usage gateway stopped, and this runner's GPU slots released (a lane killed with SIGKILL
+# leaves them to gpu_slots.py, which drops the slots of runners that have ended)
+gw_pid=""
+on_exit() {
+  [ -n "$gw_pid" ] && kill "$gw_pid" 2>/dev/null
+  [ "$GPU_SCHED" = 1 ] && python3 "$H/gpu_slots.py" release --dir "$SLOTS_DIR" --runner-pid $$ >/dev/null 2>&1
+  return 0
+}
+trap on_exit EXIT
 # the batch's plan: every job this command runs, with its trial and seeds ("pending" in live_board.py until it starts);
 # $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run
 mkdir -p "$JOBS/.plan"
@@ -249,7 +291,6 @@ if [ -n "$USAGE_GATEWAY" ]; then
     kill -0 "$gw_pid" 2>/dev/null && python3 -c 'import sys, urllib.request as u
 u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_gateway/health" 2>/dev/null
   }
-  gw_pid=""; trap '[ -n "$gw_pid" ] && kill "$gw_pid" 2>/dev/null' EXIT
   gw_start
   [ -s "$ready" ] || { log "usage gateway did not start within ${GATEWAY_START_WAIT} s (see $JOBS/.gateway/gateway.$$.err); leave USAGE_GATEWAY empty to run without it"; exit 2; }
   gw_port="$(cat "$ready")"; GW="http://$GATEWAY_BIND:$gw_port"
@@ -545,13 +586,55 @@ run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed 
       && ! python3 "$H/clamp_cpus.py" --cpus "$HOST_CPUS" --needs "${dirs[@]}" >/dev/null \
       || { log "FAILED $job: could not clamp its CPU caps to the host's $HOST_CPUS ($root); not started"; rm -rf "$root"; return 1; }
   fi
+  # GPU_SCHED=1: every NVIDIA device of the copy (main or sim, rcb_monitor, the verifier) pinned to the job's GPU
+  if [ -n "$JOB_GPU" ]; then
+    mapfile -t dirs < <(task_dirs "$root" "$@")
+    python3 "$H/pin_gpu.py" --gpu "$JOB_GPU" "${dirs[@]}" >/dev/null && python3 "$H/pin_gpu.py" --gpu "$JOB_GPU" --check "${dirs[@]}" >/dev/null \
+      || { log "FAILED $job: could not pin its containers to GPU $JOB_GPU (scripts/harbor/pin_gpu.py, $root); not started"; rm -rf "$root"; return 1; }
+  fi
   stamp_task_dirs "$root" || { log "FAILED $job: could not stamp its task copy (scripts/stamp_mtimes.py, $root); not started"; rm -rf "$root"; return 1; }
   seed_record "$job" || { log "FAILED $job: could not write its seed record ($JOBS/.seeds/$job.json); not started"; rm -rf "$root"; return 1; }
-  log "start $job: $* (concurrency $n; trial $(awk -F'\t' -v j="$job" -v K="$K" '$1 == j { print $4 " of " K; exit }' "$PLAN"), seeds $(awk -F'\t' -v j="$job" '$1 == j { printf "%s%s=%s", s, $2, $5; s = " " }' "$PLAN"))"
+  log "start $job: $* (concurrency $n; trial $(awk -F'\t' -v j="$job" -v K="$K" '$1 == j { print $4 " of " K; exit }' "$PLAN"), seeds $(awk -F'\t' -v j="$job" '$1 == j { printf "%s%s=%s", s, $2, $5; s = " " }' "$PLAN")${JOB_SLOT:+; ${JOB_GPU:+GPU $JOB_GPU, }reserved $(awk '{ print $2 " CPUs, " $3 " GB" }' <<< "$JOB_SLOT")})"
   (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
   log "done $job (harbor rc=$?)"
   [ -d "$JOBS/$job" ] && cp "$JOBS/.seeds/$job.json" "$JOBS/$job/seed.json"
+  [ -d "$JOBS/$job" ] && [ -n "$JOB_SLOT" ] && placement "$job"
   rm -rf "$root"
+  return 0
+}
+
+placement() {  # <job>: <job>/placement.json, the GPU and the reservation the trial ran with (GPU_SCHED=1)
+  local units cpus mem fam
+  read -r units cpus mem fam <<< "$JOB_SLOT"
+  printf '{"gpu": %s, "units": %s, "gpu_share": %s, "cpus": %s, "memory_gb": %s, "family": "%s", "gpus": "%s", "host_cpus": %s}\n' \
+    "$([ -n "$JOB_GPU" ] && echo "\"$JOB_GPU\"" || echo null)" "$units" "$GPU_SHARE" "$cpus" "$mem" "$fam" "$GPUS" "$HOST_CPUS" > "$JOBS/$1/placement.json"
+}
+
+JOB_GPU=""; JOB_SLOT=""   # the job's GPU ("" = none or GPU_SCHED=0) and "<units> <cpus> <memory GB> <family>" (GPU_SCHED=1)
+SLOT_WHY="$JOBS/.slots.why.$$"
+declare -A SLOT_CLASS=()  # task -> "<units> <cpus> <memory GB> <family>" (gpu_slots.py classify, once per task and lane)
+slot_class() {  # <task>: SLOT_CLASS[<task>] filled; 2 = the task could not be classified (why in $SLOT_WHY)
+  [ -n "${SLOT_CLASS[$1]:-}" ] && return 0
+  local c
+  c="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" --deformable "$DEFORMABLE_FAMILIES" --share "$GPU_SHARE" \
+        --cpu-scale "$RESERVE_CPU_SCALE" --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
+  SLOT_CLASS[$1]="$c"
+}
+acquire_slot() {  # <job> <task>: JOB_SLOT and JOB_GPU from the host's ledger (call it directly, not in $(...): it sets
+  # them); 3 = not now, other = error; why in $SLOT_WHY
+  local rc units cpus mem fam
+  JOB_GPU=""; JOB_SLOT=""
+  slot_class "$2" || return 2
+  read -r units cpus mem fam <<< "${SLOT_CLASS[$2]}"
+  JOB_GPU="$(python3 "$H/gpu_slots.py" acquire --dir "$SLOTS_DIR" --job "$1" --runner-pid $$ --units "$units" --cpus "$cpus" \
+              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --host-cpus "$HOST_CPUS" ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
+  rc=$?
+  [ $rc -eq 0 ] && { JOB_SLOT="${SLOT_CLASS[$2]}"; return 0; }
+  JOB_GPU=""; return $rc
+}
+release_slot() {  # <job>
+  [ "$GPU_SCHED" = 1 ] && python3 "$H/gpu_slots.py" release --dir "$SLOTS_DIR" --job "$1" >/dev/null 2>&1
+  JOB_GPU=""; JOB_SLOT=""
   return 0
 }
 
@@ -569,22 +652,59 @@ for t in "${tasks[@]}"; do
 done
 if [ "$SEQ" = 1 ]; then
   mkdir -p "$JOBS/.claims"
-  while IFS=$'\t' read -r job task m k seed <&3; do
-    if [ -f "$JOBS/$job/result.json" ]; then log "skip $job (already has result.json)"; continue; fi
-    mkdir "$JOBS/.claims/$job" 2>/dev/null || continue   # another lane of this batch took it
-    wait_for "$m"
-    gateway_check || { rmdir "$JOBS/.claims/$job" 2>/dev/null; break; }
-    run_job "$job" 1 -i "$task" || { rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
-    gateway_after "$job"; finish_job "$job"; summary
-    # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
-    # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
-    why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
-    if [ $rc -eq 4 ]; then
-      log "STOP lane $$: $job hit a model-account or config failure, or its model API was unreachable through the gateway ($(grep -m1 '"stop": true' <<< "$why" | cut -c1-300)); move its dir and claim aside to rerun it"; break
-    elif [ $rc -ne 0 ]; then
-      log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
+  # passes over the plan: a job that does not fit the host now (GPU_SCHED=1) is left for a later pass and the lane tries
+  # the next one; a pass that starts nothing while some job waits for room sleeps 30 s; the lane ends when no job is
+  # left unclaimed (or it stops on a failure)
+  pass=0; stop=0; said=""; said_at=0
+  while [ "$stop" = 0 ]; do
+    pass=$((pass + 1)); started=0; waiting=0; first_why=""
+    declare -A nofit=()   # this pass: the needs ("<units> <cpus> <memory GB>") the host had no room for; later jobs with
+    # the same needs wait without asking the ledger again (a pass over a long plan stays cheap)
+    while IFS=$'\t' read -r job task m k seed <&3; do
+      if [ -f "$JOBS/$job/result.json" ]; then [ "$pass" = 1 ] && log "skip $job (already has result.json)"; continue; fi
+      if [ "$GPU_SCHED" = 1 ] && slot_class "$task"; then
+        need="${SLOT_CLASS[$task]% *}"
+        [ -n "${nofit[$need]:-}" ] && [ ! -d "$JOBS/.claims/$job" ] && { waiting=$((waiting + 1)); continue; }
+      fi
+      mkdir "$JOBS/.claims/$job" 2>/dev/null || continue   # another lane of this batch took it
+      wait_for "$m"
+      gateway_check || { rmdir "$JOBS/.claims/$job" 2>/dev/null; stop=1; break; }
+      if [ "$GPU_SCHED" = 1 ]; then
+        acquire_slot "$job" "$task"; rc=$?
+        why="$(tail -1 "$SLOT_WHY" 2>/dev/null)"
+        if [ $rc -eq 3 ]; then
+          [ -n "${SLOT_CLASS[$task]:-}" ] && nofit["${SLOT_CLASS[$task]% *}"]=1
+          rmdir "$JOBS/.claims/$job" 2>/dev/null; waiting=$((waiting + 1)); [ -z "$first_why" ] && first_why="$job: $why"; continue
+        elif [ $rc -ne 0 ]; then
+          log "FAILED $job: no GPU slot ($why); not started"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue
+        fi
+      fi
+      started=$((started + 1))
+      run_job "$job" 1 -i "$task" || { release_slot "$job"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
+      gateway_after "$job"; finish_job "$job"; summary
+      release_slot "$job"
+      # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
+      # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
+      why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
+      if [ $rc -eq 4 ]; then
+        log "STOP lane $$: $job hit a model-account or config failure, or its model API was unreachable through the gateway ($(grep -m1 '"stop": true' <<< "$why" | cut -c1-300)); move its dir and claim aside to rerun it"; stop=1; break
+      elif [ $rc -ne 0 ]; then
+        log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
+      fi
+    done 3< "$PLAN"
+    [ "$stop" = 1 ] || [ "$waiting" = 0 ] && break       # every job is claimed or done: this lane is finished
+    if [ "$started" = 0 ]; then
+      # what the host lacks for the first job that waits: a line when the kind of shortage (GPU, CPUs, memory) changes,
+      # else at most every 10 minutes
+      kind="$(sed -E 's/^[^:]*: ([A-Za-z]+).*/\1/' <<< "$first_why")"
+      if [ "$kind" != "$said" ] || [ $(( $(date +%s) - said_at )) -ge 600 ]; then
+        log "lane $$ waits: $waiting job(s) do not fit the host now; first ${first_why:-(none tried this pass)}"
+        said="$kind"; said_at=$(date +%s)
+      fi
+      sleep 30
     fi
-  done 3< "$PLAN"
+  done
+  rm -f "$SLOT_WHY"
 else
   pids=()
   for m in $MODES; do
