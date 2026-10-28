@@ -65,11 +65,12 @@ AXES = {
         # The scene sits near x ~ 0.2, ~0.8 m from the Panda base: no +x.
         # Strand fan/bend/curl are already drawn from the episode seed by FiberLayout.
         dict(path="center_xy_m", kind="offset", range=[[-.02, 0.], [-.02, .02]]),
-        # The copper ring and the red strand stay (the instructions name them); the jacket is black, dark grey, navy
-        # or dark green, and the other strands' colours trade places.
-        dict(path="sheath_color", kind="choice", visual=True, values=[
-            [.026, .029, .032], [.24, .25, .27], [.05, .09, .22], [.07, .17, .10]]),
-        dict(path="strand_palette_shift", kind="choice", values=[0, 2, 4], visual=True),
+        # The red strand keeps its hue (the redesigned tiers' instructions name it); everything else changes colour and
+        # finish (fiber_bundling.CABLE_FINISHES, FIXTURE_FINISHES; 2026-10-27: the jacket and the strand palette
+        # alone moved seed 1's frame 7 Delta E from seed 0's, and the ring is no longer named copper).
+        dict(path="cable_finish", kind="choice", values=["released", "blue_pvc", "orange_pur"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "orange_enclosure", "black_enclosure"],
+             visual=True),
     ),
     "lock_picking": (
         # The chain lock (2026-10-10, it replaced the original tiers): each tier's geometry, stops and key tray are one

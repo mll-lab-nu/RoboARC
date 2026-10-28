@@ -206,7 +206,7 @@ def describe_goal(task):
         failures += ["A limited-travel rotor exceeding its allowed bounds ends the episode in failure.",
                      "The key falling more than 100 mm below the tabletop ends the episode in failure."]
     elif name == "fiber_bundling":
-        summary = "Pass every fine fiber and the front sheath through the fixed copper ring; keep the rear terminal anchored."
+        summary = "Pass every fine fiber and the front sheath through the fixed ring; keep the rear terminal anchored."
         rules += [
             "Pass every fiber tip first, then successive material points through to its root. The actual crossing history must be observed; "
             "placing fibers on the far side or passing only the tips is not completion.",

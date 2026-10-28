@@ -26,8 +26,8 @@ RING_PARTS = ("bundling_ring", "ring_mount_base", "ring_mount_post")
 
 
 def same_colour_strands(marked, count):
-    """The other strands drawn in the marked strand's palette colour (COLORS[i % len(COLORS)], the palette
-    strand_palette_shift rotates only past entry 0), in index order."""
+    """The other strands drawn in the marked strand's palette colour (COLORS[i % len(COLORS)]; every appearance seed's
+    palette, fiber_bundling.CABLE_FINISHES, keeps entry 0 red), in index order."""
     from topogym.assets.geometry.fiber_bundling import COLORS
     return [i for i in range(count) if i != marked and i % len(COLORS) == marked % len(COLORS)]
 PEG_COLOR = (.30, .34, .38)
@@ -46,7 +46,7 @@ def _yaw(deg):
 class RedesignFiberTask(FiberBundlingTask):
     """A redesign tier: the family's scene and predicate with `redesign` fixtures and goal terms."""
     instruction = ('Manipulate only the thick sheath. Route it as the formboard pegs require, then pass every fiber '
-                   'tip first through the copper ring until the roots and front sheath have passed, without sharp '
+                   'tip first through the ring until the roots and front sheath have passed, without sharp '
                    'bends, with one of the two red fibers at the stated position around the ring (seen from the entry side). Any gripper contact with a fine strand fails '
                    'the task; keep the rear terminal anchored.')
     variation_id = "fiber_bundling_rd_base"
@@ -86,6 +86,8 @@ class RedesignFiberTask(FiberBundlingTask):
                 if e.name == "bundling_ring":
                     self.ring_center = np.asarray(e.position_m, float)
             entities.append(e)
+        from topogym.assets.geometry.fiber_bundling import FIXTURE_FINISHES, finish_surface
+        fixture = None if self.config["fixture_finish"] == "released" else FIXTURE_FINISHES[self.config["fixture_finish"]]
         for peg in rd["pegs"]:
             top = float(self.origin[2] + peg["top_m"])
             h = top - self.table_height_m
@@ -93,14 +95,15 @@ class RedesignFiberTask(FiberBundlingTask):
             entities.append(EntitySpec(peg["name"], "cylinder", None, (float(c[0]), float(c[1]), self.table_height_m + h / 2),
                                        fixed=True, material={"friction": PEG_FRICTION},
                                        morph_options={"radius": float(peg["radius_m"]), "height": h},
-                                       surface={"color": PEG_COLOR}))
+                                       surface=finish_surface(fixture["peg"]) if fixture else {"color": PEG_COLOR}))
             if float(peg.get("cap_m", 0.)) > 0.:
                 entities.append(EntitySpec(f"{peg['name']}_cap", "cylinder", None,
                                            (float(c[0]), float(c[1]), top - CAP_HEIGHT_M / 2), fixed=True,
                                            material={"friction": PEG_FRICTION},
                                            morph_options={"radius": float(peg["radius_m"]) + float(peg["cap_m"]),
                                                           "height": CAP_HEIGHT_M},
-                                           surface={"color": CAP_COLOR}))
+                                           surface=finish_surface(fixture["cap"]) if fixture
+                                           else {"color": CAP_COLOR}))
         return replace(spec, entities=tuple(entities))
 
     # ------------------------------------------------------------------------------------------------ the goal
@@ -176,7 +179,7 @@ class RedesignFiberTask(FiberBundlingTask):
         """The marked colour's root angle about the ring axis from the ring's top (deg, right-handed about the feed
         direction), and whether it is within tolerance. The texts name the strand by its colour ("one of the two red
         fibers"): every strand with the marked strand's palette colour (strand i has palette entry i % len(COLORS);
-        strand_palette_shift never moves entry 0, so with 16 strands strands 0 and 8 are red) may meet the rule. The
+        every appearance seed keeps entry 0 red, so with 16 strands strands 0 and 8 are red) may meet the rule. The
         marked strand itself is reported when it is within tolerance or when none is, so a trajectory that met the
         rule with it keeps exactly its earlier record; otherwise the first other strand of that colour within tolerance."""
         lay = self.config["redesign"]["lay"]
