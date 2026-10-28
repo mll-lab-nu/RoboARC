@@ -12,6 +12,48 @@ from topogym.evaluation.terminal import SettlingSpec
 from topogym.utils.geometry.passage import aperture_crossings
 
 
+# The toy's finishes at appearance seeds 1 and 2 (scene_variation's buzz_wire_3d axes; the user, 2026-10-27), each a
+# scale_glb_color edit of the GLB materials whose name holds one of the part's keys. The texts name the parts' materials
+# (the metal wire, the metal loop, the wooden handle, the rubber sleeves), so each part keeps its material class and
+# changes colour within it: the wire copper / brass / stainless steel, the loop stainless / gunmetal / copper (never the
+# wire's metal of its seed), the handle pale beech / walnut / ebony (the wood texture kept), the sleeves black / red /
+# blue rubber. The deck (with its wooden obstacles and the wire's end blocks) is named by no text: pale wood / blue
+# paint / walnut stain, apart from every table top. The three looks of each part differ by CIEDE2000 >= 20. A default
+# names the released look and changes no file.
+PART_MATERIALS = dict(deck=("base_wood", "obstacles_wood", "posts_wood"), wire=("rail_metal", "brushed_copper"),
+                      loop=("ring_steel", "stainless_wire"), handle=("handle_wood",), sleeve=("rest_sleeve",))
+FINISHES = dict(
+    blue_paint=dict(color=(.04, .12, .45, 1.), metallic=0., roughness=.5, texture=False),
+    walnut_stain=dict(color=(.354, .29, .28, 1.), metallic=0., roughness=.45),      # x the pale wood texture
+    brass=dict(color=(.80, .62, .18, 1.), metallic=1., roughness=.3),
+    stainless_steel=dict(color=(.70, .72, .74, 1.), metallic=1., roughness=.2),
+    gunmetal=dict(color=(.10, .10, .11, 1.), metallic=1., roughness=.35),
+    polished_copper=dict(color=(.72, .33, .16, 1.), metallic=1., roughness=.2),
+    walnut=dict(color=(.354, .29, .28, 1.), metallic=0., roughness=.6),             # x the pale wood texture
+    ebony=dict(color=(.082, .077, .093, 1.), metallic=0., roughness=.3),            # x the pale wood texture
+    red_rubber=dict(color=(.50, .04, .03, 1.), metallic=0., roughness=.8),
+    blue_rubber=dict(color=(.04, .10, .45, 1.), metallic=0., roughness=.8),
+)
+FINISH_AXES = dict(deck_finish="deck", wire_finish="wire", loop_finish="loop", handle_finish="handle",
+                   sleeve_finish="sleeve")
+
+
+def apply_finishes(folder, config, defaults):
+    """Refinish the written GLBs for config's part finishes (FINISH_AXES; no file changes at their defaults). The deck's
+    own visual file (base.urdf's) takes the deck finish whole, whatever its materials are named."""
+    import xml.etree.ElementTree as ET
+    from topogym.assets.scene_visuals import scale_glb_color
+    folder = Path(folder)
+    edits = [(PART_MATERIALS[part], FINISHES[config[key]]) for key, part in FINISH_AXES.items()
+             if config[key] != defaults[key]]
+    if config["deck_finish"] != defaults["deck_finish"]:
+        deck = ET.parse(folder / "base.urdf").find("link/visual/geometry/mesh").get("filename")
+        scale_glb_color(folder / deck, 1., **FINISHES[config["deck_finish"]])
+    for path in sorted(folder.glob("*.glb")):
+        for materials, look in edits:
+            scale_glb_color(path, 1., materials=materials, **look)
+
+
 def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
     """The tool's grasp region, resolved from this instance's tool dimensions."""
     from topogym.config.registry import task_definition
@@ -36,9 +78,10 @@ class BuzzWireTask(TaskDefinition):
         terminal=dict(finish_position_tolerance_m=.005, finish_angle_tolerance_deg=10.,
                       maximum_speed_m_s=.001, maximum_angular_speed_rad_s=.02,
                       start_route_tolerance_m=.01, route_progress_tolerance_m=.003),
-        wood_tint=1., rail_rgb=[.72, .33, .16],
+        wood_tint=1., rail_rgb=[.72, .33, .16], deck_finish="pale_wood", wire_finish="copper",
+        loop_finish="stainless", handle_finish="pale_wood", sleeve_finish="black_rubber",
     )
-    hash_when_changed = ("wood_tint", "rail_rgb")
+    hash_when_changed = ("wood_tint", "rail_rgb", *FINISH_AXES)
 
     layout_resource = None
 
@@ -112,6 +155,7 @@ class BuzzWireTask(TaskDefinition):
             if self.config["rail_rgb"] != self.defaults["rail_rgb"]:
                 scale_glb_color(path, 1., materials=("rail_metal", "brushed_copper"),
                                 color=[*self.config["rail_rgb"], 1.])
+        apply_finishes(asset_dir, self.config, self.defaults)
         self.origin = np.r_[
             self.config["center_xy_m"], table_height_m
         ]

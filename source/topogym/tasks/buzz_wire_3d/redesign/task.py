@@ -19,7 +19,7 @@ import numpy as np
 import trimesh
 from scipy.spatial.transform import Rotation
 
-from topogym.tasks.buzz_wire_3d.common import BuzzWireTask
+from topogym.tasks.buzz_wire_3d.common import BuzzWireTask, apply_finishes
 from topogym.tasks.base import merge_parameters, TaskSpec, EntitySpec
 from topogym.tasks.scene_presets import record_preset
 from .design import Design, sleeve_segments
@@ -132,7 +132,7 @@ class BuzzWireRedesignTask(BuzzWireTask):
     fixed_parameters = ("linear_scale", "geometry", "base_elevation_m")
 
     # Patch 01 (main approved 10-11 for the redesign tiers): descriptive only, no rule changes
-    INSULATED_NOTE = ("Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the "
+    INSULATED_NOTE = ("Rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the "
                       "post at the finish are insulated as well.")
     instruction = BuzzWireTask.instruction + " " + INSULATED_NOTE
 
@@ -169,6 +169,7 @@ class BuzzWireRedesignTask(BuzzWireTask):
                                 color=[*self.config["rail_rgb"], 1.])
         sleeves = add_sleeves(folder, design, self.route.rail)
         obstacles = add_obstacles(folder, design, layout)
+        apply_finishes(folder, self.config, self.defaults)      # the sleeves' and the obstacles' visuals too
         report = dict(report, redesign=dict(design=design.name, tier=design.tier, sleeves=[list(x) for x in design.sleeves],
                                             sleeve_radius_m=design.sleeve_radius_m, sleeve_segments=len(sleeves),
                                             obstacles=design.obstacles, notes=design.notes))
