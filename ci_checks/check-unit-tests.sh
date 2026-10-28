@@ -42,7 +42,8 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
          scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
          scripts/usage_gateway/tests/test_budget_stop.py scripts/tests/test_stamp_mtimes.py \
-         scripts/tests/test_task_seed.py scripts/harbor/tests/test_runner_seeds.py scripts/harbor/tests/test_gpu_slots.py \
+         scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
+         scripts/harbor/tests/test_runner_seeds.py scripts/harbor/tests/test_gpu_slots.py \
          scripts/harbor/tests/test_pin_gpu.py scripts/harbor/tests/test_dsh_acp.py tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py \
          scripts/roboarc/tests/test_generator_seeds.py tools/tests/test_release_seeds.py images/tests/test_pull_all.py \

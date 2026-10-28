@@ -35,13 +35,13 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 
 | | Agent phase | Verifier |
 |---|---|---|
-| CPU cores | 2 | 2 |
-| Memory | 7 GB | 5 GB |
+| CPU cores | 4 | 2 |
+| Memory | 8 GB | 5 GB |
 | GPU memory | 2 GB | 2 GB |
 
 - GPU: required, any NVIDIA GPU; recommended: L40S 48GB / RTX 4090 24GB / L4 24GB (sm_86 or newer).
-- Measured: the Genesis release's numbers, kept until the MuJoCo release's own peaks are measured (its Harbor runs; MuJoCo physics on the CPU, Nyx on the GPU); GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards
-- Limits in the agent phase (docs/PROTOCOL.md §2.10; `[metadata.resources.limits]`, shown to the agent in `instruction.md`; always measured and reported, and exceeding one fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`), every container of the trial: 16 GiB GPU memory, 16 GiB memory, 512 processes, 10 GiB of new files under `/app`, `/tmp`, `/root`; 60 s within 120 s. Expected peak of the whole trial: 16 GiB GPU memory, 16 GiB memory. Limits measured: the Genesis release's numbers, kept until the MuJoCo release's own peaks are measured (its Harbor runs; MuJoCo physics on the CPU, Nyx on the GPU).
+- Measured: their class's values (partial MuJoCo measurements of 2026-10-13 on the class's other families, with the protocol's margin); this family's own peaks not measured yet; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards
+- Limits in the agent phase (docs/PROTOCOL.md §2.10; `[metadata.resources.limits]`, shown to the agent in `instruction.md`; always measured and reported, and exceeding one fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`), every container of the trial: 12 GiB GPU memory, 32 GiB memory, 512 processes, 10 GiB of new files under `/app`, `/tmp`, `/root`; 60 s within 120 s. Expected peak of the whole trial: 12 GiB GPU memory, 32 GiB memory. Limits measured: their class's limits (partial MuJoCo measurements of 2026-10-13 on the class's other families, with the protocol's margin); this family's own peaks not measured yet.
 
 ## Details
 | | |

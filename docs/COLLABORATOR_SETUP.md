@@ -175,8 +175,9 @@ done
   use up to 32 GB of memory (its limit). On a host shared with other work, name your GPUs (`GPUS=0,1`) and start the
   lanes with `MEM_GUARD=1`.
 - **Duration:** a trial gives the agent up to 3 h, plus setup and grading. If every trial used its whole budget, the
-  540 trials would take about 864 GPU-hours (the 336 rigid trials count a quarter of a GPU each, the 204 deformable
-  trials a whole one): about 36 days on one GPU, 9 on four, 4.5 on eight. `nohup` keeps the lanes running after you
+  540 trials would take about 837 GPU-hours (the 300 rigid trials with a GPU count a quarter of a GPU each, the 36
+  IKEA privileged trials none, the 204 deformable trials a whole one): about 35 days on one GPU, 8.7 on four, 4.4 on
+  eight. `nohup` keeps the lanes running after you
   log out.
 - **More than one host:** give each host its own part of the bases and the same batch name (a trial's seed depends
   only on the batch name, the task and the trial number), and send each host's batch back on its own (section 6).
