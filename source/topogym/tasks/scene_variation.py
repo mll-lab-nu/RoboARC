@@ -109,7 +109,7 @@ AXES = {
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
         # Goal region pinned to -y: the +y side already holds the handle.
         dict(path="base_center_xy_m", kind="offset", range=[[-.03, .03], [-.02, .02]]),
-        # The handle stays as released (the instruction names it wooden); the fixture's wood changes
+        # The handle stays wood (the instruction names it wooden): its wood changes with the fixture's
         # (orbits.FIXTURE_FINISHES). The cord (drawn grey at seed 0: its colliding links) is orange polypropylene, then
         # blue nylon (hemp sat 8 CIEDE2000 from the maple table top, 2026-10-27).
         dict(path="cord_finish", kind="choice", values=["golden_rope", "orange_rope", "blue_nylon_rope"], visual=True),

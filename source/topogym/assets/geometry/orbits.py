@@ -322,13 +322,16 @@ def finish(mesh, name, look=None):
 # "frame" the base and the posts, "turned" the stopper ball and the rings. walnut: the frame walnut-stained (the light
 # wood's grain darkened), the turned parts the released dark wood; black_lacquer: the frame black lacquer, the turned
 # parts red paint. Each >= 20 CIEDE2000 (texture means) from the released wood, from the other look's and from the
-# green goal region, and >= 15 from every table top. The wooden handle keeps its released look: its only visual geom
-# (cord.xml handle_wood) has no mass attribute, so a change to it would read as a physics change.
+# green goal region, and >= 15 from every table top. "handle": the wooden handle's wood (cord.xml handle_wood; the
+# texts call it wooden): lacquered ebony, then oiled mahogany, after the released light wood (.86, .66, .42): pairwise
+# >= 25 CIEDE2000, and >= 24 from their seed's frame and cord (the user, 2026-10-28).
 FIXTURE_FINISHES = {
     "walnut": dict(frame=dict(texture="light_wood.png", factor=[.35, .27, .2, 1.], roughness=.55, metallic=0.),
-                   turned=dict(texture="dark_wood.png", factor=[1., .85, .65, 1.], roughness=.45, metallic=0.)),
+                   turned=dict(texture="dark_wood.png", factor=[1., .85, .65, 1.], roughness=.45, metallic=0.),
+                   handle=dict(rgba=".04 .03 .025 1", roughness=.3, metallic=0.)),
     "black_lacquer": dict(frame=dict(color=[.035, .035, .04, 1.], roughness=.25, metallic=0.),
-                          turned=dict(color=[.55, .06, .05, 1.], roughness=.4, metallic=0.)),
+                          turned=dict(color=[.55, .06, .05, 1.], roughness=.4, metallic=0.),
+                          handle=dict(rgba=".3 .1 .05 1", roughness=.6, metallic=0.)),
 }
 
 
