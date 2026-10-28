@@ -27,8 +27,11 @@ AXES = {
         # Goal region pinned to -y; bounds keep the reach proxy within +2 cm (historical scene-variation geometry audit).
         dict(path="center_xy_m", kind="offset", range=[[-.03, .04], [-.01, .03]]),
         dict(path="yaw_deg", kind="offset", range=[-10., 10.]),
-        # Silver would match the horseshoes; keep the ring distinguishable.
-        dict(path="target_ring_finish", kind="choice", values=["copper", "coated_metal", "brass"], visual=True),
+        # The ring, the horseshoes and the chains (no text names their colours): seed 1 a red painted ring on black
+        # oxide horseshoes, seed 2 a dark coated ring on bronze ones; every ring stands apart from the horseshoes at
+        # its seed (brass, 18 CIEDE2000 from the copper ring, left the ring values on 2026-10-27).
+        dict(path="target_ring_finish", kind="choice", values=["copper", "red_painted", "coated_metal"], visual=True),
+        dict(path="shoe_finish", kind="choice", values=["steel", "black_oxide", "bronze"], visual=True),
     ),
     "cast_coil": (
         # Both pieces move together; the silver offset stays in world XY. +y moves the
@@ -91,9 +94,15 @@ AXES = {
     ),
     "lock_picking": (
         # The chain lock (2026-10-10, it replaced the original tiers): each tier's geometry, stops and key tray are one
-        # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move; its
-        # rotor count differs by tier (3 or 4), so the rotor colours keep their order. Only the base's finish varies.
-        dict(path="base_finish", kind="choice", values=["coated_metal", "engineering_plastic", "silver"], visual=True),
+        # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move. No text names a colour:
+        # seed 1 a teak base, blue painted frames and tray, acrylic plates (red, green, white, blue; an orange END
+        # plate) and a brass key; seed 2 a green powder-coated base, plywood frames and tray, anodised plates (sky blue,
+        # pink, lime, teal; a natural aluminium END plate) and a gunmetal key.
+        dict(path="base_finish", kind="choice", values=["coated_metal", "teak", "green_powder_coat"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["engineering_plastic", "blue_painted", "plywood"],
+             visual=True),
+        dict(path="plate_finish", kind="choice", values=["painted", "acrylic", "anodised"], visual=True),
+        dict(path="key_finish", kind="choice", values=["silver", "brass", "gunmetal"], visual=True),
     ),
     "orbits": (
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
@@ -118,13 +127,8 @@ AXES = {
     ),
     "interlocked_claws": (
         # No pose axes: the start is a two-hand pregrasp tied to arm joint angles and weld points.
-        # The target stays brown (the instruction names it); the other piece takes any non-brown colour.
-        dict(path="target_shade", kind="offset", range=[-.15, .15], visual=True),
-        dict(path="other_rgb", kind="choice", visual=True, values=[
-            None, [.18, .32, .65], [.25, .55, .30], [.50, .52, .55]]),
-        # Only Cast Trinity defines third_rgb (its third piece, B; the other bases have two pieces): B takes green, then
-        # blue, where other_rgb gives H blue, then green, so that its three pieces differ at appearance seeds 1 and 2.
-        dict(path="third_rgb", kind="choice", visual=True, values=[None, [.25, .55, .30], [.18, .32, .65]]),
+        # Every piece's colour and material (InterlockedClawsTask.piece_finishes).
+        dict(path="piece_finish", kind="choice", values=["painted", "anodised", "powder_coat"], visual=True),
     ),
     "blanket_flatten": (
         # Drawn before freezing: each seeded instance gets its own prepared archive

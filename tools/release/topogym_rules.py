@@ -31,7 +31,8 @@ PLACEMENT = {"cast_keyhole", "interlocked_claws", "hedgehog_in_cage", "horseshoe
 # variation's own words (by shape or role: the pieces' colours change with the appearance seed) override the family's
 FREE_REMAINDER = {"cast_keyhole": "the fork plate", "interlocked_claws": "the other claw piece",
                   "horseshoe_ring": "the horseshoes and chain links", "slotted_post_ring": "the cord, beads and end discs",
-                  "cast_keyhole_double_maze": "the left-hand plate"}
+                  "cast_keyhole_double_maze": "the left-hand plate", "interlocked_claws_easier": "the frame piece",
+                  **{f"interlocked_claws_rd_{t}": "the lock piece" for t in ("very_easy", "easier", "easy", "medium", "hard")}}
 # The grading replays of the GPU families (rcb_topogym.py GRADING_HOLD_S / REPLAY_TOLERANCES, tooling v16; the numbers
 # must match: ci_checks/test-topogym-grading-replay.py). family -> {threshold: (task parameter, passing side, slack)}.
 GRADING_HOLD_S = 2.0

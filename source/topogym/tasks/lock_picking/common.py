@@ -33,6 +33,17 @@ def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
     )
 
 
+# plate_finish (appearance seeds): the rotor plates' colours in rotor order (a tier uses its first ones), the END plate's
+# colour and both plates' (roughness, metallic); "painted" keeps each tier's disc_colors, the released END plate and
+# their 0.45 / 0.35. No text names a plate's colour; each rotor's three colours, the rotors of one seed, the END plate and
+# the stop frames of that seed stay >= 20 CIEDE2000 apart, and the plates >= 15 from the yellow aperture paint.
+PLATE_FINISHES = dict(
+    acrylic=dict(rotors=((.75, .10, .10), (.10, .50, .25), (.75, .75, .72), (.05, .15, .55)), end=(.80, .25, .03),
+                 roughness=.2, metallic=0.),
+    anodised=dict(rotors=((.20, .50, .85), (.80, .35, .45), (.25, .55, .05), (.05, .50, .45)), end=(.75, .75, .72),
+                  roughness=.35, metallic=.4))
+
+
 class LockPickingTask(TaskDefinition):
     task_id = "lock_picking"
     geometry_type = LockGeometry
@@ -45,11 +56,14 @@ class LockPickingTask(TaskDefinition):
         terminal=dict(rotor_tolerance_deg=.5, insertion_margin_m=.001,
                       shaft_contact_tolerance_m=.00001),
         disc_colors=[list(color) for color in DISC_COLORS], base_finish="coated_metal", key_rest_drop_m=.100,
-        key_rest_rear_robot_side_m=None, stop_frame_cap_step_deg=None)
+        key_rest_rear_robot_side_m=None, stop_frame_cap_step_deg=None, fixture_finish="engineering_plastic",
+        plate_finish="painted", key_finish="silver")
     # stop_frame_cap_step_deg: the stop frames' collision wedges at the round slot ends (ring_limit_assets); None keeps
     # the 0.15-degree wedges, MuJoCo instances set 1 (rcb_topogym), since 0.15-degree wedges are sliver hulls there.
+    # Appearance only: base_finish, fixture_finish (the stop frames, key tray, posts, cradles) and key_finish are
+    # scene_visuals roles; plate_finish names a PLATE_FINISHES entry.
     hash_when_changed = ("disc_colors", "base_finish", "key_rest_drop_m", "key_rest_rear_robot_side_m",
-                         "stop_frame_cap_step_deg")
+                         "stop_frame_cap_step_deg", "fixture_finish", "plate_finish", "key_finish")
 
     def __init__(self, config=None, seed=0):
         super().__init__(config, seed)
@@ -87,6 +101,10 @@ class LockPickingTask(TaskDefinition):
             surface=surface(self.config["base_finish"]))]
         stops = self.config["rotor_stops"]
         outlines = {}
+        plates = PLATE_FINISHES.get(self.config["plate_finish"])
+        disc_colors = self.config["disc_colors"] if plates is None else plates["rotors"][:g.disc_count]
+        self.plate_pbr = None if plates is None else dict(roughness=plates["roughness"], metallic=plates["metallic"])
+        fixture = self.config["fixture_finish"]
         if len(stops) != g.disc_count:
             raise ValueError(f"{g.disc_count} rotor-stop definitions are required")
         for i, slots in enumerate(g.slots):
@@ -94,11 +112,11 @@ class LockPickingTask(TaskDefinition):
             if not stop.bounds_deg[0] <= g.initial_disc_deg[i] <= stop.bounds_deg[1]:
                 raise ValueError("Initial rotor angle outside its physical stop range")
             path = write_disc(
-                g, slots, folder / f"disc_{i}", physics["disc_mass"], physics["disc_damping"], self.config["disc_colors"][i],
+                g, slots, folder / f"disc_{i}", physics["disc_mass"], physics["disc_damping"], disc_colors[i],
                 stop=stop, mount_z=table_height_m+base_height-g.axis_z, shallow=g.shallow_of(i),
                 cap_step_deg=self.config["stop_frame_cap_step_deg"],
             )
-            outlines[f"lock_disc_{i}"] = self._paint_aperture(path, slots, self.config["disc_colors"][i],
+            outlines[f"lock_disc_{i}"] = self._paint_aperture(path, slots, disc_colors[i],
                                                                shallow=g.shallow_of(i))
             entities.append(
                 EntitySpec(
@@ -115,24 +133,25 @@ class LockPickingTask(TaskDefinition):
                 )
             )
             frame = folder/f"disc_{i}"/"limits"/"stop_frame.urdf"
-            finish_generated_urdf(frame, "engineering_plastic")
+            finish_generated_urdf(frame, fixture)
             entities.append(EntitySpec(f"lock_frame_{i}", "urdf", frame,
                 (g.disc_x(i), g.center_y, g.axis_z), fixed=True,
                 material={"friction": .3},
                 morph_options={"merge_fixed_links": False}))
-        goal = write_endpoint(g, folder / "goal")
+        end_color = ENDPOINT_COLOR if plates is None else plates["end"]
+        goal = write_endpoint(g, folder / "goal", end_color)
         outlines["lock_goal"] = self._paint_aperture(
-            goal, (g.endpoint_deg,), ENDPOINT_COLOR, goal_plate=True
+            goal, (g.endpoint_deg,), end_color, goal_plate=True
         )
-        silver = surface("silver")
-        silver["color"] = silver["color"][:3]
-        key = write_key(g, folder / "key", physics["key_mass"], visual_finish=silver)
+        key_finish = surface(self.config["key_finish"])
+        key_finish["color"] = key_finish["color"][:3]
+        key = write_key(g, folder / "key", physics["key_mass"], visual_finish=key_finish)
         tray_length = rest["tray_end"]-rest["tray_start"]
         tray_x = (rest["tray_end"]+rest["tray_start"])/2
         entities.append(EntitySpec("key_tray", "box", None,
             (tray_x, g.center_y, rest["tray_top"]-rest["tray_thickness"]/2),
             fixed=True, morph_options={"size": (tray_length, rest["tray_width"], rest["tray_thickness"])},
-            surface=surface("engineering_plastic")))
+            surface=surface(fixture)))
         for i, x in enumerate(rest["cradle_x"]):
             bottom = table_height_m+base_height
             top = rest["tray_top"]-rest["tray_thickness"]
@@ -141,7 +160,7 @@ class LockPickingTask(TaskDefinition):
             entities.append(EntitySpec(f"key_tray_post_{i}", "box", None,
                 (x, g.center_y, (top+bottom)/2), fixed=True,
                 morph_options={"size": (.022, .05, top-bottom)},
-                surface=surface("engineering_plastic")))
+                surface=surface(fixture)))
             # The rear cradle's robot-facing side may be cut low for wrist clearance.
             low = self.config["key_rest_rear_robot_side_m"] if i == 0 else None
             for j, mesh in enumerate(write_key_cradle(rest, folder/f"cradle_{i}", low, g.shaft_radius)):
@@ -149,14 +168,14 @@ class LockPickingTask(TaskDefinition):
                     (x, g.center_y, rest["tray_top"]), fixed=True,
                     material={"friction": .6},
                     morph_options={"convexify": True, "decimate": False},
-                    surface=surface("engineering_plastic")))
+                    surface=surface(fixture)))
         # The endpoint is also supported by a real post, not floating in space.
         lower = table_height_m+base_height
         upper = g.axis_z-g.disc_radius
         entities.append(EntitySpec("lock_goal_post", "box", None,
             (g.disc_x(g.disc_count), g.center_y, (lower+upper)/2), fixed=True,
             morph_options={"size": (.035, .08, upper-lower)},
-            surface=surface("engineering_plastic")))
+            surface=surface(fixture)))
         entities.extend(
             (
                 EntitySpec(
@@ -201,7 +220,7 @@ class LockPickingTask(TaskDefinition):
         """Reuse the visual-only painter and keep its report episode-independent."""
         paint_aperture_outline(
             path, self.layout, slots, color, self.config["aperture_outline"],
-            goal_plate=goal_plate, shallow=shallow,
+            goal_plate=goal_plate, shallow=shallow, finish=self.plate_pbr,
         )
         report_path = path.parent / "aperture_outline.json"
         if not report_path.is_file():

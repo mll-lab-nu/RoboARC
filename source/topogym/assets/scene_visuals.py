@@ -13,10 +13,21 @@ SURFACES = {
 }
 # Roles added after scene_preset.json began recording SURFACES: kept out of it so every existing scene's record stays
 # byte-identical; record_preset adds the ones a scene's parameters name. brass: Horseshoe's third target-ring look
-# (appearance seeds, 2026-10-20), apart from the silver horseshoes and the default copper ring. blue_rope, black_rope:
-# Rope Threading's rope looks of appearance seeds 1 and 2 (2026-10-21), apart from every ring and grommet colour.
+# (appearance seeds, 2026-10-20 to 10-27; 18 CIEDE2000 from copper). red_painted: Horseshoe's target ring at appearance
+# seed 1 (2026-10-27). black_oxide, bronze: Horseshoe's horseshoes and chains at appearance seeds 1 and 2; brass,
+# gunmetal: Lock Picking's key; teak, green_powder_coat: its base; blue_painted, plywood: its stop frames and key tray
+# (2026-10-27). blue_rope, black_rope: Rope Threading's rope looks of appearance seeds 1 and 2 (2026-10-21), apart from
+# every ring and grommet colour.
 LATE_SURFACES = {
     "brass": dict(color=(.78, .60, .25, 1.), metallic=.9, roughness=.35),
+    "red_painted": dict(color=(.55, .05, .06, 1.), metallic=.3, roughness=.4),
+    "black_oxide": dict(color=(.04, .04, .045, 1.), metallic=.7, roughness=.5),
+    "bronze": dict(color=(.45, .28, .12, 1.), metallic=.9, roughness=.4),
+    "teak": dict(color=(.42, .24, .10, 1.), metallic=0., roughness=.6),
+    "green_powder_coat": dict(color=(.07, .25, .12, 1.), metallic=0., roughness=.6),
+    "blue_painted": dict(color=(.20, .50, .85, 1.), metallic=0., roughness=.5),
+    "plywood": dict(color=(.55, .38, .20, 1.), metallic=0., roughness=.8),
+    "gunmetal": dict(color=(.16, .17, .19, 1.), metallic=.8, roughness=.45),
     "blue_rope": dict(color=(.04, .12, .60, 1.), metallic=0., roughness=.88),
     "black_rope": dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.88),
 }
