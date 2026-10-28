@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "ad6e671849a6116f748e18ea6d852b2698ce2e9a7a20e45239c3de83918470b7",
+  "instance_sha256": "89dc6cd868dbbad8a0081f9ff8def6382ca46f4f4d42a5ec12e32d6a654d3fe5",
   "asset_files": {
     "instance_assets/mujoco/meshes/wire_base_base_0_37c13bd13268a5e2.obj": "37c13bd13268a5e224834f155bef391bde8533bd44eb1f0df0cdbb95a81aa5cb",
     "instance_assets/mujoco/meshes/wire_base_base_1_6704f1e57143911e.obj": "6704f1e57143911eb9a97ef03064c1040a056d4d4490eb04d758e57deb2f7c6a",

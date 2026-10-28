@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "107e4a25bd081742d769a3982c9ea92b2f1dc40979945ea1033e029ec1f8768e",
+  "instance_sha256": "ac36052b7091e06e592beebf3dbd710531dfb95a9d867ba719abcb3b7544563a",
   "asset_files": {
     "instance_assets/mujoco/meshes/key_cradle_0_0_9448f81735fc1096.obj": "9448f81735fc109672cb984b55992b2b1fa872b4d524ca49d64a5f734eb32d86",
     "instance_assets/mujoco/meshes/key_cradle_0_1_d5529756653d3d75.obj": "d5529756653d3d7576b067502e71edec202546b3304f429e129c1346f4bd9669",
@@ -633,7 +633,7 @@
     "instance_assets/mujoco/scene.json": "162c466eb3de940138478dbaec3b7ddeff46bf77e00836dd0c2193a994a512df",
     "instance_assets/mujoco/scene.xml": "48cd1e9fc0ef520976e69b3fa271988224e781dfc61c5b5651706b247dc26b77"
   },
-  "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+  "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
   "creation_source": {
     "sha256": "d1eb6f13b637abfdee0d4bb3aaa675b3ff352d6f02a76f856eb9e42b0e8c2d1b",
     "files": 437
@@ -649,8 +649,8 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
-      "files": 454
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+      "files": 455
     }
   },
   "image": {
@@ -659,5 +659,5 @@
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
-  "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
+  "nyx_direct_sha256": "bf41e3f747b337d5452f57f54c23cc44cca01f7956cd2df84dc24fdf1caad956"
 }

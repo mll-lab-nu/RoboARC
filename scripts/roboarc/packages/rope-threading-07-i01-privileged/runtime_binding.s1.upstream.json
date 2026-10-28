@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "d9189e021f3a472e68ccbf7f2d3f72382f0a0fa51ed375d8d02a7dd455433d95",
+  "instance_sha256": "ea92a677ede592165ec3cb336bdc292c7c6df2e0e9e3aa305442c45762af1c44",
   "asset_files": {
     "instance_assets/frozen_assets/rope_volume.npz": "c9edd62a835712b5c93b59f39b7a73e143df52eb428093cd583919e0c1813d6c",
     "instance_assets/mujoco/meshes/A_part_0580854860eaaddf.obj": "0580854860eaaddf12489f0fb6899fe541546fff6b7e0ebe22873a8912d79e53",

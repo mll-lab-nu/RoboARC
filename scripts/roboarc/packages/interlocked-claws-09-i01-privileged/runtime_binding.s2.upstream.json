@@ -1,37 +1,34 @@
 {
   "schema_version": 1,
-  "instance_sha256": "db5abac037b0143a8e0bf72bb59c68ab365c23303c277639fba1fbe1e9928bef",
+  "instance_sha256": "b68c2540f0726f2252f606ed7e5a40e7193bd498ec9ff9bd91e27b512156b20e",
   "asset_files": {
-    "instance_assets/mujoco/meshes/goal_region_0bff94a01edc6d35.obj": "0bff94a01edc6d35470bdd0f9d3b10be71ebcdc74c51996ffa0e3068ed499536",
-    "instance_assets/mujoco/scene.json": "3581c2e6572817ec93a93303f74515b42c95f0e878be8f6c45cd26bf7d61fdd7",
-    "instance_assets/mujoco/scene.xml": "10f89b3a2990d452139177812090a26e318369141c994ea0b263cd99a3d24317"
+    "instance_assets/mujoco/meshes/goal_region_596c39d9d73f30e8.obj": "596c39d9d73f30e8c30cb5bdb7a4cf669b8bc3bb7faf7388d9008b7a7fbc3978",
+    "instance_assets/mujoco/scene.json": "9e10fa8b3e571b688e9c39f9ba9c88ed4367698ad8d82c3e9e502f1804d4b26d",
+    "instance_assets/mujoco/scene.xml": "6f96b2b4b855cefea32db2437464e7beb153aec2213d6c4f22ce7acb950fb44a"
   },
-  "tooling_sha256": "d8692e15964ac9f4c536d52b1c86d0418a4f4e37ec94f98e5d91d0b4ad0dd766",
+  "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
   "creation_source": {
-    "sha256": "d601866b4c91c858aa4e249b5bf5145b8fe3263b2885048a86016e34c314c208",
-    "files": 444
+    "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+    "files": 455
   },
   "runtime": {
     "source": {
-      "sha256": "c9171f7932cebdee016b7ee1e8abd9a1afba7563a32364d91dffe85b14a51565",
-      "files": 443
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+      "files": 455
     },
     "python": "3.11.15",
     "dependencies": {
-      "genesis-world": "1.2.1",
-      "pyuipc": "0.0.25+topogym.det1.cuda128",
       "torch": "2.11.0+cu128",
       "numpy": "2.3.5",
       "scipy": "1.17.1",
       "mujoco": "3.14.0",
       "newton": "1.6.1",
       "warp-lang": "1.18.0"
-    },
-    "uipc_build_sha256": "39781d192a00d0cdc784f76e9ef2aa6fa404da510cf813ff06a04ea33b2597c1"
+    }
   },
   "image": {
-    "reference": "eai-roboarc:0.2.1-noinst",
-    "id": "sha256:cd2ac87464fd0840be7d5a71da4311eb483a8f29075b87802333be1caa569986",
+    "reference": "roboarc-r4:2.2.0-noinst",
+    "id": "sha256:4c0613fbbd6682e3e53275dd77cf1bc4fa7ec0df0b56e4e31b04e9e296900739",
     "repo_digests": []
   }
 }

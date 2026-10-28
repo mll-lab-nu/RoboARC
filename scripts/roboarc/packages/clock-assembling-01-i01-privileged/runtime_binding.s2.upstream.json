@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "ec8102685f97b0f6724fe33f710285ddfae78bb0b70c69b367bb5fd5a00b66b2",
+  "instance_sha256": "819165f92e4e3a40765650542e2b008e36a5aa9482fd6cd348e5a11d9c0e3683",
   "asset_files": {
     "instance_assets/mujoco/meshes/clock_barrel_arbor_prism32_791d5b1afa1f68f7.obj": "791d5b1afa1f68f735814b3dc6c71e12a05515d7448e048511f660c4ae930e3d",
     "instance_assets/mujoco/meshes/clock_barrel_drum_prism32_c5b8c15ef2ec70b8.obj": "c5b8c15ef2ec70b8bc71ba7bf5b9427ff11a3782c2cfa03675fd9c6090090072",

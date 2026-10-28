@@ -20,7 +20,7 @@ artifacts = [{ source = "/var/rcb-monitor/", service = "rcb_monitor" },
 
 [task]
 name = "roboarc/roboarc-interlocked-claws-08-i01-standard"
-description = "STANDARD MODE (robot as a service, eai-standard/2.4): RoboARC interlocked_claws on the same frozen instance as the privileged task. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
+description = "STANDARD MODE (robot as a service, eai-standard/2.4): RoboARC interlocked_claws on the same frozen instance as the privileged task. Separate and place the entire key piece inside the green dashed goal region. Keep the lock piece on the puzzle/system side. The key piece is the long straight bar with a short crossbar at one end; the lock piece is the open frame of bars it passes through. The agent only gets a client: get_obs (RGB, optional depth, proprioception, calibrated cameras), submit (joint_position or ee_pose chunks), stateless kinematics. No reset, no privileged state; the sim service records the episode as a trajectory and grades it."
 authors = [{ name = "Jianwen Lyu" }]
 keywords = ["robotics", "roboarc", "mujoco", "aloha", "standard-mode", "trajectory", "interlocked_claws"]
 
@@ -80,7 +80,7 @@ sim = { cpus = 4.0, memory_gb = 8.0, pids = 8192 }
 # from (a list, { from = A, to = B } or "any"), and the ones the reference solution under solution/ is for
 default = 0
 allowed = [0, 1, 2]
-oracle = [0, 1, 2]
+oracle = [0]
 build = "runtime"
 
 [verifier]

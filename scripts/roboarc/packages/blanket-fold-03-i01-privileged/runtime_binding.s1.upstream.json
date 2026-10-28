@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "e6d59557a41627ad024c2c03b4f676d681be4c0f907003ace15f7b5df4a3bd8d",
+  "instance_sha256": "a0d142b5286eece4976edbf2543a898008c0fb7292921abf18dfa4872fd66cfc",
   "asset_files": {
     "instance_assets/fold_target/blanket_fold_easy_target.npz": "f89ec70cb04c94c7d97a72086a66cd0dc081e66d1d71ff9d4544eb682d53a8f8",
     "instance_assets/initial_state/arrays.npz": "2b3ae142101f33adeaf5268fae5741c11348f2182ec522f83cfd278dba443621",
