@@ -100,7 +100,10 @@ AXES = {
     "slotted_post_ring": (
         # FEM volumes cannot rotate, so translation only; -y beyond ~2.5 cm pushes the discs out of frame.
         dict(path="center_xy_m", kind="offset", range=[[-.05, .05], [-.02, .05]]),
-        dict(path="cord_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The chain settings' cord: blue nylon, then red nylon (golden sat 9 CIEDE2000 from the released yellow links,
+        # 2026-10-27); their post and base, beads, end discs and metal ring: slotted_post_ring_hard_chain.PUZZLE_FINISHES.
+        dict(path="cord_finish", kind="choice", values=["hemp", "blue_nylon_rope", "red_nylon_rope"], visual=True),
+        dict(path="puzzle_finish", kind="choice", values=["released", "cherry_violet", "navy_pink"], visual=True),
     ),
     "interlocked_claws": (
         # No pose axes: the start is a two-hand pregrasp tied to arm joint angles and weld points.
