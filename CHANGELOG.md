@@ -152,7 +152,7 @@ reference rows are unchanged. Not released yet: the image, the instances and the
   (`topogym.assets.library.visual_asset_path`), not files of this repository.
 - An image built from this source needs them in its visual asset root. The image recipe's download of them
   (`source/images/roboarc/prepare_nyx_studio.py`: sha256-checked, with their authors in a CREDITS.txt) and their row in
-  `LICENSES/THIRD_PARTY.md` are on the branch `dev/jianwen-appearance-build`, to be merged with this.
+  `LICENSES/THIRD_PARTY.md`. The image build downloads them from Poly Haven; nothing is uploaded.
 
 ### Physics unchanged
 - Every appearance parameter re-colours or re-finishes drawn geometry (visual geoms, GLB materials, MJCF materials,
@@ -169,13 +169,12 @@ reference rows are unchanged. Not released yet: the image, the instances and the
 - The image, built from this source (the simulator source hash in `SOURCE.json`, so the runtime every puzzle task is
   bound to, changes) with the nine textures in its visual asset root. The IKEA images stay.
 - The seed-0 instances of the 30 marker bases (their scenes; the births and seed-0 references stay), made again even
-  where the release starts from the released instance tree (`release_rebuild.py --remake`, on
-  `dev/jianwen-appearance-build`). The seed-0 instances of the other 48 bases stay as they are.
+  where the release starts from the released instance tree (`release_rebuild.py --remake`). The seed-0 instances of the other 48 bases stay as they are.
 - Every seed instance: seeds 1 and 2 of all 78 bases, derived again (`tools/release/release_rebuild.py
   --appearance-seeds 1,2`), and the seeds' references re-stamped (rope-threading 04-08's unstamped references serve
   every seed as before).
 - The goal pictures: blanket-fold 01-05 at seeds 1 and 2, knot-untying 07 and 09 at seeds 0, 1 and 2 (seed 0's:
-  `release_rebuild.py --seed0-goal-pictures`, on the same branch).
+  `release_rebuild.py --seed0-goal-pictures`).
 - Every puzzle task directory, rendered again (`scripts/roboarc/mk_tasks.py`): the new texts (`tasks/` holds the 5 mm
   sentence but not yet the reworded colour sentences of 22 bases), the tooling copies (`rcb_topogym.py`,
   `nyx_direct.py`), the runtime bindings, the seeds' bindings and references, `DIGEST`. The IKEA task directories are
