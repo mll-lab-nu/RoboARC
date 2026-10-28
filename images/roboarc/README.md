@@ -15,7 +15,7 @@ recipe is `source/images/roboarc/Dockerfile`; `build.sh` builds it. It holds:
 - the Debian packages they need (ffmpeg for the replay videos, the GL / EGL / OpenGL / Vulkan loaders, X11 client
   libraries) and, for the agent harness, curl, ca-certificates and ripgrep;
 - the robot assets (`/opt/topogym-assets/robots`), Nyx's studio HDRI and wood maps, the appearance seeds' texture maps
-  (table tops, frames, floors: 1k colour, normal and ARM maps of ten CC0 Poly Haven textures, with a CREDITS.txt) and the
+  (table tops, frames, floors: 1k colour, normal and ARM maps of nine CC0 Poly Haven textures, with a CREDITS.txt) and the
   ground plane's checker texture (`/opt/topogym-visuals`), the NVIDIA Vulkan ICD and EGL vendor files;
 - every task's frozen MuJoCo instance (`/opt/robotangle/instances/<base>/`), staged into a task by
   `/opt/robotangle/stage_instance.py` and checked against the task's `runtime_binding.json`.

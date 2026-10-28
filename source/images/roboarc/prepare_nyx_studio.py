@@ -36,10 +36,6 @@ TEXTURES = {
         "4054ed6eb65cd063356ffb4a88706b7d7b78c5435051c48bf0ee64290f04bc8c",
         "f4953a881f34627cefcc22f780d392314635e31bb41f75cf3888a5af55c21820",
         "374e4408acfb0bb4512f904f6fd3ae1006195ed12f2e258625b5b8b3a91f6528")),
-    "granite_tile_03": ("Granite Tile 03", "Charlotte Baglioni", (
-        "bdb28bea17413f1a05b0498b43e9f61f253bb72d753d3bf6b555cbf5f3c9b1b4",
-        "016a678038f885f58fdb2ab642835dddd5a4d1302dbec8cb656e37ddd17dbbff",
-        "13e2e13adc697b9e70a7a1f902ba5111ca518560ebbd5eaed9fd05c0ccc51c28")),
     "diagonal_parquet": ("Diagonal Parquet", "Jenelle van Heerden and Sergej Majboroda", (
         "dd19af5da746c15c68192dea8ad8374111cc5dd04bc8d715c70dc50de0f48022",
         "a6b94b86714547d9dbbc0b040939d541857a200d610144e55ce935635925f193",
