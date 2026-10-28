@@ -29,6 +29,21 @@ REMAINDER = ("base", "post", "cord", "bead_left", "bead_right", "disc_left", "di
 CENTER_XY_M = (-.11, .04)
 SLOT_WIDTH_M = .034
 GRASP_TCP_DISTANCE_M = .09   # the ring's grasp region is centred on its centre, 61 mm from a pinch on its tube
+# The puzzle's looks of appearance seeds 1 and 2 (task parameter puzzle_finish; scene_variation's visual axis): the post
+# and base, the beads, the end discs and the ring (the texts call it metal: it stays anodised aluminium) take another
+# colour and finish, each >= 20 CIEDE2000 from both released palettes (the wood one of the below-easy settings and this
+# class's), from the other seed's, from the green goal region and from every table top, and >= 15 from the parts they
+# touch and from the cord of their seed. "released": the class palette (colours).
+PUZZLE_FINISHES = {
+    "cherry_violet": dict(fixture=dict(rgba=".45 .2 .1 1", roughness=.5, metallic=0.),           # oiled cherry
+                          bead=dict(rgba=".035 .035 .04 1", roughness=.3, metallic=0.),         # black lacquer
+                          disc=dict(rgba=".85 .35 .55 1", roughness=.7, metallic=0.),           # matte pink paint
+                          ring=dict(rgba=".25 .08 .45 1", roughness=.25, metallic=.8)),         # violet anodised
+    "navy_pink": dict(fixture=dict(rgba=".03 .05 .15 1", roughness=.3, metallic=0.),              # navy lacquer
+                      bead=dict(rgba=".03 .3 .3 1", roughness=.25, metallic=0.),                # glossy teal plastic
+                      disc=dict(rgba=".85 .62 .05 1", roughness=.7, metallic=0.),               # matte yellow paint
+                      ring=dict(rgba=".85 .35 .55 1", roughness=.5, metallic=.7)),              # pink anodised, blasted
+}
 
 
 class SlottedPostRingHardChainTask(SlottedPostRingHardTask):
@@ -42,7 +57,9 @@ class SlottedPostRingHardChainTask(SlottedPostRingHardTask):
     simulator_settings = dict(compute_backend="cpu", precision="64", solver_substeps=1)
     colours = COLOURS     # the visual twins' colours (slotted_chain.scene_xml)
     defaults = merge_parameters(SlottedPostRingHardTask.defaults, {"center_xy_m": list(CENTER_XY_M),
-                                                                    "geometry": {"slot_width_m": SLOT_WIDTH_M}})
+                                                                    "geometry": {"slot_width_m": SLOT_WIDTH_M},
+                                                                    "puzzle_finish": "released"})
+    hash_when_changed = (*SlottedPostRingHardTask.hash_when_changed, "puzzle_finish")
 
     def make_layout(self):
         """The setting's geometry with the chain's longer cord (slotted_chain.ChainLayout)."""
@@ -53,8 +70,20 @@ class SlottedPostRingHardChainTask(SlottedPostRingHardTask):
         palette, else the finish's colour alternating with half its brightness (still a chain, not a rope)."""
         if self.config["cord_finish"] == self.defaults["cord_finish"]:
             return self.colours["links"]
-        r, g, b, _ = surface(self.config["cord_finish"])["color"]
-        return tuple(" ".join(f"{v:.4g}" for v in (k*r, k*g, k*b, 1.)) for k in (.5, 1.))
+        finish = surface(self.config["cord_finish"])
+        r, g, b, _ = finish["color"]
+        return tuple(dict(rgba=" ".join(f"{v:.4g}" for v in (k*r, k*g, k*b, 1.)), roughness=finish["roughness"],
+                          metallic=finish["metallic"]) for k in (.5, 1.))
+
+    def look_colours(self):
+        """The visual twins' colours (slotted_chain.scene_xml): the class palette at the default puzzle_finish, else
+        the finish's (PUZZLE_FINISHES); the links follow cord_finish (link_colours)."""
+        finish = self.config["puzzle_finish"]
+        if finish == "released":
+            return {**self.colours, "links": self.link_colours()}
+        f = PUZZLE_FINISHES[finish]
+        return {**self.colours, "fixture": f["fixture"], "base": f["fixture"], "bead": f["bead"], "disc": f["disc"],
+                "ring": f["ring"], "links": self.link_colours()}
 
     def grasp_assist(self):
         """contact_weld_v1 on the ring only, its region round its whole body. The beads, the discs and the chain's
@@ -68,7 +97,7 @@ class SlottedPostRingHardChainTask(SlottedPostRingHardTask):
         preset = record_preset(self, asset_dir)
         self.origin = np.r_[np.asarray(self.config["center_xy_m"], float), table_height_m]
         self.layout = self.make_layout().validate()
-        xml, points = scene_xml(self.layout, LINKS, {**self.colours, "links": self.link_colours()})
+        xml, points = scene_xml(self.layout, LINKS, self.look_colours())
         path = Path(asset_dir)/f"{ENTITY}.xml"
         path.write_text(xml)
         self.chord_m = float(np.linalg.norm(points[1]-points[0]))

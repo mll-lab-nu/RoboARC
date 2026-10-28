@@ -142,5 +142,7 @@ class SlottedBelowEasyTask(SlottedPostRingEasyChainTask):
         """One flat colour for every link, as the beige cord: the default cord_finish keeps CORD."""
         if self.config["cord_finish"] == self.defaults["cord_finish"]:
             return self.colours["links"]
-        rgba = " ".join(f"{v:.4g}" for v in surface(self.config["cord_finish"])["color"])
-        return rgba, rgba
+        finish = surface(self.config["cord_finish"])
+        look = dict(rgba=" ".join(f"{v:.4g}" for v in finish["color"]), roughness=finish["roughness"],
+                    metallic=finish["metallic"])
+        return look, look

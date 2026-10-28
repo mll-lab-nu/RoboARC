@@ -17,7 +17,9 @@ SURFACES = {
 # seed 1 (2026-10-27). black_oxide, bronze: Horseshoe's horseshoes and chains at appearance seeds 1 and 2; brass,
 # gunmetal: Lock Picking's key; teak, green_powder_coat: its base; blue_painted, plywood: its stop frames and key tray
 # (2026-10-27). blue_rope, black_rope: Rope Threading's rope looks of appearance seeds 1 and 2 (2026-10-21), apart from
-# every ring and grommet colour.
+# every ring and grommet colour. blue_nylon_rope, black_polyester_rope, red_nylon_rope: rope and cord looks of
+# appearance seeds 1 and 2 (2026-10-27): another colour and another fibre than hemp or polypropylene (braided nylon has
+# a sheen, polyester a softer one), apart from every ring and grommet colour and the green goal region.
 LATE_SURFACES = {
     "brass": dict(color=(.78, .60, .25, 1.), metallic=.9, roughness=.35),
     "red_painted": dict(color=(.55, .05, .06, 1.), metallic=.3, roughness=.4),
@@ -30,6 +32,9 @@ LATE_SURFACES = {
     "gunmetal": dict(color=(.16, .17, .19, 1.), metallic=.8, roughness=.45),
     "blue_rope": dict(color=(.04, .12, .60, 1.), metallic=0., roughness=.88),
     "black_rope": dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.88),
+    "blue_nylon_rope": dict(color=(.04, .12, .60, 1.), metallic=0., roughness=.45),
+    "black_polyester_rope": dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.6),
+    "red_nylon_rope": dict(color=(.55, .06, .05, 1.), metallic=0., roughness=.5),
 }
 
 

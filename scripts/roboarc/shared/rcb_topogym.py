@@ -298,7 +298,7 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="cast_keyhole_easy", seed=0)], grasp_assist="recommended"),
     "fiber_bundling": dict(
         task_id="fiber_bundling", robot="panda_robotiq",
-        text="Pass every fine fiber through the fixed copper ring, "
+        text="Pass every fine fiber through the fixed ring, "
              "tip first and in tip-to-root material order, until all roots and the front sheath have passed and cleared "
              "the ring. The rear terminal stays anchored and must not pass through the ring. Any gripper contact with a "
              "fine fiber ends the task in failure. Avoid sharp bends and collisions; passing only the tips is not "

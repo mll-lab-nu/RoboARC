@@ -46,6 +46,18 @@ from topogym.tasks.scene_presets import record_preset
 
 TIERS = ("very_easy", "easier", "easy", "medium", "hard")
 LINK_M = .0045          # the knot profile's chain link (topogym/world/mujoco/profiles.py knot_chain_v5, rope.link_m)
+# The fixtures' looks of appearance seeds 1 and 2 (task parameter fixture_finish; scene_variation's visual axis), by
+# fixture role: the posts and the curb oiled walnut, then blue powder-coated steel; the clamp black-oxide steel, then red
+# powder-coated steel. Each is >= 20 CIEDE2000 from the released colours, from each other seed's, from the green goal
+# region and from the rope of its seed, and >= 15 from every table top. "released": each fixture's own rgba.
+FIXTURE_FINISHES = {
+    "walnut_black_oxide": dict(post=dict(color=(.20, .11, .06, 1.), metallic=0., roughness=.55),
+                               curb=dict(color=(.20, .11, .06, 1.), metallic=0., roughness=.55),
+                               clamp=dict(color=(.035, .035, .04, 1.), metallic=.6, roughness=.45)),
+    "blue_red_powder_coat": dict(post=dict(color=(.06, .16, .42, 1.), metallic=.3, roughness=.45),
+                                 curb=dict(color=(.06, .16, .42, 1.), metallic=.3, roughness=.45),
+                                 clamp=dict(color=(.55, .07, .05, 1.), metallic=.3, roughness=.4)),
+}
 
 
 def variation_id(tier: str) -> str:
@@ -104,7 +116,8 @@ class KnotUntyingRedesignTask(KnotUntyingTask):
     family_id = "knot_untying_redesign"
     model_revision = "knot_untying_rd_v1_mujoco_chain"
     difficulty = None
-    defaults = merge_parameters(KnotUntyingTask.defaults, {"redesign": {}})
+    defaults = merge_parameters(KnotUntyingTask.defaults, {"redesign": {}, "fixture_finish": "released"})
+    hash_when_changed = (*KnotUntyingTask.hash_when_changed, "fixture_finish")
     instruction = ("Untie every knot and spread each rope on the table so that nonadjacent rope segments have no "
                    "crossings or overlaps when viewed from above. A clamped rope end stays clamped.")
 
@@ -184,12 +197,14 @@ class KnotUntyingRedesignTask(KnotUntyingTask):
                 raise ValueError(f"fixture {f['name']}: kind {f['kind']} (box or cylinder)")
             rgba = f.get("rgba", ".45 .42 .38 1")
             rgba = tuple(float(v) for v in (rgba.split() if isinstance(rgba, str) else rgba))
+            finish = self.config["fixture_finish"]
+            look = dict(color=rgba) if finish == "released" else dict(FIXTURE_FINISHES[finish][f["role"]])
             prism = f["kind"] == "cylinder" and rd.get("cylinder_fixtures") == "prism"
             entities.append(EntitySpec(
                 f["name"], "mesh" if prism else f["kind"], str(mesh_path) if prism else None,
                 (ox + x, oy + y, self.table_height_m + z),
                 _yaw_quat(f.get("yaw_deg", 0.)), fixed=True, material={"friction": friction}, morph_options=opts,
-                surface={"color": rgba}))
+                surface=look))
         self.regions = {k: np.asarray(v, dtype=float) for k, v in (rd.get("regions") or {}).items()}
         # the family's single-rope attributes, for code that reads them (its first rope)
         first = rd["ropes"][0]["name"]

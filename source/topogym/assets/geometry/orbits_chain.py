@@ -88,8 +88,9 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
     The teammate standard (2026-10-07): a handle root with two branches keeps the tree shallow; ball-joint damping 2e-4,
     armature 1e-6, friction 0.3 with condim 3, mass from each link's cylinder only (the capsule's end spheres overlap the
     neighbours'), bending stiffness from a Young's modulus, k = E pi r^4 / (4 L).
-    cord_rgba colours the links (appearance only; a non-default colour on visual-only twins). Returns (path, link
-    names, link lengths, m).
+    cord_rgba colours the links (appearance only; a non-default colour on visual-only twins); an appearance seed's
+    finish dict(rgba=, roughness=, metallic=) is drawn through an MJCF material. Returns (path, link names, link
+    lengths, m).
     """
     folder = Path(folder)
     points = np.asarray(points, dtype=float)
@@ -102,6 +103,15 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
     ET.SubElement(defaults, "geom", friction=f"{friction:.9g}", condim="3", solref="0.002 1", solimp="0.95 0.99 0.001")
     asset = ET.SubElement(root, "asset")
     ET.SubElement(asset, "mesh", name="handle_visual", file="handle.obj")
+
+    def look(name, finish):
+        """A visual geom's colour attributes: rgba, or a material for a finish dict."""
+        if not isinstance(finish, dict):
+            return dict(rgba=finish)
+        if asset.find(f"material[@name='{name}']") is None:     # first in <asset>, as slotted_chain.scene_xml
+            asset.insert(len(asset.findall("material")),
+                         ET.Element("material", name=name, **{k: str(v) for k, v in finish.items()}))
+        return dict(material=name)
     body = ET.SubElement(ET.SubElement(root, "worldbody"), "body", name="handle", pos="0 0 0")
     ET.SubElement(body, "freejoint", name="handle_free")
     l = layout
@@ -128,7 +138,7 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
             # link keeps its bytes.
             ET.SubElement(link, "geom", name=f"cord_{i:02d}_visual", type="capsule",
                           fromto=_v([0., 0., 0., lengths[i], 0., 0.]), size=f"{radius_m*1.03:.9g}", mass="0",
-                          contype="0", conaffinity="0", rgba=cord_rgba)
+                          contype="0", conaffinity="0", **look("cord_finish", cord_rgba))
         links[i] = link
         return link
 

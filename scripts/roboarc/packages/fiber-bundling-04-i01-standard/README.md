@@ -33,7 +33,7 @@ See `tests/grade.py`.
 ## Details
 
 ### Goal
-Pass every fine fiber and the front sheath through the fixed copper ring; keep the rear terminal anchored.
+Pass every fine fiber and the front sheath through the fixed ring; keep the rear terminal anchored.
 
 ### Success requirements
 - Pass every fiber tip first, then successive material points through to its root. The actual crossing history must be observed; placing fibers on the far side or passing only the tips is not completion.

@@ -4,7 +4,7 @@ fiber may meet it (numpy + scipy, the simulator source; no MuJoCo, no image):
     python3 tools/tests/test_fiber_red_lay.py
 
 - the strands drawn in the marked strand's colour are those with palette entry i % len(COLORS) equal to its own
-  (16 strands: 0 and 8 are red, and strand_palette_shift never moves entry 0);
+  (16 strands: 0 and 8 are red, and every appearance seed's palette keeps entry 0 red);
 - the marked strand (0) in place: the rule holds and reports strand 0, exactly as before;
 - strand 8 in place, strand 0 not: the rule holds, reporting strand 8;
 - neither red strand in place (another colour is): the rule fails, reporting strand 0 as before.

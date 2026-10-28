@@ -86,11 +86,12 @@ AXES = {
         # The scene sits near x ~ 0.2, ~0.8 m from the Panda base: no +x.
         # Strand fan/bend/curl are already drawn from the episode seed by FiberLayout.
         dict(path="center_xy_m", kind="offset", range=[[-.02, 0.], [-.02, .02]]),
-        # The copper ring and the red strand stay (the instructions name them); the jacket is black, dark grey, navy
-        # or dark green, and the other strands' colours trade places.
-        dict(path="sheath_color", kind="choice", visual=True, values=[
-            [.026, .029, .032], [.24, .25, .27], [.05, .09, .22], [.07, .17, .10]]),
-        dict(path="strand_palette_shift", kind="choice", values=[0, 2, 4], visual=True),
+        # The red strand keeps its hue (the redesigned tiers' instructions name it); everything else changes colour and
+        # finish (fiber_bundling.CABLE_FINISHES, FIXTURE_FINISHES; 2026-10-27: the jacket and the strand palette
+        # alone moved seed 1's frame 7 Delta E from seed 0's, and the ring is no longer named copper).
+        dict(path="cable_finish", kind="choice", values=["released", "blue_pvc", "orange_pur"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "orange_enclosure", "black_enclosure"],
+             visual=True),
     ),
     "lock_picking": (
         # The chain lock (2026-10-10, it replaced the original tiers): each tier's geometry, stops and key tray are one
@@ -108,22 +109,32 @@ AXES = {
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
         # Goal region pinned to -y: the +y side already holds the handle.
         dict(path="base_center_xy_m", kind="offset", range=[[-.03, .03], [-.02, .02]]),
-        # The handle stays wooden (the instruction names it).
-        dict(path="cord_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The handle stays as released (the instruction names it wooden); the fixture's wood changes
+        # (orbits.FIXTURE_FINISHES). The cord (drawn grey at seed 0: its colliding links) is orange polypropylene, then
+        # blue nylon (hemp sat 8 CIEDE2000 from the maple table top, 2026-10-27).
+        dict(path="cord_finish", kind="choice", values=["golden_rope", "orange_rope", "blue_nylon_rope"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "walnut", "black_lacquer"], visual=True),
     ),
     "rope_threading": (
         # The nominal scene fills 95-96% of cam_high/cam_low, and a turn swings the
         # 1.1 m rope's far end (5 deg -> ~5 cm), so this envelope is small.
         dict(path="geometry.translation_m", kind="offset", range=[[-.01, .02], [-.01, 0.], None]),
         dict(path="geometry.yaw_deg", kind="offset", range=[-2., 2.]),
-        # Ring colours stay: the instruction orders the rings cyan, green, purple. The rope is hemp, blue or black, apart
-        # from every ring and grommet (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
-        dict(path="rope_finish", kind="choice", values=["hemp", "blue_rope", "black_rope"], visual=True),
+        # Ring hues stay: the instruction orders the rings cyan, green, purple; their finish changes (glossy, then matte
+        # powder coat; redesign/task.py RING_FINISHES), and the bulkhead, pedestals, posts and stands change colour and
+        # finish (FIXTURE_FINISHES). The rope is hemp, blue nylon or black polyester, apart from every ring and grommet
+        # (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
+        dict(path="rope_finish", kind="choice", values=["hemp", "blue_nylon_rope", "black_polyester_rope"], visual=True),
+        dict(path="ring_finish", kind="choice", values=["released", "glossy", "matte_powder_coat"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "olive_steel", "steel_blue"], visual=True),
     ),
     "slotted_post_ring": (
         # FEM volumes cannot rotate, so translation only; -y beyond ~2.5 cm pushes the discs out of frame.
         dict(path="center_xy_m", kind="offset", range=[[-.05, .05], [-.02, .05]]),
-        dict(path="cord_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The chain settings' cord: blue nylon, then red nylon (golden sat 9 CIEDE2000 from the released yellow links,
+        # 2026-10-27); their post and base, beads, end discs and metal ring: slotted_post_ring_hard_chain.PUZZLE_FINISHES.
+        dict(path="cord_finish", kind="choice", values=["hemp", "blue_nylon_rope", "red_nylon_rope"], visual=True),
+        dict(path="puzzle_finish", kind="choice", values=["released", "cherry_violet", "navy_pink"], visual=True),
     ),
     "interlocked_claws": (
         # No pose axes: the start is a two-hand pregrasp tied to arm joint angles and weld points.
@@ -172,7 +183,13 @@ AXES = {
         dict(path="origin_xy_m", kind="offset", range=[[-.06, .02], [-.01, .04]]),
         # Success counts projected crossings, invariant under a turn about z.
         dict(path="yaw_deg", kind="offset", range=[-30., 15.]),
-        dict(path="rope_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The rope is orange polypropylene, then blue nylon, then black polyester (hemp sat 12 CIEDE2000 from orange
+        # and 8 from the maple table top, 2026-10-27); the redesigned tiers' posts, curb and clamp change finish too
+        # (task_rd.FIXTURE_FINISHES).
+        dict(path="rope_finish", kind="choice", values=["orange_rope", "blue_nylon_rope", "black_polyester_rope"],
+             visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "walnut_black_oxide", "blue_red_powder_coat"],
+             visual=True),
     ),
     # The fixed-scene families below vary appearance only (appearance(); the user, 2026-10-20): every axis re-colours
     # visual geoms or meshes, never a colliding one; the values leave out the default and their order is the looks of
