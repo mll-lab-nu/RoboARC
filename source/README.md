@@ -10,7 +10,7 @@
 | `assets/textures/genesis/` | `/opt/topogym-visuals/genesis/`: the ground plane's checker texture (genesis-world's file, Apache-2.0; its README) |
 | `images/roboarc/Dockerfile` | the recipe (images/roboarc/README.md: what it installs and how each input is pinned) |
 | `images/roboarc/runtime.lock`, `vbd-requirements.txt` | the Python packages, by version and wheel sha256 |
-| `images/roboarc/prepare_nyx_studio.py` | build step: Nyx's studio HDRI and wood maps (sha256-checked downloads) |
+| `images/roboarc/prepare_nyx_studio.py` | build step: Nyx's studio HDRI, wood maps and the appearance seeds' texture maps (sha256-checked downloads, CREDITS.txt) |
 | `images/roboarc/warp_precompile.py` | build step: the VBD cloth's precompiled Warp kernels ([docs/simulator/VBD_CLOTH.md](../docs/simulator/VBD_CLOTH.md)) |
 | `images/roboarc/mujoco-3.14.0-epa/bytepatch_libmujoco.py` | build step: the EPA fix of `libmujoco.so` ([docs/simulator/MUJOCO_EPA_PATCH.md](../docs/simulator/MUJOCO_EPA_PATCH.md)) |
 | `images/roboarc/stage_instance.py` | `/opt/robotangle/stage_instance.py`: stages a task's frozen instance and checks it against its binding |
