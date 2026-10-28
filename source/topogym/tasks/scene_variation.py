@@ -27,86 +27,119 @@ AXES = {
         # Goal region pinned to -y; bounds keep the reach proxy within +2 cm (historical scene-variation geometry audit).
         dict(path="center_xy_m", kind="offset", range=[[-.03, .04], [-.01, .03]]),
         dict(path="yaw_deg", kind="offset", range=[-10., 10.]),
-        # Silver would match the horseshoes; keep the ring distinguishable.
-        dict(path="target_ring_finish", kind="choice", values=["copper", "coated_metal", "brass"], visual=True),
+        # The ring, the horseshoes and the chains (no text names their colours): seed 1 a red painted ring on black
+        # oxide horseshoes, seed 2 a dark coated ring on bronze ones; every ring stands apart from the horseshoes at
+        # its seed (brass, 18 CIEDE2000 from the copper ring, left the ring values on 2026-10-27).
+        dict(path="target_ring_finish", kind="choice", values=["copper", "red_painted", "coated_metal"], visual=True),
+        dict(path="shoe_finish", kind="choice", values=["steel", "black_oxide", "bronze"], visual=True),
     ),
     "cast_coil": (
         # Both pieces move together; the silver offset stays in world XY. +y moves the
         # silver piece (already at y ~ 0.23) away from both arms, so y only decreases.
         dict(path="center_xy_m", kind="offset", range=[[-.03, .03], [-.03, 0.]]),
         dict(path="yaw_deg", kind="offset", range=[-10., 10.]),
-        # Brightness of each metal; hue stays because the instruction names gold and silver.
-        dict(path="piece_tint.gold", kind="offset", range=[-.1, .1], visual=True),
-        dict(path="piece_tint.silver", kind="offset", range=[-.1, .1], visual=True),
+        # Both pieces' colour and material (scene_visuals.CAST_PIECE_FINISHES): red and blue anodised aluminium, then
+        # black and orange powder coat.
+        dict(path="piece_finish", kind="choice", values=["cast", "anodised", "powder_coat"], visual=True),
     ),
     "cast_keyhole": (
         # Inside the reference policy's IK tolerance (+-20 mm); goal region pinned to +y.
         dict(path="center_xy_m", kind="offset", range=[[-.02, .02], [-.02, .02]]),
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
-        # Brightness of each metal; hue stays because the instruction names gold and silver.
-        dict(path="piece_tint.gold", kind="offset", range=[-.1, .1], visual=True),
-        dict(path="piece_tint.silver", kind="offset", range=[-.1, .1], visual=True),
+        # Both pieces' colour and material (scene_visuals.CAST_PIECE_FINISHES): red and blue anodised aluminium, then
+        # black and orange powder coat.
+        dict(path="piece_finish", kind="choice", values=["cast", "anodised", "powder_coat"], visual=True),
     ),
     "hedgehog_in_cage": (
         # Panda base at x = -0.57: +x/+y moves away from it (reach proxy), so both lean negative.
         dict(path="center_xy_m", kind="offset", range=[[-.03, .01], [-.02, .01]]),
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
-        dict(path="wood_tint", kind="offset", range=[-.15, 0.], visual=True),
+        # Every part's colour and material (hedgehog_in_cage.common.FINISHES; the user, 2026-10-27). No text names a
+        # part's colour; the owl is "wooden" (README), so it stays wood and changes its wood (owl.OWL_FINISHES).
+        # Each axis exists only where its design defines it: the mount everywhere; cage and ball in the CLASSIC designs
+        # (easy and the ones built on it); the Cast Cage's cage, star and push rod; the owl's cage, owl and rod.
+        dict(path="mount_finish", kind="choice", values=["coated_metal", "black_anodised", "blue_powder_coat"],
+             visual=True),
+        dict(path="cage_finish", kind="choice", values=["dark_wood", "crimson_enamel", "gunmetal"], visual=True),
+        dict(path="ball_finish", kind="choice", values=["light_wood", "cobalt_anodised", "red_lacquer"], visual=True),
+        dict(path="cast_cage_finish", kind="choice", values=["black_cast", "cobalt_anodised", "gold_plated"],
+             visual=True),
+        dict(path="star_finish", kind="choice", values=["copper_cast", "gold_plated", "black_nickel"], visual=True),
+        dict(path="push_rod_finish", kind="choice", values=["steel", "black_oxide", "cobalt_anodised"], visual=True),
+        dict(path="birdcage_finish", kind="choice", values=["light_wood", "cobalt_paint", "black_iron"], visual=True),
+        dict(path="owl_finish", kind="choice", values=["wood", "wenge", "beech"], visual=True),
+        dict(path="rod_finish", kind="choice", values=["red", "yellow", "cobalt"], visual=True),
     ),
     "buzz_wire_3d": (
         # -y pushes the finish-side IK past tolerance and the far corner is 0.88 m from
         # the Panda base, so the fixture only moves -x/+y. No yaw: route frames are unrotated.
         dict(path="center_xy_m", kind="offset", range=[[-.015, 0.], [0., .015]]),
-        dict(path="wood_tint", kind="offset", range=[-.2, 0.], visual=True),
-        # Copper or brass; the steel loop stays distinct from either.
-        dict(path="rail_rgb", kind="choice", values=[[.72, .33, .16], [.78, .60, .25]], visual=True),
+        # Every part's colour and material (buzz_wire_3d.common.FINISHES; the user, 2026-10-27): the parts the texts name
+        # by material keep it (metal wire and loop, wooden handle, rubber sleeves); the deck is named by none.
+        dict(path="deck_finish", kind="choice", values=["pale_wood", "blue_paint", "walnut_stain"], visual=True),
+        dict(path="wire_finish", kind="choice", values=["copper", "brass", "stainless_steel"], visual=True),
+        dict(path="loop_finish", kind="choice", values=["stainless", "gunmetal", "polished_copper"], visual=True),
+        dict(path="handle_finish", kind="choice", values=["pale_wood", "walnut", "ebony"], visual=True),
+        dict(path="sleeve_finish", kind="choice", values=["black_rubber", "red_rubber", "blue_rubber"], visual=True),
     ),
     "fiber_bundling": (
         # The scene sits near x ~ 0.2, ~0.8 m from the Panda base: no +x.
         # Strand fan/bend/curl are already drawn from the episode seed by FiberLayout.
         dict(path="center_xy_m", kind="offset", range=[[-.02, 0.], [-.02, .02]]),
-        # The copper ring and the red strand stay (the instructions name them); the jacket is black, dark grey, navy
-        # or dark green, and the other strands' colours trade places.
-        dict(path="sheath_color", kind="choice", visual=True, values=[
-            [.026, .029, .032], [.24, .25, .27], [.05, .09, .22], [.07, .17, .10]]),
-        dict(path="strand_palette_shift", kind="choice", values=[0, 2, 4], visual=True),
+        # The red strand keeps its hue (the redesigned tiers' instructions name it); everything else changes colour and
+        # finish (fiber_bundling.CABLE_FINISHES, FIXTURE_FINISHES; 2026-10-27: the jacket and the strand palette
+        # alone moved seed 1's frame 7 Delta E from seed 0's, and the ring is no longer named copper).
+        dict(path="cable_finish", kind="choice", values=["released", "blue_pvc", "orange_pur"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "orange_enclosure", "black_enclosure"],
+             visual=True),
     ),
     "lock_picking": (
         # The chain lock (2026-10-10, it replaced the original tiers): each tier's geometry, stops and key tray are one
-        # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move; its
-        # rotor count differs by tier (3 or 4), so the rotor colours keep their order. Only the base's finish varies.
-        dict(path="base_finish", kind="choice", values=["coated_metal", "engineering_plastic", "silver"], visual=True),
+        # fixed design (tasks/lock_picking/chain.py, fixed_parameters), so the lock does not move. No text names a colour:
+        # seed 1 a teak base, blue painted frames and tray, acrylic plates (red, green, white, blue; an orange END
+        # plate) and a brass key; seed 2 a green powder-coated base, plywood frames and tray, anodised plates (sky blue,
+        # pink, lime, teal; a natural aluminium END plate) and a gunmetal key.
+        dict(path="base_finish", kind="choice", values=["coated_metal", "teak", "green_powder_coat"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["engineering_plastic", "blue_painted", "plywood"],
+             visual=True),
+        dict(path="plate_finish", kind="choice", values=["painted", "acrylic", "anodised"], visual=True),
+        dict(path="key_finish", kind="choice", values=["silver", "brass", "gunmetal"], visual=True),
     ),
     "orbits": (
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
         # Goal region pinned to -y: the +y side already holds the handle.
         dict(path="base_center_xy_m", kind="offset", range=[[-.03, .03], [-.02, .02]]),
-        # The handle stays wooden (the instruction names it).
-        dict(path="cord_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The handle stays wood (the instruction names it wooden): its wood changes with the fixture's
+        # (orbits.FIXTURE_FINISHES). The cord (drawn grey at seed 0: its colliding links) is orange polypropylene, then
+        # blue nylon (hemp sat 8 CIEDE2000 from the maple table top, 2026-10-27).
+        dict(path="cord_finish", kind="choice", values=["golden_rope", "orange_rope", "blue_nylon_rope"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "walnut", "black_lacquer"], visual=True),
     ),
     "rope_threading": (
         # The nominal scene fills 95-96% of cam_high/cam_low, and a turn swings the
         # 1.1 m rope's far end (5 deg -> ~5 cm), so this envelope is small.
         dict(path="geometry.translation_m", kind="offset", range=[[-.01, .02], [-.01, 0.], None]),
         dict(path="geometry.yaw_deg", kind="offset", range=[-2., 2.]),
-        # Ring colours stay: the instruction orders the rings cyan, green, purple. The rope is hemp, blue or black, apart
-        # from every ring and grommet (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
-        dict(path="rope_finish", kind="choice", values=["hemp", "blue_rope", "black_rope"], visual=True),
+        # Ring hues stay: the instruction orders the rings cyan, green, purple; their finish changes (glossy, then matte
+        # powder coat; redesign/task.py RING_FINISHES), and the bulkhead, pedestals, posts and stands change colour and
+        # finish (FIXTURE_FINISHES). The rope is hemp, blue nylon or black polyester, apart from every ring and grommet
+        # (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
+        dict(path="rope_finish", kind="choice", values=["hemp", "blue_nylon_rope", "black_polyester_rope"], visual=True),
+        dict(path="ring_finish", kind="choice", values=["released", "glossy", "matte_powder_coat"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "olive_steel", "steel_blue"], visual=True),
     ),
     "slotted_post_ring": (
         # FEM volumes cannot rotate, so translation only; -y beyond ~2.5 cm pushes the discs out of frame.
         dict(path="center_xy_m", kind="offset", range=[[-.05, .05], [-.02, .05]]),
-        dict(path="cord_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The chain settings' cord: blue nylon, then red nylon (golden sat 9 CIEDE2000 from the released yellow links,
+        # 2026-10-27); their post and base, beads, end discs and metal ring: slotted_post_ring_hard_chain.PUZZLE_FINISHES.
+        dict(path="cord_finish", kind="choice", values=["hemp", "blue_nylon_rope", "red_nylon_rope"], visual=True),
+        dict(path="puzzle_finish", kind="choice", values=["released", "cherry_violet", "navy_pink"], visual=True),
     ),
     "interlocked_claws": (
         # No pose axes: the start is a two-hand pregrasp tied to arm joint angles and weld points.
-        # The target stays brown (the instruction names it); the other piece takes any non-brown colour.
-        dict(path="target_shade", kind="offset", range=[-.15, .15], visual=True),
-        dict(path="other_rgb", kind="choice", visual=True, values=[
-            None, [.18, .32, .65], [.25, .55, .30], [.50, .52, .55]]),
-        # Only Cast Trinity defines third_rgb (its third piece, B; the other bases have two pieces): B takes green, then
-        # blue, where other_rgb gives H blue, then green, so that its three pieces differ at appearance seeds 1 and 2.
-        dict(path="third_rgb", kind="choice", visual=True, values=[None, [.25, .55, .30], [.18, .32, .65]]),
+        # Every piece's colour and material (InterlockedClawsTask.piece_finishes).
+        dict(path="piece_finish", kind="choice", values=["painted", "anodised", "powder_coat"], visual=True),
     ),
     "blanket_flatten": (
         # Drawn before freezing: each seeded instance gets its own prepared archive
@@ -114,7 +147,18 @@ AXES = {
         # area / 0.288 m^2, independent of position; -y would crowd the home grippers.
         dict(path="color", kind="choice", visual=True, values=[
             [.22, .46, .70], [.70, .20, .18], [.22, .52, .30], [.80, .62, .18], [.45, .47, .50]]),
-        dict(path="texture.pattern", kind="choice", values=["grid", "stripes"], visual=True),
+        # The fabric (the texture and its roughness; Nyx draws no sheen): the released cotton with a hairline grid, a
+        # matte wool in a buffalo check with charcoal, a smooth sateen striped mustard (the user, 2026-10-27). Seeds 1
+        # and 2 take red wool and green sateen. The same look gives the static boxes (the hard tiers' fence) yellow plastic
+        # or walnut (obstacle_finish; the released fence keeps Nyx's default white).
+        dict(path="texture", kind="choice", visual=True, values=[
+            dict(pattern="grid", accent_color=[.76, .84, .87], stripe_pitch_m=.06, thread_pitch_m=.002),
+            dict(pattern="check", accent_color=[.15, .15, .16], stripe_pitch_m=.05, thread_pitch_m=.003,
+                 thread_shading=.35, fibre_noise=.08, roughness=.92,
+                 obstacle_finish=dict(color=[.80, .55, .03], metallic=0., roughness=.45)),
+            dict(pattern="stripes", accent_color=[.80, .62, .18], stripe_pitch_m=.04, thread_pitch_m=.002,
+                 thread_shading=.25, roughness=.5,
+                 obstacle_finish=dict(color=[.26, .15, .09], metallic=0., roughness=.55))]),
         dict(path="center_xy_m", kind="offset", range=[[-.04, .04], [0., .03]]),
     ),
     "blanket_fold": (
@@ -122,7 +166,15 @@ AXES = {
         # start and target put it, so there is no centre axis.
         dict(path="color", kind="choice", visual=True, values=[
             [.22, .46, .70], [.70, .20, .18], [.22, .52, .30], [.80, .62, .18], [.45, .47, .50]]),
-        dict(path="texture.pattern", kind="choice", values=["grid", "stripes"], visual=True),
+        # The fabric, as blanket_flatten's.
+        dict(path="texture", kind="choice", visual=True, values=[
+            dict(pattern="grid", accent_color=[.76, .84, .87], stripe_pitch_m=.06, thread_pitch_m=.002),
+            dict(pattern="check", accent_color=[.15, .15, .16], stripe_pitch_m=.05, thread_pitch_m=.003,
+                 thread_shading=.35, fibre_noise=.08, roughness=.92,
+                 obstacle_finish=dict(color=[.80, .55, .03], metallic=0., roughness=.45)),
+            dict(pattern="stripes", accent_color=[.80, .62, .18], stripe_pitch_m=.04, thread_pitch_m=.002,
+                 thread_shading=.25, roughness=.5,
+                 obstacle_finish=dict(color=[.26, .15, .09], metallic=0., roughness=.55))]),
     ),
     "knot_untying": (
         # The knot sits at world x = 0, 13.6 cm right of the table centre: shift leans -x.
@@ -131,7 +183,13 @@ AXES = {
         dict(path="origin_xy_m", kind="offset", range=[[-.06, .02], [-.01, .04]]),
         # Success counts projected crossings, invariant under a turn about z.
         dict(path="yaw_deg", kind="offset", range=[-30., 15.]),
-        dict(path="rope_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The rope is orange polypropylene, then blue nylon, then black polyester (hemp sat 12 CIEDE2000 from orange
+        # and 8 from the maple table top, 2026-10-27); the redesigned tiers' posts, curb and clamp change finish too
+        # (task_rd.FIXTURE_FINISHES).
+        dict(path="rope_finish", kind="choice", values=["orange_rope", "blue_nylon_rope", "black_polyester_rope"],
+             visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "walnut_black_oxide", "blue_red_powder_coat"],
+             visual=True),
     ),
     # The fixed-scene families below vary appearance only (appearance(); the user, 2026-10-20): every axis re-colours
     # visual geoms or meshes, never a colliding one; the values leave out the default and their order is the looks of
@@ -139,33 +197,48 @@ AXES = {
     # the knob's white line; Trinity's green goal region). Battery's pry stick follows props_finish since 2026-10-21 (its
     # texts no longer name its colours).
     "bed_bolt": (
-        dict(path="wood_finish", kind="choice", values=["walnut", "white_painted", "white_oak"], visual=True),
-        dict(path="bolt_finish", kind="choice", values=["zinc", "yellow_zinc"], visual=True),
-        dict(path="key_finish", kind="choice", values=["black_oxide", "blue_coated"], visual=True),
+        # Colour and material together (geo.WOOD_FINISHES, BOLT_FINISHES, KEY_FINISHES; the user, 2026-10-27): seed 1 a
+        # black-painted frame with brass screws, an antique-brass bolt and a red key; seed 2 a mahogany frame with black
+        # screws, a blue anodised bolt and a black-oxide key (the ratcheting key: a black handle, a gold head). The sign's
+        # card stays white.
+        dict(path="wood_finish", kind="choice", values=["charcoal_painted", "mahogany"], visual=True),
+        dict(path="bolt_finish", kind="choice", values=["antique_brass", "blue_anodised"], visual=True),
+        dict(path="key_finish", kind="choice", values=["red_coated", "black_oxide"], visual=True),
     ),
     "caliper_sorting": (
         # The four sleeves stay alike (one finish for all); bins keep the white label cards.
-        dict(path="fixture_finish", kind="choice", values=["forest_green", "safety_orange", "wood"], visual=True),
+        # Colour and material together (geo.FIXTURE_FINISHES, BIN_FINISHES, SLEEVE_FINISHES; the user, 2026-10-27): seed
+        # 1 a green vise and rack with black V-blocks and a black-coated caliper, dark red bins, brass sleeves; seed 2 a
+        # red vise and rack with blue V-blocks and a gold-coated caliper, dark green bins, black-oxide sleeves. The
+        # caliper's scale, vernier and knob line keep their colours.
+        dict(path="fixture_finish", kind="choice", values=["forest_green", "vise_red"], visual=True),
         dict(path="bin_finish", kind="choice", values=["dark_red", "dark_green"], visual=True),
         dict(path="sleeve_finish", kind="choice", values=["brass", "black_oxide"], visual=True),
     ),
     "clock_assembling": (
-        dict(path="movement_finish", kind="choice", values=["rhodium", "gilt"], visual=True),
-        dict(path="stand_finish", kind="choice", values=["walnut", "white_plastic"], visual=True),
+        # Colour and material together (geo.MOVEMENT_FINISHES, STAND_FINISHES, SCREW_FINISHES; the user, 2026-10-27): seed
+        # 1 a ruthenium plate under rhodium bridges, walnut stands, gilt screws; seed 2 a rhodium plate under ruthenium
+        # bridges and wheels, blue plastic stands, steel screws.
+        dict(path="movement_finish", kind="choice", values=["ruthenium", "rhodium"], visual=True),
+        dict(path="stand_finish", kind="choice", values=["walnut", "blue_plastic"], visual=True),
         dict(path="screw_finish", kind="choice", values=["gilt", "steel"], visual=True),
     ),
     "wire_splicing": (
-        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; one
-        # wire's bare core turns tinned at a time, so the two cores also tell apart up close.
-        dict(path="terminal_finish", kind="choice", values=["white", "black", "grey"], visual=True),
-        dict(path="post_finish", kind="choice", values=["steel", "green", "black"], visual=True),
-        dict(path="core_finish", kind="choice", values=["copper", "b_tinned", "a_tinned"], visual=True),
+        # The texts name the wires red (A) and blue (B) and the post's yellow rod: the insulation and the rod stay; the
+        # bare cores turn tinned and aged, one of each per seed, so the two cores also tell apart up close
+        # (geo.TERMINAL_FINISHES, POST_FINISHES, CORE_FINISHES; the user, 2026-10-27).
+        dict(path="terminal_finish", kind="choice", values=["white", "green", "black"], visual=True),
+        dict(path="post_finish", kind="choice", values=["steel", "black", "green"], visual=True),
+        dict(path="core_finish", kind="choice", values=["copper", "tinned_aged", "aged_tinned"], visual=True),
     ),
     "battery_replacement": (
-        dict(path="controller_finish", kind="choice", values=["white", "red", "blue"], visual=True),
-        dict(path="tray_finish", kind="choice", values=["grey", "white"], visual=True),
-        dict(path="box_finish", kind="choice", values=["blue", "green"], visual=True),
-        dict(path="props_finish", kind="choice", values=["wood", "black"], visual=True),
+        # Colour and material together (geo.CONTROLLER_FINISHES ... STICK_FINISHES; the user, 2026-10-27): seed 1 a Shock
+        # Blue controller, a lime tray, a yellow box, green mats and a blue nylon stick; seed 2 an Electric Volt
+        # controller, a pink tray, a green box, blue mats and a yellow nylon stick.
+        dict(path="controller_finish", kind="choice", values=["shock_blue", "electric_volt"], visual=True),
+        dict(path="tray_finish", kind="choice", values=["lime", "pink"], visual=True),
+        dict(path="box_finish", kind="choice", values=["yellow", "green"], visual=True),
+        dict(path="props_finish", kind="choice", values=["green_mat", "blue_mat"], visual=True),
     ),
 }
 
@@ -243,7 +316,58 @@ def appearance(task_class, seed):
         else:
             value = _parameter_at(drawn, axis["path"])
         _assign(values, axis["path"], _plain(value))
+    values["scene_look"] = scene_look(task_class, seed)
     return values
+
+
+def scene_look(task_class, seed):
+    """The scene's look of appearance seed ``seed`` >= 1 (topogym.world.look; the user, 2026-10-27: white light that
+    changes colour temperature, a table top whose material class changes, as wood to metal or plastic, and a textured
+    floor). Each base draws, once for all its seeds, which seed is warm and which brighter, the orders of key lights and
+    of the table's and the floor's material classes, and one finish per class; seed S takes the S-th of each, so seeds
+    1 and 2 differ in every part and their table tops and floors are of different classes (the table top never seed 0's
+    plastic). The bands leave a gap round the released look (about 6000 K,
+    brightness 1, key light 0, height 2.40 m) so that no seed looks like seed 0, and stop short of dark, glaring or
+    strongly tinted scenes (renders of cast-keyhole-02, 2026-10-27: below 3600 K the green goal dashes turn yellow,
+    6500-7000 K is not told from seed 0, brightness moves the frame little under the Reinhard tone mapper): warm
+    3600-4300 K or cool 8000-10000 K, brightness 0.65-0.78 or 1.25-1.50, height 1.9-2.4 m."""
+    from topogym.world.look import (DARK_TOP_LUM, DIM_FLOOR, FLOOR_FINISHES, FRAME_FINISHES, SCENE_LOOK_VERSION,
+                                    TABLE_EXCLUDED, TABLE_FINISHES)
+    if seed < 1:
+        raise ValueError("seed 0 has no scene_look: it is the released look")
+    name = f"visual/scene_look/{task_class.task_id}/{task_class.variation_id}"
+    shared, own = VariantRng(0).stream(name), VariantRng(seed).stream(name)
+    warm_seed, bright_seed = (int(v) for v in shared.integers(2, size=2))
+    keys = shared.permutation(3) + 1
+
+    def finish_per_class(finishes, excluded=()):
+        """(the classes in this base's order, one finish of each), seed 0's finish and the excluded left out."""
+        classes = {}
+        for f, spec in list(finishes.items())[1:]:
+            if f not in excluded:
+                classes.setdefault(spec["cls"], []).append(f)
+        picks = {c: str(shared.choice(sorted(classes[c]))) for c in sorted(classes)}
+        return [str(c) for c in shared.permutation(sorted(classes))], picks
+
+    table_classes, table_of = finish_per_class(TABLE_FINISHES, TABLE_EXCLUDED.get(task_class.task_id, ()))
+    floor_classes, floor_of = finish_per_class(FLOOR_FINISHES)
+    frames = [str(f) for f in shared.permutation(sorted(list(FRAME_FINISHES)[1:]))]
+    table_at = lambda s: table_of[table_classes[(s - 1) % len(table_classes)]]
+    lum = {s: TABLE_FINISHES[table_at(s)]["lum"] for s in (1, 2)}
+    warm, bright = seed % 2 == warm_seed, seed % 2 == bright_seed
+    dim = DIM_FLOOR.get(task_class.task_id, .65)
+    if seed in lum and lum[1] != lum[2]:
+        bright = lum[seed] < lum[3 - seed]          # of seeds 1 and 2, the darker table top takes the brighter light
+    if TABLE_FINISHES[table_at(seed)]["lum"] < DARK_TOP_LUM:
+        # both seeds drew dark tops: the dim one dims little (interlocked-claws-02's seed 1 on granite tiles under 0.73
+        # fell to mean luma 0.287, 2026-10-28)
+        dim = max(dim, .85)
+    lighting = dict(key=int(keys[(seed - 1) % 3]),
+                    height_m=round(float(own.uniform(1.9, 2.4)), 3),
+                    cct_k=round(float(own.uniform(3600., 4300.) if warm else own.uniform(8000., 10000.))),
+                    brightness=round(float(own.uniform(1.25, 1.50) if bright else own.uniform(dim, max(.78, dim + .08))), 3))
+    return dict(version=SCENE_LOOK_VERSION, lighting=lighting, table=table_at(seed),
+                floor=floor_of[floor_classes[(seed - 1) % len(floor_classes)]], frame=frames[(seed - 1) % len(frames)])
 
 
 def within_envelope(task_class, config, *, atol=1e-9):
@@ -266,7 +390,7 @@ def within_envelope(task_class, config, *, atol=1e-9):
         out = {}
         for key, value in tree.items():
             path = f"{prefix}{key}"
-            if path in listed:
+            if path in listed or path == "scene_look":      # the scene's look (scene_look) is not a scene variation
                 continue
             if isinstance(value, Mapping):
                 out.update(rest(value, path + "."))

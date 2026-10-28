@@ -123,7 +123,7 @@ def part_vertices(layout):
 
 def scene_xml(layout, links=LINKS, colours=COLOURS):
     """(MJCF text of the task's reset, chain points). colours: the visual twins' COLOURS (a fixed box may have its own
-    entry by name, e.g. "base"; the others take "fixture")."""
+    entry by name, e.g. "base"; the others take "fixture"); an entry may be a finish dict (look())."""
     lay = layout
     root = ET.Element("mujoco", model="slotted_post_ring_chain")
     ET.SubElement(root, "compiler", angle="radian", autolimits="true")
@@ -134,10 +134,24 @@ def scene_xml(layout, links=LINKS, colours=COLOURS):
     asset = ET.SubElement(root, "asset")
     world = ET.SubElement(root, "worldbody")
 
+    materials = {}
+
     def look(parent, name, rgba, **geom):
-        """A visual twin of a geom: the renderer draws collision geoms in one grey, visual-only ones in their colour."""
+        """A visual twin of a geom: the renderer draws collision geoms in one grey, visual-only ones in their colour.
+        rgba: a colour, or (an appearance seed's look) a finish dict(rgba=, roughness=, metallic=), drawn through an MJCF
+        material; the released colours are plain strings, so their MJCF has no material."""
+        if isinstance(rgba, dict):
+            key = tuple(sorted(rgba.items()))
+            if key not in materials:
+                # first in <asset>: without them (the physics' view) the file's whitespace is the released one's
+                asset.insert(len(materials), ET.Element("material", name=f"finish_{len(materials)}",
+                                                        **{k: str(v) for k, v in key}))
+                materials[key] = f"finish_{len(materials)}"
+            finish = dict(material=materials[key])
+        else:
+            finish = dict(rgba=rgba)
         ET.SubElement(parent, "geom", name=name+"_look", contype="0", conaffinity="0", mass="0", group="1",
-                      rgba=rgba, **geom)
+                      **finish, **geom)
 
     wood = dict(rgba=".75 .6 .4 1")
     for name, center, half in fixture_boxes(lay):

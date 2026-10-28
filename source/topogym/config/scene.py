@@ -69,4 +69,7 @@ def load_scene_config(config):
     if not config.enable_rgb:
         scene.env.cameras = {}
     OmegaConf.resolve(scene)
+    if config.task_parameters.get("scene_look") is not None:
+        from topogym.world.look import apply_scene_look
+        apply_scene_look(scene, config.task_parameters["scene_look"])
     return scene

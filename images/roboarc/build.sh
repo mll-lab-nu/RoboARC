@@ -17,7 +17,7 @@
 # --noinst builds the image without instances (release_rebuild's `-noinst` image, used to make new instances).
 # Needs Docker with BuildKit (the default `docker` driver), ~25 GB of free disk, network access to Docker Hub (the
 # Python base image), snapshot.debian.org, pypi.org / download.pytorch.org (the wheels) and dl.polyhaven.org (the Nyx
-# studio HDRI and wood maps, sha256-checked), and (for the default instance source) read access to the HF dataset
+# studio HDRI, wood maps and the appearance seeds' texture maps, sha256-checked), and (for the default instance source) read access to the HF dataset
 # (`hf auth login` or HF_TOKEN; never printed).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

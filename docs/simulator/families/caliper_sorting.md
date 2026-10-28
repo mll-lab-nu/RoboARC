@@ -74,7 +74,8 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
   stroke font of its own (no system font). Every link has ONE textured GLB visual whose material, texture and image carry
   names of their own (Nyx draws unnamed materials of different GLB files of one scene with the first file's image).
 - The task builds scene seed 0's scenario for every seed (the owner, 2026-10-20: a seed varies appearance only;
-  `fixture_finish`, `bin_finish` and `sleeve_finish` re-colour GLBs only; the caliper and the label cards keep theirs).
+  `fixture_finish`, `bin_finish` and `sleeve_finish` re-colour GLBs only; the label cards keep theirs, and until the
+  appearance seeds v2 the caliper did too).
   On the look above (2026-10-21): `fixture_finish` the vise's body, the rack's base plate, dividers and curbs, and the
   V-blocks (slate_blue: the look above; forest_green: green vise and rack, black-oxide V-blocks; safety_orange: orange
   vise and rack, bright steel V-blocks; wood: a grey cast-iron vise, a wooden rack, the steel V-blocks; the vise's base
@@ -82,8 +83,14 @@ is not a coin toss: the natural rule "the shared class is the smaller label" is 
   light_grey; dark_red, dark_green: dark plastics of hues far from grey_blue and from the same seed's vise and rack, the
   user, 2026-10-21: any colours as long as the seeds tell apart, the bins show clearly on the white table and their
   labels read; were pale_blue and pale_yellow, whose edges hardly showed on the table), `sleeve_finish` all four sleeves
-  (steel; brass, black_oxide; all with the steel's metallic finish). Appearance seeds 1 and 2: forest_green / dark_red /
-  brass and safety_orange / dark_green / black_oxide.
+  (steel; brass, black_oxide; all with the steel's metallic finish). Appearance seeds 1 and 2 were then forest_green /
+  dark_red / brass and safety_orange / dark_green / black_oxide. Since the appearance seeds v2 (2026-10-27; CHANGELOG,
+  "Unreleased") every finish is a colour and a GLB material (metallic, roughness): seed 1 forest_green (a green
+  hammer-painted vise and rack, black-oxide V-blocks and vise steel, a black-coated caliper), dark_red bins, brass
+  sleeves; seed 2 vise_red (a red powder-coated vise and rack, blue anodised V-blocks, brass vise screw and jaw plates, a
+  gold (TiN) coated caliper), dark_green bins, black-oxide sleeves (`FIXTURE_FINISHES`, `BIN_FINISHES`,
+  `SLEEVE_FINISHES`). The caliper's printed scale, vernier and the knob's white line and the bins' label cards keep
+  their colours.
 - Per scene seed: seed 0 is the reference's scene (k 1.08 mm per unit, b 31.4; ID 38.8 / 39.1, OD 96.2 / 96.5 = 7.99 /
   8.32 and 69.98 / 70.31 mm; classes A and B, both OD 96.2, in rack slots 0-3 as A B B A; labels C A D B; no shift). Other
   seeds draw k, b, the class readings (sizes 66-74 mm outside, 7.5-9.4 mm inside), which diameter the two classes share

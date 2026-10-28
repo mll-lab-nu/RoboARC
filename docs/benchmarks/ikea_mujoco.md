@@ -26,7 +26,8 @@ Hand; ALOHA 2 with ViperX 300 s arms). The standard cameras' studio lighting use
 | `uppsta` | two Franka Panda | UPPSTÅ toy hammering block: four dowels and two end blocks, two screws driven with a hex key, eight pegs pushed in | threads (convex pieces), seat welds with the welded-part contact switch-off |
 | `kyrre` | two Franka Panda | KYRRE stool: three legs placed on the upside-down seat, six screws driven with a hex key | threads (SDF), latched retention welds with the welded-part contact switch-off; MuJoCo's native cylinders |
 
-`task.toml`: `simulator = "mujoco"`, `family = "ikea_<scene>"`, one frozen instance (`i00`, seed 0), and
+`task.toml`: `simulator = "mujoco"`, `family = "ikea_<scene>"`, one frozen instance (`i00`) for seeds 0, 1 and 2
+("Seeds" below), and
 `robot = "franka-panda-bimanual"` (two Franka Panda arms with the Franka Hand; stegesund and uppsta name their arms
 `left/` / `right/`, the others `left_` / `right_`) or `"aloha-2"` (svallet).
 
@@ -42,6 +43,28 @@ Hand; ALOHA 2 with ViperX 300 s arms). The standard cameras' studio lighting use
   depth), proprioception, `joint_position` chunks and stateless kinematics, every pose in the robot's frame (origin at
   the left arm's base link). There is no reset and no privileged state: no part poses, table height or world
   coordinates. The sidecar needs one NVIDIA GPU with Vulkan and EGL (Nyx renders the RGB, MuJoCo's raster the depth).
+
+## Seeds
+
+Every IKEA task allows seeds 0, 1 and 2 (`[metadata.seeds]`: `default = 0`, `allowed = [0, 1, 2]`, `oracle = [0]`,
+`build = "runtime"`; seed 0 only before the appearance seeds v2, CHANGELOG "Unreleased"). The runner picks a trial's
+seed ([RUNNING.md](../RUNNING.md) "Seeds") and writes it into the task's files `seed`. The scene is the one frozen
+instance at every seed; a seed changes the standard mode's Nyx lighting only:
+- seed 0 is the released lighting;
+- seeds 1 and 2 (`scripts/ikea_mujoco/mk_standard_tasks.py` `seed_look`, the puzzles' rule with IKEA's own bands): one
+  of lights 1-3 is the key light (three times as bright as the others, the only one casting shadows; seed 0's is light
+  0); the four lights keep their x, y and hang 0.98-1.48 m above the work surface (1.9-2.4 m above RoboARC's floor;
+  seed 0: 1.48 m); their light is white of 3600-4300 K or 9000-10500 K; a brightness factor scales them and the
+  environment map, which takes their colour as its tint: 1.35-1.60 on one seed, 0.85-0.92 on the other (vesken
+  1.00-1.05, svallet 1.05-1.10, uppsta 1.10-1.15, whose released frames are already near the exposure floor). One seed
+  is warm and one cool, one bright and one dim, with different key lights; each base draws this once from its name;
+- `environment/sim/rig.json` holds every seed's lights (`seeds`); the sim service reads `environment/sim/seed` and the
+  render process (`ikea_nyx.py`) draws with that seed's lights. Each standard README's Change Log states the task's own
+  dim band.
+
+The privileged mode shows the agent no images and its replay video keeps the scene's own lights, so there every seed is
+the same task. The references are checked at seed 0 (`oracle = [0]`); the scene, physics, instruction and graders are
+the same at every seed.
 
 ## Grading
 

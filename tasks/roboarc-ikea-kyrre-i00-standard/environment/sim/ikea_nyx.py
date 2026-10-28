@@ -19,7 +19,9 @@ pose, nyx_direct.quat_mul / quat_rotate). Cameras: the rig's poses and vertical 
 calibration the service reports is unchanged), 848 x 480; RoboARC's renderer settings (configs/presentation_configs/
 nyx_lab.yaml, nyx_direct.NyxScene.export): FastPathTracer, 32 spp, denoiser, Reinhard tone mapping, SMAA, the studio_small_09
 HDRI at intensity 1.0, RoboARC's four point lights (positions in rig.json, mk_standard_tasks.py: RoboARC's offsets from
-its table centre, 1.48 m above the work surface). Depth stays MuJoCo's raster (ikea_rig.Rig.depth), as RoboARC's.
+its table centre, 1.48 m above the work surface). Appearance seeds 1 and 2 light the scene differently (nyx_settings: the
+lights, the HDRI's intensity and its tint of rig.json "seeds"); seed 0 is the look above. Depth stays MuJoCo's raster
+(ikea_rig.Rig.depth), as RoboARC's.
 
 Protocol (render process stdout is the reply pipe; Nyx's own console output goes to stderr):
   request:  one JSON line {"op": "render", "cams": [indices], "nbody": n} + xpos (n, 3) + xquat (n, 4) + camera poses
@@ -76,6 +78,17 @@ def _plane_texture(model, g, folder) -> dict | None:
 
 
 
+def nyx_settings(rig_spec: dict, seed: int) -> dict:
+    """The renderer settings of appearance seed `seed`: rig.json "nyx" (seed 0: the released look), with seed S's lights,
+    environment-map intensity and tint (rig.json "seeds", mk_standard_tasks.py seed_nyx) in their place."""
+    if seed == 0:
+        return rig_spec["nyx"]
+    seeds = rig_spec.get("seeds", {})
+    if str(seed) not in seeds:
+        raise ValueError(f"rig.json has no lighting for appearance seed {seed} (it has seeds 0, {', '.join(sorted(seeds))})")
+    return {**rig_spec["nyx"], **seeds[str(seed)]["nyx"]}
+
+
 class RenderError(RuntimeError):
     """The Nyx render process failed (it died, refused or sent a short frame): the service's infrastructure, never the
     agent's doing (server.py ends the episode with reason "error", an infrastructure failure)."""
@@ -89,7 +102,7 @@ class UnsupportedGPU(RenderError):
 class NyxRig:
     """The render process of one scene and rig (physics-process side)."""
 
-    def __init__(self, model, rig, rig_spec: dict, folder: str, log_path: str | None = None):
+    def __init__(self, model, rig, rig_spec: dict, folder: str, log_path: str | None = None, seed: int = 0):
         import mujoco
         self.rig, self.names = rig, list(rig.names)
         self.folder = os.path.abspath(folder)
@@ -97,12 +110,14 @@ class NyxRig:
         mujoco.mj_saveModel(model, os.path.join(self.folder, "scene.mjb"), None)
         geoms = visible_geoms(model)
         planes = {g: _plane_texture(model, g, self.folder) for g in geoms if int(model.geom_type[g]) == int(mujoco.mjtGeom.mjGEOM_PLANE)}
-        nyx = rig_spec["nyx"]
+        nyx = nyx_settings(rig_spec, seed)
         cams = [{"name": c, "res": [rig.W, rig.H], "fov": rig.fovy(c), "near": nyx["near"],
                  "far": nyx["far_link"] if rig.mounts[c]["type"] == "link" else nyx["far"]} for c in self.names]
         scene = {"geoms": geoms, "planes": {str(g): v for g, v in planes.items()}, "cameras": cams, "lights": nyx["lights"],
                  "spp": nyx["spp"], "denoise": nyx["denoise"], "env_intensity": nyx["env_intensity"],
                  "env_map": os.environ.get("RCB_NYX_ENV_MAP", "/opt/nyx-assets/studio_small_09_2k.hdr")}
+        if "env_tint" in nyx:            # a seed's look: the lights' colour temperature
+            scene["env_tint"] = nyx["env_tint"]
         with open(os.path.join(self.folder, "scene.json"), "w") as f:
             json.dump(scene, f)
         self.nbody = int(model.nbody)
@@ -407,6 +422,8 @@ class IkeaScene:
         env.texture = str(self.spec["env_map"])
         env.layout = nps.EEnvMapLayout.LongLat
         env.multiplier = float(self.spec["env_intensity"])
+        if "env_tint" in self.spec:
+            env.tint = nps.float3(*(float(v) for v in self.spec["env_tint"]))
         asset.set_env_map(0, env)
         path = folder / N.SCENE_FILE
         nps.export_scene_file(str(path), asset)

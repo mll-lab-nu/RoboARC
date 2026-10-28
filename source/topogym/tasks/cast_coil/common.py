@@ -35,8 +35,10 @@ class CastCoilTask(RigidTaskDefinition):
                     initial_xy_offset_m=[-.12, .18], stable_duration_s=.5,
                     terminal=dict(release_clearance_m=.005, maximum_drift_m=.001,
                                   table_clearance_m=.003),
-                    piece_tint=dict(gold=1., silver=1.))
-    hash_when_changed = ("piece_tint",)
+                    piece_tint=dict(gold=1., silver=1.), piece_finish="cast")
+    # Appearance only: piece_tint scales each metal's colour, piece_finish (scene_visuals.CAST_PIECE_FINISHES) re-colours
+    # and re-finishes both pieces; at their defaults they stay out of instance_id.
+    hash_when_changed = ("piece_tint", "piece_finish")
 
     template_resource = None
 
@@ -77,6 +79,11 @@ class CastCoilTask(RigidTaskDefinition):
                 for path in sorted((folder/body.name).glob("*.glb")):
                     scale_glb_color(path, cfg["piece_tint"][metal])
                 scale_urdf_color(folder/body.name/f"{body.name}.urdf", cfg["piece_tint"][metal])
+        if cfg["piece_finish"] != self.defaults["piece_finish"]:
+            from topogym.assets.scene_visuals import refinish_cast_piece
+            for body in assembly.bodies:
+                refinish_cast_piece(folder/body.name/f"{body.name}.urdf", "gold" if "gold" in body.name else "silver",
+                                    cfg["piece_finish"])
         rotation = Rotation.from_euler("z", float(cfg["yaw_deg"]), degrees=True)
         origin = np.r_[xy, self.table_height_m-min(rotation.apply(b.visual.vertices)[:, 2].min()
                                                   for b in assembly.bodies)+clearance]

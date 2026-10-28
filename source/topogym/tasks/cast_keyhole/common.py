@@ -56,12 +56,17 @@ def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
 
 class CastKeyholeTask(PlacementGoalMixin, RigidTaskDefinition):
     task_id = "cast_keyhole"
-    placement_description = 'the entire silver keyhole piece'
+    placement_description = 'the entire keyhole plate'
+    # The pieces by shape (their colours change with the appearance seed): the target has euler number 0, the other 2.
+    placement_scene_note = ("The keyhole plate has a closed, stepped hole through it; the fork plate's stepped slot is "
+                            "open at one end.")
     goal_side = (1, 1)  # +y, the nominal scene's side; pose variation cannot flip it
     defaults = dict(scale=3., center_xy_m=[-.1356786, .05], yaw_deg=0.,
                     initial_floor_clearance_m=.0005, stable_duration_s=.5,
-                    minimum_separation_m=.02, piece_tint=dict(gold=1., silver=1.))
-    hash_when_changed = ("piece_tint",)
+                    minimum_separation_m=.02, piece_tint=dict(gold=1., silver=1.), piece_finish="cast")
+    # Appearance only: piece_tint scales each metal's colour, piece_finish (scene_visuals.CAST_PIECE_FINISHES) re-colours
+    # and re-finishes both pieces; at their defaults they stay out of instance_id.
+    hash_when_changed = ("piece_tint", "piece_finish")
 
     geometry_resource = None
     assembly_roll_deg = 45.
@@ -96,6 +101,11 @@ class CastKeyholeTask(PlacementGoalMixin, RigidTaskDefinition):
                 for path in sorted((folder/body.name).glob("*.glb")):
                     scale_glb_color(path, cfg["piece_tint"][metal])
                 scale_urdf_color(folder/body.name/f"{body.name}.urdf", cfg["piece_tint"][metal])
+        if cfg["piece_finish"] != self.defaults["piece_finish"]:
+            from topogym.assets.scene_visuals import refinish_cast_piece
+            for body in assembly.bodies:
+                refinish_cast_piece(folder/body.name/f"{body.name}.urdf", "gold" if "gold" in body.name else "silver",
+                                    cfg["piece_finish"])
         xy = np.asarray(cfg["center_xy_m"], dtype=float)
         clearance = float(cfg["initial_floor_clearance_m"])
         if xy.shape != (2,) or not np.isfinite(xy).all() or not np.isfinite(clearance) or clearance < 0:

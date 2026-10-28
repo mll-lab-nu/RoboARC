@@ -68,7 +68,9 @@ geom), no geom under 0.5 mm, and beads, bead bores, discs, ring and links all co
 
 ## Rendering
 
-nyx_direct (`TASKS` renderer "direct"). The FEM settings are drawn as the FEM setting (hemp cord, wooden discs): the FEM
+nyx_direct (`TASKS` renderer "direct"). The FEM settings are drawn as the FEM setting (hemp cord, wooden discs, at
+appearance seed 0; seeds 1 and 2 re-finish the cord, post, beads, discs and ring, `cord_finish`,
+`slotted_post_ring_hard_chain.PUZZLE_FINISHES`): the FEM
 cord is skinned on the chain's links and the rigid parts ride the MuJoCo bodies that hold them
 (`nyx_direct.chain_cord_host`, as the render bridge's `_chain_cord_host`). Against the bridge's Genesis host
 (`test_nyx_direct.py`, birth and after a 40-row nop): input buffers bitwise but rounding at birth, RGB within the host's

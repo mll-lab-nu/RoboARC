@@ -284,7 +284,9 @@ def geometry_report(layout, parts, cord):
                 physics_qualified=False, solution_verified=False, robot_reachability_verified=False)
 
 
-def finish(mesh, name):
+def finish(mesh, name, look=None):
+    """The part's visual mesh: the released wood (dark for the base and posts, light otherwise), or ``look`` (an
+    appearance seed's: dict(texture=, factor=, roughness=, metallic=) a wood texture, or dict(color=, ...) a paint)."""
     from PIL import Image
     from trimesh.visual.material import PBRMaterial
     from trimesh.visual.texture import TextureVisuals
@@ -293,22 +295,47 @@ def finish(mesh, name):
         result.visual = TextureVisuals(uv=np.zeros((len(mesh.vertices), 2)), material=PBRMaterial(
             name="orbits_yellow_cord", baseColorFactor=[.98, .78, .015, 1], roughnessFactor=.65, metallicFactor=0))
         return result
+    if look is not None and "color" in look:
+        result = mesh.copy()
+        result.visual = TextureVisuals(uv=np.zeros((len(mesh.vertices), 2)), material=PBRMaterial(
+            name=f"orbits_{name}", baseColorFactor=look["color"], roughnessFactor=look["roughness"],
+            metallicFactor=look["metallic"]))
+        return result
     vertices = mesh.vertices[mesh.faces].reshape(-1, 3)
     normals = mesh.vertex_normals[mesh.faces].reshape(-1, 3)
     dominant = np.repeat(np.argmax(np.abs(mesh.face_normals), axis=1), 3)
     u, v = np.where(dominant == 0, 1, 0), np.where(dominant == 2, 1, 2)
     rows = np.arange(len(vertices))
     uv = np.column_stack([vertices[rows, u], vertices[rows, v]])/.14+.5
-    path = resource_path("hedgehog_in_cage/materials/" + (
-        "dark_wood.png" if name == "base" or name.startswith("post_") else "light_wood.png"))
+    look = look or dict(texture="dark_wood.png" if name == "base" or name.startswith("post_") else "light_wood.png",
+                        factor=[1., .85, .65, 1.], roughness=.40, metallic=0)
+    path = resource_path("hedgehog_in_cage/materials/" + look["texture"])
     with Image.open(path) as source: texture = source.convert("RGB")
     result = trimesh.Trimesh(vertices, np.arange(len(vertices)).reshape(-1, 3), vertex_normals=normals, process=False)
     result.visual = TextureVisuals(uv=uv, material=PBRMaterial(name=f"orbits_{name}",
-        baseColorFactor=[1., .85, .65, 1.], baseColorTexture=texture, roughnessFactor=.40, metallicFactor=0))
+        baseColorFactor=look["factor"], baseColorTexture=texture, roughnessFactor=look["roughness"],
+        metallicFactor=look["metallic"]))
     return result
 
 
-def generate_assets(output, layout=None, *, initial_cord=None):
+# The fixture's looks of appearance seeds 1 and 2 (the below-easy settings' task parameter fixture_finish), by part:
+# "frame" the base and the posts, "turned" the stopper ball and the rings. walnut: the frame walnut-stained (the light
+# wood's grain darkened), the turned parts the released dark wood; black_lacquer: the frame black lacquer, the turned
+# parts red paint. Each >= 20 CIEDE2000 (texture means) from the released wood, from the other look's and from the
+# green goal region, and >= 15 from every table top. "handle": the wooden handle's wood (cord.xml handle_wood; the
+# texts call it wooden): lacquered ebony, then oiled mahogany, after the released light wood (.86, .66, .42): pairwise
+# >= 25 CIEDE2000, and >= 24 from their seed's frame and cord (the user, 2026-10-28).
+FIXTURE_FINISHES = {
+    "walnut": dict(frame=dict(texture="light_wood.png", factor=[.35, .27, .2, 1.], roughness=.55, metallic=0.),
+                   turned=dict(texture="dark_wood.png", factor=[1., .85, .65, 1.], roughness=.45, metallic=0.),
+                   handle=dict(rgba=".04 .03 .025 1", roughness=.3, metallic=0.)),
+    "black_lacquer": dict(frame=dict(color=[.035, .035, .04, 1.], roughness=.25, metallic=0.),
+                          turned=dict(color=[.55, .06, .05, 1.], roughness=.4, metallic=0.),
+                          handle=dict(rgba=".3 .1 .05 1", roughness=.6, metallic=0.)),
+}
+
+
+def generate_assets(output, layout=None, *, initial_cord=None, fixture_finish=None):
     folder = Path(output); folder.mkdir(parents=True, exist_ok=True)
     layout = (layout or OrbitsLayout()).validate()
     parts, cord = make_meshes(layout, initial_cord=initial_cord)
@@ -318,7 +345,9 @@ def generate_assets(output, layout=None, *, initial_cord=None):
     scene = trimesh.Scene()
     for name, mesh in parts.items():
         mesh.export(folder/f"{name}.obj")
-        visual = finish(mesh, name); visual.export(folder/f"{name}.glb")
+        group = "frame" if name == "base" or name.startswith("post_") else "turned"
+        look = None if fixture_finish is None or name in ("cord", "handle") else FIXTURE_FINISHES[fixture_finish][group]
+        visual = finish(mesh, name, look); visual.export(folder/f"{name}.glb")
         scene.add_geometry(visual, node_name=name)
     scene.export(folder/"scene.glb")
     np.save(folder/"cord_centerline.npy", cord)

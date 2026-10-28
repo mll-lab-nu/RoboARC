@@ -11,7 +11,7 @@ long arm along the bolt: the key's short arm goes into the bolt's head and the l
 ratcheting key (square, Phillips or slotted tip) whose tip stays in the head while its handle swings back. Since 2.1.0
 a white card lies flat on the table between the key's stand and the bolt's cradle, with the bolt's head and its
 recess drawn 4.5 times their size, so the five drives tell apart at a glance in the cameras; it is drawn only (no
-collision, no mass) and the same at every appearance seed. The family
+collision, no mass) and white at every appearance seed (its drawing unchanged). The family
 was designed by Jianwen; its bases came to RoboARC as experimental bases in 1.2.0 and were released in 1.4.0.
 
 ## Robot and grasping

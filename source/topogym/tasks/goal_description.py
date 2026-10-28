@@ -15,10 +15,12 @@ TASK_IDS = frozenset({
 })
 
 PLACEMENT = {
-    "interlocked_claws": ("the entire brown claw piece", "the other claw piece"),
+    # No colour words for parts whose colour changes with the appearance seed (2026-10-27): a setting names its pieces by
+    # shape (placement_target_description / placement_remainder_description).
+    "interlocked_claws": ("the entire target claw piece", "the other claw piece"),
     "hedgehog_in_cage": ("the whole hedgehog ball, including every spike", "all cage components"),
     "horseshoe_ring": ("the entire removable ring", "the horseshoes and chains"),
-    "cast_keyhole": ("the entire silver keyhole piece", "the gold piece"),
+    "cast_keyhole": ("the entire keyhole plate", "the fork plate"),
     "slotted_post_ring": ("the entire removable metal ring", "the post, cord, beads and end discs"),
     "orbits": ("the entire cord and wooden handle together", "the rings, posts and fixed assembly"),
 }
@@ -206,7 +208,7 @@ def describe_goal(task):
         failures += ["A limited-travel rotor exceeding its allowed bounds ends the episode in failure.",
                      "The key falling more than 100 mm below the tabletop ends the episode in failure."]
     elif name == "fiber_bundling":
-        summary = "Pass every fine fiber and the front sheath through the fixed copper ring; keep the rear terminal anchored."
+        summary = "Pass every fine fiber and the front sheath through the fixed ring; keep the rear terminal anchored."
         rules += [
             "Pass every fiber tip first, then successive material points through to its root. The actual crossing history must be observed; "
             "placing fibers on the far side or passing only the tips is not completion.",
@@ -231,10 +233,10 @@ def describe_goal(task):
         failures.append("Invalid rope volume ends the episode in failure.")
     elif name == "cast_coil":
         assembling = cfg["objective"] == "assemble"
-        summary = ("Assemble the gold and silver Cast Coil pieces into their matching interlocking configuration, then release both." if assembling else
-                   "Separate the gold and silver Cast Coil pieces completely, then release both on the table.")
+        summary = ("Assemble the two Cast Coil pieces into their matching interlocking configuration, then release both." if assembling else
+                   "Separate the two Cast Coil pieces completely, then release both on the table.")
         if assembling and getattr(task, "geometry_resource", None) and task.family_id in ("coil_design_1", "coil_design_2"):
-            summary = "Assemble the gold and silver pieces into a cube with flush outer faces, then release both on the table."
+            summary = "Assemble the two pieces into a cube with flush outer faces, then release both on the table."
         rules += [
             ("Align the pieces' matching assembly frames with relative position error below 1 mm and relative angular error below 0.02 rad." if assembling else
              "Separate the pieces' complete bounding extents by more than 10 mm along at least one axis."),

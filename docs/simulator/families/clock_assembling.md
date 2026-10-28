@@ -22,7 +22,9 @@ the barrel arbor, a click; 3:46-4:26). The scene (`topogym/assets/geometry/clock
 - on a stand: the barrel (90 teeth; a drum and its arbor with the ratchet and the square), the center wheel (80 + a 12-leaf
   pinion), the third wheel (75 + 10) and the fourth wheel (70 + 10), axes vertical, each turned in its cup by scene
   seed 0's draw for every seed (a seed varies appearance only, the owner 2026-10-20: `movement_finish`, `stand_finish`,
-  `screw_finish` re-colour visual geoms only); the
+  `screw_finish` re-colour visual geoms only; since the appearance seeds v2 each is a colour and an MJCF material:
+  seed 1 ruthenium, walnut, gilt, seed 2 rhodium, blue_plastic, steel, `clock_gear_train.py` `MOVEMENT_FINISHES`,
+  `STAND_FINISHES`, `SCREW_FINISHES`); the
   train bridge (six 20 mm bars, 12 mm thick, 60 g; a click drawn by the barrel's boss) on four posts (the barrel boss's
   post 17 mm in radius, the others 8 mm); two screws in a tray; a 9 cm probe on its stand. The layout is the design's after its base placement search (the whole scene moved by (-0.03,
   -0.06) m).

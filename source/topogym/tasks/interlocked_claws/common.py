@@ -13,14 +13,22 @@ from topogym.tasks.base import EntitySpec, RigidTaskDefinition, TaskSpec
 class InterlockedClawsTask(PlacementGoalMixin, RigidTaskDefinition):
     terminal_revision = "claws_separation_v1_grasp_contact_2mm"
     task_id = "interlocked_claws"
-    placement_description = 'the entire brown claw piece'
+    placement_description = 'the entire target claw piece'
     goal_side = (1, 1)  # +y, the nominal scene's side; pose variation cannot flip it
     defaults = dict(center_xy_m=[-.1356786, .05], initial_floor_clearance_m=.001,
                     stable_duration_s=.5, minimum_separation_m=.01,
                     sdf_cell_size_m=.001, sdf_max_res=128,
-                    initial_finger_position_m=None, target_shade=1., other_rgb=None)
-    # Appearance only: brightness of the brown target piece; colour of the other piece (None keeps it).
-    hash_when_changed = ("target_shade", "other_rgb")
+                    initial_finger_position_m=None, target_shade=1., other_rgb=None, piece_finish="painted")
+    # Appearance only: brightness of the brown target piece; colour of the other piece (None keeps it); every piece's
+    # colour and material (piece_finishes; "painted" keeps the released look).
+    hash_when_changed = ("target_shade", "other_rgb", "piece_finish")
+    # piece_finish (the appearance seeds' axis; seed 1 anodised, seed 2 powder_coat): per finish, each piece's (colour,
+    # roughness, metallic) in build order, the target first. No text names a piece's colour (2026-10-27): the target
+    # (brown in the released look) turns purple anodised aluminium, then yellow powder coat; the other piece (teal) red
+    # anodised aluminium, then blue powder coat. Each piece's three colours, the pieces of one seed and every piece and the
+    # green goal square stay >= 20 CIEDE2000 apart.
+    piece_finishes = dict(anodised=(((.25, .08, .45), .3, .6), ((.55, .05, .06), .3, .6)),
+                          powder_coat=(((.85, .65, .05), .7, 0.), ((.05, .15, .55), .7, 0.)))
 
     geometry_family = None
     gate_extra_m = (0., 0.)
@@ -211,14 +219,23 @@ class InterlockedClawsTask(PlacementGoalMixin, RigidTaskDefinition):
         return self.config["other_rgb"]
 
     def paint_pieces(self, assembly, folder):
-        """Per-piece RGBA; non-default appearance also rewrites the piece's URDF and GLB colours."""
+        """Per-piece RGBA; non-default appearance also rewrites the piece's URDF and GLB colours, and a piece_finish other
+        than "painted" each visual mesh's roughness and metallic (an OBJ visual gets a copy with a material file that
+        carries them: Nyx draws a URDF visual's colour with its mesh file's material, not the entity surface's)."""
         import xml.etree.ElementTree as ET
         from topogym.assets.scene_visuals import scale_glb_color
         shade = float(self.config["target_shade"])
+        finish = self.piece_finishes.get(self.config["piece_finish"])
+        if finish is not None and len(finish) != len(assembly.bodies):
+            raise ValueError(f"piece_finish {self.config['piece_finish']!r} must give every piece its finish")
         colors = []
         for index, body in enumerate(assembly.bodies):
             other = self.other_color(index)
-            if index == 0 and shade != 1.:
+            pbr = None
+            if finish is not None:
+                colour, *pbr = finish[index]
+                paint = lambda rgba: [*(float(c) for c in colour), float(rgba[3])]
+            elif index == 0 and shade != 1.:
                 paint = lambda rgba: [*(min(1., float(c)*shade) for c in rgba[:3]), float(rgba[3])]
             elif index > 0 and other is not None:
                 paint = lambda rgba: [*(float(c) for c in other), float(rgba[3])]
@@ -227,15 +244,42 @@ class InterlockedClawsTask(PlacementGoalMixin, RigidTaskDefinition):
                 continue
             urdf = Path(getattr(body, "asset_path", folder/body.name/f"{body.name}.urdf"))
             tree = ET.parse(urdf)
-            for node in tree.findall(".//visual/material/color"):
-                node.set("rgba", " ".join(map(str, paint([float(v) for v in node.get("rgba").split()]))))
-            for mesh in tree.findall(".//visual/geometry/mesh"):
-                if mesh.get("filename").endswith(".glb"):
-                    scale_glb_color(urdf.parent/mesh.get("filename"), shade if index == 0 else 1.,
-                                    color=None if index == 0 else [*paint([0, 0, 0, 1])])
+            for visual in tree.findall(".//visual"):
+                node = visual.find("material/color")
+                rgba = paint([float(v) for v in node.get("rgba").split()]) if node is not None else None
+                if node is not None:
+                    node.set("rgba", " ".join(map(str, rgba)))
+                for mesh in visual.findall("geometry/mesh"):
+                    source = urdf.parent/mesh.get("filename")
+                    if source.suffix == ".glb":
+                        target = index == 0 and finish is None
+                        scale_glb_color(source, shade if target else 1., color=None if target else [*paint([0, 0, 0, 1])],
+                                        **({} if pbr is None else dict(roughness=pbr[0], metallic=pbr[1])))
+                    elif pbr is not None:
+                        mesh.set("filename", str(Path(mesh.get("filename")).with_name(
+                            finished_obj(source, rgba or paint(list(body.color)), *pbr).name)))
             tree.write(urdf, encoding="unicode", xml_declaration=True)
             colors.append(tuple(paint(body.color)))
         return colors
+
+
+def finished_obj(source, rgba, roughness, metallic):
+    """A copy of OBJ visual mesh ``source`` beside it, its vertex and face lines byte for byte, that uses a material file
+    with the colour, roughness and metallic (MTL's PBR extension Pr / Pm, with Ns and Ks for readers without it); its path.
+    Nyx draws the material (renders of interlocked-claws-13, 2026-10-27; the entity surface's roughness and metallic do
+    not reach a URDF entity). A GLB copy would round the vertices to float32, and the placement and separation rules
+    read the visual meshes' vertices (task_metrics.rigid_asset_vertices). Only the URDF's <visual> names the copy, so
+    tools/tests/test_appearance_seeds.py compares its geometry (without the material lines) and not its name."""
+    name = f"{source.stem}_finish"
+    r, g, b = (float(c) for c in rgba[:3])
+    specular = [.04 + (c - .04) * float(metallic) for c in (r, g, b)]
+    shininess = min(1000., 2. / max(float(roughness), .05) ** 4 - 2.)
+    (source.parent / f"{name}.mtl").write_text(
+        f"newmtl finish\nKd {r} {g} {b}\nKs {specular[0]} {specular[1]} {specular[2]}\nNs {max(1., shininess)}\n"
+        f"Pr {float(roughness)}\nPm {float(metallic)}\n")
+    target = source.with_name(f"{name}.obj")
+    target.write_text(f"mtllib {name}.mtl\nusemtl finish\n" + source.read_text())
+    return target
 
 
 def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):

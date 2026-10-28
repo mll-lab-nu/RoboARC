@@ -130,10 +130,15 @@ class TaskDefinition:
         if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)) or seed < 0:
             raise ValueError("Task seed must be a nonnegative integer")
         supplied = dict(config or {})
+        # The scene's look under an appearance seed (topogym.world.look): every task takes it, none has it by default.
+        look = supplied.pop("scene_look", None)
         unknown = supplied.keys() - self.defaults.keys()
         if unknown:
             raise ValueError(f"Unknown {self.task_id} task parameters: {sorted(unknown)}")
         self.config = merge_parameters(self.defaults, supplied)
+        if look is not None:
+            from topogym.world.look import check_scene_look
+            self.config["scene_look"] = check_scene_look(look)
         if "terminal" in self.config:
             terminal = self.config["terminal"]
             if not isinstance(terminal, Mapping) or set(terminal) != set(self.defaults["terminal"]):

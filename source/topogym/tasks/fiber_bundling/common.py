@@ -6,9 +6,10 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from topogym.assets.geometry.fiber_bundling import FiberLayout
 from topogym.assets.geometry.fiber_bundling import (
-    COLORS,
-    JACKET_COLOR,
+    CABLE_FINISHES,
+    FIXTURE_FINISHES,
     AnchoredLayout,
+    finish_surface,
     generate_anchored_assets,
 )
 from topogym.assets.geometry.fiber_bundling import RingMount
@@ -41,7 +42,7 @@ def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
 class FiberBundlingTask(TaskDefinition):
     task_id = "fiber_bundling"
     layout_class = FiberLayout
-    instruction = ('Manipulate only the thick sheath. Pass every fiber tip first through the copper ring '
+    instruction = ('Manipulate only the thick sheath. Pass every fiber tip first through the ring '
                    'in material order, without sharp bends, until the roots and front sheath have passed. '
                    'Any gripper contact with a fine strand fails the task; keep the rear terminal anchored.')
     terminal_revision = "terminal_v4_fiber_ring_plane"
@@ -50,11 +51,13 @@ class FiberBundlingTask(TaskDefinition):
     defaults = defaults(task_id,
         geometry={}, anchor={}, center_xy_m=[-0.1, -0.25], stable_duration_s=0.5,
         terminal=dict(maximum_bend_deg=60.),
-        # Looks only (scene_variation's visual axes): the jacket's colour, and the strand palette's slots 1-7 turned by
-        # this many places (slot 0, the red strand, stays: the redesigned tiers' instructions name the red fiber)
-        sheath_color=list(JACKET_COLOR[:3]), strand_palette_shift=0,
+        # Looks only (scene_variation's visual axes; fiber_bundling.CABLE_FINISHES, FIXTURE_FINISHES): the cable's
+        # (jacket, filler, strands, ring) and the fixtures' looks of the appearance seeds; "released" keeps the released
+        # ones. (They replace 2026-10-20's sheath_color and strand_palette_shift, which the frozen seed-0 instances
+        # predate.)
+        cable_finish="released", fixture_finish="released",
     )
-    hash_when_changed = ("sheath_color", "strand_palette_shift")
+    hash_when_changed = ("cable_finish", "fixture_finish")
     # Passage is judged where a point crosses the ring's own plane. There a strand
     # centre is either in the hole (<= aperture - fiber radius) or outside the ring
     # (>= outer radius + fiber radius); in between it would be inside the tube.
@@ -68,10 +71,15 @@ class FiberBundlingTask(TaskDefinition):
         self.table_height_m = float(table_height_m)
         layout = self.layout_class(**{**self.config["geometry"], "seed": self.seed})
         anchor = AnchoredLayout(**self.config["anchor"])
-        k = int(self.config["strand_palette_shift"]) % (len(COLORS)-1)
-        self.layout, report = generate_anchored_assets(
-            asset_dir, layout, anchor, strand_colors=(COLORS[0], *COLORS[1+k:], *COLORS[1:1+k]),
-            jacket_color=(*map(float, self.config["sheath_color"]), 1.))
+        # an appearance seed's looks go on the visual geoms and the ring's visual only (finish_bundle_materials)
+        cable = None if self.config["cable_finish"] == "released" else CABLE_FINISHES[self.config["cable_finish"]]
+        finish = self.config["fixture_finish"]
+        fixture = None if finish == "released" else FIXTURE_FINISHES[finish]
+        looks = {**({k: cable[k] for k in ("jacket", "filler")} if cable else {}),
+                 **(dict(insulation=(cable["strands"], *cable["insulation"])) if cable else {}),
+                 **(fixture["terminal"] if fixture else {})}
+        self.layout, report = generate_anchored_assets(asset_dir, layout, anchor, ring_finish=cable and cable["ring"],
+                                                       looks=looks or None)
         self.origin = np.r_[
             self.config["center_xy_m"], table_height_m + anchor.axis_height_m
         ]
@@ -126,7 +134,8 @@ class FiberBundlingTask(TaskDefinition):
                     tuple(self.origin + pos),
                     fixed=True,
                     morph_options={"size": size},
-                    surface={"color": color},
+                    surface=finish_surface(fixture["cradle"][name.removeprefix("cable_cradle_")]) if fixture
+                    else {"color": color},
                 )
             )
         for name, kind, pos, size, color in RingMount().parts(
@@ -145,7 +154,8 @@ class FiberBundlingTask(TaskDefinition):
                     tuple(self.origin + pos),
                     fixed=True,
                     morph_options=options,
-                    surface={"color": color},
+                    surface=finish_surface(fixture["mount"][name.removeprefix("ring_mount_")]) if fixture
+                    else {"color": color},
                 )
             )
         return TaskSpec(

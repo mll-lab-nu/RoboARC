@@ -16,7 +16,7 @@ What the grader checks, in plain words (each task's `instruction.md` states the 
 
 Placement bases (02, 08-10):
 
-- **Containment.** Every point of the brown claw piece (in bases 08-10 the brown key), not only its centre, lies inside the goal square, at least 1 mm inside the inner edge of the dashed green line, and within the goal volume's height above the table; it may not sink more than 1 mm below the tabletop. It need not touch the table.
+- **Containment.** Every point of the target piece (base 02: the cross piece; bases 08-10: the key piece), not only its centre, lies inside the goal square, at least 1 mm inside the inner edge of the dashed green line, and within the goal volume's height above the table; it may not sink more than 1 mm below the tabletop. It need not touch the table.
 - **Separation from the rest.** The other piece, and every other puzzle component, stay entirely on the puzzle side of an invisible fixed vertical plane between the puzzle and the goal square. Moving the whole puzzle into the goal does not count.
 - **At rest.** The placed piece moves at most 1 mm/s and 0.02 rad/s. Holding it is allowed.
 
@@ -39,7 +39,7 @@ each `task.toml`. Numbers missing from the table are not used: base numbers are 
 
 | Base | Difficulty | Variation (task text) | Notes | Task dirs |
 |---|---|---|---|---|
-| `roboarc-interlocked-claws-02-i01` | easier | `easier` | place the brown claw piece | [privileged](../../tasks/roboarc-interlocked-claws-02-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-02-i01-standard/) |
+| `roboarc-interlocked-claws-02-i01` | easier | `easier` | place the cross piece | [privileged](../../tasks/roboarc-interlocked-claws-02-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-02-i01-standard/) |
 | `roboarc-interlocked-claws-05-i01` | hard | `interlocked_claws_hard` | separate both pieces | [privileged](../../tasks/roboarc-interlocked-claws-05-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-05-i01-standard/) |
 | `roboarc-interlocked-claws-08-i01` | easy | `interlocked_claws_rd_easy` | redesigned key and lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-08-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-08-i01-standard/) |
 | `roboarc-interlocked-claws-09-i01` | medium | `interlocked_claws_rd_medium` | redesigned key and lock; place the key | [privileged](../../tasks/roboarc-interlocked-claws-09-i01-privileged/) / [standard](../../tasks/roboarc-interlocked-claws-09-i01-standard/) |

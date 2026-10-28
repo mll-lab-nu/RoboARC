@@ -3,7 +3,7 @@ artifacts = ["/app/output/"]
 
 [task]
 name = "roboarc/roboarc-cast-keyhole-04-i01-privileged"
-description = "RoboARC cast_keyhole (ALOHA 2, MuJoCo): produce one replayable trajectory. Separate and place the entire silver keyhole piece (`keyhole_silver`) inside the green dashed goal region. Keep the gold piece (`keyhole_gold`) on the puzzle/system side. Frozen scene instance (variation cast_keyhole_medium, seed 0)."
+description = "RoboARC cast_keyhole (ALOHA 2, MuJoCo): produce one replayable trajectory. Separate and place the entire keyhole plate (`keyhole_silver`) inside the green dashed goal region. Keep the fork plate (`keyhole_gold`) on the puzzle/system side (the names are identifiers, not colours). The keyhole plate has a closed, stepped hole through it; the fork plate's stepped slot is open at one end. Frozen scene instance (variation cast_keyhole_medium, seed 0)."
 authors = [{ name = "Jianwen Lyu" }]
 keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "trajectory", "cast_keyhole"]
 

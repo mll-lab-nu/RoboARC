@@ -63,6 +63,11 @@ class RedesignClawsTask(InterlockedClawsTask):
     pregrasp_weld = True
     separation_only = False
     terminal_revision = "placement_region_v3_grasp_contact_2mm"
+    # The pieces by shape (their colours change with the appearance seed): the key is piece_0, the lock piece_1.
+    placement_target_description = "the entire key piece"
+    placement_remainder_description = "the lock piece"
+    placement_scene_note = ("The key piece is the long straight bar with a short crossbar at one end; the lock piece is the "
+                            "open frame of bars it passes through.")
 
     def design(self):
         """The tier's pieces, start pose and birth hands, as frozen data

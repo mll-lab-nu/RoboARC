@@ -14,7 +14,7 @@ class InterlockedClawsRotorTask(InterlockedClawsTask):
     # Each piece's grasp region covers the piece (pregrasp_targets), and a hand may acquire with its TCP up to 15 cm from
     # the region's centre.
     grasp_max_tcp_distance_m = .15
-    placement_description = "the entire brown piece"
+    placement_description = "the entire target piece"
     separation_summary = "Completely separate the two interlocked pieces and briefly hold both still."
 
     def build_assets(self, folder):

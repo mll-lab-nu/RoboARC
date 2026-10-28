@@ -246,7 +246,8 @@ def write_bundle(path, layout, paths, *, fixture=False, strand_colors=COLORS, ja
     ET.ElementTree(root).write(path, encoding="unicode", xml_declaration=True)
 
 
-def generate_assets(folder, layout=None, *, strand_colors=COLORS, jacket_color=JACKET_COLOR):
+def generate_assets(folder, layout=None, *, strand_colors=COLORS, jacket_color=JACKET_COLOR, ring_finish=None):
+    """ring_finish: an appearance seed's dict(color=, roughness=, metallic=) for the ring's visual (default: copper)."""
     import trimesh
     from trimesh.visual.material import PBRMaterial
     from trimesh.visual.texture import TextureVisuals
@@ -320,7 +321,10 @@ def generate_assets(folder, layout=None, *, strand_colors=COLORS, jacket_color=J
     # Nyx's URDF loader aliases repeated primitive visuals. Use a single
     # embedded-material visual mesh, keeping every compound collision shape.
     torus.visual = TextureVisuals(uv=np.zeros((len(torus.vertices), 2)),
-        material=PBRMaterial(baseColorFactor=(.86, .60, .20, 1), metallicFactor=.65, roughnessFactor=.3))
+        material=PBRMaterial(baseColorFactor=(.86, .60, .20, 1), metallicFactor=.65, roughnessFactor=.3)
+        if ring_finish is None else PBRMaterial(baseColorFactor=ring_finish["color"],
+                                                metallicFactor=ring_finish["metallic"],
+                                                roughnessFactor=ring_finish["roughness"]))
     torus.export(folder/"ring.glb", include_normals=True)
     ring_xml = ET.parse(folder/"ring.urdf")
     link = ring_xml.getroot().find("link")
@@ -377,6 +381,54 @@ TERMINAL_COLORS = {
     "terminal_handle": (.08, .09, .10, 1), "terminal_led": (.20, .65, .32, 1),
     "terminal_label": (.70, .75, .73, 1), "terminal_gland": (.14, .16, .17, 1),
 }
+
+# The looks of appearance seeds 1 and 2 (the task parameters cable_finish and fixture_finish; scene_variation's visual
+# axes). Each free part is >= 20 CIEDE2000 from its released colour, from the other look's and from the red strand, and
+# >= 15 from every table top it stands on; colours are linear RGB, finishes (roughness, metallic).
+#  cable: the jacket (glossy blue PVC, then matte orange PUR), the cut filler, the strands' palette (slot 0, the red
+#   strand the redesigned tiers' texts name, keeps its hue: the same red, then 10 % darker; each other slot takes another
+#   IEC 60757 insulation colour, none brown or orange: next to the red strand they read as red) and their insulation's
+#   finish, the ring (teal, then black anodised aluminium; the texts no longer name it copper).
+#  fixture: the rear terminal's parts (TERMINAL_COLORS roles), the cable cradle's and the ring mount's parts, the
+#   formboard pegs and their caps.
+_ORANGE, _BLACK, _LGREY, _BLUE = (.80, .25, .03), (.035, .035, .04), (.55, .57, .56), (.05, .15, .45)
+_DGREY, _GREEN, _TEAL = (.10, .10, .11), (.08, .34, .12), (.03, .30, .30)
+_VIOLET, _TURQUOISE, _PINK = (.25, .08, .45), (.03, .45, .50), (.85, .35, .55)
+CABLE_FINISHES = {
+    "blue_pvc": dict(
+        jacket=(_BLUE, .35, 0.), filler=(_BLACK, .9, 0.), insulation=(.3, 0.),
+        strands=(COLORS[0][:3], COLORS[5][:3], _VIOLET, _TURQUOISE, COLORS[6][:3], COLORS[1][:3], COLORS[2][:3], _PINK),
+        ring=dict(color=(*_TEAL, 1.), roughness=.3, metallic=.8)),
+    "orange_pur": dict(
+        jacket=(_ORANGE, .65, 0.), filler=(_BLUE, .9, 0.), insulation=(.7, 0.),
+        strands=(tuple(.9*v for v in COLORS[0][:3]), COLORS[2][:3], COLORS[5][:3], _VIOLET, COLORS[1][:3], COLORS[6][:3],
+                 _PINK, _TURQUOISE),
+        ring=dict(color=(*_BLACK, 1.), roughness=.5, metallic=.8)),
+}
+FIXTURE_FINISHES = {
+    "orange_enclosure": dict(
+        terminal=dict(terminal_case=(_ORANGE, .45, 0.), terminal_panel=(_LGREY, .5, 0.), terminal_foot=(_ORANGE, .8, 0.),
+                      terminal_bolt=(_BLACK, .4, .8), terminal_handle=(_LGREY, .5, 0.),
+                      terminal_led=((.05, .25, .90), .2, 0.), terminal_label=(_BLACK, .6, 0.),
+                      terminal_gland=(_LGREY, .6, 0.)),
+        cradle=dict(base=(_BLACK, .4, .8), post=(_DGREY, .4, .8), pad=(_LGREY, .85, 0.), left=(_BLACK, .4, .8),
+                    right=(_BLACK, .4, .8)),
+        mount=dict(base=(_BLACK, .4, .8), post=(_DGREY, .4, .8)), peg=(_BLACK, .5, 0.), cap=(_LGREY, .5, 0.)),
+    "black_enclosure": dict(
+        terminal=dict(terminal_case=(_BLACK, .3, 0.), terminal_panel=(_BLUE, .4, 0.), terminal_foot=(_TEAL, .8, 0.),
+                      terminal_bolt=(_BLUE, .35, .8), terminal_handle=(_ORANGE, .5, 0.),
+                      terminal_led=((.90, .90, .90), .2, 0.), terminal_label=(_ORANGE, .6, 0.),
+                      terminal_gland=(_ORANGE, .6, 0.)),
+        cradle=dict(base=(_GREEN, .45, .3), post=(_GREEN, .45, .3), pad=(_ORANGE, .85, 0.), left=(_GREEN, .45, .3),
+                    right=(_GREEN, .45, .3)),
+        mount=dict(base=(_GREEN, .45, .3), post=(_GREEN, .45, .3)), peg=(_GREEN, .5, 0.), cap=(_ORANGE, .5, 0.)),
+}
+
+
+def finish_surface(look):
+    """An EntitySpec surface of a (colour, roughness, metallic) look."""
+    color, roughness, metallic = look
+    return dict(color=tuple(color), roughness=roughness, metallic=metallic)
 
 
 @dataclass(frozen=True)
@@ -558,11 +610,56 @@ def write_dynamic_material_visuals(path):
     return records
 
 
-def generate_anchored_assets(folder, layout=None, anchor=None, *, strand_colors=COLORS, jacket_color=JACKET_COLOR):
-    """strand_colors / jacket_color: the strands' and the jacket's look (appearance only; defaults: today's)."""
+def bundle_role(name):
+    """The look role of a bundle.xml visual geom (finish_bundle_materials): ("jacket" | "filler" | a TERMINAL_COLORS key,
+    None), ("insulation", its strand), or (None, None) for the copper conductor tips."""
+    name = name.removesuffix("_material_visual")
+    if name.startswith(("jacket_visual", "jacket_cut_lip", "lead_jacket")):
+        return "jacket", None
+    if name.startswith("jacket_inner_filler"):
+        return "filler", None
+    if name.startswith("insulation_"):
+        return "insulation", int(name.split("_")[1])
+    return next((prefix for prefix in TERMINAL_COLORS if name.startswith(prefix)), None), None
+
+
+def finish_bundle_materials(path, looks):
+    """Draw the visual geoms of bundle.xml (contype = conaffinity = 0) of each role in looks through an MJCF material of
+    the look's colour, roughness and metalness (an appearance seed's look, which nyx_direct draws). looks: {role:
+    (rgb, roughness, metallic)}, "insulation": (the strand palette, roughness, metallic). Colliding geoms keep their
+    bytes, so the physics' view of the file is the released one."""
+    path = Path(path)
+    tree = ET.parse(path)
+    root = tree.getroot()
+    asset = root.find("asset")
+    materials = {}
+    for geom in root.iter("geom"):
+        role, strand = bundle_role(geom.get("name", ""))
+        if role not in looks or geom.get("contype") != "0" or geom.get("conaffinity") != "0":
+            continue
+        color, roughness, metallic = looks[role]
+        if strand is not None:
+            color = color[strand % len(color)]
+        key = (vector_text((*color, 1.)), roughness, metallic)
+        if key not in materials:     # first in <asset>: without them the file's whitespace is the released one's
+            asset.insert(len(materials), ET.Element("material", name=f"finish_{len(materials)}", rgba=key[0],
+                                                    roughness=str(roughness), metallic=str(metallic)))
+            materials[key] = f"finish_{len(materials)}"
+        del geom.attrib["rgba"]
+        geom.set("material", materials[key])
+    ET.indent(root)
+    tree.write(path, encoding="unicode", xml_declaration=True)
+
+
+def generate_anchored_assets(folder, layout=None, anchor=None, *, strand_colors=COLORS, jacket_color=JACKET_COLOR,
+                             ring_finish=None, looks=None):
+    """strand_colors / jacket_color: the strands' and the jacket's look (appearance only; defaults: today's); ring_finish
+    (generate_assets) and looks (finish_bundle_materials): an appearance seed's looks of the ring and of the visual
+    geoms, which leave the colliding geoms as released."""
     import trimesh
     folder = Path(folder)
-    layout, report = generate_assets(folder,layout,strand_colors=strand_colors,jacket_color=jacket_color)
+    layout, report = generate_assets(folder,layout,strand_colors=strand_colors,jacket_color=jacket_color,
+                                     ring_finish=ring_finish)
     anchor = anchor or AnchoredLayout()
     lead = anchor.lead()
     coarse = np.vstack([lead, np.column_stack((np.arange(1,layout.trunk_segments+1)*
@@ -574,6 +671,8 @@ def generate_anchored_assets(folder, layout=None, anchor=None, *, strand_colors=
         raise ValueError(f"Slack lead self-intersects ({clearance} m)")
     write_anchored_bundle(folder/"bundle.xml",layout,anchor,jacket_color=jacket_color)
     material_visuals = write_dynamic_material_visuals(folder / "bundle.xml")
+    if looks:
+        finish_bundle_materials(folder / "bundle.xml", looks)
     preview = trimesh.load(folder/"bundle_initial.glb",force="scene")
     for i,(a,b) in enumerate(zip(lead[:-1],lead[1:])):
         mesh = trimesh.creation.cylinder(radius=layout.trunk_radius_m,segment=(a,b),sections=32)

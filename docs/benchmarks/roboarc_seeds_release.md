@@ -1,14 +1,21 @@
 # RoboARC appearance seeds: release runbook
 
 The steps of a seeded release, as RoboARC 1.2.0 was made (first written from Jianwen's seeded release run of
-2026-10-20, then used for 1.2.0).
+2026-10-20, then used for 1.2.0), with what the appearance seeds v2 (CHANGELOG, "Unreleased") add.
 
 A seeded release gives every base three scenes: seed 0 is the frozen instance as released, seeds 1 and 2 change the
-looks only (colours, materials, textures: `topogym.tasks.scene_variation.appearance(cls, S)`, the scene seed stays 0).
+looks only (`topogym.tasks.scene_variation.appearance(cls, S)`, the scene seed stays 0): the room's lighting, the table
+top, its frame and the floor (the task parameter `scene_look`, `source/topogym/world/look.py`) and the colours and
+materials of the task's objects (the family's appearance parameters; the parts whose colour the texts name keep it,
+[colour_table.md](../simulator/seeds/colour_table.md)).
 Both twins of a base declare `[metadata.seeds] default = 0`, `allowed = [0, 1, 2]`, `build = "runtime"` and, in
 `oracle`, seed 0 and the seeds whose Harbor oracle run passed. The runner assigns the seeds without replacement
 ([RUNNING.md](../RUNNING.md) "Seeds") and runs each trial from a copy made by `scripts/task_seed.py materialize`, which
 writes the trial's seed into the task's `seed` files; results are kept per trial (RUNNING.md "Results").
+
+The IKEA tasks also allow seeds 0, 1 and 2 (`oracle = [0]`), but a seed changes only their standard mode's lighting
+([ikea_mujoco.md](ikea_mujoco.md) "Seeds"): they need none of the files below. Their standard twin's
+`environment/sim/rig.json` holds every seed's lights, written by `ikea/scripts/ikea_mujoco/mk_standard_tasks.py`.
 
 ## What a seed S of a base ships
 
@@ -39,7 +46,9 @@ orbits-02) get their seeds the same way.
 ## Commands
 
 1. Image without instances, from this repository's recipe (`source/images/roboarc/Dockerfile`, `images/roboarc/build.sh
-   --noinst`).
+   --noinst`). Its visual asset root (`TOPOGYM_VISUAL_ASSET_ROOT`) must hold every map the looks draw: the textured
+   table tops and floors of `source/topogym/world/look.py` (CC0, Poly Haven) besides the studio HDRI and the table
+   frame's wood.
 2. The release run (render tree, instances, seeds, image, files):
 
    ```bash
@@ -51,15 +60,17 @@ orbits-02) get their seeds the same way.
    renders the seeds' goal pictures in the release image (or takes them from `--goal-pictures <dir>`), re-stamps the
    references, builds the release image, writes its deterministic archive (`images/archive.sh`) and its pin in
    `images/pins.json`, and writes `assets.json`, `packages/`, `oracles/`, `release.json` and the task dirs on the render
-   tree. Look at every goal picture before going on.
+   tree. Look at every goal picture, and at the first frames of seeds 1 and 2 (the looks were tuned so that the
+   cameras' frames keep a mean luma of at least 0.35), before going on.
 3. Checks: `python3 scripts/roboarc/mk_tasks.py --check`, `--assets <work> --check` (each seed's binding against its
    instance bytes), `ci_checks/check-seed-files.py`, `check-twins.py`, `check-seeds.py`, the unit tests.
 4. The release's evidence, per seed (owner decision D4): a strict double fresh replay of the seed's reference; the
    world and robot parts of the birth and end states bit-identical to seed 0's; the Session's strict instance checks;
    Harbor oracle 1 / nop 0 for seeds 1 and 2 in both modes on at least one base per family and every new base (on
-   `task_seed.py materialize` copies, `scripts/roboarc/harbor_check.py --tasks`). Seed 0 of every released base stays
-   byte-identical (births, ends, rendered frames); the blanket families' identity rule is checked on all 14 blanket
-   bases. A seed enters `oracle` only with a passing Harbor oracle run.
+   `task_seed.py materialize` copies, `scripts/roboarc/harbor_check.py --tasks`). Seed 0 of every released base keeps
+   its births and ends byte for byte, and its rendered frames but where the release changes seed 0's look on purpose
+   (the appearance seeds v2: the goal marker of the 30 bases that draw it); the blanket families' identity rule is
+   checked on every blanket base. A seed enters `oracle` only with a passing Harbor oracle run.
 5. The HF dataset: one new revision of `eai-v2-internal/robotangle-assets` for the release, uploaded only after step 4
    passes and with the owner's approval (`instances/<base>/seeds/<S>/` and the new bases' instances), then
    `scripts/roboarc/assets.py pin <copy> <revision>` and a rebuild that fetches from it. Until that upload the seed

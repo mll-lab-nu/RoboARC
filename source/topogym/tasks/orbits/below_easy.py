@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from topogym.assets.geometry.orbits import OrbitsLayout, generate_assets, make_meshes
+from topogym.assets.geometry.orbits import FIXTURE_FINISHES, OrbitsLayout, generate_assets, make_meshes
 from topogym.assets.geometry.orbits_chain import CORD_RGBA, chain_polyline, resample_links, write_cord_assembly
 from topogym.assets.geometry.orbits_initial import natural_working_state, resample
 from topogym.assets.scene_visuals import surface, visual_collision_urdf
@@ -38,7 +38,10 @@ class OrbitsBelowEasyTask(OrbitsTask):
             'handle_bend_radius_m': .020,
         },
     }
-    defaults = merge_parameters(OrbitsTask.defaults, variant_parameters)
+    # fixture_finish: the looks of appearance seeds 1 and 2 (orbits.FIXTURE_FINISHES: the base, posts, stopper ball and
+    # rings, and the wooden handle's wood); "released" keeps the wood of the released scenes.
+    defaults = merge_parameters(OrbitsTask.defaults, {**variant_parameters, "fixture_finish": "released"})
+    hash_when_changed = (*OrbitsTask.hash_when_changed, "fixture_finish")
     fixed_parameters = ('linear_scale', 'cord_profile', 'geometry')
     model_revision = 'below_easy_v12_tie_3mm_v1'
     physics_model = "rigid_articulated"
@@ -56,11 +59,14 @@ class OrbitsBelowEasyTask(OrbitsTask):
         self.table_height_m = float(table_height_m)
         preset = record_preset(self, asset_dir)
         layout, cord, roots = self.chain_roots()
-        self.layout, report = generate_assets(asset_dir, layout, initial_cord=cord)
+        finish = self.config["fixture_finish"]
+        self.layout, report = generate_assets(asset_dir, layout, initial_cord=cord,
+                                              fixture_finish=None if finish == "released" else finish)
         folder = Path(asset_dir)
         xml, self.link_names, self.link_lengths, self.tie_link = write_cord_assembly(
             folder, self.layout, roots, radius_m=self.CHAIN_RADIUS_M, joint_damping=self.JOINT_DAMPING,
-            young_modulus_pa=self.YOUNG_MODULUS_PA, armature=self.JOINT_ARMATURE, cord_rgba=self.cord_rgba())
+            young_modulus_pa=self.YOUNG_MODULUS_PA, armature=self.JOINT_ARMATURE, cord_rgba=self.cord_rgba(),
+            handle_finish=None if finish == "released" else FIXTURE_FINISHES[finish]["handle"])
         self.link_roots = roots
         parts, _ = make_meshes(self.layout, initial_cord=cord)
         yaw = float(self.config["yaw_deg"])
@@ -130,10 +136,13 @@ class OrbitsBelowEasyTask(OrbitsTask):
         )
 
     def cord_rgba(self):
-        """The chain links' colour (appearance only): CORD_RGBA at the default cord_finish, else the finish's."""
+        """The chain links' colour (appearance only): CORD_RGBA at the default cord_finish, else the finish's colour,
+        roughness and metalness."""
         if self.config["cord_finish"] == self.defaults["cord_finish"]:
             return CORD_RGBA
-        return " ".join(f"{v:.4g}" for v in surface(self.config["cord_finish"])["color"])
+        finish = surface(self.config["cord_finish"])
+        return dict(rgba=" ".join(f"{v:.4g}" for v in finish["color"]), roughness=finish["roughness"],
+                    metallic=finish["metallic"])
 
     RING_SEGMENTS = 48
 

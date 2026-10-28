@@ -59,7 +59,8 @@ RUN python -c 'import site; from pathlib import Path; paths=sorted({str(p) for s
 COPY images/roboarc/vbd-requirements.txt /tmp/vbd-requirements.txt
 RUN python -m pip install --no-cache-dir --no-deps --require-hashes -r /tmp/vbd-requirements.txt && rm /tmp/vbd-requirements.txt \
  && python -c "from importlib.metadata import version as v; assert (v('newton'), v('warp-lang')) == ('1.6.1', '1.18.0')"
-# Nyx's studio HDRI and the table's wood maps (CC0, Poly Haven; sha256-checked downloads), and the ground plane's checker
+# Nyx's studio HDRI, the table's wood maps and the appearance seeds' texture maps (topogym/world/look.py; CC0, Poly Haven;
+# sha256-checked downloads, their CREDITS.txt), and the ground plane's checker
 # texture nyx_direct.py draws (genesis-world 1.2.1's textures/checker.png, Apache-2.0, source/assets/textures/README.md).
 COPY images/roboarc/prepare_nyx_studio.py /tmp/prepare_nyx_studio.py
 RUN python /tmp/prepare_nyx_studio.py && rm /tmp/prepare_nyx_studio.py

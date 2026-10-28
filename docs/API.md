@@ -32,8 +32,10 @@ Contents: [Design](#design) · [Running](#running) · [Tasks](#tasks) · [make()
   success predicates and failure predicates are the session's; this package adds no physics and no physics settings.
 - **The graded birth.** `reset()` is the session's own reset: the frozen instance's state, whose hash
   (`info["birth_hash"]`) is the one the graded tasks start from. Gymnasium's `reset(seed=...)` is accepted and has no
-  effect on the scene; the instance is chosen once, at `make(..., instance_seed=S)`: 0 is the released instance, and the
-  puzzles' seeds 1 and 2 are the same scene and physics in other colours and materials (`TaskInfo.seeds`).
+  effect on the scene; the instance is chosen once, at `make(..., instance_seed=S)`: 0 is the released instance, the
+  puzzles' seeds 1 and 2 are the same scene and physics in another look (lighting, table top, its frame and the floor,
+  the objects' colours and materials), and the IKEA tasks' seeds 1 and 2 the same scene under other lighting in the
+  Nyx images (`TaskInfo.seeds`).
 - **Bit identity.** Stepping a task's reference trajectory through the API from `reset()` reaches exactly the state hash
   the release recorded for it ([Tests](#tests)).
 - **Thin.** No skills (grasp, place, navigate). The only optional wrapper maps end-effector poses to joint targets with
@@ -135,7 +137,7 @@ roboarc.make(task_id, *, renderer="nyx", cameras=None, depth=False, image_size=N
 | `rules` | puzzles: `"standard"` (default) adds the standard mode's joint-speed rule to the tooling's limits; `"privileged"` applies the tooling's limits only (what privileged agents and their verifier's replays get). IKEA: one rule set |
 | `max_episode_steps` | truncation (default: the task's verifier row cap) |
 | `strict` | `True` (default): refuse to run outside the graded runtime (`roboarc.RuntimeMismatch`); `False`: warn and run |
-| `instance_seed` | which frozen instance (`TaskInfo.seeds`): 0 (default) the released one; puzzles 1, 2 the appearance seeds, staged against their own runtime bindings as the graded tasks stage them |
+| `instance_seed` | which frozen instance (`TaskInfo.seeds`): 0 (default) the released one; puzzles 1, 2 the appearance seeds (the looks only: lighting, table top, its frame and the floor, the objects' colours, materials and textures; never the physics), staged against their own runtime bindings as the graded tasks stage them; IKEA 1, 2 the same scene with the Nyx images lit differently (`renderer="nyx"`) |
 | `check_every` | IKEA only: control steps between success checks (default 40 = 0.1 s) |
 
 One environment per process: both simulators are one scene per process (the tooling's rule). For several

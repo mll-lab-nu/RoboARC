@@ -236,10 +236,10 @@ def write_disc(g, slots, folder, mass, damping, color, fixed=False, stop=None, m
     return p
 
 
-def write_endpoint(g, folder):
+def write_endpoint(g, folder, color=ENDPOINT_COLOR):
     """Fixed square goal panel, with the original finite-thickness keyhole."""
     visual,collisions=disc_assets(g,(g.endpoint_deg,),folder,goal_plate=True)
-    body=inertial(.2)+mesh_xml(visual,'visual',ENDPOINT_COLOR)+''.join(mesh_xml(p,'collision') for p in collisions)
+    body=inertial(.2)+mesh_xml(visual,'visual',color)+''.join(mesh_xml(p,'collision') for p in collisions)
     path=folder/'goal.urdf'
     path.write_text(f'<robot name="endpoint"><link name="disc">{body}</link></robot>')
     return path

@@ -30,6 +30,18 @@ DEV_PARAMETERS = dict(rope_mesh=dict(spacing=.0055, sides=12), rope_material=dic
                       rope_reference_shape="initial", rope_robot_contact="fingers",
                       aperture_contact_allowance_m=.001, aperture_check_profile="round_ring",
                       terminal=dict(maximum_speed_m_s=.01))
+# The looks of appearance seeds 1 and 2 (task parameters ring_finish and fixture_finish; scene_variation's visual axes).
+# The rings and grommets keep their hue (the texts order them by colour): a finish shades their colour and sets its
+# roughness and metalness (glossy, then matte powder coat; renders of rope-threading-08, 2026-10-27: a metallic finish
+# turned the green ring grey-green and the amber one olive). The bulkhead, the pedestals, the posts and the ring stands
+# and feet take one colour and finish (olive-drab, then steel-blue painted steel; renders of 2026-10-27: a bordeaux wall
+# read red, as the red grommet in it, and black or walnut walls left the wrist cameras dark under a dim look): >= 20
+# CIEDE2000 from the released greys, from each other, from every ring colour and from the rope of their seed, and >= 15
+# from every table top. "released": the released looks.
+RING_FINISHES = {"glossy": dict(shade=1., roughness=.2, metallic=0.),
+                 "matte_powder_coat": dict(shade=.9, roughness=.85, metallic=0.)}
+FIXTURE_FINISHES = {"olive_steel": dict(color=(.25, .25, .08, 1.), roughness=.5, metallic=.2),
+                    "steel_blue": dict(color=(.15, .25, .45, 1.), roughness=.5, metallic=.2)}
 
 
 class RedesignLayout:
@@ -76,7 +88,9 @@ def _mesh_file(folder, name, mesh, rgba):
 class RedesignThreadingTask(RopeThreadingTask):
     """Base of the five redesign tiers; subclasses set redesign_tier and the variation identity."""
     redesign_tier = None
-    defaults = merge_parameters(RopeThreadingTask.defaults, DEV_PARAMETERS)
+    defaults = merge_parameters(RopeThreadingTask.defaults,
+                                {**DEV_PARAMETERS, "ring_finish": "released", "fixture_finish": "released"})
+    hash_when_changed = (*RopeThreadingTask.hash_when_changed, "ring_finish", "fixture_finish")
     instruction = ("Thread the rope through every ring in the prescribed order and direction (the grommets in the wall "
                    "and the rings on either side of it), then keep the whole rope still.")
 
@@ -109,12 +123,19 @@ class RedesignThreadingTask(RopeThreadingTask):
                                morph_options={"convexify": False, "decimate": False})]
         ring_style = dict(fixed=True, material={"coup_type": "ipc_only"},
                           morph_options={"convexify": False, "decimate": False, "file_meshes_are_zup": True})
+        ring_finish = RING_FINISHES.get(self.config["ring_finish"])
+        fixture_finish = FIXTURE_FINISHES.get(self.config["fixture_finish"])
+
+        def fixture_surface(rgba, metallic, roughness):
+            """A fixture's surface: the released one, or the seed's fixture finish."""
+            return dict(fixture_finish) if fixture_finish else {"color": rgba, "metallic": metallic, "roughness": roughness}
         for ring in self.layout.rings():
             mesh = ring_mesh(ring, 24)
             path = _mesh_file(folder, ring["name"], mesh, ring["rgba"])
-            entities.append(EntitySpec(ring["name"], "mesh", path, (0, 0, table_height_m),
-                                       surface={"color": tuple(ring["rgba"]), "metallic": .15, "roughness": .5},
-                                       **ring_style))
+            look = {"color": tuple(ring["rgba"]), "metallic": .15, "roughness": .5} if ring_finish is None else {
+                "color": (*(min(1., float(v) * ring_finish["shade"]) for v in ring["rgba"][:3]), float(ring["rgba"][3])),
+                "metallic": ring_finish["metallic"], "roughness": ring_finish["roughness"]}
+            entities.append(EntitySpec(ring["name"], "mesh", path, (0, 0, table_height_m), surface=look, **ring_style))
             if "stand" in ring:
                 a, b = np.asarray(ring["stand"]["fromto"][:3]), np.asarray(ring["stand"]["fromto"][3:])
                 stand = trimesh.creation.capsule(height=float(np.linalg.norm(b - a)), radius=ring["stand"]["radius"],
@@ -126,14 +147,12 @@ class RedesignThreadingTask(RopeThreadingTask):
                 stand.apply_translation((a + b) / 2)
                 path = _mesh_file(folder, ring["name"] + "_stand", stand, (.6, .6, .6, 1.))
                 entities.append(EntitySpec(ring["name"] + "_stand", "mesh", path, (0, 0, table_height_m),
-                                           surface={"color": (.6, .6, .6, 1.), "metallic": .15, "roughness": .5},
-                                           **ring_style))
+                                           surface=fixture_surface((.6, .6, .6, 1.), .15, .5), **ring_style))
                 foot = trimesh.creation.box(extents=2 * np.asarray(ring["base"]["half"]))
                 foot.apply_translation(np.asarray(ring["base"]["center"]))
                 path = _mesh_file(folder, ring["name"] + "_base", foot, (.45, .48, .5, 1.))
                 entities.append(EntitySpec(ring["name"] + "_base", "mesh", path, (0, 0, table_height_m),
-                                           surface={"color": (.45, .48, .5, 1.), "metallic": .15, "roughness": .5},
-                                           **ring_style))
+                                           surface=fixture_surface((.45, .48, .5, 1.), .15, .5), **ring_style))
         for o in design.obstacles:
             if o.kind == "box":
                 from scipy.spatial.transform import Rotation
@@ -142,7 +161,7 @@ class RedesignThreadingTask(RopeThreadingTask):
                 entities.append(EntitySpec(o.name, "box", None, tuple(map(float, c)), tuple(map(float, q)), fixed=True,
                                            material={"coup_type": "ipc_only"},
                                            morph_options={"size": tuple(float(2 * h) for h in o.half)},
-                                           surface={"color": tuple(o.rgba), "metallic": .1, "roughness": .6}))
+                                           surface=fixture_surface(tuple(o.rgba), .1, .6)))
             else:
                 a = o.a + S.TASK_ROOT_WORLD
                 b = o.b + S.TASK_ROOT_WORLD
@@ -153,7 +172,7 @@ class RedesignThreadingTask(RopeThreadingTask):
                 entities.append(EntitySpec(o.name, "cylinder", None, tuple(map(float, c)), (1., 0., 0., 0.), fixed=True,
                                            material={"coup_type": "ipc_only"},
                                            morph_options={"radius": float(o.radius), "height": h},
-                                           surface={"color": tuple(o.rgba), "metallic": .1, "roughness": .6}))
+                                           surface=fixture_surface(tuple(o.rgba), .1, .6)))
         report = dict(tier=self.redesign_tier, rope_length_m=design.rope_length,
                       ring_aperture_diameters_m={r["name"]: 2 * r["inner_radius_m"] for r in self.layout.rings()},
                       target_material_order=[n + ("+" if s > 0 else "-") for n, s in self.layout.required_crossings()],

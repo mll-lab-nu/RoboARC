@@ -60,6 +60,10 @@ def fabric_weave(
     what lets an instruction name a corner without a direction word: "the red
     corner" means the same thing from every camera position, while "the far left
     corner" does not. Orthogonal to ``pattern``, so the stripes stay.
+
+    ``pattern="check"`` weaves the bands along both axes: ``accent_color`` where
+    two cross, the mean of the two colours where one runs alone (a buffalo check
+    or a gingham).
     """
 
     size_m = np.asarray(size_m, dtype=float)
@@ -122,8 +126,8 @@ def _base_colour(shape, *, color, pattern, accent_color, stripe_pitch_m, size_m)
     field = np.broadcast_to(base, (*shape, 3)).copy()
     if pattern == "plain":
         return field
-    if pattern not in ("stripes", "grid"):
-        raise ValueError(f"pattern must be 'plain', 'stripes' or 'grid', got {pattern!r}.")
+    if pattern not in ("stripes", "grid", "check"):
+        raise ValueError(f"pattern must be 'plain', 'stripes', 'grid' or 'check', got {pattern!r}.")
     if accent_color is None:
         raise ValueError(f"pattern={pattern!r} needs accent_color.")
 
@@ -136,6 +140,13 @@ def _base_colour(shape, *, color, pattern, accent_color, stripe_pitch_m, size_m)
     if pattern == "stripes":
         field[band_v, :, :] = accent
         return field
+    if pattern == "check":
+        # A woven check (buffalo check, gingham): the bands along both axes, ``accent_color`` where they cross, half
+        # way between the two colours where one band runs alone.
+        position_u = np.linspace(0.0, float(size[0]), shape[1], endpoint=False)
+        band_u = (np.floor(position_u / float(stripe_pitch_m)).astype(int) % 2) == 1
+        crossings = band_v[:, None].astype(float) + band_u[None, :].astype(float)
+        return field + (accent - base) * (crossings / 2.0)[..., None]
     # ``grid``: the same bands along BOTH texture axes, drawn as lines rather
     # than filled cells so the sheet still reads as one colour. A crease running
     # along the stripes of a one-axis pattern leaves no mark on it; a grid is cut

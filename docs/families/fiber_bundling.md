@@ -2,7 +2,7 @@
 
 Family key `fiber_bundling` · 5 task bases · robot `franka-robotiq-2f85` · physics MuJoCo 3.14.0
 
-A cable lies in a fixed cradle: a thick sheath whose rear terminal is anchored, and at its front a bundle of fine fibers branching from the sheath. The robot must pass every fine fiber, and then the front sheath, through a fixed copper ring, without touching the fine fibers with the gripper. In bases 02, 04 and 05 the number of fibers grows with the difficulty (3, 8 and 16). Bases 08 and 09 use a formboard design with 16 fibers, a tighter ring and a required end position of one of the two red fibers; base 09 adds a peg that the sheath must be routed past.
+A cable lies in a fixed cradle: a thick sheath whose rear terminal is anchored, and at its front a bundle of fine fibers branching from the sheath. The robot must pass every fine fiber, and then the front sheath, through a fixed ring, without touching the fine fibers with the gripper. In bases 02, 04 and 05 the number of fibers grows with the difficulty (3, 8 and 16). Bases 08 and 09 use a formboard design with 16 fibers, a tighter ring and a required end position of one of the two red fibers; base 09 adds a peg that the sheath must be routed past.
 
 ## Robot and grasping
 

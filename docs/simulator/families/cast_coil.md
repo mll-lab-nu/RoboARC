@@ -10,7 +10,9 @@ separate work and is not covered or released here.
 
 Two cast pieces, gold and silver, lie apart on the table (ALOHA, assisted grasp `contact_weld_v1`). The robot assembles
 them: the silver in the gold's frame within 1 mm and 0.02 rad of the assembled pose, resting near the table, held for
-the stable time.
+the stable time. Gold and silver are the pieces' colours at appearance seed 0 and their object names (`coil_gold`,
+`coil_silver`); since the appearance seeds v2 (CHANGELOG, "Unreleased") the texts say "the two Cast Coil pieces", and
+seeds 1 and 2 re-finish both (`piece_finish`, as cast_keyhole's).
 - very_easy (straight_comb): one alignment, then a straight insertion of complementary large teeth;
 - easier (offset_baffle): an offset insertion, then the front bar slid into the root pocket;
 - easy (baseline_assembly), medium (axial_screw_turn), hard (split_turn_offset): the full coil pieces, with turning and offset

@@ -857,46 +857,100 @@ LOOK_BEVEL = (("rail_", .0015), ("end_left", .0015), ("middle_board", .0015), ("
 PINE, BIRCH, HARDWOOD = (.70, .50, .30, 1), (.85, .74, .55, 1), (.47, .32, .19, 1)
 ZINC, BLACK_OXIDE, CHROME = (.66, .67, .69, 1), (.16, .16, .17, 1), (.66, .68, .71, 1)
 SHADE = dict(rail_near=1., rail_far=.95, end_left=1.04, end_r=.97, middle_board=1.02, leg=.94, ledge=1.03)
-# The appearance parameters (BedBoltTask defaults wood_finish, bolt_finish, key_finish; the user, 2026-10-20: a seed
-# varies appearance only): the first entry of each is the look above. Wood: (boards, slats, corner block and holders).
-WOOD_FINISHES = dict(pine=(PINE, BIRCH, HARDWOOD), walnut=((.42, .27, .16, 1), (.56, .40, .26, 1), (.30, .19, .11, 1)),
-                     white_oak=((.80, .68, .50, 1), (.88, .80, .64, 1), (.62, .48, .32, 1)),
-                     white_painted=((.90, .90, .88, 1), BIRCH, (.84, .84, .82, 1)))
-BOLT_FINISHES = dict(black_oxide=BLACK_OXIDE, zinc=(.72, .73, .75, 1), yellow_zinc=(.80, .68, .36, 1))
-KEY_FINISHES = dict(chrome=CHROME, black_oxide=BLACK_OXIDE, blue_coated=(.18, .32, .62, 1))
-
-
-def look_colours(wood="pine", bolt="black_oxide", key="chrome"):
-    """The colours _dress draws with for the finishes named."""
-    boards, slats, block = WOOD_FINISHES[wood]
-    return dict(boards=boards, slats=slats, block=block, bolt=BOLT_FINISHES[bolt], key=KEY_FINISHES[key])
+SIGN_CARD = (.94, .94, .92, 1)
 
 
 def _shade(rgba, f):
     return tuple(min(1., c * f) for c in rgba[:3]) + (rgba[3],)
 
 
+# The appearance parameters (BedBoltTask defaults wood_finish, bolt_finish, key_finish; the user, 2026-10-20: a seed
+# varies appearance only): the first entry of each is the look above, the others those of appearance seeds 1 and 2
+# (scene_variation AXES["bed_bolt"]). A finish is (rgba, roughness, metallic); the look above sets no roughness or
+# metallic, so its files stay as they were, and the others draw them as a material (_materials; the user, 2026-10-27:
+# seeds 1 and 2 differ from seed 0 and from each other in colour and material, CIEDE2000 >= 20 between any two seeds'
+# colours of a part, every part that stands on the table >= 15 from every table top of topogym.world.look).
+# Wood: the bed frame's boards, slats, corner block and holders, its hardware (the insert's flange and thread, the slats'
+# screw heads) and the drive sign's card (the texts call it white: it stays white, matte paper or coated card).
+# Bolt: the bolt. Key: the L key; the ratcheting key's handle (its long arm and bend), its head and bit, the head's ring.
+WOOD_FINISHES = dict(
+    pine=dict(boards=(PINE, None, None), slats=(BIRCH, None, None), block=(HARDWOOD, None, None),
+              hardware=(ZINC, None, None), card=(SIGN_CARD, None, None)),
+    # charcoal, not black: the frame fills a third of cam_high, and a black one under a dim seed's light darkened the
+    # whole frame below the seeds' exposure floor (bed-bolt-03 seed 1: mean luma 0.30, 2026-10-28)
+    charcoal_painted=dict(boards=((.16, .16, .17, 1), .55, 0.), slats=((.20, .20, .21, 1), .55, 0.),
+                       block=((.12, .12, .13, 1), .55, 0.), hardware=((.70, .52, .22, 1), .3, 1.),       # brass screws
+                       card=((.90, .90, .87, 1), .85, 0.)),
+    mahogany=dict(boards=((.36, .13, .07, 1), .3, 0.), slats=((.48, .20, .10, 1), .3, 0.),                  # lacquered
+                  block=((.26, .09, .05, 1), .3, 0.), hardware=((.06, .06, .065, 1), .45, .6),              # black oxide
+                  card=((.95, .95, .95, 1), .4, 0.)))
+BOLT_FINISHES = dict(black_oxide=(BLACK_OXIDE, None, None),
+                     antique_brass=((.36, .25, .11, 1), .5, 1.),         # brushed, as furniture bolts come
+                     blue_anodised=((.08, .20, .60, 1), .3, .8))
+KEY_FINISHES = dict(
+    chrome=dict(key=(CHROME, None, None), handle=(_shade(CHROME, .3), None, None), head=(_shade(CHROME, 1.1), None, None),
+                ring=(_shade(CHROME, .75), None, None)),
+    # powder-coated red; the ratcheting key: a red plastic handle, a black-oxide head
+    red_coated=dict(key=((.55, .05, .04, 1), .4, 0.), handle=((.55, .05, .04, 1), .5, 0.),
+                    head=((.08, .08, .09, 1), .4, .7), ring=((.05, .05, .055, 1), .4, .7)),
+    # black oxide; the ratcheting key: a black rubber handle, a titanium-nitride (gold) head
+    black_oxide=dict(key=((.06, .06, .065, 1), .4, .7), handle=((.04, .04, .045, 1), .8, 0.),
+                     head=((.72, .55, .18, 1), .25, 1.), ring=((.54, .41, .135, 1), .25, 1.)))
+
+
+def look_colours(wood="pine", bolt="black_oxide", key="chrome"):
+    """The finishes (rgba, roughness, metallic) _dress draws with for the finishes named."""
+    return dict(WOOD_FINISHES[wood], bolt=BOLT_FINISHES[bolt], **KEY_FINISHES[key])
+
+
 def _look_rgba(entity, name, drive, look):
-    """The look's colour (None: keep it), by its geom name (a twin's without "_look"); look: look_colours()."""
+    """The look's finish (None: keep the colour), by its geom name (a twin's without "_look"); look: look_colours()."""
     if entity == "bed_frame":
-        if name.startswith(("cradle_", "stand_", "key_rest", "vblock_")):
+        if name.startswith(("cradle_", "stand_", "key_rest", "vblock_")) and name != "stand_hole":
             return look["block"]
         if name.startswith("slat_"):
-            return _shade(look["slats"], (.97, 1.03, 1., .98, 1.02)[int(name.split("_")[1]) % 5])
+            return _shade_finish(look["slats"], (.97, 1.03, 1., .98, 1.02)[int(name.split("_")[1]) % 5])
         if name.startswith(("block_", "bore_")):
-            return _shade(look["block"], 1.25)
+            return _shade_finish(look["block"], 1.25)
         if name.startswith(("hole_thread", "insert_", "screw_")):
-            return ZINC
+            return look["hardware"]
+        if name == "sign_card":
+            return look["card"]
         for k, f in SHADE.items():
             if name.startswith(k):
-                return _shade(look["boards"], f)
+                return _shade_finish(look["boards"], f)
         return None
     if entity == "bolt":
         return None if name == "notch" else look["bolt"]
     if DRIVES[drive].get("ratchet"):
-        dark = name.startswith(("key_long", "key_bend"))
-        return _shade(look["key"], .3) if dark else _shade(look["key"], 1.1)
+        if name == "key_ratchet_ring":
+            return look["ring"]
+        return look["handle"] if name.startswith(("key_long", "key_bend")) else look["head"]
     return look["key"]
+
+
+def _shade_finish(finish, f):
+    return (_shade(finish[0], f),) + tuple(finish[1:])
+
+
+def _materials(world, asset, entity, drive, look):
+    """Each visual geom whose finish (_look_rgba) sets a roughness and a metallic draws them through a material of its
+    own colour (nyx_direct draws an MJCF material's colour, roughness and metalness under a scene look); the recorded look
+    sets none, so its files stay as they were."""
+    made = {}
+    for g in world.iter("geom"):
+        if not (g.get("contype") == "0" and g.get("conaffinity") == "0" and g.get("mass") == "0"):
+            continue
+        name = g.get("name")
+        finish = _look_rgba(entity, name[:-len("_look")] if name.endswith("_look") else name, drive, look)
+        if finish is None or finish[1] is None:
+            continue
+        key = (g.get("rgba"), finish[1], finish[2])
+        if key not in made:
+            made[key] = f"look_{len(made)}"
+            ET.SubElement(asset, "material", name=made[key], rgba=key[0], roughness=_v(finish[1]),
+                          metallic=_v(finish[2]))
+        g.set("material", made[key])
 
 
 def _box_corners(h, c=0.):
@@ -965,18 +1019,19 @@ def _dress(world, asset, entity, drive, look):
                     del g.attrib[k]
                 g.set("type", "mesh")
                 g.set("mesh", f"{name}_m")
-            rgba = _look_rgba(entity, base, drive, look)
-            if rgba is not None:
-                g.set("rgba", _v(rgba))
+            finish = _look_rgba(entity, base, drive, look)
+            if finish is not None:
+                g.set("rgba", _v(finish[0]))
     if entity == "bed_frame":
-        _dress_frame(world, asset, DRIVES[drive].get("stand_hole_y", .005), look["block"])
-        _dress_sign(world, asset, drive)
+        _dress_frame(world, asset, DRIVES[drive].get("stand_hole_y", .005), look["block"][0], look["hardware"][0])
+        _dress_sign(world, asset, drive, look["card"][0])
     elif entity == "bolt":
         _dress_head(world, asset)
     elif entity == "key" and not DRIVES[drive].get("ratchet"):
-        _dress_bend(world, asset, drive, look["key"])
+        _dress_bend(world, asset, drive, look["key"][0])
     elif entity == "key":
-        _dress_ratchet(world, asset, look["key"])
+        _dress_ratchet(world, asset, look["ring"][0])
+    _materials(world, asset, entity, drive, look)
 
 
 INSERT_T = .0003                # the insert's flange: in the block face, this thick
@@ -985,12 +1040,12 @@ INSERT_T = .0003                # the insert's flange: in the block face, this t
 # reference never goes, with the bolt's head drawn on it `scale` times its size and the head's recess (DRIVES) in black.
 # Visual only, on the holders body as the other looks: the physics scene and the frozen instances are unchanged.
 SIGN = dict(xy=(-.01, -.29), card=(.06, .045), scale=4.5, t=.0005)
-SIGN_CARD, SIGN_RECESS = (.94, .94, .92, 1), (.05, .05, .06, 1)
+SIGN_RECESS = (.05, .05, .06, 1)                # SIGN_CARD: the recorded look's card (WOOD_FINISHES card)
 
 
-def _dress_sign(world, asset, drive, s=SIGN):
-    """The sign (SIGN): the card, the head as ZINC and its recess in SIGN_RECESS, each a flat piece t thick laid on the one
-    below it."""
+def _dress_sign(world, asset, drive, card, s=SIGN):
+    """The sign (SIGN): the card (in the colour card), the head as ZINC and its recess in SIGN_RECESS, each a flat piece t
+    thick laid on the one below it."""
     holders, (x, y), k, t = world.find("body[@name='holders']"), s["xy"], s["scale"], s["t"]
     c = DRIVES[drive]
 
@@ -999,7 +1054,7 @@ def _dress_sign(world, asset, drive, s=SIGN):
         _look_geom(holders, f"sign_{name}", f"sign_{name}_m", rgba, pos=(x + at[0], y + at[1], t * (layer + .5)))
 
     hz, r = t / 2, k * BOLT["head_d"] / 2
-    piece("card", _box_corners((*s["card"], hz)), SIGN_CARD, 0)
+    piece("card", _box_corners((*s["card"], hz)), card, 0)
     piece("head", _prism_corners(r, hz), ZINC, 1)
     if drive == "hex":
         piece("recess", _prism_corners(k * SOCKET_AF / np.sqrt(3), hz, n=6), SIGN_RECESS, 2)
@@ -1019,14 +1074,15 @@ def _dress_sign(world, asset, drive, s=SIGN):
         piece("recess", _box_corners((np.sqrt(r * r - w * w), w, hz)), SIGN_RECESS, 2)
 
 
-def _dress_frame(world, asset, hole_y, block, h=HOLD):
+def _dress_frame(world, asset, hole_y, block, hardware, h=HOLD):
     """The insert's flange, the slats' screw heads, the bolt's V-blocks and the key's stand as one block (its five
-    pieces' looks shaded apart) with its hole's mouth drawn dark on top; block: the V-blocks' and the stand's colour."""
+    pieces' looks shaded apart) with its hole's mouth drawn dark on top; block: the V-blocks' and the stand's colour,
+    hardware: the flange's and the screw heads'."""
     frame, holders = world.find("body[@name='bedframe']"), world.find("body[@name='holders']")
     p, _ = hole_frame_point()
     _annulus(asset, "insert_flange_m", THREAD_LOOK["hole_outer"], RB + WALL, 0., INSERT_T)
     along_x = _quat(Rotation.from_euler("y", np.pi / 2).as_matrix())
-    _look_geom(frame, "insert_flange", "insert_flange_m", ZINC, pos=p, quat=along_x)
+    _look_geom(frame, "insert_flange", "insert_flange_m", hardware, pos=p, quat=along_x)
     f = FRAME
     ET.SubElement(asset, "mesh", name="screw_head_m", vertex=_v(_prism_corners(.003, .00015, 0., .0001, n=24)))
     top = f["zb"] + f["h"] - .022 + f["slat_t"]
@@ -1034,7 +1090,7 @@ def _dress_frame(world, asset, hole_y, block, h=HOLD):
         for sy in (-1, 1):
             for dx in (-1, 1):
                 y = sy * (f["W"] / 2 - f["t"] - f["ledge"] / 2)
-                _look_geom(frame, f"screw_{i}_{'nf'[sy > 0]}{'ab'[dx > 0]}", "screw_head_m", ZINC,
+                _look_geom(frame, f"screw_{i}_{'nf'[sy > 0]}{'ab'[dx > 0]}", "screw_head_m", hardware,
                            pos=(x + dx * f["slat_w"] / 4, y, top + .00005))
     # each cradle wall swept straight down to the table: below its V face, so the bolt's room above it stays clear
     for g in [g for g in holders.findall("geom") if g.get("name", "").startswith("cradle_") and g.get("contype") is None]:
@@ -1125,11 +1181,11 @@ def bend_arc(k=KEY, n=24) -> dict:
 
 
 def _dress_ratchet(world, asset, colour, r=RATCHET):
-    """The ratchet housing's top: a ring proud of it by 0.15 mm."""
+    """The ratchet housing's top: a ring proud of it by 0.15 mm, in colour (KEY_FINISHES ring)."""
     body = world.find("body[@name='key']")
     bend = np.array([KEY["long"] - KEY["s"] / 2, 0, 0])
     _annulus(asset, "key_ratchet_ring_m", r["house_r"] - .0025, r["house_r"] - .0012, -.00015, 0.)
-    _look_geom(body, "key_ratchet_ring", "key_ratchet_ring_m", _shade(colour, .75), pos=bend + (0, 0, r["house_z"][0]))
+    _look_geom(body, "key_ratchet_ring", "key_ratchet_ring_m", colour, pos=bend + (0, 0, r["house_z"][0]))
 
 
 def bolt_points() -> np.ndarray:

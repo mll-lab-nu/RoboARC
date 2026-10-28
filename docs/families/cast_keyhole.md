@@ -2,7 +2,7 @@
 
 Family key `cast_keyhole` · 5 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
-A gold piece and a silver keyhole piece are interlocked. The robot must free the silver keyhole piece completely and place all of it inside the green dashed goal square on the table, while the gold piece stays on the puzzle side.
+Two cast plates are interlocked: the keyhole plate (`keyhole_silver`, a closed, stepped hole through it) and the fork plate (`keyhole_gold`, its stepped slot open at one end; in base 06 the right-hand and the left-hand plate). The robot must free the keyhole plate completely and place all of it inside the green dashed goal square on the table, while the fork plate stays on the puzzle side. The object names are identifiers: the plates are gold and silver at appearance seed 0 and change colour and material at seeds 1 and 2.
 
 ## Robot and grasping
 
@@ -14,9 +14,9 @@ Assisted grasping of rigid parts (`contact_weld_v1`): when a closing gripper has
 
 What the grader checks, in plain words (each task's `instruction.md` states the exact rule and its limits):
 
-- **Containment.** Every point of the silver keyhole piece, not only its centre, lies inside the goal square, at least 1 mm inside the inner edge of the dashed green line, and within the goal volume's height above the table; it may not sink more than 1 mm below the tabletop. It need not touch the table.
-- **Separation from the rest.** The gold piece, and every other puzzle component, stay entirely on the puzzle side of an invisible fixed vertical plane between the puzzle and the goal square. Moving the whole puzzle into the goal does not count.
-- **At rest.** The silver piece moves at most 1 mm/s and 0.02 rad/s. Holding it is allowed; release is not required.
+- **Containment.** Every point of the keyhole plate, not only its centre, lies inside the goal square, at least 1 mm inside the inner edge of the dashed green line, and within the goal volume's height above the table; it may not sink more than 1 mm below the tabletop. It need not touch the table.
+- **Separation from the rest.** The fork plate, and every other puzzle component, stay entirely on the puzzle side of an invisible fixed vertical plane between the puzzle and the goal square. Moving the whole puzzle into the goal does not count.
+- **At rest.** The keyhole plate moves at most 1 mm/s and 0.02 rad/s. Holding it is allowed; release is not required.
 - All final conditions must hold together, continuously, for 0.5 s of simulated time.
 
 A piece falling more than 100 mm below the tabletop ends the episode in failure. Contact penetration does not end the episode by itself. A success with deep interpenetration (beyond the limits stated in the task text) is held for human review instead of being credited automatically, and a task contact deeper than 10 mm counts as a simulator breakdown.
@@ -35,7 +35,7 @@ each `task.toml`. Numbers missing from the table are not used: base numbers are 
 | `roboarc-cast-keyhole-03-i01` | easy | `cast_keyhole_easy` |  | [privileged](../../tasks/roboarc-cast-keyhole-03-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-03-i01-standard/) |
 | `roboarc-cast-keyhole-04-i01` | medium | `cast_keyhole_medium` |  | [privileged](../../tasks/roboarc-cast-keyhole-04-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-04-i01-standard/) |
 | `roboarc-cast-keyhole-05-i01` | hard | `cast_keyhole_hard` |  | [privileged](../../tasks/roboarc-cast-keyhole-05-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-05-i01-standard/) |
-| `roboarc-cast-keyhole-06-i01` | hard | `cast_keyhole_double_maze` | double maze: two plates, gold and silver, each with a slot grid, threaded through each other at right angles | [privileged](../../tasks/roboarc-cast-keyhole-06-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-06-i01-standard/) |
+| `roboarc-cast-keyhole-06-i01` | hard | `cast_keyhole_double_maze` | double maze: two plates, each with a slot grid, threaded through each other at right angles | [privileged](../../tasks/roboarc-cast-keyhole-06-i01-privileged/) / [standard](../../tasks/roboarc-cast-keyhole-06-i01-standard/) |
 
 ## Links
 

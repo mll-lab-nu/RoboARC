@@ -15,7 +15,7 @@ camera images and proprioception. The difficulty of a base is `[metadata].diffic
 | [3D buzz wire](buzz_wire_3d.md) | Guide a metal loop along a bent wire without touching it | Franka Panda + Robotiq 2F-85 | 5 | very_easy 1, easier 2, medium 1, hard 1 |
 | [Caliper sorting](caliper_sorting.md) | Measure look-alike sleeves with a vernier caliper and sort them into labelled bins | ALOHA 2 (two arms) | 1 | hard 1 |
 | [Cast coil](cast_coil.md) | Assemble two interlocking cast pieces | ALOHA 2 (two arms) | 5 | very_easy 1, easier 1, easy 1, medium 1, hard 1 |
-| [Cast keyhole](cast_keyhole.md) | Free the silver keyhole piece from the gold piece and place it in a goal square | ALOHA 2 (two arms) | 5 | easier 1, easy 1, medium 1, hard 2 |
+| [Cast keyhole](cast_keyhole.md) | Free the keyhole plate from the fork plate and place it in a goal square | ALOHA 2 (two arms) | 5 | easier 1, easy 1, medium 1, hard 2 |
 | [Clock assembling](clock_assembling.md) | Assemble a watch movement's gear train, screw down its bridge, wind it and let it run | ALOHA 2 (two arms) | 1 | hard 1 |
 | [Fiber bundling](fiber_bundling.md) | Pass a bundle of fine fibers and its sheath through a ring | Franka Panda + Robotiq 2F-85 | 5 | easier 1, easy 1, medium 2, hard 1 |
 | [Hedgehog in cage](hedgehog_in_cage.md) | Get a spiked object out of a fixed cage into a goal square | Franka Panda + Robotiq 2F-85 | 5 | easier 2, easy 2, hard 1 |

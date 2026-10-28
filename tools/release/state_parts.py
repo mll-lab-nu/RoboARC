@@ -70,7 +70,9 @@ def record(rt, s) -> dict:
 def parts(rt, s) -> dict:
     rec = record(rt, s)
     out = dict(state_sha=s.state_sha(), parts={k: sha16(v) for k, v in sorted(rec.items())},
-               physics_sha=sha16({k: v for k, v in rec.items() if k not in IGNORED}))
+               physics_sha=sha16({k: v for k, v in rec.items() if k not in IGNORED}),
+               # the task part without its instance id (an appearance seed's own): the task RNG, result and metrics
+               task_but_instance_id=sha16({k: v for k, v in rec.get("task", {}).items() if k != "instance_id"}))
     assert sha16(rec) == out["state_sha"], "the record is not the one Session.state_sha hashes"
     return out
 
@@ -80,7 +82,11 @@ def arg(name, default=None):
 
 
 def session(rt):
-    return rt.Session(arg("--task"), instance=arg("--instance"), strict=True)
+    """Session(strict) of the instance; its frozen generated assets (a rope's volume) installed as Session installs them
+    for a bound instance, so an instance without a runtime_binding.json beside it builds the same files."""
+    path = os.path.abspath(arg("--instance"))
+    rt._install_frozen_assets(os.path.dirname(path), json.load(open(path)).get("asset_identity") or {})
+    return rt.Session(arg("--task"), instance=path, strict=True)
 
 
 def main() -> int:

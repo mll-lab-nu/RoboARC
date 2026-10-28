@@ -35,7 +35,10 @@ class HorseshoeRingTask(PlacementGoalMixin, RigidTaskDefinition):
     goal_side = (1, -1)  # -y, the nominal scene's side; pose variation cannot flip it
     defaults = defaults(task_id, scale=2., center_xy_m=[-.1356786, .05], yaw_deg=0.,
                     initial_floor_clearance_m=.001, stable_duration_s=.5,
-                    minimum_separation_m=.02)
+                    minimum_separation_m=.02, shoe_finish="steel")
+    # Appearance only: the horseshoes' and chains' finish, "steel" (as generated) or a scene_visuals role for their URDF
+    # colours and GLBs; at the default it stays out of instance_id and the recorded preset.
+    hash_when_changed = ("shoe_finish",)
 
     template_resource = None
     layout_resource = None
@@ -58,6 +61,14 @@ class HorseshoeRingTask(PlacementGoalMixin, RigidTaskDefinition):
         ring_finish = finish_generated_urdf(
             folder / "target_ring" / "target_ring.urdf", cfg["target_ring_finish"]
         )
+        if cfg["shoe_finish"] != self.defaults["shoe_finish"]:
+            from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color, surface
+            shoe = surface(cfg["shoe_finish"])
+            for body in assembly.bodies:
+                if body.name != "target_ring":
+                    scale_glb_color(folder / body.name / f"{body.name}.glb", 1., color=shoe["color"],
+                                    roughness=shoe["roughness"], metallic=shoe["metallic"])
+                    scale_urdf_color(folder / body.name / f"{body.name}.urdf", 1., color=shoe["color"])
         self.assembly = assembly
         self.body_origins = {item["name"]: np.asarray(item["origin_m"]) for item in report["bodies"]}
         rotation = Rotation.from_euler("z", float(cfg["yaw_deg"]), degrees=True)

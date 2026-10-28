@@ -110,8 +110,9 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
 ## 5. The evaluation run
 
 Start it once the smoke test (section 4) has passed. Run a coding agent over the tasks with the batch runner, three trials per task and mode (`K=3`). Every puzzle task has
-three scenes (appearance seeds 0, 1 and 2: the same physics in other colours, materials and textures), and the runner
-gives the three trials of a task different seeds, so they see three different scenes; an IKEA task has one scene.
+three scenes (appearance seeds 0, 1 and 2: the same physics in another look, with other lighting, table top, floor
+and object colours and materials), and the runner gives the three trials of a task different seeds, so they see three
+different scenes; an IKEA task's three seeds are its one scene, lit three ways in the standard mode's images.
 
 Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's agents read them:
 
