@@ -764,12 +764,20 @@ def full_material(nps, surface: Surface, *, genesis_assets=None):
     return mat
 
 
-def color_material(nps, rgba_u8):
-    """The exporter's material of a vertex-coloured visual geometry: albedo = its main colour / 255."""
+def color_material(nps, rgba_u8, pbr=(None, None)):
+    """The exporter's material of a vertex-coloured visual geometry: albedo = its main colour / 255. ``pbr``: the
+    (roughness, metalness) an appearance seed's look draws as well (renderer.pbr_materials; None: not set)."""
     mat = nps.MaterialAsset()
     mat.set_properties(nps.EMaterialProperty.AlbedoColor)
     c = np.asarray(rgba_u8, dtype=np.float64) / 255.0
     mat.albedoColor = nps.float4(c[0], c[1], c[2], c[3])
+    roughness, metallic = pbr
+    if roughness is not None:
+        mat.set_properties(nps.EMaterialProperty.PerceptualRoughness)
+        mat.perceptualRoughness = roughness
+    if metallic is not None:
+        mat.set_properties(nps.EMaterialProperty.Metalness)
+        mat.metalness = metallic
     return mat
 
 
@@ -1158,6 +1166,9 @@ class NyxScene:
         n_instances = sum(len(e.geoms) if e.kind == "mjcf" else (len(e.slots) if e.kind == "mesh" else 1)
                           for e in ordered)
         cams, lights = self.camera_defs(), self.lights()
+        # an appearance seed's look (topogym.world.look) also draws the roughness and metalness of MJCF materials and
+        # mesh surfaces; the released look draws their albedo only
+        pbr = bool(self.cfg["renderer"].get("pbr_materials", False))
         asset.instance_resize(n_instances)
         asset.camera_resize(len(cams))
         asset.light_resize(len(lights))
@@ -1207,7 +1218,8 @@ class NyxScene:
                     inst.scale = yup(nps.float3(1.0, 1.0, 1.0))
                     mesh_name = self._export_geom(folder, g)
                     inst.mesh_uri = os.path.relpath(folder / mesh_name).replace("\\", "/")
-                    inst.matOverride = color_material(nps, g["rgba_u8"])
+                    inst.matOverride = color_material(nps, g["rgba_u8"], g["pbr"] if pbr and e.name != "robot" else
+                                                      (None, None))
                     inst.smooth, inst.enabled, inst.uuid = False, True, uuid
                     inst.name = g["node"]
                     asset.set_instance(index, inst)
@@ -1223,7 +1235,8 @@ class NyxScene:
                     s = (scale, scale, scale) if isinstance(scale, (int, float)) else tuple(scale)
                     inst.scale = yup(nps.float3(*s))
                     inst.mesh_uri = os.path.relpath(str(e.path)).replace("\\", "/")
-                    inst.matOverride = color_material(nps, _u8_color(_rgba(e.surface)))
+                    inst.matOverride = color_material(nps, _u8_color(_rgba(e.surface)),
+                                                      (e.surface.roughness, e.surface.metallic) if pbr else (None, None))
                     inst.smooth, inst.enabled, inst.uuid = False, True, uuid
                     asset.set_instance(index, inst)
                     index += 1
@@ -1285,6 +1298,8 @@ class NyxScene:
         env.texture = str(self._visual_root(self.cfg["renderer"]["env_map"]))
         env.layout = nps.EEnvMapLayout.LongLat
         env.multiplier = float(self.cfg["renderer"]["env_intensity"])
+        if self.cfg["renderer"].get("env_tint") is not None:       # a seed's look: the lights' colour temperature
+            env.tint = nps.float3(*(float(v) for v in self.cfg["renderer"]["env_tint"]))
         asset.set_env_map(0, env)
         path = folder / SCENE_FILE
         nps.export_scene_file(str(path), asset)
@@ -1486,7 +1501,10 @@ def _mj_geom_trimesh(mj, i, *, is_col: bool):
     mesh = trimesh.Trimesh(**params, process=False)
     mesh.visual = ColorVisuals(vertex_colors=np.tile(np.array(color), [len(mesh.vertices), 1]))
     mesh.vertex_normals          # Genesis reads every visual mesh's normals: cached, the OBJ export writes them
-    return dict(trimesh=mesh, rgba_u8=np.asarray(mesh.visual.main_color, dtype=np.uint8), geom=i)
+    # the material's roughness and metalness when it declares them (MuJoCo: -1 unset), drawn under a seed's look only
+    pbr = (None, None) if mat_id < 0 or is_col else \
+        tuple(None if v < 0 else float(v) for v in (mj.mat_roughness[mat_id], mj.mat_metallic[mat_id]))
+    return dict(trimesh=mesh, rgba_u8=np.asarray(mesh.visual.main_color, dtype=np.uint8), geom=i, pbr=pbr)
 
 
 def chain_cord_host(instance_path) -> dict | None:

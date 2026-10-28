@@ -243,7 +243,36 @@ def appearance(task_class, seed):
         else:
             value = _parameter_at(drawn, axis["path"])
         _assign(values, axis["path"], _plain(value))
+    values["scene_look"] = scene_look(task_class, seed)
     return values
+
+
+def scene_look(task_class, seed):
+    """The scene's look of appearance seed ``seed`` >= 1 (topogym.world.look; the user, 2026-10-27: white light that
+    changes colour temperature, the table top and the floor change finish). Each base draws, once for all its seeds,
+    which seed is warm and which brighter and the orders of key lights, table tops and floors; seed S takes the S-th of
+    each, so seeds 1 and 2 differ in every part. The bands leave a gap round the released look (about 6000 K,
+    brightness 1, key light 0, height 2.40 m) so that no seed looks like seed 0, and stop short of dark, glaring or
+    strongly tinted scenes (renders of cast-keyhole-02, 2026-10-27: below 3600 K the green goal dashes turn yellow,
+    6500-7000 K is not told from seed 0, brightness moves the frame little under the Reinhard tone mapper): warm
+    3600-4300 K or cool 8000-10000 K, brightness 0.65-0.78 or 1.25-1.50, height 1.9-2.4 m."""
+    from topogym.world.look import FLOOR_FINISHES, SCENE_LOOK_VERSION, TABLE_EXCLUDED, TABLE_FINISHES
+    if seed < 1:
+        raise ValueError("seed 0 has no scene_look: it is the released look")
+    name = f"visual/scene_look/{task_class.task_id}/{task_class.variation_id}"
+    shared, own = VariantRng(0).stream(name), VariantRng(seed).stream(name)
+    warm_seed, bright_seed = (int(v) for v in shared.integers(2, size=2))
+    keys = shared.permutation(3) + 1
+    tables = shared.permutation(sorted(t for t in list(TABLE_FINISHES)[1:]
+                                       if t not in TABLE_EXCLUDED.get(task_class.task_id, ())))
+    floors = shared.permutation(sorted(list(FLOOR_FINISHES)[1:]))
+    warm, bright = seed % 2 == warm_seed, seed % 2 == bright_seed
+    lighting = dict(key=int(keys[(seed - 1) % 3]),
+                    height_m=round(float(own.uniform(1.9, 2.4)), 3),
+                    cct_k=round(float(own.uniform(3600., 4300.) if warm else own.uniform(8000., 10000.))),
+                    brightness=round(float(own.uniform(1.25, 1.50) if bright else own.uniform(.65, .78)), 3))
+    return dict(version=SCENE_LOOK_VERSION, lighting=lighting, table=str(tables[(seed - 1) % len(tables)]),
+                floor=str(floors[(seed - 1) % len(floors)]))
 
 
 def within_envelope(task_class, config, *, atol=1e-9):
@@ -266,7 +295,7 @@ def within_envelope(task_class, config, *, atol=1e-9):
         out = {}
         for key, value in tree.items():
             path = f"{prefix}{key}"
-            if path in listed:
+            if path in listed or path == "scene_look":      # the scene's look (scene_look) is not a scene variation
                 continue
             if isinstance(value, Mapping):
                 out.update(rest(value, path + "."))

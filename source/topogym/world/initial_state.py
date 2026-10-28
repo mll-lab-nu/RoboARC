@@ -186,6 +186,12 @@ def scene_identity(config, scene_config, task, spec, asset_build):
     from copy import deepcopy
     from omegaconf import OmegaConf
     from topogym.utils.io import to_jsonable
+    if config.task_parameters.get("scene_look") is not None:
+        # A seed's look changes the renderer config only (topogym.world.look): the identity is the released scene's.
+        from dataclasses import replace
+        from topogym.config.scene import load_scene_config
+        scene_config = load_scene_config(replace(config, task_parameters={
+            k: v for k, v in config.task_parameters.items() if k != "scene_look"}))
     scene = OmegaConf.to_container(scene_config, resolve=True)
     # This first integration targets the production Blanket/ALOHA scene. The
     # numeric codec also has smaller rigid/PBD fixtures with explicit identities.
@@ -196,7 +202,8 @@ def scene_identity(config, scene_config, task, spec, asset_build):
     robot_sources = {str(p.relative_to(robot_root)): sha256_file(p) for p in sorted(robot_root.rglob("*"))
         if p.is_file() and p.suffix.lower() in {".xml", ".stl", ".obj", ".dae", ".ply", ".mtl", ".png"}}
     parameters = deepcopy(task.config)
-    for key in ("initialization_mode", "initial_state_path", "initial_state_resource", "initial_state_sha256"):
+    for key in ("initialization_mode", "initial_state_path", "initial_state_resource", "initial_state_sha256",
+                "scene_look"):
         parameters.pop(key, None)
     for key in getattr(task, "appearance_parameters", ()):    # looks only: their nominal values
         parameters[key] = deepcopy(task.defaults[key])

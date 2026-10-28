@@ -92,6 +92,48 @@ class AppearanceSeedTests(unittest.TestCase):
                 self.assertTrue(appearance(cls, 1))
                 self.assertNotEqual(appearance(cls, 1), appearance(cls, 2))
 
+    def test_every_release_base_has_two_scene_looks_apart_from_seed_zero(self):
+        """Seeds 1 and 2 differ in every part of the scene's look (topogym.world.look) and neither takes the released
+        table, floor, key light or a colour temperature near the released one; the draw is a pure function."""
+        from topogym.world.look import FLOOR_FINISHES, TABLE_FINISHES, check_scene_look
+        for base, task, variation in release_bases():
+            cls = task_definition(task, variation)
+            one, two = appearance(cls, 1)["scene_look"], appearance(cls, 2)["scene_look"]
+            with self.subTest(base=base):
+                self.assertEqual(appearance(cls, 1)["scene_look"], one)
+                for look in (one, two):
+                    self.assertEqual(check_scene_look(look), look)
+                    self.assertNotEqual(look["table"], next(iter(TABLE_FINISHES)))
+                    self.assertNotEqual(look["floor"], next(iter(FLOOR_FINISHES)))
+                    self.assertNotEqual(look["lighting"]["key"], 0)
+                    self.assertTrue(3600 <= look["lighting"]["cct_k"] <= 4300 or 8000 <= look["lighting"]["cct_k"] <= 10000)
+                for part in ("table", "floor"):
+                    self.assertNotEqual(one[part], two[part])
+                self.assertNotEqual(one["lighting"]["key"], two["lighting"]["key"])
+                self.assertNotEqual(one["lighting"]["cct_k"] < 6000, two["lighting"]["cct_k"] < 6000)
+                self.assertNotEqual(one["lighting"]["brightness"] < 1, two["lighting"]["brightness"] < 1)
+
+    def test_a_scene_look_changes_the_renderer_config_only(self):
+        from omegaconf import OmegaConf
+        from topogym.config.scene import load_scene_config
+        from topogym.simulator.config import SimulatorConfig
+        for family, variation in BASES[:3]:
+            cls = task_definition(family, variation)
+            plain = OmegaConf.to_container(load_scene_config(SimulatorConfig(task_id=family, variation_id=variation)))
+            looked = OmegaConf.to_container(load_scene_config(SimulatorConfig(
+                task_id=family, variation_id=variation, task_parameters=dict(scene_look=appearance(cls, 1)["scene_look"]))))
+            with self.subTest(variation=variation):
+                self.assertEqual({k: v for k, v in looked.items() if k != "env"},
+                                 {k: v for k, v in plain.items() if k != "env"})
+                self.assertEqual({k: v for k, v in looked["env"].items() if k not in ("renderer", "appearance")},
+                                 {k: v for k, v in plain["env"].items() if k not in ("renderer", "appearance")})
+                changed = {k for k in set(looked["env"]["renderer"]) | set(plain["env"]["renderer"])
+                           if looked["env"]["renderer"].get(k) != plain["env"]["renderer"].get(k)}
+                self.assertEqual(changed, {"lights", "env_intensity", "env_tint", "pbr_materials"})
+                self.assertEqual(looked["env"]["appearance"][:len(plain["env"]["appearance"])], plain["env"]["appearance"])
+                self.assertEqual([r["pattern"] for r in looked["env"]["appearance"][len(plain["env"]["appearance"]):]],
+                                 ["table", "lab_floor"])
+
     def test_a_blanket_look_keeps_the_birth_identity(self):
         """The PBD birth recipe's scene identity (declared as pbd_initial_state_generation._recipe does) is the nominal
         scene's for every look, while the drawn texture is an asset file of the tree, which an instance's asset_identity
