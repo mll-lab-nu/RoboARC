@@ -171,7 +171,7 @@ def test_prompts_are_short_task_sentences():
         assert p and p[-1] in ".!?" and len(p) <= 400 and "\n" not in p, (t.id, p)
         assert C.task_prompt(t, full=True).startswith(p)
     assert C.task_prompt(roboarc.task_info("interlocked-claws-08")) == \
-        "Separate and place the entire brown claw piece inside the green dashed goal region."
+        "Separate and place the entire key piece inside the green dashed goal region."
 
 
 def test_resize_with_pad_matches_openpi():
