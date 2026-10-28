@@ -78,7 +78,7 @@ def ring_parts(vertices, faces):
 
 
 def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint_damping=2e-4, young_modulus_pa=0.,
-                        armature=1e-6, friction=.3, cord_rgba=CORD_RGBA):
+                        armature=1e-6, friction=.3, cord_rgba=CORD_RGBA, handle_finish=None):
     """Write cord.xml: the handle (free root) with one chain branch from each eye, joined at the middle.
 
     points are the n+1 link roots and final tip from resample_links, eye to eye. Link i always has its frame at
@@ -88,9 +88,9 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
     The teammate standard (2026-10-07): a handle root with two branches keeps the tree shallow; ball-joint damping 2e-4,
     armature 1e-6, friction 0.3 with condim 3, mass from each link's cylinder only (the capsule's end spheres overlap the
     neighbours'), bending stiffness from a Young's modulus, k = E pi r^4 / (4 L).
-    cord_rgba colours the links (appearance only; a non-default colour on visual-only twins); an appearance seed's
-    finish dict(rgba=, roughness=, metallic=) is drawn through an MJCF material. Returns (path, link names, link
-    lengths, m).
+    cord_rgba colours the links (appearance only; a non-default colour on visual-only twins); it and handle_finish (the
+    wooden handle's visual, default its released rgba) may be an appearance seed's finish dict(rgba=, roughness=,
+    metallic=), drawn through an MJCF material. Returns (path, link names, link lengths, m).
     """
     folder = Path(folder)
     points = np.asarray(points, dtype=float)
@@ -119,7 +119,7 @@ def write_cord_assembly(folder, layout, points, *, radius_m, density=650., joint
                   pos=_v([l.handle_x_m, 0., l.clearance_m+l.handle_height_m/2]),
                   size=_v([l.handle_length_m/2, l.handle_width_m/2, l.handle_height_m/2]), **HANDLE_BITS)
     ET.SubElement(body, "geom", name="handle_wood", type="mesh", mesh="handle_visual", density="0",
-                  contype="0", conaffinity="0", rgba=".86 .66 .42 1")
+                  contype="0", conaffinity="0", **look("handle_finish", handle_finish or ".86 .66 .42 1"))
     turns = [_along_x(points[i+1]-points[i]) for i in range(n)]
     links = {}
 
