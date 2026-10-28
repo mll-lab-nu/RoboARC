@@ -158,7 +158,7 @@ def grader_details(fam, inst, *, limited):
     elif fam in PLACEMENT:
         side = _square_mm(inst)
         if side:
-            out.append(f"Goal square in this instance: the inner edge of the 5 mm wide dashed green line is the containment "
+            out.append(f"Goal square in this instance: the inner edge of the dashed green line is the containment "
                        f"limit (the whole line lies outside it); it encloses a {side:.1f} mm x "
                        f"{side:.1f} mm square. Every point counts: for a rigid part every vertex of its visual and collision "
                        "meshes" + ("; for the cord every vertex of its simulated volume" if fam in ("orbits", "slotted_post_ring")
