@@ -145,7 +145,11 @@ AXES = {
     ),
     "caliper_sorting": (
         # The four sleeves stay alike (one finish for all); bins keep the white label cards.
-        dict(path="fixture_finish", kind="choice", values=["forest_green", "safety_orange", "wood"], visual=True),
+        # Colour and material together (geo.FIXTURE_FINISHES, BIN_FINISHES, SLEEVE_FINISHES; the user, 2026-10-27): seed
+        # 1 a green vise and rack with black V-blocks and a black-coated caliper, dark red bins, brass sleeves; seed 2 a
+        # red vise and rack with blue V-blocks and a gold-coated caliper, dark green bins, black-oxide sleeves. The
+        # caliper's scale, vernier and knob line keep their colours.
+        dict(path="fixture_finish", kind="choice", values=["forest_green", "vise_red"], visual=True),
         dict(path="bin_finish", kind="choice", values=["dark_red", "dark_green"], visual=True),
         dict(path="sleeve_finish", kind="choice", values=["brass", "black_oxide"], visual=True),
     ),
