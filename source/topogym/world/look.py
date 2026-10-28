@@ -10,6 +10,11 @@ topogym.tasks.scene_variation.scene_look), which load_scene_config applies to th
   table     a TABLE_FINISHES name for the table top ("table");
   floor     a FLOOR_FINISHES name for the room's floor ("lab_floor").
 
+A finish is a material class (wood, metal, stone, plastic; floors wood, tile, concrete, carpet) and either a plain
+colour with roughness and metalness or a textured PBR material: colour, normal and ARM (ambient occlusion, roughness,
+metalness) maps of a CC0 Poly Haven texture, its tile size (``tile_m``: the texture's real width) setting how often it
+repeats over the table top or the floor. The maps are visual assets (topogym.assets.library.visual_asset_path).
+
 Nothing here touches a colliding geom, the MuJoCo model or the task's own objects (their colours and materials are the
 task's appearance axes). ``pbr_materials`` tells nyx_direct to draw the roughness and metalness that MJCF materials and
 mesh surfaces declare, which the released look leaves out (albedo only), so seed 0's frames stay as they were.
@@ -22,27 +27,39 @@ import numpy as np
 
 SCENE_LOOK_VERSION = 1
 
-# Table tops, linear RGB; the first is compact_lab's own (seed 0's), which no seed >= 1 draws. All light to mid tones:
-# a dark top would hide the dark ropes and cords several families use.
+def _texture(cls, name, tile_m, **more):
+    """A textured finish of Poly Haven texture ``name`` (CC0; its 1k maps <name>_{diff,nor_gl,arm}_1k.jpg). Nyx
+    multiplies the ARM map's roughness and metalness by the factors, which stay 1."""
+    return dict(cls=cls, color=[1., 1., 1.], metallic=1., roughness=1., diffuse_map=f"{name}_diff_1k.jpg",
+                normal_map=f"{name}_nor_gl_1k.jpg", arm_map=f"{name}_arm_1k.jpg", tile_m=tile_m, **more)
+
+
+# Table tops; the first is compact_lab's own plastic laminate (seed 0's). Seeds >= 1 draw a class other than plastic,
+# seeds 1 and 2 two different classes (the user, 2026-10-27: wood to metal or plastic, as RoboDojo's table materials).
+# lum: cam_high's mean luma of cast-keyhole-02 with this top under the released lights (2026-10-27): of seeds 1 and 2,
+# the one with the darker top takes the brighter light. A painted blue steel plate (0.31, with glare) was left out.
 TABLE_FINISHES = {
-    "grey_laminate": dict(color=[.83, .84, .82], metallic=0., roughness=.42),
-    "beige_laminate": dict(color=[.78, .66, .48], metallic=0., roughness=.45),
-    "maple_laminate": dict(color=[.72, .50, .30], metallic=0., roughness=.45),
-    "pale_blue_laminate": dict(color=[.45, .58, .78], metallic=0., roughness=.40),
-    "warm_grey_stone": dict(color=[.40, .38, .35], metallic=0., roughness=.65),
-    "mid_grey_laminate": dict(color=[.30, .31, .32], metallic=0., roughness=.45),
-    "brushed_steel": dict(color=[.72, .72, .73], metallic=1., roughness=.45),
+    "grey_laminate": dict(cls="plastic", color=[.83, .84, .82], metallic=0., roughness=.42, lum=.62),
+    "ash_veneer": _texture("wood", "ash_veneer", 1.0, lum=.50),
+    "cherry_veneer": _texture("wood", "cherry_veneer", 1.0, lum=.54),
+    "coated_pine": _texture("wood", "coated_pine", .74, lum=.33),
+    "brushed_steel": dict(cls="metal", color=[.72, .72, .73], metallic=1., roughness=.35, lum=.53),
+    "satin_aluminium": dict(cls="metal", color=[.80, .81, .83], metallic=1., roughness=.55, lum=.55),
+    "terrazzo": _texture("stone", "terrazzo_tiles", 2.0, lum=.43),
+    "brushed_concrete": _texture("stone", "brushed_concrete", 2.5, lum=.40),
+    "granite_tiles": _texture("stone", "granite_tile_03", 1.8, lum=.38),
 }
 # Table tops a family's seeds never draw: those its objects would not stand out from (task_id -> names).
 TABLE_EXCLUDED: dict[str, tuple] = {}
-# Floors; the first is compact_lab's blue-grey tiles (seed 0's). The grout lines stay.
+# Floors; the first is compact_lab's blue-grey tiles (seed 0's), its grout lines staying under every floor. Seeds 1 and 2
+# draw two different classes.
 FLOOR_FINISHES = {
-    "blue_grey_tile": dict(color=[.32, .37, .39], metallic=0., roughness=.70),
-    "warm_grey_tile": dict(color=[.42, .40, .37], metallic=0., roughness=.60),
-    "sand_tile": dict(color=[.58, .52, .42], metallic=0., roughness=.60),
-    "dark_slate": dict(color=[.17, .18, .19], metallic=0., roughness=.55),
-    "terracotta_tile": dict(color=[.50, .30, .22], metallic=0., roughness=.65),
-    "light_grey_vinyl": dict(color=[.62, .63, .62], metallic=0., roughness=.35),
+    "blue_grey_tile": dict(cls="tile", color=[.32, .37, .39], metallic=0., roughness=.70),
+    "parquet": _texture("wood", "diagonal_parquet", 2.36),
+    "beige_tiles": _texture("tile", "interior_tiles", 1.9),
+    "terracotta_tiles": _texture("tile", "terracotta_floor_tiles", 2.08),
+    "concrete": _texture("concrete", "brushed_concrete", 2.5),
+    "carpet": _texture("carpet", "poly_wool_herringbone", .27),
 }
 KEY_INTENSITY, FILL_INTENSITY = 3., 1.          # compact_lab's key and fill lights
 LIMITS = dict(height_m=(1.5, 2.5), cct_k=(2000., 10000.), brightness=(.5, 1.5))   # sanity bounds, not the draw's bands
@@ -108,9 +125,19 @@ def apply_scene_look(scene, look) -> None:
         renderer.env_intensity = float(renderer.env_intensity) * float(lighting["brightness"])
         renderer.env_tint = rgb
         renderer.pbr_materials = True
+    from topogym.world.lab import compact_lab_layout
+    floor = next(item for item in compact_lab_layout() if item["name"] == "lab_floor")
     current = scene.env.get("appearance")
     rules = [] if current is None else list(OmegaConf.to_container(current, resolve=True))
-    rules += [dict(pattern="table", **TABLE_FINISHES[look["table"]]),
-              dict(pattern="lab_floor", **FLOOR_FINISHES[look["floor"]])]
+    rules += [_rule("table", TABLE_FINISHES[look["table"]], scene.env.world.table.size),
+              _rule("lab_floor", FLOOR_FINISHES[look["floor"]], floor["size"])]
     with open_dict(scene.env):
         scene.env.appearance = rules
+
+
+def _rule(pattern, finish, size):
+    """nyx_direct's finish rule of ``finish`` on the box of ``size`` (x, y, z): a texture repeats once per tile_m."""
+    rule = {k: v for k, v in finish.items() if k not in ("cls", "tile_m", "lum")}
+    if "tile_m" in finish:
+        rule["uv_scale"] = [round(float(size[0]) / finish["tile_m"], 4), round(float(size[1]) / finish["tile_m"], 4)]
+    return dict(pattern=pattern, **rule)

@@ -249,9 +249,11 @@ def appearance(task_class, seed):
 
 def scene_look(task_class, seed):
     """The scene's look of appearance seed ``seed`` >= 1 (topogym.world.look; the user, 2026-10-27: white light that
-    changes colour temperature, the table top and the floor change finish). Each base draws, once for all its seeds,
-    which seed is warm and which brighter and the orders of key lights, table tops and floors; seed S takes the S-th of
-    each, so seeds 1 and 2 differ in every part. The bands leave a gap round the released look (about 6000 K,
+    changes colour temperature, a table top whose material class changes, as wood to metal or plastic, and a textured
+    floor). Each base draws, once for all its seeds, which seed is warm and which brighter, the orders of key lights and
+    of the table's and the floor's material classes, and one finish per class; seed S takes the S-th of each, so seeds
+    1 and 2 differ in every part and their table tops and floors are of different classes (the table top never seed 0's
+    plastic). The bands leave a gap round the released look (about 6000 K,
     brightness 1, key light 0, height 2.40 m) so that no seed looks like seed 0, and stop short of dark, glaring or
     strongly tinted scenes (renders of cast-keyhole-02, 2026-10-27: below 3600 K the green goal dashes turn yellow,
     6500-7000 K is not told from seed 0, brightness moves the frame little under the Reinhard tone mapper): warm
@@ -263,16 +265,29 @@ def scene_look(task_class, seed):
     shared, own = VariantRng(0).stream(name), VariantRng(seed).stream(name)
     warm_seed, bright_seed = (int(v) for v in shared.integers(2, size=2))
     keys = shared.permutation(3) + 1
-    tables = shared.permutation(sorted(t for t in list(TABLE_FINISHES)[1:]
-                                       if t not in TABLE_EXCLUDED.get(task_class.task_id, ())))
-    floors = shared.permutation(sorted(list(FLOOR_FINISHES)[1:]))
+
+    def finish_per_class(finishes, excluded=()):
+        """(the classes in this base's order, one finish of each), seed 0's finish and the excluded left out."""
+        classes = {}
+        for f, spec in list(finishes.items())[1:]:
+            if f not in excluded:
+                classes.setdefault(spec["cls"], []).append(f)
+        picks = {c: str(shared.choice(sorted(classes[c]))) for c in sorted(classes)}
+        return [str(c) for c in shared.permutation(sorted(classes))], picks
+
+    table_classes, table_of = finish_per_class(TABLE_FINISHES, TABLE_EXCLUDED.get(task_class.task_id, ()))
+    floor_classes, floor_of = finish_per_class(FLOOR_FINISHES)
+    table_at = lambda s: table_of[table_classes[(s - 1) % len(table_classes)]]
+    lum = {s: TABLE_FINISHES[table_at(s)]["lum"] for s in (1, 2)}
     warm, bright = seed % 2 == warm_seed, seed % 2 == bright_seed
+    if seed in lum and lum[1] != lum[2]:
+        bright = lum[seed] < lum[3 - seed]          # of seeds 1 and 2, the darker table top takes the brighter light
     lighting = dict(key=int(keys[(seed - 1) % 3]),
                     height_m=round(float(own.uniform(1.9, 2.4)), 3),
                     cct_k=round(float(own.uniform(3600., 4300.) if warm else own.uniform(8000., 10000.))),
                     brightness=round(float(own.uniform(1.25, 1.50) if bright else own.uniform(.65, .78)), 3))
-    return dict(version=SCENE_LOOK_VERSION, lighting=lighting, table=str(tables[(seed - 1) % len(tables)]),
-                floor=str(floors[(seed - 1) % len(floors)]))
+    return dict(version=SCENE_LOOK_VERSION, lighting=lighting, table=table_at(seed),
+                floor=floor_of[floor_classes[(seed - 1) % len(floor_classes)]])
 
 
 def within_envelope(task_class, config, *, atol=1e-9):

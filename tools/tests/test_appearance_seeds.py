@@ -107,8 +107,10 @@ class AppearanceSeedTests(unittest.TestCase):
                     self.assertNotEqual(look["floor"], next(iter(FLOOR_FINISHES)))
                     self.assertNotEqual(look["lighting"]["key"], 0)
                     self.assertTrue(3600 <= look["lighting"]["cct_k"] <= 4300 or 8000 <= look["lighting"]["cct_k"] <= 10000)
-                for part in ("table", "floor"):
-                    self.assertNotEqual(one[part], two[part])
+                self.assertNotEqual(TABLE_FINISHES[one["table"]]["cls"], TABLE_FINISHES[two["table"]]["cls"])
+                self.assertNotEqual(FLOOR_FINISHES[one["floor"]]["cls"], FLOOR_FINISHES[two["floor"]]["cls"])
+                for look in (one, two):
+                    self.assertNotEqual(TABLE_FINISHES[look["table"]]["cls"], "plastic")
                 self.assertNotEqual(one["lighting"]["key"], two["lighting"]["key"])
                 self.assertNotEqual(one["lighting"]["cct_k"] < 6000, two["lighting"]["cct_k"] < 6000)
                 self.assertNotEqual(one["lighting"]["brightness"] < 1, two["lighting"]["brightness"] < 1)

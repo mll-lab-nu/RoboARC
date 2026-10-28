@@ -622,6 +622,8 @@ class Surface:
     normal: str | None = None           # image path
     emissive_texture: Any = None
     double_sided: bool | None = None
+    arm: str | None = None              # image path: ambient occlusion, roughness, metalness (a seed's look only)
+    uv_scale: tuple | None = None       # texture repeats over a box's faces (a seed's look only)
 
     @classmethod
     def plastic(cls, color, roughness, metallic=None):
@@ -665,6 +667,10 @@ class Surface:
             self.diffuse = ("image", str(visual_root(rule["diffuse_map"])), None)
         if "normal_map" in rule:
             self.normal = str(visual_root(rule["normal_map"]))
+        if "arm_map" in rule:
+            self.arm = str(visual_root(rule["arm_map"]))
+        if "uv_scale" in rule:
+            self.uv_scale = tuple(float(v) for v in rule["uv_scale"])
 
 
 def material_override(nps, surface: Surface, *, plane_size=None, genesis_assets=None, overridden=False):
@@ -722,11 +728,15 @@ def material_override(nps, surface: Surface, *, plane_size=None, genesis_assets=
     has_diffuse = texture(surface.diffuse, P.AlbedoTexture, "albedoTexture")
     texture(None if surface.normal is None else ("image", surface.normal, None), P.NormalTexture, "normalTexture")
     has_emission = texture(surface.emissive_texture, P.EmissionTexture, "emissionTexture") or has_emission
+    texture(None if surface.arm is None else ("image", surface.arm, None), P.ArmTexture, "armTexture")
     mat.set_properties(P.Sidedness)
     mat.sidedness = nps.EMaterialSidedness.Double
     if has_diffuse and plane_size is not None:
         mat.set_properties(P.UVScale)
         mat.uvScale = nps.float2(float(plane_size[0]), float(plane_size[1]))
+    elif surface.uv_scale is not None:
+        mat.set_properties(P.UVScale)
+        mat.uvScale = nps.float2(*surface.uv_scale)
     if has_emission:
         mat.set_properties(P.AlbedoColor)
         mat.albedoColor = nps.float4(0.0, 0.0, 0.0, 1.0)
