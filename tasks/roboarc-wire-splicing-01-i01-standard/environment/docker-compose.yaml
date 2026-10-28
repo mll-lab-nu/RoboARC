@@ -16,7 +16,7 @@ services:
     depends_on: [sim]
   sim:
     cpus: 4   # rcb-monitor
-    mem_limit: 16384m   # rcb-monitor
+    mem_limit: 8192m   # rcb-monitor
     pids_limit: 8192   # rcb-monitor
     image: ghcr.io/mll-lab-nu/roboarc:2.1.0@sha256:ccc3a47a5d9e9ee94485b896070b93d737004d0cb132dc27b93bd2f19a8c917e
     volumes:

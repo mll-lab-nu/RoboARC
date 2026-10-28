@@ -71,8 +71,9 @@
 #                0 = as before: no placement, no admission, every container on GPU 0
 #   GPUS         the GPUs to use, comma-separated (default every GPU nvidia-smi lists; 0 without nvidia-smi)
 #   GPU_SHARE    rigid-task trials per GPU (4)
-#   DEFORMABLE_FAMILIES  the families whose trials have a GPU of their own (task.toml [metadata] family; default
-#                blanket_flatten blanket_fold fiber_bundling knot_untying orbits rope_threading slotted_post_ring wire_splicing)
+#   DEFORMABLE_FAMILIES  the families whose trials have a GPU of their own (task.toml [metadata] family); empty
+#                (default) = the classes with own_gpu in scripts/task_resources.toml (rope / chain and cloth), the one
+#                list of the family classes, which the tasks' declared resources come from too
 #   SLOTS_DIR    the ledger (/tmp/roboarc-slots-<uid>): every lane and batch on the host that should share GPUs uses one
 #   USAGE_GATEWAY  usage recording, optional (PROTOCOL H.6, docs/RUNNING.md "Usage recording"). Empty (default) = off:
 #                the agent calls its API directly, as Harbor runs it, and nothing below about the gateway runs; the
@@ -125,7 +126,7 @@ MODES="${MODES:-privileged standard}"; SEQ="${SEQ:-1}"; N_P="${N_P:-2}"; N_S="${
 JOBS="${JOBS:-$R/jobs/agents}"; RESULTS="${RESULTS-$(dirname "$R")/rcb_results}"; LABEL="${LABEL:-$AGENT + $MODEL ($EFFORT)}"
 LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
 GPU_SCHED="${GPU_SCHED:-1}"; GPU_SHARE="${GPU_SHARE:-4}"; SLOTS_DIR="${SLOTS_DIR:-/tmp/roboarc-slots-$(id -u)}"
-DEFORMABLE_FAMILIES="${DEFORMABLE_FAMILIES:-blanket_flatten blanket_fold fiber_bundling knot_untying orbits rope_threading slotted_post_ring wire_splicing}"
+DEFORMABLE_FAMILIES="${DEFORMABLE_FAMILIES:-}"   # empty: scripts/task_resources.toml's own_gpu classes (gpu_slots.py)
 RESERVE_CPU_SCALE="${RESERVE_CPU_SCALE:-1}"; RESERVE_MEM_SCALE="${RESERVE_MEM_SCALE:-1}"; MEM_HEADROOM_GB="${MEM_HEADROOM_GB:-}"
 if [ -z "${GPUS:-}" ]; then
   GPUS="$(nvidia-smi --query-gpu=index --format=csv,noheader 2>/dev/null | tr -d ' ' | paste -sd, -)"; GPUS="${GPUS:-0}"
@@ -215,7 +216,7 @@ LOG="$JOBS/$batch.log"
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 if [ -n "$ENV_FILE" ] && [ ! -f "$ENV_FILE" ]; then log "no env file $ENV_FILE"; exit 2; fi
 if [ "$GPU_SCHED" = 1 ]; then
-  sched="GPUs $GPUS ($GPU_SHARE rigid-task trials per GPU, a deformable-task trial alone; CPUs and memory as the tasks declare x $RESERVE_CPU_SCALE / x $RESERVE_MEM_SCALE)"
+  sched="GPUs $GPUS ($GPU_SHARE rigid-task trials per GPU, a deformable-task trial alone, deformable: ${DEFORMABLE_FAMILIES:-the own_gpu classes of scripts/task_resources.toml}; CPUs and memory as the tasks declare x $RESERVE_CPU_SCALE / x $RESERVE_MEM_SCALE)"
 else
   sched="GPU scheduling off"
 fi
@@ -637,8 +638,8 @@ declare -A SLOT_CLASS=()  # task -> "<units> <cpus> <memory GB> <family>" (gpu_s
 slot_class() {  # <task>: SLOT_CLASS[<task>] filled; 2 = the task could not be classified (why in $SLOT_WHY)
   [ -n "${SLOT_CLASS[$1]:-}" ] && return 0
   local c
-  c="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" --deformable "$DEFORMABLE_FAMILIES" --share "$GPU_SHARE" \
-        --cpu-scale "$RESERVE_CPU_SCALE" --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
+  c="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" ${DEFORMABLE_FAMILIES:+--deformable "$DEFORMABLE_FAMILIES"} \
+        --share "$GPU_SHARE" --cpu-scale "$RESERVE_CPU_SCALE" --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
   SLOT_CLASS[$1]="$c"
 }
 acquire_slot() {  # <job> <task>: JOB_SLOT and JOB_GPU from the host's ledger (call it directly, not in $(...): it sets

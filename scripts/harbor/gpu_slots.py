@@ -4,7 +4,7 @@
 every lane and every batch that use the same SLOTS_DIR.
 
     gpu_slots.py classify <task dir> [--deformable "<family> ..."] [--share 4] [--cpu-scale 1] [--mem-scale 1]
-        -> "<units> <cpus> <memory GB> <family>"
+        -> "<units> <cpus> <memory GB> <family>"; exit 1: the task's family has no class (why on stderr)
     gpu_slots.py acquire --dir D --job J --runner-pid P --units U --cpus C --mem-gb M --gpus 0,1 [--share 4]
                          [--host-cpus N] [--host-mem-gb G] [--headroom-gb H]
         -> the GPU index on stdout ("" for a trial without a GPU), exit 0; exit 3: it does not fit now (why on stderr)
@@ -12,9 +12,12 @@ every lane and every batch that use the same SLOTS_DIR.
     gpu_slots.py status --dir D
 
 The rule. A GPU has SHARE units (4). A trial of a task whose compose files reserve no GPU takes none; of a deformable
-task (its [metadata] family in --deformable) all SHARE units, a GPU of its own; of any other task 1 unit, so up to SHARE
-such trials share a GPU. A trial reserves the most CPUs and memory its task declares for the agent's or the verifier's
-phase ([metadata.resources] min_cpus / verifier_min_cpus, min_memory_gb / verifier_min_memory_gb). A trial starts when
+task all SHARE units, a GPU of its own; of any other task 1 unit, so up to SHARE such trials share a GPU. Deformable: its
+[metadata] family is in a class with `own_gpu` in scripts/task_resources.toml (the one list of the family classes, which
+the task's declared resources come from too), or in --deformable when that is given. A task the file's
+`classes_required` finds whose family is in no class is not classified (normalize refuses such a task as well). A trial
+reserves the most CPUs and memory its task declares for the agent's or the verifier's phase ([metadata.resources]
+min_cpus / verifier_min_cpus, min_memory_gb / verifier_min_memory_gb). A trial starts when
   - the reserved CPUs plus its own are at most the host's (--host-cpus, default the CPUs this process may use),
   - the reserved memory plus its own is at most the host's total less a headroom (default the larger of 4 GB and 10 %),
   - and a GPU has the units free: a 1-unit trial goes to the fullest GPU that still has a unit (packing, so that whole
@@ -40,8 +43,7 @@ from pathlib import Path
 
 WAIT_TTL_S = 30 * 60
 COMPOSE_FILES = ("docker-compose.yaml", "docker-compose.yml", "gpu.docker-compose.yaml", "gpu.docker-compose.yml")
-DEFORMABLE = ("blanket_flatten blanket_fold fiber_bundling knot_untying orbits rope_threading slotted_post_ring "
-              "wire_splicing")
+RESOURCES_FILE = Path(__file__).resolve().parents[1] / "task_resources.toml"   # the family classes
 
 
 # ---------- classify: what a task's trial needs ----------
@@ -59,6 +61,22 @@ def toml_value(section: str, key: str) -> str | None:
     return m.group(1) if m.group(1) is not None else m.group(2).strip()
 
 
+def family_classes(path: Path = RESOURCES_FILE) -> tuple[dict[str, tuple[str, bool]], str]:
+    """scripts/task_resources.toml's family classes -> ({family: (class, own_gpu)}, classes_required): every
+    `[class.<name>]` table's `families` (an array of strings, possibly over several lines) and `own_gpu`."""
+    text = path.read_text()
+    m = re.search(r'^classes_required[ \t]*=[ \t]*"((?:[^"\\]|\\.)*)"', text, re.M)
+    required = re.sub(r"\\(.)", r"\1", m.group(1)) if m else r"(?!)"
+    out: dict[str, tuple[str, bool]] = {}
+    for name in re.findall(r"^\[class\.([A-Za-z0-9_-]+)\][ \t]*$", text, re.M):
+        sec = toml_section(text, "class." + name)
+        arr = re.search(r"^families[ \t]*=[ \t]*\[(.*?)\]", sec, re.M | re.S)
+        own = (toml_value(sec, "own_gpu") or "").lower() == "true"
+        for fam in re.findall(r'"([^"]*)"', arr.group(1) if arr else ""):
+            out[fam] = (name, own)
+    return out, required
+
+
 def uses_gpu(task: Path) -> bool:
     """Whether any compose file of the task (environment/, tests/) reserves an NVIDIA device."""
     for d in ("environment", "tests"):
@@ -69,10 +87,18 @@ def uses_gpu(task: Path) -> bool:
     return False
 
 
-def classify(task: Path, deformable: set[str], share: int, cpu_scale: float = 1.0, mem_scale: float = 1.0):
-    """-> (units, cpus, memory GB, family) of one trial of the task."""
+def classify(task: Path, deformable: set[str] | None, share: int, cpu_scale: float = 1.0, mem_scale: float = 1.0):
+    """-> (units, cpus, memory GB, family) of one trial of the task. deformable: the families with a GPU of their own;
+    None = the classes with `own_gpu` in scripts/task_resources.toml. ValueError: the file's `classes_required` finds
+    the task and its family is in no class."""
     text = (task / "task.toml").read_text()
     family = toml_value(toml_section(text, "metadata"), "family") or ""
+    classes, required = family_classes()
+    if family not in classes and re.search(required, task.name):
+        raise ValueError(f"{task.name}: its family {family!r} is in no class of scripts/task_resources.toml "
+                         "([class.<name>] families)")
+    if deformable is None:
+        deformable = {f for f, (_, own) in classes.items() if own}
     res = toml_section(text, "metadata.resources")
 
     def num(key: str) -> float:
@@ -273,7 +299,7 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("classify")
     c.add_argument("task")
-    c.add_argument("--deformable", default=DEFORMABLE)
+    c.add_argument("--deformable", default=None)   # default: the own_gpu classes of scripts/task_resources.toml
     c.add_argument("--share", type=int, default=4)
     c.add_argument("--cpu-scale", type=float, default=1.0)
     c.add_argument("--mem-scale", type=float, default=1.0)
@@ -303,7 +329,11 @@ def main(argv=None) -> int:
             sys.exit(f"{a.task}: not a task directory (no task.toml)")
         if a.share < 1 or a.cpu_scale <= 0 or a.mem_scale <= 0:
             sys.exit("--share must be at least 1 and the scales positive")
-        units, cpus, mem, fam = classify(t, set(a.deformable.split()), a.share, a.cpu_scale, a.mem_scale)
+        try:
+            units, cpus, mem, fam = classify(t, None if a.deformable is None else set(a.deformable.split()), a.share,
+                                             a.cpu_scale, a.mem_scale)
+        except ValueError as e:
+            sys.exit(str(e))
         print(f"{units} {cpus:g} {mem:g} {fam}")
         return 0
     if a.cmd == "acquire":

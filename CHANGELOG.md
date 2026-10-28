@@ -6,6 +6,36 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### One list of the family classes; five families get their class's resources (task change: 18 task directories)
+- `scripts/task_resources.toml` gave the rigid, rope / chain and cloth values by regular expressions that named the
+  families; a task they did not name kept the generic rules' values without notice. The five families released after
+  the classes (2026-10-23 / 24) were not named: wire_splicing, bed_bolt, battery_replacement, caliper_sorting and
+  clock_assembling declared 2 CPUs, and their privileged tasks had a main container of 4 CPUs / 20 GB where their class
+  has 16 CPUs / 30 GB (rigid) or 40 GB (rope / chain). The batch runner reserved 2 CPUs for each of their trials.
+- The file now lists the classes once (`[class.rigid]`, `[class.rope_chain]`, `[class.cloth]`: `families`), and the
+  class rules name their class (`class = "rigid"`) instead of the families. bed_bolt, battery_replacement,
+  caliper_sorting and clock_assembling are rigid, wire_splicing rope / chain. `scripts/task_conventions.py` refuses a
+  task that `classes_required` finds (every RoboARC task but IKEA's) whose family is in no class, or a family in two
+  classes, so CI's `--check` stops a new family without a class. It also writes `[environment].cpus` from the main
+  cap, as the generator (`mk_tasks.py` `main_cpus`) does.
+- The 18 task directories of those nine bases are rendered again: `[metadata.resources]`, its limits and caps,
+  `[environment]` cpus / memory_mb, the standard sim's cap (16 → 8 GB, its class's), the README's resources, the
+  privileged `instruction.md` resource limits (GPU memory 16 → 12 GiB, memory 16 → 24 GiB, 32 for wire_splicing) and
+  `DIGEST`. Their `measured` strings say these are the class's values, not the family's own peaks. Earlier results of
+  these bases no longer match the task digests (`digest_match` false). The other 162 task directories are unchanged.
+- `scripts/harbor/gpu_slots.py` reads the deformable families (the classes with `own_gpu`: rope / chain and cloth)
+  from the same file instead of its own list; `DEFORMABLE_FAMILIES` is empty by default and still replaces them when
+  set. A RoboARC task whose family has no class is not classified, so the runner does not start it. The deformable set
+  is unchanged.
+- Tests: scripts/tests/test_task_resources.py (new), scripts/harbor/tests/test_gpu_slots.py.
+- docs/COLLABORATOR_SETUP.md's GPU-hour estimate counted the 36 IKEA privileged trials, which take no GPU, as a
+  quarter of a GPU each: 837 GPU-hours, not 864.
+- Known issue, not changed here: wire_splicing's `instruction.md` states the rigid contact-penetration rules (a success
+  with a task contact deeper than 3 mm, or 2 mm for 0.25 s, held for review; deeper than 10 mm a simulator breakdown),
+  from `tools/release/topogym_rules.py` `RIGID`. The grader installs those rules only for a task with
+  `rigid_measurements` (`rcb_topogym._install_rules`), and `WireSplicingTask` is a `TaskDefinition`, not a
+  `RigidTaskDefinition`: its successes are credited without that review.
+
 ### The batch runner places each trial on one GPU (runner change; no task, image or result changes)
 - Docker gives a container that reserves `count: 1` GPU the host's first GPU: on a host with several GPUs every trial
   of `scripts/harbor/run_agent_batch.sh` ran on GPU 0 and the other GPUs stayed idle.

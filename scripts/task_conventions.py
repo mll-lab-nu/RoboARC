@@ -310,25 +310,55 @@ def normalize_toml(task: Path) -> None:
     write_if_changed(p, s)
 
 
+def family_class(task: Path, rules: dict | None = None) -> str | None:
+    """The class of the task's family (`[metadata] family`) in scripts/task_resources.toml (`[class.<name>] families`).
+    None for a task `classes_required` does not find (IKEA) whose family is in no class. A task it finds whose family is
+    in no class is an error, as is a family in two classes: a new family gets its class there, never the generic rules'
+    values unnoticed."""
+    rules = rules if rules is not None else tomllib.loads(RESOURCES_FILE.read_text())
+    of: dict = {}
+    for name, c in rules.get("class", {}).items():
+        for f in c.get("families", []):
+            if f in of:
+                raise RuntimeError(f"scripts/task_resources.toml: family {f!r} is in the classes {of[f]!r} and {name!r}")
+            of[f] = name
+    family = (tomllib.loads((task / "task.toml").read_text()).get("metadata") or {}).get("family", "")
+    if family in of:
+        return of[family]
+    if re.search(rules.get("classes_required") or r"(?!)", task.name):
+        raise RuntimeError(f"{task.name}: its family {family!r} is in no class of scripts/task_resources.toml "
+                           "([class.<name>] families): give it its class there")
+    return None
+
+
 def resources_for(task: Path) -> dict | None:
     """`[metadata.resources]` for a task from scripts/task_resources.toml: every rule whose `match` (a regular expression)
-    finds the task directory name applies, in file order, a later rule overriding an earlier one's keys. None: no rule
-    matches (the task keeps what its task.toml says)."""
+    finds the task directory name applies, in file order, a later rule overriding an earlier one's keys; a rule with a
+    `class` only when the task's family is in that class (family_class). None: no rule matches (the task keeps what its
+    task.toml says)."""
     if not RESOURCES_FILE.is_file():
         return None
     out: dict = {}
     limits: dict = {}
     caps: dict = {}
     rules = tomllib.loads(RESOURCES_FILE.read_text())
+    cls = family_class(task, rules)
+
+    def applies(rule: dict) -> bool:
+        if "class" in rule and rule["class"] not in rules.get("class", {}):
+            raise RuntimeError(f"scripts/task_resources.toml: a rule names the class {rule['class']!r}, which no "
+                               "[class.<name>] declares")
+        return bool(re.search(rule["match"], task.name)) and rule.get("class", cls) == cls
+
     for rule in rules.get("rule", []):
-        if re.search(rule["match"], task.name):
-            out.update({k: v for k, v in rule.items() if k != "match"})
+        if applies(rule):
+            out.update({k: v for k, v in rule.items() if k not in ("match", "class")})
     for rule in rules.get("limit", []):
-        if re.search(rule["match"], task.name):
-            limits.update({k: v for k, v in rule.items() if k != "match"})
+        if applies(rule):
+            limits.update({k: v for k, v in rule.items() if k not in ("match", "class")})
     for rule in rules.get("cap", []):
-        if re.search(rule["match"], task.name):
-            caps.update({k: v for k, v in rule.items() if k != "match"})
+        if applies(rule):
+            caps.update({k: v for k, v in rule.items() if k not in ("match", "class")})
     if not out:
         return None
     unknown = (set(out) - set(RESOURCE_KEYS)) | (set(limits) - set(LIMIT_KEYS))
@@ -377,7 +407,9 @@ def normalize_main_cap(task: Path) -> None:
     """`[environment].memory_mb` = `[metadata.resources.caps].main.memory_gb` x 1024 (PROTOCOL §2.10). Harbor writes the
     agent container's kernel memory cap (`mem_limit`) from `memory_mb`; the monitor can only see a memory violation
     before the kernel's OOM killer acts when that real cap is the declared one, above the limit. A task without
-    declared caps keeps its value."""
+    declared caps keeps its value. `[environment].cpus`, where the table has it, = `caps.main.cpus` (Harbor applies
+    it too; scripts/roboarc/mk_tasks.py main_cpus, the same rule), so normalizing a task alone gives the generator's
+    result."""
     p = task / "task.toml"
     s = p.read_text()
     main = ((tomllib.loads(s).get("metadata", {}).get("resources") or {}).get("caps") or {}).get("main")
@@ -392,6 +424,8 @@ def normalize_main_cap(task: Path) -> None:
         new = re.sub(r"(?m)^memory_mb\s*=\s*[0-9.]+", f"memory_mb = {want}", body, count=1)
     else:
         new = body.rstrip("\n") + f"\nmemory_mb = {want}\n" + ("\n" if body.endswith("\n\n") else "")
+    if main.get("cpus"):
+        new = re.sub(r"(?m)^cpus\s*=\s*[0-9.]+", f"cpus = {float(main['cpus']):g}", new, count=1)
     write_if_changed(p, s[:m.start(1)] + new + s[m.end(1):])
 
 

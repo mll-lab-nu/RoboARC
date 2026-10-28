@@ -131,12 +131,15 @@ would run on GPU 0. With `GPU_SCHED=1` (the default; `SEQ=1` only) each lane pla
 ledger that every lane and batch of the host shares (`scripts/harbor/gpu_slots.py`, in `SLOTS_DIR`, default
 `/tmp/roboarc-slots-<uid>`):
 
-- **GPU.** A GPU takes up to `GPU_SHARE` (4) trials of rigid tasks. A trial of a deformable task has a GPU of its own
-  (`DEFORMABLE_FAMILIES`, matched against task.toml's `[metadata] family`: blanket_flatten, blanket_fold,
-  fiber_bundling, knot_untying, orbits, rope_threading, slotted_post_ring, wire_splicing). A task whose compose files
-  reserve no GPU (IKEA privileged) takes none. Rigid trials go to the fullest GPU that has room, so that whole GPUs
-  stay free; while a deformable trial waits, the empty GPUs are kept for it and one busy GPU takes no new rigid trial
-  until it is empty. On one GPU this alternates: up to four rigid trials, then a deformable trial alone.
+- **GPU.** A GPU takes up to `GPU_SHARE` (4) trials of rigid tasks. A trial of a deformable task has a GPU of its own:
+  its task.toml `[metadata] family` is in a class with `own_gpu` in `scripts/task_resources.toml`, the one list of the
+  family classes that the tasks' declared resources come from too (rope / chain: fiber_bundling, knot_untying, orbits,
+  rope_threading, slotted_post_ring, wire_splicing; cloth: blanket_flatten, blanket_fold); `DEFORMABLE_FAMILIES`
+  replaces that list for a run. A RoboARC task whose family is in no class is not started (normalize refuses such a
+  task as well). A task whose compose files reserve no GPU (IKEA privileged) takes none. Rigid trials go to the
+  fullest GPU that has room, so that whole GPUs stay free; while a deformable trial waits, the empty GPUs are kept for
+  it and one busy GPU takes no new rigid trial until it is empty. On one GPU this alternates: up to four rigid trials,
+  then a deformable trial alone.
 - **CPUs and memory.** A trial reserves the most its task declares for the agent's or the verifier's phase
   (`[metadata.resources]` `min_cpus` / `verifier_min_cpus` and `min_memory_gb` / `verifier_min_memory_gb`: 4 CPUs and
   7 GB for a rigid puzzle, 4 CPUs and 10 GB for blanket privileged, 3 and 3 for IKEA privileged, for example), times

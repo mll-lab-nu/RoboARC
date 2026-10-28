@@ -9,7 +9,9 @@
 - CPUs and memory: a trial starts only when the reserved CPUs and memory plus its own fit the host; with nothing else
   held it always starts;
 - the slots of a runner that has ended are dropped, and release frees a job's or a runner's slots;
-- classify reads a task's family, its declared minimums and whether its compose files reserve a GPU.
+- classify reads a task's family, its declared minimums and whether its compose files reserve a GPU; a GPU of its own
+  for the families of scripts/task_resources.toml's own_gpu classes (or of --deformable), and no classification for a
+  RoboARC task whose family is in no class.
 """
 import json
 import pathlib
@@ -148,18 +150,53 @@ class Slots(unittest.TestCase):
 
     def test_classify_tasks(self):
         tasks = REPO / "tasks"
-        rigid = next(iter(sorted(tasks.glob("roboarc-cast-coil-*-privileged"))), None)
-        cloth = next(iter(sorted(tasks.glob("roboarc-blanket-fold-*-privileged"))), None)
-        ikea_p = next(iter(sorted(tasks.glob("roboarc-ikea-*-privileged"))), None)
-        ikea_s = next(iter(sorted(tasks.glob("roboarc-ikea-*-standard"))), None)
-        if not all((rigid, cloth, ikea_p, ikea_s)):
+        first = lambda pat: next(iter(sorted(tasks.glob(pat))), None)  # noqa: E731
+        rigid = first("roboarc-cast-coil-*-privileged")
+        bolt = first("roboarc-bed-bolt-*-privileged")                       # a rigid family released after the classes
+        wire = first("roboarc-wire-splicing-*-standard")                    # rope / chain
+        cloth = first("roboarc-blanket-fold-*-privileged")
+        ikea_p = first("roboarc-ikea-*-privileged")
+        ikea_s = first("roboarc-ikea-*-standard")
+        if not all((rigid, bolt, wire, cloth, ikea_p, ikea_s)):
             self.skipTest("the task families this test reads are not in tasks/")
-        deform = set(gpu_slots.DEFORMABLE.split())
-        self.assertEqual(gpu_slots.classify(rigid, deform, 4)[:3], (1, 4.0, 7.0))
-        self.assertEqual(gpu_slots.classify(cloth, deform, 4)[0], 4)
-        self.assertEqual(gpu_slots.classify(ikea_p, deform, 4)[0], 0)      # no GPU device in its compose files
-        self.assertEqual(gpu_slots.classify(ikea_s, deform, 4)[0], 1)      # the sim sidecar has one
-        self.assertEqual(gpu_slots.classify(rigid, deform, 4, 0.5, 0.5)[1:3], (2.0, 3.5))
+        self.assertEqual(gpu_slots.classify(rigid, None, 4)[:3], (1, 4.0, 7.0))
+        self.assertEqual(gpu_slots.classify(bolt, None, 4)[:3], (1, 4.0, 7.0))
+        self.assertEqual(gpu_slots.classify(wire, None, 4)[:2], (4, 4.0))
+        self.assertEqual(gpu_slots.classify(cloth, None, 4)[0], 4)
+        self.assertEqual(gpu_slots.classify(ikea_p, None, 4)[0], 0)        # no GPU device in its compose files
+        self.assertEqual(gpu_slots.classify(ikea_s, None, 4)[0], 1)        # the sim sidecar has one
+        self.assertEqual(gpu_slots.classify(rigid, None, 4, 0.5, 0.5)[1:3], (2.0, 3.5))
+        self.assertEqual(gpu_slots.classify(rigid, {"cast_coil"}, 4)[0], 4)  # --deformable overrides the classes
+        self.assertEqual(gpu_slots.classify(cloth, set(), 4)[0], 1)
+
+    def test_every_family_has_a_class(self):
+        classes, required = gpu_slots.family_classes()
+        own = {f for f, (_, o) in classes.items() if o}
+        self.assertEqual(own, {"blanket_flatten", "blanket_fold", "fiber_bundling", "knot_untying", "orbits",
+                               "rope_threading", "slotted_post_ring", "wire_splicing"})
+        tasks = sorted((REPO / "tasks").glob("roboarc-*/task.toml"))
+        if not tasks:
+            self.skipTest("no tasks/")
+        for t in tasks:
+            if __import__("re").search(required, t.parent.name):
+                with self.subTest(task=t.parent.name):
+                    gpu_slots.classify(t.parent, None, 4)                  # raises for a family without a class
+
+    def test_family_without_class(self):
+        task = pathlib.Path(self.dir) / "roboarc-new-family-01-i01-privileged"
+        (task / "environment").mkdir(parents=True)
+        (task / "task.toml").write_text('[metadata]\nfamily = "new_family"\n\n[metadata.resources]\nmin_cpus = 2.0\n')
+        with self.assertRaisesRegex(ValueError, "new_family.*no class"):
+            gpu_slots.classify(task, None, 4)
+        with self.assertRaisesRegex(ValueError, "no class"):
+            gpu_slots.classify(task, {"new_family"}, 4)                    # an override does not give it resources
+        r = subprocess.run([sys.executable, str(TOOL), "classify", str(task)], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("no class", r.stderr)
+        other = pathlib.Path(self.dir) / "roboarc-ikea-new-i00-privileged"  # classes_required does not find IKEA
+        other.mkdir()
+        (other / "task.toml").write_text('[metadata]\nfamily = "ikea_new"\n')
+        self.assertEqual(gpu_slots.classify(other, None, 4)[0], 0)
 
 
 if __name__ == "__main__":

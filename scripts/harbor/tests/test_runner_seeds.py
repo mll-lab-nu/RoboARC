@@ -229,10 +229,9 @@ class RunnerSeeds(unittest.TestCase):
         self.run_batch(self.multi, self.single)
         calls = self.calls()
         self.assertEqual(len(calls), 4)
-        deform = set(gpu_slots.DEFORMABLE.split())
         for c in calls:
             (task,) = c["devices"]
-            units = gpu_slots.classify(self.repo / "tasks" / task, deform, 4)[0]
+            units = gpu_slots.classify(self.repo / "tasks" / task, None, 4)[0]
             place = json.loads((self.root / "jobs" / c["job"] / "placement.json").read_text())
             self.assertEqual(place["units"], units)
             if units == 0:                                         # IKEA privileged: no GPU device, none given
