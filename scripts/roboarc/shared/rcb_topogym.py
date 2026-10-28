@@ -292,8 +292,8 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="cast_coil_easy", seed=0)], grasp_assist="recommended"),
     "cast_keyhole": dict(
         task_id="cast_keyhole", robot="aloha",
-        text="Separate the silver keyhole piece from the gold piece. Place the entire silver piece inside the green dashed "
-             "goal area and hold it still briefly. Keep the gold piece outside the area on the puzzle/system side. "
+        text="Separate the keyhole plate from the fork plate. Place the entire keyhole plate inside the green dashed "
+             "goal area and hold it still briefly. Keep the fork plate outside the area on the puzzle/system side. "
              "Holding the target with the gripper is allowed.",
         instances=[dict(variation_id="cast_keyhole_easy", seed=0)], grasp_assist="recommended"),
     "fiber_bundling": dict(

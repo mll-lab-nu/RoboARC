@@ -64,12 +64,13 @@ def finish_generated_urdf(path, role):
     return dict(role=role, files=files, surface=options)
 
 
-def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
+def scale_glb_color(path, rgb_scale, *, materials=None, color=None, roughness=None, metallic=None):
     """Rescale (or with ``color`` replace) GLB base colours in place; buffers stay byte-identical.
 
     Only the glTF JSON chunk is rewritten, so textures and geometry are untouched.
     ``materials`` limits the edit to materials whose name contains one of the
     given substrings (unnamed materials match only when ``materials`` is None).
+    ``roughness`` / ``metallic`` (None: kept) also set those factors of the edited materials.
     """
     import json
     import struct
@@ -89,6 +90,10 @@ def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
         base = list(color) if color is not None else list(pbr.get("baseColorFactor", [1., 1., 1., 1.]))
         scale = [float(rgb_scale)]*3 if isinstance(rgb_scale, (int, float)) else [float(v) for v in rgb_scale]
         pbr["baseColorFactor"] = [min(1., float(base[i])*scale[i]) for i in range(3)] + [float(base[3])]
+        if roughness is not None:
+            pbr["roughnessFactor"] = float(roughness)
+        if metallic is not None:
+            pbr["metallicFactor"] = float(metallic)
     chunk = json.dumps(document, separators=(",", ":")).encode()
     chunk += b" "*(-len(chunk) % 4)
     rest = data[20+length:]
@@ -96,8 +101,8 @@ def scale_glb_color(path, rgb_scale, *, materials=None, color=None):
                      + struct.pack("<I4s", len(chunk), b"JSON") + chunk + rest)
 
 
-def scale_urdf_color(path, rgb_scale):
-    """Rescale a URDF's visual material colours in place, as scale_glb_color does a GLB's.
+def scale_urdf_color(path, rgb_scale, *, color=None):
+    """Rescale (or with ``color`` replace) a URDF's visual material colours in place, as scale_glb_color does a GLB's.
 
     A URDF visual's own ``<material><color>`` is the colour Nyx draws for its mesh,
     not the mesh file's baseColorFactor, so a tint must change both. Only the
@@ -109,12 +114,39 @@ def scale_urdf_color(path, rgb_scale):
 
     def colour(match):
         base = [float(v) for v in match.group(2).split()]
+        base[:3] = base[:3] if color is None else [float(v) for v in color[:3]]
         return match.group(1) + " ".join(str(min(1., base[i]*float(rgb_scale))) for i in range(3)) \
             + f" {base[3]:g}" + match.group(3)
 
     def visual(match):
         return re.sub(r'(<color\s+rgba=")([^"]+)(")', colour, match.group(0))
     path.write_text(re.sub(r"<visual\b.*?</visual>", visual, path.read_text(), flags=re.S))
+
+
+# Finishes of the Cast puzzles' two pieces (cast_coil, cast_keyhole; task parameter piece_finish, appearance seeds): per
+# finish, each piece's (colour, roughness, metallic), keyed by the metal it has in the released look ("cast": the
+# generated gold and silver, roughness 0.30-0.34, metallic 0.80-0.82). No text names a piece's colour (2026-10-27): the
+# gold piece turns red anodised aluminium, then matte black powder coat; the silver piece blue anodised aluminium, then
+# orange powder coat. Each piece's three colours, the two pieces of one seed and every piece and the green goal region
+# stay >= 20 CIEDE2000 apart. Nyx draws a generated piece's URDF colour with its GLB's roughness and metallic factors
+# (renders of cast-keyhole-02, 2026-10-27: the entity surface's roughness and metallic do not reach a URDF entity), so
+# both files change.
+CAST_PIECE_FINISHES = {
+    "cast": None,
+    "anodised": dict(gold=((.55, .05, .06), .35, .6), silver=((.05, .15, .55), .35, .6)),
+    "powder_coat": dict(gold=((.035, .035, .04), .75, 0.), silver=((.80, .25, .03), .7, 0.)),
+}
+
+
+def refinish_cast_piece(urdf, metal, finish):
+    """Give a generated Cast piece (its URDF and the GLBs beside it), gold or silver in the released look, its
+    CAST_PIECE_FINISHES finish, in place."""
+    from pathlib import Path
+    color, roughness, metallic = CAST_PIECE_FINISHES[finish][metal]
+    urdf = Path(urdf)
+    for path in sorted(urdf.parent.glob("*.glb")):
+        scale_glb_color(path, 1., color=(*color, 1.), roughness=roughness, metallic=metallic)
+    scale_urdf_color(urdf, 1., color=color)
 
 
 def localize_generated_urdfs(folder):

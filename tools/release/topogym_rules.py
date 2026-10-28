@@ -27,9 +27,11 @@ FINGERTIP_WORDS = {"aloha": "about 16 mm beyond the tool frame (TCP) along its a
                    "panda_robotiq": "about 6 mm beyond the tool frame (TCP) along its approach axis when open and about "
                                     "19 mm when closed (the Robotiq fingertips move forward as they close)"}
 PLACEMENT = {"cast_keyhole", "interlocked_claws", "hedgehog_in_cage", "horseshoe_ring", "orbits", "slotted_post_ring"}
-# remaining components of the placement families that are free bodies (the rest are fixed), as named in s.objects()
-FREE_REMAINDER = {"cast_keyhole": "the gold piece", "interlocked_claws": "the other claw piece",
-                  "horseshoe_ring": "the horseshoes and chain links", "slotted_post_ring": "the cord, beads and end discs"}
+# remaining components of the placement families that are free bodies (the rest are fixed), as named in s.objects(); a
+# variation's own words (by shape or role: the pieces' colours change with the appearance seed) override the family's
+FREE_REMAINDER = {"cast_keyhole": "the fork plate", "interlocked_claws": "the other claw piece",
+                  "horseshoe_ring": "the horseshoes and chain links", "slotted_post_ring": "the cord, beads and end discs",
+                  "cast_keyhole_double_maze": "the left-hand plate"}
 # The grading replays of the GPU families (rcb_topogym.py GRADING_HOLD_S / REPLAY_TOLERANCES, tooling v16; the numbers
 # must match: ci_checks/test-topogym-grading-replay.py). family -> {threshold: (task parameter, passing side, slack)}.
 GRADING_HOLD_S = 2.0
@@ -158,7 +160,7 @@ def grader_details(fam, inst, *, limited):
                        f"{side:.1f} mm square. Every point counts: for a rigid part every vertex of its visual and collision "
                        "meshes" + ("; for the cord every vertex of its simulated volume" if fam in ("orbits", "slotted_post_ring")
                                    else "") + ".")
-        free = FREE_REMAINDER.get(fam)
+        free = FREE_REMAINDER.get(inst.get("variation_id"), FREE_REMAINDER.get(fam))
         out.append("The separator is an invisible, fixed vertical plane parallel to the goal square's near edge, 5 mm beyond "
                    "the point of all remaining components that was closest to the goal square at the start; the square's "
                    "near edge is at least 30 mm beyond it. " + (

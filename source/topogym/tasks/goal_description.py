@@ -18,7 +18,7 @@ PLACEMENT = {
     "interlocked_claws": ("the entire brown claw piece", "the other claw piece"),
     "hedgehog_in_cage": ("the whole hedgehog ball, including every spike", "all cage components"),
     "horseshoe_ring": ("the entire removable ring", "the horseshoes and chains"),
-    "cast_keyhole": ("the entire silver keyhole piece", "the gold piece"),
+    "cast_keyhole": ("the entire keyhole plate", "the fork plate"),
     "slotted_post_ring": ("the entire removable metal ring", "the post, cord, beads and end discs"),
     "orbits": ("the entire cord and wooden handle together", "the rings, posts and fixed assembly"),
 }

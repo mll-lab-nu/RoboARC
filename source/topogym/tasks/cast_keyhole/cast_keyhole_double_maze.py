@@ -21,6 +21,11 @@ class CastKeyholeDoubleMazeTask(CastKeyholeTask):
     fixed_parameters = ("scale",)
     geometry_resource = "variations/cast_keyhole/double_maze/geometry.json"
     pregrasp_weld = True
+    # The plates by role (their colours change with the appearance seed): the opening puts keyhole_silver in the right
+    # hand and keyhole_gold in the left.
+    placement_target_description = "the entire right-hand plate"
+    placement_remainder_description = "the left-hand plate"
+    placement_scene_note = "At the start the right gripper holds the right-hand plate and the left gripper the left-hand plate."
 
     def build_assets(self, folder):
         from topogym.assets.geometry.cast_keyhole_double_maze import build_double_maze
@@ -39,6 +44,11 @@ class CastKeyholeDoubleMazeTask(CastKeyholeTask):
                 for path in sorted((folder / body.name).glob("*.glb")):
                     scale_glb_color(path, cfg["piece_tint"][metal])
                 scale_urdf_color(folder / body.name / f"{body.name}.urdf", cfg["piece_tint"][metal])
+        if cfg["piece_finish"] != self.defaults["piece_finish"]:
+            from topogym.assets.scene_visuals import refinish_cast_piece
+            for body in assembly.bodies:
+                refinish_cast_piece(folder / body.name / f"{body.name}.urdf", "gold" if "gold" in body.name else "silver",
+                                    cfg["piece_finish"])
         # Entities in the ALOHA model frame; finalize_spec carries them with the robot mount into the world.
         entities, self.local_vertices, targets = [], {}, []
         for body, item in zip(assembly.bodies, report["bodies"]):

@@ -156,7 +156,7 @@
    "numbers": {"very_easy": "01", "easier": "02", "easy": "03", "medium": "04", "hard": "05"},
    "note": "keyhole_v3 with the re-cut (docs/simulator/families/cast_keyhole.md): made in the native gripper space, no overrides; the released goals, rules and geometry. acceptance (validate, 2026-10-12/13): round FZJ_<family>-<tier> per base on build b38j (f9db156d16; b39j acbb4ca88e for the new designs) with this reference, criteria v2.12, 300 episodes (search protocol 3), 0 confirmed BREAKDOWN, reference within the 120 min limit: PASS on all five and on the double maze. The double maze is a new design (docs/simulator/families/cast_keyhole_double_maze.md, profile keyhole_double_maze_v2, birth c15ba78d2bfda87e) with easy as its template and its own texts. Listed 2026-10-13 by validate on main's instruction (the release owner aggregates; to be merged with Jianwen). Jianwen's 1,000-episode rounds (criteria v2.10): keyhole on 88f0d3773 PASS on all five; the double maze keyhole_dm_r2 on e9e29c39e PASS, Harbor under its own base PASS (2026-10-13, test commit 0956310dd)",
    "new_bases": {
-    "cast-keyhole-06-i01": {"template": "cast-keyhole-easy-i00", "variation": "cast_keyhole_double_maze", "design": "Double maze: two plates, gold and silver, each with a slot grid, threaded through each other at right angles (design dm4b)"}
+    "cast-keyhole-06-i01": {"template": "cast-keyhole-easy-i00", "variation": "cast_keyhole_double_maze", "design": "Double maze: two plates, each with a slot grid, threaded through each other at right angles (design dm4b)"}
    }
   },
   "cast_coil": {

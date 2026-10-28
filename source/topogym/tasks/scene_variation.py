@@ -43,9 +43,9 @@ AXES = {
         # Inside the reference policy's IK tolerance (+-20 mm); goal region pinned to +y.
         dict(path="center_xy_m", kind="offset", range=[[-.02, .02], [-.02, .02]]),
         dict(path="yaw_deg", kind="offset", range=[-5., 5.]),
-        # Brightness of each metal; hue stays because the instruction names gold and silver.
-        dict(path="piece_tint.gold", kind="offset", range=[-.1, .1], visual=True),
-        dict(path="piece_tint.silver", kind="offset", range=[-.1, .1], visual=True),
+        # Both pieces' colour and material (scene_visuals.CAST_PIECE_FINISHES): red and blue anodised aluminium, then
+        # black and orange powder coat.
+        dict(path="piece_finish", kind="choice", values=["cast", "anodised", "powder_coat"], visual=True),
     ),
     "hedgehog_in_cage": (
         # Panda base at x = -0.57: +x/+y moves away from it (reach proxy), so both lean negative.
