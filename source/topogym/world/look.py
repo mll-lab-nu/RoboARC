@@ -1,4 +1,5 @@
-"""The scene's look under an appearance seed: room lighting, table top and floor (task parameter ``scene_look``).
+"""The scene's look under an appearance seed: room lighting, table top, its frame and floor (task parameter
+``scene_look``).
 
 Seed 0 has no ``scene_look``: the compact_lab presentation as released. Seeds 1, 2, ... carry one (drawn by
 topogym.tasks.scene_variation.scene_look), which load_scene_config applies to the renderer config only:
@@ -8,7 +9,8 @@ topogym.tasks.scene_variation.scene_look), which load_scene_config applies to th
             of all four, ``cct_k`` their colour temperature (white light, the Planckian locus), ``brightness`` scales
             the four lights and the environment map together; the environment map takes the lights' colour as tint.
   table     a TABLE_FINISHES name for the table top ("table");
-  floor     a FLOOR_FINISHES name for the room's floor ("lab_floor").
+  floor     a FLOOR_FINISHES name for the room's floor ("lab_floor");
+  frame     a FRAME_FINISHES name for the table top's rim and apron ("table_frame*").
 
 A finish is a material class (wood, metal, stone, plastic; floors wood, tile, concrete, carpet) and either a plain
 colour with roughness and metalness or a textured PBR material: colour, normal and ARM (ambient occlusion, roughness,
@@ -61,6 +63,19 @@ FLOOR_FINISHES = {
     "concrete": _texture("concrete", "brushed_concrete", 2.5),
     "carpet": _texture("carpet", "poly_wool_herringbone", .27),
 }
+# The table top's rim and apron ("table_frame*"); the first is compact_lab's dark wood (seed 0's). Seeds 1 and 2 draw two
+# different ones (the user, 2026-10-27: the frame changes colour and material too).
+FRAME_FINISHES = {
+    "dark_wood": dict(cls="wood", color=[1., 1., 1.], metallic=0., roughness=.45, diffuse_map="wood_table_001_diff_1k.png",
+                      normal_map="wood_table_001_nor_gl_1k.png"),
+    "light_wood": dict(cls="wood", color=[1., 1., 1.], metallic=1., roughness=1., diffuse_map="ash_veneer_diff_1k.jpg",
+                       normal_map="ash_veneer_nor_gl_1k.jpg", arm_map="ash_veneer_arm_1k.jpg"),
+    "black_powder_coat": dict(cls="metal", color=[.04, .04, .045], metallic=.6, roughness=.45),
+    "aluminium": dict(cls="metal", color=[.80, .81, .83], metallic=1., roughness=.35),
+    "white_edge_band": dict(cls="plastic", color=[.88, .88, .86], metallic=0., roughness=.30),
+    "grey_rubber": dict(cls="rubber", color=[.22, .23, .24], metallic=0., roughness=.85),
+    "blue_painted_steel": dict(cls="metal", color=[.10, .22, .50], metallic=.4, roughness=.40),
+}
 KEY_INTENSITY, FILL_INTENSITY = 3., 1.          # compact_lab's key and fill lights
 LIMITS = dict(height_m=(1.5, 2.5), cct_k=(2000., 10000.), brightness=(.5, 1.5))   # sanity bounds, not the draw's bands
 
@@ -89,8 +104,8 @@ def cct_rgb(kelvin: float) -> list[float]:
 
 def check_scene_look(look) -> dict:
     """``look`` as a plain dict, or ValueError when it is not a scene_look of this version."""
-    if not isinstance(look, Mapping) or set(look) != {"version", "lighting", "table", "floor"}:
-        raise ValueError("scene_look must have exactly version, lighting, table and floor")
+    if not isinstance(look, Mapping) or set(look) != {"version", "lighting", "table", "floor", "frame"}:
+        raise ValueError("scene_look must have exactly version, lighting, table, floor and frame")
     if look["version"] != SCENE_LOOK_VERSION:
         raise ValueError(f"scene_look version {look['version']!r} is not {SCENE_LOOK_VERSION}")
     lighting = look["lighting"]
@@ -102,14 +117,16 @@ def check_scene_look(look) -> dict:
         value = lighting[name]
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not lo <= value <= hi:
             raise ValueError(f"scene_look.lighting.{name} must be in [{lo}, {hi}]")
-    if look["table"] not in TABLE_FINISHES or look["floor"] not in FLOOR_FINISHES:
-        raise ValueError(f"unknown scene_look table {look['table']!r} or floor {look['floor']!r}")
-    return dict(version=look["version"], lighting=dict(lighting), table=look["table"], floor=look["floor"])
+    if look["table"] not in TABLE_FINISHES or look["floor"] not in FLOOR_FINISHES or look["frame"] not in FRAME_FINISHES:
+        raise ValueError(f"unknown scene_look table {look['table']!r}, floor {look['floor']!r} or frame {look['frame']!r}")
+    return dict(version=look["version"], lighting=dict(lighting), table=look["table"], floor=look["floor"],
+                frame=look["frame"])
 
 
 def apply_scene_look(scene, look) -> None:
     """Apply ``look`` to a composed tabletop config (load_scene_config): the renderer's lights and environment map,
-    and two finish rules (env.appearance, after the presentation's) for the table top and the floor."""
+    and three finish rules (env.appearance, after the presentation's) for the table top, the floor and the table's
+    rim and apron."""
     from omegaconf import OmegaConf, open_dict
     look = check_scene_look(look)
     lighting, renderer = look["lighting"], scene.env.renderer
@@ -130,7 +147,8 @@ def apply_scene_look(scene, look) -> None:
     current = scene.env.get("appearance")
     rules = [] if current is None else list(OmegaConf.to_container(current, resolve=True))
     rules += [_rule("table", TABLE_FINISHES[look["table"]], scene.env.world.table.size),
-              _rule("lab_floor", FLOOR_FINISHES[look["floor"]], floor["size"])]
+              _rule("lab_floor", FLOOR_FINISHES[look["floor"]], floor["size"]),
+              _rule("table_frame*", FRAME_FINISHES[look["frame"]], None)]
     with open_dict(scene.env):
         scene.env.appearance = rules
 

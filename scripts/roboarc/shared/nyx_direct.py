@@ -1245,8 +1245,11 @@ class NyxScene:
                     s = (scale, scale, scale) if isinstance(scale, (int, float)) else tuple(scale)
                     inst.scale = yup(nps.float3(*s))
                     inst.mesh_uri = os.path.relpath(str(e.path)).replace("\\", "/")
-                    inst.matOverride = color_material(nps, _u8_color(_rgba(e.surface)),
-                                                      (e.surface.roughness, e.surface.metallic) if pbr else (None, None))
+                    if e.surface.emissive is not None:       # a glowing marker (the goal region's dashed boundary)
+                        inst.matOverride = material_override(nps, e.surface, genesis_assets=self.genesis_assets)
+                    else:
+                        inst.matOverride = color_material(nps, _u8_color(_rgba(e.surface)),
+                                                          (e.surface.roughness, e.surface.metallic) if pbr else (None, None))
                     inst.smooth, inst.enabled, inst.uuid = False, True, uuid
                     asset.set_instance(index, inst)
                     index += 1

@@ -95,7 +95,7 @@ class AppearanceSeedTests(unittest.TestCase):
     def test_every_release_base_has_two_scene_looks_apart_from_seed_zero(self):
         """Seeds 1 and 2 differ in every part of the scene's look (topogym.world.look) and neither takes the released
         table, floor, key light or a colour temperature near the released one; the draw is a pure function."""
-        from topogym.world.look import FLOOR_FINISHES, TABLE_FINISHES, check_scene_look
+        from topogym.world.look import FLOOR_FINISHES, FRAME_FINISHES, TABLE_FINISHES, check_scene_look
         for base, task, variation in release_bases():
             cls = task_definition(task, variation)
             one, two = appearance(cls, 1)["scene_look"], appearance(cls, 2)["scene_look"]
@@ -111,6 +111,8 @@ class AppearanceSeedTests(unittest.TestCase):
                 self.assertNotEqual(FLOOR_FINISHES[one["floor"]]["cls"], FLOOR_FINISHES[two["floor"]]["cls"])
                 for look in (one, two):
                     self.assertNotEqual(TABLE_FINISHES[look["table"]]["cls"], "plastic")
+                    self.assertNotEqual(look["frame"], next(iter(FRAME_FINISHES)))
+                self.assertNotEqual(one["frame"], two["frame"])
                 self.assertNotEqual(one["lighting"]["key"], two["lighting"]["key"])
                 self.assertNotEqual(one["lighting"]["cct_k"] < 6000, two["lighting"]["cct_k"] < 6000)
                 self.assertNotEqual(one["lighting"]["brightness"] < 1, two["lighting"]["brightness"] < 1)
@@ -134,7 +136,7 @@ class AppearanceSeedTests(unittest.TestCase):
                 self.assertEqual(changed, {"lights", "env_intensity", "env_tint", "pbr_materials"})
                 self.assertEqual(looked["env"]["appearance"][:len(plain["env"]["appearance"])], plain["env"]["appearance"])
                 self.assertEqual([r["pattern"] for r in looked["env"]["appearance"][len(plain["env"]["appearance"]):]],
-                                 ["table", "lab_floor"])
+                                 ["table", "lab_floor", "table_frame*"])
 
     def test_a_blanket_look_keeps_the_birth_identity(self):
         """The PBD birth recipe's scene identity (declared as pbd_initial_state_generation._recipe does) is the nominal
