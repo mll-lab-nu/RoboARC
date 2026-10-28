@@ -15,7 +15,9 @@ TASK_IDS = frozenset({
 })
 
 PLACEMENT = {
-    "interlocked_claws": ("the entire brown claw piece", "the other claw piece"),
+    # No colour words for parts whose colour changes with the appearance seed (2026-10-27): a setting names its pieces by
+    # shape (placement_target_description / placement_remainder_description).
+    "interlocked_claws": ("the entire target claw piece", "the other claw piece"),
     "hedgehog_in_cage": ("the whole hedgehog ball, including every spike", "all cage components"),
     "horseshoe_ring": ("the entire removable ring", "the horseshoes and chains"),
     "cast_keyhole": ("the entire keyhole plate", "the fork plate"),

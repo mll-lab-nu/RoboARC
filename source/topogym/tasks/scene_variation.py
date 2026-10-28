@@ -100,13 +100,8 @@ AXES = {
     ),
     "interlocked_claws": (
         # No pose axes: the start is a two-hand pregrasp tied to arm joint angles and weld points.
-        # The target stays brown (the instruction names it); the other piece takes any non-brown colour.
-        dict(path="target_shade", kind="offset", range=[-.15, .15], visual=True),
-        dict(path="other_rgb", kind="choice", visual=True, values=[
-            None, [.18, .32, .65], [.25, .55, .30], [.50, .52, .55]]),
-        # Only Cast Trinity defines third_rgb (its third piece, B; the other bases have two pieces): B takes green, then
-        # blue, where other_rgb gives H blue, then green, so that its three pieces differ at appearance seeds 1 and 2.
-        dict(path="third_rgb", kind="choice", visual=True, values=[None, [.25, .55, .30], [.18, .32, .65]]),
+        # Every piece's colour and material (InterlockedClawsTask.piece_finishes).
+        dict(path="piece_finish", kind="choice", values=["painted", "anodised", "powder_coat"], visual=True),
     ),
     "blanket_flatten": (
         # Drawn before freezing: each seeded instance gets its own prepared archive

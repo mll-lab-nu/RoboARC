@@ -318,7 +318,7 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="horseshoe_ring_easy", seed=0)], grasp_assist="recommended"),
     "interlocked_claws": dict(
         task_id="interlocked_claws", robot="aloha",
-        text="Separate the brown claw piece from the other claw. Place the entire brown piece inside the green dashed goal "
+        text="Separate the two claw pieces. Place the entire target claw piece inside the green dashed goal "
              "area and hold it still briefly. Keep the other piece outside the area on the puzzle/system side. Holding "
              "the target with the gripper is allowed.",
         instances=[dict(variation_id="interlocked_claws_hard", seed=0)], grasp_assist="recommended"),

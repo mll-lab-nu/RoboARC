@@ -10,11 +10,16 @@ class InterlockedClawsCastTrinityTask(InterlockedClawsTask):
     terminal_revision = "trinity_pairwise_separation_v1"
     difficulty = None
     pregrasp_weld = True
-    placement_description = "the entire gold piece (T)"
+    placement_description = "the entire T piece"
     separation_summary = "Completely separate all three pieces from one another and briefly hold them still."
     # Appearance only: the colour of the third piece, B (None: other_rgb, as for H), so that the three pieces differ.
     defaults = dict(InterlockedClawsTask.defaults, third_rgb=None)
     hash_when_changed = (*InterlockedClawsTask.hash_when_changed, "third_rgb")
+    # piece_finish: T, H, B (build order) red / blue / black anodised, then blue / yellow / red powder coat (the family's
+    # rules: three colours per piece and per seed, each pair >= 20 CIEDE2000, none near the green goal square).
+    piece_finishes = dict(
+        anodised=(((.55, .05, .06), .3, .6), ((.05, .15, .55), .3, .6), ((.035, .035, .04), .3, .6)),
+        powder_coat=(((.05, .15, .55), .7, 0.), ((.85, .65, .05), .7, 0.), ((.55, .05, .06), .7, 0.)))
     # The reference takes all three pieces (T again at its head, H and B where they hang): every piece is a grasp target
     # of both hands, centred on its bounding box with a radius of 9 cm (the farthest point, a corner of B, is 85.8 mm from
     # its box centre), and a hand may acquire with its TCP up to 12 cm from that centre.
