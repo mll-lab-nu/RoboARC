@@ -39,7 +39,9 @@ def _texture(cls, name, tile_m, **more):
 # Table tops; the first is compact_lab's own plastic laminate (seed 0's). Seeds >= 1 draw a class other than plastic,
 # seeds 1 and 2 two different classes (the user, 2026-10-27: wood to metal or plastic, as RoboDojo's table materials).
 # lum: cam_high's mean luma of cast-keyhole-02 with this top under the released lights (2026-10-27): of seeds 1 and 2,
-# the one with the darker top takes the brighter light. A painted blue steel plate (0.31, with glare) was left out.
+# the one with the darker top takes the brighter light. A painted blue steel plate (0.31, with glare) was left out, and
+# granite tiles (lum 0.38: 3 of 16 seeds drawn on it fell below the 0.35 exposure floor, the darkest a black rope on
+# their speckle, renders of 2026-10-28) were dropped.
 TABLE_FINISHES = {
     "grey_laminate": dict(cls="plastic", color=[.83, .84, .82], metallic=0., roughness=.42, lum=.62),
     "ash_veneer": _texture("wood", "ash_veneer", 1.0, lum=.50),
@@ -49,7 +51,6 @@ TABLE_FINISHES = {
     "satin_aluminium": dict(cls="metal", color=[.80, .81, .83], metallic=1., roughness=.55, lum=.55),
     "terrazzo": _texture("stone", "terrazzo_tiles", 2.0, lum=.43),
     "brushed_concrete": _texture("stone", "brushed_concrete", 2.5, lum=.40),
-    "granite_tiles": _texture("stone", "granite_tile_03", 1.8, lum=.38),
 }
 # Table tops a family's seeds never draw: those its objects would not stand out from (task_id -> names).
 TABLE_EXCLUDED: dict[str, tuple] = {
