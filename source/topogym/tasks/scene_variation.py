@@ -139,9 +139,13 @@ AXES = {
     # the knob's white line; Trinity's green goal region). Battery's pry stick follows props_finish since 2026-10-21 (its
     # texts no longer name its colours).
     "bed_bolt": (
-        dict(path="wood_finish", kind="choice", values=["walnut", "white_painted", "white_oak"], visual=True),
-        dict(path="bolt_finish", kind="choice", values=["zinc", "yellow_zinc"], visual=True),
-        dict(path="key_finish", kind="choice", values=["black_oxide", "blue_coated"], visual=True),
+        # Colour and material together (geo.WOOD_FINISHES, BOLT_FINISHES, KEY_FINISHES; the user, 2026-10-27): seed 1 a
+        # black-painted frame with brass screws, an antique-brass bolt and a red key; seed 2 a mahogany frame with black
+        # screws, a blue anodised bolt and a black-oxide key (the ratcheting key: a black handle, a gold head). The sign's
+        # card stays white.
+        dict(path="wood_finish", kind="choice", values=["black_painted", "mahogany"], visual=True),
+        dict(path="bolt_finish", kind="choice", values=["antique_brass", "blue_anodised"], visual=True),
+        dict(path="key_finish", kind="choice", values=["red_coated", "black_oxide"], visual=True),
     ),
     "caliper_sorting": (
         # The four sleeves stay alike (one finish for all); bins keep the white label cards.
