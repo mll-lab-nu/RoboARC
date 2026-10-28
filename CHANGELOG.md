@@ -101,6 +101,9 @@ reference rows are unchanged. Not released yet: the image, the instances and the
   (cast-keyhole 02-06, hedgehog-in-cage 02, 03, 06-08, horseshoe-ring 01-05, interlocked-claws 02, 05, 08-13, orbits
   01-02, slotted-post-ring 01-05). Their birth states are unchanged (cast-keyhole-02's stays `aad47b14b8722c9e`).
 - knot-untying 07 and 09 draw no marker in the scene; their goal pictures paint 5 mm dashes (`8b2c00e4`).
+- An instance records the marker's outer extent as `objects.goal_region.size`, which grew by 6 mm. The texts'
+  goal-square side is now that size minus 10 mm (was minus 4 mm; `tools/release/topogym_rules.py` `_square_mm`), so
+  the stated sides are unchanged: cast-keyhole-02 states 252.5 mm before and after.
 
 ### Texts (`810302a8` and the families' commits)
 - The colour words for parts whose colour now changes are gone; the parts are named by shape or role:
@@ -118,6 +121,8 @@ reference rows are unchanged. Not released yet: the image, the instances and the
 - "the inner edge of the 2 mm wide dashed green line" became "5 mm wide" in the texts of the 28 bases that state it
   (the 30 marker bases but interlocked-claws 05 and 11-13, which only say the square is not part of their goal; and
   knot-untying 07 and 09).
+- The same sentence said "the region's border runs along the middle of the line", true of the 2 mm line only. It now
+  says "the whole line lies outside it".
 - The same words in the catalog texts (`scripts/roboarc/shared/rcb_topogym.py` `TASKS`) and in the release tooling
   (`tools/release/topogym_rules.py`, `tools/release/mujoco_release.json`).
 - The rules, limits and numbers the texts state are unchanged.

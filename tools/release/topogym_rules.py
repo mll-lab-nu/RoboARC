@@ -87,10 +87,12 @@ def _robot_of(inst):
 
 
 def _square_mm(inst):
-    """Side of the usable goal square: the inner edge of the 2 mm dashed stripe (goal_region size - 4 mm; the stripe
-    is centred on the region's border, topogym/assets/geometry/goal_region.py)."""
+    """Side of the usable goal square: the inner edge of the 5 mm dashed stripe. The instance records the marker's outer
+    extent as goal_region size, and the stripe lies wholly outside the containment limit (topogym/assets/geometry/
+    goal_region.py), so the square is size - 10 mm. An instance made before the marker grew from 2 mm (2.1.0 and older)
+    records a size 6 mm smaller; its texts were made with size - 4 mm."""
     size = inst.get("objects", {}).get("goal_region", {}).get("size")
-    return None if not size else (float(size[0]) - .004) * 1000
+    return None if not size else (float(size[0]) - .01) * 1000
 
 
 def claws_separation(inst):
@@ -157,7 +159,7 @@ def grader_details(fam, inst, *, limited):
         side = _square_mm(inst)
         if side:
             out.append(f"Goal square in this instance: the inner edge of the 5 mm wide dashed green line is the containment "
-                       f"limit (the region's border runs along the middle of the line); it encloses a {side:.1f} mm x "
+                       f"limit (the whole line lies outside it); it encloses a {side:.1f} mm x "
                        f"{side:.1f} mm square. Every point counts: for a rigid part every vertex of its visual and collision "
                        "meshes" + ("; for the cord every vertex of its simulated volume" if fam in ("orbits", "slotted_post_ring")
                                    else "") + ".")
