@@ -14,8 +14,9 @@ recipe is `source/images/roboarc/Dockerfile`; `build.sh` builds it. It holds:
   kernels, compiled at build into `/opt/warp-cache`;
 - the Debian packages they need (ffmpeg for the replay videos, the GL / EGL / OpenGL / Vulkan loaders, X11 client
   libraries) and, for the agent harness, curl, ca-certificates and ripgrep;
-- the robot assets (`/opt/topogym-assets/robots`), Nyx's studio HDRI and wood maps and the ground plane's checker
-  texture (`/opt/topogym-visuals`), the NVIDIA Vulkan ICD and EGL vendor files;
+- the robot assets (`/opt/topogym-assets/robots`), Nyx's studio HDRI and wood maps, the appearance seeds' texture maps
+  (table tops, frames, floors: 1k colour, normal and ARM maps of ten CC0 Poly Haven textures, with a CREDITS.txt) and the
+  ground plane's checker texture (`/opt/topogym-visuals`), the NVIDIA Vulkan ICD and EGL vendor files;
 - every task's frozen MuJoCo instance (`/opt/robotangle/instances/<base>/`), staged into a task by
   `/opt/robotangle/stage_instance.py` and checked against the task's `runtime_binding.json`.
 
@@ -42,7 +43,7 @@ same file contents; only the image id differs, by file times):
 - the Python packages by version and wheel sha256: `source/images/roboarc/runtime.lock` (installed with uv,
   `--no-deps --require-hashes`; uv itself is a build stage, hash-pinned, not in the image) and
   `source/images/roboarc/vbd-requirements.txt` (newton, warp-lang);
-- the downloaded studio maps by sha256 (`source/images/roboarc/prepare_nyx_studio.py`), the MuJoCo EPA patch by the
+- the downloaded studio and texture maps by sha256 (`source/images/roboarc/prepare_nyx_studio.py`), the MuJoCo EPA patch by the
   sha256 of the library before and after.
 
 1.1.0 installs the same versions and the same wheel and Debian package files as 1.0.0: every library the graded
@@ -91,7 +92,7 @@ the owner's approval): until then build with `--instances <dir>` from the releas
 
 It needs Docker with BuildKit (the default `docker` driver), about 25 GB of free disk and network access to Docker Hub
 (the base image), snapshot.debian.org, pypi.org and download.pytorch.org (the wheels) and dl.polyhaven.org (the studio
-maps).
+and texture maps).
 
 ## Check a build
 
