@@ -14,14 +14,18 @@ and turns them into agent/trajectory.json; this class adds what DSH needs:
   picks models from its built-in catalog: its `deepseek-flash` is DeepSeek-V4.1-Flash, so the model deepseek-v4.1-flash is
   asked for as `deepseek-flash` (the trial's records keep the model as given). Releases from 0.2.1-rc.3 on also list
   models at the API origin's /models, which the usage gateway's /u/<host>/ routes cannot carry;
+- the model is requested as dsh's own option value, JSON `["<provider>","<model>"]` (dsh-acp's modelValue), the only
+  form Harbor's runner matches among dsh's options: with `deepseek/deepseek-flash` it finds no candidate, sets nothing,
+  and dsh's ACP default, deepseek-v4-flash (DeepSeek-V4-Flash), answers. acp_prompt_file.py sends the prompt only when
+  the session's model is the requested one;
 - no web tools unless web=true: a dsh patch file turns web_search and web_fetch off (PROTOCOL D11: DeepSeek would run the
   search, past the egress allowlist);
 - the instruction travels in a file, never on a command line: Harbor's ACP runner takes it as an argument, and an agent
   that runs `pkill -f <a word of the task>` would kill its own harness (the exam's issue #228). dsh/acp_prompt_file.py
   reads the file and starts Harbor's runner in its own process;
 - reasoning_effort: Harbor's runner sets only the model; acp_prompt_file.py sets the session's `reasoning_effort` option
-  (dsh advertises it per model) after the session is created and after each model change, recorded in
-  agent/dsh-effort.json.
+  (dsh advertises it per model) after the session is created and after each model change, recorded with the model
+  check in agent/dsh-session.json.
 Credentials: DEEPSEEK_API_KEY from Harbor's environment (its --env-file); DEEPSEEK_BASE_URL, when set there (the usage
 gateway), points dsh at another Messages root.
 """
@@ -50,8 +54,9 @@ PATCH = "/installed-agent/dsh-roboarc.patch.yml"
 SHIM = "/installed-agent/acp_prompt_file.py"
 PROMPT = "/tmp/acp-prompt/instruction.txt"
 # the model as RoboARC names it (the exam's run id) -> the id of dsh's built-in catalog entry (0.2.1-rc.2 models.ts:
-# id 'deepseek-flash', name 'DeepSeek-V4.1-Flash')
+# id 'deepseek-flash', name 'DeepSeek-V4.1-Flash'); the provider -> dsh's provider id (dsh-llm-deepseek-api-key)
 MODEL_IDS = {"deepseek-v4.1-flash": "deepseek-flash"}
+PROVIDERS = {"": "deepseek-official", "deepseek": "deepseek-official"}
 
 
 class DshAcpOptions(AcpOptions):
@@ -106,8 +111,9 @@ class DshAcp(AcpAgent):
         if not self.model_name:
             return None
         provider, _, model = self.model_name.rpartition("/")
+        provider = PROVIDERS.get(provider.lower(), provider)
         model = MODEL_IDS.get(model.lower(), model)
-        return f"{provider}/{model}" if provider else model
+        return json.dumps([provider, model], separators=(",", ":"))   # JSON.stringify's form
 
     @with_prompt_template
     async def run(self, instruction: str, environment: BaseEnvironment, context: AgentContext) -> None:

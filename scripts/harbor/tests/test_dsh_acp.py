@@ -8,9 +8,9 @@ docker, no model, no network.
   is the exam's, dsh-deepseek_v4_1_flash-high; AGENT_CONFIG is refused;
 - acp_prompt_file.py: the runner gets the whole instruction while the shim's own command line carries none of it, and
   the session's reasoning_effort is set after session/new and after a model change (skipped, and recorded, when the
-  session does not offer the value);
+  session does not offer the value); the prompt goes out only when the session's model is the one requested;
 - with Harbor importable (HARBOR_PYTHON, or the interpreter of `harbor` on PATH): DshAcp's registry entry, pinned version,
-  model id and launcher.
+  model value (one Harbor's runner matches among dsh's own option values) and launcher.
 """
 import json
 import os
@@ -28,12 +28,16 @@ SHIM = REPO / "scripts" / "harbor" / "agents" / "dsh" / "acp_prompt_file.py"
 sys.path.insert(0, str(HERE))
 import test_runner_seeds as trs  # noqa: E402
 
+FLASH, V4 = '["deepseek-official","deepseek-flash"]', '["deepseek-official","deepseek-v4-flash"]'   # dsh's option values
+
 FAKE_ACP = '''
 import contextlib, types
 calls = []
 VALUES = {values!r}
+model = [{start!r}]
 def opts(effort):
-    return [types.SimpleNamespace(id="model", options=[types.SimpleNamespace(value="deepseek-official/deepseek-flash")]),
+    return [types.SimpleNamespace(id="model", current_value=model[0], options=[types.SimpleNamespace(
+                group="deepseek-official", options=[types.SimpleNamespace(value=v) for v in ({flash!r}, {v4!r})])]),
             types.SimpleNamespace(id="reasoning_effort", options=[types.SimpleNamespace(value=v) for v in effort])]
 class Conn:
     async def new_session(self, cwd=None, mcp_servers=None):
@@ -41,7 +45,11 @@ class Conn:
         return types.SimpleNamespace(session_id="s1", config_options=opts(VALUES))
     async def set_config_option(self, session_id, config_id, value):
         calls.append(["set", config_id, value])
+        if config_id == "model":
+            model[0] = value
         return types.SimpleNamespace(config_options=opts(VALUES))
+    async def prompt(self, session_id, prompt):
+        calls.append(["prompt"])
 @contextlib.asynccontextmanager
 async def spawn_agent_process(client, launcher, **kw):
     yield Conn(), None
@@ -54,7 +62,12 @@ import acp
 async def main():
     async with spawn_agent_process(None, "launcher") as (conn, _):
         s = await conn.new_session(cwd="/app", mcp_servers=[])
-        await conn.set_config_option(session_id=s.session_id, config_id="model", value="deepseek-official/deepseek-flash")
+        if os.environ.get("SET_MODEL"):
+            await conn.set_config_option(session_id=s.session_id, config_id="model", value=os.environ["SET_MODEL"])
+        try:
+            await conn.prompt(session_id=s.session_id, prompt=[])
+        except RuntimeError as e:
+            acp.calls.append(["refused", str(e)])
     cmdline = open(f"/proc/{os.getpid()}/cmdline", "rb").read().replace(b"\\0", b" ").decode()
     print(json.dumps({"instruction": sys.argv[1], "rest": sys.argv[2:], "cmdline": cmdline, "calls": acp.calls}))
 if __name__ == "__main__":
@@ -70,9 +83,9 @@ class Shim(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def run_shim(self, values, effort="high"):
+    def run_shim(self, values, effort="high", start=V4, set_model=FLASH, requested=FLASH):
         (self.root / "acp").mkdir(exist_ok=True)
-        (self.root / "acp" / "__init__.py").write_text(FAKE_ACP.format(values=values))
+        (self.root / "acp" / "__init__.py").write_text(FAKE_ACP.format(values=values, start=start, flash=FLASH, v4=V4))
         (self.root / "runner.py").write_text(FAKE_RUNNER)
         (self.root / "logs").mkdir(exist_ok=True)
         task = "Thread the rope through the TASKWORD ring.\n" * 40
@@ -80,7 +93,9 @@ class Shim(unittest.TestCase):
         p = subprocess.run([sys.executable, str(SHIM), f"--instruction-file={self.root / 'instruction.txt'}",
                             f"--runner={self.root / 'runner.py'}", f"--reasoning-effort={effort}", "--",
                             f"--logs-dir={self.root / 'logs'}", "--launcher=/installed-agent/acp-launch.sh"],
-                           capture_output=True, text=True, env=dict(os.environ, PYTHONPATH=str(self.root)), timeout=60)
+                           capture_output=True, text=True, timeout=60,
+                           env=dict(os.environ, PYTHONPATH=str(self.root), SET_MODEL=set_model or "",
+                                    HARBOR_ACP_REQUESTED_MODEL=requested or ""))
         self.assertEqual(p.returncode, 0, p.stderr)
         return json.loads(p.stdout.strip().splitlines()[-1]), task
 
@@ -92,16 +107,24 @@ class Shim(unittest.TestCase):
 
     def test_effort_after_session_and_model(self):
         out, _ = self.run_shim(["low", "medium", "high"])
-        self.assertEqual(out["calls"], [["new_session"], ["set", "reasoning_effort", "high"],
-                                        ["set", "model", "deepseek-official/deepseek-flash"],
-                                        ["set", "reasoning_effort", "high"]])
-        log = json.loads((self.root / "logs" / "dsh-effort.json").read_text())
+        self.assertEqual(out["calls"], [["new_session"], ["set", "reasoning_effort", "high"], ["set", "model", FLASH],
+                                        ["set", "reasoning_effort", "high"], ["prompt"]])
+        log = json.loads((self.root / "logs" / "dsh-session.json").read_text())
         self.assertEqual([a.get("set") for a in log["attempts"]], ["high", "high"])
+        self.assertEqual(log["model"], {"requested": FLASH, "current": FLASH})
+
+    def test_wrong_model_refused(self):
+        # the model was never set (dsh's ACP default is deepseek-v4-flash): no prompt goes out
+        out, _ = self.run_shim(["low", "medium", "high"], set_model=None)
+        self.assertNotIn(["prompt"], out["calls"])
+        self.assertEqual(out["calls"][-1][0], "refused")
+        log = json.loads((self.root / "logs" / "dsh-session.json").read_text())
+        self.assertEqual(log["model"], {"requested": FLASH, "current": V4})
 
     def test_effort_not_offered(self):
         out, _ = self.run_shim(["low", "medium"])
         self.assertNotIn(["set", "reasoning_effort", "high"], out["calls"])
-        log = json.loads((self.root / "logs" / "dsh-effort.json").read_text())
+        log = json.loads((self.root / "logs" / "dsh-session.json").read_text())
         self.assertTrue(all("skipped" in a for a in log["attempts"]))
 
 
@@ -164,9 +187,18 @@ class HarborClass(unittest.TestCase):
         if not py or subprocess.run([py, "-c", "import harbor"], capture_output=True).returncode != 0:
             self.skipTest("Harbor is not importable (set HARBOR_PYTHON to its interpreter)")
         code = textwrap.dedent(f"""
-            import json, sys, tempfile, pathlib
+            import json, sys, tempfile, pathlib, types
             sys.path.insert(0, {str(REPO / 'scripts' / 'harbor' / 'agents')!r})
             from dsh_acp import DshAcp
+            class Stub(types.ModuleType):          # the ACP SDK lives in the trial's runner venv: stand-ins for the import
+                def __getattr__(self, name):
+                    if name.startswith("__"):
+                        raise AttributeError(name)
+                    setattr(self, name, type(name, (), {{}}))
+                    return getattr(self, name)
+            for m in ("acp", "acp.interfaces", "acp.schema"):
+                sys.modules.setdefault(m, Stub(m))
+            from harbor.agents.installed.acp_runner import _resolve_config_model_candidates
             d = pathlib.Path(tempfile.mkdtemp())
             a = DshAcp(logs_dir=d, model_name="deepseek/deepseek-v4.1-flash", reasoning_effort="high")
             w = DshAcp(logs_dir=d, model_name="deepseek-v4-pro", web="true", version="0.2.1-rc.4")
@@ -174,15 +206,21 @@ class HarborClass(unittest.TestCase):
                 DshAcp(logs_dir=d, bogus=1); refused = False
             except ValueError:
                 refused = True
+            # dsh's model option as session/new returns it: one group per provider, values JSON [provider, model]
+            option = types.SimpleNamespace(id="model", options=[types.SimpleNamespace(group="deepseek-official", options=[
+                types.SimpleNamespace(value=v) for v in ({FLASH!r}, '["deepseek-official","deepseek-v4-pro"]', {V4!r})])])
             print(json.dumps({{"name": a.name(), "version": a._version, "cmd": a._registry_entry.distribution.local.cmd,
-                               "model": a._requested_model(), "launcher": a._launcher(), "web": w.options.web,
+                               "model": a._requested_model(), "matched": _resolve_config_model_candidates(a._requested_model(), option),
+                               "w_model": w._requested_model(), "launcher": a._launcher(), "web": w.options.web,
                                "w_version": w._version, "w_launcher": w._launcher(), "refused": refused}}))
         """)
         p = subprocess.run([py, "-c", code], capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         out = json.loads(p.stdout.strip().splitlines()[-1])
         self.assertEqual((out["name"], out["version"], out["cmd"]), ("dsh", "0.2.1-rc.2", "/installed-agent/dsh-acp.sh"))
-        self.assertEqual(out["model"], "deepseek/deepseek-flash")          # dsh's catalog id for DeepSeek-V4.1-Flash
+        self.assertEqual(out["model"], FLASH)                   # dsh's catalog id for DeepSeek-V4.1-Flash, as dsh's own value
+        self.assertEqual(out["matched"], [FLASH])               # Harbor's runner sets exactly that option value
+        self.assertEqual(out["w_model"], '["deepseek-official","deepseek-v4-pro"]')
         self.assertIn("dsh --profile acp --patch /installed-agent/dsh-roboarc.patch.yml", out["launcher"])
         self.assertEqual((out["web"], out["w_version"]), (True, "0.2.1-rc.4"))
         self.assertNotIn("--patch", out["w_launcher"])
