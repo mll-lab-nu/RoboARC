@@ -6,6 +6,7 @@ from a committed task (docs/RUNNING.md "Seeds"). Standard library only:
 import collections
 import hashlib
 import importlib.util
+import json
 import pathlib
 import re
 import shutil
@@ -24,11 +25,11 @@ check_seed_files = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check_seed_files)
 
 
-def a_pair(single: bool = False):
+def a_pair(ikea: bool = False):
     """A committed privileged / standard pair (base name): a puzzle base (three appearance seeds since 1.2.0), or with
-    single=True an IKEA base (its default seed only)."""
-    for d in sorted((REPO / "tasks").glob("roboarc-ikea-*-privileged" if single else "roboarc-*-privileged")):
-        if not single and d.name.startswith("roboarc-ikea-"):
+    ikea=True an IKEA base (three seeds of one frozen scene since 2026-10-27: the standard mode's lighting)."""
+    for d in sorted((REPO / "tasks").glob("roboarc-ikea-*-privileged" if ikea else "roboarc-*-privileged")):
+        if not ikea and d.name.startswith("roboarc-ikea-"):
             continue
         if (d.with_name(d.name.replace("-privileged", "-standard")) / "task.toml").is_file():
             return d.name.removesuffix("-privileged")
@@ -81,7 +82,11 @@ class Assign(unittest.TestCase):
         for t in (cls.p, cls.s):
             shutil.copytree(REPO / "tasks" / t.name, t, symlinks=True)
             three_seeds(t)
-        cls.one = REPO / "tasks" / f"{a_pair(single=True)}-privileged"
+        cls.one = root / f"{a_pair(ikea=True)}-privileged"          # a task that allows its default seed only
+        shutil.copytree(REPO / "tasks" / cls.one.name, cls.one, symlinks=True)
+        p = cls.one / "task.toml"
+        p.write_text(re.sub(r'(?m)^build = "runtime"\n', "", re.sub(r"(?m)^allowed = .*$", "allowed = [0]", p.read_text(),
+                                                                      count=1)))
 
     @classmethod
     def tearDownClass(cls):
@@ -183,13 +188,25 @@ class Materialize(unittest.TestCase):
             self.assertTrue(any("trajectory.s1.npz missing" in e for e in check_seed_files.check(p)))
         self.assertTrue(any("not the files of environment/goal/" in e for e in check_seed_files.check(p)))
 
-    def test_single_seed_copy_is_the_task(self):
-        """A committed single-seed task (IKEA) materialized on its default seed is the task, byte for byte."""
+    def test_ikea(self):
+        """A committed IKEA task: materialized on its default seed it is the task, byte for byte; on seed 2 its places
+        carry the seed. Its seeds need no bindings, only the standard rig's lighting of every seed."""
+        base = a_pair(ikea=True)
         for m in ("privileged", "standard"):
-            t = REPO / "tasks" / f"{a_pair(single=True)}-{m}"
+            t = REPO / "tasks" / f"{base}-{m}"
             dst = task_seed.materialize(t, 0, self.root / f"plain-{m}")
             self.assertEqual(tree(dst), tree(t))
             self.assertEqual(check_seed_files.check(t), [])
+            d2 = task_seed.materialize(t, 2, self.root / f"two-{m}")
+            for place in task_seed.places(t):
+                self.assertEqual((d2 / place / "seed").read_text(), "2\n")
+        t = self.root / f"{base}-standard"
+        shutil.copytree(REPO / "tasks" / t.name, t, symlinks=True)
+        rig = t / "environment" / "sim" / "rig.json"
+        spec = json.loads(rig.read_text())
+        del spec["seeds"]["2"]
+        rig.write_text(json.dumps(spec))
+        self.assertEqual(check_seed_files.check(t), ["environment/sim/rig.json: no lighting of seed 2 (seeds)"])
 
 
 if __name__ == "__main__":

@@ -54,7 +54,7 @@ for t in tasks:
 
 def pair_bases():
     """Two committed task pairs (base names), the smallest of each kind: a puzzle base (three appearance seeds since
-    1.2.0) and an IKEA base (its default seed only)."""
+    1.2.0) and an IKEA base (made a single-seed task here: one_seed)."""
     size = lambda d: sum(f.stat().st_size for f in d.rglob("*") if f.is_file())  # noqa: E731
     out = []
     for kind in ("puzzle", "ikea"):
@@ -81,6 +81,14 @@ def three_seeds(task: pathlib.Path) -> None:
         (task / pl / "seed").write_text("0\n")
 
 
+def one_seed(task: pathlib.Path) -> None:
+    """Its default seed only, without seed files (every committed task allows three seeds since 2026-10-27)."""
+    p = task / "task.toml"
+    p.write_text(re.sub(r'(?m)^build = "runtime"\n', "", re.sub(r"(?m)^allowed = .*$", "allowed = [0]", p.read_text(), count=1)))
+    for f in task.rglob("seed"):
+        f.unlink()
+
+
 class RunnerSeeds(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -103,6 +111,7 @@ class RunnerSeeds(unittest.TestCase):
                 shutil.copytree(REPO / "tasks" / f"{b}-{m}", repo / "tasks" / f"{b}-{m}", symlinks=True)
         for m in ("privileged", "standard"):
             three_seeds(repo / "tasks" / f"{self.multi}-{m}")
+            one_seed(repo / "tasks" / f"{self.single}-{m}")
         self.repo = repo
         bin_dir = self.root / "bin"
         bin_dir.mkdir()

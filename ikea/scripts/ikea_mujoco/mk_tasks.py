@@ -76,6 +76,25 @@ CHANGE_LOG = """### Change Log
   stand.
 """
 
+# Appearance seeds (the user, 2026-10-27): both twins allow seeds 0, 1 and 2, built at run time from the one frozen scene:
+# the runner's copy carries the trial's seed in the files `seed` (scripts/task_seed.py materialize; 0 as committed).
+# A seed changes only the standard twin's lighting (mk_standard_tasks.py seed_look); the privileged mode shows the agent no
+# images, so there every seed is the same task. The reference was checked on seed 0 (oracle = [0]).
+SEEDS = (1, 2)
+SEEDS_TOML = f'''
+[metadata.seeds]
+default = 0
+allowed = [{", ".join(str(s) for s in (0,) + SEEDS)}]
+oracle = [0]
+build = "runtime"
+'''
+SEEDS_CHANGE = """- 2026-10-27: three appearance seeds: the task allows seeds 0, 1 and 2 (`[metadata.seeds]`, `build = "runtime"`: the
+  runner picks the trial's seed and writes it to the files `seed`), as its standard twin, whose camera images seeds 1
+  and 2 light differently. This mode shows the agent no images and its replay video keeps the scene's own lights, so
+  here every seed is the same task. The scene, the physics, the instruction, the grader, the tooling and the reference
+  are unchanged: results graded under 1.1.x stand.
+"""
+
 
 def default_tasks() -> list[str]:
     """Every task in bindings.json."""
@@ -320,7 +339,7 @@ grasp = "physical (finger friction; no assisted grasp, no welds to a gripper)"
 success_rule = "the scene's success.py (port of the source assembly grader) + the terminal rules (released, at rest, no breakdown), after the last row and after a 1.0 s hold"
 instance_seed = 0                 # one frozen scene: ikea/images/ikea-mujoco scene {t}, digest {ASSETS['tasks'][t]['digest'][:12]}
 expert_time_estimate_hours = {x['hours']}
-
+{SEEDS_TOML}
 [verifier]
 timeout_sec = {verifier_timeout(t)}.0
 environment_mode = "separate"     # verifier runs in its own sandbox (tests/Dockerfile); the agent container is gone by then
@@ -530,7 +549,7 @@ initial-state hash (`instance_ok`). Replay video (evidence only, never the verdi
 - The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
   context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).
 
-{CHANGE_LOG}'''
+{CHANGE_LOG}{SEEDS_CHANGE}'''
 
 
 SOLVE = '''#!/bin/bash
@@ -610,7 +629,8 @@ def render(t: str, out: pathlib.Path) -> None:
     files = {"task.toml": task_toml(t), "instruction.md": instruction(t),
              "environment/Dockerfile": ENV_DOCKERFILE.format(image=pinned(t)),
              "tests/Dockerfile": TESTS_DOCKERFILE.format(image=pinned(t)), "tests/test.sh": test_sh(t),
-             "tests/runtime_binding.json": binding(t), "tests/video_view.json": video_view(t), "solution/solve.sh": SOLVE}
+             "tests/runtime_binding.json": binding(t), "tests/video_view.json": video_view(t), "solution/solve.sh": SOLVE,
+             "environment/seed": "0\n", "tests/seed": "0\n"}
     for rel, s in files.items():
         p = out / rel
         p.parent.mkdir(parents=True, exist_ok=True)
