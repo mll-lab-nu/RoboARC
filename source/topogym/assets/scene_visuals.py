@@ -13,12 +13,14 @@ SURFACES = {
 }
 # Roles added after scene_preset.json began recording SURFACES: kept out of it so every existing scene's record stays
 # byte-identical; record_preset adds the ones a scene's parameters name. brass: Horseshoe's third target-ring look
-# (appearance seeds, 2026-10-20), apart from the silver horseshoes and the default copper ring. blue_rope, black_rope:
-# Rope Threading's rope looks of appearance seeds 1 and 2 (2026-10-21), apart from every ring and grommet colour.
+# (appearance seeds, 2026-10-20), apart from the silver horseshoes and the default copper ring. blue_nylon_rope,
+# black_polyester_rope: rope and cord looks of appearance seeds 1 and 2 (2026-10-27): another colour
+# and another fibre than hemp or polypropylene (braided nylon has a sheen, polyester a softer one), apart from every
+# ring and grommet colour and the green goal region, and >= 15 CIEDE2000 from every table top a seed draws.
 LATE_SURFACES = {
     "brass": dict(color=(.78, .60, .25, 1.), metallic=.9, roughness=.35),
-    "blue_rope": dict(color=(.04, .12, .60, 1.), metallic=0., roughness=.88),
-    "black_rope": dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.88),
+    "blue_nylon_rope": dict(color=(.04, .12, .60, 1.), metallic=0., roughness=.45),
+    "black_polyester_rope": dict(color=(.03, .03, .035, 1.), metallic=0., roughness=.6),
 }
 
 

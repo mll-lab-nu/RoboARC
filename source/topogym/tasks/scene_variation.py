@@ -89,9 +89,13 @@ AXES = {
         # 1.1 m rope's far end (5 deg -> ~5 cm), so this envelope is small.
         dict(path="geometry.translation_m", kind="offset", range=[[-.01, .02], [-.01, 0.], None]),
         dict(path="geometry.yaw_deg", kind="offset", range=[-2., 2.]),
-        # Ring colours stay: the instruction orders the rings cyan, green, purple. The rope is hemp, blue or black, apart
-        # from every ring and grommet (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
-        dict(path="rope_finish", kind="choice", values=["hemp", "blue_rope", "black_rope"], visual=True),
+        # Ring hues stay: the instruction orders the rings cyan, green, purple; their finish changes (glossy, then matte
+        # powder coat; redesign/task.py RING_FINISHES), and the bulkhead, pedestals, posts and stands change colour and
+        # finish (FIXTURE_FINISHES). The rope is hemp, blue nylon or black polyester, apart from every ring and grommet
+        # (orange sat near the red grommet, gold near the amber ring; 2026-10-21).
+        dict(path="rope_finish", kind="choice", values=["hemp", "blue_nylon_rope", "black_polyester_rope"], visual=True),
+        dict(path="ring_finish", kind="choice", values=["released", "glossy", "matte_powder_coat"], visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "olive_steel", "steel_blue"], visual=True),
     ),
     "slotted_post_ring": (
         # FEM volumes cannot rotate, so translation only; -y beyond ~2.5 cm pushes the discs out of frame.
