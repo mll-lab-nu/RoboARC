@@ -135,7 +135,13 @@ AXES = {
         dict(path="origin_xy_m", kind="offset", range=[[-.06, .02], [-.01, .04]]),
         # Success counts projected crossings, invariant under a turn about z.
         dict(path="yaw_deg", kind="offset", range=[-30., 15.]),
-        dict(path="rope_finish", kind="choice", values=["hemp", "orange_rope", "golden_rope"], visual=True),
+        # The rope is orange polypropylene, then blue nylon, then black polyester (hemp sat 12 CIEDE2000 from orange
+        # and 8 from the maple table top, 2026-10-27); the redesigned tiers' posts, curb and clamp change finish too
+        # (task_rd.FIXTURE_FINISHES).
+        dict(path="rope_finish", kind="choice", values=["orange_rope", "blue_nylon_rope", "black_polyester_rope"],
+             visual=True),
+        dict(path="fixture_finish", kind="choice", values=["released", "walnut_black_oxide", "blue_red_powder_coat"],
+             visual=True),
     ),
     # The fixed-scene families below vary appearance only (appearance(); the user, 2026-10-20): every axis re-colours
     # visual geoms or meshes, never a colliding one; the values leave out the default and their order is the looks of
