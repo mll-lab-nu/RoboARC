@@ -54,7 +54,10 @@ again).
     hole's mouth dark on top;
   - appearance parameters (2026-10-20, the owner: a seed varies appearance only): `wood_finish`, `bolt_finish` and
     `key_finish` (`WOOD_FINISHES`, `BOLT_FINISHES`, `KEY_FINISHES`; their first entries are the colours above) change
-    only these looks' colours (`scene_variation.appearance`: appearance seed 0 is this look).
+    only these looks' colours (`scene_variation.appearance`: appearance seed 0 is this look). Since the appearance seeds
+    v2 (2026-10-27; CHANGELOG, "Unreleased") each is a colour and an MJCF material: seed 1 a charcoal-painted frame with
+    brass screws, an antique-brass bolt, a red powder-coated key; seed 2 a lacquered mahogany frame with black-oxide
+    hardware, a blue anodised bolt, a black-oxide key. The drive card stays white (matte paper, then coated card).
   The MuJoCo scene drops the geoms with no contact and no mass and the meshes only they use
   (`topogym.world.mujoco.mjcf_entity.merge_mjcf_entity`), so each instance's physics `scene.xml` is byte for byte dev
   a0856f6b32's; only `instance.json`'s asset identity (the entity files' sha256) differs. The births are unchanged and

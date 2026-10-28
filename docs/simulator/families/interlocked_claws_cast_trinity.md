@@ -18,7 +18,9 @@ long as the solution stays as involved as the original's, is feasible in the new
 - Geometry (`topogym/assets/geometry/cast_trinity.py`, model `cast_trinity_v12`): rods, a flat band and block heads, 150 mm
   long (about 2.7 times the real puzzle), density 600 as every claws piece. Each piece's band has a 4 mm thick neck by the
   heads, the only part thinner than the 5 mm head gap; B's two heads interlock as two L shapes, so its gap is crosswise and
-  nothing passes it. Pieces `trinity_t` (gold, engraved TRINITY), `trinity_h` (H, T's mirror) and `trinity_b` (copper).
+  nothing passes it. Pieces `trinity_t` (gold, engraved TRINITY), `trinity_h` (H, T's mirror) and `trinity_b` (copper):
+  appearance seed 0's colours; seeds 1 and 2 draw T, H and B red, blue and black anodised, then blue, yellow and red
+  powder coat (`piece_finishes`).
 - Collision: profile `claws_v6_cast_trinity` = claws_v6 plus `split`: each piece collides as its exact convex decomposition
   (`t_parts`, `h_parts`, `b_parts`), so the windows, slots and head gaps stay open.
 - Opening: T in the left hand, B in the right (pregrasp_weld, contact_weld_v1; both hands acquire at the first control

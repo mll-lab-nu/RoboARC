@@ -146,7 +146,9 @@ handle collide with the ALOHA, and the restored birth hash equals the settling S
 ## Rendering
 
 nyx_direct (`TASKS` renderer "direct"); the FEM settings are drawn as the FEM setting (golden rope, wooden handle)
-through `nyx_direct.chain_cord_host`. Against the bridge's Genesis host: input buffers bitwise but rounding at birth,
+through `nyx_direct.chain_cord_host`. That is appearance seed 0's look; seeds 1 and 2 re-finish the cord, the fixture
+and the handle (orange polypropylene, walnut-stained, lacquered ebony; blue nylon, black lacquer, oiled mahogany:
+`cord_finish`, `orbits.FIXTURE_FINISHES`). Against the bridge's Genesis host: input buffers bitwise but rounding at birth,
 RGB within the host's own run-to-run spread (at most ~110 pixels > 8 levels per camera, as host against host).
 
 ## References (`scripts/robotangle/oracles/<base>-i01/`, `standard.npz` = `privileged.npz`)

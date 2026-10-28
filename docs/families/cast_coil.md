@@ -2,7 +2,7 @@
 
 Family key `cast_coil` · 5 task bases · robot `aloha-2` · physics MuJoCo 3.14.0
 
-Two rigid puzzle pieces, one gold and one silver, are on the table. The robot must assemble them into their matching interlocking configuration, then release both. The bases use different piece designs (see the table).
+Two rigid puzzle pieces (`coil_gold` and `coil_silver`: gold and silver at appearance seed 0, other colours and materials at seeds 1 and 2) are on the table. The robot must assemble them into their matching interlocking configuration, then release both. The bases use different piece designs (see the table).
 
 ## Robot and grasping
 

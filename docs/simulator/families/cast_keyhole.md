@@ -9,7 +9,10 @@ in an internal port note, not included in this repository. Shared mechanisms are
 Two 9 mm cast plates, gold and silver, interlocked through the silver's keyhole channel (ALOHA, assisted grasp
 `contact_weld_v1`). Separate the silver and hold it inside the goal area, the gold outside on the puzzle side. Five
 released tiers: very_easy and easier (simplified straight channel), easy F1, medium F2 (eccentric window), hard F3.
-Goals, rules, geometry and difficulty are the released ones.
+Goals, rules, geometry and difficulty are the released ones. Gold and silver are the plates' colours at appearance seed 0
+and their object names (`keyhole_gold`, `keyhole_silver`); since the appearance seeds v2 (CHANGELOG, "Unreleased") the
+texts call them the fork plate and the keyhole plate, and seeds 1 and 2 re-finish both (`piece_finish`,
+`scene_visuals.CAST_PIECE_FINISHES`: red and blue anodised aluminium, then black and orange powder coat).
 
 ## Profile keyhole_v4 (`topogym/world/mujoco/profiles.py`, `_KEYHOLE`, key `("cast_keyhole", None)`)
 

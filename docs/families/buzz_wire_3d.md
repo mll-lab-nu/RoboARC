@@ -34,9 +34,9 @@ each `task.toml`. Numbers missing from the table are not used: base numbers are 
 |---|---|---|---|---|
 | `roboarc-buzz-wire-3d-02-i01` | easier | `easier` |  | [privileged](../../tasks/roboarc-buzz-wire-3d-02-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-02-i01-standard/) |
 | `roboarc-buzz-wire-3d-04-i01` | medium | `buzz_wire_3d_medium` |  | [privileged](../../tasks/roboarc-buzz-wire-3d-04-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-04-i01-standard/) |
-| `roboarc-buzz-wire-3d-06-i01` | very_easy | `buzz_wire_3d_rd_very_easy` | redesigned wire: insulated black rubber sleeves the loop may rest on; insulated final bend and finish post | [privileged](../../tasks/roboarc-buzz-wire-3d-06-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-06-i01-standard/) |
-| `roboarc-buzz-wire-3d-07-i01` | easier | `buzz_wire_3d_rd_easier` | redesigned wire: insulated black rubber sleeves the loop may rest on; insulated final bend and finish post | [privileged](../../tasks/roboarc-buzz-wire-3d-07-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-07-i01-standard/) |
-| `roboarc-buzz-wire-3d-10-i01` | hard | `buzz_wire_3d_rd_hard` | redesigned wire: insulated black rubber sleeves the loop may rest on; insulated final bend and finish post | [privileged](../../tasks/roboarc-buzz-wire-3d-10-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-10-i01-standard/) |
+| `roboarc-buzz-wire-3d-06-i01` | very_easy | `buzz_wire_3d_rd_very_easy` | redesigned wire: insulated rubber sleeves the loop may rest on; insulated final bend and finish post | [privileged](../../tasks/roboarc-buzz-wire-3d-06-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-06-i01-standard/) |
+| `roboarc-buzz-wire-3d-07-i01` | easier | `buzz_wire_3d_rd_easier` | redesigned wire: insulated rubber sleeves the loop may rest on; insulated final bend and finish post | [privileged](../../tasks/roboarc-buzz-wire-3d-07-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-07-i01-standard/) |
+| `roboarc-buzz-wire-3d-10-i01` | hard | `buzz_wire_3d_rd_hard` | redesigned wire: insulated rubber sleeves the loop may rest on; insulated final bend and finish post | [privileged](../../tasks/roboarc-buzz-wire-3d-10-i01-privileged/) / [standard](../../tasks/roboarc-buzz-wire-3d-10-i01-standard/) |
 
 ## Links
 

@@ -10,7 +10,8 @@ measurement were kept outside this repository.
 
 ## The puzzle and the setting
 
-Two 9 mm plates, gold (119 x 278.5 mm) and silver (119 x 252 mm), each with a slot grid of five columns, threaded
+Two 9 mm plates, gold (119 x 278.5 mm) and silver (119 x 252 mm; the colours of appearance seed 0 and the object names,
+cast_keyhole.md), each with a slot grid of five columns, threaded
 through each other at right angles: the silver plate's left edge runs in the gold plate's grid, the gold plate's right
 arm runs in the silver plate's grid. Both grids share one depth axis (how far the plates are pushed into each other), so a
 move along a row moves both mazes, and only a door between two rows is crossed in one grid alone; the two mazes must be
@@ -39,8 +40,10 @@ solved interleaved. Slots are 2 mm wider than the plates.
   bilateral contact), each 1 kg plate turns in its hand by about 0.3-0.5 deg.
 - Goal: the family's placement (terminal revision `cast_keyhole_placement_v4_grasp_contact_2mm`): the entire silver plate
   inside the fixed goal volume (here 350 x 350 mm inside the dashed line, 342 mm high), the gold plate behind the separator
-  (y <= 52.9 mm), the silver at most 1 mm/s and 0.02 rad/s for 0.5 s; holding allowed. Task text: "Separate and place the
-  entire silver keyhole piece inside the green dashed goal region. Keep the gold piece on the puzzle/system side."
+  (y <= 52.9 mm), the silver at most 1 mm/s and 0.02 rad/s for 0.5 s; holding allowed. Task text (since the appearance
+  seeds v2): "Separate and place the entire right-hand plate (`keyhole_silver`) inside the green dashed goal region.
+  Keep the left-hand plate (`keyhole_gold`) on the puzzle/system side (the names are identifiers, not colours)."; it
+  named the plates silver and gold before.
 
 ## Reference (-i01)
 

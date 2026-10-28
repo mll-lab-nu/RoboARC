@@ -31,7 +31,8 @@ github.com/mitkel/hanyama-rotor, its state definitions only) and in the model.
   9.8e-14, part outside the mesh 0 m, mesh uncovered at most 7.5e-13 m.
 - Entities: `piece_0` (the target, the family's brown; in the right hand at the opening; the design record's silver
   piece) and `piece_1` (teal; the left hand's; the design record's gold piece). The names carry no colour words: the
-  pieces are painted in the family's colours, not Hanayama's gold and silver.
+  pieces are painted in the family's colours, not Hanayama's gold and silver. Brown and teal are appearance seed 0's;
+  seeds 1 and 2 re-finish both pieces as the family's (`InterlockedClawsTask.piece_finishes`).
 - Opening: both pieces in the hands (pregrasp_weld, contact_weld_v1), interlocked at the official start (state −00−00),
   at the reference route's first sample: the gold piece's centre 0.28 m above the table midway between the arms. Each
   hand pinches its piece's rim across the 9.0 mm thickness. The grasp regions cover the whole piece (radius 0.115 m about

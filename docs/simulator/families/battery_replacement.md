@@ -90,7 +90,12 @@ always a nylon colour (black, orange, blue; the "wood" props had drawn it in woo
 spudger"), and the coloured controller finishes are the real coloured controllers (Pulse Red, Shock Blue: a coloured
 front and a white back, battery door included), so face down a white back with coloured bumpers and triggers, on which
 the rim's red "+" marks read (seed 2's red body had made them red on red); the rim's white "-" marks turn dark on a white
-back. Seed 0 writes the entity files of f6471bc717 byte for byte. Everything else is fixed.
+back. Seed 0 writes the entity files of f6471bc717 byte for byte. Since the appearance seeds v2 (2026-10-27; CHANGELOG,
+"Unreleased") seeds 1 and 2 are the single-colour controllers Shock Blue (matte) and Electric Volt (glossy), the back,
+cover, compartment and its floor in the one colour and the bumpers and triggers darker, with a lime, then pink tray, a
+yellow, then green box, green, then blue mats and holder and a blue, then yellow nylon stick; each finish is a colour
+and a material (MJCF materials), the cover a colour only. The Pulse Red and white-backed looks above are gone; the cells
+and the red "+" marks keep their colours. Everything else is fixed.
 
 Every mechanism is physical: the controller is one MJCF entity whose shell body has no joint (MuJoCo welds it to the
 world) with three slide joints (the two spring contacts, the plunger; their stiffness and spring zero in the MJCF); the
