@@ -66,9 +66,14 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
   `--env-file`: Codex `OPENAI_API_KEY` (OpenRouter: also `OPENAI_BASE_URL=https://openrouter.ai/api/v1`), a ChatGPT
   login with `CODEX_FORCE_AUTH_JSON=1` (Harbor uploads `~/.codex/auth.json`); Claude Code `ANTHROPIC_API_KEY`, or a
   subscription with `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`).
+- DSH, the DeepSeek Harness, runs through RoboARC's own Harbor agent `scripts/harbor/agents/dsh_acp.py` (Harbor's ACP
+  agent with `@deepseek-ai/dsh` 0.2.1-rc.2 installed): `PYTHONPATH=scripts/harbor/agents harbor run ... -a dsh_acp:DshAcp
+  -m deepseek/deepseek-v4.1-flash --ak reasoning_effort=high --ak web=false --allow-agent-host api.deepseek.com`, with
+  `DEEPSEEK_API_KEY`. It is not a Harbor built-in: whether its results are official is the benchmark owner's call.
 - Turn the harness's provider-side tools off ("No tool outside the container" below): Codex `--ak web_search=disabled`
   and `--ak config=<the output of python3 scripts/harbor/codex_tools_off.py [your config.toml]>`; Claude Code
-  `--ak disallowed_tools=WebSearch,WebFetch`.
+  `--ak disallowed_tools=WebSearch,WebFetch`; dsh `--ak web=false` (a dsh patch file turns its web_search and web_fetch
+  tools off).
 - Use an absolute `-o`. jobs/ is ignored by git; results never go into the repository.
 - The trial's record is `<jobs>/<job>/<trial>/`: `agent/` (the harness's log and trajectory), `verifier/`
   (`reward.txt` 1 or 0, `reward.json`, `replay.mp4`, the resource-limits record), `artifacts/` (privileged: the agent's
@@ -109,7 +114,7 @@ header of the script lists every variable; the main ones:
 
 | what | how |
 |---|---|
-| agent, model, effort | `AGENT=codex` or `claude-code`, `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
+| agent, model, effort | `AGENT=codex`, `claude-code` or `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
 | credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
 | trials | `K` per task and mode (1); each its own job and seed |
 | web search | `WEB_SEARCH=disabled` (default) or `allowed` (not for official runs) |
@@ -349,7 +354,8 @@ the harness's own (Harbor's `result.json`, `agent_result`), where the harness re
 
 With `USAGE_GATEWAY=<dir>`, the batch runner routes the agent's model-API calls through a transparent usage gateway
 installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). The repository ships one in `scripts/usage_gateway/`
-(`USAGE_GATEWAY=scripts/usage_gateway`), taken unchanged from the shared benchmark repository (PROVENANCE.md); another
+(`USAGE_GATEWAY=scripts/usage_gateway`), taken from the shared benchmark repository (PROVENANCE.md), with DeepSeek's
+Messages API added for dsh (`AGENT=dsh` points dsh's `DEEPSEEK_BASE_URL` at the gateway); another
 gateway that takes the runner's options works too. A `USAGE_GATEWAY` without `gateway.py` stops the runner at start,
 before any job. The gateway forwards model calls only, unchanged (the agent keeps its own credentials), records each
 trial's tokens per request

@@ -20,6 +20,21 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 - docs/RUNNING.md "GPUs and lanes"; docs/COLLABORATOR_SETUP.md starts 4 lanes per GPU. `GPU_SCHED=0` is the old
   behaviour.
 
+### DSH, the DeepSeek Harness, in the batch runner: `AGENT=dsh` (runner change)
+- `scripts/harbor/agents/dsh_acp.py`, a Harbor agent of RoboARC's own: Harbor's ACP agent with `@deepseek-ai/dsh`
+  0.2.1-rc.2 installed during setup and started as `dsh --profile acp`. That version is the release line of the exam's
+  DSH runs (2026-10-15 to 10-18); it picks models from its built-in catalog, where DeepSeek-V4.1-Flash is
+  `deepseek-flash`, so `MODEL=deepseek/deepseek-v4.1-flash` gives the exam's run id, `dsh-deepseek_v4_1_flash-high`.
+- Its instruction travels in a file (`dsh/acp_prompt_file.py`), never on a command line, so an agent's
+  `pkill -f <a word of the task>` cannot kill its harness. The session's `reasoning_effort` is set from `EFFORT`.
+  `WEB_SEARCH=disabled` turns dsh's web_search and web_fetch off (`dsh/roboarc.patch.yml`).
+- Credentials: `DEEPSEEK_API_KEY` (`.env.example`; `scripts/harbor/scan_secrets.py` scans for it). Egress: the job adds
+  `api.deepseek.com`, or, with `USAGE_GATEWAY`, dsh's `DEEPSEEK_BASE_URL` points at the gateway, whose `api_paths.json`
+  now forwards DeepSeek's Messages API (`POST /anthropic/v1/messages`; pending the owner's approval).
+- DshAcp is not a Harbor built-in: whether its results are official is the owner's call (PROTOCOL D11). Tests:
+  `scripts/harbor/tests/test_dsh_acp.py`, DSH cases in `test_usage_gateway_option.py`, `test_paths.py` and
+  `account_failure_check.py --selftest`.
+
 ## 2.1.0 (2026-10-25)
 
 The owner's decision on the five bed-bolt bases (hex, Torx, square, Phillips and slotted keys): change only the

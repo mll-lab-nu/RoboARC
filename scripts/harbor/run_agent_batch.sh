@@ -4,7 +4,10 @@
 #   MODEL=<provider/model> scripts/harbor/run_agent_batch.sh <batch-name> <base> [<base> ...]
 #   (<base> = a task name without its -privileged / -standard; docs/RUNNING.md)
 # Official runs use Harbor's native agents only (PROTOCOL D11): no adapter. Env (defaults):
-#   AGENT        codex | claude-code (codex)        MODEL   the -m model (required, e.g. openai/<model>)
+#   AGENT        codex | claude-code | dsh (codex)  MODEL   the -m model (required, e.g. openai/<model>)
+#                dsh = DSH, the DeepSeek Harness, through RoboARC's own Harbor agent scripts/harbor/agents/dsh_acp.py
+#                (Harbor's ACP agent with dsh installed; not a Harbor built-in: whether its results are official is the
+#                benchmark owner's call, PROTOCOL D11), e.g. AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash EFFORT=high
 #   EFFORT       reasoning effort, --ak reasoning_effort=<EFFORT> (xhigh); `default` passes none
 #   AK           more agent options, e.g. "--ak reasoning_summary=detailed"
 #   WEB_SEARCH   disabled (default) = the harness offers the model no web search: Codex --ak web_search=disabled,
@@ -21,6 +24,7 @@
 #     ChatGPT login (codex)          CODEX_FORCE_AUTH_JSON=1 (Harbor uploads ~/.codex/auth.json into each trial)
 #     Claude subscription            CLAUDE_FORCE_OAUTH=1 and CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`)
 #     Azure OpenAI (codex)           AGENT_CONFIG=<config.toml with the Azure provider> and its key variable
+#     DeepSeek (dsh)                 DEEPSEEK_API_KEY (DeepSeek's API, api.deepseek.com, added to the job's egress)
 #   MODES        "privileged standard"; add `standard-realtime` for <base>-standard-realtime where it exists
 #   K            trials per task and mode (1). Each trial is a Harbor job of its own (`-k 1`) and runs from its own seed:
 #                the K trials of a task get distinct seeds of its `[metadata.seeds] allowed`, without replacement, in an
@@ -155,7 +159,8 @@ JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(ab
 TOKEN_BUDGET_IN="${TOKEN_BUDGET_IN:-100000000}"; TOKEN_BUDGET_OUT="${TOKEN_BUDGET_OUT:-10000000}"
 [ -z "$USAGE_GATEWAY" ] || [[ "$TOKEN_BUDGET_IN$TOKEN_BUDGET_OUT" =~ ^[0-9]+$ && -n "$TOKEN_BUDGET_IN" && -n "$TOKEN_BUDGET_OUT" ]] \
   || { echo "TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT must be whole numbers (0 = no limit)" >&2; exit 2; }
-case "$AGENT" in codex|claude-code) ;; *) echo "AGENT must be a Harbor native agent: codex or claude-code (PROTOCOL D11)" >&2; exit 2 ;; esac
+case "$AGENT" in codex|claude-code|dsh) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), or dsh (scripts/harbor/agents/dsh_acp.py)" >&2; exit 2 ;; esac
+[ "$AGENT" = dsh ] && [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; dsh takes none" >&2; exit 2; }
 # Run id (D4): harness = the agent name with - -> _; model = MODEL's last path segment, lower case, gpt-<n> joined
 # (gpt-5 -> gpt5), a leading claude- dropped (claude-opus-4-1 -> opus_4_1), every other
 # character outside [a-z0-9] -> _; effort as given ("default" when the harness sets none).
@@ -167,6 +172,12 @@ if [ -z "${RUN_ID:-}" ]; then
 fi
 [[ "$RUN_ID" =~ ^[a-z0-9_]+-[a-z0-9_]+-(none|minimal|low|medium|high|xhigh|max|default)$ ]] || { echo "run id $RUN_ID is not <harness>-<model>-<effort>" >&2; exit 2; }
 AGENT_ARGS=(-a "$AGENT" -m "$MODEL")
+if [ "$AGENT" = dsh ]; then
+  # RoboARC's own Harbor agent: Harbor imports dsh_acp:DshAcp from scripts/harbor/agents (PYTHONPATH, every harbor run)
+  AGENT_ARGS=(-a dsh_acp:DshAcp -m "$MODEL")
+  export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
+  [ -n "$USAGE_GATEWAY" ] || AGENT_ARGS+=(--allow-agent-host api.deepseek.com)   # with the gateway: through it (below)
+fi
 [ "$EFFORT" != default ] && AGENT_ARGS+=(--ak "reasoning_effort=$EFFORT")
 # Codex's other provider-side tools go off with the web search (PROTOCOL D11). Under a ChatGPT login Codex hands the
 # model the account's connectors and apps (mcp__codex_apps__*: GitHub fetch, a web search of their own, mail, drives),
@@ -186,9 +197,12 @@ fi
 AGENT_ARGS+=($AK)
 # no harness web search unless asked for (PROTOCOL D11): it runs at the model provider, so no egress allowlist stops it
 case "$WEB_SEARCH" in
-  disabled) if [ "$AGENT" = codex ]; then AGENT_ARGS+=(--ak web_search=disabled)
-            else AGENT_ARGS+=(--ak disallowed_tools=WebSearch,WebFetch); fi ;;
-  allowed) ;;
+  disabled) case "$AGENT" in
+              codex) AGENT_ARGS+=(--ak web_search=disabled) ;;
+              dsh) AGENT_ARGS+=(--ak web=false) ;;   # dsh's web_search and web_fetch tools off (a dsh patch file)
+              *) AGENT_ARGS+=(--ak disallowed_tools=WebSearch,WebFetch) ;;
+            esac ;;
+  allowed) [ "$AGENT" = dsh ] && AGENT_ARGS+=(--ak web=true) ;;
   *) echo "WEB_SEARCH must be disabled or allowed" >&2; exit 2 ;;
 esac
 SCAN=(); [ -n "$ENV_FILE" ] && SCAN+=(--env-file "$ENV_FILE")
@@ -278,7 +292,12 @@ if [ -n "$USAGE_GATEWAY" ]; then
   gw_args=(--jobs "$JOBS" --bind "$GATEWAY_BIND" --ready-file "$ready" --budget-input "$TOKEN_BUDGET_IN" --budget-output "$TOKEN_BUDGET_OUT"); for h in ${GATEWAY_EXTRA_HOSTS:-}; do gw_args+=(--extra-host "$h"); done; [ "$GATEWAY_RAW" = 1 ] && gw_args+=(--raw)
   [ "$WEB_SEARCH" = allowed ] && gw_args+=(--server-tools record)   # not an official run: the provider-run tools are only recorded
   # a plain-HTTP base URL (a self-hosted model server, e.g. sglang): the gateway may forward to exactly that host:port
-  [ "$AGENT" = claude-code ] && agent_up=$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com) || agent_up=$(upstream OPENAI_BASE_URL https://api.openai.com/v1)
+  case "$AGENT" in
+    claude-code) agent_up=$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com) ;;
+    dsh) agent_up=$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)
+         gw_args+=(--extra-host api.deepseek.com) ;;   # DeepSeek's API is no task's model host (scripts/set_agent_egress.py)
+    *) agent_up=$(upstream OPENAI_BASE_URL https://api.openai.com/v1) ;;
+  esac
   [[ "$agent_up" =~ ^http://([A-Za-z0-9.-]+:[0-9]+)(/|$) ]] && gw_args+=(--http-host "${BASH_REMATCH[1]}")
   gw_start() {  # [port]: start the gateway (a restart: on the port the agent's base URLs already name); 0 = it listens
     rm -f "$ready"
@@ -299,6 +318,8 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
   via_gw() { sed -E -e "s#^https://([^/]+)#$GW/u/\1#; t" -e "s#^http://([A-Za-z0-9.-]+:[0-9]+)#$GW/h/\1#" <<< "$1"; }
   if [ "$AGENT" = claude-code ]; then
     AGENT_ARGS+=(--ae "ANTHROPIC_BASE_URL=$(via_gw "$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com)")")
+  elif [ "$AGENT" = dsh ]; then   # dsh's Messages root (its /v1/messages and /v1/files below it)
+    AGENT_ARGS+=(--ae "DEEPSEEK_BASE_URL=$(via_gw "$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)")")
   else
     case "${CODEX_FORCE_AUTH_JSON:-}" in
       1|true|TRUE|yes) AGENT_ARGS+=(--ae "OPENAI_BASE_URL=$(via_gw https://chatgpt.com/backend-api/codex)") ;;

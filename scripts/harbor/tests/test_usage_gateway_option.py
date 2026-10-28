@@ -7,6 +7,8 @@ fake `harbor` and a fake gateway: no docker, no model, no network.
   usage_recording.json and the result's config.json say that no gateway ran, the token counts are the harness's;
 - on: the agent's base URL points at the gateway, the job's task copy allows the gateway and the package registries only,
   and the records say so (with the token budget);
+- on with AGENT=dsh: dsh's Messages root (DEEPSEEK_BASE_URL) points at the gateway, which forwards to DeepSeek's API
+  (--extra-host api.deepseek.com), and the job's egress has the gateway, not DeepSeek's host;
 - USAGE_GATEWAY naming a directory without the gateway, and the switch of earlier versions (GATEWAY=1), stop the
   runner at start, before any job.
 """
@@ -51,6 +53,7 @@ import argparse, http.server
 p = argparse.ArgumentParser()
 p.add_argument("--bind"); p.add_argument("--ready-file"); p.add_argument("--port", type=int, default=0)
 args, _ = p.parse_known_args()
+import sys; open(args.ready_file + ".argv", "w").write(" ".join(sys.argv[1:]))
 class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200); self.end_headers(); self.wfile.write(b"ok")
@@ -81,10 +84,11 @@ class UsageGatewayOption(unittest.TestCase):
         harbor.chmod(0o755)
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
-                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_"))}
+                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high", MODES="privileged",
-                        JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"))
+                        JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),
+                        SLOTS_DIR=str(self.root / "slots"), GPUS="0")
         self.task, self.base = a_task()
 
     def tearDown(self):
@@ -146,6 +150,26 @@ class UsageGatewayOption(unittest.TestCase):
         summary = (self.root / "jobs" / "b.summary.md").read_text()
         self.assertIn("usage gateway in / out", summary)
         self.assertIn("900 / 40", summary)
+
+    def test_on_dsh(self):
+        gw = self.root / "gw"
+        gw.mkdir()
+        (gw / "gateway.py").write_text(textwrap.dedent(FAKE_GATEWAY))
+        (gw / "rawlog.py").write_text("")
+        p = self.run_batch(USAGE_GATEWAY=str(gw), GATEWAY_BIND="127.0.0.1", AGENT="dsh", MODEL="deepseek/deepseek-v4.1-flash")
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        (call,) = self.calls()
+        argv = call["argv"]
+        self.assertEqual(argv[argv.index("-a") + 1], "dsh_acp:DshAcp")
+        base_urls = [x for x in argv if x.startswith("DEEPSEEK_BASE_URL=")]
+        self.assertEqual(len(base_urls), 1, argv)
+        self.assertRegex(base_urls[0], r"^DEEPSEEK_BASE_URL=http://127\.0\.0\.1:\d+/u/api\.deepseek\.com/anthropic$")
+        hosts = [argv[i + 1] for i, x in enumerate(argv) if x == "--allow-agent-host"]
+        self.assertEqual(hosts, ["127.0.0.1"])                      # through the gateway, never DeepSeek directly
+        self.assertNotIn("api.deepseek.com", call["allowed_hosts"])
+        (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+        self.assertIn("--extra-host api.deepseek.com", ready.read_text())
+        self.assertTrue((self.root / "results" / "b" / self.task / "dsh-deepseek_v4_1_flash-high").is_dir())
 
     def test_missing_gateway_stops_at_start(self):
         empty = self.root / "empty"

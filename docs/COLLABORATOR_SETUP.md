@@ -123,9 +123,10 @@ Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's age
 | ChatGPT login (Codex) | `CODEX_FORCE_AUTH_JSON=1` on the command line, beside `AGENT` (not only in the env file, so the runner's key scan also covers the login): Harbor copies `~/.codex/auth.json` into each trial |
 | Claude subscription (Claude Code) | `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) |
 | Azure OpenAI (Codex) | `AGENT_CONFIG=<config.toml with the Azure provider>` and the key variable it names; retries in the same file (`request_max_retries`, `stream_max_retries`) |
+| DeepSeek API key (DSH) | `DEEPSEEK_API_KEY`, with `AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash`: DSH, the DeepSeek Harness, through `scripts/harbor/agents/dsh_acp.py` |
 
-The agent's container reaches only these providers and the package registries (PyPI, apt). Another provider does not
-answer: ask us first.
+The agent's container reaches only these providers (with `AGENT=dsh` also DeepSeek's API) and the package registries
+(PyPI, apt). Another provider does not answer: ask us first.
 
 ```bash
 BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 90 (78 puzzle, 12 IKEA)
@@ -142,7 +143,8 @@ done
   540 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
   `MODES=standard` runs one mode only.
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
-  `claude-code`), with no adapter and no proxy that holds the credentials or changes the requests; web search off
+  `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), with no
+  adapter and no proxy that holds the credentials or changes the requests; web search off
   (leave `WEB_SEARCH` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
   its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,

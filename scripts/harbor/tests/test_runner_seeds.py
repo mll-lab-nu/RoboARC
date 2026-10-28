@@ -43,7 +43,7 @@ for t in tasks:
 devices = {{t: sorted(m.group(0).strip() for d in ("environment", "tests") for p in sorted((root / t / d).glob("*compose*.y*ml"))
                      for m in re.finditer(r"(?m)^[ \\t]*(count|device_ids):.*$", p.read_text())) for t in tasks}}
 with open(os.environ["FAKE_HARBOR_LOG"], "a") as f:
-    f.write(json.dumps({{"argv": a, "job": job, "seeds": seeds, "devices": devices}}) + "\\n")
+    f.write(json.dumps({{"argv": a, "job": job, "seeds": seeds, "devices": devices, "pythonpath": os.environ.get("PYTHONPATH")}}) + "\\n")
 for t in tasks:
     d = jobs / job / f"{{t[:32]}}__{{uuid.uuid4().hex[:7]}}"
     (d / "verifier").mkdir(parents=True)
@@ -115,7 +115,7 @@ class RunnerSeeds(unittest.TestCase):
         harbor.chmod(0o755)
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
-                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "FAKE_"))}
+                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_", "FAKE_"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high",
                         JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),

@@ -18,6 +18,9 @@ whose model calls had all answered 200 and that ended at its time budget):
            502; a stream broken off; a provider 5xx). One or more: the trial is an infrastructure failure ("infra"; write_task_results.py: not a result, not
            the agent's 0); STOP_AFTER or more in a row: the upstream is down for the lane too ("stop"). Also "infra": the
            runner found the gateway dead after the job (<job>/gateway_down.json, run_agent_batch.sh).
+  dsh      (AGENT=dsh, scripts/harbor/agents/dsh_acp.py) writes no structured account record of its own (agent/acp.txt is
+           the ACP runner's output): only the gateway rule applies; a failing account shows as Harbor exceptions, so
+           its trials are not results (write_task_results.py), but the lane does not stop by itself.
 Prints one JSON line per trial {"trial", "stop", "why", "infra"} (long tokens in messages masked); exit 4 if any trial
 should stop its lane, 0 otherwise. --selftest checks the rules on synthetic trials (exit 0 = all as expected)."""
 import glob, json, os, re, sys, tempfile
@@ -167,10 +170,21 @@ def selftest() -> int:
             bad += not good
             print(f"{'ok  ' if good else 'FAIL'} {name}: stop={r['stop']} (want {want}) infra={bool(r['infra'])} "
                   f"(want {want_infra}) {r['why'] or r['infra']}")
+        for name, totals, want in (("dsh_429_in_output", None, False), ("dsh_gateway_502_x5", tot(5), True)):
+            t = os.path.join(root, name, f"{name}__x")   # a dsh trial: Harbor's ACP output, no codex.txt / claude-code.txt
+            os.makedirs(os.path.join(t, "agent"))
+            open(os.path.join(t, "agent", "acp.txt"), "w").write("HTTP 429 Too Many Requests; Unauthorized\n")
+            if totals is not None:
+                os.makedirs(os.path.join(t, "gateway"))
+                json.dump(totals, open(os.path.join(t, "gateway", "totals.json"), "w"))
+            r = check(t)
+            good = r["stop"] == want
+            bad += not good
+            print(f"{'ok  ' if good else 'FAIL'} {name}: stop={r['stop']} (want {want})")
         r = check(os.path.join(root, "no_such_trial"))
         bad += r["stop"]
         print(f"{'ok  ' if not r['stop'] else 'FAIL'} missing trial dir: stop={r['stop']} (want False)")
-    print(f"selftest: {len(cases) + 1 - bad} / {len(cases) + 1} as expected")
+    print(f"selftest: {len(cases) + 3 - bad} / {len(cases) + 3} as expected")
     return 1 if bad else 0
 
 

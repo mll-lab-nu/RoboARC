@@ -37,7 +37,8 @@ class Rules(unittest.TestCase):
                 ("res-1.openai.azure.com", "POST", "/openai/v1/responses?api-version=preview"),
                 ("res-1.services.ai.azure.com", "POST", "/openai/v1/responses"),
                 ("api.anthropic.com", "POST", "/v1/messages?beta=true"),
-                ("api.anthropic.com", "POST", "/v1/messages/count_tokens?beta=true")]:
+                ("api.anthropic.com", "POST", "/v1/messages/count_tokens?beta=true"),
+                ("api.deepseek.com", "POST", "/anthropic/v1/messages")]:              # DSH (dsh_acp.py)
             self.assertTrue(ok(host, method, path), (host, method, path))
         for path in ("/v1/messages", "/v1/messages/count_tokens", "/v1/chat/completions"):
             self.assertTrue(ok("10.0.0.5:8080", "POST", path, plain=True), path)
@@ -92,6 +93,9 @@ class Rules(unittest.TestCase):
                 ("auth.openai.com", "POST", "/oauth/token"),                        # an allowlisted host without a list
                 ("ab.chatgpt.com", "POST", "/backend-api/codex/responses"),
                 ("mcp.anthropic.com", "POST", "/v1/messages"),
+                ("api.deepseek.com", "POST", "/anthropic/v1/files"),                # DSH's image uploads: sent inline
+                ("api.deepseek.com", "GET", "/models"),
+                ("api.deepseek.com", "POST", "/chat/completions"),
                 ("unknown.example.com", "POST", "/v1/responses")]:
             self.assertFalse(ok(host, method, path), (host, method, path))
 
