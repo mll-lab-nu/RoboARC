@@ -133,7 +133,7 @@ Screw threads and frame A's four nut sleeves are SDF meshes (0.5 mm pitch, right
   runner picks the trial's seed and writes it to the files `seed`). Seed 0 is the released look, unchanged. Seeds 1 and
   2 light the scene differently in the Nyx images (`environment/sim/rig.json` `seeds`, which the sim service picks by
   `environment/sim/seed`): another of the four ceiling lights is the key light (three times the others, the only one
-  casting shadows), the lights hang at another height, their white light is warm (3600-4300 K) or cool (8000-10000 K),
-  and they and the environment map are dimmer (x 0.65-0.78) or brighter (x 1.25-1.50); the two seeds differ in each of
-  these. The scene, the physics, the instruction, the graders, the tooling and the reference are the same for every
-  seed: results graded under 1.1.x stand.
+  casting shadows), the lights hang at another height, their white light is warm (3600-4300 K) or cool (9000-10500 K),
+  and they and the environment map are scaled by x 0.85-0.92 on one seed and x 1.35-1.60 on the other; the two seeds
+  differ in each of these. The scene, the physics, the instruction, the graders, the tooling and the reference are the
+  same for every seed: results graded under 1.1.x stand.

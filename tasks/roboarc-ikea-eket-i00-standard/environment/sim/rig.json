@@ -149,7 +149,7 @@
     "key": 2,
     "height_m": 1.907,
     "cct_k": 3751,
-    "brightness": 0.72
+    "brightness": 0.887
    },
    "nyx": {
     "lights": [
@@ -160,7 +160,7 @@
        -0.4643,
        1.4874
       ],
-      "intensity": 0.72,
+      "intensity": 0.887,
       "color": [
        1.0,
        0.6132,
@@ -175,7 +175,7 @@
        -0.4643,
        1.4874
       ],
-      "intensity": 0.72,
+      "intensity": 0.887,
       "color": [
        1.0,
        0.6132,
@@ -190,7 +190,7 @@
        0.7357,
        1.4874
       ],
-      "intensity": 2.16,
+      "intensity": 2.661,
       "color": [
        1.0,
        0.6132,
@@ -205,7 +205,7 @@
        0.7357,
        1.4874
       ],
-      "intensity": 0.72,
+      "intensity": 0.887,
       "color": [
        1.0,
        0.6132,
@@ -214,7 +214,7 @@
       "shadow": false
      }
     ],
-    "env_intensity": 0.72,
+    "env_intensity": 0.887,
     "env_tint": [
      1.0,
      0.6132,
@@ -226,8 +226,8 @@
    "scene_look": {
     "key": 3,
     "height_m": 2.09,
-    "cct_k": 8686,
-    "brightness": 1.394
+    "cct_k": 9514,
+    "brightness": 1.494
    },
    "nyx": {
     "lights": [
@@ -238,10 +238,10 @@
        -0.4643,
        1.6704
       ],
-      "intensity": 1.394,
+      "intensity": 1.494,
       "color": [
-       0.6991,
-       0.7574,
+       0.6384,
+       0.7155,
        1.0
       ],
       "shadow": false
@@ -253,10 +253,10 @@
        -0.4643,
        1.6704
       ],
-      "intensity": 1.394,
+      "intensity": 1.494,
       "color": [
-       0.6991,
-       0.7574,
+       0.6384,
+       0.7155,
        1.0
       ],
       "shadow": false
@@ -268,10 +268,10 @@
        0.7357,
        1.6704
       ],
-      "intensity": 1.394,
+      "intensity": 1.494,
       "color": [
-       0.6991,
-       0.7574,
+       0.6384,
+       0.7155,
        1.0
       ],
       "shadow": false
@@ -283,19 +283,19 @@
        0.7357,
        1.6704
       ],
-      "intensity": 4.182,
+      "intensity": 4.482,
       "color": [
-       0.6991,
-       0.7574,
+       0.6384,
+       0.7155,
        1.0
       ],
       "shadow": true
      }
     ],
-    "env_intensity": 1.394,
+    "env_intensity": 1.494,
     "env_tint": [
-     0.6991,
-     0.7574,
+     0.6384,
+     0.7155,
      1.0
     ]
    }

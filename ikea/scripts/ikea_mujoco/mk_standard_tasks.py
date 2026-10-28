@@ -55,10 +55,10 @@ SEEDS_CHANGE = """- 2026-10-27: three appearance seeds: the task allows seeds 0,
   runner picks the trial's seed and writes it to the files `seed`). Seed 0 is the released look, unchanged. Seeds 1 and
   2 light the scene differently in the Nyx images (`environment/sim/rig.json` `seeds`, which the sim service picks by
   `environment/sim/seed`): another of the four ceiling lights is the key light (three times the others, the only one
-  casting shadows), the lights hang at another height, their white light is warm (3600-4300 K) or cool (8000-10000 K),
-  and they and the environment map are dimmer (x 0.65-0.78) or brighter (x 1.25-1.50); the two seeds differ in each of
-  these. The scene, the physics, the instruction, the graders, the tooling and the reference are the same for every
-  seed: results graded under 1.1.x stand.
+  casting shadows), the lights hang at another height, their white light is warm (3600-4300 K) or cool (9000-10500 K),
+  and they and the environment map are scaled by x {dim} on one seed and x 1.35-1.60 on the other; the two seeds
+  differ in each of these. The scene, the physics, the instruction, the graders, the tooling and the reference are the
+  same for every seed: results graded under 1.1.x stand.
 """
 AGENT_S = P.AGENT_S               # the privileged twin's wall-clock cutoff (PROTOCOL v2.0 H.7): the only hard budget
 # The speed rule's numbers, for the texts: THE table is rcb_ikea.JOINT_SPEED_LIMITS_RAD_S / GRIPPER_WIDTH_SPEED_M_S (the
@@ -135,13 +135,23 @@ def nyx_look(cx, cy, cz, fx, fy) -> dict:
 
 
 # The lighting of appearance seeds 1 and 2 (mk_tasks.py SEEDS; the user, 2026-10-27: the lighting only, seed 0 the released
-# look): the puzzles' rule (source/topogym/world/look.py, topogym.tasks.scene_variation.scene_look) on this rig. The four
-# lights keep their x, y; one of lights 1-3 is the key light (3x the fill, the only one casting shadows; light 0 is seed
-# 0's); all four hang at a height drawn in 1.9-2.4 m above RoboARC's floor, i.e. 0.98-1.48 m above the work surface here
-# (seed 0's: 2.40 m, 1.48 m); their colour is a white light's of a warm (3600-4300 K) or cool (8000-10000 K) colour temperature; a
-# brightness factor of 0.65-0.78 or 1.25-1.50 scales them and the environment map, which takes their colour as its tint.
+# look): the puzzles' rule (source/topogym/world/look.py, topogym.tasks.scene_variation.scene_look) on this rig, with IKEA's
+# own bands. The four lights keep their x, y; one of lights 1-3 is the key light (3x the fill, the only one casting
+# shadows; light 0 is seed 0's); all four hang at a height drawn in 1.9-2.4 m above RoboARC's floor, i.e. 0.98-1.48 m above
+# the work surface here (seed 0's: 2.40 m, 1.48 m); their colour is a white light's of a warm (3600-4300 K) or cool colour
+# temperature; a dim or bright brightness factor scales them and the environment map, which takes their colour as its tint.
 # Each base draws once, from its name, which seed is warm and which brighter and the order of the key lights, so seeds 1
 # and 2 differ in every part. server.py / ikea_nyx.nyx_settings put a seed's lights in place of seed 0's.
+# IKEA's bands (renders of the 12 bases, 2026-10-27): the puzzles' dim 0.65-0.78 took cam_high below a mean luma of 0.35 in
+# 7 bases (IKEA's released frames are already 0.38-0.46), and their cool-bright seeds came within Delta E 8 of seed 0 in 4
+# (the puzzles' seeds also change the table top); so dim 0.85-0.92, bright 1.35-1.60, cool 9000-10500 K.
+WARM_K, COOL_K, DIM, BRIGHT = (3600., 4300.), (9000., 10500.), (.85, .92), (1.35, 1.60)
+# Three bases whose released frames are near the 0.35 floor on a camera (vesken cam_high 0.398, svallet cam_high 0.384,
+# uppsta cam_low 0.391) went below it even at 0.86-0.88 with a warm light: their dimmer seed keeps seed 0's level or a
+# little more (renders, 2026-10-27).
+DIM_BY_TASK = {"vesken": (1.00, 1.05), "svallet": (1.05, 1.10), "uppsta": (1.10, 1.15)}
+
+
 def seed_look(t: str, seed: int) -> dict:
     """The scene_look lighting of appearance seed `seed` of task `t` (look.py's names: key, height_m, cct_k, brightness)."""
     name = f"visual/scene_look/{P.name(t).removesuffix('-privileged')}"
@@ -150,8 +160,8 @@ def seed_look(t: str, seed: int) -> dict:
     keys = shared.sample((1, 2, 3), 3)
     warm, bright = seed % 2 == warm_seed, seed % 2 == bright_seed
     return {"key": keys[(seed - 1) % 3], "height_m": round(own.uniform(1.9, 2.4), 3),
-            "cct_k": round(own.uniform(3600., 4300.) if warm else own.uniform(8000., 10000.)),
-            "brightness": round(own.uniform(1.25, 1.50) if bright else own.uniform(.65, .78), 3)}
+            "cct_k": round(own.uniform(*(WARM_K if warm else COOL_K))),
+            "brightness": round(own.uniform(*(BRIGHT if bright else DIM_BY_TASK.get(t, DIM))), 3)}
 
 
 def seed_nyx(released: dict, cz: float, look: dict) -> dict:
@@ -588,7 +598,7 @@ episode with reason `timeout` when it runs out; that count never runs out before
 ### Mechanism
 {x['mechanism']}
 
-{P.CHANGE_LOG}{STANDARD_CHANGES}{SEEDS_CHANGE}'''
+{P.CHANGE_LOG}{STANDARD_CHANGES}{SEEDS_CHANGE.format(dim="%.2f-%.2f" % DIM_BY_TASK.get(t, DIM))}'''
 
 
 def render(t: str, out: pathlib.Path, refs: pathlib.Path | None) -> None:
