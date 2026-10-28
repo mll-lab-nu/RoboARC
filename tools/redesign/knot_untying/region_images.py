@@ -2,10 +2,10 @@
 """The region images of a knot_untying redesign region tier (task_rd.KnotUntyingRedesignTask.REGION_IMAGES; knot-robot
 2026-10-14): the frozen instance's start scene as the agent's cameras cam_high and cam_low render it (the Session's
 Nyx frames, robot at home), with every goal region's border drawn in as the placement tasks draw theirs in the scene
-(topogym/assets/geometry/goal_region.py: a 2 mm wide line of 20 mm dashes and 10 mm gaps, colour (.1, .85, .2)), the
+(topogym/assets/geometry/goal_region.py: a 5 mm wide line of 20 mm dashes and 10 mm gaps, colour (.1, .85, .2)), the
 line's inner edge on the region's border: the containment limit the task's words name.
 
-The redesign scene does not draw its regions, so the line is painted onto the rendered frame: every dash is a 2 mm x
+The redesign scene does not draw its regions, so the line is painted onto the rendered frame: every dash is a 5 mm x
 20 mm quad lying 0.3 mm above the tabletop, projected with the camera's own calibration (Session.camera_info:
 intrinsic_cv, extrinsic_cv) at 4 x 4 subpixels, and painted only where the rendered z-depth (Session.render_depth) shows
 the tabletop there or nothing at all: a rope, fixture or arm in front of the line hides it. Nothing in the instance,
@@ -25,7 +25,7 @@ from pathlib import Path
 import numpy as np
 
 CAMERAS = ("cam_high", "cam_low")
-LINE_M, DASH_M, GAP_M, LIFT_M = .002, .02, .01, .0003    # goal_region.write_goal_region's marker
+LINE_M, DASH_M, GAP_M, LIFT_M = .005, .02, .01, .0003    # goal_region.write_goal_region's marker
 COLOUR = np.array([.1, .85, .2]) * 255.
 SS = 4                                                     # subpixels per pixel and axis
 DEPTH_TOL_M = .002                                         # the line counts as seen when nothing is nearer than this
