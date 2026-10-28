@@ -6,7 +6,7 @@
 | Mode | standard (`eai-standard/2.4`) |
 | Twin | `roboarc-ikea-stegesund-i00-privileged` |
 | Simulator / robot | `mujoco` / `franka-panda-bimanual` |
-| Family / instance | `ikea_stegesund` / seed 0 |
+| Family / instance | `ikea_stegesund` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
 | Base image | `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e` |
@@ -128,3 +128,11 @@ Each bolt's coarse right-hand thread (2.5 mm pitch) is a capsule helix against a
   error (`ikea_nyx.UnsupportedGPU`, no start-up retry), instead of the render process crashing three times. This mode
   needs a GPU with RT cores. On a GPU with RT cores nothing changes; the images, the instruction, the scene, the
   graders, the tooling and the reference are unchanged: results graded under 1.1.x stand.
+- 2026-10-27: three appearance seeds: the task allows seeds 0, 1 and 2 (`[metadata.seeds]`, `build = "runtime"`: the
+  runner picks the trial's seed and writes it to the files `seed`). Seed 0 is the released look, unchanged. Seeds 1 and
+  2 light the scene differently in the Nyx images (`environment/sim/rig.json` `seeds`, which the sim service picks by
+  `environment/sim/seed`): another of the four ceiling lights is the key light (three times the others, the only one
+  casting shadows), the lights hang at another height, their white light is warm (3600-4300 K) or cool (9000-10500 K),
+  and they and the environment map are scaled by x 0.85-0.92 on one seed and x 1.35-1.60 on the other; the two seeds
+  differ in each of these. The scene, the physics, the instruction, the graders, the tooling and the reference are the
+  same for every seed: results graded under 1.1.x stand.

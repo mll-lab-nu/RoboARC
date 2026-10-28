@@ -114,7 +114,8 @@ class IkeaEnv(RoboARCEnv):
         if renderer == "nyx":
             import ikea_nyx
             self.nyx = ikea_nyx.NyxRig(m, self.rig, copy.deepcopy(self.rig_spec),
-                                       tempfile.mkdtemp(prefix=f"ikea_nyx_{task.name}_", dir=cache_dir()))
+                                       tempfile.mkdtemp(prefix=f"ikea_nyx_{task.name}_", dir=cache_dir()),
+                                       seed=self.instance_seed)
         native = {c: (self.rig.W, self.rig.H) for c in self.rig.names}
         depth_max = {c: float(self.rig.far) for c in self.rig.names}
         self._setup_spaces(lo, hi, np.float64, native, depth_max)

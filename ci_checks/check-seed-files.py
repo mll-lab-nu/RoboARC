@@ -16,6 +16,10 @@ falls back to another seed's files (a Dockerfile COPY of a pattern that matches 
     `runtime_binding.s<S>.json` and the `seed` file by name and run stage_instance.py with --seed-file; the standard sim
     service's entrypoint passes `--seed-file /srv/seed`, and the standard grader's `tests/Dockerfile` copies the
     bindings and picks the seed's; no COPY source is a pattern (a pattern that matches nothing does not fail a build).
+The IKEA MuJoCo tasks (roboarc-ikea-*) have one frozen scene for every seed, and a seed changes only the standard mode's
+Nyx lighting: they have the `seed` files but no per-seed bindings or staging; instead the standard sim service's
+`environment/sim/rig.json` has the lighting of every allowed seed other than the default (`seeds`), which server.py
+picks by its `seed` file.
 Tasks that allow one seed only (every task until RoboARC 1.2.0), and frozen-instance seeds (ci_checks/check-seeds.py),
 are not concerned. Run by the CI job `unit-tests` (a failure fails it) and by run_all.sh.
 
@@ -24,11 +28,13 @@ Standard library only.
 """
 from __future__ import annotations
 
+import json
 import sys
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+IKEA = "roboarc-ikea-"   # one frozen scene for every seed; the seed is the standard mode's lighting (module docstring)
 sys.path.insert(0, str(ROOT / "scripts"))
 import task_seed  # noqa: E402
 
@@ -43,6 +49,7 @@ def check(task: Path) -> list[str]:
         return []
     errs = []
     others = [s for s in allowed if s != sd["default"]]
+    ikea = task.name.startswith(IKEA)
     for place in task_seed.places(task):
         d = task / place
         if not d.is_dir():
@@ -52,7 +59,7 @@ def check(task: Path) -> list[str]:
             errs.append(f"{place}/seed missing (the default seed, overwritten by scripts/task_seed.py materialize)")
         elif f.read_text().strip() != str(sd["default"]):
             errs.append(f"{place}/seed is {f.read_text().strip()!r}, not the default seed {sd['default']}")
-        if (d / "runtime_binding.json").is_file():
+        if (d / "runtime_binding.json").is_file() and not ikea:
             for s in others:
                 if not (d / f"runtime_binding.s{s}.json").is_file():
                     errs.append(f"{place}/runtime_binding.s{s}.json missing (allowed seed {s})")
@@ -70,7 +77,16 @@ def check(task: Path) -> list[str]:
         for s in sd["oracle"]:
             if s != sd["default"] and not (task / "solution" / f"trajectory.s{s}.npz").is_file():
                 errs.append(f"solution/trajectory.s{s}.npz missing (seed {s} is in seeds.oracle)")
-    return errs + staging(task, others)
+    return errs + (ikea_lighting(task, others) if ikea else staging(task, others))
+
+
+def ikea_lighting(task: Path, others: list[int]) -> list[str]:
+    """An IKEA standard task's rig.json has the lighting of every other allowed seed (module docstring)."""
+    rig = task / "environment" / "sim" / "rig.json"
+    if not rig.is_file():                 # the privileged twin: no images
+        return []
+    seeds = json.loads(rig.read_text()).get("seeds", {})
+    return [f"environment/sim/rig.json: no lighting of seed {s} (seeds)" for s in others if str(s) not in seeds]
 
 
 def read(p: Path) -> str:

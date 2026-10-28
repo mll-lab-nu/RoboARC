@@ -6,7 +6,7 @@
 | Mode | privileged |
 | Twin | `roboarc-ikea-ikea365-i00-standard` |
 | Simulator / robot | `mujoco` / `franka-panda-bimanual` |
-| Family / instance | `ikea_ikea365` / seed 0 |
+| Family / instance | `ikea_ikea365` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
 | Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
 | Base image | `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b` |
@@ -103,3 +103,8 @@ The M4 x 0.5 thread is exact convex pieces: the screw advances only by being tur
   Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of
   1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0
   stand.
+- 2026-10-27: three appearance seeds: the task allows seeds 0, 1 and 2 (`[metadata.seeds]`, `build = "runtime"`: the
+  runner picks the trial's seed and writes it to the files `seed`), as its standard twin, whose camera images seeds 1
+  and 2 light differently. This mode shows the agent no images and its replay video keeps the scene's own lights, so
+  here every seed is the same task. The scene, the physics, the instruction, the grader, the tooling and the reference
+  are unchanged: results graded under 1.1.x stand.

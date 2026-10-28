@@ -71,6 +71,9 @@ DATA = os.environ.get("RCB_DATA", "/data"); os.makedirs(os.path.join(DATA, "call
 TASK = os.environ.get("RCB_TASK", "lack")
 BINDING = json.load(open(os.environ.get("RCB_BINDING", os.path.join(HERE, "runtime_binding.json"))))
 RIG_SPEC = json.load(open(os.environ.get("RCB_RIG", os.path.join(HERE, "rig.json"))))
+# the trial's appearance seed (scripts/task_seed.py materialize writes it; 0 as committed): it chooses the Nyx lighting
+# (rig.json "seeds", ikea_nyx.nyx_settings) and nothing else
+SEED = int(open(os.path.join(HERE, "seed")).read())
 OBS_CALIBRATION = os.environ.get("RCB_OBS_CALIBRATION", "1") == "1"
 MAX_CHUNK_S = float(os.environ.get("RCB_MAX_CHUNK_S", "10")); MAX_WATCH_S = float(os.environ.get("RCB_MAX_WATCH_S", "30"))
 WALL_CLOCK_S = float(os.environ.get("RCB_WALL_CLOCK_S", "10800"))
@@ -154,7 +157,8 @@ NYX = None
 if RENDER == "nyx":
     import tempfile
     import ikea_nyx  # noqa: E402
-    NYX = ikea_nyx.NyxRig(m, RIG, RIG_SPEC, tempfile.mkdtemp(prefix="ikea_nyx_"), log_path=os.path.join(DATA, "nyx.log"))
+    NYX = ikea_nyx.NyxRig(m, RIG, RIG_SPEC, tempfile.mkdtemp(prefix="ikea_nyx_"), log_path=os.path.join(DATA, "nyx.log"),
+                          seed=SEED)
     log({"ev": "nyx_ready", **NYX.startup})
 
 # ---------------------------------------------------------------- the robot, from the model (two arms: left_, right_)
