@@ -37,7 +37,7 @@ STEP_FACTOR, NO_REF_STEPS = 2.0, 12000                                  # defaul
 # the settings that make episodes comparable (the evaluation's, not the policy's: the run id names the policy); one run
 # id holds episodes of one configuration only
 COMPARABLE = ("interface", "convention", "horizon", "policy_hz", "image_size", "rules", "renderer",
-              "max_steps", "time_limit_s", "prompt", "roboarc_version")
+              "max_steps", "time_limit_s", "prompt", "roboarc_version", "camera_poses")
 
 
 def config_key(config: dict) -> str:
@@ -64,7 +64,17 @@ def _cameras_arg(text: str | None) -> dict | None:
     return dict(kv.split("=", 1) for kv in text.split(","))
 
 
+def _write_json(path: Path, obj) -> None:
+    """Whole or not at all: parallel runners of one run id read each other's result files."""
+    tmp = path.with_name(f".{path.name}.{os.getpid()}")
+    tmp.write_text(json.dumps(obj, indent=1, default=str))
+    os.replace(tmp, path)
+
+
 def _make_env(a, renderer: str, cameras=None, max_steps=None):
+    if a.camera_poses == "droid":
+        from . import droid_cameras
+        droid_cameras.install()
     kw = {"rules": a.rules} if resolve(a.task).suite == "puzzles" else {}
     return roboarc.make(a.task, renderer=renderer, cameras=cameras, instance_seed=a.instance_seed,
                         max_episode_steps=max_steps, **kw)
@@ -240,7 +250,7 @@ def _worker_cmd(a, worker: str, seed: int, k: int, edir: Path) -> list[str]:
            "--image-size", str(a.image_size), "--horizon", str(a.horizon), "--wait-s", str(a.wait_s)]
     for flag, v in (("--policy", a.policy), ("--convention", a.convention), ("--policy-hz", a.policy_hz),
                     ("--cameras", a.cameras), ("--prompt", a.prompt), ("--max-steps", a.max_steps),
-                    ("--time-limit-s", a.time_limit_s)):
+                    ("--time-limit-s", a.time_limit_s), ("--camera-poses", a.camera_poses)):
         if v is not None:
             cmd += [flag, str(v)]
     for flag, v in (("--full-prompt", a.full_prompt), ("--no-roboarc-obs", a.no_roboarc_obs), ("--video", a.video)):
@@ -262,7 +272,7 @@ def run(a) -> int:
               "run_id": a.run_id, "policy": a.policy, "convention": conv_name, "horizon": a.horizon,
               "policy_hz": a.policy_hz, "image_size": a.image_size, "rules": a.rules, "renderer": a.renderer,
               "max_steps": a.max_steps, "time_limit_s": a.time_limit_s, "prompt": a.prompt or task_prompt(task, full=a.full_prompt),
-              "roboarc_version": roboarc.__version__, "image": task.image,
+              "roboarc_version": roboarc.__version__, "camera_poses": a.camera_poses, "image": task.image,
               "note": "a VLA evaluation through roboarc.vla: not a Harbor trial; never ranked with agent results"}
     config["config_key"] = config_key(config)
     old = json.loads((root / "config.json").read_text()) if (root / "config.json").is_file() else None
@@ -270,7 +280,7 @@ def run(a) -> int:
         raise SystemExit(f"{root} holds episodes of another configuration ("
                          + ", ".join(f"{k}: {old.get(k)!r} -> {config[k]!r}" for k in COMPARABLE if old.get(k) != config[k])
                          + "): use another --run-id")
-    (root / "config.json").write_text(json.dumps(config, indent=1))
+    _write_json(root / "config.json", config)
     results = []
     for seed in _seeds(a.seed, task):
         for k in range(1, a.episodes + 1):
@@ -295,7 +305,7 @@ def run(a) -> int:
                                                         "ms_per_query_observe", "ms_per_query_infer")})
                 if rep:
                     res.update(replay_sha=rep.get("replay_sha"), replay_wall_s=rep.get("wall_s"), video=rep.get("video"))
-            (edir / "result.json").write_text(json.dumps(res, indent=1, default=str))
+            _write_json(edir / "result.json", res)
             results.append(res)
             print(json.dumps({k2: res.get(k2) for k2 in ("instance_seed", "episode", "success", "live_success",
                                                           "replay_success", "steps", "episode_end", "wall_s")}), flush=True)
@@ -304,7 +314,7 @@ def run(a) -> int:
                "successes": sum(int(r.get("success") or 0) for r in every),
                "pending_review": sum(int(r.get("success_pending_review") or 0) for r in every),
                "infra_errors": sum(int(r.get("infra_error") or 0) for r in every), "results": every}
-    (root / "results.json").write_text(json.dumps(summary, indent=1, default=str))
+    _write_json(root / "results.json", summary)
     return 0
 
 
@@ -344,6 +354,8 @@ def main(argv=None) -> int:
                                                     "action per control step; droid-velocity: 15)")
     ap.add_argument("--image-size", type=int, default=224)
     ap.add_argument("--cameras", help="openpi key=camera,... (default: the convention's)")
+    ap.add_argument("--camera-poses", choices=("droid",), help="droid: DROID's camera poses on the one-arm puzzles "
+                    "(droid_cameras.py; default: the task's own cameras)")
     ap.add_argument("--max-steps", type=int, help="control steps per episode (default: 2 x the reference's)")
     ap.add_argument("--time-limit-s", type=float, help="simulated seconds per episode instead of --max-steps")
     ap.add_argument("--rules", default="standard", choices=("standard", "privileged"))

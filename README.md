@@ -113,6 +113,41 @@ python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --policy ws://
 Setup, observation and action layouts per robot, prompts, episodes and grading, results and GPU needs:
 [docs/VLA.md](docs/VLA.md).
 
+### pi0.5-DROID on the one-arm puzzles
+
+openpi's DROID-trained pi0.5, zero-shot, in one command:
+
+```bash
+scripts/vla_droid.sh --task buzz-wire-3d-06,lock-picking-03,fiber-bundling-02,hedgehog-in-cage-02 \
+  --model jointpos --seed 0 --jobs 4 --out <results dir>
+```
+
+It starts the model server, runs each (task, seed) episode in the puzzle image, `--jobs` at a time, and stops the
+server; results in `<results dir>/<task>/pi05-droid-<model>/s<seed>/e1/`. `--model`: `jointpos` (default), `velocity`,
+`polaris`, or `hold` (no model: checks the setup). `--seed`: `0`, `0,1,2` or `all`.
+
+What it adapts, with no change to a task, its files or the physics:
+
+| | DROID | the puzzles | adapted by |
+|---|---|---|---|
+| cameras | exterior at (0.05, ±0.57, 0.66) m from the robot base; wrist camera on the Robotiq | the task's own | runner option `--camera-poses droid` ([droid_cameras.py](roboarc/vla/droid_cameras.py)) |
+| wrist joint q7 | Robotiq on the flange | Robotiq at -45° about the flange | model server: the model sees q7 - π/4 ([droid_adapter.py](roboarc/vla/droid_adapter.py)) |
+| start pose | DROID's reset joints | the task's | model server: the first 2.5 s move the arm there |
+| actions | 15 Hz chunks of 15, 8 executed | 40 Hz control | runner: `--convention droid --policy-hz 15 --horizon 8` |
+
+Tasks (`--task`), the 18 one-arm puzzles:
+
+| | very easy | easier | easy | medium | hard |
+|---|---|---|---|---|---|
+| buzz-wire-3d | 06 | 02, 07 | | 04 | 10 |
+| fiber-bundling | | 02 | 08 | 04, 09 | 05 |
+| hedgehog-in-cage | | 02, 08 | 03, 07 | | 06 |
+| lock-picking | | | 03 | 04 | 05 |
+
+Needs: docker with the GPU and read access to the puzzle image; openpi at `215abfb` set up with `uv sync` in `~/openpi`;
+`msgpack` and `websockets` in `.vla-lib` ([docs/VLA.md](docs/VLA.md#droid-trained-policies)). One RTX 4090 holds the
+model (8.6 GB) and about 4 episodes (1 GB each).
+
 ## Python API
 
 The package `roboarc` exposes every task as a Gymnasium-compatible environment, without Harbor. It runs the graded

@@ -57,6 +57,7 @@ docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) 
 | `--policy-hz` | the rate of the chunk's actions (default: one action per control step, 40 Hz; see below) |
 | `--max-steps`, `--time-limit-s` | the episode's limit in control steps or simulated seconds (default: below) |
 | `--image-size` | the square image size (224) |
+| `--camera-poses` | `droid`: DROID's camera poses on the one-arm puzzles ([DROID-trained policies](#droid-trained-policies)) |
 | `--prompt`, `--full-prompt` | override the instruction, or send the whole task paragraph ([Prompts](#prompts)) |
 | `--video` | render `video.mp4` while grading (GPU) |
 | `--export-reference F` | write the task's reference solution in the convention's action units (for [checking a setup](#checking-a-setup)) |
@@ -111,6 +112,43 @@ buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking.
 - Gripper: the Robotiq drive 0 rad = open .. 0.8 rad = closed, linearly normalised.
 - Cameras: `front_oblique` (closer) and `agentview` (an overview) are the two static views, `wrist` is on the hand;
   `--cameras` remaps them (`observation/exterior_image_1_left=agentview,observation/wrist_image_left=wrist`).
+
+### DROID-trained policies
+
+A policy trained on DROID (openpi's pi0.5-DROID) needs three things DROID's robot has and the one-arm puzzles do not.
+RoboARC provides them without changing a task:
+
+- **Camera poses** (`--camera-poses droid`, `roboarc/vla/droid_cameras.py`): `front_oblique`, `agentview` and `wrist`
+  move to the poses of DROID's simulated evaluation scene (sim-evals), relative to the robot: the exterior cameras at
+  (0.05, -/+0.57, 0.66) m from the robot base with a 71.5 deg vertical field of view, the wrist camera where DROID's sits
+  on the Robotiq (56.7 deg). The change is made in memory when the scene is built: the tasks, their files and the
+  physics stay as they are, the frozen-runtime checks hold, and the episodes' end states are those without it. With the
+  task's own cameras pi0.5-DROID came within 3 cm of the object in 0 of 24 one-minute episodes (buzz-wire-3d-06,
+  lock-picking-03; three checkpoints); with DROID's poses in 7 of 24.
+- **Wrist angle and start pose** (`roboarc/vla/droid_adapter.py`, a policy server around the model): RoboARC mounts the
+  Robotiq at -45 deg about the flange, DROID at 0, so the model sees q7 - pi/4 and its actions get pi/4 back; the
+  first 2.5 s move the arm to DROID's reset joints before the model is asked. The adapter reads only the joints and
+  the control step: it holds nothing about a task.
+
+`scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
+puzzle image with `--camera-poses droid`, `--jobs` at a time against that one server, and stops the server.
+
+```bash
+# once: openpi at the commit RoboARC was tested with (the checkpoints download on first use, 12 GB each, into
+# ~/.cache/openpi or $OPENPI_DATA_HOME); scripts/vla_droid.sh finds it in ~/openpi or $OPENPI
+git clone https://github.com/Physical-Intelligence/openpi.git ~/openpi && cd ~/openpi
+git checkout 215abfb217dbac7d5f1273282331b9b1866c0479 && GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
+
+scripts/vla_droid.sh --task lock-picking-03 --model jointpos --seed all --jobs 3 --out $RESULTS
+scripts/vla_droid.sh --task hedgehog-in-cage-02 --model hold --out $RESULTS -- --max-steps 400   # checks the setup
+```
+
+| `--model` | openpi checkpoint | convention |
+|---|---|---|
+| `jointpos` (default) | `pi05_droid_jointpos` | `droid` |
+| `velocity` | `pi05_droid` | `droid-velocity` |
+| `polaris` | `polaris/pi05_droid_jointpos_polaris` (jointpos with PolaRiS' simulated data) | `droid` |
+| `hold` | none: holds the arm (numpy only) | `droid` |
 
 ### Rates
 
@@ -181,6 +219,23 @@ cloth on the GPU). Measured on an RTX 4090 with a loaded 32-core host:
 | resize with pad to 224, per image | 1.7 ms | 1.7 ms |
 | a policy query (render + layout), stub server | 54 ms | 34 ms |
 | per control step, horizon 25 / 8 | 36 ms | 22 ms |
+
+pi0.5-DROID through `scripts/vla_droid.sh`, model and episodes on one RTX 4090 that other jobs kept busy (8.5 GB of
+its memory taken): the model server holds 8.6 GB and an episode about 1 GB. One server keeps about 4 episodes busy:
+4 parallel 1600-step lock-picking episodes took 49 s each against 40 s for one alone; with 6 or 9 the GPU's memory ran
+out for some, and the rest waited for the server (82-100 s each). The easiest setting of each one-arm family, 4 at a
+time to the default step limit (image 2.1.0, DROID's camera poses, live episode + grading replay):
+
+| task | control steps | live | replay | per control step (live) |
+|---|---:|---:|---:|---:|
+| lock-picking-03 | 32700 | 21.9 min | 10.1 min | 40 ms |
+| buzz-wire-3d-06 | 20900 | 17.4 min | 9.0 min | 50 ms |
+| fiber-bundling-02 | 7300 | 7.8 min | 5.4 min | 64 ms |
+| hedgehog-in-cage-08 | 6000 | 4.8 min | 2.4 min | 48 ms |
+| hedgehog-in-cage-02 | 3800 | 2.5 min | 1.8 min | 39 ms |
+
+All five took 33 minutes, the model's start included. All 18 one-arm puzzles to their limits are 402600 control steps
+per seed.
 
 Images are rendered only when the policy is asked, so with a horizon of 25 rendering costs about 2 ms per control
 step. The renderer's resolution and sampling are part of the frozen scene; images at 224 cost the same render. The
