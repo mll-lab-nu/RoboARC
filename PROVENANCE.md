@@ -271,7 +271,7 @@ references and release records are not in this tree; the maintainers keep them o
 
 ## 2.2.0: appearance seeds v2
 
-- Jianwen's appearance seeds v2 (his commits up to `aaec2712`, kept with his authorship and hashes): seeds 1 and 2
+- Jianwen's appearance seeds v2 (his commits up to `e0a930a3`, kept with his authorship and hashes): seeds 1 and 2
   change the room's lighting, the table top, its frame and the floor, and the task's objects' colours and finishes; the
   goal marker is 5 mm wide and emissive at every seed; texts no longer name parts by a colour that now changes; IKEA
   tasks allow seeds 0-2 (standard-mode lighting only). His branch also carries runner changes (each trial's host record,

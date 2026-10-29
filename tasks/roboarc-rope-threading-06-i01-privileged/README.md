@@ -78,7 +78,7 @@ Thread the rope through the cyan grommet in the wall (G1) then green ring (A) th
 ### Provenance
 - Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `a018f53a` (MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)); bound to this release's runtime (source `1552f29d`, tooling `f2320e4c`).
 - Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `b2cf9b552f31`, under `instances/rope-threading-06-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
-- Release: RoboARC 2.2.0, image `ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057` (images/roboarc/); simulator source `aaec27121` (PROVENANCE.md).
+- Release: RoboARC 2.2.0, image `ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057` (images/roboarc/); simulator source `e0a930a38` (PROVENANCE.md).
 - Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
 
 ### Change Log
