@@ -22,8 +22,8 @@ shared by every family in [docs/benchmarks/roboarc.md](benchmarks/roboarc.md); h
    it on `PYTHONPATH`, or build a derived image:
 
    ```bash
-   docker run --rm -u $(id -u):$(id -g) -v $PWD/.vla-lib:/lib ghcr.io/mll-lab-nu/roboarc:2.2.0 \
-     python -m pip install --target /lib msgpack==1.1.0 websockets==15.0.1
+   mkdir -p .vla-lib && docker run --rm -u $(id -u):$(id -g) -e HOME=/tmp -v $PWD/.vla-lib:/vla-lib \
+     ghcr.io/mll-lab-nu/roboarc:2.2.0 python -m pip install --target /vla-lib msgpack==1.1.0 websockets==15.0.1
    ```
 
    RoboARC does not import `openpi_client`: that package pins `numpy < 2`, and the simulator's numpy (2.3.5) is part of
