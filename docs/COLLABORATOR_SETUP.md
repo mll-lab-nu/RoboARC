@@ -89,8 +89,9 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
 
 - Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use (credentials: the table in
   section 5), and the usage gateway as above (section 5, "Usage gateway").
-- The two modes run one after the other, each with at most the agent's 3 h. To run them at the same time, start the same
-  command again in a second terminal (it adds a lane).
+- The two modes run one after the other, each with at most the agent's 3 h: the standard trial starts when the
+  privileged trial's agent is done, while that trial is graded in the background. To run them at the same time, start
+  the same command again in a second terminal (it adds a lane).
 - It passed when:
   - `jobs/smoke/smoke.summary.md` has a row for `roboarc-interlocked-claws-08-i01-privileged` and one for `-standard`,
     each with a success of 0 or 1 and neither marked "not a result" (a 0 is fine here: the trial only has to give a
@@ -103,7 +104,10 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
     not reach the gateway. The gateway listens on the Docker bridge address (172.17.0.1), and a host firewall that
     blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
   - `jobs/smoke/smoke.log` shows no stopped lane (the runner stops a lane when the model account fails: out of credit,
-    rate-limited, logged out).
+    rate-limited, logged out);
+  - `jobs/smoke/smoke.log` has a line `<job>: agent phase ended; it validates ...`: your Harbor reports the end of the
+    agent's phase, so a trial is graded beside the next one. If the runner's first line says `this harbor has no
+    --plugin`, the run is still valid but each lane waits for every grading: tell us your `harbor --version`.
 - The seeds the full run gives a task's three trials:
   `python3 scripts/task_seed.py assign tasks/roboarc-interlocked-claws-08-i01-privileged --batch <batch name> --trials 3`
   prints three different seeds (0, 1 and 2, in an order fixed by the batch name).
@@ -186,7 +190,8 @@ done
 - **Progress and summary:** progress is in `$JOBS/<batch>.log`, and the per-trial summary in `$JOBS/<batch>.summary.md`.
 - **Restarting** (after a reboot, or a lane stopped by a model-account failure): start the lanes again with the same
   command. Finished trials are skipped. A trial the reboot interrupted is skipped too: to run it again, move its job
-  folder and `$JOBS/.claims/<job>` out of `$JOBS` first. It gets the same seed, and this is its one rerun (next item).
+  folder and `$JOBS/.claims/<job>` out of `$JOBS` first. A reboot can interrupt more than one trial per lane: the one
+  whose agent was running and those still being graded. It gets the same seed, and this is its one rerun (next item).
 - **"not a result"** in `<batch>.summary.md` marks an infrastructure failure: the grader's `infra_error` or
   `grader_error`, no `reward.json`, a Harbor exception other than the agent's time limit, or a model-account failure.
   Such a trial may run once more, the same way: move its job folder and its claim out of `$JOBS`, start the command
