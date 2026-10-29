@@ -200,13 +200,98 @@ directories. The release also carries the runner and resource changes listed at 
   2 are new, so the trials of a run with K > 1 now see different lightings.
 
 ### Evidence
-To be filled after the release checks:
-- seed instances (156): the derive checks, strict loads in fresh processes;
-- seed 0 of the 30 marker bases: births and reference ends;
-- the seeds' references: strict fresh replays, end states against seed 0's;
-- rendered frames: seed 0 of the unchanged bases against 2.1.0, the exposure checks of seeds 1 and 2;
-- Harbor: oracle 1 and nop 0, both modes, per seed;
-- the image: its build, archive and pin.
+Scope (the owner, 2026-10-28): the image goes out on the seeds' physics evidence for all 78 bases and a Harbor smoke
+set; the full seed Harbor check (one base per family and the 30 changed bases, seeds 0-2, both modes, oracle and nop:
+516 trials, plus knot-untying 07 and 09) was not run and is an optional follow-up.
+- **Seed physics, all 78 bases (156 seed instances):** `tools/release/release_rebuild.py` derived seeds 1 and 2 of every
+  base in the image without instances (`derive_seed_instance.py`). For each of the 156: `instance_assets/` byte for byte
+  seed 0's, the physical fields equal, the birth's tick record different from seed 0's only in `task.instance_id`, and
+  the world part of the state (`world_sha`) equal to seed 0's: 156/156. Re-run independently with `--check` (derived
+  again, then each loaded strictly in a fresh process): 156/156 reloaded exact, 156/156 derived
+  again byte for byte the same instance.
+- **Seed 0:** the 30 goal-marker bases' instances were made again in the image (the marker's new drawn mesh); all 78
+  seed-0 births equal 2.1.0's, and every reference that records its birth was recorded on it (rope-threading 04-08's
+  references carry no birth stamp, fiber-bundling-05 has no reference). The other 48 bases' seed-0
+  instances are 2.1.0's, `instance_assets/` byte for byte.
+- **Release checks:** `release_rebuild.py` PASS: `mk_tasks.py --check` (all bases), `--assets --check` (every seed's
+  binding against its instance bytes), `ci_checks/run_all.sh`, `task_conventions.py --check`, `check-resources`,
+  `check-cutoffs`.
+- **Harbor smoke** (rendering off, the 2.2.0 image, `scripts/roboarc/harbor_check.py`'s task copies by
+  `scripts/task_seed.py materialize`): 55/55 as expected on 19 bases, one per family.
+  - nop 0 in both modes at seed 1 on each of them (38 trials; the blanket bases on a GPU);
+  - the privileged oracle at seed 1, reward 1 with two equal end states, on 16 of them (the shortest base of each
+    family; caliper-sorting, lock-picking and wire-splicing are left out, their references taking more than about 22
+    minutes), blanket-flatten-07 and blanket-fold-01 on a GPU;
+  - the standard oracle at seed 2 on slotted-post-ring-01, reward 1.
+  `release.json` records `seeds.<S>.harbor = "passed"` only for these 17 seed runs, with their scope, so
+  `[metadata.seeds] oracle` is `[0, 1]` (`[0, 2]` for slotted-post-ring-01's seed 2) on those bases and `[0]` elsewhere.
+- **Image:** `ghcr.io/mll-lab-nu/roboarc:2.2.0`, image id `sha256:f8fdee211ec5dbe0783e9959612e97554eefa493da8e169863c975c415db2eaf`,
+  manifest digest `sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057` (`images/pins.json`);
+  `images/archive.sh` twice gives the same archive (sha256 `01c6af183b81...`, 5782784000 bytes); pushed through a local
+  registry first, digest and config preserved.
+- **CI gates** on a fresh clone: `mk_tasks.py --check`, `ikea/ci/check.sh`, `check-image-pins.py`, `run_invariants.sh`,
+  `check-unit-tests.sh --all` with check-video / resources / cutoffs / seed-files, the API tests (CI lock),
+  `run_all.sh`, `source_hash.py --check`, `check-doc-paths.py`, `check-tooling-identity.sh`: all pass.
+
+The smoke trials:
+
+| base | seed | mode | agent | reward | end state |
+|---|---|---|---|---|---|
+| battery-replacement-01-i01 | 1 | privileged | nop | 0 | - |
+| battery-replacement-01-i01 | 1 | privileged | oracle | 1 | d486f64d1edf7243 |
+| battery-replacement-01-i01 | 1 | standard | nop | 0 | e6f51957c06da025 |
+| bed-bolt-05-i01 | 1 | privileged | nop | 0 | - |
+| bed-bolt-05-i01 | 1 | privileged | oracle | 1 | af64456a53afae07 |
+| bed-bolt-05-i01 | 1 | standard | nop | 0 | f3372966c05c5e78 |
+| blanket-flatten-07-i01 | 1 | privileged | nop | 0 | - |
+| blanket-flatten-07-i01 | 1 | privileged | oracle | 1 | 717f8f4363f6f3ae |
+| blanket-flatten-07-i01 | 1 | standard | nop | 0 | 253a4fa221ac7a26 |
+| blanket-fold-01-i01 | 1 | privileged | nop | 0 | - |
+| blanket-fold-01-i01 | 1 | privileged | oracle | 1 | 264ec69965c7da2a |
+| blanket-fold-01-i01 | 1 | standard | nop | 0 | 23a26f6068f815ba |
+| buzz-wire-3d-06-i01 | 1 | privileged | nop | 0 | - |
+| buzz-wire-3d-06-i01 | 1 | privileged | oracle | 1 | daa67b9e165cc439 |
+| buzz-wire-3d-06-i01 | 1 | standard | nop | 0 | 5a29bb0e3998e26b |
+| caliper-sorting-01-i01 | 1 | privileged | nop | 0 | - |
+| caliper-sorting-01-i01 | 1 | standard | nop | 0 | d76f4c85f4af192e |
+| cast-coil-06-i01 | 1 | privileged | nop | 0 | - |
+| cast-coil-06-i01 | 1 | privileged | oracle | 1 | 7cce32ce01151ca6 |
+| cast-coil-06-i01 | 1 | standard | nop | 0 | 808cd303f5fd8935 |
+| cast-keyhole-02-i01 | 1 | privileged | nop | 0 | - |
+| cast-keyhole-02-i01 | 1 | privileged | oracle | 1 | c96947cd0bf652ef |
+| cast-keyhole-02-i01 | 1 | standard | nop | 0 | f0a9e0fbeacc4b26 |
+| clock-assembling-01-i01 | 1 | privileged | nop | 0 | - |
+| clock-assembling-01-i01 | 1 | privileged | oracle | 1 | 6adfa4f1a6653d17 |
+| clock-assembling-01-i01 | 1 | standard | nop | 0 | d87d7727dfe445f5 |
+| fiber-bundling-02-i01 | 1 | privileged | nop | 0 | - |
+| fiber-bundling-02-i01 | 1 | privileged | oracle | 1 | 810fed65e4338d55 |
+| fiber-bundling-02-i01 | 1 | standard | nop | 0 | 7c6f4f5204395aaf |
+| hedgehog-in-cage-02-i01 | 1 | privileged | nop | 0 | - |
+| hedgehog-in-cage-02-i01 | 1 | privileged | oracle | 1 | f6b85d183aff70b3 |
+| hedgehog-in-cage-02-i01 | 1 | standard | nop | 0 | 6b66e681ceffc376 |
+| horseshoe-ring-02-i01 | 1 | privileged | nop | 0 | - |
+| horseshoe-ring-02-i01 | 1 | privileged | oracle | 1 | 3bca9f158e1cf72c |
+| horseshoe-ring-02-i01 | 1 | standard | nop | 0 | 51e85046fae03e99 |
+| interlocked-claws-09-i01 | 1 | privileged | nop | 0 | - |
+| interlocked-claws-09-i01 | 1 | privileged | oracle | 1 | 85aa11a058697a04 |
+| interlocked-claws-09-i01 | 1 | standard | nop | 0 | f786d14ce930ca66 |
+| knot-untying-02-i01 | 1 | privileged | nop | 0 | - |
+| knot-untying-02-i01 | 1 | privileged | oracle | 1 | 20a45d05de285d47 |
+| knot-untying-02-i01 | 1 | standard | nop | 0 | 6549955e78941e2e |
+| lock-picking-03-i01 | 1 | privileged | nop | 0 | - |
+| lock-picking-03-i01 | 1 | standard | nop | 0 | 279a7e3cf16dbb71 |
+| orbits-01-i01 | 1 | privileged | nop | 0 | - |
+| orbits-01-i01 | 1 | privileged | oracle | 1 | 1614d1cd230074b3 |
+| orbits-01-i01 | 1 | standard | nop | 0 | 862dfdaa4f758201 |
+| rope-threading-04-i01 | 1 | privileged | nop | 0 | - |
+| rope-threading-04-i01 | 1 | privileged | oracle | 1 | edc5ed7d3d0d6e06 |
+| rope-threading-04-i01 | 1 | standard | nop | 0 | 678a1a84a9df1832 |
+| slotted-post-ring-01-i01 | 1 | privileged | nop | 0 | - |
+| slotted-post-ring-01-i01 | 1 | privileged | oracle | 1 | ff731bd870c3203b |
+| slotted-post-ring-01-i01 | 1 | standard | nop | 0 | baecb33f68fa047e |
+| slotted-post-ring-01-i01 | 2 | standard | oracle | 1 | 35f2c8fc005bf2ad |
+| wire-splicing-01-i01 | 1 | privileged | nop | 0 | - |
+| wire-splicing-01-i01 | 1 | standard | nop | 0 | b36763d4db794b31 |
 
 ### Each trial's record names the machine it ran on
 - A trial's results recorded only the index of its GPU (`gpu` in config.json). The GPU's name and driver, the CPU

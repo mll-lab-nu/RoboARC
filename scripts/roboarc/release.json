@@ -122,7 +122,15 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): cover: radius 45.1 mm; stick: radius 32.4 mm, around the stick's handle; old_A: radius 31.3 mm; old_B: radius 31.3 mm; new_1: radius 31.3 mm; new_2: radius 31.3 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-24",
-   "step_s": 0.056
+   "step_s": 0.056,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states d486f64d1edf7243); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "bed-bolt-01-i01": {
    "creation_source": "cf508cee",
@@ -402,7 +410,15 @@
      "mode": "both",
      "text": "roboarc 2.1.0: a white card lying flat on the table between the key's stand and the bolt's cradle shows the bolt's head and its recess, drawn 4.5 times their size (visual only), and the instruction says so in one sentence; the frozen instance is re-made with it (the bed frame's drawn parts). Its physics, its birth and end states (seeds 0, 1 and 2) and the reference are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states af64456a53afae07); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "blanket-flatten-03-i01": {
    "creation_source": "e2e2f564",
@@ -646,7 +662,15 @@
      "mode": "both",
      "text": "roboarc 2.1.0: the release check counts only the robot parts that can move (arm links, wrists, grippers, fingers): the two arm bases are fixed to the world and no longer count, so a spread or folded blanket may lie against them (grader policy active_parts_clearance_v1, terminal revision release_settling_v2_active_parts; the instruction says so). The rule only gets looser: every earlier success stays one. The new terminal revision changes the instance's identity, so the frozen instance is refreshed (its scene and archives byte for byte) and the reference re-stamped (instance_sha only): the birth and end state hashes change in the task part only (the instance id and the release metrics) and in the release geometry's new fixed flags; the physics is unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 717f8f4363f6f3ae); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "blanket-flatten-08-i01": {
    "creation_source": "37aa7ac0",
@@ -762,7 +786,15 @@
      "mode": "both",
      "text": "roboarc 2.1.0: the release check counts only the robot parts that can move (arm links, wrists, grippers, fingers): the two arm bases are fixed to the world and no longer count, so a spread or folded blanket may lie against them (grader policy active_parts_clearance_v1, terminal revision release_settling_v2_active_parts; the instruction says so). The rule only gets looser: every earlier success stays one. The new terminal revision changes the instance's identity, so the frozen instance is refreshed (its scene and archives byte for byte) and the reference re-stamped (instance_sha only): the birth and end state hashes change in the task part only (the instance id and the release metrics) and in the release geometry's new fixed flags; the physics is unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 264ec69965c7da2a); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "blanket-fold-02-i01": {
    "creation_source": "e2e2f564",
@@ -1149,7 +1181,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states daa67b9e165cc439); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "buzz-wire-3d-07-i01": {
    "creation_source": "d1eb6f13",
@@ -1459,7 +1499,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 7cce32ce01151ca6); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "cast-coil-07-i01": {
    "creation_source": "6fb23e0d",
@@ -1626,7 +1674,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states c96947cd0bf652ef); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "cast-keyhole-03-i01": {
    "creation_source": "1552f29d",
@@ -1921,7 +1977,15 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): barrel: radius 65.8 mm; center: radius 42 mm; third: radius 33.8 mm; fourth: radius 33.8 mm; bridge: radius 120.6 mm; screw1: radius 20.9 mm; screw2: radius 20.9 mm; probe: radius 56.1 mm; barrel_arbor: radius 30.6 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-24",
-   "step_s": 0.08
+   "step_s": 0.08,
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 6adfa4f1a6653d17); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "fiber-bundling-02-i01": {
    "creation_source": "f24ccdce",
@@ -1972,7 +2036,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 810fed65e4338d55); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "fiber-bundling-04-i01": {
    "creation_source": "f24ccdce",
@@ -2235,7 +2307,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states f6b85d183aff70b3); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "hedgehog-in-cage-03-i01": {
    "creation_source": "1552f29d",
@@ -2547,7 +2627,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 3bca9f158e1cf72c); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "horseshoe-ring-03-i01": {
    "creation_source": "1552f29d",
@@ -2938,7 +3026,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 85aa11a058697a04); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "interlocked-claws-10-i01": {
    "creation_source": "1552f29d",
@@ -3243,7 +3339,15 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 20a45d05de285d47); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "knot-untying-04-i01": {
    "creation_source": "d601866b",
@@ -3821,7 +3925,15 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 1614d1cd230074b3); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "orbits-02-i01": {
    "creation_source": "1552f29d",
@@ -3982,7 +4094,15 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states edc5ed7d3d0d6e06); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "rope-threading-05-i01": {
    "creation_source": "a018f53a",
@@ -4397,7 +4517,21 @@
      "mode": "both",
      "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states ff731bd870c3203b); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    },
+    "2": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: standard oracle 1 (two equal end states 35f2c8fc005bf2ad); the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "slotted-post-ring-02-i01": {
    "creation_source": "1552f29d",
