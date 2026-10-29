@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "instance_sha256": "a03ef50de7b70010e78f82c81d28c19f631b615aeb208486a85892583efc523e",
+  "instance_sha256": "72fdebdad514605f400ae8105879f73b58f6abfa5ddb7aeb0d8acc7840bf2c8f",
   "asset_files": {
     "instance_assets/mujoco/scene.json": "463296f3d8a136523bb213762c8a9caef1846cc5e8c2e9efb0fa1f5ff9695b5e",
     "instance_assets/mujoco/scene.xml": "ee5d679d89707c2bb18e3d5a35fa15a9f8672a5eb5841abb5b25b5a853642124"
   },
-  "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+  "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
   "creation_source": {
     "sha256": "aae08c2e43e74bbcdf3916d72fdcdfe50280f968818f7d3f431fcd003ced13c2",
     "files": 437
@@ -21,8 +21,8 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
-      "files": 454
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+      "files": 455
     }
   },
   "image": {
@@ -31,5 +31,5 @@
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
-  "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
+  "nyx_direct_sha256": "bf41e3f747b337d5452f57f54c23cc44cca01f7956cd2df84dc24fdf1caad956"
 }

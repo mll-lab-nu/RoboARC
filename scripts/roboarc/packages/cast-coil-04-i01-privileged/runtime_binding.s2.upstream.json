@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "68b799d0959a1e5d629274686b7f9730f3a9a25c8a7734d444f8e472960e8ca1",
+  "instance_sha256": "485725a8817fc5bbd46bde2df8dcd0112050885201719afe86a6f595bbf27a77",
   "asset_files": {
     "instance_assets/mujoco/scene.json": "36ccdf15959ddb9e87b48e5d61126127cffba23c16c9a82ce147ffe6b8c00cb6",
     "instance_assets/mujoco/scene.xml": "c2178fafa81dd76c1b2d536c86738eaf0031be44bc39b9be6012a8103b946fc5"

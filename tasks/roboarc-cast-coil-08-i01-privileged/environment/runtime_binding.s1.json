@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "7fe59034f41a6f730aa1d860b9d92a4178f5fa5b96c78ddb0f98218942455fbb",
+  "instance_sha256": "2dbf5f2e5bceed2c04e9259afd1f887bdfab6b09e3f114eea72d2813e3d769b0",
   "asset_files": {
     "instance_assets/mujoco/meshes/cyl0_prism32_2b6957e8b6d67ab4.obj": "2b6957e8b6d67ab41067d521f720bcc2a64989870fdb15af63396ec40af3c644",
     "instance_assets/mujoco/meshes/cyl10_prism32_58fe30a34da748b2.obj": "58fe30a34da748b20fc445f34160b2720789646b81a0d2e115d743af1126b969",
@@ -10,7 +10,7 @@
     "instance_assets/mujoco/scene.json": "991d41aaec6f77afbb5dc707538caa32788e2edfc5745b37a0e6b054bfe9bd17",
     "instance_assets/mujoco/scene.xml": "12f688abe0fd93f77faf61df32acfb3352a19c9db4b3437d4ec12ea069aa3270"
   },
-  "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+  "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
   "creation_source": {
     "sha256": "6fb23e0d2245fc56e46872a21470b7295de61bd9820155ba085676e34cc9533d",
     "files": 438
@@ -26,8 +26,8 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
-      "files": 454
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+      "files": 455
     }
   },
   "image": {
@@ -36,5 +36,5 @@
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
-  "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
+  "nyx_direct_sha256": "bf41e3f747b337d5452f57f54c23cc44cca01f7956cd2df84dc24fdf1caad956"
 }

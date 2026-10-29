@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
-  "instance_sha256": "fd10f29f76a55d850c0a3ddedd373a90570bb9129cd5ab16c819f5d4772cbfd5",
+  "instance_sha256": "0644ba7068a9c81cf43e5b105bde0e0714746ab72edd6e2d5d88a968926dfe6f",
   "asset_files": {
-    "instance_assets/mujoco/meshes/goal_region_6b2b14ab43d4628a.obj": "6b2b14ab43d4628a44d1567ed15a6d82c308bb42d6091320cf39a479b3570c2c",
-    "instance_assets/mujoco/scene.json": "df9fc81cd1575f90ba3bd454c59bf5c528a686a3aa7842654ee4ce479543c3c1",
-    "instance_assets/mujoco/scene.xml": "d8825655c1d796dae800d86991c177468d86718d336306263a8b3ce17086eb90"
+    "instance_assets/mujoco/meshes/goal_region_8bf02333df118196.obj": "8bf02333df118196c106747ca0bbd4124999d36bd28bce0e8fd107f2d15c0eb0",
+    "instance_assets/mujoco/scene.json": "8daf840a64c4b6549a6323d3dc8a4cb0c91f83fc5c107df13dfd8411a32a6daf",
+    "instance_assets/mujoco/scene.xml": "1bd1ccfc3660960c4d899da7df535cd7b84c2bbfcd7fef660055db0ba1bc8cc8"
   },
-  "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+  "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
   "creation_source": {
-    "sha256": "d601866b4c91c858aa4e249b5bf5145b8fe3263b2885048a86016e34c314c208",
-    "files": 444
+    "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+    "files": 455
   },
   "runtime": {
     "dependencies": {
@@ -22,15 +22,15 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
-      "files": 454
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+      "files": 455
     }
   },
   "image": {
-    "reference": "eai-roboarc:0.2.1-noinst",
-    "id": "sha256:cd2ac87464fd0840be7d5a71da4311eb483a8f29075b87802333be1caa569986",
+    "reference": "roboarc-r4:2.2.0-noinst",
+    "id": "sha256:4c0613fbbd6682e3e53275dd77cf1bc4fa7ec0df0b56e4e31b04e9e296900739",
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
-  "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
+  "nyx_direct_sha256": "bf41e3f747b337d5452f57f54c23cc44cca01f7956cd2df84dc24fdf1caad956"
 }

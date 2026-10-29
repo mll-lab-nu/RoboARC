@@ -6,7 +6,7 @@ gears, wires) and IKEA furniture assembly. Each task is one frozen scene, a robo
 with a Robotiq 2F-85, or two Franka Pandas) and a grader that decides from the simulated state whether the task was
 done.
 
-Website: <https://roboarc.embodied-first-exam.ai> · Version **2.1.0** ([CHANGELOG.md](CHANGELOG.md))
+Website: <https://roboarc.embodied-first-exam.ai> · Version **2.2.0** ([CHANGELOG.md](CHANGELOG.md))
 
 ## Interfaces
 
@@ -67,7 +67,7 @@ Every interface runs the simulator in the released images:
   (V100, A100, A30, H100, H200) run the physics but render no images, and there is no software fallback
   ([docs/RUNNING.md](docs/RUNNING.md#gpus-without-rt-cores)). arm64 hosts are not supported.
 - Docker with the NVIDIA Container Toolkit.
-- The images: `ghcr.io/mll-lab-nu/roboarc:2.1.0` (the puzzles), `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`
+- The images: `ghcr.io/mll-lab-nu/roboarc:2.2.0` (the puzzles), `roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`
   (IKEA), each pinned by manifest digest ([images/pins.json](images/pins.json), [images/README.md](images/README.md)).
   The packages are private and inherit this repository's access: log in with `docker login ghcr.io -u <github user>`
   and a token with the `read:packages` scope, then pull them all with `bash images/pull_all.sh` (each is checked
@@ -130,9 +130,9 @@ Run it inside the task's image with the repository mounted:
 
 ```bash
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:2.1.0 python examples/vla_loop.py roboarc-cast-keyhole-02-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:2.2.0 python examples/vla_loop.py roboarc-cast-keyhole-02-i01
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/mll-lab-nu/roboarc:2.1.0 python -m roboarc replay roboarc-interlocked-claws-08-i01     # bit-identity check
+  ghcr.io/mll-lab-nu/roboarc:2.2.0 python -m roboarc replay roboarc-interlocked-claws-08-i01     # bit-identity check
 ```
 
 IKEA runs in `roboarc-ikea:1.1.0` (physics only) or `roboarc-ikea-sim:1.1.0` (with images). `pip install -e .` installs

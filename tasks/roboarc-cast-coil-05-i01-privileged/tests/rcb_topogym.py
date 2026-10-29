@@ -286,19 +286,19 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="buzz_wire_3d_easy", seed=0)], grasp_assist="recommended"),
     "cast_coil": dict(
         task_id="cast_coil", robot="aloha",
-        text="Assemble the separated gold and silver Cast Coil pieces into their interlocking, alternating four-layer "
+        text="Assemble the two separated Cast Coil pieces into their interlocking, alternating four-layer "
              "target configuration. Align both pieces fully; contact or grasping alone is not completion. Release both "
              "pieces, withdraw the grippers and leave the assembled puzzle stable on the table.",
         instances=[dict(variation_id="cast_coil_easy", seed=0)], grasp_assist="recommended"),
     "cast_keyhole": dict(
         task_id="cast_keyhole", robot="aloha",
-        text="Separate the silver keyhole piece from the gold piece. Place the entire silver piece inside the green dashed "
-             "goal area and hold it still briefly. Keep the gold piece outside the area on the puzzle/system side. "
+        text="Separate the keyhole plate from the fork plate. Place the entire keyhole plate inside the green dashed "
+             "goal area and hold it still briefly. Keep the fork plate outside the area on the puzzle/system side. "
              "Holding the target with the gripper is allowed.",
         instances=[dict(variation_id="cast_keyhole_easy", seed=0)], grasp_assist="recommended"),
     "fiber_bundling": dict(
         task_id="fiber_bundling", robot="panda_robotiq",
-        text="Pass every fine fiber through the fixed copper ring, "
+        text="Pass every fine fiber through the fixed ring, "
              "tip first and in tip-to-root material order, until all roots and the front sheath have passed and cleared "
              "the ring. The rear terminal stays anchored and must not pass through the ring. Any gripper contact with a "
              "fine fiber ends the task in failure. Avoid sharp bends and collisions; passing only the tips is not "
@@ -318,7 +318,7 @@ TASKS: dict[str, dict] = {
         instances=[dict(variation_id="horseshoe_ring_easy", seed=0)], grasp_assist="recommended"),
     "interlocked_claws": dict(
         task_id="interlocked_claws", robot="aloha",
-        text="Separate the brown claw piece from the other claw. Place the entire brown piece inside the green dashed goal "
+        text="Separate the two claw pieces. Place the entire target claw piece inside the green dashed goal "
              "area and hold it still briefly. Keep the other piece outside the area on the puzzle/system side. Holding "
              "the target with the gripper is allowed.",
         instances=[dict(variation_id="interlocked_claws_hard", seed=0)], grasp_assist="recommended"),

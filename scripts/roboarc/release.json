@@ -1,7 +1,7 @@
 {
  "name": "roboarc-r1",
  "note": "RoboARC release record (docs/benchmarks/roboarc.md), written by tools/release/release_rebuild.py --onto. release_commit: the simulator commit the image, the tooling and the instances come from; runtime: the image's installed runtime; bases: one record per task base (ported_from / template, instance, facts the texts state, evidence). version: the task set's version (the Release line of every task README; the image's version is images/roboarc/VERSION); changes: Change Log entries of every base.",
- "version": "2.1.0",
+ "version": "2.2.0",
  "changes": [
   {
    "date": "2026-10-19",
@@ -47,10 +47,15 @@
    "date": "2026-10-25",
    "mode": "both",
    "text": "RoboARC 2.1.0, image `ghcr.io/mll-lab-nu/roboarc:2.1.0`: the simulator source draws a card in the five bed-bolt scenes (visual only), fixes a crash in wire_splicing's coil count on a straight tail, and lets the blanket families' release check leave out the world-fixed arm bases (see those tasks' own entries); the buzz-wire 06, 07 and 10 texts state their own loop opening. Unless this task's own entry says otherwise, its instance, physics, instruction, grader and reference are unchanged, and so are its birth and end states (seeds 0, 1 and 2): results graded under 2.0.0 stand."
+  },
+  {
+   "date": "2026-10-28",
+   "mode": "both",
+   "text": "RoboARC 2.2.0, image `ghcr.io/mll-lab-nu/roboarc:2.2.0`: appearance seeds v2. Seeds 1 and 2 change the room's lighting, the table top's material, the table's frame and the floor, and the task's objects' colours and finishes; they are other scenes than the seeds 1 and 2 of 1.2.0-2.1.0, so results at those seeds (and aggregates over a task's seeds) are not comparable with earlier ones. Seed 0 looks and reads as in 2.1.0 unless this task's own entry says otherwise. The physics, the graders, the births and the reference rows are unchanged at every seed: results graded under 2.1.0 stand."
   }
  ],
- "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
- "template_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+ "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
+ "template_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
  "runtime": {
   "dependencies": {
    "torch": "2.11.0+cu128",
@@ -62,12 +67,12 @@
   },
   "python": "3.11.15",
   "source": {
-   "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
-   "files": 454
+   "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+   "files": 455
   }
  },
  "runtime_notes": "source = the simulator source the image installs (source/topogym pruned by images/topogym/prune.py; tools/release/source_hash.py computes it from a checkout); python, dependencies: the image's installed versions (source/images/roboarc/runtime.lock, vbd-requirements.txt). Since 1.1.0 the image has no Genesis and no libuipc, and the runtime names neither.",
- "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+ "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
  "tooling_version": "22",
  "bases": {
   "battery-replacement-01-i01": {
@@ -97,10 +102,10 @@
     }
    },
    "family": "battery_replacement",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "xbox_aa",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -121,13 +126,9 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states d486f64d1edf7243); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
@@ -158,10 +159,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py; make-instance bed_bolt_crossbar, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cf508cee; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "crossbar",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -179,18 +180,6 @@
    },
    "released": "2026-10-24",
    "step_s": 0.037,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-25",
@@ -226,10 +215,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py; make-instance bed_bolt_torx, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cf508cee; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "torx",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -247,18 +236,6 @@
    },
    "released": "2026-10-24",
    "step_s": 0.035,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-25",
@@ -294,10 +271,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py; make-instance bed_bolt_square, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cf508cee; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "square",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -315,18 +292,6 @@
    },
    "released": "2026-10-24",
    "step_s": 0.037,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-25",
@@ -362,10 +327,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py; make-instance bed_bolt_phillips, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cf508cee; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "phillips",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -383,18 +348,6 @@
    },
    "released": "2026-10-24",
    "step_s": 0.039,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-25",
@@ -430,10 +383,10 @@
     }
    },
    "family": "bed_bolt",
-   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py; make-instance bed_bolt_slotted, scene seed 0)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cf508cee; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "slotted",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -451,25 +404,21 @@
    },
    "released": "2026-10-24",
    "step_s": 0.034,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-25",
      "mode": "both",
      "text": "roboarc 2.1.0: a white card lying flat on the table between the key's stand and the bolt's cradle shows the bolt's head and its recess, drawn 4.5 times their size (visual only), and the instruction says so in one sentence; the frozen instance is re-made with it (the bed frame's drawn parts). Its physics, its birth and end states (seeds 0, 1 and 2) and the reference are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states af64456a53afae07); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "blanket-flatten-03-i01": {
    "creation_source": "e2e2f564",
@@ -498,10 +447,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -554,10 +503,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -616,10 +565,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -682,10 +631,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "not_run",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -716,14 +665,10 @@
    ],
    "seeds": {
     "1": {
-     "harbor": "passed (privileged oracle)",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed (privileged oracle)",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 717f8f4363f6f3ae); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
@@ -754,10 +699,10 @@
     }
    },
    "family": "blanket_flatten",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 37aa7ac0; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "not_run",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -814,10 +759,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -835,25 +780,21 @@
    },
    "gpu_physics": true,
    "released": "2026-10-14",
-   "seeds": {
-    "1": {
-     "harbor": "passed (privileged oracle)",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    },
-    "2": {
-     "harbor": "passed (privileged oracle)",
-     "date": "2026-10-26",
-     "image": "roboarc 2.1.0 (c813b33cff3f)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-25",
      "mode": "both",
      "text": "roboarc 2.1.0: the release check counts only the robot parts that can move (arm links, wrists, grippers, fingers): the two arm bases are fixed to the world and no longer count, so a spread or folded blanket may lie against them (grader policy active_parts_clearance_v1, terminal revision release_settling_v2_active_parts; the instruction says so). The rule only gets looser: every earlier success stays one. The new terminal revision changes the instance's identity, so the frozen instance is refreshed (its scene and archives byte for byte) and the reference re-stamped (instance_sha only): the birth and end state hashes change in the task part only (the instance id and the release metrics) and in the release geometry's new fixed flags; the physics is unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 264ec69965c7da2a); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "blanket-fold-02-i01": {
    "creation_source": "e2e2f564",
@@ -882,10 +823,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source e2e2f564; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -943,10 +884,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -999,10 +940,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1055,10 +996,10 @@
     }
    },
    "family": "blanket_fold",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source de81088e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1119,10 +1060,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1163,10 +1104,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 05846213; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1214,10 +1155,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1233,7 +1174,22 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): wand: radius 25 mm, on the wand's grip. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): wand: radius 25 mm, on the wand's grip. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states daa67b9e165cc439); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "buzz-wire-3d-07-i01": {
    "creation_source": "d1eb6f13",
@@ -1260,10 +1216,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1279,7 +1235,14 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): wand: radius 25 mm, on the wand's grip. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): wand: radius 25 mm, on the wand's grip. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "buzz-wire-3d-10-i01": {
    "creation_source": "d1eb6f13",
@@ -1306,10 +1269,10 @@
     }
    },
    "family": "buzz_wire_3d",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1325,7 +1288,14 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): wand: radius 25 mm, on the wand's grip. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): wand: radius 25 mm, on the wand's grip. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "caliper-sorting-01-i01": {
    "creation_source": "cacc831d",
@@ -1354,10 +1324,10 @@
     }
    },
    "family": "caliper_sorting",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "vernier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1374,19 +1344,7 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): caliper: radius 20 mm; sleeve_0: radius 40 mm; sleeve_1: radius 40 mm; sleeve_2: radius 40 mm; sleeve_3: radius 40 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-24",
-   "step_s": 0.066,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   }
+   "step_s": 0.066
   },
   "cast-coil-04-i01": {
    "creation_source": "aae08c2e",
@@ -1413,10 +1371,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1430,7 +1388,14 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_gold: radius 25 mm; coil_silver: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_gold: radius 25 mm; coil_silver: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "cast-coil-05-i01": {
    "creation_source": "aae08c2e",
@@ -1457,10 +1422,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1474,7 +1439,14 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_gold: radius 25 mm; coil_silver: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_gold: radius 25 mm; coil_silver: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "cast-coil-06-i01": {
    "creation_source": "d1eb6f13",
@@ -1501,10 +1473,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "v2_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1520,7 +1492,22 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_silver: radius 25 mm; coil_gold: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_silver: radius 25 mm; coil_gold: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 7cce32ce01151ca6); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "cast-coil-07-i01": {
    "creation_source": "6fb23e0d",
@@ -1547,10 +1534,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "v2_easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1566,7 +1553,14 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_silver: radius 25 mm; coil_gold: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_silver: radius 25 mm; coil_gold: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "cast-coil-08-i01": {
    "creation_source": "6fb23e0d",
@@ -1593,10 +1587,10 @@
     }
    },
    "family": "cast_coil",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "v2_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1612,10 +1606,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_silver: radius 25 mm; coil_gold: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): coil_silver: radius 25 mm; coil_gold: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "cast-keyhole-02-i01": {
-   "creation_source": "aae08c2e",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -1639,10 +1640,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance cast_keyhole_easier, scene seed 0)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1657,28 +1658,34 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): keyhole_gold: radius 26 mm; keyhole_silver: radius 22 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`keyhole_silver`, the target, and `keyhole_gold`), so the text does not identify them by colour alone."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states c96947cd0bf652ef); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "cast-keyhole-03-i01": {
-   "creation_source": "aae08c2e",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -1702,10 +1709,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance cast_keyhole_easy, scene seed 0)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1725,11 +1732,21 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`keyhole_silver`, the target, and `keyhole_gold`), so the text does not identify them by colour alone."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
   "cast-keyhole-04-i01": {
-   "creation_source": "aae08c2e",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -1753,10 +1770,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance cast_keyhole_medium, scene seed 0)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1776,11 +1793,21 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`keyhole_silver`, the target, and `keyhole_gold`), so the text does not identify them by colour alone."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
   "cast-keyhole-05-i01": {
-   "creation_source": "aae08c2e",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -1804,10 +1831,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source aae08c2e; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance cast_keyhole_hard, scene seed 0)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1827,11 +1854,21 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`keyhole_silver`, the target, and `keyhole_gold`), so the text does not identify them by colour alone."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
   "cast-keyhole-06-i01": {
-   "creation_source": "6fb23e0d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -1855,10 +1892,10 @@
     }
    },
    "family": "cast_keyhole",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance cast_keyhole_double_maze, scene seed 0)",
    "tier": "double_maze",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1866,7 +1903,7 @@
    },
    "template": "cast-keyhole-easy-i00",
    "variation": "cast_keyhole_double_maze",
-   "design": "Double maze: two plates, gold and silver, each with a slot grid, threaded through each other at right angles (design dm4b)",
+   "design": "Double maze: two plates, each with a slot grid, threaded through each other at right angles (design dm4b)",
    "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (keyhole_gold, keyhole_silver) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start closed on their parts and may acquire after the same bilateral-contact confirmation without another close command",
    "physics_dt_s": 0.0025,
    "grasp": "assisted (his contact_weld_v1 pre-weld: the grippers start closed on keyhole_gold, keyhole_silver)",
@@ -1880,6 +1917,16 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`keyhole_silver`, the target, and `keyhole_gold`), so the text does not identify them by colour alone."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
@@ -1910,10 +1957,10 @@
     }
    },
    "family": "clock_assembling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4163626d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4163626d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "gear_train",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1934,13 +1981,9 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 6adfa4f1a6653d17); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
@@ -1969,10 +2012,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -1987,16 +2030,19 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): fiber_bundle: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ],
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 810fed65e4338d55); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
@@ -2025,10 +2071,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2042,17 +2088,24 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): fiber_bundle: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): fiber_bundle: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "fiber-bundling-05-i01": {
    "creation_source": "f24ccdce",
    "evidence": {},
    "oracle": "none",
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2066,7 +2119,14 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): fiber_bundle: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): fiber_bundle: radius 25 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    }
+   ]
   },
   "fiber-bundling-08-i01": {
    "creation_source": "f24ccdce",
@@ -2095,10 +2155,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2125,20 +2185,13 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the lay rule takes either red fiber (the scene has two, strands 0 and 8): the text names \"one of the two red fibers\". A trajectory that met the rule with strand 0 is graded as before; one that failed only because the other red fiber, not strand 0, lay at the stated position now succeeds."
-    }
-   ],
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
     },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   }
+   ]
   },
   "fiber-bundling-09-i01": {
    "creation_source": "f24ccdce",
@@ -2167,10 +2220,10 @@
     }
    },
    "family": "fiber_bundling",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2197,23 +2250,16 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the lay rule takes either red fiber (the scene has two, strands 0 and 8): the text names \"one of the two red fibers\". A trajectory that met the rule with strand 0 is graded as before; one that failed only because the other red fiber, not strand 0, lay at the stated position now succeeds."
-    }
-   ],
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
     },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   }
+   ]
   },
   "hedgehog-in-cage-02-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2237,10 +2283,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance easier, scene seed 0)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2255,21 +2301,24 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 89.3 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ],
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states f6b85d183aff70b3); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
   "hedgehog-in-cage-03-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2293,10 +2342,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance hedgehog_in_cage_easy, scene seed 0)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2310,10 +2359,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 89.3 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 89.3 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "hedgehog-in-cage-06-i01": {
-   "creation_source": "d1eb6f13",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2337,10 +2393,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance hedgehog_in_cage_cast_cage, scene seed 0)",
    "tier": "cast_cage",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2356,10 +2412,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 90.1 mm, enclosing the whole part; push_rod: radius 37.1 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 90.1 mm, enclosing the whole part; push_rod: radius 37.1 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "hedgehog-in-cage-07-i01": {
-   "creation_source": "d1eb6f13",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2383,10 +2446,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance hedgehog_in_cage_owl, scene seed 0)",
    "tier": "owl",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2402,10 +2465,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): owl: radius 102.3 mm, enclosing the whole part; rod: radius 138 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): owl: radius 102.3 mm, enclosing the whole part; rod: radius 138 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "hedgehog-in-cage-08-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2429,10 +2499,10 @@
     }
    },
    "family": "hedgehog_in_cage",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance hedgehog_in_cage_window_change, scene seed 0)",
    "tier": "window_change",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2448,10 +2518,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 89.3 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): hedgehog_ball: radius 89.3 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "horseshoe-ring-01-i01": {
-   "creation_source": "6fb23e0d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2475,10 +2552,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance horseshoe_ring_very_easy, scene seed 0)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2492,10 +2569,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 82.6 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 82.6 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "horseshoe-ring-02-i01": {
-   "creation_source": "6fb23e0d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2519,10 +2603,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance horseshoe_ring_easier, scene seed 0)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2537,21 +2621,24 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 83.6 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ],
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 3bca9f158e1cf72c); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
   "horseshoe-ring-03-i01": {
-   "creation_source": "6fb23e0d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2575,10 +2662,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance horseshoe_ring_easy, scene seed 0)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2592,10 +2679,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 81.9 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 81.9 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "horseshoe-ring-04-i01": {
-   "creation_source": "6fb23e0d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2619,10 +2713,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance horseshoe_ring_medium, scene seed 0)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2636,10 +2730,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 81.7 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 81.7 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "horseshoe-ring-05-i01": {
-   "creation_source": "6fb23e0d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2663,10 +2764,10 @@
     }
    },
    "family": "horseshoe_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 6fb23e0d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance horseshoe_ring_hard, scene seed 0)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2680,10 +2781,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 90.8 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): horseshoe_left: radius 90.6 mm, enclosing the whole part; horseshoe_right: radius 90.6 mm, enclosing the whole part; target_ring: radius 90.8 mm, enclosing the whole part. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "interlocked-claws-02-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2707,10 +2815,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_easier, scene seed 0)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2730,11 +2838,21 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the pieces are also named by their object names (`piece_0`, the target, and `piece_1`), so the text does not identify them by colour alone."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
   "interlocked-claws-05-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2758,10 +2876,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_hard, scene seed 0)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2775,10 +2893,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): claw_0: radius 30 mm; claw_1: radius 30 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): claw_0: radius 30 mm; claw_1: radius 30 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "interlocked-claws-08-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2802,10 +2927,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_rd_easy, scene seed 0)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2813,7 +2938,7 @@
    },
    "template": "interlocked-claws-easy-i00",
    "variation": "interlocked_claws_rd_easy",
-   "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)",
+   "design": "keyhole gates: a redesigned pair of interlocked pieces, a key and a lock (new geometry)",
    "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (piece_0, piece_1) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start closed on their parts and may acquire after the same bilateral-contact confirmation without another close command",
    "physics_dt_s": 0.0025,
    "grasp": "assisted (his contact_weld_v1 pre-weld: the grippers start closed on piece_0, piece_1)",
@@ -2822,28 +2947,26 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): piece_0: 2 spheres of radius 30 mm; piece_1: 2 spheres of radius 30 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the second piece is \"a lock\", without a colour (its colour changes with the appearance seed)."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
   "interlocked-claws-09-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2867,10 +2990,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_rd_medium, scene seed 0)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2878,7 +3001,7 @@
    },
    "template": "interlocked-claws-medium-i00",
    "variation": "interlocked_claws_rd_medium",
-   "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)",
+   "design": "keyhole gates: a redesigned pair of interlocked pieces, a key and a lock (new geometry)",
    "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (piece_0, piece_1) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start closed on their parts and may acquire after the same bilateral-contact confirmation without another close command",
    "physics_dt_s": 0.0025,
    "grasp": "assisted (his contact_weld_v1 pre-weld: the grippers start closed on piece_0, piece_1)",
@@ -2887,28 +3010,34 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): piece_0: 2 spheres of radius 30 mm; piece_1: 2 spheres of radius 30 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the second piece is \"a lock\", without a colour (its colour changes with the appearance seed)."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 85aa11a058697a04); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "interlocked-claws-10-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2932,10 +3061,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_rd_hard, scene seed 0)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -2943,7 +3072,7 @@
    },
    "template": "interlocked-claws-hard-i00",
    "variation": "interlocked_claws_rd_hard",
-   "design": "keyhole gates: a redesigned pair of interlocked pieces, brown and teal (new geometry)",
+   "design": "keyhole gates: a redesigned pair of interlocked pieces, a key and a lock (new geometry)",
    "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (piece_0, piece_1) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, or the hold has to push or pull its part with more than 60 N averaged over 20 ms) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction); the grippers start closed on their parts and may acquire after the same bilateral-contact confirmation without another close command",
    "physics_dt_s": 0.0025,
    "grasp": "assisted (his contact_weld_v1 pre-weld: the grippers start closed on piece_0, piece_1)",
@@ -2952,28 +3081,26 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): piece_0: 2 spheres of radius 30 mm; piece_1: 2 spheres of radius 30 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-14",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-21",
      "mode": "both",
      "text": "RoboARC 1.2.0: the second piece is \"a lock\", without a colour (its colour changes with the appearance seed)."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
     }
    ]
   },
   "interlocked-claws-11-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -2997,10 +3124,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_cast_abc, scene seed 0)",
    "tier": "cast_abc",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3016,10 +3143,17 @@
     "privileged": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): ab_plate: radius 30 mm; c_ring: radius 30 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically. Each region's centre (in its link's frame) is in `/app/instance.json` under `simulator.grasp_assist.targets`.",
     "standard": "Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): ab_plate: radius 30 mm; c_ring: radius 30 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically."
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "interlocked-claws-12-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -3045,10 +3179,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_rotor, scene seed 0)",
    "tier": "very_hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3070,11 +3204,16 @@
      "date": "2026-10-17",
      "mode": "standard",
      "text": "roboarc 0.2.0: the standard reference (`solution/`) replaced by one within the standard service's joint-speed rule (release.json `speed_rule`); the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
    ]
   },
   "interlocked-claws-13-i01": {
-   "creation_source": "cacc831d",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -3100,10 +3239,10 @@
     }
    },
    "family": "interlocked_claws",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source cacc831d; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance interlocked_claws_cast_trinity, scene seed 0)",
    "tier": "cast_trinity",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 1.3.0 (499d6f69bd81), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3121,18 +3260,13 @@
    },
    "released": "2026-10-24",
    "step_s": 0.072,
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-24",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
-   }
+   ]
   },
   "knot-untying-02-i01": {
    "creation_source": "d601866b",
@@ -3159,10 +3293,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3205,7 +3339,15 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ]
+   ],
+   "seeds": {
+    "1": {
+     "harbor": "passed",
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 20a45d05de285d47); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
+    }
+   }
   },
   "knot-untying-04-i01": {
    "creation_source": "d601866b",
@@ -3232,10 +3374,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3305,10 +3447,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3378,10 +3520,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "not_run"
    },
@@ -3451,10 +3593,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "not_run"
    },
@@ -3496,6 +3638,11 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal pictures draw the goal region's dashed line 5 mm wide (seeds 0, 1 and 2); the scene, the physics and the grading are unchanged."
     }
    ]
   },
@@ -3524,10 +3671,10 @@
     }
    },
    "family": "knot_untying",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "not_run"
    },
@@ -3569,6 +3716,11 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal pictures draw the goal region's dashed line 5 mm wide (seeds 0, 1 and 2); the scene, the physics and the grading are unchanged."
     }
    ]
   },
@@ -3597,10 +3749,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3641,10 +3793,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3685,10 +3837,10 @@
     }
    },
    "family": "lock_picking",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d1eb6f13; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3705,7 +3857,7 @@
    "released": "2026-10-14"
   },
   "orbits-01-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -3729,10 +3881,10 @@
     }
    },
    "family": "orbits",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance orbits_very_easy, scene seed 0)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3767,21 +3919,24 @@
     "plastic": null
    },
    "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ],
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states 1614d1cd230074b3); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
   "orbits-02-i01": {
-   "creation_source": "c9171f79",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -3805,10 +3960,10 @@
     }
    },
    "family": "orbits",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source c9171f79; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance orbits_easier, scene seed 0)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "not_run"
    },
@@ -3847,6 +4002,11 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
    ]
   },
@@ -3877,10 +4037,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -3938,13 +4098,9 @@
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states edc5ed7d3d0d6e06); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
@@ -3975,10 +4131,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4032,19 +4188,7 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ],
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   }
+   ]
   },
   "rope-threading-06-i01": {
    "creation_source": "a018f53a",
@@ -4073,10 +4217,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4130,19 +4274,7 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ],
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   }
+   ]
   },
   "rope-threading-07-i01": {
    "creation_source": "a018f53a",
@@ -4171,10 +4303,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_medium",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4228,19 +4360,7 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ],
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   }
+   ]
   },
   "rope-threading-08-i01": {
    "creation_source": "a018f53a",
@@ -4269,10 +4389,10 @@
     }
    },
    "family": "rope_threading",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source a018f53a; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "rd_hard",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4326,22 +4446,10 @@
      "mode": "standard",
      "text": "roboarc 0.2.0: instruction.md drops the empty `## Task failure conditions` heading (no rule was left under it); the rules are unchanged."
     }
-   ],
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
-    }
-   }
+   ]
   },
   "slotted-post-ring-01-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -4365,10 +4473,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance slotted_post_ring_very_easy, scene seed 0)",
    "tier": "very_easy",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4403,21 +4511,30 @@
     "plastic": null
    },
    "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ],
    "seeds": {
     "1": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: privileged oracle 1 (two equal end states ff731bd870c3203b); nop 0 in privileged and standard modes; the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     },
     "2": {
      "harbor": "passed",
-     "date": "2026-10-21",
-     "image": "roboarc 1.2.0 (b600616bee6c)"
+     "date": "2026-10-28",
+     "image": "roboarc 2.2.0 (f8fdee211ec5)",
+     "scope": "Harbor smoke on the 2.2.0 image: standard oracle 1 (two equal end states 35f2c8fc005bf2ad); the seed's physics: derive_seed_instance.py (birth and world as seed 0's)"
     }
    }
   },
   "slotted-post-ring-02-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -4441,10 +4558,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance slotted_post_ring_easier, scene seed 0)",
    "tier": "easier",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4478,10 +4595,17 @@
     "tension_guard": null,
     "plastic": null
    },
-   "released": "2026-10-14"
+   "released": "2026-10-14",
+   "changes": [
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
+    }
+   ]
   },
   "slotted-post-ring-03-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -4505,10 +4629,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance slotted_post_ring_easy_chain, scene seed 0)",
    "tier": "easy_chain",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4548,11 +4672,16 @@
      "date": "2026-10-21",
      "mode": "standard",
      "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
    ]
   },
   "slotted-post-ring-04-i01": {
-   "creation_source": "d601866b",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -4576,10 +4705,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source d601866b; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance slotted_post_ring_medium_chain, scene seed 0)",
    "tier": "medium_chain",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4619,11 +4748,16 @@
      "date": "2026-10-21",
      "mode": "standard",
      "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
    ]
   },
   "slotted-post-ring-05-i01": {
-   "creation_source": "eb4db660",
+   "creation_source": "1552f29d",
    "evidence": {
     "privileged": {
      "status": "passed",
@@ -4647,10 +4781,10 @@
     }
    },
    "family": "slotted_post_ring",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source eb4db660; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made in the release image (ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py; make-instance slotted_post_ring_hard_chain, scene seed 0)",
    "tier": "hard_chain",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4690,6 +4824,11 @@
      "date": "2026-10-21",
      "mode": "both",
      "text": "roboarc 1.1.0: the reference's Harbor oracle record (README, Reference solution): it scored 1 on the release image roboarc 1.1.0, where until now no score was claimed; the reference, the frozen instance and the task text are unchanged."
+    },
+    {
+     "date": "2026-10-28",
+     "mode": "both",
+     "text": "roboarc 2.2.0: the goal marker (the green dashed line round the goal square) is 5 mm wide instead of 2 mm and drawn glowing, at every seed; each stripe's inner edge, the containment limit, is where it was, so the goal and the grading are unchanged. The frozen scene is re-made with it; the birth state and the reference are unchanged."
     }
    ]
   },
@@ -4721,10 +4860,10 @@
     }
    },
    "family": "wire_splicing",
-   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4d2cba21; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.1.0, tools/release/release_rebuild.py --instances)",
+   "instance_package": "MuJoCo instance made before this image was built (TopoGym source 4d2cba21; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "eye_wrap",
    "physics_engine": "mujoco",
-   "release_commit": "ce493b06e7f230a9d80797cc02780fb29c9af953",
+   "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
     "run": "the release image roboarc 2.1.0 (c813b33cff3f), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
@@ -4741,18 +4880,6 @@
     "standard": "Grasp regions (assisted grasping, see Grippers above; one or more spheres per graspable part): wire_a: 63 spheres of radii 26.1 mm, 5.1 mm; wire_b: 97 spheres of radii 25.1 mm, 5.5 mm. Both finger contacts must lie inside one of the part's spheres; a part touched elsewhere is grasped physically."
    },
    "released": "2026-10-23",
-   "seeds": {
-    "1": {
-     "harbor": "passed",
-     "date": "2026-10-23",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    },
-    "2": {
-     "harbor": "passed",
-     "date": "2026-10-23",
-     "image": "roboarc 1.3.0 (499d6f69bd81)"
-    }
-   },
    "changes": [
     {
      "date": "2026-10-26",
@@ -4764,5 +4891,5 @@
  },
  "experimental_bases": {},
  "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
- "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
+ "nyx_direct_sha256": "bf41e3f747b337d5452f57f54c23cc44cca01f7956cd2df84dc24fdf1caad956"
 }

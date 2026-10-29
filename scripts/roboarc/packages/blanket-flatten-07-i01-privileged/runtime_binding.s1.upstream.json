@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "78fa16f9bab14c16b9de3745c190f921c0fea7d859e6c81e1d2306a531b27117",
+  "instance_sha256": "9bef8a8502cebcf6b5c1beb027bb45275d45e9945a826c61772a12302847eb45",
   "asset_files": {
     "instance_assets/initial_state/arrays.npz": "285bbe9895dfa1939fdc8345b65bb756f39d4d5978808c7db3f63890dbff91f7",
     "instance_assets/initial_state/manifest.json": "eceb21e777c39a62c1343c676807636e3e9ff221cced5d63d63b1d87c6faaaec",

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "87ce2419bcee40026dfc268c8aaf84e7469ace0eb4ae4152ed906426a9a27c41",
+  "instance_sha256": "8c87b957bc97e94b57b2d8ca048b0ba763bb6997d684fe5a68f8ef2a9ddf75f6",
   "asset_files": {
     "instance_assets/mujoco/meshes/cyl12_prism32_59d83251f0f5a197.obj": "59d83251f0f5a1973cade2ddd5eeb1480bac16220e9e09be137c9125d644985a",
     "instance_assets/mujoco/meshes/cyl7_prism32_73909099dd29ade7.obj": "73909099dd29ade72339cc8658857d2e69f4e13ab74367ae31e0a5db93507f7b",

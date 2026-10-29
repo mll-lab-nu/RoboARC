@@ -25,7 +25,7 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 
 | input | pin |
 |---|---|
-| frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `9f34f894a454d4f39ebaed5dcf8c8c9d40f828b9`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
+| frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `b2cf9b552f310ef4cfbd91df62ccfa837757c93a`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
 | puzzle image base (1.1.0) | `python:3.11.15-slim-bookworm@sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3` (the 0.2.22 image's own base); Debian packages from `snapshot.debian.org` 20260930T230000Z at the versions in `source/images/roboarc/Dockerfile`; wheels by sha256 in `source/images/roboarc/runtime.lock` and `vbd-requirements.txt` |
 | Genesis base image (`eai-robotangle` 0.2.22; 1.0.x only) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
 | monitor sidecar (`eai-monitor` 0.1.0) | `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f53f79c2bfa4a71298b10c78383cae3afc40720ca562cc845b8d20fb0c`, the same digest as the published `eai-monitor:0.1.0` |
@@ -268,3 +268,20 @@ references and release records are not in this tree; the maintainers keep them o
   difference is their 4-byte source-mtime field) and the fifteen re-made or refreshed instances with their seeds; it
   still carries the instances of the 33 bases removed in 2.0.0, as 1.3.0 does. The bed-bolt instructions gain one
   sentence about the card, the blanket texts state the new release rule.
+
+## 2.2.0: appearance seeds v2
+
+- Jianwen's appearance seeds v2 (his commits up to `e0a930a3`, kept with his authorship and hashes): seeds 1 and 2
+  change the room's lighting, the table top, its frame and the floor, and the task's objects' colours and finishes; the
+  goal marker is 5 mm wide and emissive at every seed; texts no longer name parts by a colour that now changes; IKEA
+  tasks allow seeds 0-2 (standard-mode lighting only). His branch also carries runner changes (each trial's host record,
+  one list of the family classes for task resources, GPU placement, DSH).
+- The image `roboarc:2.2.0` is built by `tools/release/release_rebuild.py` from that source: the nine CC0 Poly Haven
+  texture sets are downloaded at build and sha256-checked; the 30 goal-marker bases' seed-0 instances are made again in
+  it (their births and references unchanged); the other 48 bases' seed-0 instances are 2.1.0's; seeds 1 and 2 of all 78
+  bases are derived again (`tools/release/derive_seed_instance.py`: `instance_assets/` byte for byte, physical fields
+  and birth equal to seed 0's but for the task's instance id), and their references re-stamped. Like 2.1.0 it still
+  carries the instances of the 33 bases removed in 2.0.0. The IKEA images are unchanged.
+- The release records keep their 2.1.0 fields but for the instance package, release commit, the re-made bases'
+  creation source and the colourless design strings; the seeds' Harbor records are this release's (CHANGELOG, 2.2.0,
+  Evidence).

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "7b165b2e694df359ef6497b33932b01ae16afbd42ad247e29b3c655e1753486f",
+  "instance_sha256": "1db96f3c2d32429b69777733cb889610698314419e9351694392386018d2e0e5",
   "asset_files": {
     "instance_assets/frozen_assets/rope_volume.npz": "aceb9ddee496d3a3c6c9befef48dbc253c37ba068d3a5b4f52bfebdc4e42e1e9",
     "instance_assets/mujoco/rope_rope.npz": "8b2402ac3d67187d06ce1de1c9a68a66560be7c4a9af622cd85bd7cf789022f3",

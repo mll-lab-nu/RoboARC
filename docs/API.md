@@ -48,7 +48,7 @@ libmujoco and the exact dependency versions the runtime bindings require.
 
 | suite | image (physics) | images with Nyx RGB |
 |---|---|---|
-| puzzles | `ghcr.io/mll-lab-nu/roboarc:2.1.0` (Python 3.11) | the same image |
+| puzzles | `ghcr.io/mll-lab-nu/roboarc:2.2.0` (Python 3.11) | the same image |
 | IKEA | `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0` (Python 3.12) | `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0` |
 
 The tasks name these images by manifest digest (`images/pins.json`); `TaskInfo.image` and `render_image` are those
@@ -62,11 +62,11 @@ image). Run from the repository root of the checkout:
 # hash (minutes: the time grows with the reference's rows and the family; orbits-02's 7918 rows take about 30 min
 # on one core)
 docker run --rm -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym -e HOME=/tmp -u $(id -u):$(id -g) \
-  ghcr.io/mll-lab-nu/roboarc:2.1.0 python -m roboarc replay roboarc-interlocked-claws-08-i01
+  ghcr.io/mll-lab-nu/roboarc:2.2.0 python -m roboarc replay roboarc-interlocked-claws-08-i01
 
 # with Nyx images (one GPU, Vulkan through the NVIDIA container toolkit)
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo:/opt/topogym \
-  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:2.1.0 python examples/vla_loop.py roboarc-cast-keyhole-02-i01
+  -e HOME=/tmp -u $(id -u):$(id -g) ghcr.io/mll-lab-nu/roboarc:2.2.0 python examples/vla_loop.py roboarc-cast-keyhole-02-i01
 
 # an IKEA task with Nyx images
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -v $PWD:/repo:ro -w /repo -e PYTHONPATH=/repo -e HOME=/tmp \

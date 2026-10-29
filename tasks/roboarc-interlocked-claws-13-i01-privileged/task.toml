@@ -61,7 +61,7 @@ main = { cpus = 16.0, memory_gb = 30.0, pids = 8192 }
 # from (a list, { from = A, to = B } or "any"), and the ones the reference solution under solution/ is for
 default = 0
 allowed = [0, 1, 2]
-oracle = [0, 1, 2]
+oracle = [0]
 build = "runtime"
 
 [verifier]

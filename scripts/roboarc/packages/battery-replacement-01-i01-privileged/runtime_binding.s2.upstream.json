@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "94219b140c610b0e44014f866263a58e9d3cfe8a8b7d5fa203c9c8e5463975cc",
+  "instance_sha256": "fe778b4422d1291af19e1545f04f5288593acb191dc24b910788cbb934a78fe2",
   "asset_files": {
     "instance_assets/mujoco/meshes/controller_chamfer_0_2af7dd9b736d4d9e.obj": "2af7dd9b736d4d9e83cbcfe0de0c6a96c18063df919bb57f0e1259d47f717fbd",
     "instance_assets/mujoco/meshes/controller_chamfer_10_751b7f51b17dc921.obj": "751b7f51b17dc921849e8334e4a51e352ec7fba3550adae466a50686ef1c9cad",

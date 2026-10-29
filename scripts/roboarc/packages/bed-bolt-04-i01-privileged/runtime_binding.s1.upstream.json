@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "instance_sha256": "052a73f41cd069b1ae6f72989dc3ee960c3e009a2b6d6a87b23eff1418390741",
+  "instance_sha256": "444da820f15f4cdfebc2d51c902d535dacd2e166cf4fd63eb4f2d9be2c5da7de",
   "asset_files": {
     "instance_assets/mujoco/meshes/bed_frame_leg_LN_prism32_4993ec41cdee1692.obj": "4993ec41cdee1692465618c887ea95a243043b9721669e08228f2f7e05e5ca2d",
     "instance_assets/mujoco/meshes/bolt_bolt_head_prism32_25d46461555e2948.obj": "25d46461555e2948a2491a2bbee6f24b69937bb47f7417879a8ce2e1e7f5d211",

@@ -3,7 +3,7 @@ artifacts = [{ source = "/var/rcb-monitor/", service = "rcb_monitor" }, "/app/ou
 
 [task]
 name = "roboarc/roboarc-interlocked-claws-08-i01-privileged"
-description = "RoboARC interlocked_claws (ALOHA 2, MuJoCo): produce one replayable trajectory. Separate and place the entire brown claw piece inside the green dashed goal region. Keep the other claw piece on the puzzle/system side. In this design the brown claw piece is a key and the other piece is a lock. Frozen scene instance (variation interlocked_claws_rd_easy, seed 0)."
+description = "RoboARC interlocked_claws (ALOHA 2, MuJoCo): produce one replayable trajectory. Separate and place the entire key piece inside the green dashed goal region. Keep the lock piece on the puzzle/system side. The key piece is the long straight bar with a short crossbar at one end; the lock piece is the open frame of bars it passes through. Frozen scene instance (variation interlocked_claws_rd_easy, seed 0)."
 authors = [{ name = "Jianwen Lyu" }]
 keywords = ["robotics", "roboarc", "mujoco", "aloha", "code-as-policy", "trajectory", "interlocked_claws"]
 
@@ -61,7 +61,7 @@ main = { cpus = 16.0, memory_gb = 30.0, pids = 8192 }
 # from (a list, { from = A, to = B } or "any"), and the ones the reference solution under solution/ is for
 default = 0
 allowed = [0, 1, 2]
-oracle = [0, 1, 2]
+oracle = [0]
 build = "runtime"
 
 [verifier]

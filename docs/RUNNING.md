@@ -249,7 +249,7 @@ harbor run -p /tmp/run1 -i <task> -a <agent> ...
 ```
 
 Every RoboARC task allows seeds 0, 1 and 2: the puzzles since 1.2.0, the IKEA tasks since the appearance seeds v2
-(CHANGELOG, "Unreleased"). Seed 0 is the released scene. `[metadata.seeds] oracle` lists the seeds whose Harbor oracle
+(2.2.0). Seed 0 is the released scene. `[metadata.seeds] oracle` lists the seeds whose Harbor oracle
 run passed (IKEA: 0).
 - A puzzle's seeds 1 and 2 are its appearance seeds: the same scene and physics in another look. The room's lighting
   changes (which light is the key light, the lights' height, a warm or a cool white, a dim or a bright scene), the table

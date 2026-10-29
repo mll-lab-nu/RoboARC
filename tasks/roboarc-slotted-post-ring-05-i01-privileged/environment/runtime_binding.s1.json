@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "instance_sha256": "c542fc2c25346225ad207c9721290da80702e5c498a25720655b2ab5eed9cb9e",
+  "instance_sha256": "083e0c28c5df037a0650da3860524eb01fd44b2269848d84adf7adffffe8f323",
   "asset_files": {
-    "instance_assets/mujoco/meshes/goal_region_bd3c9ff727235345.obj": "bd3c9ff727235345c21a8cd6ac454197eed9f02ce4439da33acab792251c2e50",
+    "instance_assets/mujoco/meshes/goal_region_cdb271a76e481a8b.obj": "cdb271a76e481a8b72eaa862278f591f948fce4e1b31931756e3c63310d685c6",
     "instance_assets/mujoco/meshes/slotted_chain_disc_b6a8509bed44e34b.obj": "b6a8509bed44e34bd8bda2d21938becd1fc9a0faa06ee15ed453fdde4939dfab",
-    "instance_assets/mujoco/scene.json": "a25fd4d2c6b3fd571a61a839cade2008359d92723c34ee9ea3ddc2b52cab9bb4",
-    "instance_assets/mujoco/scene.xml": "41505a18a806e09dcd9ac0fee4d5afd0c29d1f8ad5209b253f266c12c17dd7db",
-    "instance_assets/mujoco_settled.npz": "5b091816be21e70a457ea9edc6ff5f644faa1935b5b9c53584e04c399ba09806"
+    "instance_assets/mujoco/scene.json": "6c695d6a54789db3f1c855d51f08e44cc787883b00b107d9b128e967635484fd",
+    "instance_assets/mujoco/scene.xml": "38f0bcaa0c836b2c8de8eba42648bd82bf191c578757f8e9468aeb01c60f9a09",
+    "instance_assets/mujoco_settled.npz": "f078086de6e475dfdddc0cda58f393849fadc15f9634d813715e9f891bbdf9c9"
   },
-  "tooling_sha256": "412cbe02edb4581843ff93b1244485a40dc5539fc9622ee80498035d735ae5d8",
+  "tooling_sha256": "f2320e4c5508a807eb72b31e95317ef4347bbbe5dec4384a5eb34df2df11529f",
   "creation_source": {
-    "sha256": "eb4db66007e5029491d1ca7ceec98bca7bdc136ab2be58737f5d7bf08df60e51",
-    "files": 444
+    "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+    "files": 455
   },
   "runtime": {
     "dependencies": {
@@ -24,15 +24,15 @@
     },
     "python": "3.11.15",
     "source": {
-      "sha256": "cf508cee05bebd2ea708dea733a98894f0ce5e03d9546c77c489f2942a57f969",
-      "files": 454
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580",
+      "files": 455
     }
   },
   "image": {
-    "reference": "eai-roboarc:0.2.1-noinst",
-    "id": "sha256:cd2ac87464fd0840be7d5a71da4311eb483a8f29075b87802333be1caa569986",
+    "reference": "roboarc-r4:2.2.0-noinst",
+    "id": "sha256:4c0613fbbd6682e3e53275dd77cf1bc4fa7ec0df0b56e4e31b04e9e296900739",
     "repo_digests": []
   },
   "render_bridge_sha256": "0e04db54feded2929769443e183e2db1e6138eaec62701070fbd462925d8a2b0",
-  "nyx_direct_sha256": "20d70c415cbc8a64f38918aa39d093386690a2207d1cc9ec1faa826d910666dd"
+  "nyx_direct_sha256": "bf41e3f747b337d5452f57f54c23cc44cca01f7956cd2df84dc24fdf1caad956"
 }

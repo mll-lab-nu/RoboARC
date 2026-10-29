@@ -3,7 +3,7 @@ artifacts = [{ source = "/var/rcb-monitor/", service = "rcb_monitor" }, "/app/ou
 
 [task]
 name = "roboarc/roboarc-buzz-wire-3d-06-i01-privileged"
-description = "RoboARC buzz_wire_3d (Franka Panda + Robotiq 2F-85, MuJoCo): produce one replayable trajectory. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Black rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well. Frozen scene instance (variation buzz_wire_3d_rd_very_easy, seed 0)."
+description = "RoboARC buzz_wire_3d (Franka Panda + Robotiq 2F-85, MuJoCo): produce one replayable trajectory. Guide the metal loop along the entire wire from start to finish without touching the wire, then release the tool on the finish support. Rubber sleeves on the wire are insulated: the ring may rest on them. The final bend and the post at the finish are insulated as well. Frozen scene instance (variation buzz_wire_3d_rd_very_easy, seed 0)."
 authors = [{ name = "Jianwen Lyu" }]
 keywords = ["robotics", "roboarc", "mujoco", "panda_robotiq", "code-as-policy", "trajectory", "buzz_wire_3d"]
 
@@ -61,7 +61,7 @@ main = { cpus = 16.0, memory_gb = 30.0, pids = 8192 }
 # from (a list, { from = A, to = B } or "any"), and the ones the reference solution under solution/ is for
 default = 0
 allowed = [0, 1, 2]
-oracle = [0]
+oracle = [0, 1]
 build = "runtime"
 
 [verifier]
