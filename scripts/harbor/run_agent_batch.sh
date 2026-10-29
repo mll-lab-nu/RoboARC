@@ -64,8 +64,8 @@
 #                GPU_SHARE trials of rigid tasks, a trial of a deformable task (DEFORMABLE_FAMILIES) has a GPU of its own,
 #                a task whose compose reserves no GPU takes none; a trial starts when the CPUs and memory its task
 #                declares ([metadata.resources] min_* and verifier_min_*, times RESERVE_CPU_SCALE / RESERVE_MEM_SCALE)
-#                fit beside the trials already running (memory: the host's total less MEM_HEADROOM_GB, default the larger
-#                of 4 GB and 10 %; CPUs: HOST_CPUS), else the lane tries the plan's next job and, when none fits, waits
+#                fit beside the trials already running (memory: HOST_MEM_GB, default the host's total, less MEM_HEADROOM_GB,
+#                default the larger of 4 GB and 10 %; CPUs: HOST_CPUS), else the lane tries the plan's next job and, when none fits, waits
 #                30 s; the job's copy has its containers pinned to that GPU (scripts/harbor/pin_gpu.py; Docker maps
 #                `count: 1` to GPU 0) and <job>/placement.json records it. Start up to GPU_SHARE x GPUs lanes.
 #                0 = as before: no placement, no admission, every container on GPU 0
@@ -130,6 +130,7 @@ LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
 GPU_SCHED="${GPU_SCHED:-1}"; GPU_SHARE="${GPU_SHARE:-4}"; SLOTS_DIR="${SLOTS_DIR:-/tmp/roboarc-slots-$(id -u)}"
 DEFORMABLE_FAMILIES="${DEFORMABLE_FAMILIES:-}"   # empty: scripts/task_resources.toml's own_gpu classes (gpu_slots.py)
 RESERVE_CPU_SCALE="${RESERVE_CPU_SCALE:-1}"; RESERVE_MEM_SCALE="${RESERVE_MEM_SCALE:-1}"; MEM_HEADROOM_GB="${MEM_HEADROOM_GB:-}"
+HOST_MEM_GB="${HOST_MEM_GB:-}"
 if [ -z "${GPUS:-}" ]; then
   GPUS="$(nvidia-smi --query-gpu=index --format=csv,noheader 2>/dev/null | tr -d ' ' | paste -sd, -)"; GPUS="${GPUS:-0}"
 fi
@@ -154,6 +155,7 @@ for v in RESERVE_CPU_SCALE RESERVE_MEM_SCALE; do
   [[ "${!v}" =~ ^[0-9]*\.?[0-9]+$ ]] && [[ "${!v}" =~ [1-9] ]] || { echo "$v must be a positive number" >&2; exit 2; }
 done
 [ -z "$MEM_HEADROOM_GB" ] || [[ "$MEM_HEADROOM_GB" =~ ^[0-9]*\.?[0-9]+$ ]] || { echo "MEM_HEADROOM_GB must be a number of GB (0 or more)" >&2; exit 2; }
+[ -z "$HOST_MEM_GB" ] || [[ "$HOST_MEM_GB" =~ ^[0-9]*\.?[0-9]+$ ]] || { echo "HOST_MEM_GB must be a number of GB" >&2; exit 2; }
 # absolute paths: with the gateway on, Harbor is started from the job's own copy of the task (run_job), not from the repository
 abspath() { case "$1" in ""|/*) printf '%s' "$1" ;; *) printf '%s/%s' "$PWD" "$1" ;; esac; }
 JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(abspath "$AGENT_CONFIG")"
@@ -655,7 +657,7 @@ acquire_slot() {  # <job> <task>: JOB_SLOT and JOB_GPU from the host's ledger (c
   slot_class "$2" || return 2
   read -r units cpus mem fam <<< "${SLOT_CLASS[$2]}"
   JOB_GPU="$(python3 "$H/gpu_slots.py" acquire --dir "$SLOTS_DIR" --job "$1" --runner-pid $$ --units "$units" --cpus "$cpus" \
-              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --host-cpus "$HOST_CPUS" ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
+              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --host-cpus "$HOST_CPUS" ${HOST_MEM_GB:+--host-mem-gb "$HOST_MEM_GB"} ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
   rc=$?
   [ $rc -eq 0 ] && { JOB_SLOT="${SLOT_CLASS[$2]}"; return 0; }
   JOB_GPU=""; return $rc

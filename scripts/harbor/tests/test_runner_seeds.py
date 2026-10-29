@@ -138,7 +138,8 @@ class RunnerSeeds(unittest.TestCase):
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high",
                         JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),
-                        SLOTS_DIR=str(self.root / "slots"), GPUS="0,1", HOST_CPUS="64", MEM_HEADROOM_GB="0")
+                        SLOTS_DIR=str(self.root / "slots"), GPUS="0,1", HOST_CPUS="64", HOST_MEM_GB="256",
+                        MEM_HEADROOM_GB="0")
         self.run_id = "codex-test_model-high"
 
     def tearDown(self):

@@ -147,8 +147,8 @@ ledger that every lane and batch of the host shares (`scripts/harbor/gpu_slots.p
   (`[metadata.resources]` `min_cpus` / `verifier_min_cpus` and `min_memory_gb` / `verifier_min_memory_gb`: 4 CPUs and
   7 GB for a rigid puzzle, 4 CPUs and 10 GB for blanket privileged, 3 and 3 for IKEA privileged, for example), times
   `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1). It starts when the CPUs reserved by the trials running plus its own
-  are at most `HOST_CPUS`, and their memory plus its own at most the host's total less `MEM_HEADROOM_GB` (default the
-  larger of 4 GB and 10 %). With nothing else running it always starts. These are the tasks' minimums, three to five
+  are at most `HOST_CPUS`, and their memory plus its own at most the host's total (`HOST_MEM_GB`, default the
+  machine's) less `MEM_HEADROOM_GB` (default the larger of 4 GB and 10 %). With nothing else running it always starts. These are the tasks' minimums, three to five
   times the measured peaks: on a host with little memory for its GPUs, memory rather than GPUs bounds the trials at a
   time (32 rigid trials on 8 GPUs reserve about 224 GB and 128 CPUs).
 - A job that does not fit is left for a later pass and the lane tries the plan's next one; a lane that can start
