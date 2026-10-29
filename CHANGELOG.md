@@ -4,6 +4,18 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+### Several environments at once: `roboarc.make_vec` (preview; API only, no task, image or result changes)
+- `roboarc.make_vec(task, num_envs, instance_seeds=..., gpus=..., autoreset=..., **make_options)` runs `num_envs`
+  environments of one task, one worker process each (`roboarc/vector.py`, `VecEnv`), and returns batched observations,
+  rewards and flags. The simulators are one scene per process, so this is the supported way to step several; the
+  docs pointed at `gymnasium.vector.AsyncVectorEnv` before, which needs Gymnasium (the images do not ship it).
+- Each worker builds its environment with `roboarc.make()`; physics, rules and images are the single environment's.
+  `instance_seeds="all"` spreads the workers over the appearance seeds; `gpus` gives each worker one GPU.
+- docs/API.md "Several environments (preview)". Tests: tests/api/test_vector.py (the worker protocol with a stand-in
+  environment anywhere; marker sim: three workers of one task, seeds 0, 0 and 1, stepped with the reference rows).
+
 ## 2.2.0 (2026-10-28)
 
 Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the

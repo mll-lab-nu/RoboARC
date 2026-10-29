@@ -55,8 +55,8 @@ class IkeaEnv(RoboARCEnv):
             raise ValueError(f"{task.id} allows the instance seeds {list(task.seeds)}, not {instance_seed}")
         self.instance_seed = int(instance_seed)
         if _SCENE_LOADED:
-            raise RuntimeError("one IKEA environment per process (each scene's modules are top-level imports); use "
-                               "subprocess vector environments for several")
+            raise RuntimeError("one IKEA environment per process (each scene's modules are top-level imports); "
+                               "roboarc.make_vec runs several, one worker process each")
         self.rules = "standard"
         self.step_after_end = True
         self.check_every = max(1, int(check_every))
