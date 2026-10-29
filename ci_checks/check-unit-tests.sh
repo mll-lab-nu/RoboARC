@@ -2,7 +2,7 @@
 # Unit tests of the benchmark's tooling and the shared layer, in two tiers.
 #  1. Standard library and a shell only (no numpy, no simulator, no image): the Harbor runner's helpers (retry rule,
 #     account-failure rule, Codex config, the optional usage gateway switch and the trials' seeds and results with a fake
-#     harbor, the machine record host_info.py, build stamps), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
+#     harbor, the machine record host_info.py, the agent-end marker plugin, build stamps), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
 #     shipped usage gateway (scripts/usage_gateway/: its own tests, and the options and host lists the runner gives it),
 #     the simulator source hash (tools/release/source_hash.py), and RoboARC's generator and asset pins
 #     (scripts/roboarc/tests/: the packages' fields and checks, assets.py pin / check / check-instances on a fake
@@ -45,6 +45,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
          scripts/harbor/tests/test_runner_seeds.py scripts/harbor/tests/test_gpu_slots.py \
          scripts/harbor/tests/test_pin_gpu.py scripts/harbor/tests/test_dsh_acp.py scripts/harbor/tests/test_host_info.py \
+         scripts/harbor/tests/test_phase_marker.py \
          tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py \
          scripts/roboarc/tests/test_generator_seeds.py tools/tests/test_release_seeds.py images/tests/test_pull_all.py \

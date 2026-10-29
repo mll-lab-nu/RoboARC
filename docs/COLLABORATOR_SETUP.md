@@ -173,7 +173,9 @@ done
   (most: 4 cores and 7 to 10 GB) must fit beside the trials already running. A trial that does not fit waits, and its
   lane takes the next one. So start 4 lanes per GPU, as above: lanes beyond what the host holds only wait. A trial may
   use up to 32 GB of memory (its limit). On a host shared with other work, name your GPUs (`GPUS=0,1`) and start the
-  lanes with `MEM_GUARD=1`.
+  lanes with `MEM_GUARD=1`. When a trial's agent is done, its grading (the replay and its video) runs in the background
+  on the same GPU while the lane starts its next trial, so 4 lanes per GPU stay right (docs/RUNNING.md "GPUs and
+  lanes"; `PHASE_SPLIT=0` waits for each grading).
 - **Duration:** a trial gives the agent up to 3 h, plus setup and grading. If every trial used its whole budget, the
   540 trials would take about 837 GPU-hours (the 300 rigid trials with a GPU count a quarter of a GPU each, the 36
   IKEA privileged trials none, the 204 deformable trials a whole one): about 35 days on one GPU, 8.7 on four, 4.4 on

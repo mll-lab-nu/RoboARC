@@ -69,6 +69,17 @@
 #                30 s; the job's copy has its containers pinned to that GPU (scripts/harbor/pin_gpu.py; Docker maps
 #                `count: 1` to GPU 0) and <job>/placement.json records it. Start up to GPU_SHARE x GPUs lanes.
 #                0 = as before: no placement, no admission, every container on GPU 0
+#   PHASE_SPLIT  1 (default, with GPU_SCHED=1 and SEQ=1) = a trial's agent phase and its validation are scheduled apart:
+#                when the agent phase ends (Harbor's agent-end event, marked by the job plugin plugins/phase_marker.py
+#                in $JOBS/.phase/<job>.json), the trial validates in the background on its GPU (the replay, video and
+#                grading Harbor runs after the agent: a standard trial's in its sim container) and the lane takes the
+#                next trial at once. A validating trial keeps no GPU unit, only its task's verifier CPUs and memory
+#                ([metadata.resources] verifier_min_*, times the scales); it still counts on its GPU (GPU_RESIDENT), and
+#                a deformable trial reasons only on a GPU where no other trial reasons or validates. The lane stops
+#                on a model-account failure before it takes the next trial, as before, and ends when its trials have
+#                validated. 0 = a lane waits for each trial's validation; a Harbor without job plugins (`--plugin`)
+#                runs as 0
+#   GPU_RESIDENT the most trials on one GPU, reasoning and validating (2 x GPU_SHARE)
 #   GPUS         the GPUs to use, comma-separated (default every GPU nvidia-smi lists; 0 without nvidia-smi)
 #   GPU_SHARE    rigid-task trials per GPU (4)
 #   DEFORMABLE_FAMILIES  the families whose trials have a GPU of their own (task.toml [metadata] family); empty
@@ -128,6 +139,7 @@ MODES="${MODES:-privileged standard}"; SEQ="${SEQ:-1}"; N_P="${N_P:-2}"; N_S="${
 JOBS="${JOBS:-$R/jobs/agents}"; RESULTS="${RESULTS-$(dirname "$R")/rcb_results}"; LABEL="${LABEL:-$AGENT + $MODEL ($EFFORT)}"
 LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
 GPU_SCHED="${GPU_SCHED:-1}"; GPU_SHARE="${GPU_SHARE:-4}"; SLOTS_DIR="${SLOTS_DIR:-/tmp/roboarc-slots-$(id -u)}"
+PHASE_SPLIT="${PHASE_SPLIT:-1}"; GPU_RESIDENT="${GPU_RESIDENT:-}"
 DEFORMABLE_FAMILIES="${DEFORMABLE_FAMILIES:-}"   # empty: scripts/task_resources.toml's own_gpu classes (gpu_slots.py)
 RESERVE_CPU_SCALE="${RESERVE_CPU_SCALE:-1}"; RESERVE_MEM_SCALE="${RESERVE_MEM_SCALE:-1}"; MEM_HEADROOM_GB="${MEM_HEADROOM_GB:-}"
 if [ -z "${GPUS:-}" ]; then
@@ -150,6 +162,9 @@ fi
 case "$GPU_SCHED" in 0|1) ;; *) echo "GPU_SCHED must be 0 or 1" >&2; exit 2 ;; esac
 [[ "$GPUS" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "GPUS must be GPU indices, comma-separated (e.g. 0,1,2)" >&2; exit 2; }
 [[ "$GPU_SHARE" =~ ^[1-9][0-9]*$ ]] || { echo "GPU_SHARE must be a positive integer (rigid-task trials per GPU)" >&2; exit 2; }
+GPU_RESIDENT="${GPU_RESIDENT:-$((2 * GPU_SHARE))}"
+[[ "$GPU_RESIDENT" =~ ^[1-9][0-9]*$ ]] || { echo "GPU_RESIDENT must be a positive integer (trials per GPU, reasoning and validating)" >&2; exit 2; }
+case "$PHASE_SPLIT" in 0|1) ;; *) echo "PHASE_SPLIT must be 0 or 1" >&2; exit 2 ;; esac
 for v in RESERVE_CPU_SCALE RESERVE_MEM_SCALE; do
   [[ "${!v}" =~ ^[0-9]*\.?[0-9]+$ ]] && [[ "${!v}" =~ [1-9] ]] || { echo "$v must be a positive number" >&2; exit 2; }
 done
@@ -221,6 +236,17 @@ if [ "$GPU_SCHED" = 1 ]; then
   sched="GPUs $GPUS ($GPU_SHARE rigid-task trials per GPU, a deformable-task trial alone, deformable: ${DEFORMABLE_FAMILIES:-the own_gpu classes of scripts/task_resources.toml}; CPUs and memory as the tasks declare x $RESERVE_CPU_SCALE / x $RESERVE_MEM_SCALE)"
 else
   sched="GPU scheduling off"
+fi
+# PHASE_SPLIT=1 needs the slot ledger, one trial per lane at a time and a Harbor that loads job plugins
+if [ "$PHASE_SPLIT" = 1 ]; then
+  if [ "$GPU_SCHED" != 1 ] || [ "$SEQ" != 1 ]; then
+    PHASE_SPLIT=0; sched="$sched, validation in the lane (PHASE_SPLIT needs GPU_SCHED=1 and SEQ=1)"
+  elif ! harbor run --help 2>/dev/null | grep -q -- '--plugin'; then
+    PHASE_SPLIT=0; sched="$sched, validation in the lane (this harbor has no --plugin for the agent-end marker)"
+  else
+    export PYTHONPATH="$H/plugins${PYTHONPATH:+:$PYTHONPATH}"
+    sched="$sched, validation in the background beside the next trial (up to $GPU_RESIDENT trials per GPU)"
+  fi
 fi
 log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}, $sched"
 # the machine, as MANIFEST.md writes it (host:, GPUs:, software:), and as JSON for every job's host.json
@@ -418,8 +444,11 @@ finish_job() {  # <job>: the usage record; the raw logs compacted; no key in any
   [ -n "$RESULTS" ] && python3 "$H/write_task_results.py" "$JOBS" "$1" "$RUN_ID" "$LABEL" --out "$RESULTS/$batch" 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
 }
 
-summary() {  # one table per comparable configuration over every job of this batch, rewritten after each job (atomically: lanes share it)
-  python3 - "$JOBS" "$batch" "$R" > "$JOBS/$batch.summary.md.$$" <<'PY'
+summary() {  # one table per comparable configuration over every job of this batch, rewritten after each job (atomically:
+  # lanes and their validating trials share it; $BASHPID, as a lane's background trials share its $$, read before the
+  # redirection: a redirection's words expand in the forked child)
+  local tmp="$JOBS/$batch.summary.md.$BASHPID"
+  python3 - "$JOBS" "$batch" "$R" > "$tmp" <<'PY'
 import json, pathlib, sys, datetime as dt
 from collections import defaultdict
 jobs, batch, R = pathlib.Path(sys.argv[1]), sys.argv[2], pathlib.Path(sys.argv[3])
@@ -508,7 +537,7 @@ for k in sorted(groups, key=lambda k: tuple(map(str, k))):
             print(f"| {task}{' (easy set)' if v[0][3] else ''} | {sum(x[2] == 'success' for x in res)} / {len(res)} | "
                   + ", ".join(f"{x[0]}: s{x[1]} {x[2]}" for x in v) + " |")
 PY
-  mv -f "$JOBS/$batch.summary.md.$$" "$JOBS/$batch.summary.md"
+  mv -f "$tmp" "$JOBS/$batch.summary.md"
 }
 
 stamp_task_dirs() {  # <root>: give every file of the job's task copies a mtime derived from its content (scripts/stamp_mtimes.py)
@@ -590,9 +619,13 @@ task_dirs() {  # <root> <harbor -i args...>: the task directories the -i argumen
   done
 }
 
-run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed the plan gives it in this job)
+run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed the plan gives it in this job): the copy, then Harbor
+  prepare_job "$@" && harbor_job "$@"
+}
+
+JOB_ROOT=""   # the job's own copy of its tasks (prepare_job)
+prepare_job() {  # <job> <concurrency> <harbor -i args...>: JOB_ROOT = the job's copy, ready for Harbor; 1 = not started
   local job="$1" n="$2"; shift 2
-  local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
   local root="$R" f dirs=()
   mapfile -t dirs < <(task_dirs "$R" "$@")
   # every job runs from its own copy of the task ($JOBS/.tasks/<job>/, removed afterwards), stamped; PROTOCOL §2.10:
@@ -621,8 +654,17 @@ run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed 
   fi
   stamp_task_dirs "$root" || { log "FAILED $job: could not stamp its task copy (scripts/stamp_mtimes.py, $root); not started"; rm -rf "$root"; return 1; }
   seed_record "$job" || { log "FAILED $job: could not write its seed record ($JOBS/.seeds/$job.json); not started"; rm -rf "$root"; return 1; }
+  rm -f "$JOBS/.phase/$job.json" "$JOBS/.phase/$job.handed"     # an earlier attempt's agent-end records (PHASE_SPLIT)
   log "start $job: $* (concurrency $n; trial $(awk -F'\t' -v j="$job" -v K="$K" '$1 == j { print $4 " of " K; exit }' "$PLAN"), seeds $(awk -F'\t' -v j="$job" '$1 == j { printf "%s%s=%s", s, $2, $5; s = " " }' "$PLAN")${JOB_SLOT:+; ${JOB_GPU:+GPU $JOB_GPU, }reserved $(awk '{ print $2 " CPUs, " $3 " GB" }' <<< "$JOB_SLOT")})"
-  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
+  JOB_ROOT="$root"
+}
+
+harbor_job() {  # <job> <concurrency> <harbor -i args...>: Harbor runs the job from its copy (JOB_ROOT), which is removed
+  # afterwards; the job's seed, machine and placement records. PHASE_SPLIT=1: the agent-end marker plugin
+  local job="$1" n="$2" root="$JOB_ROOT"; shift 2
+  local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
+  local phase=(); [ "$PHASE_SPLIT" = 1 ] && phase=(--plugin phase_marker:PhaseMarker --pk "out=$JOBS/.phase/$job.json" --pk "job=$job")
+  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${phase[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
   log "done $job (harbor rc=$?)"
   [ -d "$JOBS/$job" ] && cp "$JOBS/.seeds/$job.json" "$JOBS/$job/seed.json"
   [ -d "$JOBS/$job" ] && [ -n "$HOST_INFO" ] && printf '%s\n' "$HOST_INFO" > "$JOBS/$job/host.json"
@@ -631,38 +673,78 @@ run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed 
   return 0
 }
 
-placement() {  # <job>: <job>/placement.json, the GPU and the reservation the trial ran with (GPU_SCHED=1)
+agent_phase_end() {  # <job> <pid of its background run>: 0 = its agent phase has ended and it validates (the marker of
+  # phase_marker.py, PHASE_SPLIT=1); 1 = the run has ended without a marker (PHASE_SPLIT=0: waited for). A run whose
+  # marker exists waits for the lane's hand-over (run_in_background), so the lane always sees that marker
+  [ "$PHASE_SPLIT" = 1 ] || { wait "$2"; return 1; }
+  while kill -0 "$2" 2>/dev/null; do
+    [ -s "$JOBS/.phase/$1.json" ] && return 0
+    sleep 2
+  done
+  wait "$2"; return 1
+}
+
+run_in_background() {  # <job> <harbor -i args...>: Harbor runs the job, then its records, results and summary, and its
+  # slot released. The usage gateway serves the agent phase only: when the job's agent phase ended with a marker, the
+  # lane checked the gateway then (gateway_after) and hands the job over (<job>.handed, after `gpu_slots.py phase`);
+  # the results wait for that (at most 120 s: a lane killed meanwhile), else the gateway is checked here, as before
+  local job="$1" i; shift
+  harbor_job "$job" 1 "$@"
+  if [ -s "$JOBS/.phase/$job.json" ]; then
+    for i in $(seq 60); do [ -e "$JOBS/.phase/$job.handed" ] && break; sleep 2; done
+  else
+    gateway_after "$job"
+  fi
+  finish_job "$job"; summary
+  release_slot "$job"
+}
+
+placement() {  # <job>: <job>/placement.json, the GPU and the reservation the trial ran with (GPU_SCHED=1), and what it
+  # kept while it validated (PHASE_SPLIT=1)
   local units cpus mem fam
   read -r units cpus mem fam <<< "$JOB_SLOT"
-  printf '{"gpu": %s, "units": %s, "gpu_share": %s, "cpus": %s, "memory_gb": %s, "family": "%s", "gpus": "%s", "host_cpus": %s}\n' \
-    "$([ -n "$JOB_GPU" ] && echo "\"$JOB_GPU\"" || echo null)" "$units" "$GPU_SHARE" "$cpus" "$mem" "$fam" "$GPUS" "$HOST_CPUS" > "$JOBS/$1/placement.json"
+  printf '{"gpu": %s, "units": %s, "gpu_share": %s, "cpus": %s, "memory_gb": %s, "family": "%s", "gpus": "%s", "host_cpus": %s, "phase_split": %s, "gpu_resident": %s, "validate_cpus": %s, "validate_memory_gb": %s}\n' \
+    "$([ -n "$JOB_GPU" ] && echo "\"$JOB_GPU\"" || echo null)" "$units" "$GPU_SHARE" "$cpus" "$mem" "$fam" "$GPUS" "$HOST_CPUS" \
+    "$([ "$PHASE_SPLIT" = 1 ] && echo true || echo false)" "$GPU_RESIDENT" "${JOB_VALIDATE% *}" "${JOB_VALIDATE#* }" > "$JOBS/$1/placement.json"
 }
 
 JOB_GPU=""; JOB_SLOT=""   # the job's GPU ("" = none or GPU_SCHED=0) and "<units> <cpus> <memory GB> <family>" (GPU_SCHED=1)
+JOB_VALIDATE=""           # "<cpus> <memory GB>" the job keeps while it validates (GPU_SCHED=1)
 SLOT_WHY="$JOBS/.slots.why.$$"
 declare -A SLOT_CLASS=()  # task -> "<units> <cpus> <memory GB> <family>" (gpu_slots.py classify, once per task and lane)
-slot_class() {  # <task>: SLOT_CLASS[<task>] filled; 2 = the task could not be classified (why in $SLOT_WHY)
+declare -A VALIDATE_NEED=()   # task -> "<cpus> <memory GB>" while it validates (gpu_slots.py classify --phase validate)
+slot_class() {  # <task>: SLOT_CLASS[<task>] and VALIDATE_NEED[<task>] filled; 2 = the task could not be classified (why in $SLOT_WHY)
   [ -n "${SLOT_CLASS[$1]:-}" ] && return 0
-  local c
+  local c v
   c="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" ${DEFORMABLE_FAMILIES:+--deformable "$DEFORMABLE_FAMILIES"} \
         --share "$GPU_SHARE" --cpu-scale "$RESERVE_CPU_SCALE" --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
-  SLOT_CLASS[$1]="$c"
+  v="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" --phase validate --cpu-scale "$RESERVE_CPU_SCALE" \
+        --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
+  SLOT_CLASS[$1]="$c"; VALIDATE_NEED[$1]="$v"
 }
-acquire_slot() {  # <job> <task>: JOB_SLOT and JOB_GPU from the host's ledger (call it directly, not in $(...): it sets
-  # them); 3 = not now, other = error; why in $SLOT_WHY
+acquire_slot() {  # <job> <task>: JOB_SLOT, JOB_VALIDATE and JOB_GPU from the host's ledger (call it directly, not in
+  # $(...): it sets them); 3 = not now, other = error; why in $SLOT_WHY
   local rc units cpus mem fam
-  JOB_GPU=""; JOB_SLOT=""
+  JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
   slot_class "$2" || return 2
   read -r units cpus mem fam <<< "${SLOT_CLASS[$2]}"
   JOB_GPU="$(python3 "$H/gpu_slots.py" acquire --dir "$SLOTS_DIR" --job "$1" --runner-pid $$ --units "$units" --cpus "$cpus" \
-              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --host-cpus "$HOST_CPUS" ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
+              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --resident "$GPU_RESIDENT" --host-cpus "$HOST_CPUS" \
+              ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
   rc=$?
-  [ $rc -eq 0 ] && { JOB_SLOT="${SLOT_CLASS[$2]}"; return 0; }
+  [ $rc -eq 0 ] && { JOB_SLOT="${SLOT_CLASS[$2]}"; JOB_VALIDATE="${VALIDATE_NEED[$2]}"; return 0; }
   JOB_GPU=""; return $rc
+}
+validate_slot() {  # <job> <pid>: the job's agent phase has ended: its hold validates, owned by <pid> (gpu_slots.py phase)
+  python3 "$H/gpu_slots.py" phase --dir "$SLOTS_DIR" --job "$1" --pid "$2" --cpus "${JOB_VALIDATE% *}" \
+    --mem-gb "${JOB_VALIDATE#* }" >/dev/null 2>&1 \
+    && log "$1: agent phase ended; it validates${JOB_GPU:+ on GPU $JOB_GPU} (keeps ${JOB_VALIDATE% *} CPUs, ${JOB_VALIDATE#* } GB) while lane $$ takes the next trial"
+  JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
+  return 0
 }
 release_slot() {  # <job>
   [ "$GPU_SCHED" = 1 ] && python3 "$H/gpu_slots.py" release --dir "$SLOTS_DIR" --job "$1" >/dev/null 2>&1
-  JOB_GPU=""; JOB_SLOT=""
+  JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
   return 0
 }
 
@@ -684,6 +766,7 @@ if [ "$SEQ" = 1 ]; then
   # the next one; a pass that starts nothing while some job waits for room sleeps 30 s; the lane ends when no job is
   # left unclaimed (or it stops on a failure)
   pass=0; stop=0; said=""; said_at=0
+  validating=()   # this lane's trials that validate in the background (PHASE_SPLIT=1)
   while [ "$stop" = 0 ]; do
     pass=$((pass + 1)); started=0; waiting=0; first_why=""
     declare -A nofit=()   # this pass: the needs ("<units> <cpus> <memory GB>") the host had no room for; later jobs with
@@ -708,9 +791,16 @@ if [ "$SEQ" = 1 ]; then
         fi
       fi
       started=$((started + 1))
-      run_job "$job" 1 -i "$task" || { release_slot "$job"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
-      gateway_after "$job"; finish_job "$job"; summary
-      release_slot "$job"
+      prepare_job "$job" 1 -i "$task" || { release_slot "$job"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
+      # the trial runs in the background; the lane goes on when its agent phase has ended (PHASE_SPLIT=1: it validates
+      # beside the next trial, its slot a validating one) or when it has ended
+      run_in_background "$job" -i "$task" &
+      run_pid=$!
+      if agent_phase_end "$job" "$run_pid"; then
+        gateway_after "$job"; validate_slot "$job" "$run_pid"; : > "$JOBS/.phase/$job.handed"
+        validating+=("$run_pid")
+      fi
+      JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
       # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
       # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
       why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
@@ -732,6 +822,9 @@ if [ "$SEQ" = 1 ]; then
       sleep 30
     fi
   done
+  left=0; for p in "${validating[@]}"; do kill -0 "$p" 2>/dev/null && left=$((left + 1)); done
+  [ "$left" -gt 0 ] && log "lane $$: no trial left to start; waiting for $left trial(s) of this lane to finish validating"
+  [ ${#validating[@]} -gt 0 ] && wait "${validating[@]}"
   rm -f "$SLOT_WHY"
 else
   pids=()

@@ -124,7 +124,7 @@ header of the script lists every variable; the main ones:
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
 | usage recording | `USAGE_GATEWAY=<dir>`: route the agent's model-API calls through the usage gateway installed in `<dir>` (the repository's: `USAGE_GATEWAY=scripts/usage_gateway`; "Usage recording" below). Empty (default) = off |
-| GPUs | `GPU_SCHED=1` (default): each trial placed on one GPU and admitted by CPUs and memory; `GPUS` (default every GPU), `GPU_SHARE` (4), `DEFORMABLE_FAMILIES`, `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1), `MEM_HEADROOM_GB`, `SLOTS_DIR` ("GPUs and lanes" below); `GPU_SCHED=0`: every container on GPU 0 |
+| GPUs | `GPU_SCHED=1` (default): each trial placed on one GPU and admitted by CPUs and memory; `GPUS` (default every GPU), `GPU_SHARE` (4), `DEFORMABLE_FAMILIES`, `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1), `MEM_HEADROOM_GB`, `SLOTS_DIR` ("GPUs and lanes" below); `GPU_SCHED=0`: every container on GPU 0. `PHASE_SPLIT=1` (default): a trial validates in the background while its lane starts the next one; `GPU_RESIDENT` (2 × `GPU_SHARE`) |
 | optional host tools | `LOG_MIRROR=1`: an append-only mirror of every trial's `agent/` record in a root-owned container (`rcb-log-mirror`, `scripts/harbor/log_mirror.py`), so neither the agent nor the host user can delete it. `MEM_GUARD=1`: `scripts/harbor/mem_guard.py` keeps 2 GiB of host memory available by killing the largest running RoboARC trial container (names `roboarc-*` only). Both are off by default |
 
 ### GPUs and lanes
@@ -157,15 +157,32 @@ ledger that every lane and batch of the host shares (`scripts/harbor/gpu_slots.p
   `scripts/harbor/pin_gpu.py`: main or sim, rcb_monitor and the verifier all see the same one GPU), and
   `<job>/placement.json` records the GPU and the reservation (each result's config.json has it as `gpu`). A job's slot
   is released when the job ends, a runner's when it exits, and a killed runner's at the next placement by any lane.
+- **Agent phase and validation.** A trial has two phases: the agent's (it works against the task's limit) and its
+  validation, which Harbor runs after the agent: the replay, the replay video and the grading (privileged: the verifier
+  container replays twice; standard: the sim sidecar replays once, in its collect hook, then a short verifier). With
+  `PHASE_SPLIT=1` (the default; it needs `GPU_SCHED=1`, `SEQ=1` and a Harbor with job plugins) the runner passes Harbor
+  the job plugin `scripts/harbor/plugins/phase_marker.py`, which writes `$JOBS/.phase/<job>.json` when the agent
+  phase ends. The lane then checks the usage gateway and the model account as it did after a job, and takes the next
+  trial at once while the first validates in the background; it ends when all its trials have validated. A validating
+  trial stays on its GPU (a standard trial's replay runs in its sim container, which cannot move): it frees its GPU
+  unit for another trial's agent phase and keeps only its task's verifier CPUs and memory (`verifier_min_cpus` /
+  `verifier_min_memory_gb`, times the scales: 2 CPUs and 5 GB for a puzzle privileged, 2 and 6 standard). It still
+  counts toward its GPU's trials: a GPU holds at most `GPU_RESIDENT` (2 × `GPU_SHARE`, 8) trials in either phase, and
+  a deformable trial's agent phase needs a GPU on which no other trial reasons or validates. The validation uses the
+  GPU too: the Nyx renderer draws the replay video (MuJoCo's physics runs on the CPU), and cloth tasks step the cloth
+  on CUDA. `<job>/placement.json` records the mode (`phase_split`, `gpu_resident`, `validate_cpus`,
+  `validate_memory_gb`). `PHASE_SPLIT=0` keeps a lane on its trial until the trial's results are written, as runners
+  before this option did; a Harbor without `--plugin` runs that way too, and the batch log says so.
 - Start up to `GPU_SHARE` × GPUs lanes (32 on 8 GPUs); lanes beyond what fits only wait. `GPUS=0,1` limits the runner
   to some GPUs, for example on a host shared with other work, where `MEM_GUARD=1` helps too: the ledger counts only
   the trials placed through it. `GPU_SCHED=0` turns placement off (every container on GPU 0, no admission), as runners
   before this option did; `SEQ=0` does not place trials.
 
-After each job the runner scans the job for keys and redacts them (`scripts/harbor/scan_secrets.py`), writes the
-per-task results (`scripts/harbor/write_task_results.py`), rewrites `$JOBS/<batch>.summary.md` (one table per
-comparable configuration), and stops its lane when a trial shows a model-account failure
-(`scripts/harbor/account_failure_check.py`: out of credits, rate-limited, logged out). Progress is in
+After each job (with `PHASE_SPLIT=1`, in the background once it has validated) the runner scans the job for keys and
+redacts them (`scripts/harbor/scan_secrets.py`), writes the per-task results (`scripts/harbor/write_task_results.py`)
+and rewrites `$JOBS/<batch>.summary.md` (one table per comparable configuration). Before the lane takes its next trial
+(after the job, or with `PHASE_SPLIT=1` when its agent phase has ended) it stops when the trial shows a model-account
+failure (`scripts/harbor/account_failure_check.py`: out of credits, rate-limited, logged out). Progress is in
 `$JOBS/<batch>.log`. Use one key per batch with a spending cap.
 
 To watch a batch: `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1 with every trial's

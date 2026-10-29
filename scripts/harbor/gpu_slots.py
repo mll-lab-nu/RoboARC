@@ -5,9 +5,13 @@ every lane and every batch that use the same SLOTS_DIR.
 
     gpu_slots.py classify <task dir> [--deformable "<family> ..."] [--share 4] [--cpu-scale 1] [--mem-scale 1]
         -> "<units> <cpus> <memory GB> <family>"; exit 1: the task's family has no class (why on stderr)
+    gpu_slots.py classify <task dir> --phase validate [--cpu-scale 1] [--mem-scale 1]
+        -> "<cpus> <memory GB>": what the trial keeps while it validates (the verifier's declared minimums)
     gpu_slots.py acquire --dir D --job J --runner-pid P --units U --cpus C --mem-gb M --gpus 0,1 [--share 4]
-                         [--host-cpus N] [--host-mem-gb G] [--headroom-gb H]
+                         [--resident R] [--host-cpus N] [--host-mem-gb G] [--headroom-gb H]
         -> the GPU index on stdout ("" for a trial without a GPU), exit 0; exit 3: it does not fit now (why on stderr)
+    gpu_slots.py phase --dir D --job J --pid P --cpus C --mem-gb M
+        -> the job's agent phase has ended: its hold becomes a validating one (below); exit 1: no hold for J
     gpu_slots.py release --dir D (--job J | --runner-pid P)
     gpu_slots.py status --dir D
 
@@ -20,8 +24,16 @@ reserves the most CPUs and memory its task declares for the agent's or the verif
 min_cpus / verifier_min_cpus, min_memory_gb / verifier_min_memory_gb). A trial starts when
   - the reserved CPUs plus its own are at most the host's (--host-cpus, default the CPUs this process may use),
   - the reserved memory plus its own is at most the host's total less a headroom (default the larger of 4 GB and 10 %),
-  - and a GPU has the units free: a 1-unit trial goes to the fullest GPU that still has a unit (packing, so that whole
-    GPUs stay free for deformable trials), never to a GPU being drained; a deformable trial to an empty GPU.
+  - and a GPU has the units free: a 1-unit trial goes to the fullest GPU that still has a unit and holds fewer than
+    RESIDENT trials (--resident, default twice SHARE) (packing, so that whole GPUs stay free for deformable trials),
+    never to a GPU being drained; a deformable trial to an empty GPU.
+Two phases. A trial reasons (its agent phase: its units are in use), then validates (the replay, video and grading that
+Harbor runs after the agent). When its agent phase ends, `phase` turns its hold into a validating one: it stays on its
+GPU (a standard trial replays in its sim container, which cannot move), its units are free for another trial's
+reasoning, it keeps the verifier's CPUs and memory only (never more than it held), and it belongs to the process that
+waits for its validation (--pid), so the lane may end or take the next trial. A validating trial still counts toward
+its GPU's RESIDENT trials, and a GPU on which one validates is not empty: a deformable trial reasons alone on its GPU,
+with no other trial reasoning or validating there. The change never needs room, so it always succeeds.
 When nothing else is held the CPU and memory checks are skipped: a task larger than the host must not wait forever. A
 deformable trial that does not fit is recorded as waiting. While deformable trials wait, the empty GPUs are kept for
 them (no 1-unit trial goes there), and for each waiting trial beyond the empty GPUs a busy GPU is drained: the one with
@@ -114,6 +126,20 @@ def classify(task: Path, deformable: set[str] | None, share: int, cpu_scale: flo
     return units, round(cpus, 3), round(mem, 3), family or "-"
 
 
+def validate_needs(task: Path, cpu_scale: float = 1.0, mem_scale: float = 1.0):
+    """-> (cpus, memory GB) a trial of the task keeps while it validates: [metadata.resources] verifier_min_cpus and
+    verifier_min_memory_gb (0 when not declared)."""
+    res = toml_section((task / "task.toml").read_text(), "metadata.resources")
+
+    def num(key: str) -> float:
+        try:
+            return float(toml_value(res, key) or 0)
+        except ValueError:
+            return 0.0
+
+    return round(num("verifier_min_cpus") * cpu_scale, 3), round(num("verifier_min_memory_gb") * mem_scale, 3)
+
+
 # ---------- the ledger ----------
 
 def proc_start(pid: int) -> str | None:
@@ -183,6 +209,7 @@ class Ledger:
 
 
 def used_units(holds: dict, gpus: list[str]) -> dict[str, int]:
+    """The units in use per GPU: the reasoning trials' (a validating hold has none)."""
     u = {g: 0 for g in gpus}
     for r in holds.values():
         if r.get("gpu") is not None:
@@ -190,23 +217,35 @@ def used_units(holds: dict, gpus: list[str]) -> dict[str, int]:
     return u
 
 
+def residents(holds: dict, gpus: list[str]) -> dict[str, int]:
+    """The trials on each GPU, reasoning or validating."""
+    n = {g: 0 for g in gpus}
+    for r in holds.values():
+        if r.get("gpu") is not None:
+            n[r["gpu"]] = n.get(r["gpu"], 0) + 1
+    return n
+
+
 def decide(state: dict, job: str, units: int, cpus: float, mem: float, gpus: list[str], share: int,
-           cap_cpus: float, cap_mem: float):
-    """-> (gpu or None, None) if the trial fits now, else (None, why). Updates state["draining"] (pure otherwise)."""
+           cap_cpus: float, cap_mem: float, resident: int | None = None):
+    """-> (gpu or None, None) if the trial fits now, else (None, why). Updates state["draining"] (pure otherwise).
+    resident: the most trials a GPU holds in either phase (default twice share)."""
     holds, waiting = state["holds"], state["waiting"]
-    use = used_units(holds, gpus)
-    empty = sorted((g for g in gpus if use[g] == 0), key=int)
+    resident = resident or 2 * share
+    use, res = used_units(holds, gpus), residents(holds, gpus)
+    empty = sorted((g for g in gpus if res[g] == 0), key=int)
     # deformable trials waiting for a GPU of their own (this one included, if it is one): the empty GPUs are kept for
-    # them, and for each one beyond those a busy GPU is drained (no new 1-unit trial), the one with the fewest units in use
+    # them, and for each one beyond those a busy GPU is drained (no new 1-unit trial), the one with the fewest units in
+    # use (then the fewest trials)
     waits = set(waiting) | ({job} if units >= share else set())
     reserved = empty[:len(waits)]
     need = max(0, len(waits) - len(empty))
-    drains = [g for g in state.get("draining", []) if g in gpus and use[g] > 0][:need]
+    drains = [g for g in state.get("draining", []) if g in gpus and res[g] > 0][:need]
     while len(drains) < need:
-        rest = [g for g in gpus if use[g] > 0 and g not in drains]
+        rest = [g for g in gpus if res[g] > 0 and g not in drains]
         if not rest:
             break
-        drains.append(min(rest, key=lambda g: (use[g], int(g))))
+        drains.append(min(rest, key=lambda g: (use[g], res[g], int(g))))
     state["draining"] = drains
 
     others = [r for j, r in holds.items() if j != job]
@@ -219,20 +258,23 @@ def decide(state: dict, job: str, units: int, cpus: float, mem: float, gpus: lis
             return None, f"memory: needs {mem:g} GB, {r_mem:.1f} of {cap_mem:.1f} GB reserved"
     if units == 0:
         return None, None
+    val = {g: sum(1 for r in holds.values() if r.get("gpu") == g and r.get("phase") == "validate") for g in gpus}
     if units >= share:
         if not empty:
-            return None, "GPU: needs a GPU of its own, none is empty (" + gpu_line(use, share, drains) + ")"
+            return None, "GPU: needs a GPU of its own, none is empty (" + gpu_line(use, share, drains, val) + ")"
         return empty[0], None
-    fits = [g for g in gpus if use[g] + units <= share and g not in drains and g not in reserved]
+    fits = [g for g in gpus if use[g] + units <= share and res[g] < resident and g not in drains and g not in reserved]
     if not fits:
         kept = f"; kept for {len(waits)} waiting deformable trial(s)" if waits else ""
-        return None, f"GPU: needs {units} of {share} units, no GPU has them (" + gpu_line(use, share, drains) + kept + ")"
-    gpu = min(fits, key=lambda g: (-use[g], int(g)))   # the fullest that still fits: packing
+        return None, (f"GPU: needs {units} of {share} units on a GPU with fewer than {resident} trials, no GPU has them ("
+                      + gpu_line(use, share, drains, val) + kept + ")")
+    gpu = min(fits, key=lambda g: (-use[g], -res[g], int(g)))   # the fullest that still fits: packing
     return gpu, None
 
 
-def gpu_line(use: dict, share: int, drains: list) -> str:
-    return ", ".join(f"GPU {g}: {u}/{share}{' draining' if g in drains else ''}" for g, u in use.items())
+def gpu_line(use: dict, share: int, drains: list, val: dict) -> str:
+    return ", ".join(f"GPU {g}: {u}/{share}" + (f", {val[g]} validating" if val.get(g) else "")
+                     + (" draining" if g in drains else "") for g, u in use.items())
 
 
 def cmd_acquire(a) -> int:
@@ -250,7 +292,8 @@ def cmd_acquire(a) -> int:
         sys.exit(f"--runner-pid {a.runner_pid}: no such process")
     with Ledger(a.dir) as L:
         L.prune(now)
-        gpu, why = decide(L.state, a.job, a.units, a.cpus, a.mem_gb, gpus, a.share, cap_cpus, total - headroom)
+        gpu, why = decide(L.state, a.job, a.units, a.cpus, a.mem_gb, gpus, a.share, cap_cpus, total - headroom,
+                          a.resident)
         if why:
             if a.units >= a.share:
                 L.state["waiting"][a.job] = {"pid": a.runner_pid, "start": start, "t": now}
@@ -258,10 +301,33 @@ def cmd_acquire(a) -> int:
             print(why, file=sys.stderr)
             return 3
         L.state["holds"][a.job] = {"pid": a.runner_pid, "start": start, "gpu": gpu, "units": a.units, "cpus": a.cpus,
-                                   "mem_gb": a.mem_gb, "since": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+                                   "mem_gb": a.mem_gb, "phase": "reason", "since": utc_now()}
         L.state["waiting"].pop(a.job, None)
         L.save()
     print(gpu if gpu is not None else "")
+    return 0
+
+
+def utc_now() -> str:
+    return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def cmd_phase(a) -> int:
+    """The job's agent phase has ended: its hold validates on the same GPU, with no units, the smaller of what it held
+    and the given CPUs and memory, owned by --pid."""
+    start = proc_start(a.pid)
+    if start is None:
+        sys.exit(f"--pid {a.pid}: no such process")
+    with Ledger(a.dir) as L:
+        L.prune(time.time())
+        h = L.state["holds"].get(a.job)
+        if h is None:
+            L.save()
+            print(f"no hold for {a.job}", file=sys.stderr)
+            return 1
+        h.update(phase="validate", units=0, pid=a.pid, start=start, validating_since=utc_now(),
+                 cpus=min(float(h.get("cpus", 0)), a.cpus), mem_gb=min(float(h.get("mem_gb", 0)), a.mem_gb))
+        L.save()
     return 0
 
 
@@ -285,8 +351,10 @@ def cmd_status(a) -> int:
         L.save()
         s = L.state
     for job, r in sorted(s["holds"].items(), key=lambda x: (str(x[1].get("gpu")), x[0])):
-        print(f"held   {job}: GPU {r.get('gpu') if r.get('gpu') is not None else '-'}, {r.get('units')} unit(s), "
-              f"{r.get('cpus')} CPUs, {r.get('mem_gb')} GB, since {r.get('since')} (runner {r.get('pid')})")
+        what = (f"validating since {r.get('validating_since')}" if r.get("phase") == "validate"
+                else f"{r.get('units')} unit(s)")
+        print(f"held   {job}: GPU {r.get('gpu') if r.get('gpu') is not None else '-'}, {what}, "
+              f"{r.get('cpus')} CPUs, {r.get('mem_gb')} GB, since {r.get('since')} (process {r.get('pid')})")
     for job, r in sorted(s["waiting"].items()):
         print(f"waits  {job} (deformable, runner {r.get('pid')})")
     if s["draining"]:
@@ -303,6 +371,7 @@ def main(argv=None) -> int:
     c.add_argument("--share", type=int, default=4)
     c.add_argument("--cpu-scale", type=float, default=1.0)
     c.add_argument("--mem-scale", type=float, default=1.0)
+    c.add_argument("--phase", choices=("reason", "validate"), default="reason")
     q = sub.add_parser("acquire")
     q.add_argument("--dir", required=True)
     q.add_argument("--job", required=True)
@@ -312,9 +381,16 @@ def main(argv=None) -> int:
     q.add_argument("--mem-gb", type=float, required=True)
     q.add_argument("--gpus", default="")
     q.add_argument("--share", type=int, default=4)
+    q.add_argument("--resident", type=int, default=0)   # 0: twice --share
     q.add_argument("--host-cpus", type=float, default=0)
     q.add_argument("--host-mem-gb", type=float, default=0)
     q.add_argument("--headroom-gb", type=float, default=None)
+    p = sub.add_parser("phase")
+    p.add_argument("--dir", required=True)
+    p.add_argument("--job", required=True)
+    p.add_argument("--pid", type=int, required=True)
+    p.add_argument("--cpus", type=float, required=True)
+    p.add_argument("--mem-gb", type=float, required=True)
     r = sub.add_parser("release")
     r.add_argument("--dir", required=True)
     g = r.add_mutually_exclusive_group(required=True)
@@ -329,6 +405,10 @@ def main(argv=None) -> int:
             sys.exit(f"{a.task}: not a task directory (no task.toml)")
         if a.share < 1 or a.cpu_scale <= 0 or a.mem_scale <= 0:
             sys.exit("--share must be at least 1 and the scales positive")
+        if a.phase == "validate":
+            cpus, mem = validate_needs(t, a.cpu_scale, a.mem_scale)
+            print(f"{cpus:g} {mem:g}")
+            return 0
         try:
             units, cpus, mem, fam = classify(t, None if a.deformable is None else set(a.deformable.split()), a.share,
                                              a.cpu_scale, a.mem_scale)
@@ -339,7 +419,11 @@ def main(argv=None) -> int:
     if a.cmd == "acquire":
         if a.share < 1 or a.units < 0 or a.units > a.share:
             sys.exit("--units must be between 0 and --share")
+        if a.resident < 0:
+            sys.exit("--resident must be 0 (twice --share) or more")
         return cmd_acquire(a)
+    if a.cmd == "phase":
+        return cmd_phase(a)
     return cmd_release(a) if a.cmd == "release" else cmd_status(a)
 
 

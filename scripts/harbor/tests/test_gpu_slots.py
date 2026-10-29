@@ -9,9 +9,12 @@
 - CPUs and memory: a trial starts only when the reserved CPUs and memory plus its own fit the host; with nothing else
   held it always starts;
 - the slots of a runner that has ended are dropped, and release frees a job's or a runner's slots;
+- a trial whose agent phase ended validates on its GPU (`phase`): it frees its reasoning unit and keeps the verifier's
+  CPUs and memory only, its hold passes to the process that waits for its validation, a GPU holds at most --resident
+  trials in either phase, and a deformable trial still needs a GPU on which no trial reasons or validates;
 - classify reads a task's family, its declared minimums and whether its compose files reserve a GPU; a GPU of its own
   for the families of scripts/task_resources.toml's own_gpu classes (or of --deformable), and no classification for a
-  RoboARC task whose family is in no class.
+  RoboARC task whose family is in no class; with --phase validate the verifier's CPUs and memory.
 """
 import json
 import pathlib
@@ -43,18 +46,25 @@ class Slots(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def acquire(self, job, units, cpus=1, mem=1, gpus="0,1", host_cpus=64, host_mem=256, pid=ME, headroom=None):
+    def acquire(self, job, units, cpus=1, mem=1, gpus="0,1", host_cpus=64, host_mem=256, pid=ME, headroom=None,
+                resident=None):
         args = [sys.executable, str(TOOL), "acquire", "--dir", self.dir, "--job", job, "--runner-pid", str(pid),
                 "--units", str(units), "--cpus", str(cpus), "--mem-gb", str(mem), "--gpus", gpus, "--share", "4",
                 "--host-cpus", str(host_cpus), "--host-mem-gb", str(host_mem)]
         if headroom is not None:
             args += ["--headroom-gb", str(headroom)]
+        if resident is not None:
+            args += ["--resident", str(resident)]
         p = subprocess.run(args, capture_output=True, text=True)
         self.assertIn(p.returncode, (0, 3), p.stderr)
         return (p.stdout.strip() if p.returncode == 0 else None), p.stderr.strip()
 
     def release(self, job):
         subprocess.run([sys.executable, str(TOOL), "release", "--dir", self.dir, "--job", job], check=True)
+
+    def phase(self, job, pid=ME, cpus=1, mem=1):
+        return subprocess.run([sys.executable, str(TOOL), "phase", "--dir", self.dir, "--job", job, "--pid", str(pid),
+                               "--cpus", str(cpus), "--mem-gb", str(mem)], capture_output=True, text=True)
 
     def state(self):
         return json.loads((pathlib.Path(self.dir) / "state.json").read_text())
@@ -148,6 +158,85 @@ class Slots(unittest.TestCase):
         (pathlib.Path(self.dir) / "state.json").write_text(json.dumps(st))
         self.assertEqual(self.acquire("r2", 1, gpus="0")[0], "0")  # no longer drained
 
+    def test_validation_frees_the_reasoning_unit(self):
+        for i in range(4):
+            self.assertEqual(self.acquire(f"r{i}", 1, gpus="0")[0], "0")
+        self.assertIsNone(self.acquire("r4", 1, gpus="0")[0])          # four trials reason on GPU 0
+        self.assertEqual(self.phase("r0").returncode, 0)                # r0's agent phase ended: it validates there
+        h = self.state()["holds"]["r0"]
+        self.assertEqual((h["gpu"], h["units"], h["phase"]), ("0", 0, "validate"))
+        self.assertEqual(self.acquire("r4", 1, gpus="0")[0], "0")       # its reasoning unit is free
+
+    def test_resident_cap(self):
+        for i in range(4):
+            self.acquire(f"r{i}", 1, gpus="0", resident=5)
+        self.phase("r0")
+        self.assertEqual(self.acquire("r4", 1, gpus="0", resident=5)[0], "0")   # 4 reasoning + 1 validating
+        self.phase("r1")
+        gpu, why = self.acquire("r5", 1, gpus="0", resident=5)        # a unit is free, but 5 trials are on GPU 0
+        self.assertIsNone(gpu)
+        self.assertIn("validating", why)
+        for i in range(2, 5):                                           # the default: twice the share (8)
+            self.phase(f"r{i}")
+        got = [self.acquire(f"s{i}", 1, gpus="0")[0] for i in range(4)]
+        self.assertEqual(got[:3], ["0"] * 3)                            # 5 validating + 3 reasoning
+        self.assertIsNone(got[3])
+
+    def test_deformable_needs_a_gpu_without_validation(self):
+        self.acquire("r0", 1)                                           # GPU 0
+        self.phase("r0")                                                # validates on GPU 0
+        self.assertEqual(self.acquire("d0", 4)[0], "1")                 # not GPU 0, where r0 validates
+        self.phase("d0")
+        gpu, why = self.acquire("d1", 4)                                # d0 validates on GPU 1: no GPU is empty
+        self.assertIsNone(gpu)
+        self.assertIn("none is empty", why)
+        self.release("r0")
+        self.assertEqual(self.acquire("d1", 4)[0], "0")
+
+    def test_rigid_reasoning_beside_a_validating_deformable(self):
+        self.assertEqual(self.acquire("d0", 4, gpus="0")[0], "0")
+        self.assertIsNone(self.acquire("r0", 1, gpus="0")[0])           # a deformable trial reasons alone
+        self.release("r0")
+        self.phase("d0")
+        self.assertEqual(self.acquire("r0", 1, gpus="0")[0], "0")       # it validates: rigid trials may reason there
+
+    def test_validation_releases_cpus_and_memory(self):
+        self.acquire("a", 1, cpus=4, mem=7, host_cpus=10)
+        self.acquire("b", 1, cpus=4, mem=7, host_cpus=10)
+        self.assertIsNone(self.acquire("c", 1, cpus=4, mem=7, host_cpus=10)[0])
+        self.phase("a", cpus=2, mem=5)                                  # the verifier's 2 CPUs: 6 of 10 reserved
+        self.assertEqual(self.acquire("c", 1, cpus=4, mem=7, host_cpus=10)[0], "0")
+        self.assertEqual((self.state()["holds"]["a"]["cpus"], self.state()["holds"]["a"]["mem_gb"]), (2, 5))
+
+    def test_validation_hold_belongs_to_its_process(self):
+        p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+        try:
+            self.acquire("a", 1)
+            self.assertEqual(self.phase("a", pid=p.pid).returncode, 0)
+            subprocess.run([sys.executable, str(TOOL), "release", "--dir", self.dir, "--runner-pid", str(ME)], check=True)
+            self.assertIn("a", self.state()["holds"])                   # the lane's own release leaves it
+        finally:
+            p.kill()
+            p.wait()
+        self.acquire("b", 1)                                            # its process ended: dropped
+        self.assertNotIn("a", self.state()["holds"])
+
+    def test_phase_never_grows_and_needs_a_hold(self):
+        self.acquire("a", 1, cpus=2, mem=3)
+        self.assertEqual(self.phase("a", cpus=4, mem=8).returncode, 0)
+        h = self.state()["holds"]["a"]
+        self.assertEqual((h["cpus"], h["mem_gb"]), (2, 3))
+        r = self.phase("nojob")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("no hold", r.stderr)
+
+    def test_ledger_without_phases_reads_as_reasoning(self):
+        st = {"holds": {"old": {"pid": ME, "start": gpu_slots.proc_start(ME), "gpu": "0", "units": 1, "cpus": 1,
+                                "mem_gb": 1}}, "waiting": {}, "draining": []}   # written before phases existed
+        (pathlib.Path(self.dir) / "state.json").write_text(json.dumps(st))
+        got = [self.acquire(f"r{i}", 1, gpus="0")[0] for i in range(4)]
+        self.assertEqual(got, ["0", "0", "0", None])
+
     def test_classify_tasks(self):
         tasks = REPO / "tasks"
         first = lambda pat: next(iter(sorted(tasks.glob(pat))), None)  # noqa: E731
@@ -168,6 +257,17 @@ class Slots(unittest.TestCase):
         self.assertEqual(gpu_slots.classify(rigid, None, 4, 0.5, 0.5)[1:3], (2.0, 3.5))
         self.assertEqual(gpu_slots.classify(rigid, {"cast_coil"}, 4)[0], 4)  # --deformable overrides the classes
         self.assertEqual(gpu_slots.classify(cloth, set(), 4)[0], 1)
+        # the validation phase: the verifier's declared CPUs and memory (scripts/task_resources.toml)
+        std = first("roboarc-cast-coil-*-standard")
+        self.assertEqual(gpu_slots.validate_needs(rigid), (2.0, 5.0))
+        self.assertEqual(gpu_slots.validate_needs(std), (2.0, 6.0))
+        self.assertEqual(gpu_slots.validate_needs(cloth), (2.0, 5.0))
+        self.assertEqual(gpu_slots.validate_needs(ikea_p), (3.0, 3.0))
+        self.assertEqual(gpu_slots.validate_needs(ikea_s), (2.0, 2.0))
+        self.assertEqual(gpu_slots.validate_needs(rigid, 0.5, 2), (1.0, 10.0))
+        r = subprocess.run([sys.executable, str(TOOL), "classify", str(std), "--phase", "validate"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.stdout.strip(), "2 6")
 
     def test_every_family_has_a_class(self):
         classes, required = gpu_slots.family_classes()
