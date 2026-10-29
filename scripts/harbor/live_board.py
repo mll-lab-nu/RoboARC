@@ -7,7 +7,8 @@ every few seconds while the batch runs. A runner-side tool (stdlib only); it onl
     # then open http://localhost:8765
 
 States: pending (in a batch's plan, not started; scripts/harbor/run_agent_batch.sh writes <jobs>/.plan/<batch>.json), setup
-(environment and agent install), running (with the agent's time limit), verifying, then success / failed, or aborted
+(environment and agent install), running (with the agent's time limit), verifying (after the agent: Harbor's result.json
+says so, or the runner's agent-end marker <jobs>/.phase/<job>.json exists, PHASE_SPLIT), then success / failed, or aborted
 (the job ended without finishing the trial). Per trial: tokens (live from the usage gateway's totals.json when it runs,
 else Harbor's count at the end), reward, exception, the replay / live videos, and the tail of the agent's output.
 
@@ -141,7 +142,7 @@ def trial_state(t: pathlib.Path, job: dict, ri: int, root: pathlib.Path, plan_ru
         state = "success" if reward is not None and reward >= 1 and not gw.get("over_token_budget") else "failed"
     elif job.get("finished_at"):
         state = "aborted"
-    elif ver.get("started_at") or (a1 and not ver.get("finished_at")):
+    elif ver.get("started_at") or (a1 and not ver.get("finished_at")) or (t.parent.parent / ".phase" / f"{t.parent.name}.json").exists():
         state = "verifying"
     elif a0 or agent_files:
         state = "running"

@@ -16,6 +16,25 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 - docs/API.md "Several environments (preview)". Tests: tests/api/test_vector.py (the worker protocol with a stand-in
   environment anywhere; marker sim: three workers of one task, seeds 0, 0 and 1, stepped with the reference rows).
 
+### A trial validates in the background while its lane starts the next trial
+- A lane ran one trial from start to end: after the agent's phase (up to 3 h) Harbor replays the trial, records its
+  replay video and grades it (privileged: in the verifier container; standard: in the sim sidecar's collect hook), and
+  the lane, its GPU unit and its CPU and memory reservation waited for all of it. In the exam's records the replay is
+  11.6 % (privileged) and 22.4 % (standard) of a trial's time.
+- `PHASE_SPLIT=1` (the default; `GPU_SCHED=1`, `SEQ=1`): Harbor gets the job plugin
+  `scripts/harbor/plugins/phase_marker.py` (new), which writes `$JOBS/.phase/<job>.json` on Harbor's agent-end event.
+  The lane checks the usage gateway and the model account then, turns the trial's slot into a validating one and takes
+  the next trial; the trial validates and writes its results in the background, and the lane ends when its trials
+  have. A validating trial stays on its GPU, frees its unit and keeps only its task's verifier CPUs and memory; a GPU
+  holds at most `GPU_RESIDENT` (2 x `GPU_SHARE`) trials in either phase, and a deformable trial's agent phase needs a
+  GPU on which no other trial reasons or validates. `<job>/placement.json` records the mode. `PHASE_SPLIT=0`, or a
+  Harbor without `--plugin`, runs as before.
+- `scripts/harbor/gpu_slots.py`: holds have a phase; `phase` (new) turns a hold into a validating one (no units, the
+  smaller CPUs and memory, owned by the process that waits for the validation); `acquire --resident`; `classify --phase
+  validate`. `scripts/harbor/live_board.py` shows a trial with the marker as verifying.
+- Tests: scripts/harbor/tests/test_phase_marker.py (new), scripts/harbor/tests/test_gpu_slots.py,
+  scripts/harbor/tests/test_runner_seeds.py.
+
 ## 2.2.0 (2026-10-28)
 
 Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the

@@ -15,7 +15,11 @@ seed only.
 - GPU_SCHED=1 (the default): each job's copy has every NVIDIA device pinned to the GPU the host's ledger gave it, and
   <job>/placement.json records it (a task without a GPU device: none); GPU_SCHED=0 leaves the copies as they are;
 - the machine (host_info.py, a fake nvidia-smi): logged as host:, GPUs:, software: lines, written into every job as
-  host.json, and in each result's config.json as `host`, with the name and driver of the job's GPU.
+  host.json, and in each result's config.json as `host`, with the name and driver of the job's GPU;
+- PHASE_SPLIT=1 (the default): Harbor gets the agent-end marker plugin (scripts/harbor/plugins on its PYTHONPATH); when
+  a trial's agent phase ends the lane starts the next trial while the first validates on its GPU, and ends only when
+  both have their results, with every slot released; a deformable trial waits for a GPU on which none validates;
+  PHASE_SPLIT=0, GPU_SCHED=0 or a harbor without --plugin: one trial after the other, as before.
 """
 import json
 import os
@@ -33,11 +37,16 @@ import task_seed  # noqa: E402
 
 FAKE_HARBOR = '''#!{py}
 """A stand-in for `harbor run`: records its arguments and each task copy's seed files, writes one finished trial per task
-(no reward.json, an infrastructure failure, when the job is $FAKE_INFRA_JOB)."""
-import json, os, pathlib, re, sys, uuid
+(no reward.json, an infrastructure failure, when the job is $FAKE_INFRA_JOB). With --plugin (the agent-end marker,
+plugins/phase_marker.py) it writes the marker file its --pk out= names when the "agent phase" ends, then "validates" for
+$FAKE_VERIFY_S seconds before the trial's results; `run --help` lists --plugin unless $FAKE_NO_PLUGIN is set."""
+import json, os, pathlib, re, sys, time, uuid
 a = sys.argv[1:]
 if a == ["--version"]:
     print("0.0.0-fake")
+    sys.exit(0)
+if "--help" in a:
+    print("Usage: harbor run [OPTIONS]\\n  --job-name TEXT" + ("" if os.environ.get("FAKE_NO_PLUGIN") else "\\n  --plugin TEXT"))
     sys.exit(0)
 val = lambda k: a[a.index(k) + 1]
 tasks = [a[i + 1] for i, x in enumerate(a) if x == "-i"]
@@ -49,9 +58,17 @@ devices = {{t: sorted(m.group(0).strip() for d in ("environment", "tests") for p
                      for m in re.finditer(r"(?m)^[ \\t]*(count|device_ids):.*$", p.read_text())) for t in tasks}}
 with open(os.environ["FAKE_HARBOR_LOG"], "a") as f:
     f.write(json.dumps({{"argv": a, "job": job, "seeds": seeds, "devices": devices, "pythonpath": os.environ.get("PYTHONPATH")}}) + "\\n")
-for t in tasks:
-    d = jobs / job / f"{{t[:32]}}__{{uuid.uuid4().hex[:7]}}"
+trials = {{t: jobs / job / f"{{t[:32]}}__{{uuid.uuid4().hex[:7]}}" for t in tasks}}
+for d in trials.values():                     # Harbor makes the trial's directories when it starts
     (d / "verifier").mkdir(parents=True)
+    (d / "agent").mkdir()
+if "--plugin" in a:
+    pk = dict(a[i + 1].split("=", 1) for i, x in enumerate(a) if x == "--pk")
+    out = pathlib.Path(pk["out"])
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({{"job": pk.get("job"), "agent_finished_at": "2026-10-21T00:01:10Z"}}) + "\\n")
+    time.sleep(float(os.environ.get("FAKE_VERIFY_S", "0")))
+for t, d in trials.items():
     (d / "result.json").write_text(json.dumps({{
         "id": uuid.uuid4().hex, "task_name": f"roboarc/{{t}}", "started_at": "2026-10-21T00:00:00Z",
         "agent_execution": {{"started_at": "2026-10-21T00:00:10Z", "finished_at": "2026-10-21T00:01:10Z"}},
@@ -278,6 +295,68 @@ class RunnerSeeds(unittest.TestCase):
         self.assertTrue(devs)
         self.assertTrue(all(d.startswith("count:") for d in devs))         # the task's own reservation, as before
         self.assertFalse((self.root / "jobs" / c["job"] / "placement.json").exists())
+        self.assertNotIn("--plugin", c["argv"])                              # no phase split without the ledger
+        self.assertIn("PHASE_SPLIT needs GPU_SCHED=1", (self.root / "jobs" / "b.log").read_text())
+
+    def log_index(self, needle):
+        lines = (self.root / "jobs" / "b.log").read_text().splitlines()
+        hits = [i for i, x in enumerate(lines) if needle in x]
+        self.assertTrue(hits, f"no log line with {needle!r}")
+        return hits[0]
+
+    def assert_ended_clean(self, task, jobs):
+        for k in (1, 2):
+            self.assertEqual(self.result(task, k)["result"], "fail")          # both trials have their results
+        self.assertEqual(json.loads((self.root / "slots" / "state.json").read_text())["holds"], {})
+        fin = self.log_index("finished (no unclaimed job left)")
+        self.assertTrue(all(self.log_index(f"done {j} ") < fin for j in jobs))
+
+    def test_phase_split_next_trial_during_validation(self):
+        task = f"{self.single}-standard"                                      # IKEA standard: 1 unit (its sim's GPU)
+        self.run_batch(self.single, MODES="standard", K="2", GPUS="0", FAKE_VERIFY_S="6")
+        j1, j2 = (f"b-standard-{self.single}-t{k}" for k in (1, 2))
+        self.assertLess(self.log_index(f"start {j2}:"), self.log_index(f"done {j1} "))   # t2 reasons while t1 validates
+        self.assertIn("agent phase ended; it validates on GPU 0 (keeps 2 CPUs, 2 GB)",
+                      (self.root / "jobs" / "b.log").read_text())
+        for c in self.calls():
+            argv = c["argv"]
+            self.assertEqual(argv[argv.index("--plugin") + 1], "phase_marker:PhaseMarker")
+            self.assertIn(f"out={self.root}/jobs/.phase/{c['job']}.json", argv)
+            self.assertIn("/scripts/harbor/plugins", c["pythonpath"])
+            place = json.loads((self.root / "jobs" / c["job"] / "placement.json").read_text())
+            self.assertEqual((place["phase_split"], place["gpu_resident"], place["validate_cpus"],
+                              place["validate_memory_gb"]), (True, 8, 2, 2))
+        self.assert_ended_clean(task, (j1, j2))
+
+    def test_phase_split_deformable_takes_another_gpu(self):
+        self.run_batch(self.multi, MODES="privileged", K="2", FAKE_VERIFY_S="6")   # GPUS 0,1
+        j1, j2 = (f"b-privileged-{self.multi}-t{k}" for k in (1, 2))
+        self.assertLess(self.log_index(f"start {j2}:"), self.log_index(f"done {j1} "))
+        gpus = {json.loads((self.root / "jobs" / j / "placement.json").read_text())["gpu"] for j in (j1, j2)}
+        self.assertEqual(gpus, {"0", "1"})                                    # not beside t1's validation
+        self.assert_ended_clean(f"{self.multi}-privileged", (j1, j2))
+
+    def test_phase_split_deformable_waits_on_one_gpu(self):
+        self.run_batch(self.multi, MODES="privileged", K="2", GPUS="0", FAKE_VERIFY_S="4")
+        j1, j2 = (f"b-privileged-{self.multi}-t{k}" for k in (1, 2))
+        self.assertLess(self.log_index(f"done {j1} "), self.log_index(f"start {j2}:"))   # GPU 0 empties first
+        self.assertIn("none is empty (GPU 0: 0/4, 1 validating", (self.root / "jobs" / "b.log").read_text())
+        self.assert_ended_clean(f"{self.multi}-privileged", (j1, j2))
+
+    def test_phase_split_off(self):
+        self.run_batch(self.single, MODES="standard", K="2", GPUS="0", FAKE_VERIFY_S="3", PHASE_SPLIT="0")
+        j1, j2 = (f"b-standard-{self.single}-t{k}" for k in (1, 2))
+        self.assertLess(self.log_index(f"done {j1} "), self.log_index(f"start {j2}:"))
+        self.assertTrue(all("--plugin" not in c["argv"] for c in self.calls()))
+        self.assertIs(json.loads((self.root / "jobs" / j1 / "placement.json").read_text())["phase_split"], False)
+        self.assert_ended_clean(f"{self.single}-standard", (j1, j2))
+
+    def test_harbor_without_plugins(self):
+        self.run_batch(self.single, MODES="standard", K="2", GPUS="0", FAKE_VERIFY_S="3", FAKE_NO_PLUGIN="1")
+        j1, j2 = (f"b-standard-{self.single}-t{k}" for k in (1, 2))
+        self.assertIn("this harbor has no --plugin", (self.root / "jobs" / "b.log").read_text())
+        self.assertLess(self.log_index(f"done {j1} "), self.log_index(f"start {j2}:"))
+        self.assertTrue(all("--plugin" not in c["argv"] for c in self.calls()))
 
     def test_k1_job_name_unchanged(self):
         self.run_batch(self.single, MODES="privileged")
