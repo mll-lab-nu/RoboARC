@@ -2,7 +2,7 @@
  "repo": "eai-v2-internal/robotangle-assets",
  "repo_type": "dataset",
  "private": true,
- "revision": "9f34f894a454d4f39ebaed5dcf8c8c9d40f828b9",
+ "revision": "b2cf9b552f310ef4cfbd91df62ccfa837757c93a",
  "files": {
   "instances/battery-replacement-01-i01/instance.json": "87d80c7cb6dab9a834666d35652eebea82578eea71042f139af47edf122194c3",
   "instances/battery-replacement-01-i01/instance_assets/mujoco/meshes/controller_chamfer_0_2af7dd9b736d4d9e.obj": "2af7dd9b736d4d9e83cbcfe0de0c6a96c18063df919bb57f0e1259d47f717fbd",

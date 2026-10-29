@@ -25,7 +25,7 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 
 | input | pin |
 |---|---|
-| frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `9f34f894a454d4f39ebaed5dcf8c8c9d40f828b9`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
+| frozen instances: HF dataset `eai-v2-internal/robotangle-assets` (private) | revision `b2cf9b552f310ef4cfbd91df62ccfa837757c93a`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
 | puzzle image base (1.1.0) | `python:3.11.15-slim-bookworm@sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3` (the 0.2.22 image's own base); Debian packages from `snapshot.debian.org` 20260930T230000Z at the versions in `source/images/roboarc/Dockerfile`; wheels by sha256 in `source/images/roboarc/runtime.lock` and `vbd-requirements.txt` |
 | Genesis base image (`eai-robotangle` 0.2.22; 1.0.x only) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
 | monitor sidecar (`eai-monitor` 0.1.0) | `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f53f79c2bfa4a71298b10c78383cae3afc40720ca562cc845b8d20fb0c`, the same digest as the published `eai-monitor:0.1.0` |
