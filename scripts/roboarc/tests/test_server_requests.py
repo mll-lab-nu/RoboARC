@@ -12,9 +12,10 @@ eai-standard/2.4 layer, with a stub Session (fake_service.py; needs numpy, no si
      review, soft_volume_ratio, attachment_stretch_mm, table_guard, ik_jumps), with the names of the parts involved, and
      no other field of the reading (user decision 2026-10-13: names are allowed, positions are not).
   5. mp4 video (2026-10-30, 2.2.1): a submit with the client's default video="mp4" and an observe with "both" return an
-     H.264 mp4 per camera and leave the episode alive. encode_mp4 imported imageio, which the puzzle image does not ship,
-     so every mp4 request ended the episode as an infrastructure error; it now runs the ffmpeg binary. Skipped with a
-     note where no ffmpeg is on PATH (RCB_REQUIRE_FFMPEG=1 makes that a failure; the image has it).
+     H.264 mp4 per camera holding every frame the call recorded (ffprobe counts them), and leave the episode alive.
+     encode_mp4 imported imageio, which the puzzle image does not ship, so every mp4 request ended the episode as an
+     infrastructure error; it now runs the ffmpeg binary. Skipped with a note where ffmpeg or ffprobe is not on PATH
+     (RCB_REQUIRE_FFMPEG=1 makes that a failure: the CI job installs ffmpeg and sets it; the image has both).
   6. the Nyx renderer's start-up retry (test_nyx_startup.py, a stub build).
 usage: python3 scripts/roboarc/tests/test_server_requests.py [repo root]"""
 import json, os, shutil, socket, subprocess, sys, tempfile, time, urllib.error, urllib.request
@@ -176,8 +177,8 @@ try:
         errs.append(f"meta safety fields: {text[:300]}")
 finally:
     svc.close()
-if shutil.which("ffmpeg") is None and os.environ.get("RCB_REQUIRE_FFMPEG") != "1":
-    print("note: no ffmpeg on PATH, the mp4 checks (5) are skipped")
+if not (shutil.which("ffmpeg") and shutil.which("ffprobe")) and os.environ.get("RCB_REQUIRE_FFMPEG") != "1":
+    print("note: no ffmpeg / ffprobe on PATH, the mp4 checks (5) are skipped")
 else:
     svc = Service("native")     # 5. mp4 video
     try:
@@ -185,7 +186,16 @@ else:
                                           ("observe, video both", "/observe", {"seconds": 1.0, "video": "both"}, None)):
             code, m, parts = call(path, meta, actions); st = get(svc.port, "/status"); n += 1
             vids = {k: v for k, v in parts.items() if k.startswith("video/")}
-            bad = [k for k, v in vids.items() if v.get("kind") != "mp4" or b"ftyp" not in v["data"][:64] or v.get("n", 0) < 1]
+            bad = []
+            for k, v in vids.items():
+                mp4 = os.path.join(TMP, "response.mp4")
+                with open(mp4, "wb") as f:
+                    f.write(v["data"])
+                got = subprocess.run(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
+                                      "stream=codec_name,nb_read_frames", "-of", "csv=p=0", mp4], capture_output=True, text=True).stdout.strip()
+                frames = parts.get("frames/" + k.split("/", 1)[1], {}).get("data")
+                if v.get("kind") != "mp4" or not v.get("n") or got != f"h264,{v['n']}" or (frames is not None and len(frames) != v["n"]):
+                    bad.append(f"{k}: ffprobe {got!r}, n {v.get('n')}")
             if code != 200 or st["done"] or not vids or bad:
                 errs.append(f"mp4, {name}: HTTP {code}, done {st['done']}, video parts {sorted(vids)}, bad {bad}: {str(m)[:200]}")
         final = json.load(open(os.path.join(svc.data, "final.json")))
