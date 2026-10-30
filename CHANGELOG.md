@@ -4,7 +4,35 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
-## Unreleased
+## 2.2.1 (2026-10-30)
+
+Standard mode returns mp4 video again, and every task's time limit says that the agent works alone. The same images
+(`roboarc:2.2.0`, the IKEA images 1.1.0), physics, instances, references and graders: privileged results graded under
+2.2.0 stand, and so do standard results of trials that never asked for mp4 (their task digests differ: the texts and
+the sim service changed).
+
+### The standard service's mp4 video (task change: the 78 puzzle standard directories' `environment/sim/rcb_limited.py`)
+- **The problem** (found by Jianwen in a trial Reuben sent back: claws-08, seed 1, Claude Code + Opus 5.5): the puzzle
+  standard service's `encode_mp4` (`scripts/eai_standard/v2_4/rcb_limited.py`) imported `imageio`, which the
+  `roboarc` image has never shipped (2.2.0, 2.1.0 and 1.3.0 checked). A `submit` without `video` (the client's default
+  is `"mp4"`), or a `submit` / `get_obs` with `video="mp4"` or `"both"` (the instructions' example uses
+  `video="mp4"`), executed its rows and then failed while it built the reply: a simulator error (PROTOCOL §4.6), so
+  the episode ended with `reason: "error"`, `infra_error: 1`, and the trial was not a result. A rerun that asked for
+  mp4 again ended the same way. The release smoke never asked for video: the oracle replays use `video="none"` and
+  our own standard smoke happened to use `frames` and `none` only. The graders' replay videos were not affected (they
+  run the ffmpeg binary through `topogym.recording`).
+- **The fix**: `encode_mp4` writes the frames to the image's ffmpeg binary (libx264, yuv420p, faststart, the same
+  output as before; odd sizes are padded to even ones). No image is rebuilt. IKEA's standard service
+  (`scripts/eai_standard/v2_4_live/rcb_limited.py`) is unchanged: its image ships imageio (and imageio-ffmpeg's own
+  binary, no `ffmpeg` on PATH).
+- **Tasks**: the 156 puzzle directories rendered again (the 78 standard ones' `rcb_limited.py`; the Release line
+  "RoboARC 2.2.1" and a Change Log entry in every README; `DIGEST`). The IKEA directories change only by the time limit
+  note below.
+- **Tests**: `scripts/roboarc/tests/test_server_requests.py` (5) asks the service for mp4 (a `submit` with the default
+  video, an `observe` with `"both"`) and checks the mp4 parts and that the episode stays alive; without `ffmpeg` on
+  PATH it is skipped with a note (`RCB_REQUIRE_FFMPEG=1` makes that a failure). In the `roboarc:2.2.0` image it passes
+  with the new service (47 checks) and fails with the old one (HTTP 500, `infra_error` 1, as in the trial). A release
+  runs it in the image (docs/DEVELOPING.md, Cutting a release, step 4).
 
 ### Several environments at once: `roboarc.make_vec` (preview; API only, no task, image or result changes)
 - `roboarc.make_vec(task, num_envs, instance_seeds=..., gpus=..., autoreset=..., **make_options)` runs `num_envs`

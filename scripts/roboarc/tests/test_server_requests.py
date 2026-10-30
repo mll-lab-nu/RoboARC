@@ -11,7 +11,11 @@ eai-standard/2.4 layer, with a stub Session (fake_service.py; needs numpy, no si
   4. meta["safety"] holds the declared fields as on main (rules, scope, forcing, task_contact_mm, held_finger_contact_mm,
      review, soft_volume_ratio, attachment_stretch_mm, table_guard, ik_jumps), with the names of the parts involved, and
      no other field of the reading (user decision 2026-10-13: names are allowed, positions are not).
-  5. the Nyx renderer's start-up retry (test_nyx_startup.py, a stub build).
+  5. mp4 video (2026-10-30, 2.2.1): a submit with the client's default video="mp4" and an observe with "both" return an
+     H.264 mp4 per camera and leave the episode alive. encode_mp4 imported imageio, which the puzzle image does not ship,
+     so every mp4 request ended the episode as an infrastructure error; it now runs the ffmpeg binary. Skipped with a
+     note where no ffmpeg is on PATH (RCB_REQUIRE_FFMPEG=1 makes that a failure; the image has it).
+  6. the Nyx renderer's start-up retry (test_nyx_startup.py, a stub build).
 usage: python3 scripts/roboarc/tests/test_server_requests.py [repo root]"""
 import json, os, shutil, socket, subprocess, sys, tempfile, time, urllib.error, urllib.request
 import numpy as np
@@ -172,8 +176,25 @@ try:
         errs.append(f"meta safety fields: {text[:300]}")
 finally:
     svc.close()
+if shutil.which("ffmpeg") is None and os.environ.get("RCB_REQUIRE_FFMPEG") != "1":
+    print("note: no ffmpeg on PATH, the mp4 checks (5) are skipped")
+else:
+    svc = Service("native")     # 5. mp4 video
+    try:
+        for name, path, meta, actions in (("submit, the default video", "/submit", {"type": "joint_position", "dt": 0.025}, OK),
+                                          ("observe, video both", "/observe", {"seconds": 1.0, "video": "both"}, None)):
+            code, m, parts = call(path, meta, actions); st = get(svc.port, "/status"); n += 1
+            vids = {k: v for k, v in parts.items() if k.startswith("video/")}
+            bad = [k for k, v in vids.items() if v.get("kind") != "mp4" or b"ftyp" not in v["data"][:64] or v.get("n", 0) < 1]
+            if code != 200 or st["done"] or not vids or bad:
+                errs.append(f"mp4, {name}: HTTP {code}, done {st['done']}, video parts {sorted(vids)}, bad {bad}: {str(m)[:200]}")
+        final = json.load(open(os.path.join(svc.data, "final.json")))
+        if final.get("infra_error"):
+            errs.append(f"mp4: final.json {final}")
+    finally:
+        svc.close()
 shutil.rmtree(TMP, ignore_errors=True)
-# 5. the Nyx renderer's start-up retry (nyx_direct.rig), on a stub build: its own file, run from here
+# 6. the Nyx renderer's start-up retry (nyx_direct.rig), on a stub build: its own file, run from here
 r = subprocess.run([sys.executable, os.path.join(HERE, "test_nyx_startup.py"), ROOT], capture_output=True, text=True); n += 1
 print(r.stdout, end="")
 if r.returncode != 0:

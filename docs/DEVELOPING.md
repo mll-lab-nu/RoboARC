@@ -119,7 +119,9 @@ archives byte for byte (the registry token on stdin only; [images/README.md](../
    source times), apart from the files the release changes.
 4. On a GPU host with the new image: strict replays of one base per family (and of every new or changed base), end
    hashes equal to the recorded ones; Harbor oracle (reward 1) and nop (reward 0) on a sample of bases in both modes,
-   deterministic, without infra or grader errors.
+   deterministic, without infra or grader errors. The oracles never ask for video, so also run the standard service's
+   tests in the new image, with ffmpeg required (`docker run --rm --network none -e RCB_REQUIRE_FFMPEG=1 -v
+   $PWD:/r:ro --entrypoint python <image> /r/scripts/roboarc/tests/test_server_requests.py /r`): they ask for mp4.
 5. Push the images with `images/push_all.sh` (the archives of `images/pins.json`), then tag the commit.
 
 ## Reviewing a change
