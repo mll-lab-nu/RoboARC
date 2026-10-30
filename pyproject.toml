@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "roboarc"
-version = "2.2.0"
+version = "2.2.1"
 description = "RoboARC's raw simulator interface: the benchmark's tasks as Gymnasium-compatible environments over the graded simulators"
 readme = "docs/API.md"
 requires-python = ">=3.11"
