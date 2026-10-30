@@ -37,7 +37,7 @@ checkpointed (rows, state hash, the robot's proprio row); after a crash compose 
 replays the journal and continues the SAME episode, never a reset. `python rcb_limited.py end <data dir>` is the shared
 first half of a collect hook."""
 from __future__ import annotations
-import errno, faulthandler, json, math, os, re, select, signal, socket, sys, tempfile, threading, time, traceback, zlib
+import errno, faulthandler, json, math, os, re, select, signal, socket, subprocess, sys, tempfile, threading, time, traceback, zlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Callable
 
@@ -124,15 +124,21 @@ def depth_frames_part(name: str, stack: np.ndarray) -> tuple[str, str, bytes, di
 
 
 def encode_mp4(frames: np.ndarray, fps: int) -> bytes:
-    """H.264 mp4 (yuv420p, faststart) of uint8 (N,H,W,3) frames: the same encoding every 2.0 service used."""
-    import imageio.v2 as imageio
+    """H.264 mp4 (yuv420p, faststart) of uint8 (N,H,W,3) frames: the same encoding every 2.0 service used, made by the
+    image's ffmpeg binary (the replay video's encoder too). The image has no imageio: through it, every response video
+    was a ModuleNotFoundError, a 500 that ended the episode. yuv420p needs an even width and height: an odd one gets one
+    padding row or column."""
+    frames = np.ascontiguousarray(np.asarray(frames, dtype=np.uint8))
+    _, h, w, _ = frames.shape
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tf:
         path = tf.name
     try:
-        with imageio.get_writer(path, format="FFMPEG", mode="I", fps=fps, codec="libx264", macro_block_size=1,
-                                output_params=["-movflags", "+faststart", "-pix_fmt", "yuv420p"]) as w:
-            for f in frames:
-                w.append_data(np.ascontiguousarray(f))
+        p = subprocess.run(["ffmpeg", "-y", "-nostdin", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
+                            "-s", f"{w}x{h}", "-r", str(fps), "-i", "-", "-an", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+                            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", path],
+                           input=frames.tobytes(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        if p.returncode:
+            raise RuntimeError(f"ffmpeg exit {p.returncode}: {p.stderr.decode(errors='replace')[-300:]}")
         return open(path, "rb").read()
     finally:
         try:

@@ -38,6 +38,24 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
   else. Results of earlier task versions no longer match the task digests (`digest_match` false). Generators, physics,
   graders, images and the cutoffs are unchanged.
 
+### A standard response video no longer ends the episode (task change: 78 puzzle standard tasks' service and DIGEST)
+- The puzzle standard service encoded a response video (`video` "mp4", the default of `submit`, or "both"; the
+  instructions' example `get_obs(seconds=2.0, video="mp4")`) with imageio, which the `roboarc` image has never had
+  (1.3.0, 2.1.0 and 2.2.0 checked). The import was a `ModuleNotFoundError` after the call's rows had run: a 500 that
+  ended the episode with reason "error", `infra_error` 1, so the trial was voided, and a rerun voided again as soon as
+  the agent asked for a video. Found in an Opus 5.5 trial of interlocked-claws-08: its first submit, 10 rows with the
+  default video, ended the episode 7 minutes into the agent's 3 hours. Earlier smokes never asked for a video (the
+  oracle replays, and a Qwen standard trial whose 451 submits all used "frames" or "none").
+- `scripts/eai_standard/v2_4/rcb_limited.py` `encode_mp4` now runs the image's ffmpeg binary (the replay video's
+  encoder): H.264, yuv420p, faststart, as before; an odd width or height gets one padding row or column. In the 2.2.0
+  image a submit with the default video and `get_obs(seconds=2.0, video="mp4")` / `video="both"` return one mp4 per
+  camera (848 x 480, every recorded frame) and the episode goes on.
+- The 78 puzzle standard task directories are rendered again: `environment/sim/rcb_limited.py` and `DIGEST`, nothing
+  else. The image, the runtime binding, `release.json`'s hashes, the physics, the graders and the references are
+  unchanged; privileged tasks and IKEA (`v2_4_live`, whose image has imageio) are untouched.
+- Test: `scripts/roboarc/tests/test_server_requests.py` case 6 (an mp4 per camera, the episode alive; needs ffmpeg on
+  PATH, skipped and said so without it).
+
 ## 2.2.0 (2026-10-28)
 
 Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the

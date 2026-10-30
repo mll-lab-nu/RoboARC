@@ -12,6 +12,10 @@ eai-standard/2.4 layer, with a stub Session (fake_service.py; needs numpy, no si
      review, soft_volume_ratio, attachment_stretch_mm, table_guard, ik_jumps), with the names of the parts involved, and
      no other field of the reading (user decision 2026-10-13: names are allowed, positions are not).
   5. the Nyx renderer's start-up retry (test_nyx_startup.py, a stub build).
+  6. a response video (`video` "mp4", submit's default, or "both") is an H.264 mp4 per camera with every frame the call
+     recorded, and the episode stays alive: the image has no imageio, and its import was a 500 that ended the episode
+     as an infrastructure error (Opus 5.5 trial of interlocked-claws-08, 2026-10-30). Needs ffmpeg on PATH, as the image
+     has it; without it the case is skipped, and says so.
 usage: python3 scripts/roboarc/tests/test_server_requests.py [repo root]"""
 import json, os, shutil, socket, subprocess, sys, tempfile, time, urllib.error, urllib.request
 import numpy as np
@@ -172,6 +176,26 @@ try:
         errs.append(f"meta safety fields: {text[:300]}")
 finally:
     svc.close()
+if shutil.which("ffmpeg") and shutil.which("ffprobe"):
+    svc = Service("native")     # 6. a response video: mp4 bytes per camera, the episode alive
+    try:
+        for name, path, meta, A in (("submit's default video", "/submit", {"type": "joint_position", "dt": 0.025}, np.zeros((6, 8))),
+                                    ("observe video both", "/observe", {"seconds": 0.5, "video": "both"}, None)):
+            code, m, parts = call(path, meta, A); st = get(svc.port, "/status"); n += 1
+            vid = parts.get("video/agentview") or {}
+            mp4 = os.path.join(TMP, "response.mp4")
+            open(mp4, "wb").write(vid.get("data") or b"")
+            got = subprocess.run(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
+                                  "stream=codec_name,nb_read_frames", "-of", "csv=p=0", mp4], capture_output=True, text=True).stdout.strip()
+            want = f"h264,{vid.get('n')}"
+            if code != 200 or st["done"] or vid.get("kind") != "mp4" or got != want or (path == "/observe" and
+                                                                                      len(parts.get("frames/agentview", {}).get("data", ())) != vid.get("n")):
+                errs.append(f"{name}: HTTP {code}, done {st['done']}, part {vid.get('kind')}, ffprobe {got!r} (want {want!r}): "
+                            f"{str(m)[:200]}")
+    finally:
+        svc.close()
+else:
+    print("skip 6. the response video: no ffmpeg / ffprobe on PATH")
 shutil.rmtree(TMP, ignore_errors=True)
 # 5. the Nyx renderer's start-up retry (nyx_direct.rig), on a stub build: its own file, run from here
 r = subprocess.run([sys.executable, os.path.join(HERE, "test_nyx_startup.py"), ROOT], capture_output=True, text=True); n += 1
