@@ -25,6 +25,19 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 - Tests: scripts/harbor/tests/test_phase_marker.py (new), scripts/harbor/tests/test_gpu_slots.py,
   scripts/harbor/tests/test_runner_seeds.py.
 
+### The time limit tells the agent it works alone (task change: every task directory's instruction.md and DIGEST)
+- Harbor runs each harness non-interactively (Codex's `codex exec`, for example): the agent's first reply without a
+  tool call ends its session, and nobody answers it. In a Codex trial of interlocked-claws-08 (gpt-5.3-codex, high) the
+  agent closed with an offer to the user ("If you want, I can keep iterating on gen.py ...") after 68 min of its
+  10800 s and was graded on a placeholder trajectory, unsolved.
+- The note after "You have N seconds ..." (`scripts/task_conventions.py` `CUTOFF_NOTE`, every mode) now says, before
+  the clock sentence: "You work alone: nobody reads your replies or answers questions during the session. Ending your
+  turn, or stopping to ask a question, ends the session, and the task is graded at once as it stands. While the task
+  is not solved and time is left, keep working." Harness-neutral, the same words in every task, no duration in them.
+- All 180 task directories are rendered again: the `## Time limit` section of `instruction.md` and `DIGEST`, nothing
+  else. Results of earlier task versions no longer match the task digests (`digest_match` false). Generators, physics,
+  graders, images and the cutoffs are unchanged.
+
 ## 2.2.0 (2026-10-28)
 
 Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the
