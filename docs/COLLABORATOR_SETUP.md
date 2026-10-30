@@ -42,8 +42,11 @@ Run RoboARC from the branch `main` of `mll-lab-nu/RoboARC`; it has this note and
    git clone -b main git@github.com:mll-lab-nu/RoboARC.git
    cd RoboARC
    bash images/pull_all.sh
-   python3 scripts/stamp_mtimes.py tasks   # once per checkout, so Harbor's build cache hits
+   python3 scripts/stamp_mtimes.py tasks   # after the clone and after every pull, so Harbor's build cache hits
    ```
+   A pull that brings a new release (a new version in `CHANGELOG.md`) can bring a new image: run both lines again.
+   2.2.0 moved the puzzle tasks from `roboarc:2.1.0` to `roboarc:2.2.0`; `docker image rm
+   ghcr.io/mll-lab-nu/roboarc:2.1.0` frees the old one's 10 GB.
 
 ## 3. First check: one task, both modes, no agent
 
@@ -63,12 +66,13 @@ done
 - The first run also pulls the image, so it takes longer.
 
 Then one scene other than the default, made the way the batch runner makes it: `roboarc-interlocked-claws-09-i01` at
-appearance seed 2 (its reference solution is validated at seeds 0, 1 and 2). The oracle must score 1 in both modes:
+appearance seed 1 (its reference solution passed Harbor's oracle run at seeds 0 and 1: `[metadata.seeds] oracle` in its
+`task.toml`). The oracle must score 1 in both modes:
 
 ```bash
 for m in privileged standard; do
-  python3 scripts/task_seed.py materialize ./tasks/roboarc-interlocked-claws-09-i01-$m --seed 2 --out /tmp/claws09-s2-$m
-  harbor run -p /tmp/claws09-s2-$m -i roboarc-interlocked-claws-09-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-09-s2-$m
+  python3 scripts/task_seed.py materialize ./tasks/roboarc-interlocked-claws-09-i01-$m --seed 1 --out /tmp/claws09-s1-$m
+  harbor run -p /tmp/claws09-s1-$m -i roboarc-interlocked-claws-09-i01-$m -a oracle -o "$PWD/jobs" --job-name oracle-claws-09-s1-$m
 done
 ```
 
@@ -89,6 +93,14 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
 
 - Use the `AGENT`, `MODEL`, `EFFORT`, `ENV_FILE` and `RESULTS` the full run will use (credentials: the table in
   section 5), and the usage gateway as above (section 5, "Usage gateway").
+- **Set `EFFORT` yourself**, to the reasoning level we agreed with you (the commands use `high`), never
+  `EFFORT=default`:
+  - The runner passes it to the agent as Harbor's `reasoning_effort` (for Codex `model_reasoning_effort`, over the
+    value in an `AGENT_CONFIG` file). Without `EFFORT` it passes `xhigh`.
+  - `EFFORT=default` passes no level. The model then runs at whatever level its harness or provider picks, and no
+    record says which. Codex, for example, takes its default level from the provider's model list
+    (`GET <base URL>/models`); an endpoint without that list (it answers 404) leaves the level to the provider.
+  - The level is part of the run id (`<harness>-<model>-<effort>`), so every trial of a batch runs at one level.
 - The two modes run one after the other, each with at most the agent's 3 h: the standard trial starts when the
   privileged trial's agent is done, while that trial is graded in the background. To run them at the same time, start
   the same command again in a second terminal (it adds a lane).
@@ -99,10 +111,28 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   - each job folder `jobs/smoke/smoke-<mode>-roboarc-interlocked-claws-08-i01/` has `seed.json` and
     `<trial>/verifier/reward.txt`;
   - `<RESULTS>/smoke/roboarc-interlocked-claws-08-i01-<mode>/<run id>/t1/` exists for both modes;
+  - the agent ran at your level. The `runner` line of `jobs/smoke/smoke.log` names it (`effort high`, a run id ending
+    in `-high`), and each job's `config.json` has it as `"reasoning_effort"`. With Codex, the trial's session log also
+    records the level Codex ran with. This prints it for each mode, and it must not print `None`:
+    ```bash
+    for f in jobs/smoke/smoke-*-roboarc-interlocked-claws-08-i01/*/agent/sessions/*/*/*/rollout-*.jsonl; do
+      python3 -c 'import json,sys; print(next(json.loads(l)["payload"].get("effort") for l in open(sys.argv[1]) if "\"turn_context\"" in l))' "$f"
+    done
+    ```
   - `jobs/smoke/smoke.summary.md` has the column `usage gateway in / out`, with two numbers in both rows: the agent's
     model calls went through the usage gateway. Without that column, or with `-` in a row, the agent's container did
     not reach the gateway. The gateway listens on the Docker bridge address (172.17.0.1), and a host firewall that
     blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
+  - the gateway was on as in the command. The `runner` line of `jobs/smoke/smoke.log` names it (`usage gateway
+    <checkout>/scripts/usage_gateway`, not `usage gateway off`), and each job's `usage_recording.json` says
+    `"usage_gateway": true, "raw_bodies": false`;
+  - your provider answered the model calls. This counts the HTTP statuses of all the smoke's model calls:
+    ```bash
+    python3 -c 'import collections,json,sys; print(collections.Counter(json.loads(l)["status"] for f in sys.argv[1:] for l in open(f)))' \
+      jobs/smoke/smoke-*-roboarc-interlocked-claws-08-i01/*/gateway/usage.jsonl
+    ```
+    Almost all should be 200. A 429 is your provider's rate limit ("Usage gateway" in section 5). A few 404s for
+    `GET .../models` mean your endpoint has no model list: harmless once `EFFORT` is set (above);
   - `jobs/smoke/smoke.log` shows no stopped lane (the runner stops a lane when the model account fails: out of credit,
     rate-limited, logged out);
   - `jobs/smoke/smoke.log` has a line `<job>: agent phase ended; it validates ...`: your Harbor reports the end of the
@@ -165,11 +195,18 @@ done
     go to is public (section 6).
   - The runner checks the gateway before each job and restarts it if needed. A trial is "not a result", never the
     agent's 0, if the gateway went down during its job or if its last model calls failed at the gateway.
+  - **A 429 is your provider's rate limit**, passed on unchanged. The gateway never answers 429 itself. Its own
+    refusals are 400 (past the token budget), 403 (not a model API call) and 502 (the provider cannot be reached).
+    Codex retries a 429. When it gives up, the trial ends with `ApiRateLimitError`: it is not a result, and the
+    runner stops the lane. Every lane is one more trial calling the model at the same time, so your quota (requests
+    and tokens per minute) must carry all the lanes you start. Raise the quota or start fewer lanes, and do that
+    before a trial's one rerun.
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
   `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), with no
   adapter and no proxy that holds the credentials or changes the requests (the usage gateway below is neither); web search off
   (leave `WEB_SEARCH` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
-  its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds.
+  its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds;
+  one `EFFORT` for the whole batch, the level we agreed (section 4), never `default`.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
   and every trial is taken by exactly one lane. Before a trial starts, the runner gives it a GPU and checks the host's
   CPUs and memory (docs/RUNNING.md "GPUs and lanes"): up to 4 trials of rigid tasks share a GPU, a trial of a
@@ -185,8 +222,13 @@ done
   IKEA privileged trials none, the 204 deformable trials a whole one): about 35 days on one GPU, 8.7 on four, 4.4 on
   eight. `nohup` keeps the lanes running after you
   log out.
-- **More than one host:** give each host its own part of the bases and the same batch name (a trial's seed depends
-  only on the batch name, the task and the trial number), and send each host's batch back on its own (section 6).
+- **One release per batch:** do not pull in the middle of a batch. A new release changes the tasks: 2.2.0 changed
+  every task's `DIGEST` and the puzzles' seeds 1 and 2. Lanes started again after such a pull skip the
+  finished trials and run the others on the new tasks, so the batch would mix two releases. Finish the batch first, or
+  start a new one under a batch name of its own.
+- **More than one host:** give each host its own part of the bases, the same batch name (a trial's seed depends
+  only on the batch name, the task and the trial number) and the same commit, and send each host's batch back on its
+  own (section 6).
 - **Progress and summary:** progress is in `$JOBS/<batch>.log`, and the per-trial summary in `$JOBS/<batch>.summary.md`.
 - **Restarting** (after a reboot, or a lane stopped by a model-account failure): start the lanes again with the same
   command. Finished trials are skipped. A trial the reboot interrupted is skipped too: to run it again, move its job
