@@ -125,7 +125,7 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
     blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
   - the gateway was on as in the command. The `runner` line of `jobs/smoke/smoke.log` names it (`usage gateway
     <checkout>/scripts/usage_gateway`, not `usage gateway off`), and each job's `usage_recording.json` says
-    `"usage_gateway": true, "raw_bodies": false`;
+    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50`;
   - your provider answered the model calls. This counts the HTTP statuses of all the smoke's model calls:
     ```bash
     python3 -c 'import collections,json,sys; print(collections.Counter(json.loads(l)["status"] for f in sys.argv[1:] for l in open(f)))' \
@@ -205,8 +205,9 @@ done
     before a trial's one rerun.
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
   `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), with no
-  adapter and no proxy that holds the credentials or changes the requests (the usage gateway below is neither); web search off
-  (leave `WEB_SEARCH` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
+  adapter and no proxy that holds the credentials or changes the requests (the usage gateway holds no credentials, and
+  its one change to a request, the image cap, is the same in every run); web search off (leave `WEB_SEARCH` unset);
+  the image cap at 50 (leave `GATEWAY_IMAGE_CAP` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
   its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds;
   one `EFFORT` for the whole batch, the level we agreed (section 4), never `default`.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
