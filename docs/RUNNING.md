@@ -405,6 +405,15 @@ keeps the task's own list). The runner checks the gateway before each job and re
 model calls failed at the gateway, or whose job has `gateway_down.json`, is an infrastructure failure, never the
 agent's 0. The header of `scripts/harbor/run_agent_batch.sh` lists the other `GATEWAY_*` options.
 
+With the gateway, every `harbor run` of the runner gets `-e roboarc_docker:RoboARCDocker`
+(`scripts/harbor/environments/roboarc_docker.py`): Harbor's Docker environment whose egress sidecar waits up to 900 s,
+the gateway's own upstream timeout, for a model call's response headers. Harbor's sidecar (gost, 0.23.0 to 0.25.x)
+leaves gost's default of 15 s, so a provider that took longer to start its answer (a slow or rate-limiting endpoint) had
+the call cut: the agent saw a connection reset and retried, and the provider still finished and billed the call. The
+class builds the sidecar from a patched copy of the installed Harbor's sidecar folder (in `~/.cache/roboarc/`); Harbor's
+install is not edited, and the allowlist is unchanged. A `harbor run` of your own through the gateway should pass the
+same option, with `scripts/harbor/environments` on `PYTHONPATH`.
+
 Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget), and every result's
 `config.json` says what it has:
 

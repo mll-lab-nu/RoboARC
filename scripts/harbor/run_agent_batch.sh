@@ -315,8 +315,17 @@ fi
 [ -d "$JOBS/.tasks" ] && find "$JOBS/.tasks" -mindepth 1 -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + 2>/dev/null
 
 # transparent usage gateway (one per runner, stopped with it): the agent's base URL points at it, it forwards unchanged
+ENV_ARGS=()
 if [ -n "$USAGE_GATEWAY" ]; then
   mkdir -p "$JOBS/.gateway"; ready="$JOBS/.gateway/port.$$"; rm -f "$ready"
+  # Harbor's egress sidecar cuts a plain-HTTP call whose response headers take over 15 s (gost's default readTimeout):
+  # every harbor run gets Harbor's Docker environment with the sidecar's readTimeout at the gateway's 900 s
+  # (scripts/harbor/environments/roboarc_docker.py); the import is checked here, with Harbor's own Python
+  export PYTHONPATH="$H/environments${PYTHONPATH:+:$PYTHONPATH}"; ENV_ARGS=(-e roboarc_docker:RoboARCDocker)
+  hpy="$(head -1 "$(command -v harbor)" 2>/dev/null | sed -n 's/^#!//p')"
+  if [[ "$hpy" == */python* ]] && [ -x "$hpy" ] && "$hpy" -c 'import harbor' 2>/dev/null && ! "$hpy" -c 'import roboarc_docker' >"$JOBS/.gateway/env_import.$$.err" 2>&1; then
+    log "scripts/harbor/environments/roboarc_docker.py does not import with this harbor ($JOBS/.gateway/env_import.$$.err); without it the egress sidecar cuts model calls slower than 15 s"; exit 2
+  fi
   # the upstream each base URL would have used: this environment, else the env file, else the API's default
   upstream() {  # <VAR> <default>
     local v="${!1:-}"
@@ -666,7 +675,7 @@ harbor_job() {  # <job> <concurrency> <harbor -i args...>: Harbor runs the job f
   local job="$1" n="$2" root="$JOB_ROOT"; shift 2
   local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
   local phase=(); [ "$PHASE_SPLIT" = 1 ] && phase=(--plugin phase_marker:PhaseMarker --pk "out=$JOBS/.phase/$job.json" --pk "job=$job")
-  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${phase[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
+  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${ENV_ARGS[@]}" "${phase[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
   log "done $job (harbor rc=$?)"
   [ -d "$JOBS/$job" ] && cp "$JOBS/.seeds/$job.json" "$JOBS/$job/seed.json"
   [ -d "$JOBS/$job" ] && [ -n "$HOST_INFO" ] && printf '%s\n' "$HOST_INFO" > "$JOBS/$job/host.json"

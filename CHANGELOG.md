@@ -4,6 +4,30 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+### Model calls through the usage gateway are no longer cut after 15 s (runner only; no task, image or result changes)
+- **The problem** (Jianwen's report, 2026-10-31): with the usage gateway, Harbor's egress sidecar (gost, a transparent
+  proxy that enforces the task's allowlist) reads the agent's plain-HTTP calls to the gateway and waits at most
+  `readTimeout` for the response headers. Harbor's `gost.yaml` sets none (Harbor 0.23.0 to 0.25.x), and gost's default
+  is 15 s. A call whose provider took longer to send its headers was cut: the agent saw `ECONNRESET` and retried, the
+  provider finished and billed the call, and the gateway logged the client as gone. In Reuben's deliveries 173 of 2172
+  calls (Copilot proxy, Claude Code + Opus 5.5) and 4 of 42 (a rate-limiting Azure endpoint, Codex + GPT-6 Astra) were
+  cut, every one after 15.0-15.9 s. Grades were not wrong (a trial that ends on failed model calls is an
+  infrastructure failure), but it cost tokens, time on the 3 h clock, and stopped lanes.
+- **The fix**: `scripts/harbor/environments/roboarc_docker.py`, a subclass of Harbor's `DockerEnvironment` whose egress
+  sidecar is built from a copy of the installed Harbor's sidecar folder with `readTimeout: 900s` (the gateway's own
+  upstream timeout) in the handler's metadata. The runner passes `-e roboarc_docker:RoboARCDocker` to every `harbor run`
+  when `USAGE_GATEWAY` is set, and stops at start if the class does not import with the installed Harbor. Harbor's
+  install is not edited; the patched sidecar image is built once per machine and Harbor version.
+- **Checked** (Harbor 0.23.0, oracle agent, a task allowlisting the docker bridge and a host server that sends its
+  headers after 5 s and 20 s): with Harbor's environment the 20 s call is cut after 15 s (`wget: error getting
+  response`, the server's write hits a broken pipe); with `roboarc_docker` both calls are delivered, and example.com and
+  pypi.org stay blocked.
+- **Tests**: `scripts/harbor/tests/test_roboarc_docker.py` (new; a stand-in Harbor: the patched gost.yaml, the copy
+  byte for byte with modes, reuse, an unexpected gost.yaml stops the import); `test_usage_gateway_option.py` (the runner
+  passes the environment with the gateway, not without). Docs: docs/RUNNING.md "Usage recording".
+
 ## 2.2.1 (2026-10-30)
 
 Standard mode returns mp4 video again, and every task's time limit says that the agent works alone. The same images

@@ -112,6 +112,7 @@ class UsageGatewayOption(unittest.TestCase):
         argv = " ".join(call["argv"])
         self.assertNotIn("OPENAI_BASE_URL", argv)
         self.assertNotIn("--allow-agent-host", argv)
+        self.assertNotIn("roboarc_docker", argv)         # Harbor's own Docker environment without the gateway
         own = re.search(r"(?m)^allowed_hosts = (.*)$", (REPO / "tasks" / self.task / "task.toml").read_text())
         self.assertEqual(call["allowed_hosts"], json.loads(own.group(1)) if own else None)
         jobs = self.root / "jobs"
@@ -138,6 +139,8 @@ class UsageGatewayOption(unittest.TestCase):
         self.assertEqual(len(base_urls), 1, argv)
         self.assertRegex(base_urls[0], r"^OPENAI_BASE_URL=http://127\.0\.0\.1:\d+/u/api\.openai\.com/v1$")
         self.assertIn("127.0.0.1", argv[argv.index("--allow-agent-host") + 1])
+        # the environment whose egress sidecar waits as long as the gateway (roboarc_docker.py)
+        self.assertEqual(argv[argv.index("-e") + 1], "roboarc_docker:RoboARCDocker", argv)
         self.assertEqual(call["allowed_hosts"][0], "127.0.0.1")
         self.assertNotIn("api.openai.com", call["allowed_hosts"])
         job = self.root / "jobs" / f"b-privileged-{self.base}"
