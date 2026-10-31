@@ -6,6 +6,27 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### The usage gateway caps the images in a model request at 50 (runner and gateway; no task or image changes)
+- **The problem** (Reuben's smoke test, 2026-10-31: Codex + GPT-6 Astra through a GitHub Copilot proxy, claws-08): an
+  agent that looks at the cameras resends every image it has seen with each call. After 52 minutes the standard-mode
+  trial's request carried 51 images (21 MB), Copilot answered 400 "Exceeded maximum number of images (50) allowed in the
+  request.", Codex exited, and the trial was voided. Most long standard-mode trials pass 50 images.
+- **The change** (owner 2026-10-31): `gateway.py --image-cap N` and the runner's `GATEWAY_IMAGE_CAP` (50 by default,
+  0 = no cap). A request with more than N images (the image blocks of the Anthropic, Responses and Chat Completions
+  shapes, tool results included) has its oldest replaced by a text note of its API's shape, N/2 at a time, so between N/2
+  and N stay. The rule reads the request alone and replaces the same images from one call to the next until the
+  following step, so the provider's prompt cache is broken once per step. A request within the cap is forwarded as
+  sent; a capped one re-serialized and uncompressed. The image files the agent saved are not touched.
+- **Recorded**: `usage.jsonl` `images` / `images_omitted`, `totals.json` `image_cap_requests`, `usage_recording.json` and
+  every result's `config.json` `image_cap` (null without the gateway). Without the gateway there is no cap. PROTOCOL
+  H.6, docs/RUNNING.md "Usage recording", docs/COLLABORATOR_SETUP.md.
+- **Checked** on the smoke test's own conversation (Codex's session log, rebuilt as a Responses request: 21.1 MB, 51
+  images): 25 replaced, 26 kept, 0.12 s.
+- **Tests**: `scripts/usage_gateway/tests/test_image_cap.py` (new: the step rule, the three shapes and tool results, a
+  tool call's arguments not looked into, the replaced images stable between calls, end to end through gateway.py with a
+  gzip body capped and one forwarded as sent); `test_usage_gateway_option.py` (the cap in the records and passed to the
+  gateway; a bad `GATEWAY_IMAGE_CAP` stops the runner at start).
+
 ### Model calls through the usage gateway are no longer cut after 15 s (runner only; no task, image or result changes)
 - **The problem** (Jianwen's report, 2026-10-31): with the usage gateway, Harbor's egress sidecar (gost, a transparent
   proxy that enforces the task's allowlist) reads the agent's plain-HTTP calls to the gateway and waits at most

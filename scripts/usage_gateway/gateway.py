@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Transparent usage gateway: forwards an agent's model-API requests unchanged and records, per trial, the tokens each
-request used, as it happens. Runner-side tooling (not task code, not an agent adapter): the agent is Harbor's own
+"""Transparent usage gateway: forwards an agent's model-API requests unchanged (but for the image cap, below) and records,
+per trial, the tokens each request used, as it happens. Runner-side tooling (not task code, not an agent adapter): the agent is Harbor's own
 `codex` / `claude-code`, pointed here by its base URL; it keeps its own credentials, which the gateway passes through
 and never logs or stores.
 
@@ -37,6 +37,17 @@ prompt field (provider_side_fields), an OpenRouter `:online` model, or a content
 arguments and tools' schemas are data and are not looked into. --server-tools record only records them (a run that allows the harness's web search). The
 one body forwarded unchecked is a zstd body on a host with neither decoder ("body_unchecked": true, counted in
 totals.json; the start-up log says so).
+
+Image cap (--image-cap N, 0 = off; the runner passes GATEWAY_IMAGE_CAP, 50 by default; owner 2026-10-31): an agent that
+looks at the cameras resends every image it has seen with each call, and a provider may refuse a request with more than
+a fixed number of images (GitHub Copilot: "Exceeded maximum number of images (50) allowed in the request.", which ended
+a standard-mode trial of Reuben's smoke test, 2026-10-31). A request that carries more than N images (the image blocks
+of the Anthropic, Responses and Chat Completions shapes, found where the URL check above looks) has its oldest
+d = step x ceil((n - N) / step) replaced by a text block that says so, step = N // 2: between N/2 and N stay. The rule
+depends on the request alone, and a conversation only grows, so the replaced images stay the same from one call to the
+next until the following step, and the provider's prompt cache is broken once per step, not once per image. A request
+with N images or fewer is forwarded as sent; a capped one re-serialized and uncompressed. usage.jsonl records "images"
+(how many the request carried) and "images_omitted" (how many were replaced); totals.json counts "image_cap_requests".
 
 Attribution: a request's source IP is the trial's container (or, under an egress allowlist, its egress sidecar). Harbor
 names a trial's compose project `<trial>__env`, so `docker inspect` maps the IP to the project and the project to the
@@ -216,6 +227,52 @@ def _fetched(blocks, found: set, depth: int = 0) -> None:
             _fetched(b.get("content"), found, depth + 1)
             if isinstance(src, dict):
                 _fetched(src.get("content"), found, depth + 1)
+
+
+IMAGE_TYPES = {"image": "text", "input_image": "input_text", "image_url": "text"}   # an image block's type -> the type of
+                                       # the text block that replaces it (Anthropic, Responses, Chat Completions)
+
+
+def _images(blocks, out: list, depth: int = 0) -> None:
+    """The image blocks among content blocks, in order, followed where _fetched follows them."""
+    if isinstance(blocks, dict):
+        blocks = [blocks]
+    for b in blocks if isinstance(blocks, list) else []:
+        if not isinstance(b, dict):
+            continue
+        if b.get("type") in IMAGE_TYPES:
+            out.append(b)
+        elif depth < 4 and b.get("type") not in ("tool_use", "server_tool_use", "function_call", "custom_tool_call"):
+            _images(b.get("content"), out, depth + 1)
+            if isinstance(b.get("source"), dict):
+                _images(b["source"].get("content"), out, depth + 1)
+
+
+def cap_images(text: str, cap: int) -> tuple[str | None, int, int]:
+    """(the body to forward instead, or None: forward it as sent; the images the request carries; how many of them were
+    replaced): the image cap of the module doc. `text` is a body server_tools has read."""
+    if not any(f'"{t}"' in text for t in IMAGE_TYPES):
+        return None, 0, 0
+    body = json.loads(text)
+    found: list[dict] = []
+    for key in ("input", "messages"):
+        items = body.get(key)
+        for item in items if isinstance(items, list) else []:
+            if isinstance(item, dict):
+                _images(item.get("content"), found)
+                if key == "input":
+                    _images(item.get("output"), found)
+    n = len(found)
+    if not cap or n <= cap:
+        return None, n, 0
+    step = max(1, cap // 2)
+    d = step * -(-(n - cap) // step)
+    note = f"[earlier image removed: this conversation keeps at most {cap} images, the oldest are dropped]"
+    for b in found[:d]:
+        typ, keep = IMAGE_TYPES[b["type"]], {k: b[k] for k in ("cache_control",) if k in b}
+        b.clear()
+        b.update(type=typ, text=note, **keep)
+    return json.dumps(body, ensure_ascii=False), n, d
 
 
 def server_tools(text: str) -> list[str]:
@@ -512,6 +569,8 @@ def tally(tot: dict, rec: dict) -> None:
             tot["server_tool_requests"] = tot.get("server_tool_requests", 0) + 1
         if rec.get("body_unchecked"):
             tot["body_unchecked"] = tot.get("body_unchecked", 0) + 1
+        if rec.get("images_omitted"):
+            tot["image_cap_requests"] = tot.get("image_cap_requests", 0) + 1
         if rec.get("upstream_failure"):
             tot["upstream_failures"] = tot.get("upstream_failures", 0) + 1
             tot["failures_in_a_row"] = tot.get("failures_in_a_row", 0) + 1
@@ -685,6 +744,11 @@ class Handler(BaseHTTPRequestHandler):
                     f"usage gateway: this request asks the model provider to run a tool or a search for it ({', '.join(tools)}) "
                     "and was not forwarded (provider-run tools are not available in this environment)"),
                     "server_tool_not_allowed", len(body), True, {"server_tools": tools})
+        images = omitted = 0
+        if self.command == "POST" and ARGS.image_cap and text is not None and not unchecked:
+            capped, images, omitted = cap_images(text, ARGS.image_cap)
+            if capped is not None:           # module doc, image cap: forwarded re-serialized, uncompressed
+                text, body = capped, capped.encode()
         tot = trial_totals(trial)
         if trial is not None and over_budget(tot):           # refuse, never forward: the trial has spent its budget
             record(trial, {"ts": round(t0, 3), "dur_s": 0.0, "client_ip": ip, "host": host, "method": self.command,
@@ -692,7 +756,8 @@ class Handler(BaseHTTPRequestHandler):
                            "request_bytes": len(body), "response_bytes": 0, "client_gone": False,
                            "refused": "over_token_budget"}, None)
             return self._reply(400, budget_error(host, path, tot))
-        hdrs = {k: v for k, v in self.headers.items() if k.lower() not in HOP and "\n" not in v and "\r" not in v}
+        hdrs = {k: v for k, v in self.headers.items() if k.lower() not in HOP and "\n" not in v and "\r" not in v
+                and not (omitted and k.lower() == "content-encoding")}
         hdrs["Host"] = host
         if body:
             hdrs["Content-Length"] = str(len(body))
@@ -759,6 +824,10 @@ class Handler(BaseHTTPRequestHandler):
             rec["server_tools"] = tools
         if unchecked:
             rec["body_unchecked"] = True
+        if images:
+            rec["images"] = images
+        if omitted:
+            rec["images_omitted"] = omitted
         if ARGS.raw:
             raw = {"request": {"method": self.command, "host": host, "path": path,
                                "headers": {k: v for k, v in self.headers.items() if k.lower() not in SECRET},
@@ -787,7 +856,11 @@ def main() -> int:
                    help="a model request that asks the provider to run a tool (api_paths.json): refuse it (default) or only record it")
     p.add_argument("--budget-input", type=int, default=10_000_000_000, help="per-trial input tokens, cached included; 0 = no limit (D10)")
     p.add_argument("--budget-output", type=int, default=10_000_000_000, help="per-trial output tokens; 0 = no limit (D10)")
+    p.add_argument("--image-cap", type=int, default=0,
+                   help="at most this many images per model request, the oldest replaced by a text note in steps of half of it (module doc); 0 = off")
     ARGS = p.parse_args()
+    if ARGS.image_cap < 0:
+        p.error("--image-cap must be 0 (off) or more")
     ARGS.jobs = ARGS.jobs.resolve()
     MODEL_HOSTS.extend(h.lower() for h in ARGS.extra_host)
     HTTP_HOSTS.update(h.lower() for h in ARGS.http_host)
@@ -799,7 +872,8 @@ def main() -> int:
     srv.daemon_threads = True
     port = srv.server_address[1]
     log(f"listening on {ARGS.bind}:{port}, jobs {ARGS.jobs}, raw={ARGS.raw}, hosts {MODEL_HOSTS}, http {sorted(HTTP_HOSTS)}, "
-        f"model-API paths of {[p['name'] for p in PROVIDERS]} only ({ARGS.api_paths.name}), provider-run tools: {ARGS.server_tools}")
+        f"model-API paths of {[p['name'] for p in PROVIDERS]} only ({ARGS.api_paths.name}), provider-run tools: {ARGS.server_tools}, "
+        f"image cap: {ARGS.image_cap or 'off'}")
     if zstd_how == NO_ZSTD:
         log("WARNING: no zstd decoder on this host (pip install zstandard, or the zstd program): zstd request bodies "
             "(Codex with a ChatGPT login) are forwarded unchecked and marked body_unchecked")

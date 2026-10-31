@@ -6,11 +6,11 @@ fake `harbor` and a fake gateway: no docker, no model, no network.
 - off (the default): the agent's base URL and the task's egress are left alone, no gateway directory is made, the job's
   usage_recording.json and the result's config.json say that no gateway ran, the token counts are the harness's;
 - on: the agent's base URL points at the gateway, the job's task copy allows the gateway and the package registries only,
-  and the records say so (with the token budget);
+  and the records say so (with the token budget and the image cap, 50 by default, which the gateway is given);
 - on with AGENT=dsh: dsh's Messages root (DEEPSEEK_BASE_URL) points at the gateway, which forwards to DeepSeek's API
   (--extra-host api.deepseek.com), and the job's egress has the gateway, not DeepSeek's host;
-- USAGE_GATEWAY naming a directory without the gateway, and the switch of earlier versions (GATEWAY=1), stop the
-  runner at start, before any job.
+- USAGE_GATEWAY naming a directory without the gateway, a GATEWAY_IMAGE_CAP that is not a whole number, and the switch
+  of earlier versions (GATEWAY=1), stop the runner at start, before any job.
 """
 import json
 import os
@@ -118,10 +118,11 @@ class UsageGatewayOption(unittest.TestCase):
         jobs = self.root / "jobs"
         self.assertFalse((jobs / ".gateway").exists())
         job = jobs / f"b-privileged-{self.base}"
-        self.assertEqual(json.loads((job / "usage_recording.json").read_text()), {"usage_gateway": False, "token_budget": None})
+        self.assertEqual(json.loads((job / "usage_recording.json").read_text()),
+                         {"usage_gateway": False, "token_budget": None, "image_cap": None})
         cfg = self.results_config()
-        self.assertEqual((cfg["usage_gateway"], cfg["usage_source"], cfg["usage_recorded"], cfg["token_budget"]),
-                         (False, "harness", True, None))
+        self.assertEqual((cfg["usage_gateway"], cfg["usage_source"], cfg["usage_recorded"], cfg["token_budget"],
+                          cfg["image_cap"]), (False, "harness", True, None, None))
         summary = (jobs / "b.summary.md").read_text()
         self.assertNotIn("usage gateway", summary)
         self.assertIn("usage gateway off", (jobs / "b.log").read_text())
@@ -146,10 +147,13 @@ class UsageGatewayOption(unittest.TestCase):
         job = self.root / "jobs" / f"b-privileged-{self.base}"
         rec = json.loads((job / "usage_recording.json").read_text())
         self.assertEqual(rec, {"usage_gateway": True, "raw_bodies": True,
-                               "token_budget": {"input": 100000000, "output": 10000000}})
+                               "token_budget": {"input": 100000000, "output": 10000000}, "image_cap": 50})
+        (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+        self.assertIn("--image-cap 50", ready.read_text())          # the default cap reaches the gateway
         cfg = self.results_config()
         self.assertEqual((cfg["usage_gateway"], cfg["usage_source"], cfg["usage_recorded"]), (True, "usage gateway", True))
         self.assertEqual(cfg["token_budget"], {"input": 100000000, "output": 10000000})
+        self.assertEqual(cfg["image_cap"], 50)
         summary = (self.root / "jobs" / "b.summary.md").read_text()
         self.assertIn("usage gateway in / out", summary)
         self.assertIn("900 / 40", summary)
@@ -182,6 +186,15 @@ class UsageGatewayOption(unittest.TestCase):
         self.assertIn("no gateway.py", p.stderr)
         self.assertEqual(self.calls(), [])
         self.assertFalse((self.root / "jobs").exists())
+
+    def test_bad_image_cap_stops_at_start(self):
+        gw = self.root / "gw"
+        gw.mkdir()
+        (gw / "gateway.py").write_text(textwrap.dedent(FAKE_GATEWAY))
+        p = self.run_batch(USAGE_GATEWAY=str(gw), GATEWAY_BIND="127.0.0.1", GATEWAY_IMAGE_CAP="fifty")
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("GATEWAY_IMAGE_CAP", p.stderr)
+        self.assertEqual(self.calls(), [])
 
     def test_old_switch_is_refused(self):
         p = self.run_batch(GATEWAY="1")

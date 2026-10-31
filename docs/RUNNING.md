@@ -394,7 +394,8 @@ installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). The reposito
 (`USAGE_GATEWAY=scripts/usage_gateway`), taken from the shared benchmark repository (PROVENANCE.md), with DeepSeek's
 Messages API added for dsh (`AGENT=dsh` points dsh's `DEEPSEEK_BASE_URL` at the gateway); another
 gateway that takes the runner's options works too. A `USAGE_GATEWAY` without `gateway.py` stops the runner at start,
-before any job. The gateway forwards model calls only, unchanged (the agent keeps its own credentials), records each
+before any job. The gateway forwards model calls only, unchanged but for the image cap below (the agent keeps its own
+credentials), records each
 trial's tokens per request
 (`<trial>/gateway/usage.jsonl`, `totals.json`; with `GATEWAY_RAW=1`, the default, also the raw request and response
 bodies, which hold the whole conversation: keep them private), enforces the token budget (`TOKEN_BUDGET_IN` /
@@ -414,8 +415,20 @@ class builds the sidecar from a patched copy of the installed Harbor's sidecar f
 install is not edited, and the allowlist is unchanged. A `harbor run` of your own through the gateway should pass the
 same option, with `scripts/harbor/environments` on `PYTHONPATH`.
 
-Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget), and every result's
-`config.json` says what it has:
+The gateway also caps the images in a model request: `GATEWAY_IMAGE_CAP`, 50 by default, 0 = no cap (owner 2026-10-31).
+An agent that looks at the cameras resends every image it has seen with each call, and some providers refuse a request
+with more than a fixed number: GitHub Copilot answers 400, "Exceeded maximum number of images (50) allowed in the
+request.", and Codex then exits, which voided a standard-mode trial of Reuben's smoke test (2026-10-31, 51 images after
+52 minutes). A request with more images than the cap has its oldest ones replaced by a short text note
+("[earlier image removed: this conversation keeps at most 50 images, the oldest are dropped]"), half the cap at a
+time, so that between half the cap and the cap stay; a request within the cap is forwarded as sent. Replacing in steps
+keeps the replaced images the same from one call to the next, so the provider's prompt cache is broken once per step,
+not once per image. The image files the agent saved are not touched: it can look at one again. `usage.jsonl` records
+`images` and `images_omitted` per request and `totals.json` counts `image_cap_requests`. Without the gateway there is
+no cap.
+
+Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget and image cap), and
+every result's `config.json` says what it has:
 
 | field | value |
 |---|---|
@@ -423,5 +436,6 @@ Every job of the runner gets `<job>/usage_recording.json` (whether the gateway r
 | `usage_source` | where the token counts come from: `"usage gateway"`, `"harness"` (Harbor's `result.json`), or `null` (none recorded) |
 | `usage_recorded` | `usage_source` is not `null` |
 | `token_budget` | `{"input": ..., "output": ...}`, the budget the gateway enforced (0 = no limit); `null` without the gateway |
+| `image_cap` | the most images the gateway let a model request carry (0 = no cap); `null` without the gateway, or for a job recorded before the cap existed |
 
 Without the gateway no token budget is enforced: the task's cutoff bounds the trial.

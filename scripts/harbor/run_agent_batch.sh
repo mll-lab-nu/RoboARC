@@ -92,13 +92,14 @@
 #                model API calls through the transparent usage gateway installed in <dir> (gateway.py, rawlog.py,
 #                api_paths.json). This repository ships one: USAGE_GATEWAY=scripts/usage_gateway (another gateway
 #                that takes the same options works too); a <dir> without gateway.py stops the runner at start. It forwards
-#                them unchanged (the agent keeps its own credentials) and records each trial's tokens per request in
+#                them unchanged but for GATEWAY_IMAGE_CAP (the agent keeps its own credentials) and records each trial's tokens per request in
 #                <trial>/gateway/ (usage.jsonl, totals.json). Before each job the runner checks that the gateway answers
 #                (/_gateway/health) and restarts it on its port, or stops the lane; a job during which it died gets
 #                <job>/gateway_down.json, and a trial whose last model calls failed at the gateway (upstream unreachable,
 #                stream broken off, provider 5xx) is published as "not a result", never the agent's 0.
-#                Either way every job gets <job>/usage_recording.json (whether the gateway ran, its token budget), and
-#                write_task_results.py copies it into each result's config.json (usage_gateway, usage_source, token_budget)
+#                Either way every job gets <job>/usage_recording.json (whether the gateway ran, its token budget and image
+#                cap), and write_task_results.py copies it into each result's config.json (usage_gateway, usage_source,
+#                token_budget, image_cap)
 #                The GATEWAY_* and TOKEN_BUDGET_* options below take effect only with USAGE_GATEWAY set.
 #   GATEWAY_RAW  1 (default) = the gateway also keeps every request and response body
 #                (<trial>/gateway/raw.jsonl.xz, deduplicated, see the gateway's rawlog.py; private: it holds the
@@ -119,6 +120,10 @@
 #   TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT   per-trial token budget the gateway enforces (100000000 / 10000000, PROTOCOL
 #                §5): past it every further model request is refused and the trial counts as failed; 0 = no limit.
 #                Without the gateway no token budget is enforced (the task's cutoff bounds the trial)
+#   GATEWAY_IMAGE_CAP  at most this many images per model request (50, the default; 0 = no cap): a request with more
+#                has its oldest images replaced by a short text note, half the cap at a time (GitHub Copilot refuses a
+#                request with more than 50, and an agent resends every camera image it has looked at with each call;
+#                the gateway's module doc). Without the gateway there is no cap
 # Runner-side tools (not task code), in this directory: with LOG_MIRROR=1 the container rcb-log-mirror copies every
 # trial's agent/ directory append-only into ${JOBS}_mirror/ (log_mirror.py; root-owned: neither the agent nor the host
 # user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
@@ -148,7 +153,7 @@ if [ -z "${GPUS:-}" ]; then
 fi
 USAGE_GATEWAY="${USAGE_GATEWAY:-}"
 GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
-GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
+GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"; GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-50}"
 HOST_CPUS="${HOST_CPUS:-$(nproc)}"
 [ -n "$MODEL" ] || { echo "MODEL must be set: the -m model of the agent, e.g. MODEL=openai/<model> (docs/RUNNING.md)" >&2; exit 2; }
 # the switch of earlier versions of this script: refused rather than ignored, so that nobody expects a usage record silently
@@ -157,6 +162,7 @@ if [ -n "$USAGE_GATEWAY" ]; then
   [ -f "$USAGE_GATEWAY/gateway.py" ] || { echo "USAGE_GATEWAY=$USAGE_GATEWAY: no gateway.py there. Point USAGE_GATEWAY at the gateway's directory (this repository ships one: USAGE_GATEWAY=scripts/usage_gateway), or leave USAGE_GATEWAY empty to run without usage recording (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
   USAGE_GATEWAY="$(cd "$USAGE_GATEWAY" && pwd)"
   case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
+  [[ "$GATEWAY_IMAGE_CAP" =~ ^[0-9]+$ ]] || { echo "GATEWAY_IMAGE_CAP must be a whole number (0 = no cap)" >&2; exit 2; }
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
 [[ "$K" =~ ^[1-9][0-9]*$ ]] || { echo "K must be a positive integer (trials per task and mode)" >&2; exit 2; }
@@ -332,7 +338,7 @@ if [ -n "$USAGE_GATEWAY" ]; then
     [ -z "$v" ] && [ -n "$ENV_FILE" ] && v=$(sed -n "s/^[[:space:]]*\(export[[:space:]]\+\)\?$1=//p" "$ENV_FILE" | tail -1 | tr -d "\"'")
     printf '%s' "${v:-$2}"
   }
-  gw_args=(--jobs "$JOBS" --bind "$GATEWAY_BIND" --ready-file "$ready" --budget-input "$TOKEN_BUDGET_IN" --budget-output "$TOKEN_BUDGET_OUT"); for h in ${GATEWAY_EXTRA_HOSTS:-}; do gw_args+=(--extra-host "$h"); done; [ "$GATEWAY_RAW" = 1 ] && gw_args+=(--raw)
+  gw_args=(--jobs "$JOBS" --bind "$GATEWAY_BIND" --ready-file "$ready" --budget-input "$TOKEN_BUDGET_IN" --budget-output "$TOKEN_BUDGET_OUT" --image-cap "$GATEWAY_IMAGE_CAP"); for h in ${GATEWAY_EXTRA_HOSTS:-}; do gw_args+=(--extra-host "$h"); done; [ "$GATEWAY_RAW" = 1 ] && gw_args+=(--raw)
   [ "$WEB_SEARCH" = allowed ] && gw_args+=(--server-tools record)   # not an official run: the provider-run tools are only recorded
   # a plain-HTTP base URL (a self-hosted model server, e.g. sglang): the gateway may forward to exactly that host:port
   case "$AGENT" in
@@ -406,7 +412,7 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
     GATEWAY_ONLY="$GATEWAY_ONLY,chatgpt.com"
     [ "$GATEWAY_EGRESS" = gateway ] && log "ChatGPT login: chatgpt.com stays directly reachable beside the gateway (Codex's workspace lookup needs it over HTTPS)" ;;
   esac
-  log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
+  log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, image cap: $GATEWAY_IMAGE_CAP, agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
 fi
 
 gateway_check() {  # before a job is claimed (USAGE_GATEWAY set): the gateway answers, else it is restarted on its port; 1 = it is
@@ -438,12 +444,12 @@ wait_for() {  # <mode>: block until every WAIT_FOR file of this mode exists
 }
 
 usage_record() {  # <job>: <job>/usage_recording.json, whether this job's trials ran through the usage gateway (and its
-  # token budget); write_task_results.py copies it into every result's config.json
+  # token budget and image cap); write_task_results.py copies it into every result's config.json
   if [ -n "$USAGE_GATEWAY" ]; then
-    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}}\n' \
-      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT"
+    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}, "image_cap": %s}\n' \
+      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT" "$GATEWAY_IMAGE_CAP"
   else
-    printf '{"usage_gateway": false, "token_budget": null}\n'
+    printf '{"usage_gateway": false, "token_budget": null, "image_cap": null}\n'
   fi > "$JOBS/$1/usage_recording.json"
 }
 

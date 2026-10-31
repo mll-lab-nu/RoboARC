@@ -186,7 +186,9 @@ done
   `MODES=standard` runs one mode only.
 - **Usage gateway** (`USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0`, as in the commands; keep it on). The runner
   routes the agent's model calls through a usage gateway on your host (docs/RUNNING.md "Usage recording").
-  - It forwards the calls unchanged; the agent keeps its own credentials.
+  - It forwards the calls unchanged; the agent keeps its own credentials. The one exception: a call that carries more
+    than 50 images (`GATEWAY_IMAGE_CAP`) has its oldest ones replaced by a short note, because some providers, GitHub
+    Copilot among them, refuse more than 50.
   - It records each trial's tokens per request in `<trial>/gateway/` (`usage.jsonl`, `totals.json`). The token counts
     in the results then come from the gateway, the same way for every agent and provider.
   - It enforces each trial's token budget: 100M input tokens (cache included) and 10M output tokens (reasoning

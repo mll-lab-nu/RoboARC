@@ -199,8 +199,9 @@ the allowlist `scripts/set_agent_egress.py` `HOSTS` (the model APIs and the pack
 usage gateway narrows it further to the gateway and the registries), unless the task's author declares open egress,
 `[metadata] network = "open"` (then `[agent]` sets no other policy). The runner applies what the task declares;
 open-network results are ranked apart. The verifier has no network. Usage recording is optional: an official run needs
-no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. *CI:*
-`check-verifier-isolation.sh`.
+no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. Through the gateway a
+model request carries at most `GATEWAY_IMAGE_CAP` images (50 by default; owner 2026-10-31): the oldest beyond it are
+replaced by a short text note, and every result records the cap (`image_cap`). *CI:* `check-verifier-isolation.sh`.
 
 **H.7 Comparable twins.** Where a task ships both a privileged and a standard (or standard-realtime) version, they
 share one frozen instance (byte-identical copies), one success rule and the same seeds (`default`, `allowed`,
