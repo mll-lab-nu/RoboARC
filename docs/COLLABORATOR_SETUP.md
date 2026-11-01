@@ -184,11 +184,15 @@ done
 - **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 90 × 2 × 3 =
   540 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
   `MODES=standard` runs one mode only.
-- **Seed by seed** (`SEEDS="0 1 2"`): every task's seed-0 trials start first, then seed 1, then seed 2; once the last
-  seed-0 trials are running, seed-1 trials take the GPUs they leave free (docs/RUNNING.md "Running the seeds in turn").
-  So the batch has one trial of every task, at seed 0, well before it ends. To run the rest later, start the same
-  command with `SEEDS="1 2"` and the same batch name and `JOBS`: the trials keep their numbers and seeds, and the ones
-  done are skipped. Every lane runs the same command.
+- **Seed by seed** (`SEEDS="0 1 2"`, as in the command): every task's seed-0 trials start first, then seed 1, then
+  seed 2; once every seed-0 trial has started, seed-1 trials take the GPUs that free up (docs/RUNNING.md "Running the
+  seeds in turn"). So the batch has one trial of every task, at seed 0, well before it ends. The order changes nothing
+  in the results: each trial keeps its number and seed (without `SEEDS` the runner goes task by task). The log's first
+  lines say `SEEDS 0 1 2, in that order: 180 / 180 / 180 jobs` (fewer with a shorter list of bases or one mode).
+  - To run seed 0 alone first: `SEEDS="0"`. Later, the same command with `SEEDS="1 2"`, the same batch name and the
+    same `JOBS`: the two runs make one batch of three trials per task, and finished trials are skipped.
+  - Keep `K=3` in the command: the runner stops at start if a task's trials do not run a listed seed. Every lane runs
+    the same command, `SEEDS` included.
 - **Usage gateway** (`USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0`, as in the commands; keep it on). The runner
   routes the agent's model calls through a usage gateway on your host (docs/RUNNING.md "Usage recording").
   - It forwards the calls unchanged; the agent keeps its own credentials. The one exception: a call that carries more
