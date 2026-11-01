@@ -6,6 +6,27 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### `bash-runners/`: the evaluation run one seed at a time; a batch run in parts keeps every trial in its plan (runner fix)
+- **The bug** (the `SEEDS` entry below): the batch's plan (`$JOBS/.plan/<batch>.json` and `.tsv`) listed only the trials
+  of the last command's seeds. After `SEEDS="0"`, then `SEEDS="1 2"`, it held the seed-1 and seed-2 trials only, so
+  `scripts/send_results.sh` indexed the seed-0 jobs with no task, mode, trial or seed, and its MANIFEST gave the seeds
+  used as `[1, 2]`. A lane of other seeds started on the same batch rewrote the plan under the lanes already running:
+  they then took its seeds' trials instead of their own, and could find no seed in the plan for a trial of theirs.
+- **The fix:** the plan lists every trial of the batch whatever `SEEDS` is (the plan without `SEEDS`); a lane with
+  `SEEDS` takes its trials, in their order, from `$JOBS/.plan/<batch>.seeds-<s>-<s>.tsv`. Lanes of other seeds can run
+  on the same batch at the same time, each its own trials, with no order between them. Without `SEEDS` nothing
+  changes: the plan, its order and the files in `.plan/` are as before.
+- **`bash-runners/`:** `run_seed0.sh`, `run_seed1.sh` and `run_seed2.sh` start the lanes of docs/COLLABORATOR_SETUP.md
+  section 5's command (`K=3`, the usage gateway with `GATEWAY_RAW=0`, 4 lanes per GPU, `nohup`) with `SEEDS` 0, 1 or
+  2; `start_lanes.sh` holds the command. Run them one after the other, the next once the previous one's lanes have
+  ended, with the same settings and batch name. They refuse to start without `MODEL`, `RESULTS` or an `EFFORT` other
+  than `default`, or without the `ENV_FILE`.
+- **Tests:** `test_runner_seeds.py`: with `SEEDS` the plan is the plan without it (the order in the seeds file); a
+  batch run in two parts has every trial in its plan; a `SEEDS="1 2"` lane started during a `SEEDS="0"` lane's first
+  trial leaves that lane its trials (each of the three fails on the runner before the fix); without `SEEDS`, `.plan/`
+  holds only `<batch>.json` and `.tsv`. `test_bash_runners.py` (a fake runner): each script's lanes and settings, and
+  the refusals.
+
 ### The runner can run a batch seed by seed: `SEEDS` (runner only; no task, image or result changes)
 - **Why:** with `K=3` the runner went task by task, each task's three trials (seeds 0, 1 and 2 in an order set by the
   batch name) one after the other, so a batch stopped early had all seeds of some tasks and none of others.

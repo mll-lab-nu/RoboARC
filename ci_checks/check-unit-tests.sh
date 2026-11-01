@@ -2,7 +2,7 @@
 # Unit tests of the benchmark's tooling and the shared layer, in two tiers.
 #  1. Standard library and a shell only (no numpy, no simulator, no image): the Harbor runner's helpers (retry rule,
 #     account-failure rule, Codex config, the optional usage gateway switch and the trials' seeds and results with a fake
-#     harbor, the machine record host_info.py, the agent-end marker plugin, build stamps), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
+#     harbor, the machine record host_info.py, the agent-end marker plugin, build stamps), bash-runners/ (a fake runner), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
 #     shipped usage gateway (scripts/usage_gateway/: its own tests, and the options and host lists the runner gives it),
 #     the simulator source hash (tools/release/source_hash.py), and RoboARC's generator and asset pins
 #     (scripts/roboarc/tests/: the packages' fields and checks, assets.py pin / check / check-instances on a fake
@@ -44,7 +44,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/usage_gateway/tests/test_budget_stop.py scripts/usage_gateway/tests/test_image_cap.py \
          scripts/tests/test_stamp_mtimes.py \
          scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
-         scripts/harbor/tests/test_gpu_slots.py \
+         scripts/harbor/tests/test_gpu_slots.py scripts/harbor/tests/test_bash_runners.py \
          scripts/harbor/tests/test_pin_gpu.py scripts/harbor/tests/test_dsh_acp.py scripts/harbor/tests/test_host_info.py \
          scripts/harbor/tests/test_phase_marker.py scripts/harbor/tests/test_roboarc_docker.py \
          tools/tests/test_stage_instance.py tools/tests/test_restamp.py \

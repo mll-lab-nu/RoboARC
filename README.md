@@ -150,6 +150,7 @@ in [examples/](examples/).
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
 | `scripts/` | the task layer the Harbor tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`), build helpers (`stamp_mtimes.py`, `check_image_files.py`) and `send_results.sh` / `receive_results.sh` |
 | `scripts/harbor/` | the Harbor batch runner and its helpers ([docs/RUNNING.md](docs/RUNNING.md)) |
+| `bash-runners/` | the evaluation run one seed at a time: `run_seed0.sh`, `run_seed1.sh`, `run_seed2.sh` ([docs/COLLABORATOR_SETUP.md](docs/COLLABORATOR_SETUP.md), section 5) |
 | `source/` | the image build context: the simulator package `topogym/` (with `planning/`, the planners that made the references), `assets/robots/`, the recipe `source/images/roboarc/Dockerfile` with its pinned inputs and the MuJoCo EPA patch |
 | `images/` | the image pins (`pins.json`), `pull_all.sh`, `archive.sh` and `push_all.sh` ([images/README.md](images/README.md)); `roboarc/`: the release image's `build.sh` and its README; `monitor/`: the monitor sidecar's recipe |
 | `tools/` | development tools: the release rebuild, reference recording, redesign and stress tests ([tools/README.md](tools/README.md)) |

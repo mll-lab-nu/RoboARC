@@ -191,8 +191,20 @@ done
   lines say `SEEDS 0 1 2, in that order: 180 / 180 / 180 jobs` (fewer with a shorter list of bases or one mode).
   - To run seed 0 alone first: `SEEDS="0"`. Later, the same command with `SEEDS="1 2"`, the same batch name and the
     same `JOBS`: the two runs make one batch of three trials per task, and finished trials are skipped.
-  - Keep `K=3` in the command: the runner stops at start if a task's trials do not run a listed seed. Every lane runs
-    the same command, `SEEDS` included.
+  - One seed at a time, a script per seed: `bash-runners/run_seed0.sh <batch name>`, then `run_seed1.sh`, then
+    `run_seed2.sh`, with the same batch name. Each starts the command above with `SEEDS` set to its seed (4 lanes per
+    GPU, `nohup`), from the settings in its environment:
+    ```bash
+    MODEL=openai/<model> EFFORT=high RESULTS=/path/outside/the/repo bash-runners/run_seed0.sh <batch name>
+    ```
+    `AGENT` defaults to `codex`, `ENV_FILE` to `.env` and `JOBS` to `jobs/agents` in the checkout; the other settings
+    (`GPUS`, `MEM_GUARD`, `MODES`, `CODEX_FORCE_AUTH_JSON`, ...) go on the same line, as in the command above. Bases
+    after the batch name run those only. Each lane's output goes to `jobs/<batch name>.seeds-<seed>.lane<k>.out`. Start
+    the next script once every lane of the previous one has ended: each of its output files then ends with
+    `runner <pid> of batch <batch name> finished` (seed 0: `tail -qn1 jobs/<batch name>.seeds-0.lane*.out`).
+  - Keep `K=3` in the command: the runner stops at start if a task's trials do not run a listed seed. Lanes of other
+    seeds started on the same batch while earlier ones still run do run, each lane its own trials, but their trials do
+    not wait for the earlier seed's: for the order, start the later seeds once the earlier lanes have ended.
 - **Usage gateway** (`USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0`, as in the commands; keep it on). The runner
   routes the agent's model calls through a usage gateway on your host (docs/RUNNING.md "Usage recording").
   - It forwards the calls unchanged; the agent keeps its own credentials. The one exception: a call that carries more

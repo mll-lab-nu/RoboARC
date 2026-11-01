@@ -40,7 +40,8 @@
 #                later seed's trial starts only in room that no waiting trial of an earlier seed fits, and while one
 #                waits a later seed's deformable trial is not tried (it would have a GPU kept for it). A task allowed a
 #                seed that its K trials do not run stops the batch before it starts; a task not allowed one runs no
-#                trial at it. Every lane of a batch is the same command (they share the plan)
+#                trial at it. Lanes of the same SEEDS keep that order between them; a lane of other seeds (or none) on
+#                the same batch may run beside them, each lane its own trials, with no order between them
 #   SEQ          1 = one trial at a time per runner (default): task by task, trial by trial, each mode in MODES order, one
 #                Harbor job per task, trial and mode ($JOBS/<batch>-<mode>-<task>/; with K > 1
 #                $JOBS/<batch>-<mode>-<task>-t<k>/, k = 1..K). Start the same command again to add a lane: every job is
@@ -283,13 +284,16 @@ on_exit() {
   return 0
 }
 trap on_exit EXIT
-# the batch's plan: every job this command runs, with its trial and seeds ("pending" in live_board.py until it starts);
-# $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run
+# the batch's plan: every job of the batch, with its trial and seeds ("pending" in live_board.py until it starts);
+# $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run. With
+# SEEDS the plan is the same (lanes of other SEEDS may run beside this one, and send_results.sh indexes the batch from
+# it), and the lane runs the trials of its seeds in their order, RUN_PLAN = $JOBS/.plan/<batch>.seeds-<s>-<s>.tsv
 mkdir -p "$JOBS/.plan"
 PLAN="$JOBS/.plan/$batch.tsv"
-plan_notes="$(python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "$SEEDS" "${tasks[@]}" <<'PY'
+RUN_PLAN="$PLAN"; [ -n "$SEEDS" ] && RUN_PLAN="$JOBS/.plan/$batch.seeds-${SEEDS// /-}.tsv"
+plan_notes="$(python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "$SEEDS" "$RUN_PLAN" "${tasks[@]}" <<'PY'
 import json, os, pathlib, sys
-repo, out, tsv, batch, run_id, seq, modes, K, want, *tasks = sys.argv[1:]
+repo, out, tsv, batch, run_id, seq, modes, K, want, run_tsv, *tasks = sys.argv[1:]
 sys.path.insert(0, str(pathlib.Path(repo) / "scripts"))
 import task_seed, task_conventions as tc  # noqa: E402
 K = int(K)
@@ -307,6 +311,8 @@ for t, k, m in order:
         seeds[d.name] = task_seed.assign(d, batch, K)
     job = f"{batch}-{m}-{t}{suffix(k)}" if seq == "1" else f"{batch}-{m}{suffix(k)}"
     jobs.append({"job": job, "task": d.name, "mode": m, "trial": k, "trials": K, "seed": seeds[d.name][k - 1]})
+row = lambda j: f"{j['job']}\t{j['task']}\t{j['mode']}\t{j['trial']}\t{j['seed']}\n"
+files = [(out, json.dumps({"batch": batch, "run_id": run_id, "trials": K, "jobs": jobs}, indent=1)), (tsv, "".join(map(row, jobs)))]
 if want:                                   # SEEDS: the trials of these seeds only, a seed's trials before the next seed's
     want = sorted({int(s) for s in want.split()})
     for task, run in seeds.items():
@@ -319,11 +325,11 @@ if want:                                   # SEEDS: the trials of these seeds on
                       f"run seeds {run} (K trials run K of a task's allowed seeds: K=3 runs all three of a RoboARC task)")
                 sys.exit(1)
             print(f"SEEDS: {task} does not allow seed {s} (allowed: {sd['allowed']}); none of its trials runs at it")
-    jobs = sorted((j for j in jobs if j["seed"] in want), key=lambda j: j["seed"])   # stable: task, trial, mode
+    turn = sorted((j for j in jobs if j["seed"] in want), key=lambda j: j["seed"])   # stable: task, trial, mode
     print(f"SEEDS {' '.join(map(str, want))}, in that order: "
-          f"{' / '.join(str(sum(j['seed'] == s for j in jobs)) for s in want)} jobs")
-for f, text in ((out, json.dumps({"batch": batch, "run_id": run_id, "trials": K, "jobs": jobs}, indent=1)),
-                (tsv, "".join(f"{j['job']}\t{j['task']}\t{j['mode']}\t{j['trial']}\t{j['seed']}\n" for j in jobs))):
+          f"{' / '.join(str(sum(j['seed'] == s for j in turn)) for s in want)} jobs")
+    files.append((run_tsv, "".join(map(row, turn))))
+for f, text in files:
     tmp = pathlib.Path(f"{f}.{os.getpid()}")
     tmp.write_text(text)
     tmp.replace(f)
@@ -870,8 +876,8 @@ if [ "$SEQ" = 1 ]; then
       elif [ $rc -ne 0 ]; then
         log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
       fi
-      [ -n "$SEEDS" ] && { again=1; break; }   # SEEDS: after each trial the plan is read from the top: an earlier seed's job first
-    done 3< "$PLAN"
+      [ -n "$SEEDS" ] && { again=1; break; }   # SEEDS: after each trial RUN_PLAN is read from the top: an earlier seed's job first
+    done 3< "$RUN_PLAN"
     [ "$again" = 1 ] && [ "$stop" = 0 ] && continue
     [ "$stop" = 1 ] || [ "$waiting" = 0 ] && break       # every job is claimed or done: this lane is finished
     if [ "$started" = 0 ]; then

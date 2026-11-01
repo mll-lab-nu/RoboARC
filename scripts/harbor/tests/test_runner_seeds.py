@@ -21,7 +21,8 @@ seed only.
   both have their results, with every slot released; a deformable trial waits for a GPU on which none validates;
   PHASE_SPLIT=0, GPU_SCHED=0 or a harbor without --plugin: one trial after the other, as before;
 - SEEDS: only the trials of those seeds, every trial of a lower seed started before any of a higher one, each trial
-  with its number and seed (SEEDS="0", then SEEDS="1 2": the batch's K=3 trials); a later seed's deformable trial
+  with its number and seed (SEEDS="0", then SEEDS="1 2", or a SEEDS="1 2" lane beside a SEEDS="0" one: the batch's
+  K=3 trials, all of them in the batch's plan); a later seed's deformable trial
   waits while trials of an earlier seed wait for the GPU; a later seed's trial takes the room that is free once every
   trial of the earlier seed has started; a malformed SEEDS, SEEDS with SEQ=0 and a seed a task's K trials do not run
   are refused. Without SEEDS the plan, the start order, the log and the scheduling are the runner's before SEEDS.
@@ -34,6 +35,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parents[3]
@@ -379,8 +381,12 @@ class RunnerSeeds(unittest.TestCase):
         """The jobs in the order the log says they started."""
         return re.findall(r"\] start (\S+): ", (self.root / "jobs" / "b.log").read_text())
 
-    def plan_rows(self):
-        return [tuple(x.split("\t")) for x in (self.root / "jobs" / ".plan" / "b.tsv").read_text().splitlines()]
+    def plan_rows(self, name="b.tsv"):
+        return [tuple(x.split("\t")) for x in (self.root / "jobs" / ".plan" / name).read_text().splitlines()]
+
+    def plan_seeds(self):
+        """The batch's plan as send_results.sh's index reads it: job -> seed."""
+        return {j["job"]: j["seed"] for j in json.loads((self.root / "jobs" / ".plan" / "b.json").read_text())["jobs"]}
 
     def task_major(self, bases, modes, K):
         """The plan of the runner before SEEDS: task by task, trial by trial, each mode in MODES order."""
@@ -390,7 +396,8 @@ class RunnerSeeds(unittest.TestCase):
     def test_seeds_in_turn(self):
         bases, modes = (self.multi, self.single), ("privileged", "standard")
         self.run_batch(*bases, K="3", SEEDS="0 1 2", GPU_SCHED="0")
-        rows = self.plan_rows()
+        self.assertEqual(self.plan_rows(), self.task_major(bases, modes, 3))       # the batch's plan, as without SEEDS
+        rows = self.plan_rows("b.seeds-0-1-2.tsv")
         self.assertEqual(rows, sorted(self.task_major(bases, modes, 3), key=lambda r: int(r[4])))   # the same trials, by seed
         self.assertEqual(self.starts(), [r[0] for r in rows])
         self.assertIn("SEEDS 0 1 2, in that order: 8 / 2 / 2 jobs", (self.root / "jobs" / "b.log").read_text())
@@ -404,6 +411,7 @@ class RunnerSeeds(unittest.TestCase):
         self.run_batch(*bases, K="3", GPU_SCHED="0")
         self.assertEqual(self.plan_rows(), self.task_major(bases, modes, 3))
         self.assertEqual(self.starts(), [r[0] for r in self.plan_rows()])
+        self.assertEqual(sorted(p.name for p in (self.root / "jobs" / ".plan").iterdir()), ["b.json", "b.tsv"])
         log = (self.root / "jobs" / "b.log").read_text()
         self.assertNotIn("SEEDS", log)
         self.assertNotIn("starts while", log)
@@ -419,12 +427,42 @@ class RunnerSeeds(unittest.TestCase):
         both = self.starts()
         self.assertEqual(sorted(both), sorted(seed_of))                            # every trial, once
         self.assertEqual([seed_of[j] for j in both[len(first):]], [1, 2])
+        self.assertEqual(self.plan_seeds(), seed_of)                               # the plan has the trials of both runs
         for k in (1, 2, 3):
             self.assertEqual(self.result(f"{self.multi}-privileged", k)["seed"], want[k - 1])
             self.assertEqual(self.result(f"{self.single}-privileged", k)["seed"], 0)
         log = (self.root / "jobs" / "b.log").read_text()
         self.assertIn(f"SEEDS: {self.single}-privileged does not allow seed 1", log)   # the single-seed fixture
         self.assertIn("SEEDS 1 2, in that order: 1 / 1 jobs", log)
+
+    def test_seeds_lanes_of_other_seeds_side_by_side(self):
+        """A SEEDS="1 2" lane started while a SEEDS="0" lane is in its first trial: each lane runs its own seeds' trials,
+        every trial once, from its seed, and the plan keeps the batch's every trial."""
+        want = self.expected(self.multi, 3)
+        seed_of = {f"b-privileged-{self.multi}-t{k}": want[k - 1] for k in (1, 2, 3)}
+        seed_of.update({f"b-privileged-{self.single}-t{k}": 0 for k in (1, 2, 3)})
+        first = f"b-privileged-{self.multi}-t{want.index(0) + 1}"                # the SEEDS="0" lane's first trial
+        log = self.root / "jobs" / "b.log"
+        lane = subprocess.Popen(["bash", str(self.repo / "scripts/harbor/run_agent_batch.sh"), "b", self.multi, self.single],
+                                env=dict(self.env, MODES="privileged", K="3", SEEDS="0", GPU_SCHED="0",
+                                         FAKE_PHASES=json.dumps({first: [6, 0]})),
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, cwd=self.root)
+        try:
+            for _ in range(600):
+                if log.exists() and f"start {first}:" in log.read_text():
+                    break
+                time.sleep(0.1)
+            self.run_batch(self.multi, self.single, MODES="privileged", K="3", SEEDS="1 2", GPU_SCHED="0")
+            out, _ = lane.communicate(timeout=900)
+        finally:
+            if lane.poll() is None:
+                lane.kill()
+        self.assertEqual(lane.returncode, 0, out)
+        self.assertEqual(sorted(self.starts()), sorted(seed_of))                    # every trial, once
+        for k in (1, 2, 3):
+            self.assertEqual(self.result(f"{self.multi}-privileged", k)["seed"], want[k - 1])
+            self.assertEqual(self.result(f"{self.single}-privileged", k)["seed"], 0)
+        self.assertEqual(self.plan_seeds(), seed_of)
 
     def test_seeds_earlier_seed_first(self):
         """One GPU, one trial on it at a time: the seed-1 deformable trial waits for the three seed-0 IKEA trials. (The

@@ -294,14 +294,20 @@ seed-0 trials first, then those of seed 1, then those of seed 2.
   runner before anything starts. A task not allowed a listed seed runs no trial at it, with a line in the log.
 - **An order of priority, not rounds.** A later seed's trial starts only in room that no waiting trial of an earlier
   seed fits. While seed-0 trials remain and fit, the GPUs go to them; once every seed-0 trial has started, seed-1
-  trials take the room that frees up, beside the last seed-0 trials still running. To keep that order a lane reads the
-  plan from the top after each trial it starts, and while a trial of an earlier seed waits for room it does not try a
+  trials take the room that frees up, beside the last seed-0 trials still running. To keep that order a lane reads its
+  trials from the top after each trial it starts, and while a trial of an earlier seed waits for room it does not try a
   later seed's deformable trial (a waiting deformable trial has a GPU kept or drained for it, "GPUs and lanes" above).
   The log says `SEEDS 0 1 2, in that order: <n> / <n> / <n> jobs` at the start, and
   `lane <pid>: <job> (seed <s>) starts while <n> job(s) of seed <s0> wait for room` when a later seed takes free room.
 - **One limit.** Tasks reserve different CPUs and memory: a later seed's trial that needs less than an earlier seed's
   waiting one may start in room too small for that one, as between the tasks of one seed.
-- `SEQ=1` only (the default), and every lane of a batch is the same command: the lanes share the batch's plan.
+- **Lanes.** Lanes of the same `SEEDS` keep the order between them. A lane of other seeds can run on the same batch at
+  the same time (`SEEDS="1 2"` started while `SEEDS="0"` lanes still run), each lane running its own trials, but its
+  trials then do not wait for the other lane's: for the order, start the next seeds once the earlier lanes have ended.
+  The batch's plan (`$JOBS/.plan/<batch>.json`) lists every trial of the batch whatever `SEEDS` is, so
+  `scripts/send_results.sh` indexes every trial of a batch run in parts; a lane takes its trials in the order of
+  `$JOBS/.plan/<batch>.seeds-0-1-2.tsv` (for `SEEDS="0 1 2"`).
+- `SEQ=1` only (the default).
 
 Without `SEEDS` the runner plans and schedules as it did before the option.
 
