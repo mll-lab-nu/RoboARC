@@ -6,6 +6,26 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### The runner can run a batch seed by seed: `SEEDS` (runner only; no task, image or result changes)
+- **Why:** with `K=3` the runner went task by task, each task's three trials (seeds 0, 1 and 2 in an order set by the
+  batch name) one after the other, so a batch stopped early had all seeds of some tasks and none of others.
+- **The change:** `SEEDS="0 1 2"` (or a part of it, e.g. `"1 2"`; `SEQ=1` only) runs, of the K trials, those of the
+  listed seeds, every task's trials of the lowest seed first. The trials keep their numbers and seeds, so `SEEDS="0"`
+  and later `SEEDS="1 2"` with the same batch name and `JOBS` make one K=3 batch. It is an order of priority: a later
+  seed's trial starts only in room no waiting trial of an earlier seed fits, so seed-1 trials fill the GPUs the last
+  seed-0 trials leave free. With `SEEDS` a lane reads the plan from the top after each trial it starts, and while a
+  trial of an earlier seed waits for room it does not try a later seed's deformable trial (the slot ledger would keep
+  or drain a GPU for it). A task allowed a listed seed that its K trials do not run stops the runner at start. Without
+  `SEEDS` nothing changes. docs/RUNNING.md "Running the seeds in turn"; docs/COLLABORATOR_SETUP.md section 5 uses
+  `SEEDS="0 1 2"`.
+- **Tests** (`scripts/harbor/tests/test_runner_seeds.py`, fake harbor): the plan by seed with the same trials and seeds;
+  two runs (`"0"`, then `"1 2"`) making the batch; a seed-1 deformable trial waiting for the seed-0 trials of a GPU; a
+  seed-1 trial filling free room before seed 0's last trial is done; the lane back at the top of the plan after each
+  trial (a seed-1 trial that had no room goes before seed 2); the refusals. Without `SEEDS`: the plan, the start order
+  and the log as before, and a waiting deformable trial still taking the GPU before a 1-unit one. The fake harbor
+  takes per-job agent and validation times (`FAKE_PHASES`). The file now runs about 6 minutes: its limit in
+  `ci_checks/check-unit-tests.sh` is 600 s.
+
 ### The usage gateway caps the images in a model request at 50 (runner and gateway; no task or image changes)
 - **The problem** (Reuben's smoke test, 2026-10-31: Codex + GPT-6 Astra through a GitHub Copilot proxy, claws-08): an
   agent that looks at the cameras resends every image it has seen with each call. After 52 minutes the standard-mode

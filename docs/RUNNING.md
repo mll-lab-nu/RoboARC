@@ -120,6 +120,7 @@ header of the script lists every variable; the main ones:
 | agent, model, effort | `AGENT=codex`, `claude-code` or `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
 | credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
 | trials | `K` per task and mode (1); each its own job and seed |
+| seeds in turn | `SEEDS="0 1 2"`: only the trials of those seeds, every task's trials of the lowest seed first ("Running the seeds in turn" below); unset (default) = every trial, task by task |
 | web search | `WEB_SEARCH=disabled` (default) or `allowed` (not for official runs) |
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
@@ -280,6 +281,29 @@ run passed (IKEA: 0).
   is the same task.
 
 A task that allows its default seed only runs from a copy that is the task as it is.
+
+### Running the seeds in turn
+
+`SEEDS` (unset by default) runs a batch seed by seed: with `SEEDS="0 1 2"` and `K=3` the runner starts every task's
+seed-0 trials first, then those of seed 1, then those of seed 2.
+- **Which trials.** Of the K trials only those whose seed is listed run, each with its trial number and seed (the
+  assignment above), so the job names and results are those of the whole batch. `SEEDS="0"` now and `SEEDS="1 2"`
+  later, with the same batch name and `JOBS`, run the batch's K=3 trials between them; a trial that already has its
+  result is skipped, as always. The order the seeds are listed in does not matter: the lowest goes first.
+- **K stays 3.** A task allowed a listed seed that none of its K trials runs (K too small, e.g. left at 1) stops the
+  runner before anything starts. A task not allowed a listed seed runs no trial at it, with a line in the log.
+- **An order of priority, not rounds.** A later seed's trial starts only in room that no waiting trial of an earlier
+  seed fits. While seed-0 trials remain and fit, the GPUs go to them; once every seed-0 trial has started, seed-1
+  trials take the room that frees up, beside the last seed-0 trials still running. To keep that order a lane reads the
+  plan from the top after each trial it starts, and while a trial of an earlier seed waits for room it does not try a
+  later seed's deformable trial (a waiting deformable trial has a GPU kept or drained for it, "GPUs and lanes" above).
+  The log says `SEEDS 0 1 2, in that order: <n> / <n> / <n> jobs` at the start, and
+  `lane <pid>: <job> (seed <s>) starts while <n> job(s) of seed <s0> wait for room` when a later seed takes free room.
+- **One limit.** Tasks reserve different CPUs and memory: a later seed's trial that needs less than an earlier seed's
+  waiting one may start in room too small for that one, as between the tasks of one seed.
+- `SEQ=1` only (the default), and every lane of a batch is the same command: the lanes share the batch's plan.
+
+Without `SEEDS` the runner plans and schedules as it did before the option.
 
 ## Infrastructure failures: one full retry
 

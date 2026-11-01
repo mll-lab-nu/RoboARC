@@ -44,7 +44,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/usage_gateway/tests/test_budget_stop.py scripts/usage_gateway/tests/test_image_cap.py \
          scripts/tests/test_stamp_mtimes.py \
          scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
-         scripts/harbor/tests/test_runner_seeds.py scripts/harbor/tests/test_gpu_slots.py \
+         scripts/harbor/tests/test_gpu_slots.py \
          scripts/harbor/tests/test_pin_gpu.py scripts/harbor/tests/test_dsh_acp.py scripts/harbor/tests/test_host_info.py \
          scripts/harbor/tests/test_phase_marker.py scripts/harbor/tests/test_roboarc_docker.py \
          tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
@@ -53,6 +53,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          tools/tests/test_d4_tools.py scripts/roboarc/tests/test_cutoff_exceptions.py; do
   run 300 "$t"
 done
+run 600 scripts/harbor/tests/test_runner_seeds.py   # the runner with a fake harbor: its lanes wait 30 s when nothing fits
 run 120 scripts/harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials
 run 300 tools/release/source_hash.py --check   # the simulator source hashes to release.json's runtime.source (SOURCE.json)
 

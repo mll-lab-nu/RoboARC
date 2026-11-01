@@ -19,7 +19,12 @@ seed only.
 - PHASE_SPLIT=1 (the default): Harbor gets the agent-end marker plugin (scripts/harbor/plugins on its PYTHONPATH); when
   a trial's agent phase ends the lane starts the next trial while the first validates on its GPU, and ends only when
   both have their results, with every slot released; a deformable trial waits for a GPU on which none validates;
-  PHASE_SPLIT=0, GPU_SCHED=0 or a harbor without --plugin: one trial after the other, as before.
+  PHASE_SPLIT=0, GPU_SCHED=0 or a harbor without --plugin: one trial after the other, as before;
+- SEEDS: only the trials of those seeds, every trial of a lower seed started before any of a higher one, each trial
+  with its number and seed (SEEDS="0", then SEEDS="1 2": the batch's K=3 trials); a later seed's deformable trial
+  waits while trials of an earlier seed wait for the GPU; a later seed's trial takes the room that is free once every
+  trial of the earlier seed has started; a malformed SEEDS, SEEDS with SEQ=0 and a seed a task's K trials do not run
+  are refused. Without SEEDS the plan, the start order, the log and the scheduling are the runner's before SEEDS.
 """
 import json
 import os
@@ -39,7 +44,9 @@ FAKE_HARBOR = '''#!{py}
 """A stand-in for `harbor run`: records its arguments and each task copy's seed files, writes one finished trial per task
 (no reward.json, an infrastructure failure, when the job is $FAKE_INFRA_JOB). With --plugin (the agent-end marker,
 plugins/phase_marker.py) it writes the marker file its --pk out= names when the "agent phase" ends, then "validates" for
-$FAKE_VERIFY_S seconds before the trial's results; `run --help` lists --plugin unless $FAKE_NO_PLUGIN is set."""
+$FAKE_VERIFY_S seconds before the trial's results; `run --help` lists --plugin unless $FAKE_NO_PLUGIN is set.
+$FAKE_PHASES, {{"<job>": [agent s, validation s]}}, gives a job an agent phase of its own length (default none) and its own
+validation instead."""
 import json, os, pathlib, re, sys, time, uuid
 a = sys.argv[1:]
 if a == ["--version"]:
@@ -62,12 +69,14 @@ trials = {{t: jobs / job / f"{{t[:32]}}__{{uuid.uuid4().hex[:7]}}" for t in task
 for d in trials.values():                     # Harbor makes the trial's directories when it starts
     (d / "verifier").mkdir(parents=True)
     (d / "agent").mkdir()
+agent_s, verify_s = json.loads(os.environ.get("FAKE_PHASES", "{{}}")).get(job, [0, float(os.environ.get("FAKE_VERIFY_S", "0"))])
+time.sleep(agent_s)
 if "--plugin" in a:
     pk = dict(a[i + 1].split("=", 1) for i, x in enumerate(a) if x == "--pk")
     out = pathlib.Path(pk["out"])
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({{"job": pk.get("job"), "agent_finished_at": "2026-10-21T00:01:10Z"}}) + "\\n")
-    time.sleep(float(os.environ.get("FAKE_VERIFY_S", "0")))
+    time.sleep(verify_s)
 for t, d in trials.items():
     (d / "result.json").write_text(json.dumps({{
         "id": uuid.uuid4().hex, "task_name": f"roboarc/{{t}}", "started_at": "2026-10-21T00:00:00Z",
@@ -151,7 +160,7 @@ class RunnerSeeds(unittest.TestCase):
         (bin_dir / "nvidia-smi").chmod(0o755)
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
-                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_", "FAKE_"))}
+                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_", "FAKE_", "SEEDS"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high",
                         JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),
@@ -364,6 +373,108 @@ class RunnerSeeds(unittest.TestCase):
         self.assertEqual(c["job"], f"b-privileged-{self.single}")
         cfg = self.result(f"{self.single}-privileged", 1)
         self.assertEqual((cfg["trial"], cfg["trials"], cfg["seed"]), (1, 1, 0))
+
+    # SEEDS (docs/RUNNING.md "Running the seeds in turn")
+    def starts(self):
+        """The jobs in the order the log says they started."""
+        return re.findall(r"\] start (\S+): ", (self.root / "jobs" / "b.log").read_text())
+
+    def plan_rows(self):
+        return [tuple(x.split("\t")) for x in (self.root / "jobs" / ".plan" / "b.tsv").read_text().splitlines()]
+
+    def task_major(self, bases, modes, K):
+        """The plan of the runner before SEEDS: task by task, trial by trial, each mode in MODES order."""
+        return [(f"b-{m}-{b}-t{k}", f"{b}-{m}", m, str(k), str(self.expected(b, K)[k - 1]))
+                for b in bases for k in range(1, K + 1) for m in modes]
+
+    def test_seeds_in_turn(self):
+        bases, modes = (self.multi, self.single), ("privileged", "standard")
+        self.run_batch(*bases, K="3", SEEDS="0 1 2", GPU_SCHED="0")
+        rows = self.plan_rows()
+        self.assertEqual(rows, sorted(self.task_major(bases, modes, 3), key=lambda r: int(r[4])))   # the same trials, by seed
+        self.assertEqual(self.starts(), [r[0] for r in rows])
+        self.assertIn("SEEDS 0 1 2, in that order: 8 / 2 / 2 jobs", (self.root / "jobs" / "b.log").read_text())
+        for b in bases:
+            for m in modes:
+                for k in (1, 2, 3):
+                    self.assertEqual(self.result(f"{b}-{m}", k)["seed"], self.expected(b, 3)[k - 1])
+
+    def test_without_seeds_the_order_is_unchanged(self):
+        bases, modes = (self.multi, self.single), ("privileged", "standard")
+        self.run_batch(*bases, K="3", GPU_SCHED="0")
+        self.assertEqual(self.plan_rows(), self.task_major(bases, modes, 3))
+        self.assertEqual(self.starts(), [r[0] for r in self.plan_rows()])
+        log = (self.root / "jobs" / "b.log").read_text()
+        self.assertNotIn("SEEDS", log)
+        self.assertNotIn("starts while", log)
+
+    def test_seeds_in_two_runs(self):
+        want = self.expected(self.multi, 3)
+        seed_of = {f"b-privileged-{self.multi}-t{k}": want[k - 1] for k in (1, 2, 3)}
+        seed_of.update({f"b-privileged-{self.single}-t{k}": 0 for k in (1, 2, 3)})
+        self.run_batch(self.multi, self.single, MODES="privileged", K="3", SEEDS="0")
+        first = self.starts()
+        self.assertEqual(sorted(first), sorted(j for j, s in seed_of.items() if s == 0))
+        self.run_batch(self.multi, self.single, MODES="privileged", K="3", SEEDS=" 1  2 ")
+        both = self.starts()
+        self.assertEqual(sorted(both), sorted(seed_of))                            # every trial, once
+        self.assertEqual([seed_of[j] for j in both[len(first):]], [1, 2])
+        for k in (1, 2, 3):
+            self.assertEqual(self.result(f"{self.multi}-privileged", k)["seed"], want[k - 1])
+            self.assertEqual(self.result(f"{self.single}-privileged", k)["seed"], 0)
+        log = (self.root / "jobs" / "b.log").read_text()
+        self.assertIn(f"SEEDS: {self.single}-privileged does not allow seed 1", log)   # the single-seed fixture
+        self.assertIn("SEEDS 1 2, in that order: 1 / 1 jobs", log)
+
+    def test_seeds_earlier_seed_first(self):
+        """One GPU, one trial on it at a time: the seed-1 deformable trial waits for the three seed-0 IKEA trials. (The
+        same host without SEEDS: test_without_seeds_a_waiting_deformable_goes_first.)"""
+        want = self.expected(self.multi, 3)
+        self.run_batch(self.multi, MODES="standard", K="3", SEEDS="0", GPUS="0")          # its seed-0 trial, done first
+        self.run_batch(self.single, self.multi, MODES="standard", K="3", SEEDS="0 1", GPUS="0", GPU_RESIDENT="1",
+                       FAKE_VERIFY_S="2")
+        s1 = f"b-standard-{self.multi}-t{want.index(1) + 1}"
+        self.assertLess(self.log_index(f"start b-standard-{self.single}-t3:"), self.log_index(f"start {s1}:"))
+        self.assertEqual(json.loads((self.root / "slots" / "state.json").read_text())["holds"], {})
+
+    def test_without_seeds_a_waiting_deformable_goes_first(self):
+        self.run_batch(self.single, self.multi, MODES="standard", K="2", GPUS="0", GPU_RESIDENT="1", FAKE_VERIFY_S="2")
+        self.assertLess(self.log_index(f"start b-standard-{self.multi}-t1:"), self.log_index(f"start b-standard-{self.single}-t2:"))
+
+    def test_seeds_later_seed_fills_free_room(self):
+        want = self.expected(self.multi, 3)
+        self.run_batch(self.multi, MODES="standard", K="3", SEEDS="0 1", FAKE_VERIFY_S="4")      # GPUs 0 and 1
+        s0, s1 = (f"b-standard-{self.multi}-t{want.index(s) + 1}" for s in (0, 1))
+        self.assertLess(self.log_index(f"start {s1}:"), self.log_index(f"done {s0} "))   # while seed 0's last validates
+        self.assertEqual(json.loads((self.root / "slots" / "state.json").read_text())["holds"], {})
+
+    def test_seeds_back_to_the_top_after_each_trial(self):
+        """IKEA with three seeds, one trial on the GPU at a time (its privileged trials take none): the seed-0 standard
+        trial validates for 8 s, so the seed-1 standard trial finds no room and the seed-1 privileged trial starts; by the
+        end of that one's 14 s agent phase the GPU is free, and the lane, reading the plan from the top again, starts
+        the seed-1 standard trial before the seed-2 trials below it."""
+        for m in ("privileged", "standard"):
+            three_seeds(self.repo / "tasks" / f"{self.single}-{m}")
+        want = task_seed.assign(self.repo / "tasks" / f"{self.single}-privileged", "b", 3)
+        job = lambda m, s: f"b-{m}-{self.single}-t{want.index(s) + 1}"  # noqa: E731
+        phases = {job("standard", 0): [0, 8], job("privileged", 1): [14, 0]}
+        self.run_batch(self.single, MODES="standard privileged", K="3", SEEDS="0 1 2", GPUS="0", GPU_RESIDENT="1",
+                       FAKE_PHASES=json.dumps(phases))
+        at = lambda m, s: self.log_index(f"start {job(m, s)}:")  # noqa: E731
+        self.assertLess(at("privileged", 1), at("standard", 1))         # the seed-1 standard trial had no room at first
+        self.assertLess(at("standard", 1), at("privileged", 2))         # and is tried again before seed 2
+
+    def test_seeds_refused(self):
+        t1 = self.expected(self.multi, 1)[0]
+        other = min({0, 1, 2} - {t1})
+        for env, needle in (({"SEEDS": "0,1"}, "SEEDS must be seeds separated by spaces"),
+                            ({"SEEDS": "0", "SEQ": "0"}, "SEEDS needs SEQ=1"),
+                            ({"SEEDS": str(other)}, f"allows seed {other}, but its 1 trial(s) in batch b run seeds [{t1}]")):
+            p = subprocess.run(["bash", str(self.repo / "scripts/harbor/run_agent_batch.sh"), "b", self.multi],
+                               env=dict(self.env, **env), capture_output=True, text=True, timeout=300, cwd=self.root)
+            self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+            self.assertIn(needle, p.stdout + p.stderr)
+        self.assertEqual(self.calls(), [])
 
 
 if __name__ == "__main__":

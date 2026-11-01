@@ -174,7 +174,7 @@ BASES=$(ls tasks | sed -nE 's/-privileged$//p')   # every task base: 90 (78 puzz
 mkdir -p jobs
 LANES=$((4 * $(nvidia-smi -L | wc -l)))             # 4 lanes per GPU ("Lanes" below)
 for lane in $(seq 1 $LANES); do
-  AGENT=codex MODEL=openai/<model> EFFORT=high K=3 ENV_FILE=$PWD/.env \
+  AGENT=codex MODEL=openai/<model> EFFORT=high K=3 SEEDS="0 1 2" ENV_FILE=$PWD/.env \
     USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0 \
     JOBS="$PWD/jobs/agents" RESULTS=/path/outside/the/repo \
     nohup scripts/harbor/run_agent_batch.sh <batch name> $BASES > "jobs/lane$lane.out" 2>&1 &
@@ -184,6 +184,11 @@ done
 - **Which tasks and modes:** every task base in both modes (the default `MODES`), three trials each: 90 × 2 × 3 =
   540 trials. If we send you a shorter list, give those bases instead of `$BASES`. `MODES=privileged` or
   `MODES=standard` runs one mode only.
+- **Seed by seed** (`SEEDS="0 1 2"`): every task's seed-0 trials start first, then seed 1, then seed 2; once the last
+  seed-0 trials are running, seed-1 trials take the GPUs they leave free (docs/RUNNING.md "Running the seeds in turn").
+  So the batch has one trial of every task, at seed 0, well before it ends. To run the rest later, start the same
+  command with `SEEDS="1 2"` and the same batch name and `JOBS`: the trials keep their numbers and seeds, and the ones
+  done are skipped. Every lane runs the same command.
 - **Usage gateway** (`USAGE_GATEWAY=scripts/usage_gateway GATEWAY_RAW=0`, as in the commands; keep it on). The runner
   routes the agent's model calls through a usage gateway on your host (docs/RUNNING.md "Usage recording").
   - It forwards the calls unchanged; the agent keeps its own credentials. The one exception: a call that carries more

@@ -32,6 +32,15 @@
 #                every mode; docs/RUNNING.md "Seeds"). A task that allows one seed runs it in every trial. Each job's copy
 #                of a task is made by scripts/task_seed.py materialize with the trial's seed, and the job records the
 #                trial and its seeds in <job>/seed.json (also $JOBS/.seeds/<job>.json, written before the job starts)
+#   SEEDS        "" (default) = every trial, in the SEQ=1 order below. Seeds separated by spaces, e.g. "0 1 2" or "1 2"
+#                (SEQ=1 only): of the K trials only those of these seeds run, every task's trial of the lowest seed
+#                before any trial of the next (docs/RUNNING.md "Running the seeds in turn"). The trials keep their
+#                numbers and seeds, so SEEDS="0" now and SEEDS="1 2" later, with the same batch name and JOBS, run the
+#                batch's K=3 trials between them. A lane goes back to the top of the plan after each trial it starts; a
+#                later seed's trial starts only in room that no waiting trial of an earlier seed fits, and while one
+#                waits a later seed's deformable trial is not tried (it would have a GPU kept for it). A task allowed a
+#                seed that its K trials do not run stops the batch before it starts; a task not allowed one runs no
+#                trial at it. Every lane of a batch is the same command (they share the plan)
 #   SEQ          1 = one trial at a time per runner (default): task by task, trial by trial, each mode in MODES order, one
 #                Harbor job per task, trial and mode ($JOBS/<batch>-<mode>-<task>/; with K > 1
 #                $JOBS/<batch>-<mode>-<task>-t<k>/, k = 1..K). Start the same command again to add a lane: every job is
@@ -166,6 +175,11 @@ if [ -n "$USAGE_GATEWAY" ]; then
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
 [[ "$K" =~ ^[1-9][0-9]*$ ]] || { echo "K must be a positive integer (trials per task and mode)" >&2; exit 2; }
+read -ra seed_list <<< "${SEEDS:-}"; SEEDS="${seed_list[*]}"
+if [ -n "$SEEDS" ]; then
+  [[ "$SEEDS" =~ ^[0-9]+( [0-9]+)*$ ]] || { echo "SEEDS must be seeds separated by spaces, e.g. SEEDS=\"0 1 2\"" >&2; exit 2; }
+  [ "$SEQ" = 1 ] || { echo "SEEDS needs SEQ=1 (with SEQ=0 one job holds every task, each from its own seed)" >&2; exit 2; }
+fi
 case "$GPU_SCHED" in 0|1) ;; *) echo "GPU_SCHED must be 0 or 1" >&2; exit 2 ;; esac
 [[ "$GPUS" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "GPUS must be GPU indices, comma-separated (e.g. 0,1,2)" >&2; exit 2; }
 [[ "$GPU_SHARE" =~ ^[1-9][0-9]*$ ]] || { echo "GPU_SHARE must be a positive integer (rigid-task trials per GPU)" >&2; exit 2; }
@@ -273,11 +287,11 @@ trap on_exit EXIT
 # $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run
 mkdir -p "$JOBS/.plan"
 PLAN="$JOBS/.plan/$batch.tsv"
-python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "${tasks[@]}" <<'PY' || { log "could not plan batch $batch (scripts/task_seed.py assign)"; exit 2; }
+plan_notes="$(python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "$SEEDS" "${tasks[@]}" <<'PY'
 import json, os, pathlib, sys
-repo, out, tsv, batch, run_id, seq, modes, K, *tasks = sys.argv[1:]
+repo, out, tsv, batch, run_id, seq, modes, K, want, *tasks = sys.argv[1:]
 sys.path.insert(0, str(pathlib.Path(repo) / "scripts"))
-import task_seed  # noqa: E402
+import task_seed, task_conventions as tc  # noqa: E402
 K = int(K)
 name = lambda m, t: {"standard": f"{t}-standard", "limited": f"{t}-standard", "standard-realtime": f"{t}-standard-realtime"}.get(m, f"{t}-privileged")
 suffix = lambda k: f"-t{k}" if K > 1 else ""
@@ -293,12 +307,29 @@ for t, k, m in order:
         seeds[d.name] = task_seed.assign(d, batch, K)
     job = f"{batch}-{m}-{t}{suffix(k)}" if seq == "1" else f"{batch}-{m}{suffix(k)}"
     jobs.append({"job": job, "task": d.name, "mode": m, "trial": k, "trials": K, "seed": seeds[d.name][k - 1]})
+if want:                                   # SEEDS: the trials of these seeds only, a seed's trials before the next seed's
+    want = sorted({int(s) for s in want.split()})
+    for task, run in seeds.items():
+        sd = task_seed.seeds(pathlib.Path(repo) / "tasks" / task)
+        for s in want:
+            if s in run:
+                continue
+            if tc.seed_allowed(sd, s):
+                print(f"SEEDS {' '.join(map(str, want))}: {task} allows seed {s}, but its {K} trial(s) in batch {batch} "
+                      f"run seeds {run} (K trials run K of a task's allowed seeds: K=3 runs all three of a RoboARC task)")
+                sys.exit(1)
+            print(f"SEEDS: {task} does not allow seed {s} (allowed: {sd['allowed']}); none of its trials runs at it")
+    jobs = sorted((j for j in jobs if j["seed"] in want), key=lambda j: j["seed"])   # stable: task, trial, mode
+    print(f"SEEDS {' '.join(map(str, want))}, in that order: "
+          f"{' / '.join(str(sum(j['seed'] == s for j in jobs)) for s in want)} jobs")
 for f, text in ((out, json.dumps({"batch": batch, "run_id": run_id, "trials": K, "jobs": jobs}, indent=1)),
                 (tsv, "".join(f"{j['job']}\t{j['task']}\t{j['mode']}\t{j['trial']}\t{j['seed']}\n" for j in jobs))):
     tmp = pathlib.Path(f"{f}.{os.getpid()}")
     tmp.write_text(text)
     tmp.replace(f)
 PY
+)" || { log "could not plan batch $batch (scripts/task_seed.py assign)"; [ -n "$plan_notes" ] && log "$plan_notes"; exit 2; }
+[ -n "$plan_notes" ] && while IFS= read -r note; do log "$note"; done <<< "$plan_notes"
 
 # append-only mirror of every trial's agent/ directory, out of every trial container's reach
 if [ "$LOG_MIRROR" = 1 ] && ! docker ps --format '{{.Names}}' | grep -qx rcb-log-mirror; then
@@ -784,15 +815,27 @@ if [ "$SEQ" = 1 ]; then
   # left unclaimed (or it stops on a failure)
   pass=0; stop=0; said=""; said_at=0
   validating=()   # this lane's trials that validate in the background (PHASE_SPLIT=1)
+  seed_wait() {  # <seed>: SEEDS: a job of this seed waits for room in this pass. open_seed: the lowest such seed (a later
+    # seed's trial starts only in room no job of it fits); open_n: its jobs that wait
+    [ -n "$SEEDS" ] || return 0
+    [ -z "$open_seed" ] && open_seed="$1"
+    [ "$1" = "$open_seed" ] && open_n=$((open_n + 1))
+    return 0
+  }
   while [ "$stop" = 0 ]; do
-    pass=$((pass + 1)); started=0; waiting=0; first_why=""
+    pass=$((pass + 1)); started=0; waiting=0; first_why=""; open_seed=""; open_n=0; again=0
     declare -A nofit=()   # this pass: the needs ("<units> <cpus> <memory GB>") the host had no room for; later jobs with
     # the same needs wait without asking the ledger again (a pass over a long plan stays cheap)
     while IFS=$'\t' read -r job task m k seed <&3; do
       if [ -f "$JOBS/$job/result.json" ]; then [ "$pass" = 1 ] && log "skip $job (already has result.json)"; continue; fi
       if [ "$GPU_SCHED" = 1 ] && slot_class "$task"; then
         need="${SLOT_CLASS[$task]% *}"
-        [ -n "${nofit[$need]:-}" ] && [ ! -d "$JOBS/.claims/$job" ] && { waiting=$((waiting + 1)); continue; }
+        # SEEDS: while a job of an earlier seed waits for room, a later seed's deformable trial is not tried (the ledger
+        # would keep a GPU for it, or drain one)
+        if [ -n "$open_seed" ] && [ "$seed" -gt "$open_seed" ] && [ "${need%% *}" -ge "$GPU_SHARE" ] && [ ! -d "$JOBS/.claims/$job" ]; then
+          waiting=$((waiting + 1)); continue
+        fi
+        [ -n "${nofit[$need]:-}" ] && [ ! -d "$JOBS/.claims/$job" ] && { waiting=$((waiting + 1)); seed_wait "$seed"; continue; }
       fi
       mkdir "$JOBS/.claims/$job" 2>/dev/null || continue   # another lane of this batch took it
       wait_for "$m"
@@ -802,11 +845,12 @@ if [ "$SEQ" = 1 ]; then
         why="$(tail -1 "$SLOT_WHY" 2>/dev/null)"
         if [ $rc -eq 3 ]; then
           [ -n "${SLOT_CLASS[$task]:-}" ] && nofit["${SLOT_CLASS[$task]% *}"]=1
-          rmdir "$JOBS/.claims/$job" 2>/dev/null; waiting=$((waiting + 1)); [ -z "$first_why" ] && first_why="$job: $why"; continue
+          rmdir "$JOBS/.claims/$job" 2>/dev/null; waiting=$((waiting + 1)); seed_wait "$seed"; [ -z "$first_why" ] && first_why="$job: $why"; continue
         elif [ $rc -ne 0 ]; then
           log "FAILED $job: no GPU slot ($why); not started"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue
         fi
       fi
+      [ -n "$open_seed" ] && [ "$seed" -gt "$open_seed" ] && log "lane $$: $job (seed $seed) starts while $open_n job(s) of seed $open_seed wait for room"
       started=$((started + 1))
       prepare_job "$job" 1 -i "$task" || { release_slot "$job"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
       # the trial runs in the background; the lane goes on when its agent phase has ended (PHASE_SPLIT=1: it validates
@@ -826,7 +870,9 @@ if [ "$SEQ" = 1 ]; then
       elif [ $rc -ne 0 ]; then
         log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
       fi
+      [ -n "$SEEDS" ] && { again=1; break; }   # SEEDS: after each trial the plan is read from the top: an earlier seed's job first
     done 3< "$PLAN"
+    [ "$again" = 1 ] && [ "$stop" = 0 ] && continue
     [ "$stop" = 1 ] || [ "$waiting" = 0 ] && break       # every job is claimed or done: this lane is finished
     if [ "$started" = 0 ]; then
       # what the host lacks for the first job that waits: a line when the kind of shortage (GPU, CPUs, memory) changes,
