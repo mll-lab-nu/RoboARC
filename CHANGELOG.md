@@ -6,6 +6,36 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### `AGENT=antigravity`: Antigravity + Gemini through a Chat Completions server (runner, agent and gateway; no task, image or result changes for other agents)
+- **Why:** the Antigravity + Gemini 4 Argon pair is served only through an OpenAI-compatible Chat Completions server
+  (GitHub Copilot's proxy). The Antigravity SDK speaks the Gemini API only, and its own OpenAI-compatible mode, meant
+  for local servers, drops every image a tool returns and never sends a reasoning effort (checked 2026-11-01 on
+  google-antigravity 0.1.9 and 0.1.23, offline, against a recording server); Harbor's own antigravity-sdk agent pins
+  0.1.9 (Harbor 0.23, 0.24) and leaves the SDK's web tools on. Runs this way are the pair's official runs (decided
+  2026-11-01).
+- **The agent:** `scripts/harbor/agents/antigravity_sdk.py` (on Harbor's BaseInstalledAgent; Harbor 0.23, 0.24 and 0.25):
+  google-antigravity 0.1.23 with every dependency locked (`agents/antigravity/run_agent.py` and its uv lock), installed
+  with uv 0.11.30 during agent setup and run offline; the SDK's evaluation preset (`LocalAgentConfig.eval()`) with
+  `search_web` (a second model call with Google Search, run at the provider), `read_url_content` and `generate_image`
+  off; the instruction in a file; `reasoning_effort` -> the SDK's thinking level; token counts from the SDK's session
+  totals.
+- **The gateway:** `--gemini-chat` (`scripts/usage_gateway/gemini_chat.py`) translates the SDK's Gemini requests into
+  Chat Completions requests and the answers back (function calls and responses, images returned by tools, tool
+  choice, thinking level -> `reasoning_effort`, streaming, errors); every check applies to the translated request
+  (path list, provider-run tools, image cap, budget) and a Gemini provider-run tool (`googleSearch` and its kin) is
+  refused. usage.jsonl records the agent's request (`translated_from`). Without the flag nothing changes.
+- **The runner:** `AGENT=antigravity` needs `USAGE_GATEWAY` and `ANTIGRAVITY_BASE_URL` (the server's plain-HTTP base: a
+  proxy on the run's host) and `GEMINI_API_KEY`; an `EFFORT` without an SDK level, `WEB_SEARCH=allowed` and
+  `AGENT_CONFIG` are refused at start. The job's usage_recording.json and each result's config.json record
+  `"api_translation": "gemini-chat"` (no other result gets the key). `scan_secrets.py` also looks for `GEMINI_API_KEY`.
+- **Tests:** `test_gemini_chat.py` (the translation; the gateway end to end with a stub server, with and without the
+  flag), `test_antigravity_sdk.py` (the pins and the lock; install and run against a stand-in environment with Harbor
+  0.23, 0.24 and 0.25), `test_usage_gateway_option.py` (the runner's arguments and refusals). By hand, 2026-11-01: the
+  agent installed in a `roboarc:2.2.0` container (Python 3.11) and run with the network cut, through the gateway to a
+  scripted Chat Completions model (the command ran, the image arrived, `reasoning_effort` on the wire, the SDK's token
+  totals equal to the gateway's); and a Harbor 0.23 trial of a toy task under an egress allowlist of the gateway and
+  the registries (reward 1; Harbor's token counts equal to the gateway's; a direct fetch from the container refused).
+
 ### The agent's time: 11400 s (3 h 10 min) instead of 10800 s (owner's decision; 178 task dirs and their DIGEST)
 - **Why:** the agent's clock in `/run/rcb-limits/usage.json` (`time_left_s`, `deadline_utc`) counts from the trial
   environment's start, before Harbor installs the harness; Harbor's cutoff counts from the agent's run. The install

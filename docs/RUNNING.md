@@ -70,10 +70,19 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
   agent with `@deepseek-ai/dsh` 0.2.1-rc.2 installed): `PYTHONPATH=scripts/harbor/agents harbor run ... -a dsh_acp:DshAcp
   -m deepseek/deepseek-v4.1-flash --ak reasoning_effort=high --ak web=false --allow-agent-host api.deepseek.com`, with
   `DEEPSEEK_API_KEY`. It is not a Harbor built-in: whether its results are official is the benchmark owner's call.
+- Antigravity runs through RoboARC's own Harbor agent `scripts/harbor/agents/antigravity_sdk.py`: the Antigravity SDK
+  (PyPI `google-antigravity` 0.1.23, every dependency locked in `agents/antigravity/run_agent.py.lock`), its evaluation
+  preset (`LocalAgentConfig.eval()`) with `search_web`, `read_url_content` and `generate_image` off. The SDK speaks the
+  Gemini API only; a Gemini model served through an OpenAI-compatible Chat Completions server (GitHub Copilot's proxy)
+  is reached through the usage gateway, which translates each request and answer (`--gemini-chat`,
+  `scripts/usage_gateway/gemini_chat.py`): `AGENT=antigravity` in the batch runner below. The SDK's own
+  OpenAI-compatible mode is not used: it drops every image a tool returns and never sends a reasoning effort. Runs
+  this way are Antigravity + Gemini's official runs (decided 2026-11-01).
 - Turn the harness's provider-side tools off ("No tool outside the container" below): Codex `--ak web_search=disabled`
   and `--ak config=<the output of python3 scripts/harbor/codex_tools_off.py [your config.toml]>`; Claude Code
   `--ak disallowed_tools=WebSearch,WebFetch`; dsh `--ak web=false` (a dsh patch file turns its web_search and web_fetch
-  tools off).
+  tools off); Antigravity's are off in `agents/antigravity/run_agent.py` (its `search_web` is a second model call that
+  declares Google Search, which the provider runs; the gateway also refuses any Gemini request that declares one).
 - Use an absolute `-o`. jobs/ is ignored by git; results never go into the repository.
 - The trial's record is `<jobs>/<job>/<trial>/`: `agent/` (the harness's log and trajectory), `verifier/`
   (`reward.txt` 1 or 0, `reward.json`, `replay.mp4`, the resource-limits record), `artifacts/` (privileged: the agent's
@@ -84,7 +93,8 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 
 A result is official only when its run had all of these:
 - **Harbor's native agents**, configured through environment variables; no agent adapter, no proxy that holds
-  credentials or changes requests.
+  credentials or changes requests. The one exception, decided 2026-11-01: `AGENT=antigravity` (RoboARC's own agent for
+  the Antigravity SDK, and the usage gateway's translation of its Gemini requests for a Chat Completions server; above).
 - **No tool outside the container**: the harness's web search, account connectors, apps, plugins, image generation and
   cloud agents off (below).
 - **The task's own cutoff**, no multiplier (`--timeout-multiplier`, `--agent-timeout-multiplier`, an agent
@@ -117,7 +127,7 @@ header of the script lists every variable; the main ones:
 
 | what | how |
 |---|---|
-| agent, model, effort | `AGENT=codex`, `claude-code` or `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
+| agent, model, effort | `AGENT=codex`, `claude-code`, `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`) or `antigravity` (the Antigravity SDK, `scripts/harbor/agents/antigravity_sdk.py`: `MODEL=google/<model>`, `ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1` (a Chat Completions server), `GEMINI_API_KEY`, the usage gateway on; `EFFORT` minimal, low, medium, high, xhigh or default), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
 | credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
 | trials | `K` per task and mode (1); each its own job and seed |
 | seeds in turn | `SEEDS="0 1 2"`: only the trials of those seeds, every task's trials of the lowest seed first ("Running the seeds in turn" below); unset (default) = every trial, task by task |

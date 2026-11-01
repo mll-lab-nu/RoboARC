@@ -4,8 +4,8 @@ gateway's --gemini-chat (gateway.py), for AGENT=antigravity (scripts/harbor/agen
 The Antigravity SDK speaks the Gemini API only (POST <base>/v1beta/models/<model>:streamGenerateContent?alt=sse, and
 :generateContent); its OpenAI-compatible mode, meant for local servers, drops every image a tool returns and never sends a
 reasoning effort, so it cannot run a RoboARC task. A model served only through Chat Completions (GitHub Copilot's proxy for
-Gemini 4 Argon) is reached by translating each request here, in the gateway, and each answer back; the user decided
-2026-11-01 that runs through it are Antigravity + Gemini's official runs. What is mapped, and nothing else:
+Gemini 4 Argon) is reached by translating each request here, in the gateway, and each answer back; runs through it are
+Antigravity + Gemini's official runs (decided 2026-11-01). What is mapped, and nothing else:
 
   request (Gemini -> Chat Completions)
     systemInstruction                 -> a system message

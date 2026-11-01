@@ -201,7 +201,10 @@ usage gateway narrows it further to the gateway and the registries), unless the 
 open-network results are ranked apart. The verifier has no network. Usage recording is optional: an official run needs
 no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. Through the gateway a
 model request carries at most `GATEWAY_IMAGE_CAP` images (50 by default; owner 2026-10-31): the oldest beyond it are
-replaced by a short text note, and every result records the cap (`image_cap`). *CI:* `check-verifier-isolation.sh`.
+replaced by a short text note, and every result records the cap (`image_cap`). With `AGENT=antigravity` the gateway
+also translates the agent's Gemini API requests into Chat Completions requests for the model server, and the answers
+back (decided 2026-11-01; `scripts/usage_gateway/gemini_chat.py`), and every such result records it (`api_translation`).
+*CI:* `check-verifier-isolation.sh`.
 
 **H.7 Comparable twins.** Where a task ships both a privileged and a standard (or standard-realtime) version, they
 share one frozen instance (byte-identical copies), one success rule and the same seeds (`default`, `allowed`,

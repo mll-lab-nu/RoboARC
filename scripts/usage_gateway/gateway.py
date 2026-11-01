@@ -49,7 +49,7 @@ next until the following step, and the provider's prompt cache is broken once pe
 with N images or fewer is forwarded as sent; a capped one re-serialized and uncompressed. usage.jsonl records "images"
 (how many the request carried) and "images_omitted" (how many were replaced); totals.json counts "image_cap_requests".
 
-Gemini requests to a Chat Completions server (--gemini-chat; the runner passes it with AGENT=antigravity only; the user,
+Gemini requests to a Chat Completions server (--gemini-chat; the runner passes it with AGENT=antigravity only; decided
 2026-11-01): the Antigravity SDK speaks the Gemini API, and a model served only through Chat Completions (GitHub
 Copilot's proxy for Gemini 4 Argon) cannot answer it. With the flag, a POST to <route><prefix>/v1beta/models/<model>:
 generateContent or :streamGenerateContent is translated (gemini_chat.py: what is mapped) into a POST to

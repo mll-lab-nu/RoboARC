@@ -1,7 +1,7 @@
 """The Antigravity SDK (PyPI google-antigravity: Google's Antigravity agent as a library) as a Harbor agent: Antigravity +
 Gemini 4 Argon, the model served by an OpenAI-compatible Chat Completions server (GitHub Copilot's proxy) and reached
-through the usage gateway's --gemini-chat translation (scripts/usage_gateway/gemini_chat.py). The user decided
-2026-11-01 that these runs are Antigravity + Gemini's official runs.
+through the usage gateway's --gemini-chat translation (scripts/usage_gateway/gemini_chat.py). These runs are
+Antigravity + Gemini's official runs (decided 2026-11-01).
 
     PYTHONPATH=scripts/harbor/agents harbor run ... -a antigravity_sdk:AntigravitySdk -m google/gemini-4-argon \\
         --ak reasoning_effort=high --ae GOOGLE_GEMINI_BASE_URL=<the gateway's route to the Chat Completions server>

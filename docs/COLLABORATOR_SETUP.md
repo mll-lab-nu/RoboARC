@@ -164,8 +164,10 @@ Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's age
 | Claude subscription (Claude Code) | `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) |
 | Azure OpenAI (Codex) | `AGENT_CONFIG=<config.toml with the Azure provider>` and the key variable it names; retries in the same file (`request_max_retries`, `stream_max_retries`) |
 | DeepSeek API key (DSH) | `DEEPSEEK_API_KEY`, with `AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash`: DSH, the DeepSeek Harness, through `scripts/harbor/agents/dsh_acp.py` |
+| Chat Completions server (Antigravity) | `ANTIGRAVITY_BASE_URL=http://127.0.0.1:<port>/v1` (the server's base, plain HTTP with a port: a proxy on the run's own host; the gateway calls `<base>/chat/completions`) and `GEMINI_API_KEY` (the key the server expects, sent as a Bearer token; at least 16 characters, any value if the server needs none: the key scan of `send_results.sh` needs one), with `AGENT=antigravity MODEL=google/<model>` and the usage gateway on: the Antigravity SDK through `scripts/harbor/agents/antigravity_sdk.py`, its Gemini requests translated by the gateway (docs/RUNNING.md "A single trial") |
 
-The agent's container reaches only these providers (with `AGENT=dsh` also DeepSeek's API), and with the usage gateway
+The agent's container reaches only these providers (with `AGENT=dsh` also DeepSeek's API; with `AGENT=antigravity` the
+gateway alone, which reaches your Chat Completions server), and with the usage gateway
 on (below) only through it, and the package registries (PyPI, apt). Another provider does not answer: ask us first.
 An Azure AI Foundry endpoint (`*.services.ai.azure.com`) also needs `GATEWAY_EXTRA_HOSTS="*.services.ai.azure.com"`.
 
@@ -225,9 +227,11 @@ done
     and tokens per minute) must carry all the lanes you start. Raise the quota or start fewer lanes, and do that
     before a trial's one rerun.
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
-  `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), with no
+  `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), or
+  `AGENT=antigravity` (RoboARC's own agent for the Antigravity SDK; official, decided 2026-11-01), with no
   adapter and no proxy that holds the credentials or changes the requests (the usage gateway holds no credentials, and
-  its one change to a request, the image cap, is the same in every run); web search off (leave `WEB_SEARCH` unset);
+  its one change to a request, the image cap, is the same in every run; with `AGENT=antigravity` it also translates
+  the SDK's Gemini requests for your Chat Completions server, and every result records that as `api_translation`); web search off (leave `WEB_SEARCH` unset);
   the image cap at 50 (leave `GATEWAY_IMAGE_CAP` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
   its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds;
   one `EFFORT` for the whole batch, the level we agreed (section 4), never `default`.

@@ -12,7 +12,7 @@
 #                scripts/harbor/agents/antigravity_sdk.py, its web tools off, the model served by an OpenAI-compatible
 #                Chat Completions server (ANTIGRAVITY_BASE_URL, a plain-HTTP address with a port: a local proxy) and
 #                reached through the usage gateway's Gemini translation (USAGE_GATEWAY required; gemini_chat.py);
-#                official for Antigravity + Gemini (the user, 2026-11-01), e.g. AGENT=antigravity
+#                official for Antigravity + Gemini (decided 2026-11-01), e.g. AGENT=antigravity
 #                MODEL=google/gemini-4-argon EFFORT=high (EFFORT: minimal, low, medium, high, xhigh or default)
 #   EFFORT       reasoning effort, --ak reasoning_effort=<EFFORT> (xhigh); `default` passes none
 #   AK           more agent options, e.g. "--ak reasoning_summary=detailed"
