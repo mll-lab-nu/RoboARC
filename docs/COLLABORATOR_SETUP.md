@@ -96,7 +96,8 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
 - **Set `EFFORT` yourself**, to the reasoning level we agreed with you (the commands use `high`), never
   `EFFORT=default`:
   - The runner passes it to the agent as Harbor's `reasoning_effort` (for Codex `model_reasoning_effort`, over the
-    value in an `AGENT_CONFIG` file). Without `EFFORT` it passes `xhigh`.
+    value in an `AGENT_CONFIG` file; for Antigravity the SDK's thinking level, `xhigh` being its `extra_high`, which
+    the gateway sends on as `reasoning_effort`). Without `EFFORT` it passes `xhigh`.
   - `EFFORT=default` passes no level. The model then runs at whatever level its harness or provider picks, and no
     record says which. Codex, for example, takes its default level from the provider's model list
     (`GET <base URL>/models`); an endpoint without that list (it answers 404) leaves the level to the provider.
@@ -119,13 +120,19 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
       python3 -c 'import json,sys; print(next(json.loads(l)["payload"].get("effort") for l in open(sys.argv[1]) if "\"turn_context\"" in l))' "$f"
     done
     ```
+    With Antigravity, the first line of each trial's agent log names the level (`thinking level high`) and the tools
+    that are off (`generate_image`, `read_url_content`, `search_web`):
+    ```bash
+    head -qn1 jobs/smoke/smoke-*-roboarc-interlocked-claws-08-i01/*/agent/antigravity.txt
+    ```
   - `jobs/smoke/smoke.summary.md` has the column `usage gateway in / out`, with two numbers in both rows: the agent's
     model calls went through the usage gateway. Without that column, or with `-` in a row, the agent's container did
     not reach the gateway. The gateway listens on the Docker bridge address (172.17.0.1), and a host firewall that
     blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
   - the gateway was on as in the command. The `runner` line of `jobs/smoke/smoke.log` names it (`usage gateway
     <checkout>/scripts/usage_gateway`, not `usage gateway off`), and each job's `usage_recording.json` says
-    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50`;
+    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50` (with Antigravity also
+    `"api_translation": "gemini-chat"`);
   - your provider answered the model calls. This counts the HTTP statuses of all the smoke's model calls:
     ```bash
     python3 -c 'import collections,json,sys; print(collections.Counter(json.loads(l)["status"] for f in sys.argv[1:] for l in open(f)))' \
