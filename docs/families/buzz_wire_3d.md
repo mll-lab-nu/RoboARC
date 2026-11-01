@@ -22,7 +22,7 @@ What the grader checks, in plain words (each task's `instruction.md` states the 
 
 Any contact between a metal part of the wand and the metal wire ends the episode in failure, including brief or zero-force touches (contact of the wooden handle does not count). The wand falling more than 100 mm below the tabletop also ends the episode in failure.
 
-Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged mode the delivered trajectory is replayed open-loop twice in a fresh process: both replays must succeed, and the strict goal must be reached within the trajectory's own rows. In standard mode the simulator service grades the live episode and a fresh-process replay confirms it. The details are on the [benchmark page](../benchmarks/roboarc.md) (section "Grading replays").
+Every task has a wall-clock budget of 11400 s (3 h 10 min) in both modes. In privileged mode the delivered trajectory is replayed open-loop twice in a fresh process: both replays must succeed, and the strict goal must be reached within the trajectory's own rows. In standard mode the simulator service grades the live episode and a fresh-process replay confirms it. The details are on the [benchmark page](../benchmarks/roboarc.md) (section "Grading replays").
 
 ## Bases
 

@@ -84,7 +84,7 @@ Each task base ships as two [Harbor](https://github.com/laude-institute/harbor) 
   (optional depth), proprioception and calibrated cameras, and submits joint or end-effector chunks, with no reset and
   no privileged state. The service grades the live episode, and for the puzzles a fresh-process replay confirms it.
 
-The agent's budget is wall clock, 3 h per task (10800 s); wire-splicing-01 has 6 h by the owner's exception, and its
+The agent's budget is wall clock, 3 h 10 min per task (11400 s); wire-splicing-01 has 6 h by the owner's exception, and its
 trials form their own group. Harbor 0.23 or newer and Python >= 3.11 for the repository tools.
 
 ```bash

@@ -116,7 +116,7 @@ the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment
 `TaskInfo` (no simulator needed): `id`, `suite` (`puzzles` | `ikea`), `family`, `name` (the tooling's task key), `seeds`
 (the allowed instance seeds),
 `base`, `difficulty`, `robot`, `description`, `image`, `render_image`, `max_episode_steps` (the verifier's row cap),
-`agent_time_limit_s` (the Harbor agent budget: 10800 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
+`agent_time_limit_s` (the Harbor agent budget: 11400 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
 `reference_end_hash` and, for IKEA, `reference_settled_hash`. 77 of the 78 puzzle bases ship a reference
 (fiber-bundling-05 does not); every IKEA task does.
 

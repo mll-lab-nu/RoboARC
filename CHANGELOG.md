@@ -6,6 +6,23 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### The agent's time: 11400 s (3 h 10 min) instead of 10800 s (owner's decision; 178 task dirs and their DIGEST)
+- **Why:** the agent's clock in `/run/rcb-limits/usage.json` (`time_left_s`, `deadline_utc`) counts from the trial
+  environment's start, before Harbor installs the harness; Harbor's cutoff counts from the agent's run. The install
+  (48-401 s in recent trials) came out of the clock the agent plans by, and agents stop when it reads 0: a Codex trial
+  of 2026-10-31 with a 401 s install stopped at `time_left_s` 0 after 10406 s of its 10800.
+- **10800 -> 11400:** `scripts/roboarc/mk_tasks.py` `CUTOFF_SEC` and `ikea/scripts/ikea_mujoco/mk_tasks.py` `AGENT_S`,
+  rendered into every task's `[agent] timeout_sec`, the instruction's `## Time limit`, the README's `Agent time budget`
+  row, the monitor's limits (`environment/rcb_monitor/limits.json`, `tests/rcb_limits.json`) and the standard sim
+  service's `RCB_WALL_CLOCK_S`. wire-splicing-01-i01 keeps its 21600 s. The grading timeouts stay: they already cover
+  11400 s. The IKEA standard service's default `RCB_WALL_CLOCK_S` is 11400 too, and the IKEA README's reference timing
+  no longer says "against the N s budget" (each record names the 10800 s it was measured against).
+- **Results:** `cutoff_s` is part of the configuration results are ranked by, so trials at 11400 s form a group apart
+  from earlier ones at 10800 s. A batch runs on one release.
+- **Docs and tests:** README, docs/API.md, docs/RUNNING.md "The agent's time", docs/benchmarks/{roboarc,ikea_mujoco}.md,
+  the 18 family pages, docs/COLLABORATOR_SETUP.md (the run's duration: about 884 GPU-hours if every trial used its
+  whole time); `roboarc/registry.py`'s default; `tests/api/test_catalogue.py`.
+
 ### `bash-runners/`: the evaluation run one seed at a time; a batch run in parts keeps every trial in its plan (runner fix)
 - **The bug** (the `SEEDS` entry below): the batch's plan (`$JOBS/.plan/<batch>.json` and `.tsv`) listed only the trials
   of the last command's seeds. After `SEEDS="0"`, then `SEEDS="1 2"`, it held the seed-1 and seed-2 trials only, so

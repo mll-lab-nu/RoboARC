@@ -31,7 +31,7 @@ executed, journaled and recorded, so a replay of the recorded trajectory runs ex
 leaves those rows unchanged) and meta["clipped"] says so. An unlimited gripper switches at the row.
 
 Budget: the wall clock only (PROTOCOL v2.0 H.7: the privileged twin's cutoff). spec budget.wall_clock_s (RCB_WALL_CLOCK_S,
-10800 s) counts from the agent's first request to the service (any endpoint), so the service's time_left_s never runs out
+11400 s) counts from the agent's first request to the service (any endpoint), so the service's time_left_s never runs out
 before Harbor's [agent] timeout_sec does; at 0 the episode ends (reason "timeout") between calls.
 
 Crash recovery (rcb_limited.Episode, resume class `exact`: MuJoCo on the CPU is bit-deterministic): every executed control
@@ -76,7 +76,7 @@ RIG_SPEC = json.load(open(os.environ.get("RCB_RIG", os.path.join(HERE, "rig.json
 SEED = int(open(os.path.join(HERE, "seed")).read())
 OBS_CALIBRATION = os.environ.get("RCB_OBS_CALIBRATION", "1") == "1"
 MAX_CHUNK_S = float(os.environ.get("RCB_MAX_CHUNK_S", "10")); MAX_WATCH_S = float(os.environ.get("RCB_MAX_WATCH_S", "30"))
-WALL_CLOCK_S = float(os.environ.get("RCB_WALL_CLOCK_S", "10800"))
+WALL_CLOCK_S = float(os.environ.get("RCB_WALL_CLOCK_S", "11400"))
 LIVE_FPS = int(os.environ.get("RCB_LIVE_FPS", "10")); LIVE_CAM = os.environ.get("RCB_LIVE_CAMERA", "cam_high")
 # /spec max_frames_per_call (cameras x frames; a frame with per-frame depth counts DEPTH_WEIGHT more). The recorder holds every frame
 # of a call (848 x 480 RGB = 1.2 MB) and stacks and encodes them again: 1000 keeps one call near 3.7 GB at its peak,

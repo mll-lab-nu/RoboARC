@@ -101,7 +101,7 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
     record says which. Codex, for example, takes its default level from the provider's model list
     (`GET <base URL>/models`); an endpoint without that list (it answers 404) leaves the level to the provider.
   - The level is part of the run id (`<harness>-<model>-<effort>`), so every trial of a batch runs at one level.
-- The two modes run one after the other, each with at most the agent's 3 h: the standard trial starts when the
+- The two modes run one after the other, each with at most the agent's 3 h 10 min: the standard trial starts when the
   privileged trial's agent is done, while that trial is graded in the background. To run them at the same time, start
   the same command again in a second terminal (it adds a lane).
 - It passed when:
@@ -241,9 +241,9 @@ done
   lanes with `MEM_GUARD=1`. When a trial's agent is done, its grading (the replay and its video) runs in the background
   on the same GPU while the lane starts its next trial, so 4 lanes per GPU stay right (docs/RUNNING.md "GPUs and
   lanes"; `PHASE_SPLIT=0` waits for each grading).
-- **Duration:** a trial gives the agent up to 3 h, plus setup and grading. If every trial used its whole budget, the
-  540 trials would take about 837 GPU-hours (the 300 rigid trials with a GPU count a quarter of a GPU each, the 36
-  IKEA privileged trials none, the 204 deformable trials a whole one): about 35 days on one GPU, 8.7 on four, 4.4 on
+- **Duration:** a trial gives the agent up to 3 h 10 min, plus setup and grading. If every trial used its whole budget, the
+  540 trials would take about 884 GPU-hours (the 300 rigid trials with a GPU count a quarter of a GPU each, the 36
+  IKEA privileged trials none, the 204 deformable trials a whole one): about 37 days on one GPU, 9.2 on four, 4.6 on
   eight. `nohup` keeps the lanes running after you
   log out.
 - **One release per batch:** do not pull in the middle of a batch. A new release changes the tasks: 2.2.0 changed
@@ -264,7 +264,7 @@ done
   again; it gets the same seed. Once only: a rerun that fails again stays as it is. Name every rerun in `NOTES`
   (section 6). A trial the agent ended itself, or that reached its time limit, is a result (0 or 1): never run it
   again.
-- **Budget:** each trial gives the agent up to 3 h; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
+- **Budget:** each trial gives the agent up to 3 h 10 min; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
   its results are ranked as a group of their own). Use one API key per batch, with a spending cap.
 - **Live view:** `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1. Keep it local: it shows unredacted output.
 - **When it has finished:** send it back (section 6).

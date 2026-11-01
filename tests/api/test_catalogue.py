@@ -54,8 +54,8 @@ assert PINS["roboarc"] == "ghcr.io/mll-lab-nu/roboarc:2.2.0@" + PINS["roboarc"].
 
 def test_metadata():
     for t in roboarc.list_tasks():
-        # 3 h, or the owner's exception for the base (scripts/task_conventions.py CUTOFF_EXCEPTIONS)
-        assert t.max_episode_steps > 0 and t.agent_time_limit_s == CUTOFF_EXCEPTIONS.get(t.id, 10800.0), t.id
+        # 3 h 10 min (mk_tasks.py CUTOFF_SEC), or the owner's exception for the base (task_conventions.py CUTOFF_EXCEPTIONS)
+        assert t.max_episode_steps > 0 and t.agent_time_limit_s == CUTOFF_EXCEPTIONS.get(t.id, 11400.0), t.id
         assert set(t.task_dirs) == {"privileged", "standard"}
         assert t.image.startswith("ghcr.io/mll-lab-nu/roboarc")
         json.dumps(t.to_dict())

@@ -217,7 +217,7 @@ caller's (`AGENT_CONFIG`). An API key can still request a search directly: read 
 
 ## The agent's time (the cutoff)
 
-A trial's agent gets the task's `[agent] timeout_sec` (10800 s for every RoboARC task but wire-splicing-01-i01, which has 21600 s by the owner's
+A trial's agent gets the task's `[agent] timeout_sec` (11400 s for every RoboARC task but wire-splicing-01-i01, which has 21600 s by the owner's
 exception, `scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`) and nothing else. Harbor counts
 it around the agent's run only (after the environment has been built and started and the harness installed, each under
 a timeout of its own); a standard task's `sim` service starts with the environment, and what it has not finished
@@ -232,7 +232,8 @@ privileged and standard versions of a task have the same cutoff (H.7); the instr
 (rendered by `scripts/task_conventions.py`, the last thing the agent reads), the README's `Agent time budget` row and,
 in standard mode, the sim service's `RCB_WALL_CLOCK_S` state the same number, and nothing else in the instruction states
 the limit. The standard service's `time_left_s` counts the same limit from the agent's first request to the service.
-`/run/rcb-limits/usage.json` shows the agent its clock. The same section tells the agent it works alone: the harness
+`/run/rcb-limits/usage.json` shows the agent its clock, counted from the trial environment's start, so the harness's
+install comes out of it (48-401 s measured; agents stop when it reads 0): the 11400 s are 3 h with 10 min for that. The same section tells the agent it works alone: the harness
 runs non-interactively, so a reply without a tool call (a question to the user included) ends the agent's run, and the
 trial is graded as it stands, a result like a cutoff. Harbor hands `instruction.md` to the agent as it is, and the
 runner adds nothing. `--agent-setup-timeout-multiplier` (for slow harness installs) is fine: set-up is not the agent's

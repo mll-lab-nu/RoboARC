@@ -66,7 +66,9 @@ import task_conventions as TC  # noqa: E402  the protocol's conventions: every g
 # the sim service's wall clock. To change it (an owner decision; the pull request states old -> new), edit it here and
 # regenerate. A base the owner excepted (scripts/task_conventions.py CUTOFF_EXCEPTIONS) gets its own number, and its
 # grading timeouts grow with it (cutoff_of, grading_timeouts).
-CUTOFF_SEC = 10800
+# 10800 -> 11400 (2026-11-01): the agent's clock in usage.json counts from the trial environment's start, so the
+# harness's install before the session (48-401 s measured) came out of 3 h; agents stop when it reads 0.
+CUTOFF_SEC = 11400
 
 REL = json.loads((HERE / "release.json").read_text())
 ASSETS = json.loads((HERE / "assets.json").read_text())        # the pinned HF dataset (scripts/roboarc/assets.py)

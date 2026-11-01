@@ -70,7 +70,7 @@ the family pages list each family's robot and success rule.
 
 ## Time budget
 
-10800 s (3 h) wall clock in both modes and every family (each task's `[agent] timeout_sec`; PROTOCOL §2.12), except
+11400 s (3 h 10 min) wall clock in both modes and every family (each task's `[agent] timeout_sec`; PROTOCOL §2.12), except
 wire-splicing-01-i01: 21600 s (6 h) by the owner's exception (`scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`; its
 privileged verifier 45000 s, its standard collect hook 32400 s); `cutoff_s` is part of the configuration results are
 ranked by, so its trials form their own group. The texts

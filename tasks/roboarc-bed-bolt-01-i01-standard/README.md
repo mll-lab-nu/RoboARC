@@ -8,7 +8,7 @@
 | Simulator / robot | `roboarc` / `aloha-2` |
 | Family / instance | `bed_bolt` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
-| Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
+| Agent time budget | 11400 s; tokens: protocol default (PROTOCOL §5) |
 | Base image | `ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057` |
 
 ## Task

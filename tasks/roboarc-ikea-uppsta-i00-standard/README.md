@@ -8,7 +8,7 @@
 | Simulator / robot | `mujoco` / `franka-panda-bimanual` |
 | Family / instance | `ikea_uppsta` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
-| Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
+| Agent time budget | 11400 s; tokens: protocol default (PROTOCOL §5) |
 | Base image | `ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e` |
 
 ## Task
@@ -68,7 +68,7 @@ Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]`
 | Initial state | sha256 `3b69cfd57f5a5330…` of the mjSTATE_INTEGRATION vector |
 
 ### Budget
-The wall clock only, the privileged twin's cutoff (PROTOCOL v2.0 H.7): `[agent] timeout_sec` = 10800 s. The service
+The wall clock only, the privileged twin's cutoff (PROTOCOL v2.0 H.7): `[agent] timeout_sec` = 11400 s. The service
 counts the same limit from the agent's first request (`spec.budget.wall_clock_s`, `meta.time_left_s`) and ends the
 episode with reason `timeout` when it runs out; that count never runs out before Harbor's.
 

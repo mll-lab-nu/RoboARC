@@ -112,7 +112,7 @@ def _puzzle_tasks(root: Path) -> dict[str, TaskInfo]:
             id=f"roboarc-{base}", suite="puzzles", family=md.get("family", name), name=name, base=base,
             difficulty=md.get("difficulty"), robot=md.get("robot", ""), description=meta["task"]["description"],
             image=image, render_image=image, max_episode_steps=int(cap) if cap else 200_000,
-            agent_time_limit_s=float(meta.get("agent", {}).get("timeout_sec", 10800.0)),
+            agent_time_limit_s=float(meta.get("agent", {}).get("timeout_sec", 11400.0)),
             task_dirs={"privileged": str(d), **({"standard": str(std)} if std.is_dir() else {})},
             reference=str(ref) if ref.is_file() else None, reference_end_hash=expect, seeds=_seeds(md))
     return out
@@ -148,7 +148,7 @@ def _ikea_tasks(root: Path) -> dict[str, TaskInfo]:
             id=f"roboarc-ikea-{name}-i00", suite="ikea", family=md.get("family", f"ikea_{name}"), name=name, base=name,
             difficulty=md.get("difficulty"), robot=md.get("robot", ""), description=meta["task"]["description"],
             image=image, render_image=sim_image or image, max_episode_steps=int(rows.group(1)) if rows else 50_000_000,
-            agent_time_limit_s=float(meta.get("agent", {}).get("timeout_sec", 10800.0)),
+            agent_time_limit_s=float(meta.get("agent", {}).get("timeout_sec", 11400.0)),
             task_dirs={"privileged": str(d), **({"standard": str(std)} if std.is_dir() else {})},
             reference=str(ref) if ref.is_file() else None, reference_end_hash=h.get("end"),
             reference_settled_hash=h.get("settled"), seeds=_seeds(md))

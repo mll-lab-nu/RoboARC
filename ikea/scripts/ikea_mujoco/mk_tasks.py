@@ -27,7 +27,7 @@ ROOT = HERE.parents[1]
 TASKS = ROOT.parent / "tasks"                     # the repository's tasks/, next to the puzzles
 SHARED = HERE / "shared"
 VERSION = (ROOT / "images/ikea-mujoco/VERSION").read_text().strip()
-AGENT_S = 10800                 # 3 h wall clock, both modes, as RoboARC's puzzles (PROTOCOL v2.0 H.7)
+AGENT_S = 11400                 # 3 h 10 min wall clock, both modes, as RoboARC's puzzles (scripts/roboarc/mk_tasks.py CUTOFF_SEC)
 TEXTS = json.loads((HERE / "tasks.json").read_text())
 ASSETS = json.loads((HERE / "assets.json").read_text())
 BIND = json.loads((HERE / "bindings.json").read_text())
@@ -486,7 +486,7 @@ def readme(t: str, traj: pathlib.Path) -> str:
         ver += " " + e["image_note"]
     tm = e.get("timing")
     if tm and "text" in tm:
-        ver += f" Reference timing against the {AGENT_S} s budget: {tm['text']}"
+        ver += f" Reference timing: {tm['text']}"          # the record names the budget it was measured against
     elif tm:
         ver += (f" Reference timing against the {AGENT_S} s budget, by host: one unobserved replay "
                 f"{tm['quiet_i9_14900HX_s']:.0f} s ({100 * tm['quiet_i9_14900HX_s'] / AGENT_S:.1f} %) on a quiet "
