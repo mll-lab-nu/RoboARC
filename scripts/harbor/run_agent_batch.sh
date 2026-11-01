@@ -4,10 +4,16 @@
 #   MODEL=<provider/model> scripts/harbor/run_agent_batch.sh <batch-name> <base> [<base> ...]
 #   (<base> = a task name without its -privileged / -standard; docs/RUNNING.md)
 # Official runs use Harbor's native agents only (PROTOCOL D11): no adapter. Env (defaults):
-#   AGENT        codex | claude-code | dsh (codex)  MODEL   the -m model (required, e.g. openai/<model>)
+#   AGENT        codex | claude-code | dsh | antigravity (codex)  MODEL   the -m model (required, e.g. openai/<model>)
 #                dsh = DSH, the DeepSeek Harness, through RoboARC's own Harbor agent scripts/harbor/agents/dsh_acp.py
 #                (Harbor's ACP agent with dsh installed; not a Harbor built-in: whether its results are official is the
 #                benchmark owner's call, PROTOCOL D11), e.g. AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash EFFORT=high
+#                antigravity = the Antigravity SDK (google-antigravity 0.1.23) through RoboARC's own Harbor agent
+#                scripts/harbor/agents/antigravity_sdk.py, its web tools off, the model served by an OpenAI-compatible
+#                Chat Completions server (ANTIGRAVITY_BASE_URL, a plain-HTTP address with a port: a local proxy) and
+#                reached through the usage gateway's Gemini translation (USAGE_GATEWAY required; gemini_chat.py);
+#                official for Antigravity + Gemini (the user, 2026-11-01), e.g. AGENT=antigravity
+#                MODEL=google/gemini-4-argon EFFORT=high (EFFORT: minimal, low, medium, high, xhigh or default)
 #   EFFORT       reasoning effort, --ak reasoning_effort=<EFFORT> (xhigh); `default` passes none
 #   AK           more agent options, e.g. "--ak reasoning_summary=detailed"
 #   WEB_SEARCH   disabled (default) = the harness offers the model no web search: Codex --ak web_search=disabled,
@@ -25,6 +31,8 @@
 #     Claude subscription            CLAUDE_FORCE_OAUTH=1 and CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`)
 #     Azure OpenAI (codex)           AGENT_CONFIG=<config.toml with the Azure provider> and its key variable
 #     DeepSeek (dsh)                 DEEPSEEK_API_KEY (DeepSeek's API, api.deepseek.com, added to the job's egress)
+#     Chat Completions (antigravity) ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1 (the server's base: <base>/chat/completions)
+#                                    and GEMINI_API_KEY (the key it expects, sent as a Bearer token; any value if none)
 #   MODES        "privileged standard"; add `standard-realtime` for <base>-standard-realtime where it exists
 #   K            trials per task and mode (1). Each trial is a Harbor job of its own (`-k 1`) and runs from its own seed:
 #                the K trials of a task get distinct seeds of its `[metadata.seeds] allowed`, without replacement, in an
@@ -200,8 +208,14 @@ JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(ab
 TOKEN_BUDGET_IN="${TOKEN_BUDGET_IN:-100000000}"; TOKEN_BUDGET_OUT="${TOKEN_BUDGET_OUT:-10000000}"
 [ -z "$USAGE_GATEWAY" ] || [[ "$TOKEN_BUDGET_IN$TOKEN_BUDGET_OUT" =~ ^[0-9]+$ && -n "$TOKEN_BUDGET_IN" && -n "$TOKEN_BUDGET_OUT" ]] \
   || { echo "TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT must be whole numbers (0 = no limit)" >&2; exit 2; }
-case "$AGENT" in codex|claude-code|dsh) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), or dsh (scripts/harbor/agents/dsh_acp.py)" >&2; exit 2 ;; esac
-[ "$AGENT" = dsh ] && [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; dsh takes none" >&2; exit 2; }
+case "$AGENT" in codex|claude-code|dsh|antigravity) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), dsh (scripts/harbor/agents/dsh_acp.py) or antigravity (scripts/harbor/agents/antigravity_sdk.py)" >&2; exit 2 ;; esac
+case "$AGENT" in dsh|antigravity) [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; $AGENT takes none" >&2; exit 2; } ;; esac
+if [ "$AGENT" = antigravity ]; then
+  # the model server speaks Chat Completions only: the gateway translates the SDK's Gemini requests (gemini_chat.py)
+  [ -n "$USAGE_GATEWAY" ] || { echo "AGENT=antigravity needs the usage gateway (USAGE_GATEWAY=scripts/usage_gateway): it translates the SDK's Gemini requests for the Chat Completions server" >&2; exit 2; }
+  case "$EFFORT" in minimal|low|medium|high|xhigh|default) ;; *) echo "EFFORT for AGENT=antigravity: minimal, low, medium, high, xhigh or default (the SDK's thinking levels)" >&2; exit 2 ;; esac
+  [ "$WEB_SEARCH" = disabled ] || { echo "AGENT=antigravity has its web tools off (agents/antigravity/run_agent.py); WEB_SEARCH=allowed is not available" >&2; exit 2; }
+fi
 # Run id (D4): harness = the agent name with - -> _; model = MODEL's last path segment, lower case, gpt-<n> joined
 # (gpt-5 -> gpt5), a leading claude- dropped (claude-opus-4-1 -> opus_4_1), every other
 # character outside [a-z0-9] -> _; effort as given ("default" when the harness sets none).
@@ -218,6 +232,10 @@ if [ "$AGENT" = dsh ]; then
   AGENT_ARGS=(-a dsh_acp:DshAcp -m "$MODEL")
   export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
   [ -n "$USAGE_GATEWAY" ] || AGENT_ARGS+=(--allow-agent-host api.deepseek.com)   # with the gateway: through it (below)
+fi
+if [ "$AGENT" = antigravity ]; then   # RoboARC's own Harbor agent, as dsh's
+  AGENT_ARGS=(-a antigravity_sdk:AntigravitySdk -m "$MODEL")
+  export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
 fi
 [ "$EFFORT" != default ] && AGENT_ARGS+=(--ak "reasoning_effort=$EFFORT")
 # Codex's other provider-side tools go off with the web search (PROTOCOL D11). Under a ChatGPT login Codex hands the
@@ -241,6 +259,7 @@ case "$WEB_SEARCH" in
   disabled) case "$AGENT" in
               codex) AGENT_ARGS+=(--ak web_search=disabled) ;;
               dsh) AGENT_ARGS+=(--ak web=false) ;;   # dsh's web_search and web_fetch tools off (a dsh patch file)
+              antigravity) ;;                        # search_web, read_url_content, generate_image off in run_agent.py
               *) AGENT_ARGS+=(--ak disallowed_tools=WebSearch,WebFetch) ;;
             esac ;;
   allowed) [ "$AGENT" = dsh ] && AGENT_ARGS+=(--ak web=true) ;;
@@ -382,6 +401,9 @@ if [ -n "$USAGE_GATEWAY" ]; then
     claude-code) agent_up=$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com) ;;
     dsh) agent_up=$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)
          gw_args+=(--extra-host api.deepseek.com) ;;   # DeepSeek's API is no task's model host (scripts/set_agent_egress.py)
+    antigravity) agent_up=$(upstream ANTIGRAVITY_BASE_URL "")
+         [[ "$agent_up" =~ ^http://[A-Za-z0-9.-]+:[0-9]+(/|$) ]] || { log "AGENT=antigravity: ANTIGRAVITY_BASE_URL must be the Chat Completions server's plain-HTTP base with a port, e.g. http://127.0.0.1:4141/v1 (env or ENV_FILE); got '${agent_up:-nothing}'"; exit 2; }
+         gw_args+=(--gemini-chat) ;;   # the SDK's Gemini requests -> <base>/chat/completions (gemini_chat.py)
     *) agent_up=$(upstream OPENAI_BASE_URL https://api.openai.com/v1) ;;
   esac
   [[ "$agent_up" =~ ^http://([A-Za-z0-9.-]+:[0-9]+)(/|$) ]] && gw_args+=(--http-host "${BASH_REMATCH[1]}")
@@ -404,6 +426,8 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
   via_gw() { sed -E -e "s#^https://([^/]+)#$GW/u/\1#; t" -e "s#^http://([A-Za-z0-9.-]+:[0-9]+)#$GW/h/\1#" <<< "$1"; }
   if [ "$AGENT" = claude-code ]; then
     AGENT_ARGS+=(--ae "ANTHROPIC_BASE_URL=$(via_gw "$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com)")")
+  elif [ "$AGENT" = antigravity ]; then   # the SDK appends /v1beta/models/<model>:streamGenerateContent to it
+    AGENT_ARGS+=(--ae "GOOGLE_GEMINI_BASE_URL=$(via_gw "$agent_up")")
   elif [ "$AGENT" = dsh ]; then   # dsh's Messages root (its /v1/messages and /v1/files below it)
     AGENT_ARGS+=(--ae "DEEPSEEK_BASE_URL=$(via_gw "$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)")")
   else
@@ -481,10 +505,12 @@ wait_for() {  # <mode>: block until every WAIT_FOR file of this mode exists
 }
 
 usage_record() {  # <job>: <job>/usage_recording.json, whether this job's trials ran through the usage gateway (and its
-  # token budget and image cap); write_task_results.py copies it into every result's config.json
+  # token budget and image cap; with AGENT=antigravity "api_translation": the gateway's Gemini -> Chat Completions
+  # translation); write_task_results.py copies it into every result's config.json
   if [ -n "$USAGE_GATEWAY" ]; then
-    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}, "image_cap": %s}\n' \
-      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT" "$GATEWAY_IMAGE_CAP"
+    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}, "image_cap": %s%s}\n' \
+      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT" "$GATEWAY_IMAGE_CAP" \
+      "$([ "$AGENT" = antigravity ] && printf ', "api_translation": "gemini-chat"')"
   else
     printf '{"usage_gateway": false, "token_budget": null, "image_cap": null}\n'
   fi > "$JOBS/$1/usage_recording.json"

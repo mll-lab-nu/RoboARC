@@ -9,6 +9,11 @@ fake `harbor` and a fake gateway: no docker, no model, no network.
   and the records say so (with the token budget and the image cap, 50 by default, which the gateway is given);
 - on with AGENT=dsh: dsh's Messages root (DEEPSEEK_BASE_URL) points at the gateway, which forwards to DeepSeek's API
   (--extra-host api.deepseek.com), and the job's egress has the gateway, not DeepSeek's host;
+- on with AGENT=antigravity: the SDK's Gemini base URL (GOOGLE_GEMINI_BASE_URL) is the gateway's route to the Chat
+  Completions server of ANTIGRAVITY_BASE_URL, the gateway translates (--gemini-chat) and may forward to exactly that
+  plain-HTTP server, the records name the translation (api_translation); AGENT=antigravity without the gateway, with an
+  EFFORT the SDK has no level for, with WEB_SEARCH=allowed or AGENT_CONFIG, or without a plain-HTTP ANTIGRAVITY_BASE_URL
+  stops the runner at start;
 - USAGE_GATEWAY naming a directory without the gateway, a GATEWAY_IMAGE_CAP that is not a whole number, and the switch
   of earlier versions (GATEWAY=1), stop the runner at start, before any job.
 """
@@ -84,7 +89,8 @@ class UsageGatewayOption(unittest.TestCase):
         harbor.chmod(0o755)
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
-                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_"))}
+                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_",
+                                            "ANTIGRAVITY_", "GEMINI_", "GOOGLE_GEMINI_"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high", MODES="privileged",
                         JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),
@@ -177,6 +183,49 @@ class UsageGatewayOption(unittest.TestCase):
         (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
         self.assertIn("--extra-host api.deepseek.com", ready.read_text())
         self.assertTrue((self.root / "results" / "b" / self.task / "dsh-deepseek_v4_1_flash-high").is_dir())
+
+    def gateway_dir(self) -> pathlib.Path:
+        gw = self.root / "gw"
+        gw.mkdir(exist_ok=True)
+        (gw / "gateway.py").write_text(textwrap.dedent(FAKE_GATEWAY))
+        (gw / "rawlog.py").write_text("")
+        return gw
+
+    def test_on_antigravity(self):
+        p = self.run_batch(USAGE_GATEWAY=str(self.gateway_dir()), GATEWAY_BIND="127.0.0.1", AGENT="antigravity",
+                           MODEL="google/gemini-4-argon", ANTIGRAVITY_BASE_URL="http://127.0.0.1:4141/v1",
+                           GEMINI_API_KEY="k" * 20, FAKE_GATEWAY_TOTALS="1")
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        (call,) = self.calls()
+        argv = call["argv"]
+        self.assertEqual((argv[argv.index("-a") + 1], argv[argv.index("-m") + 1]), ("antigravity_sdk:AntigravitySdk", "google/gemini-4-argon"))
+        aks = [argv[i + 1] for i, x in enumerate(argv) if x == "--ak"]
+        self.assertEqual(aks, ["reasoning_effort=high"])            # no web option: the tools are off in run_agent.py
+        base_urls = [x for x in argv if "BASE_URL=" in x]
+        self.assertEqual(len(base_urls), 1, argv)
+        self.assertRegex(base_urls[0], r"^GOOGLE_GEMINI_BASE_URL=http://127\.0\.0\.1:\d+/h/127\.0\.0\.1:4141/v1$")
+        hosts = [argv[i + 1] for i, x in enumerate(argv) if x == "--allow-agent-host"]
+        self.assertEqual(hosts, ["127.0.0.1"])                      # the gateway, never the model server directly
+        (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+        self.assertIn("--gemini-chat", ready.read_text().split())
+        self.assertIn("--http-host 127.0.0.1:4141", ready.read_text())
+        job = self.root / "jobs" / f"b-privileged-{self.base}"
+        self.assertEqual(json.loads((job / "usage_recording.json").read_text())["api_translation"], "gemini-chat")
+        cfg = self.results_config("antigravity-gemini_4_argon-high")
+        self.assertEqual((cfg["usage_gateway"], cfg["api_translation"]), (True, "gemini-chat"))
+
+    def test_antigravity_refusals(self):
+        gw, url = str(self.gateway_dir()), "http://127.0.0.1:4141/v1"
+        for env, msg in ((dict(ANTIGRAVITY_BASE_URL=url), "needs the usage gateway"),
+                         (dict(USAGE_GATEWAY=gw, ANTIGRAVITY_BASE_URL=url, EFFORT="max"), "EFFORT for AGENT=antigravity"),
+                         (dict(USAGE_GATEWAY=gw, ANTIGRAVITY_BASE_URL=url, WEB_SEARCH="allowed"), "WEB_SEARCH=allowed is not available"),
+                         (dict(USAGE_GATEWAY=gw, ANTIGRAVITY_BASE_URL=url, AGENT_CONFIG=str(self.root / "c.toml")), "antigravity takes none"),
+                         (dict(USAGE_GATEWAY=gw, ANTIGRAVITY_BASE_URL="https://proxy.example/v1"), "plain-HTTP base"),
+                         (dict(USAGE_GATEWAY=gw), "plain-HTTP base")):
+            p = self.run_batch(AGENT="antigravity", MODEL="google/gemini-4-argon", GATEWAY_BIND="127.0.0.1", **env)
+            self.assertEqual(p.returncode, 2, (env, p.stdout + p.stderr))
+            self.assertIn(msg, p.stdout + p.stderr, env)
+            self.assertEqual(self.calls(), [], env)
 
     def test_missing_gateway_stops_at_start(self):
         empty = self.root / "empty"

@@ -47,6 +47,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
          scripts/harbor/tests/test_gpu_slots.py scripts/harbor/tests/test_bash_runners.py \
          scripts/harbor/tests/test_pin_gpu.py scripts/harbor/tests/test_dsh_acp.py scripts/harbor/tests/test_host_info.py \
+         scripts/harbor/tests/test_antigravity_sdk.py \
          scripts/harbor/tests/test_phase_marker.py scripts/harbor/tests/test_roboarc_docker.py \
          tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py \

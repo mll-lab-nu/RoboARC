@@ -23,7 +23,9 @@ placed the job on a GPU (`gpu`, its index), that GPU's name and driver (`gpu_nam
 token counts come from: "usage gateway" (<trial>/gateway/totals.json), "harness" (Harbor's result.json agent_result), or
 null: none recorded), `usage_recorded` (usage_source is not null), `token_budget` (the budget the gateway enforced,
 {"input", "output"}; null without the gateway) and `image_cap` (the most images the gateway let a model request carry,
-0 = no cap; null without the gateway, or for a job recorded before the cap existed).
+0 = no cap; null without the gateway, or for a job recorded before the cap existed). An AGENT=antigravity result also
+has `api_translation` ("gemini-chat": the gateway translated the agent's Gemini requests for a Chat Completions server,
+scripts/usage_gateway/gemini_chat.py); no other result has the key.
 attempts.json: every attempt of this task x run id x trial seen so far. RUNNING.md "Infrastructure failures": an
 infrastructure failure (not a result) allows at most one full retry with the same instance, seed and configuration; the
 voided attempt is never counted, an agent's own failure is never retried, and more than 2 attempts of one trial is
@@ -203,8 +205,11 @@ def usage_of(trial, r):
         source = None
     budget = rec.get("token_budget") if on and isinstance(rec.get("token_budget"), dict) else None
     cap = rec.get("image_cap") if on and type(rec.get("image_cap")) is int else None
-    return {"usage_gateway": on, "usage_source": source, "usage_recorded": source is not None, "token_budget": budget,
-            "image_cap": cap}
+    out = {"usage_gateway": on, "usage_source": source, "usage_recorded": source is not None, "token_budget": budget,
+           "image_cap": cap}
+    if on and isinstance(rec.get("api_translation"), str):     # AGENT=antigravity only (module docstring)
+        out["api_translation"] = rec["api_translation"]
+    return out
 
 
 def started(r):
