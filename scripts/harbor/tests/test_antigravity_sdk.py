@@ -131,7 +131,7 @@ class HarborClass(unittest.TestCase):
         uploads = {c["upload"]: c["text"] for c in calls if "upload" in c}
         self.assertEqual(uploads["/installed-agent/run_agent.py"], SCRIPT.read_text())
         self.assertEqual(uploads["/installed-agent/run_agent.py.lock"], (SCRIPT.parent / "run_agent.py.lock").read_text())
-        (sync,) = [c for c in calls if "exec" in c and " sync --script --locked " in c["exec"]]
+        (sync,) = [c for c in calls if "exec" in c and " sync --locked --script " in c["exec"]]
         self.assertEqual(sync["env"]["UV_CACHE_DIR"], "/installed-agent/uv/cache")
         self.assertNotIn("UV_OFFLINE", sync["env"])                       # the network is still there during setup
         self.assertIn("--version | grep -qx 0.1.23", sync["exec"])

@@ -53,13 +53,6 @@ def _generated(usage: Any) -> int | None:
     return None if candidates is None and thoughts is None else (candidates or 0) + (thoughts or 0)
 
 
-def step_metrics(usage: Any) -> dict:
-    return {"prompt_tokens": _count(usage, "prompt_token_count"), "completion_tokens": _generated(usage),
-            "cached_tokens": _count(usage, "cached_content_token_count"),
-            "extra": {"candidates_tokens": _count(usage, "candidates_token_count"),
-                      "thoughts_tokens": _count(usage, "thoughts_token_count")}}
-
-
 def final_metrics(usage: Any, complete: bool) -> dict:
     accounting = {"source": "sdk_session_total_usage", "complete": complete}
     if usage is None:
@@ -78,10 +71,8 @@ def step_record(step: Any, model: str, user, model_source) -> dict | None:
         return None
     rec: dict[str, Any] = {"timestamp": None, "source": "agent" if step.source == model_source else "system",
                            "message": step.content or ""}
-    if step.source == model_source:            # ATIF: model_name, metrics, reasoning and tool calls on agent steps only
-        rec["model_name"] = model
-        if getattr(step, "usage_metadata", None) is not None:
-            rec["metrics"] = step_metrics(step.usage_metadata)
+    if step.source == model_source:            # ATIF: model_name, reasoning and tool calls on agent steps only (no per-step
+        rec["model_name"] = model              # metrics: the SDK deprecates Step.usage_metadata; the session totals count)
         if step.thinking:
             rec["reasoning_content"] = step.thinking
         if step.tool_calls:

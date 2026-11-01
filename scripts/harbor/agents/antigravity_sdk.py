@@ -11,7 +11,7 @@ pins SDK 0.1.9 (Harbor 0.23, 0.24; its OpenAI-compatible mode drops the images t
 changes shape between those releases, and leaves the SDK's web tools on; this class, on Harbor's BaseInstalledAgent:
 - install, during agent setup (the environment's network: a task's egress allowlist applies to the agent's run only):
   uv 0.11.30 (astral's installer, into /installed-agent/uv/bin), the runner antigravity/run_agent.py with its uv lock
-  (google-antigravity 0.1.23 and every dependency pinned) and `uv sync --script --locked`; the run then starts from
+  (google-antigravity 0.1.23 and every dependency pinned) and `uv sync --locked --script`; the run then starts from
   /installed-agent/uv with UV_OFFLINE=1, without the network;
 - the run: the SDK's evaluation preset with search_web, read_url_content and generate_image off (run_agent.py: why);
 - the instruction travels in a file, never on a command line (dsh_acp.py: an agent that runs `pkill -f <a word of the
@@ -93,7 +93,7 @@ class AntigravitySdk(BaseInstalledAgent):
         await environment.exec(command=f"chmod 644 {SCRIPT} {SCRIPT}.lock", user="root")
         # the SDK and its dependencies (a Python too, where the image's is older than 3.11), now, while there is network
         await self.exec_as_agent(environment, env=UV_ENV,
-                                 command=f"{UV} sync --script --locked {SCRIPT} && {UV} run --script --locked --offline "
+                                 command=f"{UV} sync --locked --script {SCRIPT} && {UV} run --script --locked --offline "
                                          f"{SCRIPT} --version | grep -qx {shlex.quote(SDK_VERSION)}")
 
     def populate_context_post_run(self, context: AgentContext) -> None:
