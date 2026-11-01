@@ -49,6 +49,18 @@ next until the following step, and the provider's prompt cache is broken once pe
 with N images or fewer is forwarded as sent; a capped one re-serialized and uncompressed. usage.jsonl records "images"
 (how many the request carried) and "images_omitted" (how many were replaced); totals.json counts "image_cap_requests".
 
+Gemini requests to a Chat Completions server (--gemini-chat; the runner passes it with AGENT=antigravity only; the user,
+2026-11-01): the Antigravity SDK speaks the Gemini API, and a model served only through Chat Completions (GitHub
+Copilot's proxy for Gemini 4 Argon) cannot answer it. With the flag, a POST to <route><prefix>/v1beta/models/<model>:
+generateContent or :streamGenerateContent is translated (gemini_chat.py: what is mapped) into a POST to
+<route><prefix>/chat/completions, and every check above applies to that request: the path list (Chat Completions are
+listed for a --http-host upstream only), the tools (a Gemini tool other than function declarations, googleSearch and its
+kin, is refused as "server_tool"), the image cap, the budget; the key the SDK sends (x-goog-api-key) goes upstream as a
+Bearer token. The answer comes back translated, streamed as it arrives, an HTTP error as a Gemini error body.
+usage.jsonl records the request sent ("path") and the agent's ("translated_from"); raw.jsonl.gz keeps both sides of the
+upstream exchange (the agent's side is the translation of it). Without the flag nothing of this exists: a Gemini path is
+on no list and refused like any other.
+
 Attribution: a request's source IP is the trial's container (or, under an egress allowlist, its egress sidecar). Harbor
 names a trial's compose project `<trial>__env`, so `docker inspect` maps the IP to the project and the project to the
 trial directory <jobs>/<job>/<trial>/. Everything a trial's requests produce goes to <trial>/gateway/, next to Harbor's
@@ -99,6 +111,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import gemini_chat  # noqa: E402
 import rawlog  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -599,8 +612,10 @@ def trial_totals(trial: pathlib.Path | None) -> dict:
             return {}
 
 
-def api_error(host: str, path: str, msg: str, code: str) -> dict:
+def api_error(host: str, path: str, msg: str, code: str, status: int = 403) -> dict:
     """An error body in the provider's own format, so that the harness shows the message."""
+    if getattr(ARGS, "gemini_chat", False) and gemini_chat.match(path.split("?")[0]):   # a Gemini agent (--gemini-chat)
+        return gemini_chat.error_body(status, msg)
     if "anthropic" in host or "/messages" in path.split("?")[0]:   # Anthropic Messages API, any host
         return {"type": "error", "error": {"type": "invalid_request_error", "message": msg}}
     return {"error": {"message": msg, "type": "invalid_request_error", "code": code, "param": None}}
@@ -609,7 +624,7 @@ def api_error(host: str, path: str, msg: str, code: str) -> dict:
 def budget_error(host: str, path: str, tot: dict) -> dict:
     msg = (f"token budget exceeded for this trial: input {tot.get('input', 0)} / {ARGS.budget_input}, output "
            f"{tot.get('output', 0)} / {ARGS.budget_output} (PROTOCOL §5); the run is over")
-    return api_error(host, path, msg, "token_budget_exceeded")
+    return api_error(host, path, msg, "token_budget_exceeded", 400)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -701,7 +716,9 @@ class Handler(BaseHTTPRequestHandler):
         if (self.headers.get("Upgrade") or "").lower() == "websocket":
             return self._reply(405, {"error": "usage gateway: no WebSocket; use HTTPS (supports_websockets = false)"})
         host, path = m.group(1), m.group(2) or "/"
-        if not path_allowed(provider_of(host, m is plain), self.command, path):   # default deny, never forwarded
+        g = gemini_chat.match(path.split("?", 1)[0]) if ARGS.gemini_chat and self.command == "POST" else None
+        upath = f"{g.prefix}/chat/completions" if g else path      # what the upstream is asked (module doc: --gemini-chat)
+        if not path_allowed(provider_of(host, m is plain), self.command, upath):   # default deny, never forwarded
             n, drained = self.drain()
             if (self.command, path.split("?", 1)[0]) in HARNESS_PROBES:     # the harness's own probe: refused, not an attempt
                 return self._reply(403, api_error(host, path, "usage gateway: not a model API call", "path_not_allowed"),
@@ -724,6 +741,23 @@ class Handler(BaseHTTPRequestHandler):
         if self.command != "POST":
             body = b""                   # a GET's body is not forwarded: nothing on the lists reads one
         text, how = decode_request(body, encodings[0] if encodings else "") if body else (None, "text")
+        if g:   # --gemini-chat: the Chat Completions request it translates into is what every check below sees
+            try:
+                gbody = json.loads(text if text is not None else "", object_pairs_hook=_no_duplicates)
+                if not isinstance(gbody, dict):
+                    raise Unreadable("not a JSON object")
+                chat, gtools = gemini_chat.to_chat(gbody, g.model, g.stream)
+            except (ValueError, RecursionError) as exc:      # Unreadable and gemini_chat.Untranslatable among them
+                return self.refuse(trial, t0, host, path, "body_unreadable", (
+                    "usage gateway: this Gemini request could not be translated for the model server "
+                    f"({type(exc).__name__}); it was not forwarded"), "body_unreadable", len(body), True)
+            if gtools:                   # googleSearch and its kin: the provider would run them, whatever --server-tools says
+                return self.refuse(trial, t0, host, path, "server_tool", (
+                    f"usage gateway: this request asks the model provider to run a tool for it ({', '.join(gtools)}) "
+                    "and was not forwarded (provider-run tools are not available in this environment)"),
+                    "server_tool_not_allowed", len(body), True, {"server_tools": gtools})
+            text = json.dumps(chat, ensure_ascii=False)
+            body, how = text.encode(), "text"
         tools, unchecked = [], False
         if self.command == "POST":       # a model request: one readable JSON object that declares no provider-run tool
             refuse = ARGS.server_tools == "refuse"
@@ -756,29 +790,44 @@ class Handler(BaseHTTPRequestHandler):
                            "request_bytes": len(body), "response_bytes": 0, "client_gone": False,
                            "refused": "over_token_budget"}, None)
             return self._reply(400, budget_error(host, path, tot))
-        hdrs = {k: v for k, v in self.headers.items() if k.lower() not in HOP and "\n" not in v and "\r" not in v
-                and not (omitted and k.lower() == "content-encoding")}
-        hdrs["Host"] = host
+        if g:      # a request of its own: JSON, the SDK's key as a Bearer token, the SDK's User-Agent
+            hdrs = {"Host": host, "Content-Type": "application/json",
+                    "Accept": "text/event-stream" if g.stream else "application/json"}
+            for k, v in (("Authorization", f"Bearer {self.headers.get('x-goog-api-key')}" if self.headers.get("x-goog-api-key") else ""),
+                         ("User-Agent", self.headers.get("User-Agent") or "")):
+                if v and "\n" not in v and "\r" not in v:
+                    hdrs[k] = v
+        else:
+            hdrs = {k: v for k, v in self.headers.items() if k.lower() not in HOP and "\n" not in v and "\r" not in v
+                    and not (omitted and k.lower() == "content-encoding")}
+            hdrs["Host"] = host
         if body:
             hdrs["Content-Length"] = str(len(body))
         acc, chunks, client_gone = {}, [], False
         try:
             conn = (http.client.HTTPConnection if m is plain else http.client.HTTPSConnection)(host, timeout=ARGS.timeout)
-            conn.request(self.command, path, body=body or None, headers=hdrs)
+            conn.request(self.command, upath, body=body or None, headers=hdrs)
             r = conn.getresponse()
         except Exception as exc:  # noqa: BLE001 -- the agent sees an upstream error, as it would without the gateway
             log(f"upstream {host[:253]}: {type(exc).__name__}")        # not the message: it can hold the request's URL
             # recorded (board 0121 M4): a trial whose model calls end like this is an infrastructure failure
             record(trial or TRIALS.lookup(ip), {
                 "ts": round(t0, 3), "dur_s": round(time.time() - t0, 2), "client_ip": ip, "host": host, "method": self.command,
-                "path": path.split("?")[0], "status": 502, "model": None, "usage": {}, "usage_raw": {}, "request_bytes": len(body),
+                "path": upath.split("?")[0], "status": 502, "model": None, "usage": {}, "usage_raw": {}, "request_bytes": len(body),
                 "response_bytes": 0, "client_gone": False, "forwarded": False,
                 "upstream_failure": f"unreachable: {type(exc).__name__}"}, None)
-            return self._reply(502, {"error": f"usage gateway: upstream {host} unreachable: {type(exc).__name__}"})
-        self.send_response(r.status)
-        for k, v in r.getheaders():
-            if k.lower() not in HOP:
-                self.send_header(k, v)
+            msg = f"usage gateway: upstream {host} unreachable: {type(exc).__name__}"
+            return self._reply(502, gemini_chat.error_body(502, msg) if g else {"error": msg})
+        tr = None                                  # --gemini-chat: the answer's translation, fed as it arrives
+        if g:
+            tr = (gemini_chat.Stream() if g.stream else gemini_chat.Whole()) if r.status == 200 else gemini_chat.Error(r.status)
+            self.send_response(r.status)
+            self.send_header("Content-Type", "text/event-stream" if r.status == 200 and g.stream else "application/json")
+        else:
+            self.send_response(r.status)
+            for k, v in r.getheaders():
+                if k.lower() not in HOP:
+                    self.send_header(k, v)
         self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
         broken = None
@@ -795,15 +844,19 @@ class Handler(BaseHTTPRequestHandler):
                     log(f"upstream {host[:253]}: stream broken off ({broken})")
                 break
             chunks.append(chunk)
-            if not client_gone:                    # the agent hung up: keep reading, the request is billed anyway
+            out = tr.feed(chunk) if tr else chunk
+            if out and not client_gone:            # the agent hung up: keep reading, the request is billed anyway
                 try:
-                    self.wfile.write(b"%x\r\n%s\r\n" % (len(chunk), chunk)); self.wfile.flush()
+                    self.wfile.write(b"%x\r\n%s\r\n" % (len(out), out)); self.wfile.flush()
                 except OSError:
                     client_gone = True
         if broken:                                 # no closing chunk: the agent sees a broken stream, as without the gateway
             self.close_connection = True
         elif not client_gone:
             try:
+                out = tr.close() if tr else b""     # the translated answer's last event (or whole document)
+                if out:
+                    self.wfile.write(b"%x\r\n%s\r\n" % (len(out), out))
                 self.wfile.write(b"0\r\n\r\n"); self.wfile.flush()
             except OSError:
                 client_gone = True
@@ -811,7 +864,7 @@ class Handler(BaseHTTPRequestHandler):
         parse_body(resp, acc)
         trial = trial or TRIALS.lookup(ip)
         rec = {"ts": round(t0, 3), "dur_s": round(time.time() - t0, 2), "client_ip": ip, "host": host,
-               "method": self.command, "path": path.split("?")[0], "status": r.status, "model": acc.get("model"),
+               "method": self.command, "path": upath.split("?")[0], "status": r.status, "model": acc.get("model"),
                "usage": normalize(acc.get("raw") or {}), "usage_raw": acc.get("raw") or {},
                "request_bytes": len(body), "response_bytes": len(resp), "client_gone": client_gone,
                "session": {k.lower(): v for k, v in self.headers.items() if "session" in k.lower()}}
@@ -820,6 +873,8 @@ class Handler(BaseHTTPRequestHandler):
         elif r.status >= 500:                       # the provider's own server error (502, 503, 529 overloaded, ...)
             rec["upstream_failure"] = f"HTTP {r.status}"
         raw = None
+        if g:                                       # --gemini-chat: the agent's own request, as it asked
+            rec["translated_from"] = path.split("?")[0]
         if tools:                                   # --server-tools record: forwarded, and flagged
             rec["server_tools"] = tools
         if unchecked:
@@ -829,7 +884,7 @@ class Handler(BaseHTTPRequestHandler):
         if omitted:
             rec["images_omitted"] = omitted
         if ARGS.raw:
-            raw = {"request": {"method": self.command, "host": host, "path": path,
+            raw = {"request": {"method": self.command, "host": host, "path": upath,
                                "headers": {k: v for k, v in self.headers.items() if k.lower() not in SECRET},
                                "body": text if text is not None else base64.b64encode(body).decode(), "body_as": how},
                    "response": {"status": r.status,
@@ -858,6 +913,8 @@ def main() -> int:
     p.add_argument("--budget-output", type=int, default=10_000_000_000, help="per-trial output tokens; 0 = no limit (D10)")
     p.add_argument("--image-cap", type=int, default=0,
                    help="at most this many images per model request, the oldest replaced by a text note in steps of half of it (module doc); 0 = off")
+    p.add_argument("--gemini-chat", action="store_true",
+                   help="translate Gemini API model calls into Chat Completions requests to the upstream, and the answers back (module doc; AGENT=antigravity)")
     ARGS = p.parse_args()
     if ARGS.image_cap < 0:
         p.error("--image-cap must be 0 (off) or more")
@@ -873,7 +930,7 @@ def main() -> int:
     port = srv.server_address[1]
     log(f"listening on {ARGS.bind}:{port}, jobs {ARGS.jobs}, raw={ARGS.raw}, hosts {MODEL_HOSTS}, http {sorted(HTTP_HOSTS)}, "
         f"model-API paths of {[p['name'] for p in PROVIDERS]} only ({ARGS.api_paths.name}), provider-run tools: {ARGS.server_tools}, "
-        f"image cap: {ARGS.image_cap or 'off'}")
+        f"image cap: {ARGS.image_cap or 'off'}" + (", Gemini requests translated to Chat Completions" if ARGS.gemini_chat else ""))
     if zstd_how == NO_ZSTD:
         log("WARNING: no zstd decoder on this host (pip install zstandard, or the zstd program): zstd request bodies "
             "(Codex with a ChatGPT login) are forwarded unchecked and marked body_unchecked")

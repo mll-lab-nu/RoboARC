@@ -42,6 +42,7 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
          scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
          scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
          scripts/usage_gateway/tests/test_budget_stop.py scripts/usage_gateway/tests/test_image_cap.py \
+         scripts/usage_gateway/tests/test_gemini_chat.py \
          scripts/tests/test_stamp_mtimes.py \
          scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
          scripts/harbor/tests/test_gpu_slots.py scripts/harbor/tests/test_bash_runners.py \
