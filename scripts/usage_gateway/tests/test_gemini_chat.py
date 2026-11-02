@@ -12,6 +12,7 @@ import base64
 import http.client
 import json
 import pathlib
+import socket
 import subprocess
 import sys
 import tempfile
@@ -203,6 +204,14 @@ class Answer(unittest.TestCase):
         e.feed(b"upstream down")
         self.assertEqual(json.loads(e.close())["error"], {"code": 503, "message": "upstream down", "status": "UNAVAILABLE"})
 
+    def test_server_errors_are_given_as_503(self):
+        # the SDK retries 429 and 503 only: a 500 of a proxy whose fetch failed ended a trial (2026-11-02)
+        self.assertEqual([gc.agent_status(s) for s in (400, 429, 500, 501, 502, 503, 504)], [400, 429, 503, 501, 503, 503, 503])
+        e = gc.Error(500)
+        e.feed(b'{"error":{"message":"fetch failed","type":"error"}}')
+        self.assertEqual((e.status, json.loads(e.close())["error"]),
+                         (503, {"code": 503, "message": "HTTP 500 from the model server: fetch failed", "status": "UNAVAILABLE"}))
+
 
 class ChatStub(BaseHTTPRequestHandler):
     seen: list[dict] = []
@@ -261,6 +270,12 @@ class EndToEnd(unittest.TestCase):
         cls.procs = []
         cls.port = cls.start("--gemini-chat", "--image-cap", "2")
         cls.plain_port = cls.start()
+        with socket.socket() as s:                       # a port nothing listens on: an unreachable model server
+            s.bind(("127.0.0.1", 0))
+            cls.dead = f"127.0.0.1:{s.getsockname()[1]}"
+        cls.up, up = cls.dead, cls.up
+        cls.dead_port = cls.start("--gemini-chat")
+        cls.up = up
 
     @classmethod
     def tearDownClass(cls):
@@ -284,7 +299,8 @@ class EndToEnd(unittest.TestCase):
         after its answer has gone out)."""
         f = self.jobs / ".gateway" / "unattributed.jsonl"       # no trial owns loopback
         for _ in range(100):
-            recs = [json.loads(x) for x in f.read_text().splitlines()] if f.exists() else []
+            # whole lines only: the gateway may be half-way through writing the last one
+            recs = [json.loads(x) for x in f.read_text().split("\n")[:-1]] if f.exists() else []
             if len(recs) > more_than:
                 return recs
             time.sleep(0.05)
@@ -331,6 +347,23 @@ class EndToEnd(unittest.TestCase):
         st, _, out = self.call(f"/h/{self.up}/v1/v1beta/models/g:streamGenerateContent?alt=sse", sdk_request())
         self.assertEqual((st, json.loads(out)["error"]["status"]), (429, "RESOURCE_EXHAUSTED"))
 
+    def test_server_errors_reach_the_sdk_as_503(self):
+        n = len(self.records())
+        for status, given in ((500, 503), (502, 503), (504, 503), (400, 400)):
+            ChatStub.status = status
+            st, _, out = self.call(f"/h/{self.up}/v1/v1beta/models/g:streamGenerateContent?alt=sse", sdk_request())
+            self.assertEqual((st, json.loads(out)["error"]["code"]), (given, given), status)
+            rec = self.last(n)
+            n += 1
+            self.assertEqual(rec["status"], status)                  # the record keeps the server's
+            self.assertEqual(rec.get("agent_status"), given if given != status else None)
+            self.assertEqual(rec.get("upstream_failure"), f"HTTP {status}" if status >= 500 else None)
+        # the gateway's own 502 (the server unreachable) too
+        st, _, out = self.call(f"/h/{self.dead}/v1/v1beta/models/g:streamGenerateContent?alt=sse", sdk_request(), self.dead_port)
+        self.assertEqual((st, json.loads(out)["error"]["status"]), (503, "UNAVAILABLE"))
+        rec = self.last(n)
+        self.assertEqual((rec["status"], rec["agent_status"], rec["upstream_failure"]), (502, 503, "unreachable: ConnectionRefusedError"))
+
     def test_refusals(self):
         # a provider-run Gemini tool: refused in Gemini's error format, nothing forwarded
         n = len(self.records())
@@ -354,6 +387,10 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(json.loads(out)["error"]["code"], "path_not_allowed")      # the OpenAI-format refusal, as before
         self.assertEqual(self.last(n)["path"], "/v1/v1beta/models/g:streamGenerateContent")
         self.assertEqual(ChatStub.seen, [])
+        ChatStub.status = 500                            # a server error of a Chat Completions call: as it came
+        st, _, out = self.call(f"/h/{self.up}/v1/chat/completions", {"model": "g4", "messages": []}, self.plain_port)
+        self.assertEqual((st, json.loads(out)), (500, {"error": {"message": "slow down"}}))
+        self.assertNotIn("agent_status", self.last(n + 1))
 
 
 if __name__ == "__main__":

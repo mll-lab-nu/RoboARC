@@ -77,7 +77,10 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
   is reached through the usage gateway, which translates each request and answer (`--gemini-chat`,
   `scripts/usage_gateway/gemini_chat.py`): `AGENT=antigravity` in the batch runner below. The SDK's own
   OpenAI-compatible mode is not used: it drops every image a tool returns and never sends a reasoning effort. Runs
-  this way are Antigravity + Gemini's official runs (decided 2026-11-01).
+  this way are Antigravity + Gemini's official runs (decided 2026-11-01). A 500, 502 or 504 of the server (and the
+  gateway's own 502) reaches the SDK as 503, which its evaluation preset retries, as it does a 429; passed on as it
+  came, a 500 ended a run at 2 h 46 min in Reuben's first run (decided 2026-11-02). The gateway's records keep the
+  server's status (`agent_status`: the one given).
 - Turn the harness's provider-side tools off ("No tool outside the container" below): Codex `--ak web_search=disabled`
   and `--ak config=<the output of python3 scripts/harbor/codex_tools_off.py [your config.toml]>`; Claude Code
   `--ak disallowed_tools=WebSearch,WebFetch`; dsh `--ak web=false` (a dsh patch file turns its web_search and web_fetch
@@ -456,7 +459,10 @@ class builds the sidecar from a patched copy of the installed Harbor's sidecar f
 install is not edited, and the allowlist is unchanged. A `harbor run` of your own through the gateway should pass the
 same option, with `scripts/harbor/environments` on `PYTHONPATH`.
 
-The gateway also caps the images in a model request: `GATEWAY_IMAGE_CAP`, 50 by default, 0 = no cap (owner 2026-10-31).
+The gateway also caps the images in a model request: `GATEWAY_IMAGE_CAP`, 50 by default (owner 2026-10-31) and 10 for
+Gemini 4 Argon (`MODEL=<provider>/gemini-4-argon`, decided 2026-11-02: GitHub Copilot answers it 400, "too many images:
+maximum allowed for model gemini-4-argon is 10", which voided a standard-mode trial of Reuben's first Antigravity run),
+0 = no cap.
 An agent that looks at the cameras resends every image it has seen with each call, and some providers refuse a request
 with more than a fixed number: GitHub Copilot answers 400, "Exceeded maximum number of images (50) allowed in the
 request.", and Codex then exits, which voided a standard-mode trial of Reuben's smoke test (2026-10-31, 51 images after

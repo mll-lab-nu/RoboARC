@@ -11,7 +11,8 @@ fake `harbor` and a fake gateway: no docker, no model, no network.
   (--extra-host api.deepseek.com), and the job's egress has the gateway, not DeepSeek's host;
 - on with AGENT=antigravity: the SDK's Gemini base URL (GOOGLE_GEMINI_BASE_URL) is the gateway's route to the Chat
   Completions server of ANTIGRAVITY_BASE_URL, the gateway translates (--gemini-chat) and may forward to exactly that
-  plain-HTTP server, the records name the translation (api_translation); AGENT=antigravity without the gateway, with an
+  plain-HTTP server, the records name the translation (api_translation); the image cap is 10 for Gemini 4 Argon, and
+  stays 50 for another model and wherever GATEWAY_IMAGE_CAP is set; AGENT=antigravity without the gateway, with an
   EFFORT the SDK has no level for, with WEB_SEARCH=allowed or AGENT_CONFIG, or without a plain-HTTP ANTIGRAVITY_BASE_URL
   stops the runner at start;
 - USAGE_GATEWAY naming a directory without the gateway, a GATEWAY_IMAGE_CAP that is not a whole number, and the switch
@@ -21,6 +22,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -209,10 +211,25 @@ class UsageGatewayOption(unittest.TestCase):
         (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
         self.assertIn("--gemini-chat", ready.read_text().split())
         self.assertIn("--http-host 127.0.0.1:4141", ready.read_text())
+        self.assertIn("--image-cap 10", ready.read_text())          # Copilot's limit for Gemini 4 Argon
         job = self.root / "jobs" / f"b-privileged-{self.base}"
-        self.assertEqual(json.loads((job / "usage_recording.json").read_text())["api_translation"], "gemini-chat")
+        rec = json.loads((job / "usage_recording.json").read_text())
+        self.assertEqual((rec["api_translation"], rec["image_cap"]), ("gemini-chat", 10))
         cfg = self.results_config("antigravity-gemini_4_argon-high")
-        self.assertEqual((cfg["usage_gateway"], cfg["api_translation"]), (True, "gemini-chat"))
+        self.assertEqual((cfg["usage_gateway"], cfg["api_translation"], cfg["image_cap"]), (True, "gemini-chat", 10))
+
+    def test_image_cap_10_for_gemini_4_argon_only(self):
+        url = "http://127.0.0.1:4141/v1"
+        for env, cap in ((dict(MODEL="google/gemini-3.1-pro-preview"), 50),       # another Gemini model
+                         (dict(MODEL="google/gemini-4-argon", GATEWAY_IMAGE_CAP="50"), 50)):   # set: as set
+            shutil.rmtree(self.root / "jobs", ignore_errors=True)
+            p = self.run_batch(USAGE_GATEWAY=str(self.gateway_dir()), GATEWAY_BIND="127.0.0.1", AGENT="antigravity",
+                               ANTIGRAVITY_BASE_URL=url, GEMINI_API_KEY="k" * 20, **env)
+            self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+            (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+            self.assertIn(f"--image-cap {cap}", ready.read_text(), env)
+            rec = json.loads((self.root / "jobs" / f"b-privileged-{self.base}" / "usage_recording.json").read_text())
+            self.assertEqual(rec["image_cap"], cap, env)
 
     def test_antigravity_refusals(self):
         gw, url = str(self.gateway_dir()), "http://127.0.0.1:4141/v1"

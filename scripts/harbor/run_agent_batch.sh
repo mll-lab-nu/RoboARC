@@ -138,10 +138,11 @@
 #   TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT   per-trial token budget the gateway enforces (100000000 / 10000000, PROTOCOL
 #                §5): past it every further model request is refused and the trial counts as failed; 0 = no limit.
 #                Without the gateway no token budget is enforced (the task's cutoff bounds the trial)
-#   GATEWAY_IMAGE_CAP  at most this many images per model request (50, the default; 0 = no cap): a request with more
-#                has its oldest images replaced by a short text note, half the cap at a time (GitHub Copilot refuses a
-#                request with more than 50, and an agent resends every camera image it has looked at with each call;
-#                the gateway's module doc). Without the gateway there is no cap
+#   GATEWAY_IMAGE_CAP  at most this many images per model request (50, the default; 10, the default for MODEL=<provider>/
+#                gemini-4-argon; 0 = no cap): a request with more has its oldest images replaced by a short text note,
+#                half the cap at a time (GitHub Copilot refuses a request with more than 50, or more than 10 for Gemini 4
+#                Argon, and an agent resends every camera image it has looked at with each call; the gateway's module
+#                doc). Without the gateway there is no cap
 # Runner-side tools (not task code), in this directory: with LOG_MIRROR=1 the container rcb-log-mirror copies every
 # trial's agent/ directory append-only into ${JOBS}_mirror/ (log_mirror.py; root-owned: neither the agent nor the host
 # user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
@@ -171,7 +172,9 @@ if [ -z "${GPUS:-}" ]; then
 fi
 USAGE_GATEWAY="${USAGE_GATEWAY:-}"
 GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
-GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"; GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-50}"
+GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
+# GitHub Copilot takes at most 10 images per request for Gemini 4 Argon (decided 2026-11-02); every other model 50
+case "${MODEL##*/}" in gemini-4-argon) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-10}" ;; *) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-50}" ;; esac
 HOST_CPUS="${HOST_CPUS:-$(nproc)}"
 [ -n "$MODEL" ] || { echo "MODEL must be set: the -m model of the agent, e.g. MODEL=openai/<model> (docs/RUNNING.md)" >&2; exit 2; }
 # the switch of earlier versions of this script: refused rather than ignored, so that nobody expects a usage record silently

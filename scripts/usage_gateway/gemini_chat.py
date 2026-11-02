@@ -38,7 +38,8 @@ Antigravity + Gemini's official runs (decided 2026-11-01). What is mapped, and n
                                          with the history and the next request restores the fields: whatever the
                                          server needs to see again of its own earlier turns (an opaque reasoning token)
     finish_reason                     -> finishReason (FINISH); usage -> usageMetadata (usage_metadata)
-    an HTTP error                     -> the same status, a Gemini error body
+    an HTTP error                     -> a Gemini error body, with the same status but 500, 502 and 504 given as 503,
+                                         which the SDK retries (agent_status)
 """
 from __future__ import annotations
 
@@ -59,6 +60,7 @@ STANDARD = {"role", "content", "tool_calls", "refusal", "function_call", "audio"
 STATUS = {400: "INVALID_ARGUMENT", 401: "UNAUTHENTICATED", 403: "PERMISSION_DENIED", 404: "NOT_FOUND",
           408: "DEADLINE_EXCEEDED", 409: "ABORTED", 429: "RESOURCE_EXHAUSTED", 499: "CANCELLED", 500: "INTERNAL",
           501: "UNIMPLEMENTED", 502: "UNAVAILABLE", 503: "UNAVAILABLE", 504: "DEADLINE_EXCEEDED"}
+RETRIED = (500, 502, 504)    # given to the SDK as 503 (agent_status)
 
 
 class Route(NamedTuple):
@@ -436,18 +438,29 @@ class Whole:
         return json.dumps(from_chat(resp if isinstance(resp, dict) else {}), ensure_ascii=False).encode()
 
 
+def agent_status(status: int) -> int:
+    """The HTTP status the SDK is given for one of the Chat Completions server (or for the gateway's own 502): 500, 502
+    and 504 as 503, the server error the SDK retries (RetryConfig.benchmark() retries 429 and 503 only, so one 500 of a
+    proxy whose fetch had failed ended a trial of Reuben's, 2026-11-02; decided 2026-11-02); any other as it is."""
+    return 503 if status in RETRIED else status
+
+
 class Error:
-    """An HTTP error of the Chat Completions server: feed() keeps its body, close() gives the Gemini error body."""
+    """An HTTP error of the Chat Completions server: feed() keeps its body, close() gives the Gemini error body, with the
+    status the SDK is given (agent_status; a changed one is named in the message)."""
 
     def __init__(self, status: int):
-        self.status, self.buf = status, b""
+        self.upstream, self.status, self.buf = status, agent_status(status), b""
 
     def feed(self, data: bytes) -> bytes:
         self.buf += data
         return b""
 
     def close(self) -> bytes:
-        return json.dumps(error_body(self.status, self.buf), ensure_ascii=False).encode()
+        body = error_body(self.status, self.buf)
+        if self.status != self.upstream:
+            body["error"]["message"] = f"HTTP {self.upstream} from the model server: {body['error']['message']}"
+        return json.dumps(body, ensure_ascii=False).encode()
 
 
 def error_body(status: int, upstream) -> dict:

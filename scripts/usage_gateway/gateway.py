@@ -38,10 +38,11 @@ arguments and tools' schemas are data and are not looked into. --server-tools re
 one body forwarded unchecked is a zstd body on a host with neither decoder ("body_unchecked": true, counted in
 totals.json; the start-up log says so).
 
-Image cap (--image-cap N, 0 = off; the runner passes GATEWAY_IMAGE_CAP, 50 by default; owner 2026-10-31): an agent that
-looks at the cameras resends every image it has seen with each call, and a provider may refuse a request with more than
-a fixed number of images (GitHub Copilot: "Exceeded maximum number of images (50) allowed in the request.", which ended
-a standard-mode trial of Reuben's smoke test, 2026-10-31). A request that carries more than N images (the image blocks
+Image cap (--image-cap N, 0 = off; the runner passes GATEWAY_IMAGE_CAP, 50 by default, owner 2026-10-31, and 10 for
+Gemini 4 Argon, decided 2026-11-02): an agent that looks at the cameras resends every image it has seen with each call,
+and a provider may refuse a request with more than a fixed number of images (GitHub Copilot: "Exceeded maximum number of
+images (50) allowed in the request.", which ended a standard-mode trial of Reuben's smoke test, 2026-10-31; for Gemini 4
+Argon: "too many images: maximum allowed for model gemini-4-argon is 10", which ended another, 2026-11-02). A request that carries more than N images (the image blocks
 of the Anthropic, Responses and Chat Completions shapes, found where the URL check above looks) has its oldest
 d = step x ceil((n - N) / step) replaced by a text block that says so, step = N // 2: between N/2 and N stay. The rule
 depends on the request alone, and a conversation only grows, so the replaced images stay the same from one call to the
@@ -56,7 +57,9 @@ generateContent or :streamGenerateContent is translated (gemini_chat.py: what is
 <route><prefix>/chat/completions, and every check above applies to that request: the path list (Chat Completions are
 listed for a --http-host upstream only), the tools (a Gemini tool other than function declarations, googleSearch and its
 kin, is refused as "server_tool"), the image cap, the budget; the key the SDK sends (x-goog-api-key) goes upstream as a
-Bearer token. The answer comes back translated, streamed as it arrives, an HTTP error as a Gemini error body.
+Bearer token. The answer comes back translated, streamed as it arrives, an HTTP error as a Gemini error body: a 500, 502
+or 504 of the server, and the gateway's own 502, as 503, which the SDK retries (gemini_chat.agent_status; decided
+2026-11-02); usage.jsonl keeps the server's "status" and records the one given as "agent_status".
 usage.jsonl records the request sent ("path") and the agent's ("translated_from"); raw.jsonl.gz keeps both sides of the
 upstream exchange (the agent's side is the translation of it). Without the flag nothing of this exists: a Gemini path is
 on no list and refused like any other.
@@ -811,17 +814,21 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as exc:  # noqa: BLE001 -- the agent sees an upstream error, as it would without the gateway
             log(f"upstream {host[:253]}: {type(exc).__name__}")        # not the message: it can hold the request's URL
             # recorded (board 0121 M4): a trial whose model calls end like this is an infrastructure failure
-            record(trial or TRIALS.lookup(ip), {
-                "ts": round(t0, 3), "dur_s": round(time.time() - t0, 2), "client_ip": ip, "host": host, "method": self.command,
-                "path": upath.split("?")[0], "status": 502, "model": None, "usage": {}, "usage_raw": {}, "request_bytes": len(body),
-                "response_bytes": 0, "client_gone": False, "forwarded": False,
-                "upstream_failure": f"unreachable: {type(exc).__name__}"}, None)
+            rec = {"ts": round(t0, 3), "dur_s": round(time.time() - t0, 2), "client_ip": ip, "host": host, "method": self.command,
+                   "path": upath.split("?")[0], "status": 502, "model": None, "usage": {}, "usage_raw": {}, "request_bytes": len(body),
+                   "response_bytes": 0, "client_gone": False, "forwarded": False,
+                   "upstream_failure": f"unreachable: {type(exc).__name__}"}
+            if g:                                  # --gemini-chat: given as 503, which the SDK retries
+                rec["agent_status"] = gemini_chat.agent_status(502)
+            record(trial or TRIALS.lookup(ip), rec, None)
             msg = f"usage gateway: upstream {host} unreachable: {type(exc).__name__}"
-            return self._reply(502, gemini_chat.error_body(502, msg) if g else {"error": msg})
+            if g:
+                return self._reply(rec["agent_status"], gemini_chat.error_body(rec["agent_status"], msg))
+            return self._reply(502, {"error": msg})
         tr = None                                  # --gemini-chat: the answer's translation, fed as it arrives
         if g:
             tr = (gemini_chat.Stream() if g.stream else gemini_chat.Whole()) if r.status == 200 else gemini_chat.Error(r.status)
-            self.send_response(r.status)
+            self.send_response(gemini_chat.agent_status(r.status))     # 500, 502, 504 as 503: the SDK retries it
             self.send_header("Content-Type", "text/event-stream" if r.status == 200 and g.stream else "application/json")
         else:
             self.send_response(r.status)
@@ -875,6 +882,8 @@ class Handler(BaseHTTPRequestHandler):
         raw = None
         if g:                                       # --gemini-chat: the agent's own request, as it asked
             rec["translated_from"] = path.split("?")[0]
+            if gemini_chat.agent_status(r.status) != r.status:     # "status" stays the server's
+                rec["agent_status"] = gemini_chat.agent_status(r.status)
         if tools:                                   # --server-tools record: forwarded, and flagged
             rec["server_tools"] = tools
         if unchecked:

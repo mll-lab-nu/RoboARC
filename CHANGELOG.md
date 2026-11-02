@@ -6,6 +6,18 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### Antigravity + Gemini 4 Argon on GitHub Copilot: an image cap of 10 and server errors retried (runner and gateway; nothing changes for another model or agent)
+- **Why:** Reuben's first run (2026-11-02) voided both trials. Standard mode: Copilot refuses a Gemini 4 Argon request
+  with more than 10 images ("too many images: maximum allowed for model gemini-4-argon is 10, got 12"), and the
+  gateway's cap of 50 never applied. Privileged mode, at 2 h 46 min: one request ended in a 500 of the proxy ("fetch
+  failed"), and the SDK, whose evaluation preset retries 429 and 503 only, ended the run.
+- **Image cap:** the runner's default `GATEWAY_IMAGE_CAP` is 10 for `MODEL=<provider>/gemini-4-argon` and stays 50 for
+  every other model; a `GATEWAY_IMAGE_CAP` set by hand is used as it is. Results record the cap (`image_cap`) as before.
+- **Server errors:** with `--gemini-chat` (`AGENT=antigravity`) a 500, 502 or 504 of the model server, and the
+  gateway's own 502, reach the SDK as 503 (`UNAVAILABLE`, the server's status named in the message), so the SDK retries
+  them with its backoff. usage.jsonl keeps the server's `status` and records `agent_status`; a trial whose last model
+  calls failed is still not a result. Without the flag nothing changes.
+
 ### `AGENT=antigravity`: Antigravity + Gemini through a Chat Completions server (runner, agent and gateway; no task, image or result changes for other agents)
 - **Why:** the Antigravity + Gemini 4 Argon pair is served only through an OpenAI-compatible Chat Completions server
   (GitHub Copilot's proxy). The Antigravity SDK speaks the Gemini API only, and its own OpenAI-compatible mode, meant

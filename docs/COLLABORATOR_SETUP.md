@@ -131,7 +131,7 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
     blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
   - the gateway was on as in the command. The `runner` line of `jobs/smoke/smoke.log` names it (`usage gateway
     <checkout>/scripts/usage_gateway`, not `usage gateway off`), and each job's `usage_recording.json` says
-    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50` (with Antigravity also
+    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50` (10 with Gemini 4 Argon; with Antigravity also
     `"api_translation": "gemini-chat"`);
   - your provider answered the model calls. This counts the HTTP statuses of all the smoke's model calls:
     ```bash
@@ -218,7 +218,8 @@ done
   routes the agent's model calls through a usage gateway on your host (docs/RUNNING.md "Usage recording").
   - It forwards the calls unchanged; the agent keeps its own credentials. The one exception: a call that carries more
     than 50 images (`GATEWAY_IMAGE_CAP`) has its oldest ones replaced by a short note, because some providers, GitHub
-    Copilot among them, refuse more than 50.
+    Copilot among them, refuse more than 50. With Gemini 4 Argon (`MODEL=google/gemini-4-argon`) the cap is 10, which
+    the runner sets itself: Copilot refuses more than 10 images for that model.
   - It records each trial's tokens per request in `<trial>/gateway/` (`usage.jsonl`, `totals.json`). The token counts
     in the results then come from the gateway, the same way for every agent and provider.
   - It enforces each trial's token budget: 100M input tokens (cache included) and 10M output tokens (reasoning
@@ -229,7 +230,8 @@ done
     agent's 0, if the gateway went down during its job or if its last model calls failed at the gateway.
   - **A 429 is your provider's rate limit**, passed on unchanged. The gateway never answers 429 itself. Its own
     refusals are 400 (past the token budget), 403 (not a model API call) and 502 (the provider cannot be reached).
-    Codex retries a 429. When it gives up, the trial ends with `ApiRateLimitError`: it is not a result, and the
+    With `AGENT=antigravity`, a 500, 502 or 504 reaches the SDK as 503, which it retries (the records keep the
+    provider's status). Codex retries a 429. When it gives up, the trial ends with `ApiRateLimitError`: it is not a result, and the
     runner stops the lane. Every lane is one more trial calling the model at the same time, so your quota (requests
     and tokens per minute) must carry all the lanes you start. Raise the quota or start fewer lanes, and do that
     before a trial's one rerun.
@@ -237,9 +239,9 @@ done
   `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), or
   `AGENT=antigravity` (RoboARC's own agent for the Antigravity SDK; official, decided 2026-11-01), with no
   adapter and no proxy that holds the credentials or changes the requests (the usage gateway holds no credentials, and
-  its one change to a request, the image cap, is the same in every run; with `AGENT=antigravity` it also translates
+  its one change to a request, the image cap, is the runner's for the model; with `AGENT=antigravity` it also translates
   the SDK's Gemini requests for your Chat Completions server, and every result records that as `api_translation`); web search off (leave `WEB_SEARCH` unset);
-  the image cap at 50 (leave `GATEWAY_IMAGE_CAP` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
+  the runner's image cap, 50, or 10 for Gemini 4 Argon (leave `GATEWAY_IMAGE_CAP` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
   its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds;
   one `EFFORT` for the whole batch, the level we agreed (section 4), never `default`.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,
