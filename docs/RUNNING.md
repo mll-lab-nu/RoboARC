@@ -65,7 +65,9 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 - Use Harbor's native agents (`-a codex`, `-a claude-code`) with their credentials in the environment or an
   `--env-file`: Codex `OPENAI_API_KEY` (OpenRouter: also `OPENAI_BASE_URL=https://openrouter.ai/api/v1`), a ChatGPT
   login with `CODEX_FORCE_AUTH_JSON=1` (Harbor uploads `~/.codex/auth.json`); Claude Code `ANTHROPIC_API_KEY`, or a
-  subscription with `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`).
+  subscription with `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`). Through a GitHub
+  Copilot proxy on the run's host: `OPENAI_BASE_URL` (Codex) or `ANTHROPIC_BASE_URL` (Claude Code) is the proxy's
+  plain-HTTP address with its port, and the key variable holds what the proxy expects.
 - DSH, the DeepSeek Harness, runs through RoboARC's own Harbor agent `scripts/harbor/agents/dsh_acp.py` (Harbor's ACP
   agent with `@deepseek-ai/dsh` 0.2.1-rc.2 installed): `PYTHONPATH=scripts/harbor/agents harbor run ... -a dsh_acp:DshAcp
   -m deepseek/deepseek-v4.1-flash --ak reasoning_effort=high --ak web=false --allow-agent-host api.deepseek.com`, with
@@ -96,8 +98,10 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 
 A result is official only when its run had all of these:
 - **Harbor's native agents**, configured through environment variables; no agent adapter, no proxy that holds
-  credentials or changes requests. The one exception, decided 2026-11-01: `AGENT=antigravity` (RoboARC's own agent for
-  the Antigravity SDK, and the usage gateway's translation of its Gemini requests for a Chat Completions server; above).
+  credentials or changes requests. Two exceptions: a GitHub Copilot proxy between Codex or Claude Code and Copilot,
+  which holds the Copilot credentials (decided 2026-11-02); and `AGENT=antigravity` (RoboARC's own agent for the
+  Antigravity SDK, and the usage gateway's translation of its Gemini requests for a Chat Completions server, such as
+  Copilot's; decided 2026-11-01; above).
 - **No tool outside the container**: the harness's web search, account connectors, apps, plugins, image generation and
   cloud agents off (below).
 - **The task's own cutoff**, no multiplier (`--timeout-multiplier`, `--agent-timeout-multiplier`, an agent

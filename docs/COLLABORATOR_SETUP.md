@@ -170,6 +170,7 @@ Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's age
 | ChatGPT login (Codex) | `CODEX_FORCE_AUTH_JSON=1` on the command line, beside `AGENT` (not only in the env file, so the runner's key scan also covers the login): Harbor copies `~/.codex/auth.json` into each trial |
 | Claude subscription (Claude Code) | `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) |
 | Azure OpenAI (Codex) | `AGENT_CONFIG=<config.toml with the Azure provider>` and the key variable it names; retries in the same file (`request_max_retries`, `stream_max_retries`) |
+| GitHub Copilot proxy (Codex, Claude Code) | Codex: `OPENAI_BASE_URL=http://127.0.0.1:<port>/v1`; Claude Code: `ANTHROPIC_BASE_URL=http://127.0.0.1:<port>` (the proxy's plain-HTTP address with its port, on the run's own host); and `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` set to what the proxy expects (at least 16 characters, any value if it needs none: the key scan of `send_results.sh` needs one). Official, decided 2026-11-02 |
 | DeepSeek API key (DSH) | `DEEPSEEK_API_KEY`, with `AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash`: DSH, the DeepSeek Harness, through `scripts/harbor/agents/dsh_acp.py` |
 | Chat Completions server (Antigravity) | `ANTIGRAVITY_BASE_URL=http://127.0.0.1:<port>/v1` (the server's base, plain HTTP with a port: a proxy on the run's own host; the gateway calls `<base>/chat/completions`) and `GEMINI_API_KEY` (the key the server expects, sent as a Bearer token; at least 16 characters, any value if the server needs none: the key scan of `send_results.sh` needs one), with `AGENT=antigravity MODEL=google/<model>` and the usage gateway on: the Antigravity SDK through `scripts/harbor/agents/antigravity_sdk.py`, its Gemini requests translated by the gateway (docs/RUNNING.md "A single trial") |
 
@@ -238,7 +239,8 @@ done
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
   `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), or
   `AGENT=antigravity` (RoboARC's own agent for the Antigravity SDK; official, decided 2026-11-01), with no
-  adapter and no proxy that holds the credentials or changes the requests (the usage gateway holds no credentials, and
+  adapter and no proxy that holds the credentials or changes the requests, but for a GitHub Copilot proxy in front of
+  the agent (official, decided 2026-11-02) (the usage gateway holds no credentials, and
   its one change to a request, the image cap, is the runner's for the model; with `AGENT=antigravity` it also translates
   the SDK's Gemini requests for your Chat Completions server, and every result records that as `api_translation`); web search off (leave `WEB_SEARCH` unset);
   the runner's image cap, 50, or 10 for Gemini 4 Argon (leave `GATEWAY_IMAGE_CAP` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and

@@ -6,6 +6,11 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### Official runs: Codex and Claude Code through a GitHub Copilot proxy count (docs only)
+- A GitHub Copilot proxy on the run's host, which holds the Copilot credentials and passes the agent's requests on to
+  Copilot, no longer keeps a run of Harbor's Codex or Claude Code agent from being official (decided 2026-11-02).
+  RUNNING "Official runs" and COLLABORATOR_SETUP ("Keep as they are", and the credentials table's new row) say so.
+
 ### Antigravity + Gemini 4 Argon on GitHub Copilot: an image cap of 10 and server errors retried (runner and gateway; nothing changes for another model or agent)
 - **Why:** Reuben's first run (2026-11-02) voided both trials. Standard mode: Copilot refuses a Gemini 4 Argon request
   with more than 10 images ("too many images: maximum allowed for model gemini-4-argon is 10, got 12"), and the
