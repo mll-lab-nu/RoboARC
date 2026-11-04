@@ -72,9 +72,9 @@ def _write_json(path: Path, obj) -> None:
 
 
 def _make_env(a, renderer: str, cameras=None, max_steps=None):
-    if a.camera_poses == "droid":
+    if a.camera_poses:
         from . import droid_cameras
-        droid_cameras.install()
+        droid_cameras.install(a.camera_poses)
     kw = {"rules": a.rules} if resolve(a.task).suite == "puzzles" else {}
     return roboarc.make(a.task, renderer=renderer, cameras=cameras, instance_seed=a.instance_seed,
                         max_episode_steps=max_steps, **kw)
@@ -354,8 +354,9 @@ def main(argv=None) -> int:
                                                     "action per control step; droid-velocity: 15)")
     ap.add_argument("--image-size", type=int, default=224)
     ap.add_argument("--cameras", help="openpi key=camera,... (default: the convention's)")
-    ap.add_argument("--camera-poses", choices=("droid",), help="droid: DROID's camera poses on the one-arm puzzles "
-                    "(droid_cameras.py; default: the task's own cameras)")
+    ap.add_argument("--camera-poses", choices=("droid", "molmoact2"), help="droid: DROID's camera poses on the one-arm "
+                    "puzzles; molmoact2: the same with agentview aimed as in MolmoAct2's simulation (droid_cameras.py; "
+                    "default: the task's own cameras)")
     ap.add_argument("--max-steps", type=int, help="control steps per episode (default: 2 x the reference's)")
     ap.add_argument("--time-limit-s", type=float, help="simulated seconds per episode instead of --max-steps")
     ap.add_argument("--rules", default="standard", choices=("standard", "privileged"))

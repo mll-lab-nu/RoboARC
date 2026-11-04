@@ -110,13 +110,13 @@ def test_the_control_step_is_required():
 
 def test_molmoact2_gets_droid_frames_in_its_slot_order():
     """The runner pads the 848 x 480 cameras to 320 x 320 (--image-size 320); MolmoAct2 gets DROID's 320 x 180 frames
-    back without a padding row, in its slot order (exterior 1, exterior 2, wrist), and DROID's joints + gripper."""
+    back without a padding row, exterior 1 and wrist (as MolmoAct2's own DROID clients), and DROID's joints + gripper."""
     cams = [np.full((480, 848, 3), 50 * (i + 1), np.uint8) for i in range(3)]
     o = {k: C.resize_with_pad(c, 320, 320) for k, c in zip(IMAGES, cams)}
     o.update({JOINTS: DROID_RESET, "observation/gripper_position": np.array([0.25]), "prompt": "p"})
     images, state = molmoact2_inputs(o)
-    assert [im.shape for im in images] == [(180, 320, 3)] * 3
-    assert [(int(im.min()), int(im.max())) for im in images] == [(50, 50), (100, 100), (150, 150)]
+    assert [im.shape for im in images] == [(180, 320, 3)] * 2
+    assert [(int(im.min()), int(im.max())) for im in images] == [(50, 50), (150, 150)]
     assert state.dtype == np.float32 and np.allclose(state, np.r_[DROID_RESET, 0.25])
 
 

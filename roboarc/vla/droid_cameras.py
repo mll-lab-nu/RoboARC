@@ -15,6 +15,10 @@ the robot:
     wrist      sim-evals' wrist camera in the Robotiq's base_link (OpenGL), focal length 2.8 mm on the same aperture; the
                base_link in DROID's flange (DROID's Isaac USD); DROID's flange 51.8 mm behind RoboARC's `hand` frame
                along its z axis with the same axes, for the gripper pose of the DroidAdapter's q7 offset (pi/4)
+
+`molmoact2` (MolmoAct2's simulated DROID scene, allenai/molmoact2 sim_eval/robots/franka_droid.py at 66b87e6): the same,
+but agentview aimed as that scene's one exterior camera, from the same position: at a point in the robot's base frame,
+no roll (sapien's look_at). Its wrist camera is sim-evals' (the same position on the gripper, 1.3 deg apart).
 """
 from __future__ import annotations
 
@@ -25,6 +29,7 @@ import numpy as np
 
 EXTERIOR = {"front_oblique": ((0.05, -0.57, 0.66), (0.805, 0.399, -0.195, -0.393)),   # position, quaternion w x y z
             "agentview": ((0.05, 0.57, 0.66), (-0.393, -0.195, 0.399, 0.805))}
+MOLMOACT2_AGENTVIEW = ((0.05, 0.57, 0.66), (0.63, -0.48, -0.42))   # position, the point it looks at
 WRIST_IN_ROBOTIQ = ((0.011, -0.031, -0.074), (-0.420, 0.570, 0.576, -0.409))
 ROBOTIQ_IN_FLANGE = np.array([[0, 0, 1, 0], [0, -1, 0, 0], [1, 0, 0, 0.0182], [0, 0, 0, 1.0]])
 FLANGE_IN_HAND = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.0518], [0, 0, 0, 1.0]])
@@ -43,14 +48,26 @@ def _pose(pos, quat) -> np.ndarray:
     return T
 
 
+def _look_at(eye, target) -> np.ndarray:
+    """4 x 4 pose of an OpenGL camera at `eye` looking at `target`, its x axis level (no roll)."""
+    f = np.subtract(target, eye) / np.linalg.norm(np.subtract(target, eye))
+    x = np.cross(f, [0, 0, 1.0])
+    x /= np.linalg.norm(x)
+    T = np.eye(4)
+    T[:3, :3] = np.column_stack([x, np.cross(x, f), -f])
+    T[:3, 3] = eye
+    return T
+
+
 def _view(T: np.ndarray) -> tuple[list, list, list]:
     """An OpenGL camera's pose -> RoboARC's camera fields: its position, a point it looks at, its up vector."""
     p, forward, up = T[:3, 3], -T[:3, 2], T[:3, 1]
     return p.tolist(), (p + 0.3 * forward).tolist(), up.tolist()
 
 
-def apply(scene) -> None:
-    """In place: DROID's poses for the cameras of a one-arm puzzle's scene (what topogym's load_scene_config returns)."""
+def apply(scene, poses: str = "droid") -> None:
+    """In place: DROID's poses (`droid` or `molmoact2`) for the cameras of a one-arm puzzle's scene (what topogym's
+    load_scene_config returns)."""
     cams = scene.env.cameras
     missing = sorted({"front_oblique", "agentview", "wrist"} - set(cams))
     if missing:
@@ -63,13 +80,16 @@ def apply(scene) -> None:
     for name, (pos, quat) in EXTERIOR.items():
         p, lookat, up = _view(base @ _pose(pos, quat))
         cams[name].update(pos=p, lookat=lookat, up=up, fov=EXTERIOR_FOV)
+    if poses == "molmoact2":
+        p, lookat, up = _view(base @ _look_at(*MOLMOACT2_AGENTVIEW))
+        cams["agentview"].update(pos=p, lookat=lookat, up=up)
     p, lookat, up = _view(FLANGE_IN_HAND @ ROBOTIQ_IN_FLANGE @ _pose(*WRIST_IN_ROBOTIQ))
     cams["wrist"]["attach"].update(offset_pos=p, offset_lookat=lookat, offset_up=up)
     cams["wrist"]["fov"] = WRIST_FOV
 
 
-def install() -> None:
-    """From now on every scene this process builds has DROID's camera poses: wraps topogym's load_scene_config, which
+def install(poses: str = "droid") -> None:
+    """From now on every scene this process builds has DROID's camera poses (`droid` or `molmoact2`): wraps topogym's load_scene_config, which
     the simulator, its render host and its camera calibration import each time they build a scene."""
     from .._runtime import IMAGE_TOPOGYM
     topogym = os.environ.get("ROBOARC_TOPOGYM") or str(IMAGE_TOPOGYM)
@@ -77,13 +97,16 @@ def install() -> None:
         sys.path.append(topogym)
     from topogym.config import scene
     load = scene.load_scene_config
-    if getattr(load, "droid_cameras", False):
+    installed = getattr(load, "droid_cameras", None)
+    if installed:
+        if installed != poses:
+            raise ValueError(f"this process's scenes already have the {installed} camera poses")
         return
 
     def load_scene_config(config):
         s = load(config)
-        apply(s)
+        apply(s, poses)
         return s
 
-    load_scene_config.droid_cameras = True
+    load_scene_config.droid_cameras = poses
     scene.load_scene_config = load_scene_config

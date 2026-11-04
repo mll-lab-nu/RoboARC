@@ -2,7 +2,8 @@
 # A DROID-trained policy (pi0.5-DROID, MolmoAct2-DROID) on RoboARC's one-arm puzzles in one command (docs/VLA.md,
 # "DROID-trained policies"): starts one DroidAdapter model server, runs every (task, seed) episode in the puzzle image
 # with DROID's camera poses, --jobs at a time against that server, then stops the server. Results:
-# <out>/<task>/<run id>/s<seed>/e1/ (roboarc.vla.run).
+# <out>/<task>/<run id>/s<seed>/e1/ (roboarc.vla.run). MolmoAct2 gets the cameras of its own simulation and client:
+# agentview aimed as there (--camera-poses molmoact2) and two images, the exterior and the wrist.
 #
 #   scripts/vla_droid.sh --task lock-picking-03,buzz-wire-3d-06 --model jointpos --seed all --jobs 4 --out DIR
 #
@@ -36,11 +37,13 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$TASKS" ] || { echo "--task is needed (see the top of $0)" >&2; exit 2; }
 [ -d "$VLA_LIB/websockets" ] || { echo "no protocol packages in $VLA_LIB (docs/VLA.md, Setup)" >&2; exit 2; }
-# per model: its environment, convention, actions executed per query (each model's own DROID client) and image size
-ENV_DIR=$OPENPI CONV=droid HORIZON=8 SIZE=224 NAME=pi05-droid-$MODEL
+# per model: its environment, convention, actions executed per query (each model's own DROID client), image size and
+# cameras (empty: the convention's)
+ENV_DIR=$OPENPI CONV=droid HORIZON=8 SIZE=224 NAME=pi05-droid-$MODEL POSES=droid CAMERAS=""
 case $MODEL in
   velocity) CONV=droid-velocity;;
-  molmoact2*) ENV_DIR=$MOLMOACT2 HORIZON=15 SIZE=320 NAME=$MODEL-droid;;
+  molmoact2*) ENV_DIR=$MOLMOACT2 HORIZON=15 SIZE=320 NAME=$MODEL-droid POSES=molmoact2
+              CAMERAS=observation/exterior_image_1_left=agentview,observation/wrist_image_left=wrist;;
 esac
 RUN_ID=${RUN_ID:-$NAME}
 [ "$SEEDS" = all ] && SEEDS=0,1,2
@@ -75,7 +78,7 @@ episode() {   # <task> <seed> [runner args]: one runner in its own container; pr
   shift 2
   "${DOCKER[@]}" --name "vla-$RUN_ID-$task-s$seed-$$" -v "$OUT:/results" "$IMAGE" python -m roboarc.vla.run \
     --task "$task" --policy "$POLICY" --convention "$CONV" --policy-hz 15 --horizon "$HORIZON" --image-size "$SIZE" \
-    --camera-poses droid --run-id "$RUN_ID" --seed "$seed" --out /results "$@" 2>&1 | tail -1 | sed "s/^/$task seed $seed: /"
+    --camera-poses "$POSES" ${CAMERAS:+--cameras "$CAMERAS"} --run-id "$RUN_ID" --seed "$seed" --out /results "$@" 2>&1 | tail -1 | sed "s/^/$task seed $seed: /"
 }
 
 pids=()

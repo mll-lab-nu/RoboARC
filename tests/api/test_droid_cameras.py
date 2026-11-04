@@ -45,6 +45,21 @@ def test_poses_are_those_of_task_28s_camera_files():
     assert c.wrist.fov == pytest.approx(56.74, abs=0.01)
 
 
+def test_molmoact2_aims_agentview_as_its_simulation():
+    """agentview from the same position, looking at MolmoAct2's simulated scene's point, level; the rest as droid's."""
+    droid, molmo = scene(), scene()
+    D.apply(droid)
+    D.apply(molmo, "molmoact2")
+    a = molmo.env.cameras.agentview
+    eye, target = np.add(MOUNT, (0.05, 0.57, 0.66)), np.add(MOUNT, (0.63, -0.48, -0.42))
+    look = np.subtract(a.lookat, a.pos)
+    assert np.allclose(a.pos, eye) and np.allclose(look / np.linalg.norm(look), (target - eye) / np.linalg.norm(target - eye))
+    assert abs(np.cross(look, a.up)[2]) == pytest.approx(0, abs=1e-12) and a.up[2] > 0      # no roll
+    assert not np.allclose(a.lookat, droid.env.cameras.agentview.lookat)
+    for name in ("front_oblique", "wrist"):
+        assert molmo.env.cameras[name] == droid.env.cameras[name]
+
+
 def test_exterior_cameras_follow_the_robot_base():
     s = scene(mount=[-0.4, 0.1, 1.0])
     D.apply(s)

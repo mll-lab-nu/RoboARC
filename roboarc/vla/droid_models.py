@@ -69,10 +69,12 @@ class OpenpiModel(DroidModel):
 class MolmoAct2Model(DroidModel):
     """allenai/MolmoAct2-DROID (5B) through its Hugging Face code, called as its model card and allenai/molmoact2's
     examples/droid/host_server_droid.py call it: continuous actions from 10 flow steps, no depth reasoning, the prompt
-    normalised by the model; `dtype` float32, or bfloat16 weights under bfloat16 autocast (the model card's two paths). Its three camera slots take the convention's three images in the order it was trained with
-    (exterior 1, exterior 2, wrist: the model card), each cut back to DROID's 16:9 frame: 320 x 180 when the runner pads
-    the 848 x 480 cameras to 320 x 320 (--image-size 320). It returns 15 actions: absolute joint positions (the model
-    clips them to DROID's 1-99 % range) and a continuous gripper position, clipped here to [0, 1]."""
+    normalised by the model; `dtype` float32, or bfloat16 weights under bfloat16 autocast (the model card's two paths).
+    It gets two images, exterior 1 and the wrist, as that server and allenai/molmoact2's simulated and real DROID clients
+    send them (scripts/vla_droid.sh renders agentview, aimed as in that simulation, as exterior 1), each cut back to
+    DROID's 16:9 frame: 320 x 180 when the runner pads the 848 x 480 cameras to 320 x 320 (--image-size 320). It returns
+    15 actions: absolute joint positions (the model clips its state and actions to DROID's 1-99 % range) and a
+    continuous gripper position, clipped here to [0, 1]."""
     repo, revision = "allenai/MolmoAct2-DROID", "d8c1abd8a27d8e859455bbe514df2bcc617db0fb"
     image_size = 320
 
@@ -113,9 +115,9 @@ def droid_frame(image: np.ndarray) -> np.ndarray:
 
 
 def molmoact2_inputs(obs: dict) -> tuple[list, np.ndarray]:
-    """MolmoAct2-DROID's inputs: the three frames in its slot order and the state (8,) float32: DROID's 7 joints and the
+    """MolmoAct2-DROID's inputs: the exterior 1 and wrist frames and the state (8,) float32: DROID's 7 joints and the
     gripper position (0 = open .. 1 = closed)."""
-    images = [droid_frame(np.asarray(obs[k], dtype=np.uint8)) for k in IMAGES]
+    images = [droid_frame(np.asarray(obs[k], dtype=np.uint8)) for k in (IMAGES[0], IMAGES[2])]
     state = np.r_[np.asarray(obs[JOINTS]).reshape(7), np.asarray(obs[GRIPPER]).reshape(1)].astype(np.float32)
     return images, state
 
