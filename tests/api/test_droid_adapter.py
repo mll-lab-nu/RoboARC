@@ -1,5 +1,6 @@
-"""roboarc.vla.droid_adapter: DROID's wrist convention and start pose around a DROID-trained policy. Without a simulator
-unless marked `sim` (the runner against the adapter, rendering off)."""
+"""roboarc.vla.droid_adapter: DROID's wrist convention and start pose around a DROID-trained policy, and the models'
+own inputs and outputs (droid_models.py, without their libraries). Without a simulator unless marked `sim` (the runner
+against the adapter, rendering off)."""
 import json
 import os
 
@@ -9,6 +10,7 @@ import pytest
 import roboarc
 from roboarc.vla import conventions as C
 from roboarc.vla.droid_adapter import DROID_RESET, JOINTS, WRIST_OFFSET, DroidAdapter
+from roboarc.vla.droid_models import IMAGES, molmoact2_actions, molmoact2_inputs
 from roboarc.vla.stub_server import HoldPolicy
 
 from test_vla import _serve, droid_env
@@ -104,6 +106,27 @@ def test_velocity_move_reaches_droid_reset_through_the_velocity_convention():
 def test_the_control_step_is_required():
     with pytest.raises(ValueError, match="control_step"):
         DroidAdapter(Refuse()).infer({JOINTS: HOME})
+
+
+def test_molmoact2_gets_droid_frames_in_its_slot_order():
+    """The runner pads the 848 x 480 cameras to 320 x 320 (--image-size 320); MolmoAct2 gets DROID's 320 x 180 frames
+    back without a padding row, in its slot order (exterior 1, exterior 2, wrist), and DROID's joints + gripper."""
+    cams = [np.full((480, 848, 3), 50 * (i + 1), np.uint8) for i in range(3)]
+    o = {k: C.resize_with_pad(c, 320, 320) for k, c in zip(IMAGES, cams)}
+    o.update({JOINTS: DROID_RESET, "observation/gripper_position": np.array([0.25]), "prompt": "p"})
+    images, state = molmoact2_inputs(o)
+    assert [im.shape for im in images] == [(180, 320, 3)] * 3
+    assert [(int(im.min()), int(im.max())) for im in images] == [(50, 50), (100, 100), (150, 150)]
+    assert state.dtype == np.float32 and np.allclose(state, np.r_[DROID_RESET, 0.25])
+
+
+def test_molmoact2_actions_clip_only_the_gripper():
+    raw = np.zeros((1, 15, 8))
+    raw[0, :, 6] = -0.4
+    raw[0, :, 7] = np.linspace(-0.2, 1.3, 15)
+    a = molmoact2_actions(raw)
+    assert a.shape == (15, 8) and np.all(a[:, 6] == -0.4)
+    assert a[:, 7].min() == 0.0 and a[:, 7].max() == 1.0 and np.allclose(a[3:12, 7], raw[0, 3:12, 7])
 
 
 @pytest.mark.sim

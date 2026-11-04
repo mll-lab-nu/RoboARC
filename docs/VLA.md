@@ -96,7 +96,7 @@ buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking.
 
 ```python
 {"observation/exterior_image_1_left": (224, 224, 3) uint8,     # camera `front_oblique`
- "observation/exterior_image_2_left": (224, 224, 3) uint8,     # camera `agentview` (ignored by openpi's DROID inputs)
+ "observation/exterior_image_2_left": (224, 224, 3) uint8,     # camera `agentview` (openpi's DROID inputs ignore it)
  "observation/wrist_image_left": (224, 224, 3) uint8,          # camera `wrist`
  "observation/joint_position": (7,) float64,
  "observation/gripper_position": (1,) float64,                 # 0 = open .. 1 = closed (DROID's)
@@ -115,8 +115,8 @@ buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking.
 
 ### DROID-trained policies
 
-A policy trained on DROID (openpi's pi0.5-DROID) needs three things DROID's robot has and the one-arm puzzles do not.
-RoboARC provides them without changing a task:
+A policy trained on DROID (openpi's pi0.5-DROID, AI2's MolmoAct2-DROID) needs three things DROID's robot has and the
+one-arm puzzles do not. RoboARC provides them without changing a task:
 
 - **Camera poses** (`--camera-poses droid`, `roboarc/vla/droid_cameras.py`): `front_oblique`, `agentview` and `wrist`
   move to the poses of DROID's simulated evaluation scene (sim-evals), relative to the robot: the exterior cameras at
@@ -130,6 +130,18 @@ RoboARC provides them without changing a task:
   first 2.5 s move the arm to DROID's reset joints before the model is asked. The adapter reads only the joints and
   the control step: it holds nothing about a task.
 
+The models behind the adapter (`roboarc/vla/droid_models.py`) share one interface: `load()` once (the weights, then one
+call on a blank observation, so the first real call does not outlast the client's keepalive), then `infer(obs)` ->
+`(H, 8)` in DROID's units. Each runs in its own Python environment and imports its libraries only when it loads.
+Each is called as its own DROID client calls it:
+
+- pi0.5-DROID (openpi): two images (exterior 1, wrist) at 224 x 224 with padding; 15 actions per query, 8 executed
+  (openpi's DROID example).
+- MolmoAct2-DROID (Hugging Face `allenai/MolmoAct2-DROID`): three images in the order it was trained with (exterior 1,
+  exterior 2, wrist), each DROID's 16:9 frame (320 x 180: the runner pads to 320 x 320, the model takes the padding
+  off); 15 actions per query, all 15 executed (the checkpoint's `n_action_steps` and AI2's clients); bfloat16, 10 flow
+  steps, the gripper clipped to [0, 1] (AI2's DROID server).
+
 `scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
 puzzle image with `--camera-poses droid`, `--jobs` at a time against that one server, and stops the server.
 
@@ -138,17 +150,23 @@ puzzle image with `--camera-poses droid`, `--jobs` at a time against that one se
 # ~/.cache/openpi or $OPENPI_DATA_HOME); scripts/vla_droid.sh finds it in ~/openpi or $OPENPI
 git clone https://github.com/Physical-Intelligence/openpi.git ~/openpi && cd ~/openpi
 git checkout 215abfb217dbac7d5f1273282331b9b1866c0479 && GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
+# MolmoAct2: AI2's environment (no lock file: torch 2.11.0 and transformers 4.57.6 tested) + the protocol's msgpack;
+# the weights download on first use (22 GB, into ~/.cache/huggingface or $HF_HOME); found in ~/molmoact2 or $MOLMOACT2
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/allenai/molmoact2.git ~/molmoact2 && cd ~/molmoact2
+git checkout 66b87e64efd99dfd103241418113955cf64dfa9c && uv sync && uv pip install msgpack==1.1.0
 
 scripts/vla_droid.sh --task lock-picking-03 --model jointpos --seed all --jobs 3 --out $RESULTS
+scripts/vla_droid.sh --task lock-picking-03 --model molmoact2 --jobs 3 --out $RESULTS
 scripts/vla_droid.sh --task hedgehog-in-cage-02 --model hold --out $RESULTS -- --max-steps 400   # checks the setup
 ```
 
-| `--model` | openpi checkpoint | convention |
-|---|---|---|
-| `jointpos` (default) | `pi05_droid_jointpos` | `droid` |
-| `velocity` | `pi05_droid` | `droid-velocity` |
-| `polaris` | `polaris/pi05_droid_jointpos_polaris` (jointpos with PolaRiS' simulated data) | `droid` |
-| `hold` | none: holds the arm (numpy only) | `droid` |
+| `--model` | checkpoint | convention | executed per query, image size |
+|---|---|---|---|
+| `jointpos` (default) | openpi `pi05_droid_jointpos` | `droid` | 8, 224 |
+| `velocity` | openpi `pi05_droid` | `droid-velocity` | 8, 224 |
+| `polaris` | openpi `polaris/pi05_droid_jointpos_polaris` (jointpos with PolaRiS' simulated data) | `droid` | 8, 224 |
+| `molmoact2` | Hugging Face `allenai/MolmoAct2-DROID` at `d8c1abd` | `droid` | 15, 320 |
+| `hold` | none: holds the arm (numpy only) | `droid` | 8, 224 |
 
 ### Rates
 

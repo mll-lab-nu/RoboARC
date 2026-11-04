@@ -1,6 +1,7 @@
-# pi0.5-DROID on the one-arm puzzles
+# DROID-trained VLAs on the one-arm puzzles
 
-openpi's DROID-trained pi0.5, zero-shot, on RoboARC's 18 one-arm puzzles (Franka + Robotiq 2F-85), in one command.
+Two models trained on DROID, zero-shot, on RoboARC's 18 one-arm puzzles (Franka + Robotiq 2F-85), in one command:
+openpi's pi0.5-DROID and AI2's MolmoAct2-DROID.
 
 ## Run
 
@@ -11,12 +12,13 @@ scripts/vla_droid.sh --task lock-picking-03,buzz-wire-3d-06 --jobs 2 --out resul
 ```
 
 The script starts the model server, runs every (task, seed) episode in the puzzle image, `--jobs` at a time, and stops
-the server. Each episode writes `results/<task>/pi05-droid-<model>/s<seed>/e1/result.json` (`success`, `steps`, ...).
+the server. Each episode writes `results/<task>/<run id>/s<seed>/e1/result.json` (`success`, `steps`, ...); the run id
+is `pi05-droid-<model>` or `molmoact2-droid`.
 
 | option | values | default |
 |---|---|---|
 | `--task` | task ids, comma-separated (below) | required |
-| `--model` | `jointpos`, `velocity`, `polaris`; `hold` = no model, checks the setup | `jointpos` |
+| `--model` | pi0.5: `jointpos`, `velocity`, `polaris`; `molmoact2`; `hold` = no model, checks the setup | `jointpos` |
 | `--seed` | `0`, `0,1,2` or `all` (the scene's colours and materials; same physics) | `0` |
 | `--jobs` | episodes at a time | `1` |
 | `--out` | results directory | `./vla_results` |
@@ -42,7 +44,13 @@ DROID's robot is the same arm and gripper. Three things differ; none of the task
 | wrist joint q7 | Robotiq on the flange | Robotiq at -45° about the flange | model server: the model sees q7 - π/4 ([droid_adapter.py](droid_adapter.py)) |
 | start pose | DROID's reset joints | the task's | model server: the first 2.5 s move the arm there |
 
-The actions run as DROID's: 15 Hz chunks of 15, 8 executed per query (`--convention droid --policy-hz 15 --horizon 8`).
+The actions run as DROID's, 15 per second, and each model is called as its own DROID client calls it
+([droid_models.py](droid_models.py)):
+
+| | pi0.5-DROID | MolmoAct2-DROID |
+|---|---|---|
+| images | exterior 1, wrist: 224 x 224 with padding | exterior 1, exterior 2, wrist: 320 x 180 |
+| actions per query | 15, 8 executed (`--horizon 8`) | 15, all executed (`--horizon 15`) |
 
 ## Setup (once)
 
@@ -54,14 +62,21 @@ The actions run as DROID's: 15 Hz chunks of 15, 8 executed per query (`--convent
    git checkout 215abfb217dbac7d5f1273282331b9b1866c0479 && GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
    ```
 
-3. The protocol's two packages, from the repository root:
+3. For MolmoAct2, AI2's environment (the weights download on first use, 22 GB):
+
+   ```bash
+   GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/allenai/molmoact2.git ~/molmoact2 && cd ~/molmoact2
+   git checkout 66b87e64efd99dfd103241418113955cf64dfa9c && uv sync && uv pip install msgpack==1.1.0
+   ```
+
+4. The protocol's two packages, from the repository root:
 
    ```bash
    mkdir -p .vla-lib && docker run --rm -u $(id -u):$(id -g) -e HOME=/tmp -v $PWD/.vla-lib:/vla-lib \
      ghcr.io/mll-lab-nu/roboarc:2.2.0 python -m pip install --target /vla-lib msgpack==1.1.0 websockets==15.0.1
    ```
 
-Other places: `OPENPI=<dir>`, `VLA_LIB=<dir>`, `IMAGE=<image>` in the environment.
+Other places: `OPENPI=<dir>`, `MOLMOACT2=<dir>`, `VLA_LIB=<dir>`, `IMAGE=<image>` in the environment.
 
 ## GPU
 
