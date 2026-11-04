@@ -7,16 +7,17 @@
 #   scripts/vla_droid.sh --task lock-picking-03,buzz-wire-3d-06 --model jointpos --seed all --jobs 4 --out DIR
 #
 #   --task    one-arm puzzle ids, comma-separated (buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking)
-#   --model   jointpos (default) | velocity | polaris | molmoact2 | hold (no model: checks the setup)  (droid_models.py)
+#   --model   jointpos (default) | velocity | polaris | molmoact2 | molmoact2-bf16 | hold (no model: checks the setup)
+#             (roboarc/vla/droid_models.py)
 #   --seed    0 (default) | 0,1,2 | all              --jobs    episodes at a time (default 1)
-#   --out     results root (default ./vla_results)   --run-id  default pi05-droid-<model>, molmoact2-droid
+#   --out     results root (default ./vla_results)   --run-id  default pi05-droid-<model>, <model>-droid (MolmoAct2)
 #   --policy  ws://HOST:PORT of a running DroidAdapter server of --model (then none is started)
 #   --port    the started server's port (default 8000);   after --: more roboarc.vla.run arguments
 #
 # Needs docker with the GPU, the protocol packages in $VLA_LIB (default .vla-lib; docs/VLA.md, Setup) and the model's
 # environment set up with `uv sync`: openpi at 215abfb in $OPENPI (default ~/openpi) for pi0.5, allenai/molmoact2 at
 # 66b87e6 in $MOLMOACT2 (default ~/molmoact2) for MolmoAct2. The server takes the GPU memory it uses (pi0.5-DROID
-# 8.6 GB, MolmoAct2-DROID 11 GB), each episode about 1 GB; one server keeps about 4 episodes busy (docs/VLA.md).
+# 8.6 GB, MolmoAct2-DROID about 24 GB in float32, under 16 in bfloat16), each episode about 1 GB (docs/VLA.md).
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 IMAGE=${IMAGE:-ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057}
@@ -39,7 +40,7 @@ done
 ENV_DIR=$OPENPI CONV=droid HORIZON=8 SIZE=224 NAME=pi05-droid-$MODEL
 case $MODEL in
   velocity) CONV=droid-velocity;;
-  molmoact2) ENV_DIR=$MOLMOACT2 HORIZON=15 SIZE=320 NAME=molmoact2-droid;;
+  molmoact2*) ENV_DIR=$MOLMOACT2 HORIZON=15 SIZE=320 NAME=$MODEL-droid;;
 esac
 RUN_ID=${RUN_ID:-$NAME}
 [ "$SEEDS" = all ] && SEEDS=0,1,2

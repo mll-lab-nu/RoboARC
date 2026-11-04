@@ -139,8 +139,9 @@ Each is called as its own DROID client calls it:
   (openpi's DROID example).
 - MolmoAct2-DROID (Hugging Face `allenai/MolmoAct2-DROID`): three images in the order it was trained with (exterior 1,
   exterior 2, wrist), each DROID's 16:9 frame (320 x 180: the runner pads to 320 x 320, the model takes the padding
-  off); 15 actions per query, all 15 executed (the checkpoint's `n_action_steps` and AI2's clients); bfloat16, 10 flow
-  steps, the gripper clipped to [0, 1] (AI2's DROID server).
+  off); 15 actions per query, all 15 executed (the checkpoint's `n_action_steps` and AI2's clients); 10 flow steps,
+  the gripper clipped to [0, 1] (AI2's DROID server); float32 as the model card's reported runs (about 24 GB),
+  `molmoact2-bf16` its bfloat16 path for a smaller GPU (under 16 GB).
 
 `scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
 puzzle image with `--camera-poses droid`, `--jobs` at a time against that one server, and stops the server.
@@ -165,7 +166,8 @@ scripts/vla_droid.sh --task hedgehog-in-cage-02 --model hold --out $RESULTS -- -
 | `jointpos` (default) | openpi `pi05_droid_jointpos` | `droid` | 8, 224 |
 | `velocity` | openpi `pi05_droid` | `droid-velocity` | 8, 224 |
 | `polaris` | openpi `polaris/pi05_droid_jointpos_polaris` (jointpos with PolaRiS' simulated data) | `droid` | 8, 224 |
-| `molmoact2` | Hugging Face `allenai/MolmoAct2-DROID` at `d8c1abd` | `droid` | 15, 320 |
+| `molmoact2` | Hugging Face `allenai/MolmoAct2-DROID` at `d8c1abd`, float32 | `droid` | 15, 320 |
+| `molmoact2-bf16` | the same in bfloat16 | `droid` | 15, 320 |
 | `hold` | none: holds the arm (numpy only) | `droid` | 8, 224 |
 
 ### Rates

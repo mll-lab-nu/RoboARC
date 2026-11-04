@@ -13,12 +13,12 @@ scripts/vla_droid.sh --task lock-picking-03,buzz-wire-3d-06 --jobs 2 --out resul
 
 The script starts the model server, runs every (task, seed) episode in the puzzle image, `--jobs` at a time, and stops
 the server. Each episode writes `results/<task>/<run id>/s<seed>/e1/result.json` (`success`, `steps`, ...); the run id
-is `pi05-droid-<model>` or `molmoact2-droid`.
+is `pi05-droid-<model>` or `<model>-droid` for MolmoAct2.
 
 | option | values | default |
 |---|---|---|
 | `--task` | task ids, comma-separated (below) | required |
-| `--model` | pi0.5: `jointpos`, `velocity`, `polaris`; `molmoact2`; `hold` = no model, checks the setup | `jointpos` |
+| `--model` | pi0.5: `jointpos`, `velocity`, `polaris`; `molmoact2` (float32), `molmoact2-bf16`; `hold` = no model, checks the setup | `jointpos` |
 | `--seed` | `0`, `0,1,2` or `all` (the scene's colours and materials; same physics) | `0` |
 | `--jobs` | episodes at a time | `1` |
 | `--out` | results directory | `./vla_results` |
