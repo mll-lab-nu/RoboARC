@@ -17,7 +17,7 @@
 # Needs docker with the GPU, the protocol packages in $VLA_LIB (default .vla-lib; docs/VLA.md, Setup) and the model's
 # environment set up with `uv sync`: openpi at 215abfb in $OPENPI (default ~/openpi) for pi0.5, allenai/molmoact2 at
 # 66b87e6 in $MOLMOACT2 (default ~/molmoact2) for MolmoAct2. The server takes the GPU memory it uses (pi0.5-DROID
-# 8.6 GB, MolmoAct2-DROID about 24 GB in float32, under 16 in bfloat16), each episode about 1 GB (docs/VLA.md).
+# 8.6 GB; MolmoAct2-DROID 11 GB in bfloat16, about 24 GB in float32), each episode about 1 GB (docs/VLA.md).
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 IMAGE=${IMAGE:-ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057}

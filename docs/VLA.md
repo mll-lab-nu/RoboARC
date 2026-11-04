@@ -240,6 +240,9 @@ cloth on the GPU). Measured on an RTX 4090 with a loaded 32-core host:
 | a policy query (render + layout), stub server | 54 ms | 34 ms |
 | per control step, horizon 25 / 8 | 36 ms | 22 ms |
 
+MolmoAct2-DROID's server holds 11 GB in bfloat16 and about 24 GB in float32 (its model card); a query (15 actions,
+1 s of simulated time) took 0.22 s on a free RTX 4090 and 0.84 s on a busy one (bfloat16).
+
 pi0.5-DROID through `scripts/vla_droid.sh`, model and episodes on one RTX 4090 that other jobs kept busy (8.5 GB of
 its memory taken): the model server holds 8.6 GB and an episode about 1 GB. One server keeps about 4 episodes busy:
 4 parallel 1600-step lock-picking episodes took 49 s each against 40 s for one alone; with 6 or 9 the GPU's memory ran

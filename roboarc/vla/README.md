@@ -82,4 +82,5 @@ Other places: `OPENPI=<dir>`, `MOLMOACT2=<dir>`, `VLA_LIB=<dir>`, `IMAGE=<image>
 
 One RTX 4090: the model server takes 8.6 GB and each episode about 1 GB, so `--jobs 4`. The four easiest settings
 above (lock-picking-03, buzz-wire-3d-06, fiber-bundling-02, hedgehog-in-cage-02) took 33 minutes 4 at a time, on a
-GPU shared with other jobs. More: [docs/VLA.md](../../docs/VLA.md#droid-trained-policies).
+GPU shared with other jobs. MolmoAct2-DROID: 11 GB in bfloat16 (`molmoact2-bf16`), about 24 GB in float32 (the model
+card); 0.22 s per query on a free 4090, 0.84 s on a busy one. More: [docs/VLA.md](../../docs/VLA.md#droid-trained-policies).
