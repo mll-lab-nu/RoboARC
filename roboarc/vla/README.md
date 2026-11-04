@@ -49,7 +49,7 @@ The actions run as DROID's, 15 per second, and each model is called as its own D
 
 | | pi0.5-DROID | MolmoAct2-DROID |
 |---|---|---|
-| images | exterior 1, wrist: 224 x 224 with padding | exterior 1, exterior 2, wrist: 320 x 180 |
+| images | exterior 1 (`front_oblique`), wrist: 224 x 224 with padding | exterior 1 (`agentview`, aimed as in AI2's simulation: `--camera-poses molmoact2`), wrist: 320 x 180 |
 | actions per query | 15, 8 executed (`--horizon 8`) | 15, all executed (`--horizon 15`) |
 
 ## Setup (once)

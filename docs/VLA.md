@@ -57,7 +57,7 @@ docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) 
 | `--policy-hz` | the rate of the chunk's actions (default: one action per control step, 40 Hz; see below) |
 | `--max-steps`, `--time-limit-s` | the episode's limit in control steps or simulated seconds (default: below) |
 | `--image-size` | the square image size (224) |
-| `--camera-poses` | `droid`: DROID's camera poses on the one-arm puzzles ([DROID-trained policies](#droid-trained-policies)) |
+| `--camera-poses` | `droid`: DROID's camera poses on the one-arm puzzles; `molmoact2`: the same with `agentview` aimed as in AI2's MolmoAct2 simulation ([DROID-trained policies](#droid-trained-policies)) |
 | `--prompt`, `--full-prompt` | override the instruction, or send the whole task paragraph ([Prompts](#prompts)) |
 | `--video` | render `video.mp4` while grading (GPU) |
 | `--export-reference F` | write the task's reference solution in the convention's action units (for [checking a setup](#checking-a-setup)) |
@@ -124,7 +124,9 @@ one-arm puzzles do not. RoboARC provides them without changing a task:
   on the Robotiq (56.7 deg). The change is made in memory when the scene is built: the tasks, their files and the
   physics stay as they are, the frozen-runtime checks hold, and the episodes' end states are those without it. With the
   task's own cameras pi0.5-DROID came within 3 cm of the object in 0 of 24 one-minute episodes (buzz-wire-3d-06,
-  lock-picking-03; three checkpoints); with DROID's poses in 7 of 24.
+  lock-picking-03; three checkpoints); with DROID's poses in 7 of 24. `--camera-poses molmoact2` is the same but
+  for `agentview`, aimed as the one exterior camera of AI2's MolmoAct2 simulation (`allenai/molmoact2`
+  `sim_eval/robots/franka_droid.py`: from the same position, 18 deg apart).
 - **Wrist angle and start pose** (`roboarc/vla/droid_adapter.py`, a policy server around the model): RoboARC mounts the
   Robotiq at -45 deg about the flange, DROID at 0, so the model sees q7 - pi/4 and its actions get pi/4 back; the
   first 2.5 s move the arm to DROID's reset joints before the model is asked. The adapter reads only the joints and
@@ -137,14 +139,16 @@ Each is called as its own DROID client calls it:
 
 - pi0.5-DROID (openpi): two images (exterior 1, wrist) at 224 x 224 with padding; 15 actions per query, 8 executed
   (openpi's DROID example).
-- MolmoAct2-DROID (Hugging Face `allenai/MolmoAct2-DROID`): three images in the order it was trained with (exterior 1,
-  exterior 2, wrist), each DROID's 16:9 frame (320 x 180: the runner pads to 320 x 320, the model takes the padding
-  off); 15 actions per query, all 15 executed (the checkpoint's `n_action_steps` and AI2's clients); 10 flow steps,
-  the gripper clipped to [0, 1] (AI2's DROID server); float32 as the model card's reported runs (about 24 GB),
+- MolmoAct2-DROID (Hugging Face `allenai/MolmoAct2-DROID`): two images, the exterior camera of AI2's simulation
+  (`agentview` with `--camera-poses molmoact2`) and the wrist, as AI2's DROID server and clients send them; each
+  DROID's 16:9 frame (320 x 180: the runner pads to 320 x 320, the model takes the padding off); 15 actions per
+  query, all 15 executed (the checkpoint's `n_action_steps` and AI2's clients); 10 flow steps, the gripper clipped to
+  [0, 1] (AI2's DROID server); float32 as the model card's reported runs (about 24 GB),
   `molmoact2-bf16` its bfloat16 path for a smaller GPU (under 16 GB).
 
 `scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
-puzzle image with `--camera-poses droid`, `--jobs` at a time against that one server, and stops the server.
+puzzle image with each model's cameras (`--camera-poses droid`; MolmoAct2: `molmoact2` and `agentview` as
+exterior 1), `--jobs` at a time against that one server, and stops the server.
 
 ```bash
 # once: openpi at the commit RoboARC was tested with (the checkpoints download on first use, 12 GB each, into
