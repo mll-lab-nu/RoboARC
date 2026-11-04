@@ -137,8 +137,8 @@ call on a blank observation, so the first real call does not outlast the client'
 `(H, 8)` in DROID's units. Each runs in its own Python environment and imports its libraries only when it loads.
 Each is called as its own DROID client calls it:
 
-- pi0.5-DROID (openpi): two images (exterior 1, wrist) at 224 x 224 with padding; 15 actions per query, 8 executed
-  (openpi's DROID example).
+- pi0.5-DROID (openpi): two images, the exterior camera of sim-evals (`agentview`, on the robot's left) and the wrist,
+  at 224 x 224 with padding; 15 actions per query, 8 executed (openpi's DROID example).
 - MolmoAct2-DROID (Hugging Face `allenai/MolmoAct2-DROID`): two images, the exterior camera of AI2's simulation
   (`agentview` with `--camera-poses molmoact2`) and the wrist, as AI2's DROID server and clients send them; each
   DROID's 16:9 frame (320 x 180: the runner pads to 320 x 320, the model takes the padding off); 15 actions per
@@ -147,8 +147,8 @@ Each is called as its own DROID client calls it:
   `molmoact2-bf16` its bfloat16 path for a smaller GPU (under 16 GB).
 
 `scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
-puzzle image with each model's cameras (`--camera-poses droid`; MolmoAct2: `molmoact2` and `agentview` as
-exterior 1), `--jobs` at a time against that one server, and stops the server.
+puzzle image with each model's cameras (`agentview` as exterior 1 and the wrist; `--camera-poses droid`, MolmoAct2
+`molmoact2`), `--jobs` at a time against that one server, and stops the server.
 
 ```bash
 # once: openpi at the commit RoboARC was tested with (the checkpoints download on first use, 12 GB each, into

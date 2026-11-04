@@ -71,7 +71,7 @@ class MolmoAct2Model(DroidModel):
     examples/droid/host_server_droid.py call it: continuous actions from 10 flow steps, no depth reasoning, the prompt
     normalised by the model; `dtype` float32, or bfloat16 weights under bfloat16 autocast (the model card's two paths).
     It gets two images, exterior 1 and the wrist, as that server and allenai/molmoact2's simulated and real DROID clients
-    send them (scripts/vla_droid.sh renders agentview, aimed as in that simulation, as exterior 1), each cut back to
+    send them (scripts/vla_droid.sh gives agentview, aimed as in that simulation, as exterior 1), each cut back to
     DROID's 16:9 frame: 320 x 180 when the runner pads the 848 x 480 cameras to 320 x 320 (--image-size 320). It returns
     15 actions: absolute joint positions (the model clips its state and actions to DROID's 1-99 % range) and a
     continuous gripper position, clipped here to [0, 1]."""

@@ -9,8 +9,9 @@ physics stays as it is (the cameras are the renderer's only), so the frozen-runt
 The poses are those of DROID's simulated evaluation scene (sim-evals, the Isaac scene of DROID's robot), relative to
 the robot:
 
-    exterior   sim-evals' external_cam_2 (the robot's right: front_oblique, exterior image 1 of the droid convention)
-               and external_cam (the robot's left: agentview): positions in the robot's base frame (link0),
+    exterior   sim-evals' external_cam_2 (the robot's right: front_oblique, the droid convention's default exterior
+               image 1) and external_cam (the robot's left: agentview, sim-evals' exterior image 1 and the one
+               scripts/vla_droid.sh gives the models): positions in the robot's base frame (link0),
                orientations as OpenGL cameras (looking along -z, up +y); focal length 2.1 mm on a 3.024 mm high aperture
     wrist      sim-evals' wrist camera in the Robotiq's base_link (OpenGL), focal length 2.8 mm on the same aperture; the
                base_link in DROID's flange (DROID's Isaac USD); DROID's flange 51.8 mm behind RoboARC's `hand` frame
