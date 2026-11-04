@@ -2,12 +2,13 @@
 DROID's units. Each runs in its own Python environment (scripts/vla_droid.sh picks it); a model's libraries are
 imported in load(), never when this module is.
 
-    jointpos    openpi's pi05_droid_jointpos: absolute joint positions + the gripper position (0 = open .. 1 = closed),
-                the `droid` convention                                                      (openpi's environment)
+    jointpos    openpi's pi05_droid_jointpos: absolute joint positions + the gripper position (0 = open .. 1 = closed,
+                binarised at 0.5), the `droid` convention                                   (openpi's environment)
     velocity    openpi's pi05_droid: DROID's normalised joint velocities, the `droid-velocity` convention
     polaris     pi05_droid_jointpos fine-tuned with PolaRiS' simulated data: `droid`
     molmoact2   allenai/MolmoAct2-DROID in float32 (the model card's reported runs, about 24 GB of GPU memory):
-                absolute joint positions + the gripper position, `droid`           (allenai/molmoact2's environment)
+                absolute joint positions + a continuous gripper position (its DROID client does not binarise it),
+                `droid`                                                            (allenai/molmoact2's environment)
     molmoact2-bf16   the same in bfloat16 (the model card's smaller path, under 16 GB)
     hold        stub_server's HoldPolicy instead of a model (numpy only), for checking a setup: `droid`
 
@@ -54,7 +55,9 @@ class HoldModel(DroidModel):
 
 class OpenpiModel(DroidModel):
     """An openpi checkpoint served by openpi's own policy (its input and output transforms): `config` is openpi's
-    training config, `checkpoint` its directory (gs:// paths download into ~/.cache/openpi or $OPENPI_DATA_HOME)."""
+    training config, `checkpoint` its directory (gs:// paths download into ~/.cache/openpi or $OPENPI_DATA_HOME). The
+    gripper actions are binarised at 0.5, as openpi's DROID client (examples/droid/main.py) and sim-evals' execute
+    them."""
 
     def __init__(self, config: str, checkpoint: str, velocity: bool = False):
         self.config, self.checkpoint, self.velocity = config, checkpoint, velocity
@@ -64,6 +67,12 @@ class OpenpiModel(DroidModel):
         from openpi.policies import policy_config
         from openpi.training import config as openpi_config
         self.policy = policy_config.create_trained_policy(openpi_config.get_config(self.config), self.checkpoint)
+
+    def infer(self, obs: dict) -> dict:
+        out = self.policy.infer(obs)
+        a = np.array(out["actions"])
+        a[:, 7] = a[:, 7] > 0.5
+        return {**out, "actions": a}
 
 
 class MolmoAct2Model(DroidModel):

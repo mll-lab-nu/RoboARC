@@ -3,6 +3,7 @@ own inputs and outputs (droid_models.py, without their libraries). Without a sim
 against the adapter, rendering off)."""
 import json
 import os
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -10,7 +11,7 @@ import pytest
 import roboarc
 from roboarc.vla import conventions as C
 from roboarc.vla.droid_adapter import DROID_RESET, JOINTS, WRIST_OFFSET, DroidAdapter
-from roboarc.vla.droid_models import IMAGES, molmoact2_actions, molmoact2_inputs
+from roboarc.vla.droid_models import IMAGES, OpenpiModel, molmoact2_actions, molmoact2_inputs
 from roboarc.vla.stub_server import HoldPolicy
 
 from test_vla import _serve, droid_env
@@ -118,6 +119,20 @@ def test_molmoact2_gets_droid_frames_in_its_slot_order():
     assert [im.shape for im in images] == [(180, 320, 3)] * 2
     assert [(int(im.min()), int(im.max())) for im in images] == [(50, 50), (150, 150)]
     assert state.dtype == np.float32 and np.allclose(state, np.r_[DROID_RESET, 0.25])
+
+
+def test_openpi_gripper_is_binarised_at_one_half():
+    """pi0.5's gripper actions become 0 or 1 at 0.5, as openpi's DROID client and sim-evals' execute them; the joints
+    and the other outputs stay as the policy gave them."""
+    raw = np.zeros((15, 8), np.float32)
+    raw[:, :7] = 0.3
+    raw[:, 7] = np.linspace(0.0, 1.0, 15)
+    m = OpenpiModel("cfg", "ckpt")
+    m.policy = SimpleNamespace(infer=lambda o: {"actions": raw.copy(), "policy_timing": {"infer_ms": 1.0}})
+    out = m.infer({})
+    a = out["actions"]
+    assert a.dtype == raw.dtype and np.array_equal(a[:, :7], raw[:, :7]) and out["policy_timing"] == {"infer_ms": 1.0}
+    assert np.array_equal(a[:, 7], (raw[:, 7] > 0.5).astype(np.float32))
 
 
 def test_molmoact2_actions_clip_only_the_gripper():

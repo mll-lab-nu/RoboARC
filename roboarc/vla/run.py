@@ -23,6 +23,7 @@ import os
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import roboarc  # noqa: F401  (before numpy: the graded numpy settings)
@@ -66,7 +67,7 @@ def _cameras_arg(text: str | None) -> dict | None:
 
 def _write_json(path: Path, obj) -> None:
     """Whole or not at all: parallel runners of one run id read each other's result files."""
-    tmp = path.with_name(f".{path.name}.{os.getpid()}")
+    tmp = path.with_name(f".{path.name}.{uuid.uuid4().hex}")   # not the pid: 1 in every container
     tmp.write_text(json.dumps(obj, indent=1, default=str))
     os.replace(tmp, path)
 

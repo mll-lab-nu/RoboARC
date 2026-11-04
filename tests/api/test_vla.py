@@ -295,6 +295,17 @@ def test_verdict_is_the_standard_rule():
     assert verdict(live, None, "ikea")["success"] == 1
 
 
+def test_parallel_writers_of_one_json_file(tmp_path):
+    """Runners of one run id write config.json at once; in containers every runner's pid is the same (1), so the
+    temporary names must not depend on it. Threads of one process share a pid too."""
+    from concurrent.futures import ThreadPoolExecutor
+    from roboarc.vla.run import _write_json
+    path = tmp_path / "config.json"
+    with ThreadPoolExecutor(8) as pool:
+        list(pool.map(lambda i: [_write_json(path, {"writer": i, "n": n}) for n in range(50)], range(8)))
+    assert json.loads(path.read_text())["n"] == 49 and [p.name for p in tmp_path.iterdir()] == ["config.json"]
+
+
 def test_default_step_limit():
     from roboarc.vla.run import default_max_steps
     t = roboarc.task_info("interlocked-claws-08")
