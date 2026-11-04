@@ -202,7 +202,9 @@ open-network results are ranked apart. The verifier has no network. Usage record
 no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. Through the gateway a
 model request carries at most `GATEWAY_IMAGE_CAP` images (50 by default, owner 2026-10-31; 10 for Gemini 4 Argon, GitHub
 Copilot's limit for it, decided 2026-11-02): the oldest beyond it are replaced by a short text note, and every result
-records the cap (`image_cap`). With `AGENT=antigravity` the gateway also translates the agent's Gemini API requests into
+records the cap (`image_cap`). For Gemini 4 Argon a request is also kept under 4.5 MiB (`GATEWAY_IMAGE_BYTES`, decided
+2026-11-04: over 5 MiB the Copilot route refuses it) by replacing more of its oldest images, and those results record
+it (`image_bytes`). With `AGENT=antigravity` the gateway also translates the agent's Gemini API requests into
 Chat Completions requests for the model server, and the answers back, a server error (500, 502, 504) as 503, which the
 SDK retries (decided 2026-11-01 and 2026-11-02; `scripts/usage_gateway/gemini_chat.py`), and every such result records
 it (`api_translation`).

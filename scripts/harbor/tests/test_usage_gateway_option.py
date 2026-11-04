@@ -12,10 +12,12 @@ fake `harbor` and a fake gateway: no docker, no model, no network.
 - on with AGENT=antigravity: the SDK's Gemini base URL (GOOGLE_GEMINI_BASE_URL) is the gateway's route to the Chat
   Completions server of ANTIGRAVITY_BASE_URL, the gateway translates (--gemini-chat) and may forward to exactly that
   plain-HTTP server, the records name the translation (api_translation); the image cap is 10 for Gemini 4 Argon, and
-  stays 50 for another model and wherever GATEWAY_IMAGE_CAP is set; AGENT=antigravity without the gateway, with an
+  stays 50 for another model and wherever GATEWAY_IMAGE_CAP is set; the size cap (GATEWAY_IMAGE_BYTES) is 4.5 MiB for
+  Gemini 4 Argon, as set when set, and off for every other model, the gateway's arguments and the records then as they
+  were before it (image_bytes only in a record that has it); AGENT=antigravity without the gateway, with an
   EFFORT the SDK has no level for, with WEB_SEARCH=allowed or AGENT_CONFIG, or without a plain-HTTP ANTIGRAVITY_BASE_URL
   stops the runner at start;
-- USAGE_GATEWAY naming a directory without the gateway, a GATEWAY_IMAGE_CAP that is not a whole number, and the switch
+- USAGE_GATEWAY naming a directory without the gateway, a GATEWAY_IMAGE_CAP or GATEWAY_IMAGE_BYTES that is not a whole number, and the switch
   of earlier versions (GATEWAY=1), stop the runner at start, before any job.
 """
 import json
@@ -231,6 +233,40 @@ class UsageGatewayOption(unittest.TestCase):
             rec = json.loads((self.root / "jobs" / f"b-privileged-{self.base}" / "usage_recording.json").read_text())
             self.assertEqual(rec["image_cap"], cap, env)
 
+    def test_image_bytes_4_5_mib_for_gemini_4_argon_only(self):
+        """GATEWAY_IMAGE_BYTES: 4.5 MiB by default for Gemini 4 Argon, as set when set (0 = off), and off for every other
+        model: then the gateway's arguments and the records are what they were before the option existed."""
+        url = "http://127.0.0.1:4141/v1"
+        for env, size in ((dict(MODEL="google/gemini-4-argon"), 4718592),
+                          (dict(MODEL="google/gemini-4-argon", GATEWAY_IMAGE_BYTES="3000000"), 3000000),
+                          (dict(MODEL="google/gemini-4-argon", GATEWAY_IMAGE_BYTES="0"), None),
+                          (dict(MODEL="google/gemini-3.1-pro-preview"), None)):
+            shutil.rmtree(self.root / "jobs", ignore_errors=True)
+            shutil.rmtree(self.root / "results", ignore_errors=True)
+            p = self.run_batch(USAGE_GATEWAY=str(self.gateway_dir()), GATEWAY_BIND="127.0.0.1", AGENT="antigravity",
+                               ANTIGRAVITY_BASE_URL=url, GEMINI_API_KEY="k" * 20, **env)
+            self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+            (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+            argv = ready.read_text()
+            rec = json.loads((self.root / "jobs" / f"b-privileged-{self.base}" / "usage_recording.json").read_text())
+            run_id = "antigravity-" + env["MODEL"].split("/")[1].replace("-", "_").replace(".", "_") + "-high"
+            cfg = self.results_config(run_id)
+            if size:
+                self.assertIn(f"--image-bytes {size}", argv, env)
+                self.assertEqual((rec["image_bytes"], cfg["image_bytes"]), (size, size), env)
+            else:
+                self.assertNotIn("--image-bytes", argv, env)
+                self.assertNotIn("image_bytes", rec, env)
+                self.assertNotIn("image_bytes", cfg, env)
+
+    def test_image_bytes_off_for_codex(self):
+        p = self.run_batch(USAGE_GATEWAY=str(self.gateway_dir()), GATEWAY_BIND="127.0.0.1")
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+        self.assertNotIn("--image-bytes", ready.read_text())
+        self.assertIn("image cap: 50, agent egress", (self.root / "jobs" / "b.log").read_text())   # the log line as before
+        self.assertNotIn("image_bytes", self.results_config())
+
     def test_antigravity_refusals(self):
         gw, url = str(self.gateway_dir()), "http://127.0.0.1:4141/v1"
         for env, msg in ((dict(ANTIGRAVITY_BASE_URL=url), "needs the usage gateway"),
@@ -257,10 +293,11 @@ class UsageGatewayOption(unittest.TestCase):
         gw = self.root / "gw"
         gw.mkdir()
         (gw / "gateway.py").write_text(textwrap.dedent(FAKE_GATEWAY))
-        p = self.run_batch(USAGE_GATEWAY=str(gw), GATEWAY_BIND="127.0.0.1", GATEWAY_IMAGE_CAP="fifty")
-        self.assertEqual(p.returncode, 2)
-        self.assertIn("GATEWAY_IMAGE_CAP", p.stderr)
-        self.assertEqual(self.calls(), [])
+        for var in ("GATEWAY_IMAGE_CAP", "GATEWAY_IMAGE_BYTES"):
+            p = self.run_batch(USAGE_GATEWAY=str(gw), GATEWAY_BIND="127.0.0.1", **{var: "fifty"})
+            self.assertEqual(p.returncode, 2, var)
+            self.assertIn(var, p.stderr)
+            self.assertEqual(self.calls(), [], var)
 
     def test_old_switch_is_refused(self):
         p = self.run_batch(GATEWAY="1")

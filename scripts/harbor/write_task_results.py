@@ -25,7 +25,8 @@ null: none recorded), `usage_recorded` (usage_source is not null), `token_budget
 {"input", "output"}; null without the gateway) and `image_cap` (the most images the gateway let a model request carry,
 0 = no cap; null without the gateway, or for a job recorded before the cap existed). An AGENT=antigravity result also
 has `api_translation` ("gemini-chat": the gateway translated the agent's Gemini requests for a Chat Completions server,
-scripts/usage_gateway/gemini_chat.py); no other result has the key.
+scripts/usage_gateway/gemini_chat.py); no other result has the key. A result whose gateway also capped the size of a
+request (GATEWAY_IMAGE_BYTES) has `image_bytes`, that size; no other result has the key.
 attempts.json: every attempt of this task x run id x trial seen so far. RUNNING.md "Infrastructure failures": an
 infrastructure failure (not a result) allows at most one full retry with the same instance, seed and configuration; the
 voided attempt is never counted, an agent's own failure is never retried, and more than 2 attempts of one trial is
@@ -209,6 +210,8 @@ def usage_of(trial, r):
            "image_cap": cap}
     if on and isinstance(rec.get("api_translation"), str):     # AGENT=antigravity only (module docstring)
         out["api_translation"] = rec["api_translation"]
+    if on and type(rec.get("image_bytes")) is int:              # GATEWAY_IMAGE_BYTES on only (module docstring)
+        out["image_bytes"] = rec["image_bytes"]
     return out
 
 

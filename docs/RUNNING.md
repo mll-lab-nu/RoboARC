@@ -478,6 +478,15 @@ not once per image. The image files the agent saved are not touched: it can look
 `images` and `images_omitted` per request and `totals.json` counts `image_cap_requests`. Without the gateway there is
 no cap.
 
+For Gemini 4 Argon the gateway also caps the size of a request: `GATEWAY_IMAGE_BYTES`, 4718592 bytes (4.5 MiB) for
+`MODEL=<provider>/gemini-4-argon` (decided 2026-11-04) and 0 = off for every other model. Through a GitHub Copilot
+proxy a Gemini 4 Argon request over 5 MiB is answered 413 "Request Entity Too Large" and the SDK ends the run, which
+voided six trials of Reuben's Gemini 4 Argon run (2026-11-04, 5.0 to 5.4 MiB with 8 to 10 images; the largest request
+answered was 4.98 MiB). A request still over the size after the image cap has more of its oldest images replaced, in the
+same steps, until it fits; the newest image always stays, and a request still over it with no older image to replace
+is forwarded as it is and recorded with `over_image_bytes`. Off, nothing changes: the gateway is not given the option
+and the records have no `image_bytes`.
+
 Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget and image cap), and
 every result's `config.json` says what it has:
 
@@ -488,5 +497,6 @@ every result's `config.json` says what it has:
 | `usage_recorded` | `usage_source` is not `null` |
 | `token_budget` | `{"input": ..., "output": ...}`, the budget the gateway enforced (0 = no limit); `null` without the gateway |
 | `image_cap` | the most images the gateway let a model request carry (0 = no cap); `null` without the gateway, or for a job recorded before the cap existed |
+| `image_bytes` | only where the gateway also capped the size of a request (`GATEWAY_IMAGE_BYTES`, Gemini 4 Argon): that size in bytes |
 
 Without the gateway no token budget is enforced: the task's cutoff bounds the trial.

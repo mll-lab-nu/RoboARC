@@ -49,6 +49,14 @@ depends on the request alone, and a conversation only grows, so the replaced ima
 next until the following step, and the provider's prompt cache is broken once per step, not once per image. A request
 with N images or fewer is forwarded as sent; a capped one re-serialized and uncompressed. usage.jsonl records "images"
 (how many the request carried) and "images_omitted" (how many were replaced); totals.json counts "image_cap_requests".
+With --image-bytes B (0 = off; the runner passes GATEWAY_IMAGE_BYTES, 0 by default and 4.5 MiB for Gemini 4 Argon,
+decided 2026-11-04) a request whose body (its JSON, uncompressed) is still over B bytes after the count cap has more of
+its oldest images replaced, `step` at a time, until it is not (through a GitHub Copilot proxy, a Gemini 4 Argon request
+over 5 MiB is answered with HTTP 413 "Request Entity Too Large", by Copilot or by the proxy, which is not known yet, and
+the SDK ends the run: six voided trials of Reuben's run, 2026-11-04, at 5.0-5.4 MiB with 8-10 images, while the largest
+request answered was 4.98 MiB). The replaced images are still the oldest ones in whole steps, and the more a
+conversation grows the more of them go, so the cache argument above holds. The newest image always stays; a request
+still over B with no older image to replace is forwarded as it is and recorded with "over_image_bytes": true.
 
 Gemini requests to a Chat Completions server (--gemini-chat; the runner passes it with AGENT=antigravity only; decided
 2026-11-01): the Antigravity SDK speaks the Gemini API, and a model served only through Chat Completions (GitHub
@@ -264,9 +272,10 @@ def _images(blocks, out: list, depth: int = 0) -> None:
                 _images(b["source"].get("content"), out, depth + 1)
 
 
-def cap_images(text: str, cap: int) -> tuple[str | None, int, int]:
+def cap_images(text: str, cap: int, max_bytes: int = 0) -> tuple[str | None, int, int]:
     """(the body to forward instead, or None: forward it as sent; the images the request carries; how many of them were
-    replaced): the image cap of the module doc. `text` is a body server_tools has read."""
+    replaced): the image cap of the module doc, by count and, with max_bytes, by size. `text` is a body server_tools has
+    read."""
     if not any(f'"{t}"' in text for t in IMAGE_TYPES):
         return None, 0, 0
     body = json.loads(text)
@@ -279,16 +288,28 @@ def cap_images(text: str, cap: int) -> tuple[str | None, int, int]:
                 if key == "input":
                     _images(item.get("output"), found)
     n = len(found)
-    if not cap or n <= cap:
+    over = max_bytes and len(text.encode()) > max_bytes
+    if (not cap or n <= cap) and not (over and n > 1):
         return None, n, 0
     step = max(1, cap // 2)
-    d = step * -(-(n - cap) // step)
-    note = f"[earlier image removed: this conversation keeps at most {cap} images, the oldest are dropped]"
-    for b in found[:d]:
-        typ, keep = IMAGE_TYPES[b["type"]], {k: b[k] for k in ("cache_control",) if k in b}
-        b.clear()
-        b.update(type=typ, text=note, **keep)
-    return json.dumps(body, ensure_ascii=False), n, d
+    d = step * -(-(n - cap) // step) if cap and n > cap else 0
+    limits = [f"at most {cap} images"] if cap else []
+    limits += [f"requests of at most {max_bytes / 2**20:g} MiB"] if max_bytes else []
+    note = f"[earlier image removed: this conversation keeps {' and '.join(limits)}, the oldest are dropped]"
+
+    def replace(blocks):
+        for b in blocks:
+            typ, keep = IMAGE_TYPES[b["type"]], {k: b[k] for k in ("cache_control",) if k in b}
+            b.clear()
+            b.update(type=typ, text=note, **keep)
+
+    replace(found[:d])
+    out = json.dumps(body, ensure_ascii=False)
+    while max_bytes and len(out.encode()) > max_bytes and d < n - 1:    # the newest image always stays
+        replace(found[d:min(d + step, n - 1)])
+        d = min(d + step, n - 1)
+        out = json.dumps(body, ensure_ascii=False)
+    return out, n, d
 
 
 def server_tools(text: str) -> list[str]:
@@ -782,8 +803,8 @@ class Handler(BaseHTTPRequestHandler):
                     "and was not forwarded (provider-run tools are not available in this environment)"),
                     "server_tool_not_allowed", len(body), True, {"server_tools": tools})
         images = omitted = 0
-        if self.command == "POST" and ARGS.image_cap and text is not None and not unchecked:
-            capped, images, omitted = cap_images(text, ARGS.image_cap)
+        if self.command == "POST" and (ARGS.image_cap or ARGS.image_bytes) and text is not None and not unchecked:
+            capped, images, omitted = cap_images(text, ARGS.image_cap, ARGS.image_bytes)
             if capped is not None:           # module doc, image cap: forwarded re-serialized, uncompressed
                 text, body = capped, capped.encode()
         tot = trial_totals(trial)
@@ -892,6 +913,8 @@ class Handler(BaseHTTPRequestHandler):
             rec["images"] = images
         if omitted:
             rec["images_omitted"] = omitted
+        if ARGS.image_bytes and text is not None and len(text.encode()) > ARGS.image_bytes:
+            rec["over_image_bytes"] = True           # module doc, image cap: still over it, with no older image to replace
         if ARGS.raw:
             raw = {"request": {"method": self.command, "host": host, "path": upath,
                                "headers": {k: v for k, v in self.headers.items() if k.lower() not in SECRET},
@@ -922,11 +945,16 @@ def main() -> int:
     p.add_argument("--budget-output", type=int, default=10_000_000_000, help="per-trial output tokens; 0 = no limit (D10)")
     p.add_argument("--image-cap", type=int, default=0,
                    help="at most this many images per model request, the oldest replaced by a text note in steps of half of it (module doc); 0 = off")
+    p.add_argument("--image-bytes", type=int, default=0,
+                   help="a model request over this many bytes has more of its oldest images replaced, in the same steps, "
+                        "until it fits; the newest image stays (module doc); 0 = off")
     p.add_argument("--gemini-chat", action="store_true",
                    help="translate Gemini API model calls into Chat Completions requests to the upstream, and the answers back (module doc; AGENT=antigravity)")
     ARGS = p.parse_args()
     if ARGS.image_cap < 0:
         p.error("--image-cap must be 0 (off) or more")
+    if ARGS.image_bytes < 0:
+        p.error("--image-bytes must be 0 (off) or more")
     ARGS.jobs = ARGS.jobs.resolve()
     MODEL_HOSTS.extend(h.lower() for h in ARGS.extra_host)
     HTTP_HOSTS.update(h.lower() for h in ARGS.http_host)
@@ -939,7 +967,8 @@ def main() -> int:
     port = srv.server_address[1]
     log(f"listening on {ARGS.bind}:{port}, jobs {ARGS.jobs}, raw={ARGS.raw}, hosts {MODEL_HOSTS}, http {sorted(HTTP_HOSTS)}, "
         f"model-API paths of {[p['name'] for p in PROVIDERS]} only ({ARGS.api_paths.name}), provider-run tools: {ARGS.server_tools}, "
-        f"image cap: {ARGS.image_cap or 'off'}" + (", Gemini requests translated to Chat Completions" if ARGS.gemini_chat else ""))
+        f"image cap: {ARGS.image_cap or 'off'}" + (f", image bytes: {ARGS.image_bytes}" if ARGS.image_bytes else "")
+        + (", Gemini requests translated to Chat Completions" if ARGS.gemini_chat else ""))
     if zstd_how == NO_ZSTD:
         log("WARNING: no zstd decoder on this host (pip install zstandard, or the zstd program): zstd request bodies "
             "(Codex with a ChatGPT login) are forwarded unchecked and marked body_unchecked")

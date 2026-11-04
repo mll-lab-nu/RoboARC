@@ -6,6 +6,19 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### Gemini 4 Argon on GitHub Copilot: requests kept under 4.5 MiB (runner and gateway; nothing changes for another model)
+- **Why:** six of the 90 trials of Reuben's Gemini 4 Argon privileged run (2026-11-04) were voided: a request of
+  5.0 to 5.4 MiB, with 8 to 10 images, was answered 413 "Request Entity Too Large" and the SDK ended the run. The largest
+  request answered was 4.98 MiB, while the same proxy's other endpoints answered Codex requests of up to 25 MiB and
+  Claude Code ones of up to 20 MiB. Whether Copilot or the proxy sets the limit is not known yet. The image cap of 10
+  counts images, not bytes.
+- **Size cap:** the gateway's new `--image-bytes B` (0 = off, the default): a request still over B bytes after the
+  image cap has more of its oldest images replaced, in the image cap's steps, until it fits; the newest image always
+  stays; a request still over B with no older image to replace is forwarded as it is and recorded with
+  `over_image_bytes`. The runner's `GATEWAY_IMAGE_BYTES` is 4718592 (4.5 MiB) for `MODEL=<provider>/gemini-4-argon` and
+  0 for every other model, as set when set by hand. Off, the gateway is not given the option and its records,
+  `usage_recording.json` and the results are as before; on, those two and the results record `image_bytes`.
+
 ### Official runs: Codex and Claude Code through a GitHub Copilot proxy count (docs only)
 - A GitHub Copilot proxy on the run's host, which holds the Copilot credentials and passes the agent's requests on to
   Copilot, no longer keeps a run of Harbor's Codex or Claude Code agent from being official (decided 2026-11-02).
