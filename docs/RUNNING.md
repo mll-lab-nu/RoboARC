@@ -65,15 +65,29 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 - Use Harbor's native agents (`-a codex`, `-a claude-code`) with their credentials in the environment or an
   `--env-file`: Codex `OPENAI_API_KEY` (OpenRouter: also `OPENAI_BASE_URL=https://openrouter.ai/api/v1`), a ChatGPT
   login with `CODEX_FORCE_AUTH_JSON=1` (Harbor uploads `~/.codex/auth.json`); Claude Code `ANTHROPIC_API_KEY`, or a
-  subscription with `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`).
+  subscription with `CLAUDE_FORCE_OAUTH=1` and `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`). Through a GitHub
+  Copilot proxy on the run's host: `OPENAI_BASE_URL` (Codex) or `ANTHROPIC_BASE_URL` (Claude Code) is the proxy's
+  plain-HTTP address with its port, and the key variable holds what the proxy expects.
 - DSH, the DeepSeek Harness, runs through RoboARC's own Harbor agent `scripts/harbor/agents/dsh_acp.py` (Harbor's ACP
   agent with `@deepseek-ai/dsh` 0.2.1-rc.2 installed): `PYTHONPATH=scripts/harbor/agents harbor run ... -a dsh_acp:DshAcp
   -m deepseek/deepseek-v4.1-flash --ak reasoning_effort=high --ak web=false --allow-agent-host api.deepseek.com`, with
   `DEEPSEEK_API_KEY`. It is not a Harbor built-in: whether its results are official is the benchmark owner's call.
+- Antigravity runs through RoboARC's own Harbor agent `scripts/harbor/agents/antigravity_sdk.py`: the Antigravity SDK
+  (PyPI `google-antigravity` 0.1.23, every dependency locked in `agents/antigravity/run_agent.py.lock`), its evaluation
+  preset (`LocalAgentConfig.eval()`) with `search_web`, `read_url_content` and `generate_image` off. The SDK speaks the
+  Gemini API only; a Gemini model served through an OpenAI-compatible Chat Completions server (GitHub Copilot's proxy)
+  is reached through the usage gateway, which translates each request and answer (`--gemini-chat`,
+  `scripts/usage_gateway/gemini_chat.py`): `AGENT=antigravity` in the batch runner below. The SDK's own
+  OpenAI-compatible mode is not used: it drops every image a tool returns and never sends a reasoning effort. Runs
+  this way are Antigravity + Gemini's official runs (decided 2026-11-01). A 500, 502 or 504 of the server (and the
+  gateway's own 502) reaches the SDK as 503, which its evaluation preset retries, as it does a 429; passed on as it
+  came, a 500 ended a run at 2 h 46 min in Reuben's first run (decided 2026-11-02). The gateway's records keep the
+  server's status (`agent_status`: the one given).
 - Turn the harness's provider-side tools off ("No tool outside the container" below): Codex `--ak web_search=disabled`
   and `--ak config=<the output of python3 scripts/harbor/codex_tools_off.py [your config.toml]>`; Claude Code
   `--ak disallowed_tools=WebSearch,WebFetch`; dsh `--ak web=false` (a dsh patch file turns its web_search and web_fetch
-  tools off).
+  tools off); Antigravity's are off in `agents/antigravity/run_agent.py` (its `search_web` is a second model call that
+  declares Google Search, which the provider runs; the gateway also refuses any Gemini request that declares one).
 - Use an absolute `-o`. jobs/ is ignored by git; results never go into the repository.
 - The trial's record is `<jobs>/<job>/<trial>/`: `agent/` (the harness's log and trajectory), `verifier/`
   (`reward.txt` 1 or 0, `reward.json`, `replay.mp4`, the resource-limits record), `artifacts/` (privileged: the agent's
@@ -84,7 +98,10 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
 
 A result is official only when its run had all of these:
 - **Harbor's native agents**, configured through environment variables; no agent adapter, no proxy that holds
-  credentials or changes requests.
+  credentials or changes requests. Two exceptions: a GitHub Copilot proxy between Codex or Claude Code and Copilot,
+  which holds the Copilot credentials (decided 2026-11-02); and `AGENT=antigravity` (RoboARC's own agent for the
+  Antigravity SDK, and the usage gateway's translation of its Gemini requests for a Chat Completions server, such as
+  Copilot's; decided 2026-11-01; above).
 - **No tool outside the container**: the harness's web search, account connectors, apps, plugins, image generation and
   cloud agents off (below).
 - **The task's own cutoff**, no multiplier (`--timeout-multiplier`, `--agent-timeout-multiplier`, an agent
@@ -117,14 +134,15 @@ header of the script lists every variable; the main ones:
 
 | what | how |
 |---|---|
-| agent, model, effort | `AGENT=codex`, `claude-code` or `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
+| agent, model, effort | `AGENT=codex`, `claude-code`, `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`) or `antigravity` (the Antigravity SDK, `scripts/harbor/agents/antigravity_sdk.py`: `MODEL=google/<model>`, `ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1` (a Chat Completions server), `GEMINI_API_KEY`, the usage gateway on; `EFFORT` minimal, low, medium, high, xhigh or default), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
 | credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
 | trials | `K` per task and mode (1); each its own job and seed |
+| seeds in turn | `SEEDS="0 1 2"`: only the trials of those seeds, every task's trials of the lowest seed first ("Running the seeds in turn" below); unset (default) = every trial, task by task |
 | web search | `WEB_SEARCH=disabled` (default) or `allowed` (not for official runs) |
 | run id | `RUN_ID`, derived as `<harness>-<model>-<effort>` ([TAXONOMY.md](TAXONOMY.md)) |
 | results | `RESULTS`: a directory outside the repository (default `../rcb_results` next to the checkout; empty = skip) |
 | usage recording | `USAGE_GATEWAY=<dir>`: route the agent's model-API calls through the usage gateway installed in `<dir>` (the repository's: `USAGE_GATEWAY=scripts/usage_gateway`; "Usage recording" below). Empty (default) = off |
-| GPUs | `GPU_SCHED=1` (default): each trial placed on one GPU and admitted by CPUs and memory; `GPUS` (default every GPU), `GPU_SHARE` (4), `DEFORMABLE_FAMILIES`, `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1), `MEM_HEADROOM_GB`, `SLOTS_DIR` ("GPUs and lanes" below); `GPU_SCHED=0`: every container on GPU 0 |
+| GPUs | `GPU_SCHED=1` (default): each trial placed on one GPU and admitted by CPUs and memory; `GPUS` (default every GPU), `GPU_SHARE` (4), `DEFORMABLE_FAMILIES`, `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1), `MEM_HEADROOM_GB`, `SLOTS_DIR` ("GPUs and lanes" below); `GPU_SCHED=0`: every container on GPU 0. `PHASE_SPLIT=1` (default): a trial validates in the background while its lane starts the next one; `GPU_RESIDENT` (2 × `GPU_SHARE`) |
 | optional host tools | `LOG_MIRROR=1`: an append-only mirror of every trial's `agent/` record in a root-owned container (`rcb-log-mirror`, `scripts/harbor/log_mirror.py`), so neither the agent nor the host user can delete it. `MEM_GUARD=1`: `scripts/harbor/mem_guard.py` keeps 2 GiB of host memory available by killing the largest running RoboARC trial container (names `roboarc-*` only). Both are off by default |
 
 ### GPUs and lanes
@@ -147,8 +165,8 @@ ledger that every lane and batch of the host shares (`scripts/harbor/gpu_slots.p
   (`[metadata.resources]` `min_cpus` / `verifier_min_cpus` and `min_memory_gb` / `verifier_min_memory_gb`: 4 CPUs and
   7 GB for a rigid puzzle, 4 CPUs and 10 GB for blanket privileged, 3 and 3 for IKEA privileged, for example), times
   `RESERVE_CPU_SCALE` / `RESERVE_MEM_SCALE` (1). It starts when the CPUs reserved by the trials running plus its own
-  are at most `HOST_CPUS`, and their memory plus its own at most the host's total less `MEM_HEADROOM_GB` (default the
-  larger of 4 GB and 10 %). With nothing else running it always starts. These are the tasks' minimums, three to five
+  are at most `HOST_CPUS`, and their memory plus its own at most the host's total (`HOST_MEM_GB`, default the
+  machine's) less `MEM_HEADROOM_GB` (default the larger of 4 GB and 10 %). With nothing else running it always starts. These are the tasks' minimums, three to five
   times the measured peaks: on a host with little memory for its GPUs, memory rather than GPUs bounds the trials at a
   time (32 rigid trials on 8 GPUs reserve about 224 GB and 128 CPUs).
 - A job that does not fit is left for a later pass and the lane tries the plan's next one; a lane that can start
@@ -157,15 +175,32 @@ ledger that every lane and batch of the host shares (`scripts/harbor/gpu_slots.p
   `scripts/harbor/pin_gpu.py`: main or sim, rcb_monitor and the verifier all see the same one GPU), and
   `<job>/placement.json` records the GPU and the reservation (each result's config.json has it as `gpu`). A job's slot
   is released when the job ends, a runner's when it exits, and a killed runner's at the next placement by any lane.
+- **Agent phase and validation.** A trial has two phases: the agent's (it works against the task's limit) and its
+  validation, which Harbor runs after the agent: the replay, the replay video and the grading (privileged: the verifier
+  container replays twice; standard: the sim sidecar replays once, in its collect hook, then a short verifier). With
+  `PHASE_SPLIT=1` (the default; it needs `GPU_SCHED=1`, `SEQ=1` and a Harbor with job plugins) the runner passes Harbor
+  the job plugin `scripts/harbor/plugins/phase_marker.py`, which writes `$JOBS/.phase/<job>.json` when the agent
+  phase ends. The lane then checks the usage gateway and the model account as it did after a job, and takes the next
+  trial at once while the first validates in the background; it ends when all its trials have validated. A validating
+  trial stays on its GPU (a standard trial's replay runs in its sim container, which cannot move): it frees its GPU
+  unit for another trial's agent phase and keeps only its task's verifier CPUs and memory (`verifier_min_cpus` /
+  `verifier_min_memory_gb`, times the scales: 2 CPUs and 5 GB for a puzzle privileged, 2 and 6 standard). It still
+  counts toward its GPU's trials: a GPU holds at most `GPU_RESIDENT` (2 × `GPU_SHARE`, 8) trials in either phase, and
+  a deformable trial's agent phase needs a GPU on which no other trial reasons or validates. The validation uses the
+  GPU too: the Nyx renderer draws the replay video (MuJoCo's physics runs on the CPU), and cloth tasks step the cloth
+  on CUDA. `<job>/placement.json` records the mode (`phase_split`, `gpu_resident`, `validate_cpus`,
+  `validate_memory_gb`). `PHASE_SPLIT=0` keeps a lane on its trial until the trial's results are written, as runners
+  before this option did; a Harbor without `--plugin` runs that way too, and the batch log says so.
 - Start up to `GPU_SHARE` × GPUs lanes (32 on 8 GPUs); lanes beyond what fits only wait. `GPUS=0,1` limits the runner
   to some GPUs, for example on a host shared with other work, where `MEM_GUARD=1` helps too: the ledger counts only
   the trials placed through it. `GPU_SCHED=0` turns placement off (every container on GPU 0, no admission), as runners
   before this option did; `SEQ=0` does not place trials.
 
-After each job the runner scans the job for keys and redacts them (`scripts/harbor/scan_secrets.py`), writes the
-per-task results (`scripts/harbor/write_task_results.py`), rewrites `$JOBS/<batch>.summary.md` (one table per
-comparable configuration), and stops its lane when a trial shows a model-account failure
-(`scripts/harbor/account_failure_check.py`: out of credits, rate-limited, logged out). Progress is in
+After each job (with `PHASE_SPLIT=1`, in the background once it has validated) the runner scans the job for keys and
+redacts them (`scripts/harbor/scan_secrets.py`), writes the per-task results (`scripts/harbor/write_task_results.py`)
+and rewrites `$JOBS/<batch>.summary.md` (one table per comparable configuration). Before the lane takes its next trial
+(after the job, or with `PHASE_SPLIT=1` when its agent phase has ended) it stops when the trial shows a model-account
+failure (`scripts/harbor/account_failure_check.py`: out of credits, rate-limited, logged out). Progress is in
 `$JOBS/<batch>.log`. Use one key per batch with a spending cap.
 
 To watch a batch: `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1 with every trial's
@@ -199,7 +234,7 @@ caller's (`AGENT_CONFIG`). An API key can still request a search directly: read 
 
 ## The agent's time (the cutoff)
 
-A trial's agent gets the task's `[agent] timeout_sec` (10800 s for every RoboARC task but wire-splicing-01-i01, which has 21600 s by the owner's
+A trial's agent gets the task's `[agent] timeout_sec` (11400 s for every RoboARC task but wire-splicing-01-i01, which has 21600 s by the owner's
 exception, `scripts/task_conventions.py` `CUTOFF_EXCEPTIONS`) and nothing else. Harbor counts
 it around the agent's run only (after the environment has been built and started and the harness installed, each under
 a timeout of its own); a standard task's `sim` service starts with the environment, and what it has not finished
@@ -214,7 +249,10 @@ privileged and standard versions of a task have the same cutoff (H.7); the instr
 (rendered by `scripts/task_conventions.py`, the last thing the agent reads), the README's `Agent time budget` row and,
 in standard mode, the sim service's `RCB_WALL_CLOCK_S` state the same number, and nothing else in the instruction states
 the limit. The standard service's `time_left_s` counts the same limit from the agent's first request to the service.
-`/run/rcb-limits/usage.json` shows the agent its clock. Harbor hands `instruction.md` to the agent as it is, and the
+`/run/rcb-limits/usage.json` shows the agent its clock, counted from the trial environment's start, so the harness's
+install comes out of it (48-401 s measured; agents stop when it reads 0): the 11400 s are 3 h with 10 min for that. The same section tells the agent it works alone: the harness
+runs non-interactively, so a reply without a tool call (a question to the user included) ends the agent's run, and the
+trial is graded as it stands, a result like a cutoff. Harbor hands `instruction.md` to the agent as it is, and the
 runner adds nothing. `--agent-setup-timeout-multiplier` (for slow harness installs) is fine: set-up is not the agent's
 time.
 
@@ -261,6 +299,35 @@ run passed (IKEA: 0).
   is the same task.
 
 A task that allows its default seed only runs from a copy that is the task as it is.
+
+### Running the seeds in turn
+
+`SEEDS` (unset by default) runs a batch seed by seed: with `SEEDS="0 1 2"` and `K=3` the runner starts every task's
+seed-0 trials first, then those of seed 1, then those of seed 2.
+- **Which trials.** Of the K trials only those whose seed is listed run, each with its trial number and seed (the
+  assignment above), so the job names and results are those of the whole batch. `SEEDS="0"` now and `SEEDS="1 2"`
+  later, with the same batch name and `JOBS`, run the batch's K=3 trials between them; a trial that already has its
+  result is skipped, as always. The order the seeds are listed in does not matter: the lowest goes first.
+- **K stays 3.** A task allowed a listed seed that none of its K trials runs (K too small, e.g. left at 1) stops the
+  runner before anything starts. A task not allowed a listed seed runs no trial at it, with a line in the log.
+- **An order of priority, not rounds.** A later seed's trial starts only in room that no waiting trial of an earlier
+  seed fits. While seed-0 trials remain and fit, the GPUs go to them; once every seed-0 trial has started, seed-1
+  trials take the room that frees up, beside the last seed-0 trials still running. To keep that order a lane reads its
+  trials from the top after each trial it starts, and while a trial of an earlier seed waits for room it does not try a
+  later seed's deformable trial (a waiting deformable trial has a GPU kept or drained for it, "GPUs and lanes" above).
+  The log says `SEEDS 0 1 2, in that order: <n> / <n> / <n> jobs` at the start, and
+  `lane <pid>: <job> (seed <s>) starts while <n> job(s) of seed <s0> wait for room` when a later seed takes free room.
+- **One limit.** Tasks reserve different CPUs and memory: a later seed's trial that needs less than an earlier seed's
+  waiting one may start in room too small for that one, as between the tasks of one seed.
+- **Lanes.** Lanes of the same `SEEDS` keep the order between them. A lane of other seeds can run on the same batch at
+  the same time (`SEEDS="1 2"` started while `SEEDS="0"` lanes still run), each lane running its own trials, but its
+  trials then do not wait for the other lane's: for the order, start the next seeds once the earlier lanes have ended.
+  The batch's plan (`$JOBS/.plan/<batch>.json`) lists every trial of the batch whatever `SEEDS` is, so
+  `scripts/send_results.sh` indexes every trial of a batch run in parts; a lane takes its trials in the order of
+  `$JOBS/.plan/<batch>.seeds-0-1-2.tsv` (for `SEEDS="0 1 2"`).
+- `SEQ=1` only (the default).
+
+Without `SEEDS` the runner plans and schedules as it did before the option.
 
 ## Infrastructure failures: one full retry
 
@@ -375,7 +442,8 @@ installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). The reposito
 (`USAGE_GATEWAY=scripts/usage_gateway`), taken from the shared benchmark repository (PROVENANCE.md), with DeepSeek's
 Messages API added for dsh (`AGENT=dsh` points dsh's `DEEPSEEK_BASE_URL` at the gateway); another
 gateway that takes the runner's options works too. A `USAGE_GATEWAY` without `gateway.py` stops the runner at start,
-before any job. The gateway forwards model calls only, unchanged (the agent keeps its own credentials), records each
+before any job. The gateway forwards model calls only, unchanged but for the image cap below (the agent keeps its own
+credentials), records each
 trial's tokens per request
 (`<trial>/gateway/usage.jsonl`, `totals.json`; with `GATEWAY_RAW=1`, the default, also the raw request and response
 bodies, which hold the whole conversation: keep them private), enforces the token budget (`TOKEN_BUDGET_IN` /
@@ -386,8 +454,32 @@ keeps the task's own list). The runner checks the gateway before each job and re
 model calls failed at the gateway, or whose job has `gateway_down.json`, is an infrastructure failure, never the
 agent's 0. The header of `scripts/harbor/run_agent_batch.sh` lists the other `GATEWAY_*` options.
 
-Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget), and every result's
-`config.json` says what it has:
+With the gateway, every `harbor run` of the runner gets `-e roboarc_docker:RoboARCDocker`
+(`scripts/harbor/environments/roboarc_docker.py`): Harbor's Docker environment whose egress sidecar waits up to 900 s,
+the gateway's own upstream timeout, for a model call's response headers. Harbor's sidecar (gost, 0.23.0 to 0.25.x)
+leaves gost's default of 15 s, so a provider that took longer to start its answer (a slow or rate-limiting endpoint) had
+the call cut: the agent saw a connection reset and retried, and the provider still finished and billed the call. The
+class builds the sidecar from a patched copy of the installed Harbor's sidecar folder (in `~/.cache/roboarc/`); Harbor's
+install is not edited, and the allowlist is unchanged. A `harbor run` of your own through the gateway should pass the
+same option, with `scripts/harbor/environments` on `PYTHONPATH`.
+
+The gateway also caps the images in a model request: `GATEWAY_IMAGE_CAP`, 50 by default (owner 2026-10-31) and 10 for
+Gemini 4 Argon (`MODEL=<provider>/gemini-4-argon`, decided 2026-11-02: GitHub Copilot answers it 400, "too many images:
+maximum allowed for model gemini-4-argon is 10", which voided a standard-mode trial of Reuben's first Antigravity run),
+0 = no cap.
+An agent that looks at the cameras resends every image it has seen with each call, and some providers refuse a request
+with more than a fixed number: GitHub Copilot answers 400, "Exceeded maximum number of images (50) allowed in the
+request.", and Codex then exits, which voided a standard-mode trial of Reuben's smoke test (2026-10-31, 51 images after
+52 minutes). A request with more images than the cap has its oldest ones replaced by a short text note
+("[earlier image removed: this conversation keeps at most 50 images, the oldest are dropped]"), half the cap at a
+time, so that between half the cap and the cap stay; a request within the cap is forwarded as sent. Replacing in steps
+keeps the replaced images the same from one call to the next, so the provider's prompt cache is broken once per step,
+not once per image. The image files the agent saved are not touched: it can look at one again. `usage.jsonl` records
+`images` and `images_omitted` per request and `totals.json` counts `image_cap_requests`. Without the gateway there is
+no cap.
+
+Every job of the runner gets `<job>/usage_recording.json` (whether the gateway ran, its token budget and image cap), and
+every result's `config.json` says what it has:
 
 | field | value |
 |---|---|
@@ -395,5 +487,6 @@ Every job of the runner gets `<job>/usage_recording.json` (whether the gateway r
 | `usage_source` | where the token counts come from: `"usage gateway"`, `"harness"` (Harbor's `result.json`), or `null` (none recorded) |
 | `usage_recorded` | `usage_source` is not `null` |
 | `token_budget` | `{"input": ..., "output": ...}`, the budget the gateway enforced (0 = no limit); `null` without the gateway |
+| `image_cap` | the most images the gateway let a model request carry (0 = no cap); `null` without the gateway, or for a job recorded before the cap existed |
 
 Without the gateway no token budget is enforced: the task's cutoff bounds the trial.

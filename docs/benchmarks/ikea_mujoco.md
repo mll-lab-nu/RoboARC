@@ -116,7 +116,7 @@ width): 318.75 units/s in lack and stenerik, 182.142857 units/s in the other Pan
 
 ## Time limits
 
-- **Agent:** 10800 s (3 h) of wall clock in both modes (`[agent] timeout_sec`). In standard mode the service counts the
+- **Agent:** 11400 s (3 h 10 min) of wall clock in both modes (`[agent] timeout_sec`). In standard mode the service counts the
   same limit from the agent's first request (`meta["time_left_s"]`).
 - **Privileged trajectory length:** at most the task's row cap, stated in its instruction: the verifier's two replays
   plus the video replay must fit its time limit.

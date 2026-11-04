@@ -26,7 +26,7 @@ services:
     environment:
       RCB_TASK: stenerik
       RCB_DATA: /data
-      RCB_WALL_CLOCK_S: "10800"   # the agent's wall clock, from its first request (= [agent] timeout_sec), server.py
+      RCB_WALL_CLOCK_S: "11400"   # the agent's wall clock, from its first request (= [agent] timeout_sec), server.py
       RCB_STARTUP_TIMEOUT_S: "900"
       PYTHONPATH: /srv
       RCB_SESSION_LOG: ""

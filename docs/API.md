@@ -116,7 +116,7 @@ the IKEA names (`ikea-lack`, `lack`). Both modes of a task share one environment
 `TaskInfo` (no simulator needed): `id`, `suite` (`puzzles` | `ikea`), `family`, `name` (the tooling's task key), `seeds`
 (the allowed instance seeds),
 `base`, `difficulty`, `robot`, `description`, `image`, `render_image`, `max_episode_steps` (the verifier's row cap),
-`agent_time_limit_s` (the Harbor agent budget: 10800 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
+`agent_time_limit_s` (the Harbor agent budget: 11400 s, 21600 s for wire-splicing-01), `task_dirs`, `reference` (the reference trajectory, if any),
 `reference_end_hash` and, for IKEA, `reference_settled_hash`. 77 of the 78 puzzle bases ship a reference
 (fiber-bundling-05 does not); every IKEA task does.
 
@@ -141,7 +141,7 @@ roboarc.make(task_id, *, renderer="nyx", cameras=None, depth=False, image_size=N
 | `check_every` | IKEA only: control steps between success checks (default 40 = 0.1 s) |
 
 One environment per process: both simulators are one scene per process (the tooling's rule). For several
-environments use subprocess vector environments (`gymnasium.vector.AsyncVectorEnv`).
+environments use `roboarc.make_vec` (one worker process per environment; below, "Several environments").
 
 ## The environment
 
@@ -301,6 +301,35 @@ action, an arm whose IK residual exceeds 2 cm / 20 deg, or whose solution jumps 
 IK branch), holds its targets; `info["ee_plan"]` says why. IKEA has no such wrapper: its tooling has no IK and its
 standard mode no `ee_pose` action.
 
+## Several environments (preview)
+
+```python
+venv = roboarc.make_vec("orbits-02", 4, instance_seeds="all", renderer="nyx", image_size=(224, 224))
+obs, infos = venv.reset()             # obs["proprio"]: (4, P); obs["rgb"][cam]: (4, H, W, 3)
+obs, rewards, terminated, truncated, infos = venv.step(actions)    # actions: (4, action_dim)
+venv.call("success"); venv.set_attr("step_images", False); venv.close()
+```
+
+`roboarc.make_vec(task, num_envs, ...)` runs `num_envs` environments of one task, each in its own worker process
+(started with `spawn`), built by `roboarc.make()` with the same options, and gathers them into batches: every array
+gains a leading `num_envs` axis. Physics, rules and images are the single environment's (tested: two workers on one
+instance stay bit-identical). It does not need Gymnasium; `num_envs`, `single_observation_space` and
+`single_action_space` follow `gymnasium.vector`. The workers are spawned, so a script that calls `make_vec` needs the
+usual `if __name__ == "__main__":` guard (each worker imports the script's main module again); they start with
+numpy's graded settings even when the script imported numpy before roboarc.
+
+| option | meaning |
+|---|---|
+| `instance_seeds` | `0` (default), one seed for all, `"all"` (the task's seeds in turn: 0, 1, 2, 0, ...; the appearance seeds, same physics), or a list of `num_envs` seeds |
+| `gpus` | GPU indices given to the workers in turn (each sees only its GPU, `CUDA_VISIBLE_DEVICES`); default: every worker sees the parent's GPUs |
+| `autoreset` | `False` (default): an environment whose episode ended is not stepped again until `reset(indices=[i])` (its entry repeats its last observation, reward 0, `infos[i]["ended"]`); `True`: it is reset in the step that ended it, the observation returned is the new episode's first, and `infos[i]` holds `final_observation` and `reset_info` |
+| others | `roboarc.make()`'s (`renderer`, `cameras`, `depth`, `image_size`, `rules`, ...) |
+
+`reset(indices=None)`, `step(actions)`, `observe(indices=None)`, `call(name, *args, indices=None)` (any environment
+method, e.g. `state_sha`, `get_state`, `evaluate`), `get_attr` / `set_attr`, `close()`; also a context manager.
+Each worker holds a whole simulator (and, with `nyx`, its own renderer), so memory and GPU memory grow with
+`num_envs`. This is a preview: the interface may change in a later release.
+
 ## Examples
 
 - `examples/random_policy.py <task>`: a random walk around the current targets (the cheapest smoke test).
@@ -361,7 +390,7 @@ Nyx left the hash unchanged.
 ## Limitations
 
 - Each task is a few frozen instances (`instance_seed`): there is no randomisation of the scene, as in the benchmark.
-- One environment per process (use subprocess vector environments).
+- One environment per process (`roboarc.make_vec` runs several, one worker process each).
 - The standard mode's service has more than the per-step interface: chunked submissions with interpolation, its wall
   clock, its live-episode grading and replay. The API's step is the service's control step; a policy that runs well
   here sees the same physics, observations and rules there.

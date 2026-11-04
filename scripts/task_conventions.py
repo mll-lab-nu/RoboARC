@@ -202,16 +202,24 @@ _CUTOFF_WAITS = (" Waiting counts too: a tool call that sends input to a process
                  "example Codex's `yield_time_ms`) even when the answer is printed at once, so give such calls a short "
                  "wait and poll again if the output is not complete, or run one-shot scripts that exit when they are "
                  "done.")
+# Harbor runs each harness non-interactively (Codex's `codex exec`, for example): the agent's first reply without a tool
+# call ends its session, and nobody answers it. An agent that closed with an offer to the user ("If you want, I can keep
+# iterating ...") ended its trial there, unsolved, after 68 min of a 3 h budget. Harness-neutral, same text for every
+# agent; no duration in it (ci_checks/check-cutoffs.py).
+_CUTOFF_ALONE = (" You work alone: nobody reads your replies or answers questions during the session. Ending your turn, "
+                 "or stopping to ask a question, ends the session, and the task is graded at once as it stands. While the "
+                 "task is not solved and time is left, keep working.")
 CUTOFF_NOTE = {
     "privileged": ("This is wall-clock time from the start of your session; the time a simulator takes to start counts. "
                    "When it is up you are stopped without warning and only what is in `/app/output/` at that moment is "
                    "graded, so save a deliverable as soon as you have one and overwrite it whenever you have a better "
-                   "one." + _CUTOFF_CLOCK + _CUTOFF_WAITS + _CUTOFF_CLOSE),
+                   "one." + _CUTOFF_ALONE + _CUTOFF_CLOCK + _CUTOFF_WAITS + _CUTOFF_CLOSE),
     "standard": ("This is wall-clock time from the start of your session; the time you wait for the simulator service "
                  "counts. When it is up you are stopped without warning and the episode is graded as it stands at that "
                  "moment. The service's `time_left_s` counts the same limit from your first request to the service, so "
                  "it never runs out before your time does: your real time left is `time_left_s` minus the time you "
-                 "spent before that request. Plan by it." + _CUTOFF_CLOCK + _CUTOFF_WAITS + _CUTOFF_CLOSE),
+                 "spent before that request. Plan by it." + _CUTOFF_ALONE + _CUTOFF_CLOCK + _CUTOFF_WAITS
+                 + _CUTOFF_CLOSE),
 }
 CUTOFF_NOTE["standard-realtime"] = CUTOFF_NOTE["standard"]
 assert set(CUTOFF_NOTE) == set(MODE_REGISTRY), "every mode of MODE_REGISTRY needs its CUTOFF_NOTE (PROTOCOL §2.12)"

@@ -37,7 +37,7 @@ checkpointed (rows, state hash, the robot's proprio row); after a crash compose 
 replays the journal and continues the SAME episode, never a reset. `python rcb_limited.py end <data dir>` is the shared
 first half of a collect hook."""
 from __future__ import annotations
-import errno, faulthandler, json, math, os, re, select, signal, socket, sys, tempfile, threading, time, traceback, zlib
+import errno, faulthandler, json, math, os, re, select, signal, socket, subprocess, sys, tempfile, threading, time, traceback, zlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Callable
 
@@ -124,16 +124,19 @@ def depth_frames_part(name: str, stack: np.ndarray) -> tuple[str, str, bytes, di
 
 
 def encode_mp4(frames: np.ndarray, fps: int) -> bytes:
-    """H.264 mp4 (yuv420p, faststart) of uint8 (N,H,W,3) frames: the same encoding every 2.0 service used."""
-    import imageio.v2 as imageio
+    """H.264 mp4 (yuv420p, faststart) of uint8 (N,H,W,3) frames: the same encoding every 2.0 service used, through the
+    ffmpeg binary (the puzzle image ships ffmpeg, not imageio); odd sizes are padded to even ones."""
+    frames = np.ascontiguousarray(np.asarray(frames, dtype=np.uint8))
+    n, h, w, _ = frames.shape
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tf:
         path = tf.name
     try:
-        with imageio.get_writer(path, format="FFMPEG", mode="I", fps=fps, codec="libx264", macro_block_size=1,
-                                output_params=["-movflags", "+faststart", "-pix_fmt", "yuv420p"]) as w:
-            for f in frames:
-                w.append_data(np.ascontiguousarray(f))
-        return open(path, "rb").read()
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}",
+                        "-r", str(fps), "-i", "-", "-an", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", "-c:v", "libx264",
+                        "-pix_fmt", "yuv420p", "-movflags", "+faststart", path],
+                       input=frames.tobytes(), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        with open(path, "rb") as f:
+            return f.read()
     finally:
         try:
             os.unlink(path)

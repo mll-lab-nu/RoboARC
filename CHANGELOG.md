@@ -4,6 +4,228 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 `mll-lab-nu/embodied-first-exam` (formerly robot_coding_bench), under the image name `ghcr.io/mll-lab-nu/eai-roboarc`.
 1.0.0 is the first release from this repository. Its content is the "V3" wave of that repository.
 
+## Unreleased
+
+### Official runs: Codex and Claude Code through a GitHub Copilot proxy count (docs only)
+- A GitHub Copilot proxy on the run's host, which holds the Copilot credentials and passes the agent's requests on to
+  Copilot, no longer keeps a run of Harbor's Codex or Claude Code agent from being official (decided 2026-11-02).
+  RUNNING "Official runs" and COLLABORATOR_SETUP ("Keep as they are", and the credentials table's new row) say so.
+
+### Antigravity + Gemini 4 Argon on GitHub Copilot: an image cap of 10 and server errors retried (runner and gateway; nothing changes for another model or agent)
+- **Why:** Reuben's first run (2026-11-02) voided both trials. Standard mode: Copilot refuses a Gemini 4 Argon request
+  with more than 10 images ("too many images: maximum allowed for model gemini-4-argon is 10, got 12"), and the
+  gateway's cap of 50 never applied. Privileged mode, at 2 h 46 min: one request ended in a 500 of the proxy ("fetch
+  failed"), and the SDK, whose evaluation preset retries 429 and 503 only, ended the run.
+- **Image cap:** the runner's default `GATEWAY_IMAGE_CAP` is 10 for `MODEL=<provider>/gemini-4-argon` and stays 50 for
+  every other model; a `GATEWAY_IMAGE_CAP` set by hand is used as it is. Results record the cap (`image_cap`) as before.
+- **Server errors:** with `--gemini-chat` (`AGENT=antigravity`) a 500, 502 or 504 of the model server, and the
+  gateway's own 502, reach the SDK as 503 (`UNAVAILABLE`, the server's status named in the message), so the SDK retries
+  them with its backoff. usage.jsonl keeps the server's `status` and records `agent_status`; a trial whose last model
+  calls failed is still not a result. Without the flag nothing changes.
+
+### `AGENT=antigravity`: Antigravity + Gemini through a Chat Completions server (runner, agent and gateway; no task, image or result changes for other agents)
+- **Why:** the Antigravity + Gemini 4 Argon pair is served only through an OpenAI-compatible Chat Completions server
+  (GitHub Copilot's proxy). The Antigravity SDK speaks the Gemini API only, and its own OpenAI-compatible mode, meant
+  for local servers, drops every image a tool returns and never sends a reasoning effort (checked 2026-11-01 on
+  google-antigravity 0.1.9 and 0.1.23, offline, against a recording server); Harbor's own antigravity-sdk agent pins
+  0.1.9 (Harbor 0.23, 0.24) and leaves the SDK's web tools on. Runs this way are the pair's official runs (decided
+  2026-11-01).
+- **The agent:** `scripts/harbor/agents/antigravity_sdk.py` (on Harbor's BaseInstalledAgent; Harbor 0.23, 0.24 and 0.25):
+  google-antigravity 0.1.23 with every dependency locked (`agents/antigravity/run_agent.py` and its uv lock), installed
+  with uv 0.11.30 during agent setup and run offline; the SDK's evaluation preset (`LocalAgentConfig.eval()`) with
+  `search_web` (a second model call with Google Search, run at the provider), `read_url_content` and `generate_image`
+  off; the instruction in a file; `reasoning_effort` -> the SDK's thinking level; token counts from the SDK's session
+  totals.
+- **The gateway:** `--gemini-chat` (`scripts/usage_gateway/gemini_chat.py`) translates the SDK's Gemini requests into
+  Chat Completions requests and the answers back (function calls and responses, images returned by tools, tool
+  choice, thinking level -> `reasoning_effort`, streaming, errors); every check applies to the translated request
+  (path list, provider-run tools, image cap, budget) and a Gemini provider-run tool (`googleSearch` and its kin) is
+  refused. usage.jsonl records the agent's request (`translated_from`). Without the flag nothing changes.
+- **The runner:** `AGENT=antigravity` needs `USAGE_GATEWAY` and `ANTIGRAVITY_BASE_URL` (the server's plain-HTTP base: a
+  proxy on the run's host) and `GEMINI_API_KEY`; an `EFFORT` without an SDK level, `WEB_SEARCH=allowed` and
+  `AGENT_CONFIG` are refused at start. The job's usage_recording.json and each result's config.json record
+  `"api_translation": "gemini-chat"` (no other result gets the key). `scan_secrets.py` also looks for `GEMINI_API_KEY`.
+- **Tests:** `test_gemini_chat.py` (the translation; the gateway end to end with a stub server, with and without the
+  flag), `test_antigravity_sdk.py` (the pins and the lock; install and run against a stand-in environment with Harbor
+  0.23, 0.24 and 0.25), `test_usage_gateway_option.py` (the runner's arguments and refusals). By hand, 2026-11-01: the
+  agent installed in a `roboarc:2.2.0` container (Python 3.11) and run with the network cut, through the gateway to a
+  scripted Chat Completions model (the command ran, the image arrived, `reasoning_effort` on the wire, the SDK's token
+  totals equal to the gateway's); and a Harbor 0.23 trial of a toy task under an egress allowlist of the gateway and
+  the registries (reward 1; Harbor's token counts equal to the gateway's; a direct fetch from the container refused).
+
+### The agent's time: 11400 s (3 h 10 min) instead of 10800 s (owner's decision; 178 task dirs and their DIGEST)
+- **Why:** the agent's clock in `/run/rcb-limits/usage.json` (`time_left_s`, `deadline_utc`) counts from the trial
+  environment's start, before Harbor installs the harness; Harbor's cutoff counts from the agent's run. The install
+  (48-401 s in recent trials) came out of the clock the agent plans by, and agents stop when it reads 0: a Codex trial
+  of 2026-10-31 with a 401 s install stopped at `time_left_s` 0 after 10406 s of its 10800.
+- **10800 -> 11400:** `scripts/roboarc/mk_tasks.py` `CUTOFF_SEC` and `ikea/scripts/ikea_mujoco/mk_tasks.py` `AGENT_S`,
+  rendered into every task's `[agent] timeout_sec`, the instruction's `## Time limit`, the README's `Agent time budget`
+  row, the monitor's limits (`environment/rcb_monitor/limits.json`, `tests/rcb_limits.json`) and the standard sim
+  service's `RCB_WALL_CLOCK_S`. wire-splicing-01-i01 keeps its 21600 s. The grading timeouts stay: they already cover
+  11400 s. The IKEA standard service's default `RCB_WALL_CLOCK_S` is 11400 too, and the IKEA README's reference timing
+  no longer says "against the N s budget" (each record names the 10800 s it was measured against).
+- **Results:** `cutoff_s` is part of the configuration results are ranked by, so trials at 11400 s form a group apart
+  from earlier ones at 10800 s. A batch runs on one release.
+- **Docs and tests:** README, docs/API.md, docs/RUNNING.md "The agent's time", docs/benchmarks/{roboarc,ikea_mujoco}.md,
+  the 18 family pages, docs/COLLABORATOR_SETUP.md (the run's duration: about 884 GPU-hours if every trial used its
+  whole time); `roboarc/registry.py`'s default; `tests/api/test_catalogue.py`.
+
+### `bash-runners/`: the evaluation run one seed at a time; a batch run in parts keeps every trial in its plan (runner fix)
+- **The bug** (the `SEEDS` entry below): the batch's plan (`$JOBS/.plan/<batch>.json` and `.tsv`) listed only the trials
+  of the last command's seeds. After `SEEDS="0"`, then `SEEDS="1 2"`, it held the seed-1 and seed-2 trials only, so
+  `scripts/send_results.sh` indexed the seed-0 jobs with no task, mode, trial or seed, and its MANIFEST gave the seeds
+  used as `[1, 2]`. A lane of other seeds started on the same batch rewrote the plan under the lanes already running:
+  they then took its seeds' trials instead of their own, and could find no seed in the plan for a trial of theirs.
+- **The fix:** the plan lists every trial of the batch whatever `SEEDS` is (the plan without `SEEDS`); a lane with
+  `SEEDS` takes its trials, in their order, from `$JOBS/.plan/<batch>.seeds-<s>-<s>.tsv`. Lanes of other seeds can run
+  on the same batch at the same time, each its own trials, with no order between them. Without `SEEDS` nothing
+  changes: the plan, its order and the files in `.plan/` are as before.
+- **`bash-runners/`:** `run_seed0.sh`, `run_seed1.sh` and `run_seed2.sh` start the lanes of docs/COLLABORATOR_SETUP.md
+  section 5's command (`K=3`, the usage gateway with `GATEWAY_RAW=0`, 4 lanes per GPU, `nohup`) with `SEEDS` 0, 1 or
+  2; `start_lanes.sh` holds the command. Run them one after the other, the next once the previous one's lanes have
+  ended, with the same settings and batch name. They refuse to start without `MODEL`, `RESULTS` or an `EFFORT` other
+  than `default`, or without the `ENV_FILE`.
+- **Tests:** `test_runner_seeds.py`: with `SEEDS` the plan is the plan without it (the order in the seeds file); a
+  batch run in two parts has every trial in its plan; a `SEEDS="1 2"` lane started during a `SEEDS="0"` lane's first
+  trial leaves that lane its trials (each of the three fails on the runner before the fix); without `SEEDS`, `.plan/`
+  holds only `<batch>.json` and `.tsv`. `test_bash_runners.py` (a fake runner): each script's lanes and settings, and
+  the refusals.
+
+### The runner can run a batch seed by seed: `SEEDS` (runner only; no task, image or result changes)
+- **Why:** with `K=3` the runner went task by task, each task's three trials (seeds 0, 1 and 2 in an order set by the
+  batch name) one after the other, so a batch stopped early had all seeds of some tasks and none of others.
+- **The change:** `SEEDS="0 1 2"` (or a part of it, e.g. `"1 2"`; `SEQ=1` only) runs, of the K trials, those of the
+  listed seeds, every task's trials of the lowest seed first. The trials keep their numbers and seeds, so `SEEDS="0"`
+  and later `SEEDS="1 2"` with the same batch name and `JOBS` make one K=3 batch. It is an order of priority: a later
+  seed's trial starts only in room no waiting trial of an earlier seed fits, so seed-1 trials fill the GPUs the last
+  seed-0 trials leave free. With `SEEDS` a lane reads the plan from the top after each trial it starts, and while a
+  trial of an earlier seed waits for room it does not try a later seed's deformable trial (the slot ledger would keep
+  or drain a GPU for it). A task allowed a listed seed that its K trials do not run stops the runner at start. Without
+  `SEEDS` nothing changes. docs/RUNNING.md "Running the seeds in turn"; docs/COLLABORATOR_SETUP.md section 5 uses
+  `SEEDS="0 1 2"`.
+- **Tests** (`scripts/harbor/tests/test_runner_seeds.py`, fake harbor): the plan by seed with the same trials and seeds;
+  two runs (`"0"`, then `"1 2"`) making the batch; a seed-1 deformable trial waiting for the seed-0 trials of a GPU; a
+  seed-1 trial filling free room before seed 0's last trial is done; the lane back at the top of the plan after each
+  trial (a seed-1 trial that had no room goes before seed 2); the refusals. Without `SEEDS`: the plan, the start order
+  and the log as before, and a waiting deformable trial still taking the GPU before a 1-unit one. The fake harbor
+  takes per-job agent and validation times (`FAKE_PHASES`). The file now runs about 6 minutes: its limit in
+  `ci_checks/check-unit-tests.sh` is 600 s.
+
+### The usage gateway caps the images in a model request at 50 (runner and gateway; no task or image changes)
+- **The problem** (Reuben's smoke test, 2026-10-31: Codex + GPT-6 Astra through a GitHub Copilot proxy, claws-08): an
+  agent that looks at the cameras resends every image it has seen with each call. After 52 minutes the standard-mode
+  trial's request carried 51 images (21 MB), Copilot answered 400 "Exceeded maximum number of images (50) allowed in the
+  request.", Codex exited, and the trial was voided. Most long standard-mode trials pass 50 images.
+- **The change** (owner 2026-10-31): `gateway.py --image-cap N` and the runner's `GATEWAY_IMAGE_CAP` (50 by default,
+  0 = no cap). A request with more than N images (the image blocks of the Anthropic, Responses and Chat Completions
+  shapes, tool results included) has its oldest replaced by a text note of its API's shape, N/2 at a time, so between N/2
+  and N stay. The rule reads the request alone and replaces the same images from one call to the next until the
+  following step, so the provider's prompt cache is broken once per step. A request within the cap is forwarded as
+  sent; a capped one re-serialized and uncompressed. The image files the agent saved are not touched.
+- **Recorded**: `usage.jsonl` `images` / `images_omitted`, `totals.json` `image_cap_requests`, `usage_recording.json` and
+  every result's `config.json` `image_cap` (null without the gateway). Without the gateway there is no cap. PROTOCOL
+  H.6, docs/RUNNING.md "Usage recording", docs/COLLABORATOR_SETUP.md.
+- **Checked** on the smoke test's own conversation (Codex's session log, rebuilt as a Responses request: 21.1 MB, 51
+  images): 25 replaced, 26 kept, 0.12 s.
+- **Tests**: `scripts/usage_gateway/tests/test_image_cap.py` (new: the step rule, the three shapes and tool results, a
+  tool call's arguments not looked into, the replaced images stable between calls, end to end through gateway.py with a
+  gzip body capped and one forwarded as sent); `test_usage_gateway_option.py` (the cap in the records and passed to the
+  gateway; a bad `GATEWAY_IMAGE_CAP` stops the runner at start).
+
+### Model calls through the usage gateway are no longer cut after 15 s (runner only; no task, image or result changes)
+- **The problem** (Jianwen's report, 2026-10-31): with the usage gateway, Harbor's egress sidecar (gost, a transparent
+  proxy that enforces the task's allowlist) reads the agent's plain-HTTP calls to the gateway and waits at most
+  `readTimeout` for the response headers. Harbor's `gost.yaml` sets none (Harbor 0.23.0 to 0.25.x), and gost's default
+  is 15 s. A call whose provider took longer to send its headers was cut: the agent saw `ECONNRESET` and retried, the
+  provider finished and billed the call, and the gateway logged the client as gone. In Reuben's deliveries 173 of 2172
+  calls (Copilot proxy, Claude Code + Opus 5.5) and 4 of 42 (a rate-limiting Azure endpoint, Codex + GPT-6 Astra) were
+  cut, every one after 15.0-15.9 s. Grades were not wrong (a trial that ends on failed model calls is an
+  infrastructure failure), but it cost tokens, time on the 3 h clock, and stopped lanes.
+- **The fix**: `scripts/harbor/environments/roboarc_docker.py`, a subclass of Harbor's `DockerEnvironment` whose egress
+  sidecar is built from a copy of the installed Harbor's sidecar folder with `readTimeout: 900s` (the gateway's own
+  upstream timeout) in the handler's metadata. The runner passes `-e roboarc_docker:RoboARCDocker` to every `harbor run`
+  when `USAGE_GATEWAY` is set, and stops at start if the class does not import with the installed Harbor. Harbor's
+  install is not edited; the patched sidecar image is built once per machine and Harbor version.
+- **Checked** (Harbor 0.23.0, oracle agent, a task allowlisting the docker bridge and a host server that sends its
+  headers after 5 s and 20 s): with Harbor's environment the 20 s call is cut after 15 s (`wget: error getting
+  response`, the server's write hits a broken pipe); with `roboarc_docker` both calls are delivered, and example.com and
+  pypi.org stay blocked.
+- **Tests**: `scripts/harbor/tests/test_roboarc_docker.py` (new; a stand-in Harbor: the patched gost.yaml, the copy
+  byte for byte with modes, reuse, an unexpected gost.yaml stops the import); `test_usage_gateway_option.py` (the runner
+  passes the environment with the gateway, not without). Docs: docs/RUNNING.md "Usage recording".
+
+## 2.2.1 (2026-10-30)
+
+Standard mode returns mp4 video again, and every task's time limit says that the agent works alone. The same images
+(`roboarc:2.2.0`, the IKEA images 1.1.0), physics, instances, references and graders: privileged results graded under
+2.2.0 stand, and so do standard results of trials that never asked for mp4 (their task digests differ: the texts and
+the sim service changed).
+
+### The standard service's mp4 video (task change: the 78 puzzle standard directories' `environment/sim/rcb_limited.py`)
+- **The problem** (found by Jianwen in a trial Reuben sent back: claws-08, seed 1, Claude Code + Opus 5.5): the puzzle
+  standard service's `encode_mp4` (`scripts/eai_standard/v2_4/rcb_limited.py`) imported `imageio`, which the
+  `roboarc` image has never shipped (2.2.0, 2.1.0 and 1.3.0 checked). A `submit` without `video` (the client's default
+  is `"mp4"`), or a `submit` / `get_obs` with `video="mp4"` or `"both"` (the instructions' example uses
+  `video="mp4"`), executed its rows and then failed while it built the reply: a simulator error (PROTOCOL §4.6), so
+  the episode ended with `reason: "error"`, `infra_error: 1`, and the trial was not a result. A rerun that asked for
+  mp4 again ended the same way. The release smoke never asked for video: the oracle replays use `video="none"` and
+  our own standard smoke happened to use `frames` and `none` only. The graders' replay videos were not affected (they
+  run the ffmpeg binary through `topogym.recording`).
+- **The fix**: `encode_mp4` writes the frames to the image's ffmpeg binary (libx264, yuv420p, faststart, the same
+  output as before; odd sizes are padded to even ones). No image is rebuilt. IKEA's standard service
+  (`scripts/eai_standard/v2_4_live/rcb_limited.py`) is unchanged: its image ships imageio (and imageio-ffmpeg's own
+  binary, no `ffmpeg` on PATH).
+- **Tasks**: the 156 puzzle directories rendered again (the 78 standard ones' `rcb_limited.py`; the Release line
+  "RoboARC 2.2.1" and a Change Log entry in every README; `DIGEST`). The IKEA directories change only by the time limit
+  note below.
+- **Tests**: `scripts/roboarc/tests/test_server_requests.py` (5) asks the service for mp4 (a `submit` with the default
+  video, an `observe` with `"both"`) and checks the mp4 parts and that the episode stays alive; without `ffmpeg` on
+  PATH it is skipped with a note (`RCB_REQUIRE_FFMPEG=1` makes that a failure). In the `roboarc:2.2.0` image it passes
+  with the new service (47 checks) and fails with the old one (HTTP 500, `infra_error` 1, as in the trial). A release
+  runs it in the image (docs/DEVELOPING.md, Cutting a release, step 4).
+
+### Several environments at once: `roboarc.make_vec` (preview; API only, no task, image or result changes)
+- `roboarc.make_vec(task, num_envs, instance_seeds=..., gpus=..., autoreset=..., **make_options)` runs `num_envs`
+  environments of one task, one worker process each (`roboarc/vector.py`, `VecEnv`), and returns batched observations,
+  rewards and flags. The simulators are one scene per process, so this is the supported way to step several; the
+  docs pointed at `gymnasium.vector.AsyncVectorEnv` before, which needs Gymnasium (the images do not ship it).
+- Each worker builds its environment with `roboarc.make()`; physics, rules and images are the single environment's.
+  `instance_seeds="all"` spreads the workers over the appearance seeds; `gpus` gives each worker one GPU.
+- docs/API.md "Several environments (preview)". Tests: tests/api/test_vector.py (the worker protocol with a stand-in
+  environment anywhere; marker sim: three workers of one task, seeds 0, 0 and 1, stepped with the reference rows).
+
+### A trial validates in the background while its lane starts the next trial
+- A lane ran one trial from start to end: after the agent's phase (up to 3 h) Harbor replays the trial, records its
+  replay video and grades it (privileged: in the verifier container; standard: in the sim sidecar's collect hook), and
+  the lane, its GPU unit and its CPU and memory reservation waited for all of it. In the exam's records the replay is
+  11.6 % (privileged) and 22.4 % (standard) of a trial's time.
+- `PHASE_SPLIT=1` (the default; `GPU_SCHED=1`, `SEQ=1`): Harbor gets the job plugin
+  `scripts/harbor/plugins/phase_marker.py` (new), which writes `$JOBS/.phase/<job>.json` on Harbor's agent-end event.
+  The lane checks the usage gateway and the model account then, turns the trial's slot into a validating one and takes
+  the next trial; the trial validates and writes its results in the background, and the lane ends when its trials
+  have. A validating trial stays on its GPU, frees its unit and keeps only its task's verifier CPUs and memory; a GPU
+  holds at most `GPU_RESIDENT` (2 x `GPU_SHARE`) trials in either phase, and a deformable trial's agent phase needs a
+  GPU on which no other trial reasons or validates. `<job>/placement.json` records the mode. `PHASE_SPLIT=0`, or a
+  Harbor without `--plugin`, runs as before.
+- `scripts/harbor/gpu_slots.py`: holds have a phase; `phase` (new) turns a hold into a validating one (no units, the
+  smaller CPUs and memory, owned by the process that waits for the validation); `acquire --resident`; `classify --phase
+  validate`. `scripts/harbor/live_board.py` shows a trial with the marker as verifying.
+- Tests: scripts/harbor/tests/test_phase_marker.py (new), scripts/harbor/tests/test_gpu_slots.py,
+  scripts/harbor/tests/test_runner_seeds.py.
+
+### The time limit tells the agent it works alone (task change: every task directory's instruction.md and DIGEST)
+- Harbor runs each harness non-interactively (Codex's `codex exec`, for example): the agent's first reply without a
+  tool call ends its session, and nobody answers it. In a Codex trial of interlocked-claws-08 (gpt-5.3-codex, high) the
+  agent closed with an offer to the user ("If you want, I can keep iterating on gen.py ...") after 68 min of its
+  10800 s and was graded on a placeholder trajectory, unsolved.
+- The note after "You have N seconds ..." (`scripts/task_conventions.py` `CUTOFF_NOTE`, every mode) now says, before
+  the clock sentence: "You work alone: nobody reads your replies or answers questions during the session. Ending your
+  turn, or stopping to ask a question, ends the session, and the task is graded at once as it stands. While the task
+  is not solved and time is left, keep working." Harness-neutral, the same words in every task, no duration in them.
+- All 180 task directories are rendered again: the `## Time limit` section of `instruction.md` and `DIGEST`, nothing
+  else. Results of earlier task versions no longer match the task digests (`digest_match` false). Generators, physics,
+  graders, images and the cutoffs are unchanged.
+
 ## 2.2.0 (2026-10-28)
 
 Appearance seeds 1 and 2 of every puzzle base change much more than the objects' colours: the room's lighting, the

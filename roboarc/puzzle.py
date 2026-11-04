@@ -121,7 +121,7 @@ class PuzzleEnv(RoboARCEnv):
                          render_mode=render_mode, max_episode_steps=max_episode_steps, strict=strict)
         if _SESSION_BUILT:
             raise RuntimeError("one RoboARC puzzle environment per process (the simulator is one scene per process); "
-                               "use subprocess vector environments for several")
+                               "roboarc.make_vec runs several, one worker process each")
         self.rules = rules
         root = repo_root()
         problems = check_graded_runtime(strict=False)

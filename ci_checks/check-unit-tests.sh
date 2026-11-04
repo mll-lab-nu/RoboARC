@@ -2,7 +2,7 @@
 # Unit tests of the benchmark's tooling and the shared layer, in two tiers.
 #  1. Standard library and a shell only (no numpy, no simulator, no image): the Harbor runner's helpers (retry rule,
 #     account-failure rule, Codex config, the optional usage gateway switch and the trials' seeds and results with a fake
-#     harbor, the machine record host_info.py, build stamps), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
+#     harbor, the machine record host_info.py, the agent-end marker plugin, build stamps), bash-runners/ (a fake runner), the seed tool (scripts/task_seed.py: assign, materialize; ci_checks/check-seed-files.py), the
 #     shipped usage gateway (scripts/usage_gateway/: its own tests, and the options and host lists the runner gives it),
 #     the simulator source hash (tools/release/source_hash.py), and RoboARC's generator and asset pins
 #     (scripts/roboarc/tests/: the packages' fields and checks, assets.py pin / check / check-instances on a fake
@@ -41,16 +41,21 @@ run() {   # run <timeout s> <test path from the repository root> [arguments of t
 for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_retry_policy.py \
          scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
          scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
-         scripts/usage_gateway/tests/test_budget_stop.py scripts/tests/test_stamp_mtimes.py \
+         scripts/usage_gateway/tests/test_budget_stop.py scripts/usage_gateway/tests/test_image_cap.py \
+         scripts/usage_gateway/tests/test_gemini_chat.py \
+         scripts/tests/test_stamp_mtimes.py \
          scripts/tests/test_task_seed.py scripts/tests/test_task_resources.py \
-         scripts/harbor/tests/test_runner_seeds.py scripts/harbor/tests/test_gpu_slots.py \
+         scripts/harbor/tests/test_gpu_slots.py scripts/harbor/tests/test_bash_runners.py \
          scripts/harbor/tests/test_pin_gpu.py scripts/harbor/tests/test_dsh_acp.py scripts/harbor/tests/test_host_info.py \
+         scripts/harbor/tests/test_antigravity_sdk.py \
+         scripts/harbor/tests/test_phase_marker.py scripts/harbor/tests/test_roboarc_docker.py \
          tools/tests/test_stage_instance.py tools/tests/test_restamp.py \
          scripts/roboarc/tests/test_generator.py scripts/roboarc/tests/test_assets.py \
          scripts/roboarc/tests/test_generator_seeds.py tools/tests/test_release_seeds.py images/tests/test_pull_all.py \
          tools/tests/test_d4_tools.py scripts/roboarc/tests/test_cutoff_exceptions.py; do
   run 300 "$t"
 done
+run 600 scripts/harbor/tests/test_runner_seeds.py   # the runner with a fake harbor: its lanes wait 30 s when nothing fits
 run 120 scripts/harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials
 run 300 tools/release/source_hash.py --check   # the simulator source hashes to release.json's runtime.source (SOURCE.json)
 

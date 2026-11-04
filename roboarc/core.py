@@ -185,7 +185,7 @@ def make(task_id: str, *, renderer: str = "nyx", cameras=None, depth: bool = Fal
          render_mode: str | None = None, rules: str = "standard", max_episode_steps: int | None = None,
          strict: bool = True, instance_seed: int = 0, **kwargs) -> RoboARCEnv:
     """Build the environment of one RoboARC task (see docs/API.md). One environment per process: the simulators are
-    one-scene-per-process; use subprocess vector environments (gymnasium.vector.AsyncVectorEnv) for several.
+    one-scene-per-process; roboarc.make_vec runs several (one worker process each).
 
     renderer   "nyx" (the graded renderer, GPU), "mujoco" (MuJoCo's raster of the physics model: a quick look, not the
                graded images) or "none" (no images: proprioception only, fastest).

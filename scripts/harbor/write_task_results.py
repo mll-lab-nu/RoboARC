@@ -21,8 +21,11 @@ placed the job on a GPU (`gpu`, its index), that GPU's name and driver (`gpu_nam
 `usage_gateway` (true / false: whether the runner routed the trial through the usage gateway, from
 <job>/usage_recording.json; null when the job has no such record, e.g. a plain `harbor run`), `usage_source` (where the
 token counts come from: "usage gateway" (<trial>/gateway/totals.json), "harness" (Harbor's result.json agent_result), or
-null: none recorded), `usage_recorded` (usage_source is not null) and `token_budget` (the budget the gateway enforced,
-{"input", "output"}; null without the gateway).
+null: none recorded), `usage_recorded` (usage_source is not null), `token_budget` (the budget the gateway enforced,
+{"input", "output"}; null without the gateway) and `image_cap` (the most images the gateway let a model request carry,
+0 = no cap; null without the gateway, or for a job recorded before the cap existed). An AGENT=antigravity result also
+has `api_translation` ("gemini-chat": the gateway translated the agent's Gemini requests for a Chat Completions server,
+scripts/usage_gateway/gemini_chat.py); no other result has the key.
 attempts.json: every attempt of this task x run id x trial seen so far. RUNNING.md "Infrastructure failures": an
 infrastructure failure (not a result) allows at most one full retry with the same instance, seed and configuration; the
 voided attempt is never counted, an agent's own failure is never retried, and more than 2 attempts of one trial is
@@ -189,7 +192,8 @@ def trial_config(trial, task, r):
 
 
 def usage_of(trial, r):
-    """The trial's usage recording (module docstring): usage_gateway, usage_source, usage_recorded, token_budget."""
+    """The trial's usage recording (module docstring): usage_gateway, usage_source, usage_recorded, token_budget,
+    image_cap."""
     rec = load_json(trial.parent / "usage_recording.json")
     on = rec.get("usage_gateway") if isinstance(rec.get("usage_gateway"), bool) else None
     ar = r.get("agent_result") or {}
@@ -200,7 +204,12 @@ def usage_of(trial, r):
     else:
         source = None
     budget = rec.get("token_budget") if on and isinstance(rec.get("token_budget"), dict) else None
-    return {"usage_gateway": on, "usage_source": source, "usage_recorded": source is not None, "token_budget": budget}
+    cap = rec.get("image_cap") if on and type(rec.get("image_cap")) is int else None
+    out = {"usage_gateway": on, "usage_source": source, "usage_recorded": source is not None, "token_budget": budget,
+           "image_cap": cap}
+    if on and isinstance(rec.get("api_translation"), str):     # AGENT=antigravity only (module docstring)
+        out["api_translation"] = rec["api_translation"]
+    return out
 
 
 def started(r):

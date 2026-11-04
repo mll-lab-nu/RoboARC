@@ -8,7 +8,7 @@
 | Simulator / robot | `mujoco` / `franka-panda-bimanual` |
 | Family / instance | `ikea_lack` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
 | Oracle | `full` |
-| Agent time budget | 10800 s; tokens: protocol default (PROTOCOL §5) |
+| Agent time budget | 11400 s; tokens: protocol default (PROTOCOL §5) |
 | Base image | `ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b` |
 
 ## Task
@@ -30,7 +30,7 @@ the last row). Pass iff both replays pass and end in the same state hashes (`det
 scene in the verifier image must match `tests/runtime_binding.json` file by file (`instance_exact`) and build to its
 initial-state hash (`instance_ok`). Replay video (evidence only, never the verdict): a third process replays the same rows and renders `/logs/verifier/replay.mp4` (CPU OSMesa, 512 x 288, at most 750 frames over the episode and the 1.0 s hold; `video_rendered`).
 
-Harbor checks (2026-10-18, a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew, image `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1` id `b9552184c2de`): `oracle` scored 1 (two replays, 772.1 s wall); `oracle` scored 1 (two replays, 626.2 s wall); `nop` scored 0. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`684fe3c488e0` / `a4bc18f244c3`, on a Ryzen 9 7950X workstation). Reference timing against the 10800 s budget: one unobserved replay of the hand-slew reference 372 s (3.4 %; 8.6 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 1342 s on a loaded Ryzen 9 7950X workstation (load 40-90); 1127 s on a Xeon Gold 6230R core including the re-time step (reported only), end and settled hashes equal on every host and in the Harbor replays.
+Harbor checks (2026-10-18, a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew, image `ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1` id `b9552184c2de`): `oracle` scored 1 (two replays, 772.1 s wall); `oracle` scored 1 (two replays, 626.2 s wall); `nop` scored 0. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`684fe3c488e0` / `a4bc18f244c3`, on a Ryzen 9 7950X workstation). Reference timing: one unobserved replay of the hand-slew reference 372 s (3.4 %; 8.6 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 1342 s on a loaded Ryzen 9 7950X workstation (load 40-90); 1127 s on a Xeon Gold 6230R core including the re-time step (reported only), end and settled hashes equal on every host and in the Harbor replays.
 
 ## Compute resources
 Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.

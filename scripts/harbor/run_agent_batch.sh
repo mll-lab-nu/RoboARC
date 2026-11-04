@@ -4,10 +4,16 @@
 #   MODEL=<provider/model> scripts/harbor/run_agent_batch.sh <batch-name> <base> [<base> ...]
 #   (<base> = a task name without its -privileged / -standard; docs/RUNNING.md)
 # Official runs use Harbor's native agents only (PROTOCOL D11): no adapter. Env (defaults):
-#   AGENT        codex | claude-code | dsh (codex)  MODEL   the -m model (required, e.g. openai/<model>)
+#   AGENT        codex | claude-code | dsh | antigravity (codex)  MODEL   the -m model (required, e.g. openai/<model>)
 #                dsh = DSH, the DeepSeek Harness, through RoboARC's own Harbor agent scripts/harbor/agents/dsh_acp.py
 #                (Harbor's ACP agent with dsh installed; not a Harbor built-in: whether its results are official is the
 #                benchmark owner's call, PROTOCOL D11), e.g. AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash EFFORT=high
+#                antigravity = the Antigravity SDK (google-antigravity 0.1.23) through RoboARC's own Harbor agent
+#                scripts/harbor/agents/antigravity_sdk.py, its web tools off, the model served by an OpenAI-compatible
+#                Chat Completions server (ANTIGRAVITY_BASE_URL, a plain-HTTP address with a port: a local proxy) and
+#                reached through the usage gateway's Gemini translation (USAGE_GATEWAY required; gemini_chat.py);
+#                official for Antigravity + Gemini (decided 2026-11-01), e.g. AGENT=antigravity
+#                MODEL=google/gemini-4-argon EFFORT=high (EFFORT: minimal, low, medium, high, xhigh or default)
 #   EFFORT       reasoning effort, --ak reasoning_effort=<EFFORT> (xhigh); `default` passes none
 #   AK           more agent options, e.g. "--ak reasoning_summary=detailed"
 #   WEB_SEARCH   disabled (default) = the harness offers the model no web search: Codex --ak web_search=disabled,
@@ -25,6 +31,8 @@
 #     Claude subscription            CLAUDE_FORCE_OAUTH=1 and CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`)
 #     Azure OpenAI (codex)           AGENT_CONFIG=<config.toml with the Azure provider> and its key variable
 #     DeepSeek (dsh)                 DEEPSEEK_API_KEY (DeepSeek's API, api.deepseek.com, added to the job's egress)
+#     Chat Completions (antigravity) ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1 (the server's base: <base>/chat/completions)
+#                                    and GEMINI_API_KEY (the key it expects, sent as a Bearer token; any value if none)
 #   MODES        "privileged standard"; add `standard-realtime` for <base>-standard-realtime where it exists
 #   K            trials per task and mode (1). Each trial is a Harbor job of its own (`-k 1`) and runs from its own seed:
 #                the K trials of a task get distinct seeds of its `[metadata.seeds] allowed`, without replacement, in an
@@ -32,6 +40,16 @@
 #                every mode; docs/RUNNING.md "Seeds"). A task that allows one seed runs it in every trial. Each job's copy
 #                of a task is made by scripts/task_seed.py materialize with the trial's seed, and the job records the
 #                trial and its seeds in <job>/seed.json (also $JOBS/.seeds/<job>.json, written before the job starts)
+#   SEEDS        "" (default) = every trial, in the SEQ=1 order below. Seeds separated by spaces, e.g. "0 1 2" or "1 2"
+#                (SEQ=1 only): of the K trials only those of these seeds run, every task's trial of the lowest seed
+#                before any trial of the next (docs/RUNNING.md "Running the seeds in turn"). The trials keep their
+#                numbers and seeds, so SEEDS="0" now and SEEDS="1 2" later, with the same batch name and JOBS, run the
+#                batch's K=3 trials between them. A lane goes back to the top of the plan after each trial it starts; a
+#                later seed's trial starts only in room that no waiting trial of an earlier seed fits, and while one
+#                waits a later seed's deformable trial is not tried (it would have a GPU kept for it). A task allowed a
+#                seed that its K trials do not run stops the batch before it starts; a task not allowed one runs no
+#                trial at it. Lanes of the same SEEDS keep that order between them; a lane of other seeds (or none) on
+#                the same batch may run beside them, each lane its own trials, with no order between them
 #   SEQ          1 = one trial at a time per runner (default): task by task, trial by trial, each mode in MODES order, one
 #                Harbor job per task, trial and mode ($JOBS/<batch>-<mode>-<task>/; with K > 1
 #                $JOBS/<batch>-<mode>-<task>-t<k>/, k = 1..K). Start the same command again to add a lane: every job is
@@ -64,11 +82,22 @@
 #                GPU_SHARE trials of rigid tasks, a trial of a deformable task (DEFORMABLE_FAMILIES) has a GPU of its own,
 #                a task whose compose reserves no GPU takes none; a trial starts when the CPUs and memory its task
 #                declares ([metadata.resources] min_* and verifier_min_*, times RESERVE_CPU_SCALE / RESERVE_MEM_SCALE)
-#                fit beside the trials already running (memory: the host's total less MEM_HEADROOM_GB, default the larger
-#                of 4 GB and 10 %; CPUs: HOST_CPUS), else the lane tries the plan's next job and, when none fits, waits
+#                fit beside the trials already running (memory: HOST_MEM_GB, default the host's total, less MEM_HEADROOM_GB,
+#                default the larger of 4 GB and 10 %; CPUs: HOST_CPUS), else the lane tries the plan's next job and, when none fits, waits
 #                30 s; the job's copy has its containers pinned to that GPU (scripts/harbor/pin_gpu.py; Docker maps
 #                `count: 1` to GPU 0) and <job>/placement.json records it. Start up to GPU_SHARE x GPUs lanes.
 #                0 = as before: no placement, no admission, every container on GPU 0
+#   PHASE_SPLIT  1 (default, with GPU_SCHED=1 and SEQ=1) = a trial's agent phase and its validation are scheduled apart:
+#                when the agent phase ends (Harbor's agent-end event, marked by the job plugin plugins/phase_marker.py
+#                in $JOBS/.phase/<job>.json), the trial validates in the background on its GPU (the replay, video and
+#                grading Harbor runs after the agent: a standard trial's in its sim container) and the lane takes the
+#                next trial at once. A validating trial keeps no GPU unit, only its task's verifier CPUs and memory
+#                ([metadata.resources] verifier_min_*, times the scales); it still counts on its GPU (GPU_RESIDENT), and
+#                a deformable trial reasons only on a GPU where no other trial reasons or validates. The lane stops
+#                on a model-account failure before it takes the next trial, as before, and ends when its trials have
+#                validated. 0 = a lane waits for each trial's validation; a Harbor without job plugins (`--plugin`)
+#                runs as 0
+#   GPU_RESIDENT the most trials on one GPU, reasoning and validating (2 x GPU_SHARE)
 #   GPUS         the GPUs to use, comma-separated (default every GPU nvidia-smi lists; 0 without nvidia-smi)
 #   GPU_SHARE    rigid-task trials per GPU (4)
 #   DEFORMABLE_FAMILIES  the families whose trials have a GPU of their own (task.toml [metadata] family); empty
@@ -81,13 +110,14 @@
 #                model API calls through the transparent usage gateway installed in <dir> (gateway.py, rawlog.py,
 #                api_paths.json). This repository ships one: USAGE_GATEWAY=scripts/usage_gateway (another gateway
 #                that takes the same options works too); a <dir> without gateway.py stops the runner at start. It forwards
-#                them unchanged (the agent keeps its own credentials) and records each trial's tokens per request in
+#                them unchanged but for GATEWAY_IMAGE_CAP (the agent keeps its own credentials) and records each trial's tokens per request in
 #                <trial>/gateway/ (usage.jsonl, totals.json). Before each job the runner checks that the gateway answers
 #                (/_gateway/health) and restarts it on its port, or stops the lane; a job during which it died gets
 #                <job>/gateway_down.json, and a trial whose last model calls failed at the gateway (upstream unreachable,
 #                stream broken off, provider 5xx) is published as "not a result", never the agent's 0.
-#                Either way every job gets <job>/usage_recording.json (whether the gateway ran, its token budget), and
-#                write_task_results.py copies it into each result's config.json (usage_gateway, usage_source, token_budget)
+#                Either way every job gets <job>/usage_recording.json (whether the gateway ran, its token budget and image
+#                cap), and write_task_results.py copies it into each result's config.json (usage_gateway, usage_source,
+#                token_budget, image_cap)
 #                The GATEWAY_* and TOKEN_BUDGET_* options below take effect only with USAGE_GATEWAY set.
 #   GATEWAY_RAW  1 (default) = the gateway also keeps every request and response body
 #                (<trial>/gateway/raw.jsonl.xz, deduplicated, see the gateway's rawlog.py; private: it holds the
@@ -108,6 +138,11 @@
 #   TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT   per-trial token budget the gateway enforces (100000000 / 10000000, PROTOCOL
 #                §5): past it every further model request is refused and the trial counts as failed; 0 = no limit.
 #                Without the gateway no token budget is enforced (the task's cutoff bounds the trial)
+#   GATEWAY_IMAGE_CAP  at most this many images per model request (50, the default; 10, the default for MODEL=<provider>/
+#                gemini-4-argon; 0 = no cap): a request with more has its oldest images replaced by a short text note,
+#                half the cap at a time (GitHub Copilot refuses a request with more than 50, or more than 10 for Gemini 4
+#                Argon, and an agent resends every camera image it has looked at with each call; the gateway's module
+#                doc). Without the gateway there is no cap
 # Runner-side tools (not task code), in this directory: with LOG_MIRROR=1 the container rcb-log-mirror copies every
 # trial's agent/ directory append-only into ${JOBS}_mirror/ (log_mirror.py; root-owned: neither the agent nor the host
 # user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
@@ -128,14 +163,18 @@ MODES="${MODES:-privileged standard}"; SEQ="${SEQ:-1}"; N_P="${N_P:-2}"; N_S="${
 JOBS="${JOBS:-$R/jobs/agents}"; RESULTS="${RESULTS-$(dirname "$R")/rcb_results}"; LABEL="${LABEL:-$AGENT + $MODEL ($EFFORT)}"
 LOG_MIRROR="${LOG_MIRROR:-0}"; MEM_GUARD="${MEM_GUARD:-0}"
 GPU_SCHED="${GPU_SCHED:-1}"; GPU_SHARE="${GPU_SHARE:-4}"; SLOTS_DIR="${SLOTS_DIR:-/tmp/roboarc-slots-$(id -u)}"
+PHASE_SPLIT="${PHASE_SPLIT:-1}"; GPU_RESIDENT="${GPU_RESIDENT:-}"
 DEFORMABLE_FAMILIES="${DEFORMABLE_FAMILIES:-}"   # empty: scripts/task_resources.toml's own_gpu classes (gpu_slots.py)
 RESERVE_CPU_SCALE="${RESERVE_CPU_SCALE:-1}"; RESERVE_MEM_SCALE="${RESERVE_MEM_SCALE:-1}"; MEM_HEADROOM_GB="${MEM_HEADROOM_GB:-}"
+HOST_MEM_GB="${HOST_MEM_GB:-}"
 if [ -z "${GPUS:-}" ]; then
   GPUS="$(nvidia-smi --query-gpu=index --format=csv,noheader 2>/dev/null | tr -d ' ' | paste -sd, -)"; GPUS="${GPUS:-0}"
 fi
 USAGE_GATEWAY="${USAGE_GATEWAY:-}"
 GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
 GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
+# GitHub Copilot takes at most 10 images per request for Gemini 4 Argon (decided 2026-11-02); every other model 50
+case "${MODEL##*/}" in gemini-4-argon) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-10}" ;; *) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-50}" ;; esac
 HOST_CPUS="${HOST_CPUS:-$(nproc)}"
 [ -n "$MODEL" ] || { echo "MODEL must be set: the -m model of the agent, e.g. MODEL=openai/<model> (docs/RUNNING.md)" >&2; exit 2; }
 # the switch of earlier versions of this script: refused rather than ignored, so that nobody expects a usage record silently
@@ -144,16 +183,26 @@ if [ -n "$USAGE_GATEWAY" ]; then
   [ -f "$USAGE_GATEWAY/gateway.py" ] || { echo "USAGE_GATEWAY=$USAGE_GATEWAY: no gateway.py there. Point USAGE_GATEWAY at the gateway's directory (this repository ships one: USAGE_GATEWAY=scripts/usage_gateway), or leave USAGE_GATEWAY empty to run without usage recording (docs/RUNNING.md \"Usage recording\")" >&2; exit 2; }
   USAGE_GATEWAY="$(cd "$USAGE_GATEWAY" && pwd)"
   case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
+  [[ "$GATEWAY_IMAGE_CAP" =~ ^[0-9]+$ ]] || { echo "GATEWAY_IMAGE_CAP must be a whole number (0 = no cap)" >&2; exit 2; }
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
 [[ "$K" =~ ^[1-9][0-9]*$ ]] || { echo "K must be a positive integer (trials per task and mode)" >&2; exit 2; }
+read -ra seed_list <<< "${SEEDS:-}"; SEEDS="${seed_list[*]}"
+if [ -n "$SEEDS" ]; then
+  [[ "$SEEDS" =~ ^[0-9]+( [0-9]+)*$ ]] || { echo "SEEDS must be seeds separated by spaces, e.g. SEEDS=\"0 1 2\"" >&2; exit 2; }
+  [ "$SEQ" = 1 ] || { echo "SEEDS needs SEQ=1 (with SEQ=0 one job holds every task, each from its own seed)" >&2; exit 2; }
+fi
 case "$GPU_SCHED" in 0|1) ;; *) echo "GPU_SCHED must be 0 or 1" >&2; exit 2 ;; esac
 [[ "$GPUS" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "GPUS must be GPU indices, comma-separated (e.g. 0,1,2)" >&2; exit 2; }
 [[ "$GPU_SHARE" =~ ^[1-9][0-9]*$ ]] || { echo "GPU_SHARE must be a positive integer (rigid-task trials per GPU)" >&2; exit 2; }
+GPU_RESIDENT="${GPU_RESIDENT:-$((2 * GPU_SHARE))}"
+[[ "$GPU_RESIDENT" =~ ^[1-9][0-9]*$ ]] || { echo "GPU_RESIDENT must be a positive integer (trials per GPU, reasoning and validating)" >&2; exit 2; }
+case "$PHASE_SPLIT" in 0|1) ;; *) echo "PHASE_SPLIT must be 0 or 1" >&2; exit 2 ;; esac
 for v in RESERVE_CPU_SCALE RESERVE_MEM_SCALE; do
   [[ "${!v}" =~ ^[0-9]*\.?[0-9]+$ ]] && [[ "${!v}" =~ [1-9] ]] || { echo "$v must be a positive number" >&2; exit 2; }
 done
 [ -z "$MEM_HEADROOM_GB" ] || [[ "$MEM_HEADROOM_GB" =~ ^[0-9]*\.?[0-9]+$ ]] || { echo "MEM_HEADROOM_GB must be a number of GB (0 or more)" >&2; exit 2; }
+[ -z "$HOST_MEM_GB" ] || [[ "$HOST_MEM_GB" =~ ^[0-9]*\.?[0-9]+$ ]] || { echo "HOST_MEM_GB must be a number of GB" >&2; exit 2; }
 # absolute paths: with the gateway on, Harbor is started from the job's own copy of the task (run_job), not from the repository
 abspath() { case "$1" in ""|/*) printf '%s' "$1" ;; *) printf '%s/%s' "$PWD" "$1" ;; esac; }
 JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(abspath "$AGENT_CONFIG")"
@@ -162,8 +211,14 @@ JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(ab
 TOKEN_BUDGET_IN="${TOKEN_BUDGET_IN:-100000000}"; TOKEN_BUDGET_OUT="${TOKEN_BUDGET_OUT:-10000000}"
 [ -z "$USAGE_GATEWAY" ] || [[ "$TOKEN_BUDGET_IN$TOKEN_BUDGET_OUT" =~ ^[0-9]+$ && -n "$TOKEN_BUDGET_IN" && -n "$TOKEN_BUDGET_OUT" ]] \
   || { echo "TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT must be whole numbers (0 = no limit)" >&2; exit 2; }
-case "$AGENT" in codex|claude-code|dsh) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), or dsh (scripts/harbor/agents/dsh_acp.py)" >&2; exit 2 ;; esac
-[ "$AGENT" = dsh ] && [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; dsh takes none" >&2; exit 2; }
+case "$AGENT" in codex|claude-code|dsh|antigravity) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), dsh (scripts/harbor/agents/dsh_acp.py) or antigravity (scripts/harbor/agents/antigravity_sdk.py)" >&2; exit 2 ;; esac
+case "$AGENT" in dsh|antigravity) [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; $AGENT takes none" >&2; exit 2; } ;; esac
+if [ "$AGENT" = antigravity ]; then
+  # the model server speaks Chat Completions only: the gateway translates the SDK's Gemini requests (gemini_chat.py)
+  [ -n "$USAGE_GATEWAY" ] || { echo "AGENT=antigravity needs the usage gateway (USAGE_GATEWAY=scripts/usage_gateway): it translates the SDK's Gemini requests for the Chat Completions server" >&2; exit 2; }
+  case "$EFFORT" in minimal|low|medium|high|xhigh|default) ;; *) echo "EFFORT for AGENT=antigravity: minimal, low, medium, high, xhigh or default (the SDK's thinking levels)" >&2; exit 2 ;; esac
+  [ "$WEB_SEARCH" = disabled ] || { echo "AGENT=antigravity has its web tools off (agents/antigravity/run_agent.py); WEB_SEARCH=allowed is not available" >&2; exit 2; }
+fi
 # Run id (D4): harness = the agent name with - -> _; model = MODEL's last path segment, lower case, gpt-<n> joined
 # (gpt-5 -> gpt5), a leading claude- dropped (claude-opus-4-1 -> opus_4_1), every other
 # character outside [a-z0-9] -> _; effort as given ("default" when the harness sets none).
@@ -180,6 +235,10 @@ if [ "$AGENT" = dsh ]; then
   AGENT_ARGS=(-a dsh_acp:DshAcp -m "$MODEL")
   export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
   [ -n "$USAGE_GATEWAY" ] || AGENT_ARGS+=(--allow-agent-host api.deepseek.com)   # with the gateway: through it (below)
+fi
+if [ "$AGENT" = antigravity ]; then   # RoboARC's own Harbor agent, as dsh's
+  AGENT_ARGS=(-a antigravity_sdk:AntigravitySdk -m "$MODEL")
+  export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
 fi
 [ "$EFFORT" != default ] && AGENT_ARGS+=(--ak "reasoning_effort=$EFFORT")
 # Codex's other provider-side tools go off with the web search (PROTOCOL D11). Under a ChatGPT login Codex hands the
@@ -203,6 +262,7 @@ case "$WEB_SEARCH" in
   disabled) case "$AGENT" in
               codex) AGENT_ARGS+=(--ak web_search=disabled) ;;
               dsh) AGENT_ARGS+=(--ak web=false) ;;   # dsh's web_search and web_fetch tools off (a dsh patch file)
+              antigravity) ;;                        # search_web, read_url_content, generate_image off in run_agent.py
               *) AGENT_ARGS+=(--ak disallowed_tools=WebSearch,WebFetch) ;;
             esac ;;
   allowed) [ "$AGENT" = dsh ] && AGENT_ARGS+=(--ak web=true) ;;
@@ -222,6 +282,17 @@ if [ "$GPU_SCHED" = 1 ]; then
 else
   sched="GPU scheduling off"
 fi
+# PHASE_SPLIT=1 needs the slot ledger, one trial per lane at a time and a Harbor that loads job plugins
+if [ "$PHASE_SPLIT" = 1 ]; then
+  if [ "$GPU_SCHED" != 1 ] || [ "$SEQ" != 1 ]; then
+    PHASE_SPLIT=0; sched="$sched, validation in the lane (PHASE_SPLIT needs GPU_SCHED=1 and SEQ=1)"
+  elif ! harbor run --help 2>/dev/null | grep -q -- '--plugin'; then
+    PHASE_SPLIT=0; sched="$sched, validation in the lane (this harbor has no --plugin for the agent-end marker)"
+  else
+    export PYTHONPATH="$H/plugins${PYTHONPATH:+:$PYTHONPATH}"
+    sched="$sched, validation in the background beside the next trial (up to $GPU_RESIDENT trials per GPU)"
+  fi
+fi
 log "runner $$: $AGENT $MODEL effort $EFFORT, run id $RUN_ID, modes $MODES, web search $WEB_SEARCH, usage gateway ${USAGE_GATEWAY:-off}, $sched"
 # the machine, as MANIFEST.md writes it (host:, GPUs:, software:), and as JSON for every job's host.json
 HOST_INFO="$(python3 "$H/host_info.py" 2>/dev/null)" || HOST_INFO=""
@@ -235,15 +306,18 @@ on_exit() {
   return 0
 }
 trap on_exit EXIT
-# the batch's plan: every job this command runs, with its trial and seeds ("pending" in live_board.py until it starts);
-# $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run
+# the batch's plan: every job of the batch, with its trial and seeds ("pending" in live_board.py until it starts);
+# $JOBS/.plan/<batch>.tsv (job, task, mode, trial, seed; one line per task of a job) is what the loops below run. With
+# SEEDS the plan is the same (lanes of other SEEDS may run beside this one, and send_results.sh indexes the batch from
+# it), and the lane runs the trials of its seeds in their order, RUN_PLAN = $JOBS/.plan/<batch>.seeds-<s>-<s>.tsv
 mkdir -p "$JOBS/.plan"
 PLAN="$JOBS/.plan/$batch.tsv"
-python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "${tasks[@]}" <<'PY' || { log "could not plan batch $batch (scripts/task_seed.py assign)"; exit 2; }
+RUN_PLAN="$PLAN"; [ -n "$SEEDS" ] && RUN_PLAN="$JOBS/.plan/$batch.seeds-${SEEDS// /-}.tsv"
+plan_notes="$(python3 - "$R" "$JOBS/.plan/$batch.json" "$PLAN" "$batch" "$RUN_ID" "$SEQ" "$MODES" "$K" "$SEEDS" "$RUN_PLAN" "${tasks[@]}" <<'PY'
 import json, os, pathlib, sys
-repo, out, tsv, batch, run_id, seq, modes, K, *tasks = sys.argv[1:]
+repo, out, tsv, batch, run_id, seq, modes, K, want, run_tsv, *tasks = sys.argv[1:]
 sys.path.insert(0, str(pathlib.Path(repo) / "scripts"))
-import task_seed  # noqa: E402
+import task_seed, task_conventions as tc  # noqa: E402
 K = int(K)
 name = lambda m, t: {"standard": f"{t}-standard", "limited": f"{t}-standard", "standard-realtime": f"{t}-standard-realtime"}.get(m, f"{t}-privileged")
 suffix = lambda k: f"-t{k}" if K > 1 else ""
@@ -259,12 +333,31 @@ for t, k, m in order:
         seeds[d.name] = task_seed.assign(d, batch, K)
     job = f"{batch}-{m}-{t}{suffix(k)}" if seq == "1" else f"{batch}-{m}{suffix(k)}"
     jobs.append({"job": job, "task": d.name, "mode": m, "trial": k, "trials": K, "seed": seeds[d.name][k - 1]})
-for f, text in ((out, json.dumps({"batch": batch, "run_id": run_id, "trials": K, "jobs": jobs}, indent=1)),
-                (tsv, "".join(f"{j['job']}\t{j['task']}\t{j['mode']}\t{j['trial']}\t{j['seed']}\n" for j in jobs))):
+row = lambda j: f"{j['job']}\t{j['task']}\t{j['mode']}\t{j['trial']}\t{j['seed']}\n"
+files = [(out, json.dumps({"batch": batch, "run_id": run_id, "trials": K, "jobs": jobs}, indent=1)), (tsv, "".join(map(row, jobs)))]
+if want:                                   # SEEDS: the trials of these seeds only, a seed's trials before the next seed's
+    want = sorted({int(s) for s in want.split()})
+    for task, run in seeds.items():
+        sd = task_seed.seeds(pathlib.Path(repo) / "tasks" / task)
+        for s in want:
+            if s in run:
+                continue
+            if tc.seed_allowed(sd, s):
+                print(f"SEEDS {' '.join(map(str, want))}: {task} allows seed {s}, but its {K} trial(s) in batch {batch} "
+                      f"run seeds {run} (K trials run K of a task's allowed seeds: K=3 runs all three of a RoboARC task)")
+                sys.exit(1)
+            print(f"SEEDS: {task} does not allow seed {s} (allowed: {sd['allowed']}); none of its trials runs at it")
+    turn = sorted((j for j in jobs if j["seed"] in want), key=lambda j: j["seed"])   # stable: task, trial, mode
+    print(f"SEEDS {' '.join(map(str, want))}, in that order: "
+          f"{' / '.join(str(sum(j['seed'] == s for j in turn)) for s in want)} jobs")
+    files.append((run_tsv, "".join(map(row, turn))))
+for f, text in files:
     tmp = pathlib.Path(f"{f}.{os.getpid()}")
     tmp.write_text(text)
     tmp.replace(f)
 PY
+)" || { log "could not plan batch $batch (scripts/task_seed.py assign)"; [ -n "$plan_notes" ] && log "$plan_notes"; exit 2; }
+[ -n "$plan_notes" ] && while IFS= read -r note; do log "$note"; done <<< "$plan_notes"
 
 # append-only mirror of every trial's agent/ directory, out of every trial container's reach
 if [ "$LOG_MIRROR" = 1 ] && ! docker ps --format '{{.Names}}' | grep -qx rcb-log-mirror; then
@@ -287,21 +380,33 @@ fi
 [ -d "$JOBS/.tasks" ] && find "$JOBS/.tasks" -mindepth 1 -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + 2>/dev/null
 
 # transparent usage gateway (one per runner, stopped with it): the agent's base URL points at it, it forwards unchanged
+ENV_ARGS=()
 if [ -n "$USAGE_GATEWAY" ]; then
   mkdir -p "$JOBS/.gateway"; ready="$JOBS/.gateway/port.$$"; rm -f "$ready"
+  # Harbor's egress sidecar cuts a plain-HTTP call whose response headers take over 15 s (gost's default readTimeout):
+  # every harbor run gets Harbor's Docker environment with the sidecar's readTimeout at the gateway's 900 s
+  # (scripts/harbor/environments/roboarc_docker.py); the import is checked here, with Harbor's own Python
+  export PYTHONPATH="$H/environments${PYTHONPATH:+:$PYTHONPATH}"; ENV_ARGS=(-e roboarc_docker:RoboARCDocker)
+  hpy="$(head -1 "$(command -v harbor)" 2>/dev/null | sed -n 's/^#!//p')"
+  if [[ "$hpy" == */python* ]] && [ -x "$hpy" ] && "$hpy" -c 'import harbor' 2>/dev/null && ! "$hpy" -c 'import roboarc_docker' >"$JOBS/.gateway/env_import.$$.err" 2>&1; then
+    log "scripts/harbor/environments/roboarc_docker.py does not import with this harbor ($JOBS/.gateway/env_import.$$.err); without it the egress sidecar cuts model calls slower than 15 s"; exit 2
+  fi
   # the upstream each base URL would have used: this environment, else the env file, else the API's default
   upstream() {  # <VAR> <default>
     local v="${!1:-}"
     [ -z "$v" ] && [ -n "$ENV_FILE" ] && v=$(sed -n "s/^[[:space:]]*\(export[[:space:]]\+\)\?$1=//p" "$ENV_FILE" | tail -1 | tr -d "\"'")
     printf '%s' "${v:-$2}"
   }
-  gw_args=(--jobs "$JOBS" --bind "$GATEWAY_BIND" --ready-file "$ready" --budget-input "$TOKEN_BUDGET_IN" --budget-output "$TOKEN_BUDGET_OUT"); for h in ${GATEWAY_EXTRA_HOSTS:-}; do gw_args+=(--extra-host "$h"); done; [ "$GATEWAY_RAW" = 1 ] && gw_args+=(--raw)
+  gw_args=(--jobs "$JOBS" --bind "$GATEWAY_BIND" --ready-file "$ready" --budget-input "$TOKEN_BUDGET_IN" --budget-output "$TOKEN_BUDGET_OUT" --image-cap "$GATEWAY_IMAGE_CAP"); for h in ${GATEWAY_EXTRA_HOSTS:-}; do gw_args+=(--extra-host "$h"); done; [ "$GATEWAY_RAW" = 1 ] && gw_args+=(--raw)
   [ "$WEB_SEARCH" = allowed ] && gw_args+=(--server-tools record)   # not an official run: the provider-run tools are only recorded
   # a plain-HTTP base URL (a self-hosted model server, e.g. sglang): the gateway may forward to exactly that host:port
   case "$AGENT" in
     claude-code) agent_up=$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com) ;;
     dsh) agent_up=$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)
          gw_args+=(--extra-host api.deepseek.com) ;;   # DeepSeek's API is no task's model host (scripts/set_agent_egress.py)
+    antigravity) agent_up=$(upstream ANTIGRAVITY_BASE_URL "")
+         [[ "$agent_up" =~ ^http://[A-Za-z0-9.-]+:[0-9]+(/|$) ]] || { log "AGENT=antigravity: ANTIGRAVITY_BASE_URL must be the Chat Completions server's plain-HTTP base with a port, e.g. http://127.0.0.1:4141/v1 (env or ENV_FILE); got '${agent_up:-nothing}'"; exit 2; }
+         gw_args+=(--gemini-chat) ;;   # the SDK's Gemini requests -> <base>/chat/completions (gemini_chat.py)
     *) agent_up=$(upstream OPENAI_BASE_URL https://api.openai.com/v1) ;;
   esac
   [[ "$agent_up" =~ ^http://([A-Za-z0-9.-]+:[0-9]+)(/|$) ]] && gw_args+=(--http-host "${BASH_REMATCH[1]}")
@@ -324,6 +429,8 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
   via_gw() { sed -E -e "s#^https://([^/]+)#$GW/u/\1#; t" -e "s#^http://([A-Za-z0-9.-]+:[0-9]+)#$GW/h/\1#" <<< "$1"; }
   if [ "$AGENT" = claude-code ]; then
     AGENT_ARGS+=(--ae "ANTHROPIC_BASE_URL=$(via_gw "$(upstream ANTHROPIC_BASE_URL https://api.anthropic.com)")")
+  elif [ "$AGENT" = antigravity ]; then   # the SDK appends /v1beta/models/<model>:streamGenerateContent to it
+    AGENT_ARGS+=(--ae "GOOGLE_GEMINI_BASE_URL=$(via_gw "$agent_up")")
   elif [ "$AGENT" = dsh ]; then   # dsh's Messages root (its /v1/messages and /v1/files below it)
     AGENT_ARGS+=(--ae "DEEPSEEK_BASE_URL=$(via_gw "$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)")")
   else
@@ -369,7 +476,7 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
     GATEWAY_ONLY="$GATEWAY_ONLY,chatgpt.com"
     [ "$GATEWAY_EGRESS" = gateway ] && log "ChatGPT login: chatgpt.com stays directly reachable beside the gateway (Codex's workspace lookup needs it over HTTPS)" ;;
   esac
-  log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
+  log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, image cap: $GATEWAY_IMAGE_CAP, agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
 fi
 
 gateway_check() {  # before a job is claimed (USAGE_GATEWAY set): the gateway answers, else it is restarted on its port; 1 = it is
@@ -401,12 +508,14 @@ wait_for() {  # <mode>: block until every WAIT_FOR file of this mode exists
 }
 
 usage_record() {  # <job>: <job>/usage_recording.json, whether this job's trials ran through the usage gateway (and its
-  # token budget); write_task_results.py copies it into every result's config.json
+  # token budget and image cap; with AGENT=antigravity "api_translation": the gateway's Gemini -> Chat Completions
+  # translation); write_task_results.py copies it into every result's config.json
   if [ -n "$USAGE_GATEWAY" ]; then
-    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}}\n' \
-      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT"
+    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}, "image_cap": %s%s}\n' \
+      "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT" "$GATEWAY_IMAGE_CAP" \
+      "$([ "$AGENT" = antigravity ] && printf ', "api_translation": "gemini-chat"')"
   else
-    printf '{"usage_gateway": false, "token_budget": null}\n'
+    printf '{"usage_gateway": false, "token_budget": null, "image_cap": null}\n'
   fi > "$JOBS/$1/usage_recording.json"
 }
 
@@ -418,8 +527,11 @@ finish_job() {  # <job>: the usage record; the raw logs compacted; no key in any
   [ -n "$RESULTS" ] && python3 "$H/write_task_results.py" "$JOBS" "$1" "$RUN_ID" "$LABEL" --out "$RESULTS/$batch" 2>&1 | tail -3 | sed "s/^/[$1] /" | tee -a "$LOG"
 }
 
-summary() {  # one table per comparable configuration over every job of this batch, rewritten after each job (atomically: lanes share it)
-  python3 - "$JOBS" "$batch" "$R" > "$JOBS/$batch.summary.md.$$" <<'PY'
+summary() {  # one table per comparable configuration over every job of this batch, rewritten after each job (atomically:
+  # lanes and their validating trials share it; $BASHPID, as a lane's background trials share its $$, read before the
+  # redirection: a redirection's words expand in the forked child)
+  local tmp="$JOBS/$batch.summary.md.$BASHPID"
+  python3 - "$JOBS" "$batch" "$R" > "$tmp" <<'PY'
 import json, pathlib, sys, datetime as dt
 from collections import defaultdict
 jobs, batch, R = pathlib.Path(sys.argv[1]), sys.argv[2], pathlib.Path(sys.argv[3])
@@ -508,7 +620,7 @@ for k in sorted(groups, key=lambda k: tuple(map(str, k))):
             print(f"| {task}{' (easy set)' if v[0][3] else ''} | {sum(x[2] == 'success' for x in res)} / {len(res)} | "
                   + ", ".join(f"{x[0]}: s{x[1]} {x[2]}" for x in v) + " |")
 PY
-  mv -f "$JOBS/$batch.summary.md.$$" "$JOBS/$batch.summary.md"
+  mv -f "$tmp" "$JOBS/$batch.summary.md"
 }
 
 stamp_task_dirs() {  # <root>: give every file of the job's task copies a mtime derived from its content (scripts/stamp_mtimes.py)
@@ -590,9 +702,13 @@ task_dirs() {  # <root> <harbor -i args...>: the task directories the -i argumen
   done
 }
 
-run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed the plan gives it in this job)
+run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed the plan gives it in this job): the copy, then Harbor
+  prepare_job "$@" && harbor_job "$@"
+}
+
+JOB_ROOT=""   # the job's own copy of its tasks (prepare_job)
+prepare_job() {  # <job> <concurrency> <harbor -i args...>: JOB_ROOT = the job's copy, ready for Harbor; 1 = not started
   local job="$1" n="$2"; shift 2
-  local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
   local root="$R" f dirs=()
   mapfile -t dirs < <(task_dirs "$R" "$@")
   # every job runs from its own copy of the task ($JOBS/.tasks/<job>/, removed afterwards), stamped; PROTOCOL §2.10:
@@ -621,8 +737,17 @@ run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed 
   fi
   stamp_task_dirs "$root" || { log "FAILED $job: could not stamp its task copy (scripts/stamp_mtimes.py, $root); not started"; rm -rf "$root"; return 1; }
   seed_record "$job" || { log "FAILED $job: could not write its seed record ($JOBS/.seeds/$job.json); not started"; rm -rf "$root"; return 1; }
+  rm -f "$JOBS/.phase/$job.json" "$JOBS/.phase/$job.handed"     # an earlier attempt's agent-end records (PHASE_SPLIT)
   log "start $job: $* (concurrency $n; trial $(awk -F'\t' -v j="$job" -v K="$K" '$1 == j { print $4 " of " K; exit }' "$PLAN"), seeds $(awk -F'\t' -v j="$job" '$1 == j { printf "%s%s=%s", s, $2, $5; s = " " }' "$PLAN")${JOB_SLOT:+; ${JOB_GPU:+GPU $JOB_GPU, }reserved $(awk '{ print $2 " CPUs, " $3 " GB" }' <<< "$JOB_SLOT")})"
-  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
+  JOB_ROOT="$root"
+}
+
+harbor_job() {  # <job> <concurrency> <harbor -i args...>: Harbor runs the job from its copy (JOB_ROOT), which is removed
+  # afterwards; the job's seed, machine and placement records. PHASE_SPLIT=1: the agent-end marker plugin
+  local job="$1" n="$2" root="$JOB_ROOT"; shift 2
+  local envf=(); [ -n "$ENV_FILE" ] && envf=(--env-file "$ENV_FILE")
+  local phase=(); [ "$PHASE_SPLIT" = 1 ] && phase=(--plugin phase_marker:PhaseMarker --pk "out=$JOBS/.phase/$job.json" --pk "job=$job")
+  (cd "$root" && harbor run -p tasks "$@" "${AGENT_ARGS[@]}" "${ENV_ARGS[@]}" "${phase[@]}" "${envf[@]}" -n "$n" -k 1 -y -o "$JOBS" --job-name "$job") > "$JOBS/$job.harbor.log" 2>&1
   log "done $job (harbor rc=$?)"
   [ -d "$JOBS/$job" ] && cp "$JOBS/.seeds/$job.json" "$JOBS/$job/seed.json"
   [ -d "$JOBS/$job" ] && [ -n "$HOST_INFO" ] && printf '%s\n' "$HOST_INFO" > "$JOBS/$job/host.json"
@@ -631,38 +756,78 @@ run_job() {  # <job> <concurrency> <harbor -i args...> (each task from the seed 
   return 0
 }
 
-placement() {  # <job>: <job>/placement.json, the GPU and the reservation the trial ran with (GPU_SCHED=1)
+agent_phase_end() {  # <job> <pid of its background run>: 0 = its agent phase has ended and it validates (the marker of
+  # phase_marker.py, PHASE_SPLIT=1); 1 = the run has ended without a marker (PHASE_SPLIT=0: waited for). A run whose
+  # marker exists waits for the lane's hand-over (run_in_background), so the lane always sees that marker
+  [ "$PHASE_SPLIT" = 1 ] || { wait "$2"; return 1; }
+  while kill -0 "$2" 2>/dev/null; do
+    [ -s "$JOBS/.phase/$1.json" ] && return 0
+    sleep 2
+  done
+  wait "$2"; return 1
+}
+
+run_in_background() {  # <job> <harbor -i args...>: Harbor runs the job, then its records, results and summary, and its
+  # slot released. The usage gateway serves the agent phase only: when the job's agent phase ended with a marker, the
+  # lane checked the gateway then (gateway_after) and hands the job over (<job>.handed, after `gpu_slots.py phase`);
+  # the results wait for that (at most 120 s: a lane killed meanwhile), else the gateway is checked here, as before
+  local job="$1" i; shift
+  harbor_job "$job" 1 "$@"
+  if [ -s "$JOBS/.phase/$job.json" ]; then
+    for i in $(seq 60); do [ -e "$JOBS/.phase/$job.handed" ] && break; sleep 2; done
+  else
+    gateway_after "$job"
+  fi
+  finish_job "$job"; summary
+  release_slot "$job"
+}
+
+placement() {  # <job>: <job>/placement.json, the GPU and the reservation the trial ran with (GPU_SCHED=1), and what it
+  # kept while it validated (PHASE_SPLIT=1)
   local units cpus mem fam
   read -r units cpus mem fam <<< "$JOB_SLOT"
-  printf '{"gpu": %s, "units": %s, "gpu_share": %s, "cpus": %s, "memory_gb": %s, "family": "%s", "gpus": "%s", "host_cpus": %s}\n' \
-    "$([ -n "$JOB_GPU" ] && echo "\"$JOB_GPU\"" || echo null)" "$units" "$GPU_SHARE" "$cpus" "$mem" "$fam" "$GPUS" "$HOST_CPUS" > "$JOBS/$1/placement.json"
+  printf '{"gpu": %s, "units": %s, "gpu_share": %s, "cpus": %s, "memory_gb": %s, "family": "%s", "gpus": "%s", "host_cpus": %s, "phase_split": %s, "gpu_resident": %s, "validate_cpus": %s, "validate_memory_gb": %s}\n' \
+    "$([ -n "$JOB_GPU" ] && echo "\"$JOB_GPU\"" || echo null)" "$units" "$GPU_SHARE" "$cpus" "$mem" "$fam" "$GPUS" "$HOST_CPUS" \
+    "$([ "$PHASE_SPLIT" = 1 ] && echo true || echo false)" "$GPU_RESIDENT" "${JOB_VALIDATE% *}" "${JOB_VALIDATE#* }" > "$JOBS/$1/placement.json"
 }
 
 JOB_GPU=""; JOB_SLOT=""   # the job's GPU ("" = none or GPU_SCHED=0) and "<units> <cpus> <memory GB> <family>" (GPU_SCHED=1)
+JOB_VALIDATE=""           # "<cpus> <memory GB>" the job keeps while it validates (GPU_SCHED=1)
 SLOT_WHY="$JOBS/.slots.why.$$"
 declare -A SLOT_CLASS=()  # task -> "<units> <cpus> <memory GB> <family>" (gpu_slots.py classify, once per task and lane)
-slot_class() {  # <task>: SLOT_CLASS[<task>] filled; 2 = the task could not be classified (why in $SLOT_WHY)
+declare -A VALIDATE_NEED=()   # task -> "<cpus> <memory GB>" while it validates (gpu_slots.py classify --phase validate)
+slot_class() {  # <task>: SLOT_CLASS[<task>] and VALIDATE_NEED[<task>] filled; 2 = the task could not be classified (why in $SLOT_WHY)
   [ -n "${SLOT_CLASS[$1]:-}" ] && return 0
-  local c
+  local c v
   c="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" ${DEFORMABLE_FAMILIES:+--deformable "$DEFORMABLE_FAMILIES"} \
         --share "$GPU_SHARE" --cpu-scale "$RESERVE_CPU_SCALE" --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
-  SLOT_CLASS[$1]="$c"
+  v="$(python3 "$H/gpu_slots.py" classify "$R/tasks/$1" --phase validate --cpu-scale "$RESERVE_CPU_SCALE" \
+        --mem-scale "$RESERVE_MEM_SCALE" 2>"$SLOT_WHY")" || return 2
+  SLOT_CLASS[$1]="$c"; VALIDATE_NEED[$1]="$v"
 }
-acquire_slot() {  # <job> <task>: JOB_SLOT and JOB_GPU from the host's ledger (call it directly, not in $(...): it sets
-  # them); 3 = not now, other = error; why in $SLOT_WHY
+acquire_slot() {  # <job> <task>: JOB_SLOT, JOB_VALIDATE and JOB_GPU from the host's ledger (call it directly, not in
+  # $(...): it sets them); 3 = not now, other = error; why in $SLOT_WHY
   local rc units cpus mem fam
-  JOB_GPU=""; JOB_SLOT=""
+  JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
   slot_class "$2" || return 2
   read -r units cpus mem fam <<< "${SLOT_CLASS[$2]}"
   JOB_GPU="$(python3 "$H/gpu_slots.py" acquire --dir "$SLOTS_DIR" --job "$1" --runner-pid $$ --units "$units" --cpus "$cpus" \
-              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --host-cpus "$HOST_CPUS" ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
+              --mem-gb "$mem" --gpus "$GPUS" --share "$GPU_SHARE" --resident "$GPU_RESIDENT" --host-cpus "$HOST_CPUS" \
+              ${HOST_MEM_GB:+--host-mem-gb "$HOST_MEM_GB"} ${MEM_HEADROOM_GB:+--headroom-gb "$MEM_HEADROOM_GB"} 2>"$SLOT_WHY")"
   rc=$?
-  [ $rc -eq 0 ] && { JOB_SLOT="${SLOT_CLASS[$2]}"; return 0; }
+  [ $rc -eq 0 ] && { JOB_SLOT="${SLOT_CLASS[$2]}"; JOB_VALIDATE="${VALIDATE_NEED[$2]}"; return 0; }
   JOB_GPU=""; return $rc
+}
+validate_slot() {  # <job> <pid>: the job's agent phase has ended: its hold validates, owned by <pid> (gpu_slots.py phase)
+  python3 "$H/gpu_slots.py" phase --dir "$SLOTS_DIR" --job "$1" --pid "$2" --cpus "${JOB_VALIDATE% *}" \
+    --mem-gb "${JOB_VALIDATE#* }" >/dev/null 2>&1 \
+    && log "$1: agent phase ended; it validates${JOB_GPU:+ on GPU $JOB_GPU} (keeps ${JOB_VALIDATE% *} CPUs, ${JOB_VALIDATE#* } GB) while lane $$ takes the next trial"
+  JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
+  return 0
 }
 release_slot() {  # <job>
   [ "$GPU_SCHED" = 1 ] && python3 "$H/gpu_slots.py" release --dir "$SLOTS_DIR" --job "$1" >/dev/null 2>&1
-  JOB_GPU=""; JOB_SLOT=""
+  JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
   return 0
 }
 
@@ -684,15 +849,28 @@ if [ "$SEQ" = 1 ]; then
   # the next one; a pass that starts nothing while some job waits for room sleeps 30 s; the lane ends when no job is
   # left unclaimed (or it stops on a failure)
   pass=0; stop=0; said=""; said_at=0
+  validating=()   # this lane's trials that validate in the background (PHASE_SPLIT=1)
+  seed_wait() {  # <seed>: SEEDS: a job of this seed waits for room in this pass. open_seed: the lowest such seed (a later
+    # seed's trial starts only in room no job of it fits); open_n: its jobs that wait
+    [ -n "$SEEDS" ] || return 0
+    [ -z "$open_seed" ] && open_seed="$1"
+    [ "$1" = "$open_seed" ] && open_n=$((open_n + 1))
+    return 0
+  }
   while [ "$stop" = 0 ]; do
-    pass=$((pass + 1)); started=0; waiting=0; first_why=""
+    pass=$((pass + 1)); started=0; waiting=0; first_why=""; open_seed=""; open_n=0; again=0
     declare -A nofit=()   # this pass: the needs ("<units> <cpus> <memory GB>") the host had no room for; later jobs with
     # the same needs wait without asking the ledger again (a pass over a long plan stays cheap)
     while IFS=$'\t' read -r job task m k seed <&3; do
       if [ -f "$JOBS/$job/result.json" ]; then [ "$pass" = 1 ] && log "skip $job (already has result.json)"; continue; fi
       if [ "$GPU_SCHED" = 1 ] && slot_class "$task"; then
         need="${SLOT_CLASS[$task]% *}"
-        [ -n "${nofit[$need]:-}" ] && [ ! -d "$JOBS/.claims/$job" ] && { waiting=$((waiting + 1)); continue; }
+        # SEEDS: while a job of an earlier seed waits for room, a later seed's deformable trial is not tried (the ledger
+        # would keep a GPU for it, or drain one)
+        if [ -n "$open_seed" ] && [ "$seed" -gt "$open_seed" ] && [ "${need%% *}" -ge "$GPU_SHARE" ] && [ ! -d "$JOBS/.claims/$job" ]; then
+          waiting=$((waiting + 1)); continue
+        fi
+        [ -n "${nofit[$need]:-}" ] && [ ! -d "$JOBS/.claims/$job" ] && { waiting=$((waiting + 1)); seed_wait "$seed"; continue; }
       fi
       mkdir "$JOBS/.claims/$job" 2>/dev/null || continue   # another lane of this batch took it
       wait_for "$m"
@@ -702,15 +880,23 @@ if [ "$SEQ" = 1 ]; then
         why="$(tail -1 "$SLOT_WHY" 2>/dev/null)"
         if [ $rc -eq 3 ]; then
           [ -n "${SLOT_CLASS[$task]:-}" ] && nofit["${SLOT_CLASS[$task]% *}"]=1
-          rmdir "$JOBS/.claims/$job" 2>/dev/null; waiting=$((waiting + 1)); [ -z "$first_why" ] && first_why="$job: $why"; continue
+          rmdir "$JOBS/.claims/$job" 2>/dev/null; waiting=$((waiting + 1)); seed_wait "$seed"; [ -z "$first_why" ] && first_why="$job: $why"; continue
         elif [ $rc -ne 0 ]; then
           log "FAILED $job: no GPU slot ($why); not started"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue
         fi
       fi
+      [ -n "$open_seed" ] && [ "$seed" -gt "$open_seed" ] && log "lane $$: $job (seed $seed) starts while $open_n job(s) of seed $open_seed wait for room"
       started=$((started + 1))
-      run_job "$job" 1 -i "$task" || { release_slot "$job"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
-      gateway_after "$job"; finish_job "$job"; summary
-      release_slot "$job"
+      prepare_job "$job" 1 -i "$task" || { release_slot "$job"; rmdir "$JOBS/.claims/$job" 2>/dev/null; not_started=$((not_started + 1)); continue; }   # another lane or a later run may take it
+      # the trial runs in the background; the lane goes on when its agent phase has ended (PHASE_SPLIT=1: it validates
+      # beside the next trial, its slot a validating one) or when it has ended
+      run_in_background "$job" -i "$task" &
+      run_pid=$!
+      if agent_phase_end "$job" "$run_pid"; then
+        gateway_after "$job"; validate_slot "$job" "$run_pid"; : > "$JOBS/.phase/$job.handed"
+        validating+=("$run_pid")
+      fi
+      JOB_GPU=""; JOB_SLOT=""; JOB_VALIDATE=""
       # the model account is out of credits, rate-limited or logged out: every further job would fail within minutes. Only
       # structured evidence counts (Codex's rate_limits and last event, Claude Code's result event): account_failure_check.py
       why=$(python3 "$H/account_failure_check.py" "$JOBS/$job"/*__*/ 2>&1); rc=$?
@@ -719,7 +905,9 @@ if [ "$SEQ" = 1 ]; then
       elif [ $rc -ne 0 ]; then
         log "account check of $job failed (rc $rc): $(tail -1 <<< "$why" | cut -c1-200)"
       fi
-    done 3< "$PLAN"
+      [ -n "$SEEDS" ] && { again=1; break; }   # SEEDS: after each trial RUN_PLAN is read from the top: an earlier seed's job first
+    done 3< "$RUN_PLAN"
+    [ "$again" = 1 ] && [ "$stop" = 0 ] && continue
     [ "$stop" = 1 ] || [ "$waiting" = 0 ] && break       # every job is claimed or done: this lane is finished
     if [ "$started" = 0 ]; then
       # what the host lacks for the first job that waits: a line when the kind of shortage (GPU, CPUs, memory) changes,
@@ -732,6 +920,9 @@ if [ "$SEQ" = 1 ]; then
       sleep 30
     fi
   done
+  left=0; for p in "${validating[@]}"; do kill -0 "$p" 2>/dev/null && left=$((left + 1)); done
+  [ "$left" -gt 0 ] && log "lane $$: no trial left to start; waiting for $left trial(s) of this lane to finish validating"
+  [ ${#validating[@]} -gt 0 ] && wait "${validating[@]}"
   rm -f "$SLOT_WHY"
 else
   pids=()

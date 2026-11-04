@@ -6,7 +6,7 @@ gears, wires) and IKEA furniture assembly. Each task is one frozen scene, a robo
 with a Robotiq 2F-85, or two Franka Pandas) and a grader that decides from the simulated state whether the task was
 done.
 
-Website: <https://roboarc.embodied-first-exam.ai> · Version **2.2.0** ([CHANGELOG.md](CHANGELOG.md))
+Website: <https://roboarc.embodied-first-exam.ai> · Version **2.2.1** ([CHANGELOG.md](CHANGELOG.md))
 
 ## Interfaces
 
@@ -84,7 +84,7 @@ Each task base ships as two [Harbor](https://github.com/laude-institute/harbor) 
   (optional depth), proprioception and calibrated cameras, and submits joint or end-effector chunks, with no reset and
   no privileged state. The service grades the live episode, and for the puzzles a fresh-process replay confirms it.
 
-The agent's budget is wall clock, 3 h per task (10800 s); wire-splicing-01 has 6 h by the owner's exception, and its
+The agent's budget is wall clock, 3 h 10 min per task (11400 s); wire-splicing-01 has 6 h by the owner's exception, and its
 trials form their own group. Harbor 0.23 or newer and Python >= 3.11 for the repository tools.
 
 ```bash
@@ -159,6 +159,7 @@ in [examples/](examples/).
 | `scripts/roboarc/` | the puzzle generator `mk_tasks.py` and its inputs: `release.json`, `packages/` (the per-task texts), `oracles/` (reference trajectories), `shared/` (the pinned tooling and graders), `assets.json` (instance pins); `regrade.py`, `harbor_check.py` |
 | `scripts/` | the task layer the Harbor tasks cite (`task_conventions.py`, `set_agent_egress.py`, `task_resources.toml`, `eai_standard/`, `rcb_monitor/`), build helpers (`stamp_mtimes.py`, `check_image_files.py`) and `send_results.sh` / `receive_results.sh` |
 | `scripts/harbor/` | the Harbor batch runner and its helpers ([docs/RUNNING.md](docs/RUNNING.md)) |
+| `bash-runners/` | the evaluation run one seed at a time: `run_seed0.sh`, `run_seed1.sh`, `run_seed2.sh` ([docs/COLLABORATOR_SETUP.md](docs/COLLABORATOR_SETUP.md), section 5) |
 | `source/` | the image build context: the simulator package `topogym/` (with `planning/`, the planners that made the references), `assets/robots/`, the recipe `source/images/roboarc/Dockerfile` with its pinned inputs and the MuJoCo EPA patch |
 | `images/` | the image pins (`pins.json`), `pull_all.sh`, `archive.sh` and `push_all.sh` ([images/README.md](images/README.md)); `roboarc/`: the release image's `build.sh` and its README; `monitor/`: the monitor sidecar's recipe |
 | `tools/` | development tools: the release rebuild, reference recording, redesign and stress tests ([tools/README.md](tools/README.md)) |

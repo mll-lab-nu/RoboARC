@@ -19,7 +19,7 @@ What the grader checks, in plain words (each task's `instruction.md` states the 
 - **At rest.** The ring moves at most 1 mm/s and 0.02 rad/s. Holding it is allowed; release is not required.
 - All final conditions must hold together, continuously, for 0.5 s of simulated time.
 
-Every task has a wall-clock budget of 10800 s (3 h) in both modes. In privileged mode the delivered trajectory is replayed open-loop twice in a fresh process: both replays must succeed, and the strict goal must be reached within the trajectory's own rows. In standard mode the simulator service grades the live episode and a fresh-process replay confirms it. The details are on the [benchmark page](../benchmarks/roboarc.md) (section "Grading replays").
+Every task has a wall-clock budget of 11400 s (3 h 10 min) in both modes. In privileged mode the delivered trajectory is replayed open-loop twice in a fresh process: both replays must succeed, and the strict goal must be reached within the trajectory's own rows. In standard mode the simulator service grades the live episode and a fresh-process replay confirms it. The details are on the [benchmark page](../benchmarks/roboarc.md) (section "Grading replays").
 
 ## Bases
 

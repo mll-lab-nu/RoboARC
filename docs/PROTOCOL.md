@@ -199,8 +199,14 @@ the allowlist `scripts/set_agent_egress.py` `HOSTS` (the model APIs and the pack
 usage gateway narrows it further to the gateway and the registries), unless the task's author declares open egress,
 `[metadata] network = "open"` (then `[agent]` sets no other policy). The runner applies what the task declares;
 open-network results are ranked apart. The verifier has no network. Usage recording is optional: an official run needs
-no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. *CI:*
-`check-verifier-isolation.sh`.
+no usage gateway (RUNNING.md "Usage recording"), and its results say whether usage was recorded. Through the gateway a
+model request carries at most `GATEWAY_IMAGE_CAP` images (50 by default, owner 2026-10-31; 10 for Gemini 4 Argon, GitHub
+Copilot's limit for it, decided 2026-11-02): the oldest beyond it are replaced by a short text note, and every result
+records the cap (`image_cap`). With `AGENT=antigravity` the gateway also translates the agent's Gemini API requests into
+Chat Completions requests for the model server, and the answers back, a server error (500, 502, 504) as 503, which the
+SDK retries (decided 2026-11-01 and 2026-11-02; `scripts/usage_gateway/gemini_chat.py`), and every such result records
+it (`api_translation`).
+*CI:* `check-verifier-isolation.sh`.
 
 **H.7 Comparable twins.** Where a task ships both a privileged and a standard (or standard-realtime) version, they
 share one frozen instance (byte-identical copies), one success rule and the same seeds (`default`, `allowed`,

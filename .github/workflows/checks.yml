@@ -58,12 +58,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
         with: { python-version: "3.12.15" }
+      - name: ffmpeg (the standard service's mp4 checks, scripts/roboarc/tests/test_server_requests.py 5)
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
       - name: Test dependencies
         run: python3 -m pip install --quiet --no-deps --require-hashes -r ci_checks/requirements-ci.lock
       - name: Unit tests, check-video, resources, cutoffs, seed files
         run: |
           set -e
-          bash ci_checks/check-unit-tests.sh --all
+          RCB_REQUIRE_FFMPEG=1 bash ci_checks/check-unit-tests.sh --all
           python3 ci_checks/check-video.py tasks/roboarc-*
           python3 ci_checks/check-resources.py tasks/roboarc-*
           python3 ci_checks/check-cutoffs.py tasks/roboarc-*

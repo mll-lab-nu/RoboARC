@@ -17,7 +17,7 @@ MAGIC = {".gz": b"\x1f\x8b", ".xz": b"\xfd7zXZ\x00"}
 DECOMPRESSOR = {".gz": lambda: zlib.decompressobj(zlib.MAX_WBITS | 16), ".xz": lzma.LZMADecompressor}
 
 VARS = ["OPENROUTER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN",
-        "AZURE_API_KEY", "AZURE_OPENAI_API_KEY", "DEEPSEEK_API_KEY"]
+        "AZURE_API_KEY", "AZURE_OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY"]
 
 
 def decompress(data: bytes, suffix: str) -> tuple[bytes, bool]:

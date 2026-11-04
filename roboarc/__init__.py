@@ -20,7 +20,7 @@ if "numpy" not in _sys.modules:
 if not _rt.SETTINGS_AT_NUMPY_IMPORT:
     _rt.record_numpy_settings()
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 from ._runtime import RuntimeMismatch  # noqa: E402
 from .registry import TaskInfo, list_tasks, resolve, task_info  # noqa: E402
@@ -32,10 +32,16 @@ def make(task_id, **kwargs):
     return _make(task_id, **kwargs)
 
 
+def make_vec(task_id, num_envs, **kwargs):
+    """Build `num_envs` environments of one task, one per worker process (preview); see roboarc.vector.make_vec."""
+    from .vector import make_vec as _make_vec
+    return _make_vec(task_id, num_envs, **kwargs)
+
+
 def load_reference(task_id, mode="privileged"):
     """The task's reference trajectory (default: the privileged mode's solution) as an (N, action_dim) array, or None."""
     from .references import load_reference as _load
     return _load(task_id, mode)
 
 
-__all__ = ["make", "list_tasks", "task_info", "resolve", "load_reference", "TaskInfo", "RuntimeMismatch", "__version__"]
+__all__ = ["make", "make_vec", "list_tasks", "task_info", "resolve", "load_reference", "TaskInfo", "RuntimeMismatch", "__version__"]
