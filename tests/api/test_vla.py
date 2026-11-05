@@ -330,7 +330,7 @@ def test_episode_end_to_end(tmp_path):
         acts = z["actions"]
     seeds = "0,1" if 1 in task.seeds else "0"         # seed 1: the same rows succeed on the appearance seed
     for name, policy, steps in (("replay", ReplayPolicy(acts, horizon=30), None), ("hold", HoldPolicy(30), 200)):
-        port, stop = _serve(policy)
+        port, stop = _serve(policy, {"version": {"model": name}})
         try:
             argv = ["--task", task.id, "--policy", f"ws://127.0.0.1:{port}", "--out", str(tmp_path / "out"),
                     "--run-id", name, "--renderer", "none"] + (["--max-steps", str(steps)] if steps else [])
@@ -340,6 +340,7 @@ def test_episode_end_to_end(tmp_path):
         run = tmp_path / "out" / task.id / name
         res = json.loads((run / "s0" / "e1" / "result.json").read_text())
         assert json.loads((run / "config.json").read_text())["config_key"].startswith("vla:")
+        assert res["server_metadata"] == {"version": {"model": name}}, res      # the served model's pinned versions
         if name == "replay":
             assert res["success"] == 1 and res["replay_success"] == 1 and res["deterministic"] == 1, res
             if task.reference_end_hash:

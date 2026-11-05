@@ -219,7 +219,7 @@ interface's results:
 <out>/<task>/<run id>/results.json        every episode of the run id
 <out>/<task>/<run id>/s<seed>/e<k>/
     result.json      success, success_pending_review, live_success, replay_success, deterministic, infra_error,
-                     steps, episode_end, end hashes, timings
+                     steps, episode_end, end hashes, timings, server metadata (the model's pinned versions)
     live.json        the live episode (prompt, server metadata, cameras, rates, review and forcing evidence)
     trajectory.npz   the executed rows (after every limit), in the format of the privileged mode's deliverable
     chunks.npz       every action chunk the policy returned and the control step it was asked at

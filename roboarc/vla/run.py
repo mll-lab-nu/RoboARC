@@ -303,7 +303,8 @@ def run(a) -> int:
                 res.update(verdict(live, rep, task.suite))
                 res.update({k2: live.get(k2) for k2 in ("episode_end", "steps", "sim_time_s", "queries", "birth_hash",
                                                         "live_sha", "wall_s", "ms_per_step_total", "ms_per_step_physics",
-                                                        "ms_per_query_observe", "ms_per_query_infer")})
+                                                        "ms_per_query_observe", "ms_per_query_infer",
+                                                        "server_metadata")})
                 if rep:
                     res.update(replay_sha=rep.get("replay_sha"), replay_wall_s=rep.get("wall_s"), video=rep.get("video"))
             _write_json(edir / "result.json", res)

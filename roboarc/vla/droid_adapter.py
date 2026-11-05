@@ -91,7 +91,7 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO)
     model = MODELS[a.model]
     model.load()
-    meta = {"policy": f"{model.name} + roboarc DroidAdapter", "model": a.model,
+    meta = {"policy": f"{model.name} + roboarc DroidAdapter", "model": a.model, "version": model.version,
             "convention": "droid-velocity" if model.velocity else "droid", "policy_hz": DROID_CONTROL_HZ, "move_s": MOVE_S,
             "droid_reset": DROID_RESET.tolist(), "wrist_offset_rad": WRIST_OFFSET}
     serve(DroidAdapter(model, velocity=model.velocity), a.host, a.port, meta)

@@ -127,7 +127,7 @@ def test_openpi_gripper_is_binarised_at_one_half():
     raw = np.zeros((15, 8), np.float32)
     raw[:, :7] = 0.3
     raw[:, 7] = np.linspace(0.0, 1.0, 15)
-    m = OpenpiModel("cfg", "ckpt")
+    m = OpenpiModel("cfg", "ckpt", "sha")
     m.policy = SimpleNamespace(infer=lambda o: {"actions": raw.copy(), "policy_timing": {"infer_ms": 1.0}})
     out = m.infer({})
     a = out["actions"]

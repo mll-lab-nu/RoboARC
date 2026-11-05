@@ -13,7 +13,8 @@ imported in load(), never when this module is.
     hold        stub_server's HoldPolicy instead of a model (numpy only), for checking a setup: `droid`
 
 A model gets the droid convention's observation with DROID's q7 (the adapter's wrist offset applied, no "roboarc"
-entry) and returns {"actions": (H, 8)} in DROID's units."""
+entry) and returns {"actions": (H, 8)} in DROID's units. Its pinned versions (`version`) go into the server's metadata,
+and from there into every episode's live.json and result.json."""
 from __future__ import annotations
 
 import numpy as np
@@ -23,12 +24,14 @@ from .stub_server import HoldPolicy
 JOINTS = "observation/joint_position"
 GRIPPER = "observation/gripper_position"
 IMAGES = ("observation/exterior_image_1_left", "observation/exterior_image_2_left", "observation/wrist_image_left")
+OPENPI_COMMIT = "215abfb217dbac7d5f1273282331b9b1866c0479"     # the openpi the pi0.5 checkpoints are served with
 
 
 class DroidModel:
     """A DROID-trained policy: load() once before serving, then infer(obs) -> {"actions": (H, 8)}. A subclass loads its
     weights in _load() and sets self.policy (anything with infer), or overrides infer."""
     name = "?"
+    version: dict = {}    # the pinned code and weights
     velocity = False      # the actions are DROID's joint velocities (the droid-velocity convention)
     image_size = 224      # the images' size the model is run with (the runner's --image-size)
 
@@ -55,13 +58,16 @@ class HoldModel(DroidModel):
 
 class OpenpiModel(DroidModel):
     """An openpi checkpoint served by openpi's own policy (its input and output transforms): `config` is openpi's
-    training config, `checkpoint` its directory (gs:// paths download into ~/.cache/openpi or $OPENPI_DATA_HOME). The
+    training config, `checkpoint` its directory (gs:// paths download into ~/.cache/openpi or $OPENPI_DATA_HOME) and
+    `files_sha256` its version: the sha256 of its files' sorted "<path> <md5>" lines, with the MD5s (base64) Google Cloud
+    Storage lists (https://storage.googleapis.com/storage/v1/b/openpi-assets/o?prefix=checkpoints/<name>/). The
     gripper actions are binarised at 0.5, as openpi's DROID client (examples/droid/main.py) and sim-evals' execute
     them."""
 
-    def __init__(self, config: str, checkpoint: str, velocity: bool = False):
+    def __init__(self, config: str, checkpoint: str, files_sha256: str, velocity: bool = False):
         self.config, self.checkpoint, self.velocity = config, checkpoint, velocity
         self.name = f"{config} ({checkpoint})"
+        self.version = {"openpi": OPENPI_COMMIT, "checkpoint": checkpoint, "checkpoint_files_sha256": files_sha256}
 
     def _load(self) -> None:
         from openpi.policies import policy_config
@@ -90,6 +96,7 @@ class MolmoAct2Model(DroidModel):
     def __init__(self, dtype: str = "float32"):
         self.dtype = dtype
         self.name = f"{self.repo} ({self.revision[:7]}, {dtype})"
+        self.version = {"model": self.repo, "revision": self.revision}
 
     def _load(self) -> None:
         import torch
@@ -141,11 +148,14 @@ def molmoact2_actions(actions) -> np.ndarray:
 
 
 # The joint-position checkpoints take openpi's pi05_droid_jointpos_polaris config: DROID's joint-position inputs and
-# absolute outputs, the norm stats from the checkpoint.
-MODELS = {"jointpos": OpenpiModel("pi05_droid_jointpos_polaris", "gs://openpi-assets/checkpoints/pi05_droid_jointpos"),
-          "velocity": OpenpiModel("pi05_droid", "gs://openpi-assets/checkpoints/pi05_droid", velocity=True),
+# absolute outputs, the norm stats from the checkpoint. Their files were uploaded on 2025-12-13 (pi05_droid 2025-09-08).
+MODELS = {"jointpos": OpenpiModel("pi05_droid_jointpos_polaris", "gs://openpi-assets/checkpoints/pi05_droid_jointpos",
+                                  "1062e5b3dfecce4a0f6e8dbaf0793820c62e6cb32dc86096f9cc84664764cb50"),
+          "velocity": OpenpiModel("pi05_droid", "gs://openpi-assets/checkpoints/pi05_droid",
+                                  "92d6cfebe9293bcdbd23afdb17f3fdc147cd4c63bcb5f6c186e0dcccbf21a73a", velocity=True),
           "polaris": OpenpiModel("pi05_droid_jointpos_polaris",
-                                 "gs://openpi-assets/checkpoints/polaris/pi05_droid_jointpos_polaris"),
+                                 "gs://openpi-assets/checkpoints/polaris/pi05_droid_jointpos_polaris",
+                                 "5cbf57c52f52e02e1d8cc27945b46ff2bb87e051d97a43fed7e11bc6c5bf4faa"),
           "molmoact2": MolmoAct2Model("float32"),
           "molmoact2-bf16": MolmoAct2Model("bfloat16"),
           "hold": HoldModel()}
