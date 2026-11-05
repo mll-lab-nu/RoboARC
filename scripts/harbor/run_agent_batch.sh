@@ -143,6 +143,10 @@
 #                half the cap at a time (GitHub Copilot refuses a request with more than 50, or more than 10 for Gemini 4
 #                Argon, and an agent resends every camera image it has looked at with each call; the gateway's module
 #                doc). Without the gateway there is no cap
+#   GATEWAY_IMAGE_BYTES  a model request still over this many bytes after GATEWAY_IMAGE_CAP has more of its oldest
+#                images replaced, in the same steps, until it is not; the newest image stays (0, the default = off;
+#                4718592 = 4.5 MiB, the default for MODEL=<provider>/gemini-4-argon: through a GitHub Copilot proxy a
+#                Gemini 4 Argon request over 5 MiB is refused). Without the gateway there is no cap
 # Runner-side tools (not task code), in this directory: with LOG_MIRROR=1 the container rcb-log-mirror copies every
 # trial's agent/ directory append-only into ${JOBS}_mirror/ (log_mirror.py; root-owned: neither the agent nor the host
 # user can delete it); with MEM_GUARD=1 mem_guard.py keeps 2 GiB of host memory available. After each job: a key scan
@@ -173,8 +177,12 @@ fi
 USAGE_GATEWAY="${USAGE_GATEWAY:-}"
 GATEWAY_RAW="${GATEWAY_RAW:-1}"; GATEWAY_BIND="${GATEWAY_BIND:-172.17.0.1}"; GATEWAY_START_WAIT="${GATEWAY_START_WAIT:-10}"
 GATEWAY_EGRESS="${GATEWAY_EGRESS:-gateway}"
-# GitHub Copilot takes at most 10 images per request for Gemini 4 Argon (decided 2026-11-02); every other model 50
-case "${MODEL##*/}" in gemini-4-argon) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-10}" ;; *) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-50}" ;; esac
+# GitHub Copilot takes at most 10 images per request for Gemini 4 Argon (decided 2026-11-02); every other model 50.
+# A Gemini 4 Argon request over 5 MiB is refused too (HTTP 413): 4.5 MiB for it (decided 2026-11-04); no size cap otherwise
+case "${MODEL##*/}" in
+  gemini-4-argon) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-10}"; GATEWAY_IMAGE_BYTES="${GATEWAY_IMAGE_BYTES:-4718592}" ;;
+  *) GATEWAY_IMAGE_CAP="${GATEWAY_IMAGE_CAP:-50}"; GATEWAY_IMAGE_BYTES="${GATEWAY_IMAGE_BYTES:-0}" ;;
+esac
 HOST_CPUS="${HOST_CPUS:-$(nproc)}"
 [ -n "$MODEL" ] || { echo "MODEL must be set: the -m model of the agent, e.g. MODEL=openai/<model> (docs/RUNNING.md)" >&2; exit 2; }
 # the switch of earlier versions of this script: refused rather than ignored, so that nobody expects a usage record silently
@@ -184,6 +192,7 @@ if [ -n "$USAGE_GATEWAY" ]; then
   USAGE_GATEWAY="$(cd "$USAGE_GATEWAY" && pwd)"
   case "$GATEWAY_EGRESS" in gateway|task) ;; *) echo "GATEWAY_EGRESS must be gateway or task" >&2; exit 2 ;; esac
   [[ "$GATEWAY_IMAGE_CAP" =~ ^[0-9]+$ ]] || { echo "GATEWAY_IMAGE_CAP must be a whole number (0 = no cap)" >&2; exit 2; }
+  [[ "$GATEWAY_IMAGE_BYTES" =~ ^[0-9]+$ ]] || { echo "GATEWAY_IMAGE_BYTES must be a whole number of bytes (0 = no cap)" >&2; exit 2; }
 fi
 [[ "$HOST_CPUS" =~ ^[1-9][0-9]*$ ]] || { echo "HOST_CPUS must be a positive integer (the host's CPU count)" >&2; exit 2; }
 [[ "$K" =~ ^[1-9][0-9]*$ ]] || { echo "K must be a positive integer (trials per task and mode)" >&2; exit 2; }
@@ -398,6 +407,7 @@ if [ -n "$USAGE_GATEWAY" ]; then
     printf '%s' "${v:-$2}"
   }
   gw_args=(--jobs "$JOBS" --bind "$GATEWAY_BIND" --ready-file "$ready" --budget-input "$TOKEN_BUDGET_IN" --budget-output "$TOKEN_BUDGET_OUT" --image-cap "$GATEWAY_IMAGE_CAP"); for h in ${GATEWAY_EXTRA_HOSTS:-}; do gw_args+=(--extra-host "$h"); done; [ "$GATEWAY_RAW" = 1 ] && gw_args+=(--raw)
+  [ "$GATEWAY_IMAGE_BYTES" != 0 ] && gw_args+=(--image-bytes "$GATEWAY_IMAGE_BYTES")
   [ "$WEB_SEARCH" = allowed ] && gw_args+=(--server-tools record)   # not an official run: the provider-run tools are only recorded
   # a plain-HTTP base URL (a self-hosted model server, e.g. sglang): the gateway may forward to exactly that host:port
   case "$AGENT" in
@@ -476,7 +486,7 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
     GATEWAY_ONLY="$GATEWAY_ONLY,chatgpt.com"
     [ "$GATEWAY_EGRESS" = gateway ] && log "ChatGPT login: chatgpt.com stays directly reachable beside the gateway (Codex's workspace lookup needs it over HTTPS)" ;;
   esac
-  log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, image cap: $GATEWAY_IMAGE_CAP, agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
+  log "usage gateway $GW (pid $gw_pid, raw bodies: $GATEWAY_RAW, token budget $TOKEN_BUDGET_IN in / $TOKEN_BUDGET_OUT out, image cap: $GATEWAY_IMAGE_CAP$([ "$GATEWAY_IMAGE_BYTES" != 0 ] && printf ' (and %s bytes)' "$GATEWAY_IMAGE_BYTES"), agent egress: $GATEWAY_EGRESS); per-trial records in <trial>/gateway/"
 fi
 
 gateway_check() {  # before a job is claimed (USAGE_GATEWAY set): the gateway answers, else it is restarted on its port; 1 = it is
@@ -508,11 +518,12 @@ wait_for() {  # <mode>: block until every WAIT_FOR file of this mode exists
 }
 
 usage_record() {  # <job>: <job>/usage_recording.json, whether this job's trials ran through the usage gateway (and its
-  # token budget and image cap; with AGENT=antigravity "api_translation": the gateway's Gemini -> Chat Completions
-  # translation); write_task_results.py copies it into every result's config.json
+  # token budget and image cap; "image_bytes" when GATEWAY_IMAGE_BYTES is on; with AGENT=antigravity "api_translation":
+  # the gateway's Gemini -> Chat Completions translation); write_task_results.py copies it into every result's config.json
   if [ -n "$USAGE_GATEWAY" ]; then
-    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}, "image_cap": %s%s}\n' \
+    printf '{"usage_gateway": true, "raw_bodies": %s, "token_budget": {"input": %s, "output": %s}, "image_cap": %s%s%s}\n' \
       "$([ "$GATEWAY_RAW" = 1 ] && echo true || echo false)" "$TOKEN_BUDGET_IN" "$TOKEN_BUDGET_OUT" "$GATEWAY_IMAGE_CAP" \
+      "$([ "$GATEWAY_IMAGE_BYTES" != 0 ] && printf ', "image_bytes": %s' "$GATEWAY_IMAGE_BYTES")" \
       "$([ "$AGENT" = antigravity ] && printf ', "api_translation": "gemini-chat"')"
   else
     printf '{"usage_gateway": false, "token_budget": null, "image_cap": null}\n'

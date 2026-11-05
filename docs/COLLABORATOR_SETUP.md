@@ -131,8 +131,8 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
     blocks containers from reaching the host stops it. Tell us, with `jobs/smoke/.gateway/`;
   - the gateway was on as in the command. The `runner` line of `jobs/smoke/smoke.log` names it (`usage gateway
     <checkout>/scripts/usage_gateway`, not `usage gateway off`), and each job's `usage_recording.json` says
-    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50` (10 with Gemini 4 Argon; with Antigravity also
-    `"api_translation": "gemini-chat"`);
+    `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50` (10 with Gemini 4 Argon, and `"image_bytes":
+    4718592`; with Antigravity also `"api_translation": "gemini-chat"`);
   - your provider answered the model calls. This counts the HTTP statuses of all the smoke's model calls:
     ```bash
     python3 -c 'import collections,json,sys; print(collections.Counter(json.loads(l)["status"] for f in sys.argv[1:] for l in open(f)))' \
@@ -220,7 +220,8 @@ done
   - It forwards the calls unchanged; the agent keeps its own credentials. The one exception: a call that carries more
     than 50 images (`GATEWAY_IMAGE_CAP`) has its oldest ones replaced by a short note, because some providers, GitHub
     Copilot among them, refuse more than 50. With Gemini 4 Argon (`MODEL=google/gemini-4-argon`) the cap is 10, which
-    the runner sets itself: Copilot refuses more than 10 images for that model.
+    the runner sets itself: Copilot refuses more than 10 images for that model. For that model the runner also keeps a
+    call under 4.5 MiB (`GATEWAY_IMAGE_BYTES`) by replacing more of its oldest images: a call over 5 MiB is refused.
   - It records each trial's tokens per request in `<trial>/gateway/` (`usage.jsonl`, `totals.json`). The token counts
     in the results then come from the gateway, the same way for every agent and provider.
   - It enforces each trial's token budget: 100M input tokens (cache included) and 10M output tokens (reasoning
@@ -243,7 +244,7 @@ done
   the agent (official, decided 2026-11-02) (the usage gateway holds no credentials, and
   its one change to a request, the image cap, is the runner's for the model; with `AGENT=antigravity` it also translates
   the SDK's Gemini requests for your Chat Completions server, and every result records that as `api_translation`); web search off (leave `WEB_SEARCH` unset);
-  the runner's image cap, 50, or 10 for Gemini 4 Argon (leave `GATEWAY_IMAGE_CAP` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
+  the runner's image cap, 50, or 10 and 4.5 MiB for Gemini 4 Argon (leave `GATEWAY_IMAGE_CAP` and `GATEWAY_IMAGE_BYTES` unset); the task's own time limit (no `--timeout-multiplier` or `--agent-timeout-multiplier`) and
   its instruction as it is (no prompt template, nothing added through `AK`); the task's network; the runner's seeds;
   one `EFFORT` for the whole batch, the level we agreed (section 4), never `default`.
 - **Lanes:** one runner runs one trial at a time; each copy of the same command started on the same `JOBS` adds a lane,

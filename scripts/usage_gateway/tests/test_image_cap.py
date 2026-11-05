@@ -9,7 +9,12 @@
 - everything else in the request is left as it was, and the replaced images of a conversation stay the same from one
   call to the next until the following step (the provider's prompt cache is broken once per step);
 - end to end: a capped request reaches the upstream re-serialized and uncompressed, one within the cap as it was sent
-  (gzip and all); usage.jsonl records images / images_omitted, totals.json counts image_cap_requests.
+  (gzip and all); usage.jsonl records images / images_omitted, totals.json counts image_cap_requests;
+- the size cap (--image-bytes, decided 2026-11-04): off, the count cap alone, byte for byte; on, a request still over
+  it has more of its oldest images replaced, in the same steps, until it fits, the newest image always kept; the
+  replaced images stay the same between calls until the next step; the six requests GitHub Copilot refused with 413 in
+  Reuben's Gemini 4 Argon run (5.0-5.4 MiB, 8-10 images) fit under 4.5 MiB; end to end, a request that still does not
+  fit is forwarded as sent and recorded with over_image_bytes.
 """
 from __future__ import annotations
 
@@ -136,6 +141,83 @@ class Shapes(unittest.TestCase):
         self.assertEqual((tot["requests"], tot["image_cap_requests"]), (2, 1))
 
 
+MIB = 2 ** 20
+BOTH = "[earlier image removed: this conversation keeps at most 10 images and requests of at most 4.5 MiB, the oldest are dropped]"
+
+
+def chat_body(n: int, size: int) -> dict:
+    """A Chat Completions request (what the gateway sends for Gemini 4 Argon) with n images of about `size` bytes each,
+    one per message, numbered in their data URLs."""
+    url = lambda i: {"type": "image_url", "image_url": {"url": f"data:image/png;base64,IMG{i}:" + "A" * size}}
+    return {"model": "gemini-4-argon", "messages": [{"role": "user", "content": [{"type": "text", "text": "task"}]}]
+            + [{"role": "user", "content": [{"type": "text", "text": f"frame {i}"}, url(i)]} for i in range(n)]}
+
+
+def chat_kept(body: dict) -> list[int]:
+    """The numbers of the images still in a Chat Completions body, in order."""
+    return [int(b["image_url"]["url"].split("IMG")[1].split(":")[0]) for m in body["messages"] for b in m["content"]
+            if b["type"] == "image_url"]
+
+
+class Bytes(unittest.TestCase):
+    def test_off_is_the_count_cap_alone(self):
+        """Off, the size of a request does not matter: 1 MB images, up to 25 MB, get the count cap's rule and note."""
+        for n, omitted in ((3, 0), (10, 0), (11, 5), (16, 10), (25, 15)):
+            text, images, d = gateway.cap_images(json.dumps(chat_body(n, MIB)), 10, 0)
+            self.assertEqual((images, d), (n, omitted), n)
+            if omitted:
+                out = json.loads(text)
+                self.assertEqual(chat_kept(out), list(range(omitted, n)), n)
+                self.assertEqual(out["messages"][1]["content"][1], {"type": "text", "text": NOTE.format(10)})
+            else:
+                self.assertIsNone(text)                  # forwarded as sent, 10 MB and all
+
+    def test_under_the_size_is_forwarded_as_sent(self):
+        self.assertEqual(gateway.cap_images(json.dumps(chat_body(6, 100_000)), 10, int(4.5 * MIB)), (None, 6, 0))
+
+    def test_over_the_size_the_oldest_go_in_steps(self):
+        text, n, d = gateway.cap_images(json.dumps(chat_body(8, 600_000)), 10, int(4.5 * MIB))   # 4.8 MB: over
+        out = json.loads(text)
+        self.assertEqual((n, d, chat_kept(out)), (8, 5, [5, 6, 7]))           # one step of 5; the newest stay
+        self.assertLessEqual(len(text.encode()), 4.5 * MIB)
+        self.assertEqual(out["messages"][1]["content"][1], {"type": "text", "text": BOTH})
+        self.assertEqual(out["messages"][1]["content"][0], {"type": "text", "text": "frame 0"})   # the rest as it was
+
+    def test_the_requests_copilot_refused_fit(self):
+        """Reuben's Gemini 4 Argon run, 2026-11-04: the six requests answered 413 (MiB, images)."""
+        for mib, n in ((5.01, 10), (5.09, 10), (5.15, 8), (5.17, 9), (5.32, 10), (5.40, 10)):
+            size = int(mib * MIB / n)
+            text, images, d = gateway.cap_images(json.dumps(chat_body(n, size)), 10, int(4.5 * MIB))
+            self.assertGreater(len(json.dumps(chat_body(n, size)).encode()), 5 * MIB, mib)
+            self.assertLessEqual(len(text.encode()), 4.5 * MIB, mib)
+            self.assertEqual((images, d % 5), (n, 0), mib)
+            self.assertEqual(chat_kept(json.loads(text))[-1], n - 1, mib)    # the newest image is there
+
+    def test_the_replaced_images_stay_the_same_between_calls(self):
+        """0.6 MB images, 10 and 4.5 MiB: 8 to 12 images replace the same 5 (the count cap's step at 11 and 12 too), so
+        those calls start alike up to the 8th image; at 13 the next 5 go."""
+        outs = {n: json.loads(gateway.cap_images(json.dumps(chat_body(n, 600_000)), 10, int(4.5 * MIB))[0])
+                for n in (8, 9, 10, 11, 12, 13)}
+        head = outs[8]["messages"]
+        for n in (9, 10, 11, 12):
+            self.assertEqual(outs[n]["messages"][:len(head)], head, n)
+            self.assertEqual(chat_kept(outs[n])[0], 5, n)
+        self.assertEqual(chat_kept(outs[13])[0], 10)
+        self.assertNotEqual(outs[13]["messages"][:len(head)], head)
+
+    def test_the_newest_image_stays(self):
+        self.assertEqual(gateway.cap_images(json.dumps(chat_body(1, 5 * MIB)), 10, int(4.5 * MIB)), (None, 1, 0))
+        text, n, d = gateway.cap_images(json.dumps(chat_body(3, 5 * MIB)), 10, int(4.5 * MIB))
+        self.assertEqual((n, d, chat_kept(json.loads(text))), (3, 2, [2]))     # still over: forwarded so, and recorded
+        self.assertGreater(len(text.encode()), 4.5 * MIB)
+
+    def test_size_cap_without_a_count_cap_goes_one_at_a_time(self):
+        text, n, d = gateway.cap_images(json.dumps(chat_body(5, 1000)), 0, 3500)
+        self.assertEqual((n, d, chat_kept(json.loads(text))), (5, 3, [3, 4]))
+        self.assertLessEqual(len(text.encode()), 3500)
+        self.assertIn("keeps requests of at most", text)
+
+
 class Upstream(BaseHTTPRequestHandler):
     got: list[tuple[dict, bytes]] = []
 
@@ -199,11 +281,62 @@ class EndToEnd(unittest.TestCase):
                 proc.terminate(); proc.wait(10); proc.stderr.close()
                 stub.shutdown(); stub.server_close()
 
+    def test_size_cap_end_to_end(self):
+        with tempfile.TemporaryDirectory() as td:
+            jobs = pathlib.Path(td)
+            stub = ThreadingHTTPServer(("127.0.0.1", 0), Upstream)
+            threading.Thread(target=stub.serve_forever, daemon=True).start()
+            up = f"127.0.0.1:{stub.server_address[1]}"
+            ready = jobs / "ready"
+            proc = subprocess.Popen([sys.executable, str(HERE / "gateway.py"), "--jobs", str(jobs), "--bind", "127.0.0.1",
+                                     "--ready-file", str(ready), "--http-host", up, "--image-cap", "10",
+                                     "--image-bytes", "4000"],
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            try:
+                for _ in range(100):
+                    if ready.exists() and ready.read_text():
+                        break
+                    if proc.poll() is not None:
+                        raise RuntimeError(proc.stderr.read().decode()[-2000:])
+                    time.sleep(0.1)
+                port = int(ready.read_text())
+
+                def call(body: dict) -> bytes:
+                    sent = gzip.compress(json.dumps(body).encode())
+                    c = http.client.HTTPConnection("127.0.0.1", port, timeout=30)
+                    c.request("POST", f"/h/{up}/v1/chat/completions", body=sent,
+                              headers={"Content-Type": "application/json", "Content-Encoding": "gzip"})
+                    r = c.getresponse(); r.read(); c.close()
+                    self.assertEqual(r.status, 200)
+                    return sent
+
+                Upstream.got.clear()
+                call(chat_body(6, 1000))                 # 6 images, about 6 KB: under the count cap, over the size
+                sent = call(chat_body(1, 5000))          # one image over the size: nothing older to replace
+                (h1, b1), (h2, b2) = Upstream.got
+                self.assertNotIn("content-encoding", {k.lower() for k in h1})          # capped: plain JSON
+                self.assertLessEqual(len(b1), 4000)
+                self.assertEqual(chat_kept(json.loads(b1)), [5])
+                self.assertEqual(({k.lower(): v for k, v in h2.items()}["content-encoding"], b2), ("gzip", sent))   # as sent
+                f = jobs / ".gateway" / "unattributed.jsonl"
+                for _ in range(100):
+                    recs = [json.loads(x) for x in f.read_text().splitlines()] if f.exists() else []
+                    if len(recs) == 2:
+                        break
+                    time.sleep(0.1)
+                self.assertEqual(sorted((r.get("images"), r.get("images_omitted", 0), r.get("over_image_bytes", False))
+                                        for r in recs), [(1, 0, True), (6, 5, False)])
+                self.assertIn("image bytes: 4000", "".join(p.read_text() for p in (jobs / ".gateway").glob("gateway-*.log")))
+            finally:
+                proc.terminate(); proc.wait(10); proc.stderr.close()
+                stub.shutdown(); stub.server_close()
+
     def test_negative_cap_does_not_start(self):
-        p = subprocess.run([sys.executable, str(HERE / "gateway.py"), "--jobs", "/nonexistent", "--image-cap", "-1"],
-                           capture_output=True, text=True, timeout=60)
-        self.assertEqual(p.returncode, 2)
-        self.assertIn("--image-cap", p.stderr)
+        for flag in ("--image-cap", "--image-bytes"):
+            p = subprocess.run([sys.executable, str(HERE / "gateway.py"), "--jobs", "/nonexistent", flag, "-1"],
+                               capture_output=True, text=True, timeout=60)
+            self.assertEqual(p.returncode, 2, flag)
+            self.assertIn(flag, p.stderr)
 
 
 if __name__ == "__main__":
