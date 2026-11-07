@@ -51,6 +51,40 @@ class Rules(unittest.TestCase):
             self.assertFalse(ok(host, "POST", path), (host, path))
         self.assertTrue(ok("10.0.0.5:8080", "POST", "/v1/chat/completions", plain=True))
 
+    def test_moonshot(self):
+        """Kimi Code (AGENT=kimi-code): Moonshot's chat completions, model list and image or video uploads; nothing else."""
+        for host in ("api.moonshot.ai", "api.moonshot.cn"):
+            for method, path in (("POST", "/v1/chat/completions"), ("GET", "/v1/models"), ("POST", "/v1/files")):
+                self.assertTrue(ok(host, method, path), (host, method, path))
+            for method, path in (("GET", "/v1/files"), ("GET", "/v1/files/f-1/content"), ("POST", "/v1/files/f-1"),
+                                 ("POST", "/v1/batches"), ("GET", "/v1/users/me/balance"), ("POST", "/v1/responses"),
+                                 ("POST", "/v1/tokenizers/estimate-token-count"), ("POST", "/anthropic/v1/messages")):
+                self.assertFalse(ok(host, method, path), (host, method, path))
+        self.assertFalse(ok("api.kimi.com", "POST", "/coding/v1/chat/completions"))     # another host: no list
+        moon = gateway.provider_of("api.moonshot.ai", False)
+        self.assertEqual((moon["uploads"], moon["record_fields"]), ({"/v1/files": {"image", "video"}}, ["thinking", "reasoning_effort"]))
+        self.assertTrue(all(p["uploads"] == {} and p["record_fields"] == [] for p in gateway.PROVIDERS if p["name"] != "moonshot"))
+        doc = json.loads(gateway.API_PATHS.read_text())     # record_fields are recorded, never provider-side fields
+        self.assertEqual(gateway.PROVIDER_FIELDS, set(doc["provider_side_fields"]))
+
+    def test_upload_purpose(self):
+        def form(*parts, boundary="----formdata-undici-0123"):
+            body = b"".join(b"--" + boundary.encode() + b"\r\n" + h + b"\r\n\r\n" + v + b"\r\n" for h, v in parts)
+            return body + b"--" + boundary.encode() + b"--\r\n", f"multipart/form-data; boundary={boundary}"
+        png = (b'Content-Disposition: form-data; name="file"; filename="cam.png"\r\nContent-Type: image/png', b"\x89PNG\r\n\x1a\n\x00")
+        up = gateway.upload_purpose
+        self.assertEqual(up(*form(png, (b'Content-Disposition: form-data; name="purpose"', b"image"))), "image")
+        self.assertEqual(up(*form((b'content-disposition: form-data; name="purpose"', b"video"), png)), "video")
+        self.assertEqual(up(*form(png, (b'Content-Disposition: form-data; name="purpose"', b"file-extract"))), "file-extract")
+        self.assertIsNone(up(*form(png)))                                                       # no purpose
+        self.assertIsNone(up(*form((b'Content-Disposition: form-data; name="purpose"', b"image"),
+                                   (b'Content-Disposition: form-data; name="purpose"', b"file-extract"), png)))   # two
+        self.assertIsNone(up(*form((b'Content-Disposition: form-data; name="purposes"', b"image"), png)))
+        body, _ = form(png, (b'Content-Disposition: form-data; name="purpose"', b"image"))
+        self.assertIsNone(up(body, "application/json"))
+        self.assertIsNone(up(body, "multipart/form-data"))                                     # no boundary
+        self.assertEqual(up(body, 'multipart/form-data; charset=utf-8; boundary="----formdata-undici-0123"'), "image")
+
     def test_a_star_is_one_segment(self):
         with tempfile.TemporaryDirectory() as td:
             f = pathlib.Path(td) / "p.json"
@@ -127,6 +161,13 @@ class Rules(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     gateway.load_paths(f)
             self.assertEqual(gateway.CLIENT_TOOLS, {"function", "custom", "namespace"})      # a bad file changes nothing
+            files = [["POST", "/v1/files"]]
+            for extra in ({"uploads": {"/v1/upload": ["image"]}}, {"uploads": {"/v1/files": []}}, {"uploads": {"/v1/files": "image"}},
+                          {"uploads": {"/v1/files": [""]}}, {"uploads": [["/v1/files", ["image"]]]}, {"record_fields": "thinking"},
+                          {"record_fields": [1]}):
+                f.write_text(json.dumps({**base, "providers": [{"name": "x", "hosts": ["h"], "allow": files, **extra}]}))
+                with self.assertRaises(ValueError, msg=extra):
+                    gateway.load_paths(f)
 
     def test_server_tools(self):
         st = gateway.server_tools
@@ -187,6 +228,21 @@ class Rules(unittest.TestCase):
                      "\ufeff{}", "[" * 100000):
             with self.assertRaises(gateway.Unreadable, msg=body[:40]):
                 st(body)
+
+    def test_moonshot_tools(self):
+        """Moonshot's own web search is a declared tool of type builtin_function: refused, on the request or on a message
+        (Kimi Code can put its tools on the system message); its function tools pass."""
+        st = gateway.server_tools
+        fn = {"type": "function", "function": {"name": "Bash", "parameters": {"type": "object"}}}
+        search = {"type": "builtin_function", "function": {"name": "$web_search"}}
+        self.assertEqual(st(json.dumps({"model": "kimi-k3.1-pro", "messages": [], "tools": [fn],
+                                        "thinking": {"type": "enabled", "effort": "max"}})), [])
+        self.assertEqual(st(json.dumps({"model": "k", "messages": [], "tools": [fn, search]})), ["builtin_function"])
+        self.assertEqual(st(json.dumps({"model": "k", "messages": [{"role": "system", "content": "s", "tools": [fn]}]})), [])
+        self.assertEqual(st(json.dumps({"model": "k", "messages": [{"role": "system", "content": "s", "tools": [search]}]})),
+                         ["builtin_function"])
+        self.assertEqual(st(json.dumps({"model": "k", "messages": [{"role": "user", "content": [
+            {"type": "image_url", "image_url": {"url": "ms://file-1", "id": "file-1"}}]}]})), [])   # an uploaded image: the agent's
 
     def test_decode_request(self):
         import gzip
@@ -397,6 +453,9 @@ class UpstreamFailures(unittest.TestCase):
         self.assertEqual(tot["last_upstream_failure"], "stream broken off: X")
         gateway.tally(tot, {**ok, "ts": 5})
         self.assertEqual((tot["requests"], tot["upstream_failures"], tot["failures_in_a_row"]), (3, 2, 0))
+        gateway.tally(tot, {"ts": 6, "usage": {}, "upload": {"purpose": "image", "bytes": 10}})   # Moonshot: no model call
+        gateway.tally(tot, {"ts": 7, "usage": {}})
+        self.assertEqual((tot["requests"], tot["uploads"], tot["no_usage"]), (5, 1, 1))
 
     def test_end_to_end(self):
         import socket
@@ -443,6 +502,118 @@ class UpstreamFailures(unittest.TestCase):
             finally:
                 proc.terminate(); proc.wait(10)
                 stub.shutdown(); stub.server_close()
+
+
+class MoonshotStub(BaseHTTPRequestHandler):
+    """Moonshot as Kimi Code meets it: an upload answered with a file id; a streamed answer whose usage is in the last
+    chunk's choices[0], the cache hits as cached_tokens."""
+    seen: list[tuple[str, str, str, bytes]] = []
+
+    def log_message(self, *a):
+        pass
+
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        MoonshotStub.seen.append((self.command, self.path, self.headers.get("Content-Type") or "", body))
+        if self.path == "/v1/files":
+            out, ctype = json.dumps({"id": "file-1", "object": "file", "purpose": "image"}).encode(), "application/json"
+        else:
+            usage = {"prompt_tokens": 100, "completion_tokens": 7, "total_tokens": 107, "cached_tokens": 90}
+            out = b"".join(b"data: " + json.dumps(e).encode() + b"\n\n" for e in (
+                {"model": "kimi-k3.1-pro", "choices": [{"index": 0, "delta": {"content": "ok"}, "finish_reason": None}]},
+                {"model": "kimi-k3.1-pro", "choices": [{"index": 0, "delta": {}, "finish_reason": "stop", "usage": usage}]})) \
+                + b"data: [DONE]\n\n"
+            ctype = "text/event-stream"
+        self.send_response(200); self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
+
+
+class MoonshotEndToEnd(unittest.TestCase):
+    """gateway.py with the moonshot provider's rules (uploads, record_fields) given to a stub on loopback (an
+    --http-host upstream gets the `http` provider's list: here a copy of api_paths.json whose `http` has moonshot's)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.td = tempfile.TemporaryDirectory()
+        cls.jobs = pathlib.Path(cls.td.name)
+        doc = json.loads(gateway.API_PATHS.read_text())
+        moon = next(p for p in doc["providers"] if p["name"] == "moonshot")
+        for p in doc["providers"]:
+            if p["name"] == "http":
+                p.update(allow=moon["allow"], uploads=moon["uploads"], record_fields=moon["record_fields"])
+        paths = cls.jobs / "api_paths.json"
+        paths.write_text(json.dumps(doc))
+        cls.stub = ThreadingHTTPServer(("127.0.0.1", 0), MoonshotStub)
+        threading.Thread(target=cls.stub.serve_forever, daemon=True).start()
+        cls.up = f"127.0.0.1:{cls.stub.server_address[1]}"
+        ready = cls.jobs / "ready"
+        cls.proc = subprocess.Popen([sys.executable, str(HERE / "gateway.py"), "--jobs", str(cls.jobs), "--bind", "127.0.0.1",
+                                     "--ready-file", str(ready), "--http-host", cls.up, "--api-paths", str(paths),
+                                     "--image-cap", "2"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        for _ in range(100):
+            if ready.exists() and ready.read_text():
+                break
+            if cls.proc.poll() is not None:
+                raise RuntimeError(cls.proc.stderr.read().decode()[-2000:])
+            time.sleep(0.1)
+        cls.port = int(ready.read_text())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.proc.terminate(); cls.proc.wait(10); cls.proc.stderr.close()
+        cls.stub.shutdown(); cls.stub.server_close(); cls.td.cleanup()
+
+    def post(self, path: str, body: bytes, ctype: str):
+        c = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)
+        c.request("POST", f"/h/{self.up}{path}", body=body, headers={"Content-Type": ctype, "Authorization": "Bearer SECRET-KEY"})
+        r = c.getresponse(); out = r.read(); c.close()
+        return r.status, out
+
+    @staticmethod
+    def upload(purpose: str) -> tuple[bytes, str]:
+        b = "----formdata-undici-042"
+        body = (f'--{b}\r\nContent-Disposition: form-data; name="file"; filename="image"\r\nContent-Type: image/png\r\n\r\n'
+                ).encode() + b'\x89PNG\r\n\x1a\n"image_url"' + (
+                f'\r\n--{b}\r\nContent-Disposition: form-data; name="purpose"\r\n\r\n{purpose}\r\n--{b}--\r\n').encode()
+        return body, f"multipart/form-data; boundary={b}"
+
+    def records(self) -> list[dict]:
+        f = self.jobs / ".gateway" / "unattributed.jsonl"
+        return [json.loads(x) for x in f.read_text().splitlines()] if f.exists() else []
+
+    def test_uploads_and_model_calls(self):
+        MoonshotStub.seen.clear()
+        body, ctype = self.upload("image")
+        st, out = self.post("/v1/files", body, ctype)
+        self.assertEqual((st, json.loads(out)["id"]), (200, "file-1"))
+        self.assertEqual(MoonshotStub.seen, [("POST", "/v1/files", ctype, body)])          # forwarded as sent
+        for purpose, why in (("file-extract", "server_tool"), ("batch", "server_tool")):
+            st, out = self.post("/v1/files", *self.upload(purpose))
+            self.assertEqual(st, 403, out)
+        for raw, ct in ((b'{"purpose": "image"}', "application/json"), (self.upload("image")[0], "multipart/form-data")):
+            self.assertEqual(self.post("/v1/files", raw, ct)[0], 403)
+        self.assertEqual(len(MoonshotStub.seen), 1)
+        chat = {"model": "kimi-k3.1-pro", "stream": True, "thinking": {"type": "enabled", "effort": "max"},
+                "messages": [{"role": "user", "content": [{"type": "image_url", "image_url": {"url": "ms://file-1"}}]}],
+                "tools": [{"type": "function", "function": {"name": "Bash", "parameters": {}}}]}
+        st, out = self.post("/v1/chat/completions", json.dumps(chat).encode(), "application/json")
+        self.assertEqual(st, 200, out)
+        self.assertIn(b'"usage"', out)                                                    # the stream as it came
+        chat["tools"].append({"type": "builtin_function", "function": {"name": "$web_search"}})
+        self.assertEqual(self.post("/v1/chat/completions", json.dumps(chat).encode(), "application/json")[0], 403)
+        recs = self.records()
+        (up,) = [r for r in recs if r.get("upload")]
+        self.assertEqual((up["upload"], up["usage"], up["status"]), ({"purpose": "image", "bytes": len(body)}, {}, 200))
+        self.assertNotIn("request_fields", up)
+        self.assertEqual(sorted(tuple(r["server_tools"]) for r in recs if r.get("refused") == "server_tool"),
+                         [("builtin_function",), ("files:batch",), ("files:file-extract",)])
+        self.assertEqual(len([r for r in recs if r.get("refused") == "body_unreadable"]), 2)
+        (call,) = [r for r in recs if r["path"] == "/v1/chat/completions" and not r.get("refused")]
+        self.assertEqual(call["request_fields"], {"thinking": {"type": "enabled", "effort": "max"}})
+        self.assertEqual((call["model"], call["usage"]), ("kimi-k3.1-pro", {"input": 100, "cached": 90, "output": 7}))
+        self.assertEqual(call["images"], 1)                     # an uploaded image still counts toward the cap
+        everything = "".join(p.read_text() for p in (self.jobs / ".gateway").iterdir() if p.is_file())
+        self.assertNotIn("SECRET-KEY", everything)
 
 
 if __name__ == "__main__":

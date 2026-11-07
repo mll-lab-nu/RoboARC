@@ -72,6 +72,19 @@ usage.jsonl records the request sent ("path") and the agent's ("translated_from"
 upstream exchange (the agent's side is the translation of it). Without the flag nothing of this exists: a Gemini path is
 on no list and refused like any other.
 
+Moonshot (AGENT=kimi-code, Kimi Code CLI: scripts/harbor/agents/kimi_code_cli.py; added 2026-11-06, pending the owner's
+approval): api_paths.json's `moonshot` provider lists Moonshot's Chat Completions (its server-side web search is a tool
+of type builtin_function, which the tool rule above refuses), the model list, and one upload path, POST /v1/files, with
+the purposes it may carry (`uploads`: image, video). Kimi Code uploads every image (and video) it shows the model there
+and refers to it as ms://<id>; a 401 or 403 there it takes for a login failure and ends the call, it does not send the
+image inline instead. Such a body is a multipart/form-data upload, not JSON: it is forwarded when it has exactly one
+purpose field and that purpose is listed (another, such as file-extract, a document the provider would read for the
+agent, is refused as "server_tool"), without the tool rule, the image cap or a usage (usage.jsonl "upload": purpose and
+bytes; totals.json counts it in "uploads", not "no_usage"); the image cap still counts the images a request refers to
+by id. The provider's `record_fields` (thinking, reasoning_effort) are recorded for each of its model requests as sent
+(usage.jsonl "request_fields"): the reasoning level that reached the model. Moonshot streams an answer's usage in the
+last chunk's choices[0], and its cache hits as usage.cached_tokens: both are read.
+
 Attribution: a request's source IP is the trial's container (or, under an egress allowlist, its egress sidecar). Harbor
 names a trial's compose project `<trial>__env`, so `docker inspect` maps the IP to the project and the project to the
 trial directory <jobs>/<job>/<trial>/. Everything a trial's requests produce goes to <trial>/gateway/, next to Harbor's
@@ -98,8 +111,9 @@ the runner maps to TokenBudgetExceeded (issue #229). 0 disables a limit. Default
 "usage limit" wording on purpose: scripts/account_failure_check.py would read those as an account failure.
 
 Token counts are normalized the way Harbor counts them: input = everything the model read (Anthropic: input +
-cache_read + cache_creation; OpenAI: input_tokens, which include cached ones), output = output_tokens (reasoning
-included). Requests from an address no trial owns go to <jobs>/.gateway/unattributed.jsonl.
+cache_read + cache_creation; OpenAI: input_tokens, which include cached ones; Chat Completions: prompt_tokens, which
+include the cached ones, given as prompt_tokens_details.cached_tokens or, by Moonshot, cached_tokens), output =
+output_tokens (reasoning included). Requests from an address no trial owns go to <jobs>/.gateway/unattributed.jsonl.
 """
 from __future__ import annotations
 
@@ -151,7 +165,8 @@ HTTP_PROVIDER = "http"         # the provider whose list a --http-host upstream 
 
 
 def load_paths(path: pathlib.Path = API_PATHS) -> list[dict]:
-    """api_paths.json, checked: [{"name", "hosts": [pattern], "allow": [(METHOD, [segment, ...])]}]. A malformed file
+    """api_paths.json, checked: [{"name", "hosts": [pattern], "allow": [(METHOD, [segment, ...])], "uploads": {path:
+    {purpose, ...}}, "record_fields": [name, ...]}] (the last two optional, module doc: Moonshot). A malformed file
     is an error at start-up (the gateway does not start), never a gateway that forwards everything. Also sets
     CLIENT_TOOLS and PROVIDER_FIELDS from the same file."""
     out = []
@@ -168,7 +183,19 @@ def load_paths(path: pathlib.Path = API_PATHS) -> list[dict]:
             if method not in ("GET", "POST") or not re.fullmatch(r"(/[A-Za-z0-9._*-]+)+", pth):
                 raise ValueError(f"{path}: provider {p['name']}: bad rule {method} {pth}")
             allow.append((method, pth.split("/")[1:]))
-        out.append({"name": str(p["name"]), "hosts": [str(h).lower() for h in p["hosts"]], "allow": allow})
+        uploads, rules = {}, p.get("uploads", {})
+        if not isinstance(rules, dict):
+            raise ValueError(f"{path}: provider {p['name']}: uploads must be an object")
+        for pth, purposes in rules.items():                 # a listed POST path whose body is a multipart file upload
+            if ("POST", pth.split("/")[1:]) not in allow or "*" in pth or not isinstance(purposes, list) or not purposes \
+                    or not all(isinstance(x, str) and x for x in purposes):
+                raise ValueError(f"{path}: provider {p['name']}: bad upload rule {pth} {purposes}")
+            uploads[pth] = set(purposes)
+        recorded = p.get("record_fields", [])
+        if not isinstance(recorded, list) or not all(isinstance(x, str) and x for x in recorded):
+            raise ValueError(f"{path}: provider {p['name']}: record_fields must be a list of names")
+        out.append({"name": str(p["name"]), "hosts": [str(h).lower() for h in p["hosts"]], "allow": allow,
+                    "uploads": uploads, "record_fields": recorded})
     CLIENT_TOOLS.clear(); CLIENT_TOOLS.update(tools)             # only once the whole file is good
     HARNESS_PROBES.clear(); HARNESS_PROBES.update(probes)
     PROVIDER_FIELDS.clear(); PROVIDER_FIELDS.update(fields)
@@ -317,7 +344,8 @@ def server_tools(text: str) -> list[str]:
     without duplicate keys. Looked at, and nothing else (a tool call's arguments and a tool's schema are data: a key
     named `tools` in them is not a declaration):
       - the tools it declares: top-level `tools`, and the `tools` of a top-level `input` item (Codex 0.160 declares its
-        tools there, in `additional_tools` items), namespaces followed. A type that is not the agent's own
+        tools there, in `additional_tools` items) or of a `messages` item (Kimi Code can declare them on its system
+        message), namespaces followed. A type that is not the agent's own
         (CLIENT_TOOLS; no type = a function tool) is the provider's;
       - the provider-side fields it sets (PROVIDER_FIELDS), and a `:online` model (OpenRouter's web plugin), also among
         `models`;
@@ -342,7 +370,7 @@ def server_tools(text: str) -> list[str]:
         for item in items if isinstance(items, list) else []:
             if not isinstance(item, dict):
                 continue
-            if key == "input" and isinstance(item.get("tools"), list):
+            if isinstance(item.get("tools"), list):      # an `input` item's (Codex) or a message's (Kimi Code's system message)
                 _declared(item["tools"], found)
             _fetched(item.get("content"), found)
             if key == "input":                       # a tool output's own content blocks (function_call_output and its kin)
@@ -377,6 +405,12 @@ def usage_from(obj, acc: dict) -> None:
     elif isinstance(obj.get("usage"), dict):                            # non-streamed bodies; Chat Completions chunks
         acc.setdefault("model", obj.get("model"))
         acc["raw"] = obj["usage"]
+    elif isinstance(obj.get("choices"), list):      # Moonshot's last Chat Completions chunk: the usage in choices[0]
+        for ch in obj["choices"]:
+            if isinstance(ch, dict) and isinstance(ch.get("usage"), dict):
+                acc.setdefault("model", obj.get("model"))
+                acc["raw"] = ch["usage"]               # one choice's (Kimi asks for one): the same tokens, never added up
+                break
 
 
 def normalize(raw: dict) -> dict:
@@ -391,11 +425,25 @@ def normalize(raw: dict) -> dict:
         return {"input": int(raw.get("input_tokens") or 0),
                 "cached": int((raw.get("input_tokens_details") or {}).get("cached_tokens") or 0),
                 "output": int(raw.get("output_tokens") or 0)}
-    if "prompt_tokens" in raw:                                                        # Chat Completions
+    if "prompt_tokens" in raw:                                    # Chat Completions (Moonshot: cached_tokens beside them)
         return {"input": int(raw.get("prompt_tokens") or 0),
-                "cached": int((raw.get("prompt_tokens_details") or {}).get("cached_tokens") or 0),
+                "cached": int((raw.get("prompt_tokens_details") or {}).get("cached_tokens") or raw.get("cached_tokens") or 0),
                 "output": int(raw.get("completion_tokens") or 0)}
     return {}
+
+
+def upload_purpose(body: bytes, content_type: str) -> str | None:
+    """The `purpose` of a multipart/form-data file upload (an api_paths.json `uploads` path), or None: the body is not
+    one such upload with exactly one purpose field (two would leave it to the upstream's parser which one counts)."""
+    m = re.search(r'(?:^|;)\s*boundary="?([^";\s]+)"?', content_type, re.I)
+    if not re.match(r"\s*multipart/form-data\s*;", content_type, re.I) or not m:
+        return None
+    found = []
+    for part in body.split(b"--" + m.group(1).encode())[1:]:
+        head, sep, value = part.partition(b"\r\n\r\n")
+        if sep and re.search(rb'(?im)^content-disposition:\s*form-data;\s*name="?purpose"?\s*(;|$)', head):
+            found.append(value.rsplit(b"\r\n", 1)[0].decode("utf-8", "replace").strip())
+    return found[0] if len(found) == 1 else None
 
 
 def parse_body(body: bytes, acc: dict) -> None:
@@ -600,6 +648,8 @@ def tally(tot: dict, rec: dict) -> None:
         if u:
             for k in ("input", "cached", "output"):
                 tot[k] += u.get(k, 0)
+        elif rec.get("upload"):                    # a file upload (module doc, Moonshot): no model call, no usage to miss
+            tot["uploads"] = tot.get("uploads", 0) + 1
         else:
             tot["no_usage"] += 1
         if rec.get("server_tools"):
@@ -742,7 +792,8 @@ class Handler(BaseHTTPRequestHandler):
         host, path = m.group(1), m.group(2) or "/"
         g = gemini_chat.match(path.split("?", 1)[0]) if ARGS.gemini_chat and self.command == "POST" else None
         upath = f"{g.prefix}/chat/completions" if g else path      # what the upstream is asked (module doc: --gemini-chat)
-        if not path_allowed(provider_of(host, m is plain), self.command, upath):   # default deny, never forwarded
+        prov = provider_of(host, m is plain)
+        if not path_allowed(prov, self.command, upath):   # default deny, never forwarded
             n, drained = self.drain()
             if (self.command, path.split("?", 1)[0]) in HARNESS_PROBES:     # the harness's own probe: refused, not an attempt
                 return self._reply(403, api_error(host, path, "usage gateway: not a model API call", "path_not_allowed"),
@@ -783,7 +834,19 @@ class Handler(BaseHTTPRequestHandler):
             text = json.dumps(chat, ensure_ascii=False)
             body, how = text.encode(), "text"
         tools, unchecked = [], False
-        if self.command == "POST":       # a model request: one readable JSON object that declares no provider-run tool
+        upload = prov["uploads"].get(upath.split("?", 1)[0]) if self.command == "POST" and not g else None
+        if upload is not None:           # a file upload (module doc, Moonshot): multipart, not JSON; only these purposes
+            purpose = upload_purpose(body, self.headers.get("Content-Type") or "") if not encodings else None
+            if purpose is None:
+                return self.refuse(trial, t0, host, path, "body_unreadable", (
+                    "usage gateway: this upload is not one multipart/form-data body with one purpose field; it was not "
+                    "forwarded"), "body_unreadable", len(body), True)
+            if purpose not in upload:
+                return self.refuse(trial, t0, host, path, "server_tool", (
+                    f"usage gateway: an upload for {purpose[:40]!r} asks the model provider to process a file for the agent "
+                    f"and was not forwarded (uploads here: {', '.join(sorted(upload))}, for the model to see)"),
+                    "server_tool_not_allowed", len(body), True, {"server_tools": [f"files:{purpose[:40]}"]})
+        elif self.command == "POST":     # a model request: one readable JSON object that declares no provider-run tool
             refuse = ARGS.server_tools == "refuse"
             if text is None and how == NO_ZSTD and body.startswith(ZSTD_MAGIC):
                 unchecked = True         # a zstd body and no zstd decoder on this host: the one body forwarded unread
@@ -803,10 +866,16 @@ class Handler(BaseHTTPRequestHandler):
                     "and was not forwarded (provider-run tools are not available in this environment)"),
                     "server_tool_not_allowed", len(body), True, {"server_tools": tools})
         images = omitted = 0
-        if self.command == "POST" and (ARGS.image_cap or ARGS.image_bytes) and text is not None and not unchecked:
+        if self.command == "POST" and (ARGS.image_cap or ARGS.image_bytes) and text is not None and not unchecked \
+                and upload is None:
             capped, images, omitted = cap_images(text, ARGS.image_cap, ARGS.image_bytes)
             if capped is not None:           # module doc, image cap: forwarded re-serialized, uncompressed
                 text, body = capped, capped.encode()
+        fields = None                        # module doc, Moonshot: what the request sent of these, as it sent it
+        if prov["record_fields"] and self.command == "POST" and upload is None and text is not None and not unchecked \
+                and not g:                   # server_tools has read it: one JSON object
+            sent = json.loads(text)
+            fields = {k: sent[k] for k in prov["record_fields"] if k in sent}
         tot = trial_totals(trial)
         if trial is not None and over_budget(tot):           # refuse, never forward: the trial has spent its budget
             record(trial, {"ts": round(t0, 3), "dur_s": 0.0, "client_ip": ip, "host": host, "method": self.command,
@@ -907,6 +976,10 @@ class Handler(BaseHTTPRequestHandler):
                 rec["agent_status"] = gemini_chat.agent_status(r.status)
         if tools:                                   # --server-tools record: forwarded, and flagged
             rec["server_tools"] = tools
+        if upload is not None:
+            rec["upload"] = {"purpose": purpose, "bytes": len(body)}
+        if fields is not None:
+            rec["request_fields"] = fields
         if unchecked:
             rec["body_unchecked"] = True
         if images:

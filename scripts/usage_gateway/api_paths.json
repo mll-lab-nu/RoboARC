@@ -6,10 +6,16 @@
   "segment by segment (`*` = exactly one segment). The lists are what Codex and Claude Code sent in 738,826 recorded",
   "requests of official runs (responses, models, messages, count_tokens) plus the Responses API's compaction call.",
   "Not on any list, so refused: account connectors and apps, plugins, files, conversations, chat completions,",
-  "web search, images, audio, batches, assistants, token endpoints. `http` is the provider of a --http-host upstream.",
+  "web search, images, audio, batches, assistants, token endpoints (Moonshot's chat completions and image uploads",
+  "aside, below). `http` is the provider of a --http-host upstream.",
   "deepseek: DSH (scripts/harbor/agents/dsh_acp.py, dsh 0.2.1-rc.2) sends its model calls to DeepSeek's Anthropic-compatible",
   "Messages API (DEEPSEEK_BASE_URL = <gateway>/u/api.deepseek.com/anthropic); its image uploads (/anthropic/v1/files) are",
-  "refused like every files endpoint, and dsh then sends the images inline. Added 2026-10-28, pending the owner's approval."
+  "refused like every files endpoint, and dsh then sends the images inline. Added 2026-10-28, pending the owner's approval.",
+  "moonshot: Kimi Code CLI (scripts/harbor/agents/kimi_code_cli.py, AGENT=kimi-code) sends its model calls to Moonshot's",
+  "Chat Completions (KIMI_BASE_URL = <gateway>/u/api.moonshot.ai/v1, or .cn) and uploads every image it shows the model",
+  "to /v1/files first (`uploads`: only these purposes; a refusal there ends its call instead of sending the image",
+  "inline); `record_fields`: recorded per request as sent (gateway.py module doc). Added 2026-11-06, pending the owner's",
+  "approval."
  ],
  "_comment_tools": [
   "A model request may declare only tools the agent runs itself: no `type` (Anthropic's custom tools) or one of",
@@ -18,7 +24,8 @@
   "provider_side_fields: top-level request fields that make the provider search the web, connect to a server, query",
   "its own data sources, or take tools from a stored prompt. Chat completions are forwarded only to a --http-host",
   "upstream (a self-hosted server): no recorded request of an official run used them, and at the providers that API",
-  "serves models that search the web without any tool declaration; list the path for a provider that needs it."
+  "serves models that search the web without any tool declaration; list the path for a provider that needs it. Moonshot",
+  "needs it: its models search only through a declared tool, `$web_search` of type builtin_function, refused here."
  ],
  "_comment_probes": [
   "harness_probes: requests a harness sends by itself at start-up that are not model calls (Claude Code: HEAD",
@@ -44,6 +51,10 @@
              ["GET", "/api/v1/models"]]},
   {"name": "deepseek", "hosts": ["api.deepseek.com"],
    "allow": [["POST", "/anthropic/v1/messages"]]},
+  {"name": "moonshot", "hosts": ["api.moonshot.ai", "api.moonshot.cn"],
+   "allow": [["POST", "/v1/chat/completions"], ["GET", "/v1/models"], ["POST", "/v1/files"]],
+   "uploads": {"/v1/files": ["image", "video"]},
+   "record_fields": ["thinking", "reasoning_effort"]},
   {"name": "http", "hosts": [],
    "allow": [["POST", "/v1/messages"], ["POST", "/v1/messages/count_tokens"], ["POST", "/v1/chat/completions"],
              ["POST", "/v1/responses"], ["GET", "/v1/models"]]}

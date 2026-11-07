@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+import json
 import pathlib
 import sys
 import types
@@ -56,7 +57,8 @@ class CachedInputCounts(unittest.TestCase):
     def test_every_format_counts_the_cache(self):
         raws = [{"input_tokens": 10, "cache_read_input_tokens": 980, "cache_creation_input_tokens": 10, "output_tokens": 1},
                 {"input_tokens": 1000, "input_tokens_details": {"cached_tokens": 990}, "output_tokens": 1},
-                {"prompt_tokens": 1000, "prompt_tokens_details": {"cached_tokens": 990}, "completion_tokens": 1}]
+                {"prompt_tokens": 1000, "prompt_tokens_details": {"cached_tokens": 990}, "completion_tokens": 1},
+                {"prompt_tokens": 1000, "cached_tokens": 990, "completion_tokens": 1, "total_tokens": 1001}]     # Moonshot
         for raw in raws:
             u = gateway.normalize(raw)
             self.assertEqual(u["input"], 1000, raw)
@@ -64,6 +66,35 @@ class CachedInputCounts(unittest.TestCase):
             gateway.tally(tot, {"ts": 1.0, "usage": u})
             self.assertTrue(gateway.over_budget(tot), raw)      # 1000 of 1000, nearly all of it cached
             self.assertEqual(tot.get("over_token_budget"), 1)
+            self.assertEqual(u["cached"], 980 if "cache_read_input_tokens" in raw else 990, raw)
+        # the two places a cache hit can be given are the same quantity: taken once, never added up
+        self.assertEqual(gateway.normalize({"prompt_tokens": 9, "prompt_tokens_details": {"cached_tokens": 5}, "cached_tokens": 5,
+                                            "completion_tokens": 1}), {"input": 9, "cached": 5, "output": 1})
+
+
+class ChatCompletionsStreams(unittest.TestCase):
+    """The usage of a streamed Chat Completions answer: in the last chunk, top-level (OpenAI's) or in choices[0]
+    (Moonshot's), read once either way."""
+    @staticmethod
+    def parse(*events) -> dict:
+        acc: dict = {}
+        gateway.parse_body(b"".join(b"data: " + json.dumps(e).encode() + b"\n\n" for e in events) + b"data: [DONE]\n\n", acc)
+        return acc
+
+    def test_usage_in_choices(self):
+        usage = {"prompt_tokens": 100, "completion_tokens": 7, "total_tokens": 107, "cached_tokens": 90}
+        acc = self.parse({"model": "kimi-k3.1-pro", "choices": [{"index": 0, "delta": {"content": "x"}, "finish_reason": None}]},
+                         {"model": "kimi-k3.1-pro", "choices": [{"index": 0, "delta": {}, "finish_reason": "stop", "usage": usage}]})
+        self.assertEqual((acc["model"], gateway.normalize(acc["raw"])), ("kimi-k3.1-pro", {"input": 100, "cached": 90, "output": 7}))
+
+    def test_top_level_usage_first(self):
+        top = {"prompt_tokens": 3, "completion_tokens": 1}
+        acc = self.parse({"model": "m", "choices": [{"index": 0, "delta": {}, "usage": {"prompt_tokens": 99}}], "usage": top})
+        self.assertEqual(acc["raw"], top)
+        acc = self.parse({"model": "m", "choices": [{"index": 0, "delta": {}}], "usage": None},     # OpenAI's chunks before the last
+                         {"model": "m", "choices": [], "usage": top})
+        self.assertEqual(acc["raw"], top)
+        self.assertEqual(self.parse({"model": "m", "choices": [{"index": 0, "delta": {"content": "x"}}]}), {})
 
 
 if __name__ == "__main__":
