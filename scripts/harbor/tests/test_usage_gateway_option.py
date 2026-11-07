@@ -17,6 +17,11 @@ fake `harbor` and a fake gateway: no docker, no model, no network.
   were before it (image_bytes only in a record that has it); AGENT=antigravity without the gateway, with an
   EFFORT the SDK has no level for, with WEB_SEARCH=allowed or AGENT_CONFIG, or without a plain-HTTP ANTIGRAVITY_BASE_URL
   stops the runner at start;
+- on with AGENT=kimi-code: the CLI's base URL (KIMI_BASE_URL) is the gateway's route to Moonshot's API (api.moonshot.ai by
+  default, api.moonshot.cn when named), which the gateway may forward to (--extra-host), the job's egress has the gateway
+  only, no web option is passed (the tools are off in the CLI's config); AGENT=kimi-code without the gateway, with an
+  EFFORT the CLI has no level for, with WEB_SEARCH=allowed or AGENT_CONFIG, or with a KIMI_BASE_URL other than
+  Moonshot's API stops the runner at start;
 - USAGE_GATEWAY naming a directory without the gateway, a GATEWAY_IMAGE_CAP or GATEWAY_IMAGE_BYTES that is not a whole number, and the switch
   of earlier versions (GATEWAY=1), stop the runner at start, before any job.
 """
@@ -94,7 +99,7 @@ class UsageGatewayOption(unittest.TestCase):
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
                     if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_",
-                                            "ANTIGRAVITY_", "GEMINI_", "GOOGLE_GEMINI_"))}
+                                            "ANTIGRAVITY_", "GEMINI_", "GOOGLE_GEMINI_", "KIMI_"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high", MODES="privileged",
                         JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),
@@ -276,6 +281,51 @@ class UsageGatewayOption(unittest.TestCase):
                          (dict(USAGE_GATEWAY=gw, ANTIGRAVITY_BASE_URL="https://proxy.example/v1"), "plain-HTTP base"),
                          (dict(USAGE_GATEWAY=gw), "plain-HTTP base")):
             p = self.run_batch(AGENT="antigravity", MODEL="google/gemini-4-argon", GATEWAY_BIND="127.0.0.1", **env)
+            self.assertEqual(p.returncode, 2, (env, p.stdout + p.stderr))
+            self.assertIn(msg, p.stdout + p.stderr, env)
+            self.assertEqual(self.calls(), [], env)
+
+    def test_on_kimi_code(self):
+        for base, host in ((None, "api.moonshot.ai"), ("https://api.moonshot.cn/v1/", "api.moonshot.cn")):
+            shutil.rmtree(self.root / "jobs", ignore_errors=True)
+            self.log.unlink(missing_ok=True)
+            env = {"KIMI_BASE_URL": base} if base else {}
+            p = self.run_batch(USAGE_GATEWAY=str(self.gateway_dir()), GATEWAY_BIND="127.0.0.1", AGENT="kimi-code",
+                               MODEL="moonshot/kimi-k3.1-pro", EFFORT="max", KIMI_API_KEY="k" * 20, FAKE_GATEWAY_TOTALS="1", **env)
+            self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+            (call,) = self.calls()
+            argv = call["argv"]
+            self.assertEqual((argv[argv.index("-a") + 1], argv[argv.index("-m") + 1]), ("kimi_code_cli:KimiCodeCli", "moonshot/kimi-k3.1-pro"))
+            aks = [argv[i + 1] for i, x in enumerate(argv) if x == "--ak"]
+            self.assertEqual(aks, ["reasoning_effort=max"])         # no web option: the tools are off in the CLI's config
+            base_urls = [x for x in argv if "BASE_URL=" in x]
+            self.assertEqual(len(base_urls), 1, argv)
+            self.assertRegex(base_urls[0], rf"^KIMI_BASE_URL=http://127\.0\.0\.1:\d+/u/{re.escape(host)}/v1$")
+            hosts = [argv[i + 1] for i, x in enumerate(argv) if x == "--allow-agent-host"]
+            self.assertEqual(hosts, ["127.0.0.1"])                  # through the gateway, never Moonshot directly
+            self.assertFalse([h for h in call["allowed_hosts"] if "moonshot" in h])
+            (ready,) = (self.root / "jobs" / ".gateway").glob("port.*.argv")
+            gw_argv = ready.read_text()
+            self.assertIn(f"--extra-host {host}", gw_argv)
+            self.assertNotIn("--http-host", gw_argv)
+            self.assertNotIn("--gemini-chat", gw_argv)
+            self.assertIn("--image-cap 50", gw_argv)
+            rec = json.loads((self.root / "jobs" / f"b-privileged-{self.base}" / "usage_recording.json").read_text())
+            self.assertNotIn("api_translation", rec)
+            cfg = self.results_config("kimi_code-kimi_k3_1_pro-max")
+            self.assertEqual((cfg["usage_gateway"], cfg["usage_source"]), (True, "usage gateway"))
+
+    def test_kimi_code_refusals(self):
+        gw = str(self.gateway_dir())
+        for env, msg in ((dict(), "needs the usage gateway"),
+                         (dict(USAGE_GATEWAY=gw, EFFORT="minimal"), "EFFORT for AGENT=kimi-code"),
+                         (dict(USAGE_GATEWAY=gw, WEB_SEARCH="allowed"), "WEB_SEARCH=allowed is not available"),
+                         (dict(USAGE_GATEWAY=gw, AGENT_CONFIG=str(self.root / "c.toml")), "kimi-code takes none"),
+                         (dict(USAGE_GATEWAY=gw, KIMI_BASE_URL="https://api.kimi.com/coding/v1"), "must be Moonshot's API"),
+                         (dict(USAGE_GATEWAY=gw, KIMI_BASE_URL="http://127.0.0.1:8000/v1"), "must be Moonshot's API"),
+                         (dict(USAGE_GATEWAY=gw, KIMI_BASE_URL="https://api.moonshot.ai/v2"), "must be Moonshot's API")):
+            p = self.run_batch(**{"AGENT": "kimi-code", "MODEL": "moonshot/kimi-k3.1-pro", "EFFORT": "max",
+                                  "GATEWAY_BIND": "127.0.0.1", "KIMI_API_KEY": "k" * 20, **env})
             self.assertEqual(p.returncode, 2, (env, p.stdout + p.stderr))
             self.assertIn(msg, p.stdout + p.stderr, env)
             self.assertEqual(self.calls(), [], env)

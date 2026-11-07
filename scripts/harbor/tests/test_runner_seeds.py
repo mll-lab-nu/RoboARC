@@ -162,7 +162,7 @@ class RunnerSeeds(unittest.TestCase):
         (bin_dir / "nvidia-smi").chmod(0o755)
         self.log = self.root / "harbor.jsonl"
         self.env = {k: v for k, v in os.environ.items()
-                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_", "FAKE_", "SEEDS"))}
+                    if not k.startswith(("GATEWAY", "USAGE_GATEWAY", "TOKEN_BUDGET", "OPENAI_", "ANTHROPIC_", "CODEX_", "DEEPSEEK_", "KIMI_", "FAKE_", "SEEDS"))}
         self.env.update(PATH=f"{bin_dir}:{os.path.dirname(sys.executable)}:{os.environ.get('PATH', '')}",
                         FAKE_HARBOR_LOG=str(self.log), MODEL="openai/test-model", EFFORT="high",
                         JOBS=str(self.root / "jobs"), RESULTS=str(self.root / "results"),

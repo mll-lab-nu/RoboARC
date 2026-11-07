@@ -4,7 +4,7 @@
 #   MODEL=<provider/model> scripts/harbor/run_agent_batch.sh <batch-name> <base> [<base> ...]
 #   (<base> = a task name without its -privileged / -standard; docs/RUNNING.md)
 # Official runs use Harbor's native agents only (PROTOCOL D11): no adapter. Env (defaults):
-#   AGENT        codex | claude-code | dsh | antigravity (codex)  MODEL   the -m model (required, e.g. openai/<model>)
+#   AGENT        codex | claude-code | dsh | antigravity | kimi-code (codex)  MODEL   the -m model (required, e.g. openai/<model>)
 #                dsh = DSH, the DeepSeek Harness, through RoboARC's own Harbor agent scripts/harbor/agents/dsh_acp.py
 #                (Harbor's ACP agent with dsh installed; not a Harbor built-in: whether its results are official is the
 #                benchmark owner's call, PROTOCOL D11), e.g. AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash EFFORT=high
@@ -14,6 +14,11 @@
 #                reached through the usage gateway's Gemini translation (USAGE_GATEWAY required; gemini_chat.py);
 #                official for Antigravity + Gemini (decided 2026-11-01), e.g. AGENT=antigravity
 #                MODEL=google/gemini-4-argon EFFORT=high (EFFORT: minimal, low, medium, high, xhigh or default)
+#                kimi-code = Kimi Code CLI (npm @moonshot-ai/kimi-code 2.5.2) through RoboARC's own Harbor agent
+#                scripts/harbor/agents/kimi_code_cli.py, its web tools off, on Moonshot's API reached through the usage
+#                gateway's moonshot provider (USAGE_GATEWAY required: its token budget is the trial's; whether its
+#                results are official is the benchmark owner's call), e.g. AGENT=kimi-code
+#                MODEL=moonshot/kimi-k3.1-pro EFFORT=max (EFFORT: low, medium, high, xhigh, max or default)
 #   EFFORT       reasoning effort, --ak reasoning_effort=<EFFORT> (xhigh); `default` passes none
 #   AK           more agent options, e.g. "--ak reasoning_summary=detailed"
 #   WEB_SEARCH   disabled (default) = the harness offers the model no web search: Codex --ak web_search=disabled,
@@ -33,6 +38,7 @@
 #     DeepSeek (dsh)                 DEEPSEEK_API_KEY (DeepSeek's API, api.deepseek.com, added to the job's egress)
 #     Chat Completions (antigravity) ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1 (the server's base: <base>/chat/completions)
 #                                    and GEMINI_API_KEY (the key it expects, sent as a Bearer token; any value if none)
+#     Moonshot (kimi-code)           KIMI_API_KEY; KIMI_BASE_URL https://api.moonshot.ai/v1 (default) or https://api.moonshot.cn/v1
 #   MODES        "privileged standard"; add `standard-realtime` for <base>-standard-realtime where it exists
 #   K            trials per task and mode (1). Each trial is a Harbor job of its own (`-k 1`) and runs from its own seed:
 #                the K trials of a task get distinct seeds of its `[metadata.seeds] allowed`, without replacement, in an
@@ -220,13 +226,19 @@ JOBS="$(abspath "$JOBS")"; ENV_FILE="$(abspath "$ENV_FILE")"; AGENT_CONFIG="$(ab
 TOKEN_BUDGET_IN="${TOKEN_BUDGET_IN:-100000000}"; TOKEN_BUDGET_OUT="${TOKEN_BUDGET_OUT:-10000000}"
 [ -z "$USAGE_GATEWAY" ] || [[ "$TOKEN_BUDGET_IN$TOKEN_BUDGET_OUT" =~ ^[0-9]+$ && -n "$TOKEN_BUDGET_IN" && -n "$TOKEN_BUDGET_OUT" ]] \
   || { echo "TOKEN_BUDGET_IN / TOKEN_BUDGET_OUT must be whole numbers (0 = no limit)" >&2; exit 2; }
-case "$AGENT" in codex|claude-code|dsh|antigravity) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), dsh (scripts/harbor/agents/dsh_acp.py) or antigravity (scripts/harbor/agents/antigravity_sdk.py)" >&2; exit 2 ;; esac
-case "$AGENT" in dsh|antigravity) [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; $AGENT takes none" >&2; exit 2; } ;; esac
+case "$AGENT" in codex|claude-code|dsh|antigravity|kimi-code) ;; *) echo "AGENT must be a Harbor native agent, codex or claude-code (PROTOCOL D11), dsh (scripts/harbor/agents/dsh_acp.py), antigravity (scripts/harbor/agents/antigravity_sdk.py) or kimi-code (scripts/harbor/agents/kimi_code_cli.py)" >&2; exit 2 ;; esac
+case "$AGENT" in dsh|antigravity|kimi-code) [ -n "$AGENT_CONFIG" ] && { echo "AGENT_CONFIG is for Codex and Claude Code; $AGENT takes none" >&2; exit 2; } ;; esac
 if [ "$AGENT" = antigravity ]; then
   # the model server speaks Chat Completions only: the gateway translates the SDK's Gemini requests (gemini_chat.py)
   [ -n "$USAGE_GATEWAY" ] || { echo "AGENT=antigravity needs the usage gateway (USAGE_GATEWAY=scripts/usage_gateway): it translates the SDK's Gemini requests for the Chat Completions server" >&2; exit 2; }
   case "$EFFORT" in minimal|low|medium|high|xhigh|default) ;; *) echo "EFFORT for AGENT=antigravity: minimal, low, medium, high, xhigh or default (the SDK's thinking levels)" >&2; exit 2 ;; esac
   [ "$WEB_SEARCH" = disabled ] || { echo "AGENT=antigravity has its web tools off (agents/antigravity/run_agent.py); WEB_SEARCH=allowed is not available" >&2; exit 2; }
+fi
+if [ "$AGENT" = kimi-code ]; then
+  # Kimi Code has no token budget of its own: the gateway's is the trial's (PROTOCOL §5); Moonshot is reached through it
+  [ -n "$USAGE_GATEWAY" ] || { echo "AGENT=kimi-code needs the usage gateway (USAGE_GATEWAY=scripts/usage_gateway): Moonshot's API is reached through its moonshot provider, and its token budget is the trial's" >&2; exit 2; }
+  case "$EFFORT" in low|medium|high|xhigh|max|default) ;; *) echo "EFFORT for AGENT=kimi-code: low, medium, high, xhigh, max or default (Kimi Code's thinking efforts; Kimi K3.1 Pro takes low, high and max)" >&2; exit 2 ;; esac
+  [ "$WEB_SEARCH" = disabled ] || { echo "AGENT=kimi-code has its web tools off (agents/kimi_code_cli.py); WEB_SEARCH=allowed is not available" >&2; exit 2; }
 fi
 # Run id (D4): harness = the agent name with - -> _; model = MODEL's last path segment, lower case, gpt-<n> joined
 # (gpt-5 -> gpt5), a leading claude- dropped (claude-opus-4-1 -> opus_4_1), every other
@@ -247,6 +259,10 @@ if [ "$AGENT" = dsh ]; then
 fi
 if [ "$AGENT" = antigravity ]; then   # RoboARC's own Harbor agent, as dsh's
   AGENT_ARGS=(-a antigravity_sdk:AntigravitySdk -m "$MODEL")
+  export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
+fi
+if [ "$AGENT" = kimi-code ]; then     # RoboARC's own Harbor agent, as dsh's
+  AGENT_ARGS=(-a kimi_code_cli:KimiCodeCli -m "$MODEL")
   export PYTHONPATH="$H/agents${PYTHONPATH:+:$PYTHONPATH}"
 fi
 [ "$EFFORT" != default ] && AGENT_ARGS+=(--ak "reasoning_effort=$EFFORT")
@@ -272,6 +288,7 @@ case "$WEB_SEARCH" in
               codex) AGENT_ARGS+=(--ak web_search=disabled) ;;
               dsh) AGENT_ARGS+=(--ak web=false) ;;   # dsh's web_search and web_fetch tools off (a dsh patch file)
               antigravity) ;;                        # search_web, read_url_content, generate_image off in run_agent.py
+              kimi-code) ;;                          # WebSearch and FetchURL off in its config.toml (kimi_code_cli.py)
               *) AGENT_ARGS+=(--ak disallowed_tools=WebSearch,WebFetch) ;;
             esac ;;
   allowed) [ "$AGENT" = dsh ] && AGENT_ARGS+=(--ak web=true) ;;
@@ -417,6 +434,10 @@ if [ -n "$USAGE_GATEWAY" ]; then
     antigravity) agent_up=$(upstream ANTIGRAVITY_BASE_URL "")
          [[ "$agent_up" =~ ^http://[A-Za-z0-9.-]+:[0-9]+(/|$) ]] || { log "AGENT=antigravity: ANTIGRAVITY_BASE_URL must be the Chat Completions server's plain-HTTP base with a port, e.g. http://127.0.0.1:4141/v1 (env or ENV_FILE); got '${agent_up:-nothing}'"; exit 2; }
          gw_args+=(--gemini-chat) ;;   # the SDK's Gemini requests -> <base>/chat/completions (gemini_chat.py)
+    kimi-code) agent_up=$(upstream KIMI_BASE_URL https://api.moonshot.ai/v1)
+         [[ "$agent_up" =~ ^https://(api\.moonshot\.(ai|cn))/v1/?$ ]] || { log "AGENT=kimi-code: KIMI_BASE_URL must be Moonshot's API, https://api.moonshot.ai/v1 (the default) or https://api.moonshot.cn/v1, the hosts of the gateway's moonshot provider (api_paths.json); got '$agent_up'"; exit 2; }
+         agent_up="${agent_up%/}"
+         gw_args+=(--extra-host "${BASH_REMATCH[1]}") ;;   # Moonshot's API is no task's model host (scripts/set_agent_egress.py)
     *) agent_up=$(upstream OPENAI_BASE_URL https://api.openai.com/v1) ;;
   esac
   [[ "$agent_up" =~ ^http://([A-Za-z0-9.-]+:[0-9]+)(/|$) ]] && gw_args+=(--http-host "${BASH_REMATCH[1]}")
@@ -443,6 +464,8 @@ u.build_opener(u.ProxyHandler({})).open(sys.argv[1], timeout=15).read()' "$GW/_g
     AGENT_ARGS+=(--ae "GOOGLE_GEMINI_BASE_URL=$(via_gw "$agent_up")")
   elif [ "$AGENT" = dsh ]; then   # dsh's Messages root (its /v1/messages and /v1/files below it)
     AGENT_ARGS+=(--ae "DEEPSEEK_BASE_URL=$(via_gw "$(upstream DEEPSEEK_BASE_URL https://api.deepseek.com/anthropic)")")
+  elif [ "$AGENT" = kimi-code ]; then   # the CLI's base: its /chat/completions, /files and /models below it
+    AGENT_ARGS+=(--ae "KIMI_BASE_URL=$(via_gw "$agent_up")")
   else
     case "${CODEX_FORCE_AUTH_JSON:-}" in
       1|true|TRUE|yes) AGENT_ARGS+=(--ae "OPENAI_BASE_URL=$(via_gw https://chatgpt.com/backend-api/codex)") ;;

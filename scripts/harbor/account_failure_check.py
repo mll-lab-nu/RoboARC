@@ -21,6 +21,11 @@ whose model calls had all answered 200 and that ended at its time budget):
   dsh      (AGENT=dsh, scripts/harbor/agents/dsh_acp.py) writes no structured account record of its own (agent/acp.txt is
            the ACP runner's output): only the gateway rule applies; a failing account shows as Harbor exceptions, so
            its trials are not results (write_task_results.py), but the lane does not stop by itself.
+  kimi     (AGENT=kimi-code, scripts/harbor/agents/kimi_code_cli.py: agent/kimi-code.txt; the gateway is required) the
+           LAST model call of <trial>/gateway/usage.jsonl (a forwarded /chat/completions request) was answered 401, 402
+           or 429 by the provider: a key Moonshot does not accept, or a 429 Kimi Code gave up on (its retries ran out,
+           or exceeded_current_quota_error, which it does not retry: the account's balance is spent). A 429 the CLI
+           retried past is followed by other calls.
 Prints one JSON line per trial {"trial", "stop", "why", "infra"} (long tokens in messages masked); exit 4 if any trial
 should stop its lane, 0 otherwise. --selftest checks the rules on synthetic trials (exit 0 = all as expected)."""
 import glob, json, os, re, sys, tempfile
@@ -97,6 +102,19 @@ def check(t: str) -> dict:
             msg = str(last.get("result") or last.get("subtype") or "")
             if PAT.search(msg):
                 why.append(f"claude: result: {mask(msg)}")
+    usage = os.path.join(t, "gateway", "usage.jsonl")
+    if os.path.exists(os.path.join(t, "agent", "kimi-code.txt")) and os.path.exists(usage):
+        last = None
+        for line in open(usage, errors="replace"):
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(rec, dict) and str(rec.get("path", "")).endswith("/chat/completions") and not rec.get("refused") \
+                    and rec.get("forwarded") is not False:
+                last = rec
+        if last and last.get("status") in (401, 402, 429):
+            why.append(f"kimi: the trial's last model call was answered HTTP {last['status']} by the provider")
     return {"trial": name, "stop": bool(why), "why": why, "infra": infra + [w for w in why if w not in infra]}
 
 
@@ -181,10 +199,31 @@ def selftest() -> int:
             good = r["stop"] == want
             bad += not good
             print(f"{'ok  ' if good else 'FAIL'} {name}: stop={r['stop']} (want {want})")
+        chat = lambda status, **k: {"path": "/v1/chat/completions", "status": status, **k}
+        kimi = {  # a Kimi Code trial (agent/kimi-code.txt): its model calls as the gateway recorded them
+            "kimi_quota_429": ([chat(200), chat(429)], True),
+            "kimi_bad_key_401": ([chat(401)], True),
+            "kimi_429_retried": ([chat(429), chat(429), chat(200)], False),
+            "kimi_refused_last": ([chat(200), chat(403, refused="server_tool")], False),
+            "kimi_upload_after": ([chat(429), {"path": "/v1/files", "status": 200}], True),
+            "kimi_unreachable_last": ([chat(200), chat(502, forwarded=False)], False),
+            "kimi_no_usage": (None, False)}
+        for name, (recs, want) in kimi.items():
+            t = os.path.join(root, name, f"{name}__x")
+            os.makedirs(os.path.join(t, "agent"))
+            open(os.path.join(t, "agent", "kimi-code.txt"), "w").write('{"role": "assistant", "content": "429"}\n')
+            if recs is not None:
+                os.makedirs(os.path.join(t, "gateway"))
+                with open(os.path.join(t, "gateway", "usage.jsonl"), "w") as f:
+                    f.writelines(json.dumps(r) + "\n" for r in recs)
+            r = check(t)
+            good = r["stop"] == want
+            bad += not good
+            print(f"{'ok  ' if good else 'FAIL'} {name}: stop={r['stop']} (want {want}) {r['why']}")
         r = check(os.path.join(root, "no_such_trial"))
         bad += r["stop"]
         print(f"{'ok  ' if not r['stop'] else 'FAIL'} missing trial dir: stop={r['stop']} (want False)")
-    print(f"selftest: {len(cases) + 3 - bad} / {len(cases) + 3} as expected")
+    print(f"selftest: {len(cases) + 3 + len(kimi) - bad} / {len(cases) + 3 + len(kimi)} as expected")
     return 1 if bad else 0
 
 
