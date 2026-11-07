@@ -83,11 +83,24 @@ harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model>
   gateway's own 502) reaches the SDK as 503, which its evaluation preset retries, as it does a 429; passed on as it
   came, a 500 ended a run at 2 h 46 min in Reuben's first run (decided 2026-11-02). The gateway's records keep the
   server's status (`agent_status`: the one given).
+- Kimi Code runs through RoboARC's own Harbor agent `scripts/harbor/agents/kimi_code_cli.py`: Kimi Code CLI (npm
+  `@moonshot-ai/kimi-code` 2.5.2) run as Harbor's own kimi-code agent runs it (`kimi --prompt ... --output-format
+  stream-json`), with `WebSearch` and `FetchURL` off in its `config.toml`, the model, key, base URL and thinking effort
+  in its `KIMI_MODEL_*` variables (`EFFORT` low, medium, high, xhigh or max; Kimi K3.1 Pro takes low, high and max, max
+  being its default), on Moonshot's API (`KIMI_API_KEY`; `KIMI_BASE_URL` `https://api.moonshot.ai/v1`, the default, or
+  `https://api.moonshot.cn/v1`) through the usage gateway (`AGENT=kimi-code` in the batch runner below, e.g.
+  `MODEL=moonshot/kimi-k3.1-pro EFFORT=max`). The gateway's `moonshot` provider forwards its chat completions and the
+  image and video uploads it makes before it shows the model an image, and records the reasoning setting each request
+  sent (`request_fields`: `thinking`). The CLI takes its prompt on its command line only, so its argv holds the
+  instruction, as Codex's does. It is not a Harbor built-in: whether its results are official is the benchmark
+  owner's call. trajectory.json needs Harbor 0.25 (its converter of the CLI's session journal).
 - Turn the harness's provider-side tools off ("No tool outside the container" below): Codex `--ak web_search=disabled`
   and `--ak config=<the output of python3 scripts/harbor/codex_tools_off.py [your config.toml]>`; Claude Code
   `--ak disallowed_tools=WebSearch,WebFetch`; dsh `--ak web=false` (a dsh patch file turns its web_search and web_fetch
   tools off); Antigravity's are off in `agents/antigravity/run_agent.py` (its `search_web` is a second model call that
-  declares Google Search, which the provider runs; the gateway also refuses any Gemini request that declares one).
+  declares Google Search, which the provider runs; the gateway also refuses any Gemini request that declares one);
+  Kimi Code's in its `config.toml` (`agents/kimi_code_cli.py`; Moonshot's own search is a declared tool of type
+  `builtin_function`, which the gateway refuses).
 - Use an absolute `-o`. jobs/ is ignored by git; results never go into the repository.
 - The trial's record is `<jobs>/<job>/<trial>/`: `agent/` (the harness's log and trajectory), `verifier/`
   (`reward.txt` 1 or 0, `reward.json`, `replay.mp4`, the resource-limits record), `artifacts/` (privileged: the agent's
@@ -134,7 +147,7 @@ header of the script lists every variable; the main ones:
 
 | what | how |
 |---|---|
-| agent, model, effort | `AGENT=codex`, `claude-code`, `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`) or `antigravity` (the Antigravity SDK, `scripts/harbor/agents/antigravity_sdk.py`: `MODEL=google/<model>`, `ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1` (a Chat Completions server), `GEMINI_API_KEY`, the usage gateway on; `EFFORT` minimal, low, medium, high, xhigh or default), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
+| agent, model, effort | `AGENT=codex`, `claude-code`, `dsh` (DSH, the DeepSeek Harness, `scripts/harbor/agents/dsh_acp.py`: `MODEL=deepseek/deepseek-v4.1-flash`, `DEEPSEEK_API_KEY`) or `antigravity` (the Antigravity SDK, `scripts/harbor/agents/antigravity_sdk.py`: `MODEL=google/<model>`, `ANTIGRAVITY_BASE_URL=http://<host>:<port>/v1` (a Chat Completions server), `GEMINI_API_KEY`, the usage gateway on; `EFFORT` minimal, low, medium, high, xhigh or default) or `kimi-code` (Kimi Code CLI, `scripts/harbor/agents/kimi_code_cli.py`: `MODEL=moonshot/<model>`, `KIMI_API_KEY`, `KIMI_BASE_URL` Moonshot's API, the usage gateway on; `EFFORT` low, medium, high, xhigh, max or default), `MODEL` (required), `EFFORT` (`--ak reasoning_effort`, default `xhigh`; `default` passes none), more options in `AK` |
 | credentials | as Harbor's agents read them (above); `ENV_FILE` = Harbor's `--env-file` (`.env.example` lists the variables). Azure OpenAI and retries: a Codex `config.toml` in `AGENT_CONFIG` (`--ak config=`), with `request_max_retries` / `stream_max_retries`. For long OpenRouter runs declare OpenRouter as a provider of its own in that file (`model_provider = "openrouter"`, `wire_api = "responses"`, `supports_websockets = false`) |
 | trials | `K` per task and mode (1); each its own job and seed |
 | seeds in turn | `SEEDS="0 1 2"`: only the trials of those seeds, every task's trials of the lowest seed first ("Running the seeds in turn" below); unset (default) = every trial, task by task |
@@ -440,7 +453,9 @@ the harness's own (Harbor's `result.json`, `agent_result`), where the harness re
 With `USAGE_GATEWAY=<dir>`, the batch runner routes the agent's model-API calls through a transparent usage gateway
 installed in `<dir>` (`gateway.py`, `rawlog.py`, `api_paths.json`). The repository ships one in `scripts/usage_gateway/`
 (`USAGE_GATEWAY=scripts/usage_gateway`), taken from the shared benchmark repository (PROVENANCE.md), with DeepSeek's
-Messages API added for dsh (`AGENT=dsh` points dsh's `DEEPSEEK_BASE_URL` at the gateway); another
+Messages API added for dsh (`AGENT=dsh` points dsh's `DEEPSEEK_BASE_URL` at the gateway) and Moonshot's API for Kimi
+Code (`AGENT=kimi-code`: its chat completions, its image and video uploads, and the request's `thinking` recorded as
+`request_fields`; the gateway's module doc); another
 gateway that takes the runner's options works too. A `USAGE_GATEWAY` without `gateway.py` stops the runner at start,
 before any job. The gateway forwards model calls only, unchanged but for the image cap below (the agent keeps its own
 credentials), records each

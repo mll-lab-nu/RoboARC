@@ -97,7 +97,8 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   `EFFORT=default`:
   - The runner passes it to the agent as Harbor's `reasoning_effort` (for Codex `model_reasoning_effort`, over the
     value in an `AGENT_CONFIG` file; for Antigravity the SDK's thinking level, `xhigh` being its `extra_high`, which
-    the gateway sends on as `reasoning_effort`). Without `EFFORT` it passes `xhigh`.
+    the gateway sends on as `reasoning_effort`; for Kimi Code its thinking effort, which it sends as `thinking.effort`).
+    Without `EFFORT` it passes `xhigh`.
   - `EFFORT=default` passes no level. The model then runs at whatever level its harness or provider picks, and no
     record says which. Codex, for example, takes its default level from the provider's model list
     (`GET <base URL>/models`); an endpoint without that list (it answers 404) leaves the level to the provider.
@@ -125,6 +126,14 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
     ```bash
     head -qn1 jobs/smoke/smoke-*-roboarc-interlocked-claws-08-i01/*/agent/antigravity.txt
     ```
+    With Kimi Code, the gateway records what each model call sent (`request_fields`): every call must print your level
+    (`{'type': 'enabled', 'effort': 'max', ...}` with `EFFORT=max`), and the CLI's config must turn `WebSearch` and
+    `FetchURL` off:
+    ```bash
+    python3 -c 'import collections,json,sys; print(collections.Counter(str(json.loads(l).get("request_fields", {}).get("thinking")) for f in sys.argv[1:] for l in open(f) if "/chat/completions" in l))' \
+      jobs/smoke/smoke-*-roboarc-interlocked-claws-08-i01/*/gateway/usage.jsonl
+    grep -h disabled jobs/smoke/smoke-*-roboarc-interlocked-claws-08-i01/*/agent/.kimi-code/config.toml
+    ```
   - `jobs/smoke/smoke.summary.md` has the column `usage gateway in / out`, with two numbers in both rows: the agent's
     model calls went through the usage gateway. Without that column, or with `-` in a row, the agent's container did
     not reach the gateway. The gateway listens on the Docker bridge address (172.17.0.1), and a host firewall that
@@ -132,7 +141,8 @@ AGENT=codex MODEL=openai/<model> EFFORT=high K=1 ENV_FILE=$PWD/.env \
   - the gateway was on as in the command. The `runner` line of `jobs/smoke/smoke.log` names it (`usage gateway
     <checkout>/scripts/usage_gateway`, not `usage gateway off`), and each job's `usage_recording.json` says
     `"usage_gateway": true, "raw_bodies": false` and `"image_cap": 50` (10 with Gemini 4 Argon, and `"image_bytes":
-    4718592`; with Antigravity also `"api_translation": "gemini-chat"`);
+    4718592`; with Antigravity also `"api_translation": "gemini-chat"`); with Kimi Code each trial has
+    `agent/trajectory.json` (Harbor 0.25);
   - your provider answered the model calls. This counts the HTTP statuses of all the smoke's model calls:
     ```bash
     python3 -c 'import collections,json,sys; print(collections.Counter(json.loads(l)["status"] for f in sys.argv[1:] for l in open(f)))' \
@@ -173,9 +183,11 @@ Credentials go in an env file, `ENV_FILE` (copy `.env.example`), as Harbor's age
 | GitHub Copilot proxy (Codex, Claude Code) | Codex: `OPENAI_BASE_URL=http://127.0.0.1:<port>/v1`; Claude Code: `ANTHROPIC_BASE_URL=http://127.0.0.1:<port>` (the proxy's plain-HTTP address with its port, on the run's own host); and `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` set to what the proxy expects (at least 16 characters, any value if it needs none: the key scan of `send_results.sh` needs one). Official, decided 2026-11-02 |
 | DeepSeek API key (DSH) | `DEEPSEEK_API_KEY`, with `AGENT=dsh MODEL=deepseek/deepseek-v4.1-flash`: DSH, the DeepSeek Harness, through `scripts/harbor/agents/dsh_acp.py` |
 | Chat Completions server (Antigravity) | `ANTIGRAVITY_BASE_URL=http://127.0.0.1:<port>/v1` (the server's base, plain HTTP with a port: a proxy on the run's own host; the gateway calls `<base>/chat/completions`) and `GEMINI_API_KEY` (the key the server expects, sent as a Bearer token; at least 16 characters, any value if the server needs none: the key scan of `send_results.sh` needs one), with `AGENT=antigravity MODEL=google/<model>` and the usage gateway on: the Antigravity SDK through `scripts/harbor/agents/antigravity_sdk.py`, its Gemini requests translated by the gateway (docs/RUNNING.md "A single trial") |
+| Moonshot API key (Kimi Code) | `KIMI_API_KEY`, and `KIMI_BASE_URL=https://api.moonshot.cn/v1` for Moonshot's China platform (unset: `https://api.moonshot.ai/v1`), with `AGENT=kimi-code MODEL=moonshot/<model>` (e.g. `moonshot/kimi-k3.1-pro`) and the usage gateway on: Kimi Code CLI through `scripts/harbor/agents/kimi_code_cli.py` (docs/RUNNING.md "A single trial"). A model whose context window is not 1M tokens: also `KIMI_MODEL_MAX_CONTEXT_SIZE=<its window>` |
 
 The agent's container reaches only these providers (with `AGENT=dsh` also DeepSeek's API; with `AGENT=antigravity` the
-gateway alone, which reaches your Chat Completions server), and with the usage gateway
+gateway alone, which reaches your Chat Completions server; with `AGENT=kimi-code` the gateway alone, which reaches
+Moonshot's API), and with the usage gateway
 on (below) only through it, and the package registries (PyPI, apt). Another provider does not answer: ask us first.
 An Azure AI Foundry endpoint (`*.services.ai.azure.com`) also needs `GATEWAY_EXTRA_HOSTS="*.services.ai.azure.com"`.
 
@@ -234,12 +246,15 @@ done
     refusals are 400 (past the token budget), 403 (not a model API call) and 502 (the provider cannot be reached).
     With `AGENT=antigravity`, a 500, 502 or 504 reaches the SDK as 503, which it retries (the records keep the
     provider's status). Codex retries a 429. When it gives up, the trial ends with `ApiRateLimitError`: it is not a result, and the
-    runner stops the lane. Every lane is one more trial calling the model at the same time, so your quota (requests
+    runner stops the lane. Kimi Code retries a 429 too, but not Moonshot's `exceeded_current_quota_error` (a 429 that
+    means the account's balance is spent); a Kimi Code trial whose last model call was answered 429 is not a result,
+    and the runner stops the lane. Every lane is one more trial calling the model at the same time, so your quota (requests
     and tokens per minute) must carry all the lanes you start. Raise the quota or start fewer lanes, and do that
     before a trial's one rerun.
 - **Keep as they are** (a result counts only when its run had them): Harbor's own agent (`AGENT=codex` or
   `claude-code`), or `AGENT=dsh` (RoboARC's own agent for DSH; whether its results count is the owner's call), or
-  `AGENT=antigravity` (RoboARC's own agent for the Antigravity SDK; official, decided 2026-11-01), with no
+  `AGENT=antigravity` (RoboARC's own agent for the Antigravity SDK; official, decided 2026-11-01), or `AGENT=kimi-code`
+  (RoboARC's own agent for Kimi Code CLI; whether its results count is the owner's call), with no
   adapter and no proxy that holds the credentials or changes the requests, but for a GitHub Copilot proxy in front of
   the agent (official, decided 2026-11-02) (the usage gateway holds no credentials, and
   its one change to a request, the image cap, is the runner's for the model; with `AGENT=antigravity` it also translates

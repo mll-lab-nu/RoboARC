@@ -6,6 +6,42 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### `AGENT=kimi-code`: Kimi Code CLI on Moonshot's API (runner, agent and gateway; nothing changes for another agent or provider)
+- **Why:** a collaborator runs the evaluation with Kimi Code CLI and Kimi K3.1 Pro on Moonshot's API. Harbor's own
+  kimi-code agent (Harbor 0.23 to 0.25) installs whatever version is latest, leaves the CLI's web tools on (FetchURL
+  fetches from the container itself), takes no reasoning effort, and writes trajectory.json from 0.25 on only; and the
+  usage gateway knew no Moonshot host. Whether these runs are official is the owner's call.
+- **The agent:** `scripts/harbor/agents/kimi_code_cli.py` (on Harbor's BaseInstalledAgent; Harbor 0.23, 0.24 and 0.25):
+  Kimi Code CLI 2.5.2 (npm `@moonshot-ai/kimi-code`; Node through Harbor's nvm snippet) installed during agent setup and
+  run as Harbor's own agent runs it (`kimi --prompt ... --output-format stream-json`, `agent/kimi-code.txt`,
+  `agent/.kimi-code/`); `WebSearch` and `FetchURL` off in its `config.toml`; the model, key (`KIMI_API_KEY`), base URL
+  (`KIMI_BASE_URL`), context window (1M unless `KIMI_MODEL_MAX_CONTEXT_SIZE`) and effort in its `KIMI_MODEL_*`
+  variables, the key in the process's environment only; `reasoning_effort` -> its thinking effort (low, medium, high,
+  xhigh, max; another is refused before the trial). The CLI takes a prompt on its command line only: its argv holds
+  the instruction, as Codex's does. trajectory.json and the token counts from Harbor 0.25's converter of the CLI's
+  session journal.
+- **The gateway:** a `moonshot` provider (`api.moonshot.ai`, `api.moonshot.cn`; pending the owner's approval, as
+  DeepSeek's): chat completions, the model list, and `POST /v1/files` as an upload path for images and videos only.
+  Kimi Code uploads every image it shows the model and reads a refusal there as a login failure that ends its run
+  (checked with the CLI's release binary against a stand-in Moonshot, 2026-11-06), so the upload is forwarded when it is
+  one multipart body with one listed purpose, without the JSON checks; another purpose is refused as a provider-run
+  tool. `record_fields`: each model request's `thinking` (and `reasoning_effort`) as sent, in usage.jsonl
+  (`request_fields`): Kimi Code sends the effort as `thinking.effort`. Moonshot's usage in a stream's last
+  `choices[0]` and its `cached_tokens` are read; the tool rule also looks at a message's `tools`.
+- **The runner:** `AGENT=kimi-code` needs `USAGE_GATEWAY` (its token budget is the trial's) and a `KIMI_BASE_URL` at
+  Moonshot's API (default `https://api.moonshot.ai/v1`; `.cn` for the China platform), given to the gateway as
+  `--extra-host` and to the agent as the gateway's route; an `EFFORT` outside the CLI's levels, `WEB_SEARCH=allowed` and
+  `AGENT_CONFIG` are refused at start. `scan_secrets.py` looks for `KIMI_API_KEY`; `account_failure_check.py` stops the
+  lane when a Kimi Code trial's last model call was answered 401, 402 or 429 (`exceeded_current_quota_error`, a spent
+  balance, is a 429 the CLI does not retry). `.env.example` and `bash-runners/start_lanes.sh` name the variables.
+- **Tests:** `test_kimi_code.py` (the agent against a stand-in environment, Harbor 0.24 and 0.25),
+  `test_usage_gateway_option.py` (arguments, both hosts, refusals), `test_paths.py` (the provider, uploads, the tool rule
+  on messages, an end-to-end run with Moonshot-shaped answers), `test_budget_stop.py` (both usage shapes),
+  `account_failure_check.py --selftest`. By hand, 2026-11-06: the CLI's 2.5.2 release binary through the gateway to a
+  stand-in Moonshot, offline: it sends `thinking: {"type": "enabled", "effort": "max", "keep": "all"}`, offers no web
+  tool, uploads the image (multipart, with a Content-Length) and refers to it as `ms://<id>`, and the gateway records
+  the usage, the upload and the effort; with the upload refused the run ends at its first image.
+
 ### Gemini 4 Argon on GitHub Copilot: requests kept under 4.5 MiB (runner and gateway; nothing changes for another model)
 - **Why:** six of the 90 trials of Reuben's Gemini 4 Argon privileged run (2026-11-04) were voided: a request of
   5.0 to 5.4 MiB, with 8 to 10 images, was answered 413 "Request Entity Too Large" and the SDK ended the run. The largest

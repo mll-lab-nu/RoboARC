@@ -12,8 +12,10 @@
 #   MODEL     the agent's model, e.g. openai/<model> (required)
 #   EFFORT    the reasoning level agreed with us, e.g. high (required; never `default`)
 #   RESULTS   a directory outside the repository for the per-trial results (required)
-#   AGENT     codex | claude-code | dsh | antigravity (codex); antigravity: MODEL=google/<the model server's id>, and in the
-#             ENV_FILE ANTIGRAVITY_BASE_URL (the Chat Completions server's plain-HTTP base) and GEMINI_API_KEY (docs/RUNNING.md)
+#   AGENT     codex | claude-code | dsh | antigravity | kimi-code (codex); antigravity: MODEL=google/<the model server's id>,
+#             and in the ENV_FILE ANTIGRAVITY_BASE_URL (the Chat Completions server's plain-HTTP base) and GEMINI_API_KEY;
+#             kimi-code: MODEL=moonshot/<model id> (e.g. moonshot/kimi-k3.1-pro), and in the ENV_FILE KIMI_API_KEY (and
+#             KIMI_BASE_URL for Moonshot's China platform) (docs/RUNNING.md)
 #   ENV_FILE  the credentials file (<repo>/.env, a copy of .env.example)
 #   JOBS      <repo>/jobs/agents; each lane's output: <JOBS>/../<batch>.seeds-<seed>.lane<k>.out
 #   LANES     4 per GPU: of GPUS when it is set (a host shared with other work), else of every GPU nvidia-smi lists
