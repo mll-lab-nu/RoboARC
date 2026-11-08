@@ -12,6 +12,8 @@ imported in load(), never when this module is.
     molmoact2-bf16   the same in bfloat16 (the model card's smaller path, under 16 GB)
     groot       nvidia/GR00T-N1.7-DROID in bfloat16: absolute joint positions + the gripper position (binarised at 0.5),
                 `droid`                                                         (NVIDIA/Isaac-GR00T's environment)
+    cosmos3     nvidia/Cosmos3-Nano-Policy-DROID: absolute joint positions + the gripper position (binarised at 0.5),
+                `droid`, three images                                       (NVIDIA/cosmos-framework's environment)
     hold        stub_server's HoldPolicy instead of a model (numpy only), for checking a setup: `droid`
 
 A model gets the droid convention's observation with DROID's q7 (the adapter's wrist offset applied, no "roboarc"
@@ -157,6 +159,30 @@ class Gr00tModel(DroidModel):
         return {"actions": groot_actions(out)}
 
 
+class Cosmos3Model(DroidModel):
+    """nvidia/Cosmos3-Nano-Policy-DROID (16B) through NVIDIA/cosmos-framework's RoboLab policy service, asked as
+    RoboLab's Cosmos3 client (policies/cosmos3) asks it (cosmos3_request): three DROID frames at 640 x 360, the wrist
+    and both exterior cameras (the service puts them in one 640 x 540 image, the exteriors at half size below the
+    wrist, as that client does; scripts/vla_droid.sh gives front_oblique, on the robot's right, as exterior 2), the
+    joints and the gripper position (the service flips the gripper both ways); the service's defaults: 4 UniPC steps,
+    guidance 3, a seed per query drawn from seed 0. 32 actions back, absolute joint positions and the gripper position,
+    binarised at 0.5 as that client executes them (cosmos3_actions); that client executes all 32 (--horizon 32)."""
+    repo, revision = "nvidia/Cosmos3-Nano-Policy-DROID", "24aa5d14a6cbef19ac6930bd2bf67c9c08e56be0"
+    code = "bbd4a67c3cf54cc6699464ad1259f3a0f6537da9"     # NVIDIA/cosmos-framework
+    image_size = 640
+
+    def __init__(self):
+        self.name = f"{self.repo} ({self.revision[:7]})"
+        self.version = {"cosmos_framework": self.code, "model": self.repo, "revision": self.revision}
+
+    def _load(self) -> None:
+        from cosmos_framework.scripts.action_policy_server_robolab import RobolabPolicyService, RobolabServerArgs
+        self.policy = RobolabPolicyService(RobolabServerArgs(checkpoint_path=self.repo, hf_revision=self.revision))
+
+    def infer(self, obs: dict) -> dict:
+        return {"actions": cosmos3_actions(self.policy.infer(cosmos3_request(obs))["action"])}
+
+
 def droid_frame(image: np.ndarray) -> np.ndarray:
     """A square image the runner padded from a 16:9 camera (resize_with_pad) -> its middle 9/16 of the rows: DROID's
     frame shape (320 x 180 from 320 x 320)."""
@@ -218,6 +244,21 @@ def groot_actions(out: dict) -> np.ndarray:
     return a
 
 
+def cosmos3_request(obs: dict) -> dict:
+    """The RoboLab policy service's request from a droid-convention observation: the three images cut back to DROID's
+    16:9 frame (640 x 360 from the runner's 640 x 640), DROID's joints and gripper position as they are."""
+    return {**{k: droid_frame(np.asarray(obs[k], dtype=np.uint8)) for k in IMAGES},
+            JOINTS: np.asarray(obs[JOINTS], dtype=np.float32).reshape(7),
+            GRIPPER: np.asarray(obs[GRIPPER], dtype=np.float32).reshape(1), "prompt": obs["prompt"]}
+
+
+def cosmos3_actions(action) -> np.ndarray:
+    """The service's (H, 8) actions -> (H, 8) float64, the gripper position binarised at 0.5."""
+    a = np.array(action, dtype=np.float64)
+    a[:, 7] = a[:, 7] > 0.5
+    return a
+
+
 # The joint-position checkpoints take openpi's pi05_droid_jointpos_polaris config: DROID's joint-position inputs and
 # absolute outputs, the norm stats from the checkpoint. Their files were uploaded on 2025-12-13 (pi05_droid 2025-09-08).
 MODELS = {"jointpos": OpenpiModel("pi05_droid_jointpos_polaris", "gs://openpi-assets/checkpoints/pi05_droid_jointpos",
@@ -230,4 +271,5 @@ MODELS = {"jointpos": OpenpiModel("pi05_droid_jointpos_polaris", "gs://openpi-as
           "molmoact2": MolmoAct2Model("float32"),
           "molmoact2-bf16": MolmoAct2Model("bfloat16"),
           "groot": Gr00tModel(),
+          "cosmos3": Cosmos3Model(),
           "hold": HoldModel()}

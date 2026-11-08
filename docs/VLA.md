@@ -115,7 +115,8 @@ buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking.
 
 ### DROID-trained policies
 
-A policy trained on DROID (openpi's pi0.5-DROID, AI2's MolmoAct2-DROID, NVIDIA's GR00T-N1.7-DROID) needs three things
+A policy trained on DROID (openpi's pi0.5-DROID, AI2's MolmoAct2-DROID, NVIDIA's GR00T-N1.7-DROID and
+Cosmos3-Nano-Policy-DROID) needs three things
 DROID's robot has and the one-arm puzzles do not. RoboARC provides them without changing a task:
 
 - **Camera poses** (`--camera-poses droid`, `roboarc/vla/droid_cameras.py`): `front_oblique`, `agentview` and `wrist`
@@ -151,10 +152,16 @@ Each is called as its own DROID client calls it:
   rotation stored as Isaac-GR00T's DROID data stores it; it equals that repository's `demo_data/droid_sample` to
   3e-7); 40 actions per query, 15 executed (Isaac-GR00T's DROID client `examples/DROID/main_gr00t.py`), the gripper
   binarised at 0.5; 4 flow steps, bfloat16 (6.4 GB).
+- Cosmos3-Nano-Policy-DROID (Hugging Face `nvidia/Cosmos3-Nano-Policy-DROID` through NVIDIA's `cosmos-framework`, its
+  RoboLab policy service): three images, the wrist and both exterior cameras (`agentview` on the robot's left,
+  `front_oblique` on its right), each DROID's 16:9 frame at 640 x 360, as RoboLab's Cosmos3 client sends them (the
+  service puts them in one image, the exteriors at half size below the wrist); the joints and the gripper; 32
+  actions per query, all 32 executed (that client), the gripper binarised at 0.5; the service's defaults: 4 steps,
+  guidance 3, a seed per query drawn from seed 0.
 
 `scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
-puzzle image with each model's cameras (`agentview` as exterior 1 and the wrist; `--camera-poses droid`, MolmoAct2
-`molmoact2`), `--jobs` at a time against that one server, and stops the server.
+puzzle image with each model's cameras (`agentview` as exterior 1 and the wrist, Cosmos3 also `front_oblique` as
+exterior 2; `--camera-poses droid`, MolmoAct2 `molmoact2`), `--jobs` at a time against that one server, and stops the server.
 
 ```bash
 # once: openpi at the commit RoboARC was tested with (the checkpoints download on first use, 12 GB each, into
@@ -171,6 +178,13 @@ git checkout 66b87e64efd99dfd103241418113955cf64dfa9c && uv sync && uv pip insta
 git clone https://github.com/NVIDIA/Isaac-GR00T.git ~/Isaac-GR00T && cd ~/Isaac-GR00T
 git checkout 1a1837f20538b7d7e21f977a11a5aee14f99803c && git lfs pull --include "scripts/deployment/dgpu/wheels/*"
 uv sync && uv pip install msgpack==1.1.0 websockets
+# Cosmos3: NVIDIA's environment (Python 3.13, torch 2.13 for CUDA 13, so an NVIDIA driver 580 or newer) + the
+# protocol's msgpack; the repository asks for uv 0.11.29, and its server needs uv on PATH (it fetches the weights
+# with it on first use, 33 GB); found in ~/cosmos-framework or $COSMOS3
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/NVIDIA/cosmos-framework.git ~/cosmos-framework
+cd ~/cosmos-framework && git checkout bbd4a67c3cf54cc6699464ad1259f3a0f6537da9
+uvx uv@0.11.29 sync --all-extras --group=cu130-torch213-train --group=policy-server
+uvx uv@0.11.29 pip install msgpack==1.1.0
 
 scripts/vla_droid.sh --task lock-picking-03 --model jointpos --seed all --jobs 3 --out $RESULTS
 scripts/vla_droid.sh --task lock-picking-03 --model molmoact2 --jobs 3 --out $RESULTS
@@ -185,6 +199,7 @@ scripts/vla_droid.sh --task hedgehog-in-cage-02 --model hold --out $RESULTS -- -
 | `molmoact2` | Hugging Face `allenai/MolmoAct2-DROID` at `d8c1abd`, float32 | `droid` | 15, 320 |
 | `molmoact2-bf16` | the same in bfloat16 | `droid` | 15, 320 |
 | `groot` | Hugging Face `nvidia/GR00T-N1.7-DROID` at `05e7cc9`, bfloat16 | `droid` | 15, 320 |
+| `cosmos3` | Hugging Face `nvidia/Cosmos3-Nano-Policy-DROID` at `24aa5d1` | `droid` | 32, 640 |
 | `hold` | none: holds the arm (numpy only) | `droid` | 8, 224 |
 
 ### Rates
@@ -258,7 +273,9 @@ cloth on the GPU). Measured on an RTX 4090 with a loaded 32-core host:
 | per control step, horizon 25 / 8 | 36 ms | 22 ms |
 
 MolmoAct2-DROID's server holds 11 GB in bfloat16 and about 24 GB in float32 (its model card); a query (15 actions,
-1 s of simulated time) took 0.22 s on a free RTX 4090 and 0.84 s on a busy one (bfloat16).
+1 s of simulated time) took 0.22 s on a free RTX 4090 and 0.84 s on a busy one (bfloat16). On a free RTX PRO 6000
+(96 GB): GR00T-N1.7-DROID holds 6.4 GB and a query (40 actions) takes 63 ms; Cosmos3-Nano-Policy-DROID holds 33 GB and
+a query (32 actions, about 2 s of simulated time) takes 1.3 s.
 
 pi0.5-DROID through `scripts/vla_droid.sh`, model and episodes on one RTX 4090 that other jobs kept busy (8.5 GB of
 its memory taken): the model server holds 8.6 GB and an episode about 1 GB. One server keeps about 4 episodes busy:

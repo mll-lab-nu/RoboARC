@@ -11,8 +11,8 @@ import pytest
 import roboarc
 from roboarc.vla import conventions as C
 from roboarc.vla.droid_adapter import DROID_RESET, JOINTS, WRIST_OFFSET, DroidAdapter
-from roboarc.vla.droid_models import (IMAGES, OpenpiModel, droid_eef_9d, groot_actions, groot_request,
-                                      molmoact2_actions, molmoact2_inputs)
+from roboarc.vla.droid_models import (IMAGES, OpenpiModel, cosmos3_actions, cosmos3_request, droid_eef_9d,
+                                      groot_actions, groot_request, molmoact2_actions, molmoact2_inputs)
 from roboarc.vla.stub_server import HoldPolicy
 
 from test_vla import _serve, droid_env
@@ -183,6 +183,25 @@ def test_groot_actions_join_joints_and_binarised_gripper():
     a = groot_actions(out)
     assert a.shape == (40, 8) and np.allclose(a[:, :7], 0.3)
     assert np.array_equal(a[:, 7], (np.linspace(0, 1, 40) > 0.5).astype(float))
+
+
+def test_cosmos3_request_has_three_droid_frames():
+    """Both exterior cameras and the wrist as DROID's 640 x 360 frames, the joints (7,) and gripper (1,) as float32."""
+    cams = [np.full((480, 848, 3), 50 * (i + 1), np.uint8) for i in range(3)]
+    o = {k: C.resize_with_pad(c, 640, 640) for k, c in zip(IMAGES, cams)}
+    r = cosmos3_request({**o, JOINTS: DROID_RESET, "observation/gripper_position": np.array([0.25]), "prompt": "p"})
+    assert [r[k].shape for k in IMAGES] == [(360, 640, 3)] * 3
+    assert [int(r[k].min()) for k in IMAGES] == [int(r[k].max()) for k in IMAGES] == [50, 100, 150]
+    assert r[JOINTS].dtype == r["observation/gripper_position"].dtype == np.float32
+    assert np.allclose(r[JOINTS], DROID_RESET) and r["observation/gripper_position"].tolist() == [0.25]
+    assert r["prompt"] == "p"
+
+
+def test_cosmos3_actions_binarise_the_gripper():
+    action = np.c_[np.full((32, 7), 0.3, np.float32), np.linspace(0, 1, 32, dtype=np.float32)]
+    a = cosmos3_actions(action)
+    assert a.shape == (32, 8) and a.dtype == np.float64 and np.allclose(a[:, :7], 0.3)
+    assert np.array_equal(a[:, 7], (np.linspace(0, 1, 32) > 0.5).astype(float))
 
 
 @pytest.mark.sim
