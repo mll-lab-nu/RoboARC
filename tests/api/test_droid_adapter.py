@@ -11,7 +11,8 @@ import pytest
 import roboarc
 from roboarc.vla import conventions as C
 from roboarc.vla.droid_adapter import DROID_RESET, JOINTS, WRIST_OFFSET, DroidAdapter
-from roboarc.vla.droid_models import IMAGES, OpenpiModel, molmoact2_actions, molmoact2_inputs
+from roboarc.vla.droid_models import (IMAGES, OpenpiModel, droid_eef_9d, groot_actions, groot_request,
+                                      molmoact2_actions, molmoact2_inputs)
 from roboarc.vla.stub_server import HoldPolicy
 
 from test_vla import _serve, droid_env
@@ -142,6 +143,46 @@ def test_molmoact2_actions_clip_only_the_gripper():
     a = molmoact2_actions(raw)
     assert a.shape == (15, 8) and np.all(a[:, 6] == -0.4)
     assert a[:, 7].min() == 0.0 and a[:, 7].max() == 1.0 and np.allclose(a[3:12, 7], raw[0, 3:12, 7])
+
+
+# Two frames of Isaac-GR00T's demo_data/droid_sample (episode 0, frames 0 and 400): DROID's joints and the data's eef_9d
+DROID_SAMPLE = [([-0.22476, -0.4210602, -0.1281129, -2.3547568, -0.1962341, 2.2180023, 0.0263882],
+                 [0.418337, -0.1657044, 0.5165336, -0.2482533, -0.2758719, -0.9285823, 0.9672262, -0.1233633,
+                  -0.2219347]),
+                ([-0.1130906, 0.3409959, 0.0495907, -2.1415112, 0.1455035, 2.5047667, -0.2688557],
+                 [0.5729071, -0.0376473, 0.2453221, 0.0839255, -0.042899, -0.9955482, 0.9920771, 0.0973273, 0.079439])]
+
+
+@pytest.mark.parametrize("q, eef", DROID_SAMPLE)
+def test_groot_eef_9d_matches_droid_data(q, eef):
+    assert np.allclose(droid_eef_9d(q), eef, atol=1e-6)
+
+
+def test_groot_request_has_droid_frames_and_state():
+    """Exterior 1 and the wrist as DROID's 320 x 180 frames (batch 1, one time step), DROID's eef_9d, gripper and
+    joints as float32, and the prompt."""
+    cams = [np.full((480, 848, 3), 50 * (i + 1), np.uint8) for i in range(3)]
+    o = {k: C.resize_with_pad(c, 320, 320) for k, c in zip(IMAGES, cams)}
+    r = groot_request({**o, JOINTS: DROID_RESET, "observation/gripper_position": np.array([0.25]), "prompt": "p"})
+    video = r["video"]
+    assert sorted(video) == ["exterior_image_1_left", "wrist_image_left"]
+    assert all(v.shape == (1, 1, 180, 320, 3) and v.dtype == np.uint8 for v in video.values())
+    assert np.all(video["exterior_image_1_left"] == 50) and np.all(video["wrist_image_left"] == 150)
+    state = r["state"]
+    assert {k: v.shape for k, v in state.items()} == {"eef_9d": (1, 1, 9), "gripper_position": (1, 1, 1),
+                                                      "joint_position": (1, 1, 7)}
+    assert all(v.dtype == np.float32 for v in state.values())
+    assert np.allclose(state["eef_9d"][0, 0], droid_eef_9d(DROID_RESET), atol=1e-6)
+    assert np.allclose(state["joint_position"][0, 0], DROID_RESET) and state["gripper_position"][0, 0, 0] == 0.25
+    assert r["language"] == {"annotation.language.language_instruction": [["p"]]}
+
+
+def test_groot_actions_join_joints_and_binarised_gripper():
+    out = {"joint_position": np.full((1, 40, 7), 0.3, np.float32),
+           "gripper_position": np.linspace(0, 1, 40, dtype=np.float32).reshape(1, 40, 1)}
+    a = groot_actions(out)
+    assert a.shape == (40, 8) and np.allclose(a[:, :7], 0.3)
+    assert np.array_equal(a[:, 7], (np.linspace(0, 1, 40) > 0.5).astype(float))
 
 
 @pytest.mark.sim

@@ -10,6 +10,8 @@ imported in load(), never when this module is.
                 absolute joint positions + a continuous gripper position (its DROID client does not binarise it),
                 `droid`                                                            (allenai/molmoact2's environment)
     molmoact2-bf16   the same in bfloat16 (the model card's smaller path, under 16 GB)
+    groot       nvidia/GR00T-N1.7-DROID in bfloat16: absolute joint positions + the gripper position (binarised at 0.5),
+                `droid`                                                         (NVIDIA/Isaac-GR00T's environment)
     hold        stub_server's HoldPolicy instead of a model (numpy only), for checking a setup: `droid`
 
 A model gets the droid convention's observation with DROID's q7 (the adapter's wrist offset applied, no "roboarc"
@@ -25,6 +27,11 @@ JOINTS = "observation/joint_position"
 GRIPPER = "observation/gripper_position"
 IMAGES = ("observation/exterior_image_1_left", "observation/exterior_image_2_left", "observation/wrist_image_left")
 OPENPI_COMMIT = "215abfb217dbac7d5f1273282331b9b1866c0479"     # the openpi the pi0.5 checkpoints are served with
+# Franka's kinematics (modified DH: a, d, alpha per joint), then the flange 0.107 m along the last axis: panda_link8
+FRANKA_DH = ((0, 0.333, 0), (0, 0, -np.pi / 2), (0, 0.316, np.pi / 2), (0.0825, 0, np.pi / 2),
+             (-0.0825, 0.384, -np.pi / 2), (0, 0, np.pi / 2), (0.088, 0, np.pi / 2))
+FLANGE = 0.107
+DROID_EEF_ROTATION_CORRECT = np.array([[0, 0, -1], [-1, 0, 0], [0, 1, 0]], float)  # Isaac-GR00T's droid_frame.py
 
 
 class DroidModel:
@@ -122,6 +129,34 @@ class MolmoAct2Model(DroidModel):
         return {"actions": molmoact2_actions(out.actions)}
 
 
+class Gr00tModel(DroidModel):
+    """nvidia/GR00T-N1.7-DROID (3B, its backbone nvidia/Cosmos-Reason2-2B) through NVIDIA/Isaac-GR00T's Gr00tPolicy in
+    bfloat16, asked as that repository's DROID client (examples/DROID/main_gr00t.py) asks it (groot_request): its own
+    4 flow steps; 40 actions back, absolute joint positions and the gripper position, binarised at 0.5 as that client
+    executes them (groot_actions); that client executes 15 per query (scripts/vla_droid.sh: --horizon 15)."""
+    repo, revision = "nvidia/GR00T-N1.7-DROID", "05e7cc97e40dbd33b0890c35cc0214fcb0547ab5"
+    code = "1a1837f20538b7d7e21f977a11a5aee14f99803c"     # NVIDIA/Isaac-GR00T
+    backbone = "nvidia/Cosmos-Reason2-2B"                   # loaded by the model from its Hugging Face main
+    image_size = 320
+
+    def __init__(self):
+        self.name = f"{self.repo} ({self.revision[:7]}, bfloat16)"
+        self.version = {"isaac_gr00t": self.code, "model": self.repo, "revision": self.revision}
+
+    def _load(self) -> None:
+        import torch
+        from huggingface_hub import snapshot_download
+        from gr00t.policy.gr00t_policy import Gr00tPolicy
+        self.version["backbone"] = f"{self.backbone}@{snapshot_download(self.backbone).rsplit('/', 1)[-1]}"
+        torch.manual_seed(0)
+        self.policy = Gr00tPolicy("OXE_DROID_RELATIVE_EEF_RELATIVE_JOINT",
+                                  snapshot_download(self.repo, revision=self.revision), device="cuda")
+
+    def infer(self, obs: dict) -> dict:
+        out, _ = self.policy.get_action(groot_request(obs))
+        return {"actions": groot_actions(out)}
+
+
 def droid_frame(image: np.ndarray) -> np.ndarray:
     """A square image the runner padded from a 16:9 camera (resize_with_pad) -> its middle 9/16 of the rows: DROID's
     frame shape (320 x 180 from 320 x 320)."""
@@ -147,6 +182,42 @@ def molmoact2_actions(actions) -> np.ndarray:
     return a
 
 
+def droid_eef_9d(q) -> np.ndarray:
+    """GR00T-N1.7-DROID's eef_9d state (9,) from DROID's joints: DROID's cartesian position (panda_link8 in the base
+    frame, its rotation as DROID's extrinsic "xyz" Euler angles) converted as Isaac-GR00T's compute_eef_9d converts it:
+    the position, then the angles read as scipy's "XYZ", times its rotation correction, the first two rows. It equals
+    the eef_9d of Isaac-GR00T's demo_data/droid_sample from that data's joints (to 3e-7)."""
+    from scipy.spatial.transform import Rotation
+    T = np.eye(4)
+    for (a, d, alpha), theta in zip(FRANKA_DH + ((0, FLANGE, 0),), [*np.asarray(q, float).reshape(7), 0.0]):
+        ca, sa, ct, st = np.cos(alpha), np.sin(alpha), np.cos(theta), np.sin(theta)
+        T = T @ np.array([[ct, -st, 0, a], [st * ca, ct * ca, -sa, -d * sa], [st * sa, ct * sa, ca, d * ca],
+                          [0, 0, 0, 1]])
+    euler = Rotation.from_matrix(T[:3, :3]).as_euler("xyz")
+    rot = Rotation.from_euler("XYZ", euler).as_matrix() @ DROID_EEF_ROTATION_CORRECT
+    return np.r_[T[:3, 3], rot[:2].reshape(6)]
+
+
+def groot_request(obs: dict) -> dict:
+    """Gr00tPolicy's request (batch 1, one time step: the checkpoint's delta indices) from a droid-convention
+    observation, as Isaac-GR00T's DROID client builds it: the exterior 1 and wrist frames (DROID's 320 x 180,
+    droid_frame), the state (eef_9d, the gripper position, the joints; float32) and the prompt."""
+    q = np.asarray(obs[JOINTS], dtype=np.float64).reshape(7)
+    state = {"eef_9d": droid_eef_9d(q), "gripper_position": np.asarray(obs[GRIPPER]).reshape(1), "joint_position": q}
+    return {"video": {k: droid_frame(np.asarray(obs[IMAGES[i]], dtype=np.uint8))[None, None]
+                      for k, i in (("exterior_image_1_left", 0), ("wrist_image_left", 2))},
+            "state": {k: v.astype(np.float32)[None, None] for k, v in state.items()},
+            "language": {"annotation.language.language_instruction": [[obs["prompt"]]]}}
+
+
+def groot_actions(out: dict) -> np.ndarray:
+    """Gr00tPolicy's actions (batch 1) -> (H, 8) float64: the absolute joint positions and the gripper position,
+    binarised at 0.5."""
+    a = np.concatenate([out["joint_position"][0], out["gripper_position"][0]], axis=1).astype(np.float64)
+    a[:, 7] = a[:, 7] > 0.5
+    return a
+
+
 # The joint-position checkpoints take openpi's pi05_droid_jointpos_polaris config: DROID's joint-position inputs and
 # absolute outputs, the norm stats from the checkpoint. Their files were uploaded on 2025-12-13 (pi05_droid 2025-09-08).
 MODELS = {"jointpos": OpenpiModel("pi05_droid_jointpos_polaris", "gs://openpi-assets/checkpoints/pi05_droid_jointpos",
@@ -158,4 +229,5 @@ MODELS = {"jointpos": OpenpiModel("pi05_droid_jointpos_polaris", "gs://openpi-as
                                  "5cbf57c52f52e02e1d8cc27945b46ff2bb87e051d97a43fed7e11bc6c5bf4faa"),
           "molmoact2": MolmoAct2Model("float32"),
           "molmoact2-bf16": MolmoAct2Model("bfloat16"),
+          "groot": Gr00tModel(),
           "hold": HoldModel()}

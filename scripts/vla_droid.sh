@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# A DROID-trained policy (pi0.5-DROID, MolmoAct2-DROID) on RoboARC's one-arm puzzles in one command (docs/VLA.md,
-# "DROID-trained policies"): starts one DroidAdapter model server, runs every (task, seed) episode in the puzzle image
-# with DROID's camera poses, --jobs at a time against that server, then stops the server. Results:
+# A DROID-trained policy (pi0.5-DROID, MolmoAct2-DROID, GR00T-N1.7-DROID) on RoboARC's one-arm puzzles in one
+# command (docs/VLA.md, "DROID-trained policies"): starts one DroidAdapter model server, runs every (task, seed) episode
+# in the puzzle image with DROID's camera poses, --jobs at a time against that server, then stops the server. Results:
 # <out>/<task>/<run id>/s<seed>/e1/ (roboarc.vla.run). Every model gets two images, as the official DROID simulations
 # send them: the exterior camera on the robot's left (agentview) and the wrist; MolmoAct2 with agentview aimed as in
 # AI2's simulation (--camera-poses molmoact2), the others as in sim-evals (--camera-poses droid).
@@ -9,23 +9,25 @@
 #   scripts/vla_droid.sh --task lock-picking-03,buzz-wire-3d-06 --model jointpos --seed all --jobs 4 --out DIR
 #
 #   --task    one-arm puzzle ids, comma-separated (buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking)
-#   --model   jointpos (default) | velocity | polaris | molmoact2 | molmoact2-bf16 | hold (no model: checks the setup)
-#             (roboarc/vla/droid_models.py)
+#   --model   jointpos (default) | velocity | polaris | molmoact2 | molmoact2-bf16 | groot | hold (no model: checks
+#             the setup) (roboarc/vla/droid_models.py)
 #   --seed    0 (default) | 0,1,2 | all              --jobs    episodes at a time (default 1)
-#   --out     results root (default ./vla_results)   --run-id  default pi05-droid-<model>, <model>-droid (MolmoAct2)
+#   --out     results root (default ./vla_results)   --run-id  default pi05-droid-<model>, <model>-droid (the others)
 #   --policy  ws://HOST:PORT of a running DroidAdapter server of --model (then none is started)
 #   --port    the started server's port (default 8000);   after --: more roboarc.vla.run arguments
 #
 # Needs docker with the GPU, the protocol packages in $VLA_LIB (default .vla-lib; docs/VLA.md, Setup) and the model's
 # environment set up with `uv sync`: openpi at 215abfb in $OPENPI (default ~/openpi) for pi0.5, allenai/molmoact2 at
-# 66b87e6 in $MOLMOACT2 (default ~/molmoact2) for MolmoAct2. The server takes the GPU memory it uses (pi0.5-DROID
-# 8.6 GB; MolmoAct2-DROID 11 GB in bfloat16, about 24 GB in float32), each episode about 1 GB (docs/VLA.md).
+# 66b87e6 in $MOLMOACT2 (default ~/molmoact2) for MolmoAct2, NVIDIA/Isaac-GR00T at 1a1837f in $GROOT (default
+# ~/Isaac-GR00T) for GR00T. The server takes the GPU memory it uses (pi0.5-DROID 8.6 GB; MolmoAct2-DROID 11 GB in
+# bfloat16, about 24 GB in float32; GR00T-N1.7-DROID 6.4 GB), each episode about 1 GB (docs/VLA.md).
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 IMAGE=${IMAGE:-ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057}
 VLA_LIB=${VLA_LIB:-$REPO/.vla-lib}
 OPENPI=${OPENPI:-$HOME/openpi}
 MOLMOACT2=${MOLMOACT2:-$HOME/molmoact2}
+GROOT=${GROOT:-$HOME/Isaac-GR00T}
 TASKS="" MODEL=jointpos SEEDS=0 JOBS=1 OUT=$PWD/vla_results RUN_ID="" POLICY="" PORT=8000
 while [ $# -gt 0 ]; do
   case $1 in
@@ -45,6 +47,7 @@ ENV_DIR=$OPENPI CONV=droid HORIZON=8 SIZE=224 NAME=pi05-droid-$MODEL POSES=droid
 case $MODEL in
   velocity) CONV=droid-velocity;;
   molmoact2*) ENV_DIR=$MOLMOACT2 HORIZON=15 SIZE=320 NAME=$MODEL-droid POSES=molmoact2;;
+  groot) ENV_DIR=$GROOT HORIZON=15 SIZE=320 NAME=groot-n17-droid;;
 esac
 RUN_ID=${RUN_ID:-$NAME}
 [ "$SEEDS" = all ] && SEEDS=0,1,2

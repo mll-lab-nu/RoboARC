@@ -115,8 +115,8 @@ buzz-wire-3d, fiber-bundling, hedgehog-in-cage, lock-picking.
 
 ### DROID-trained policies
 
-A policy trained on DROID (openpi's pi0.5-DROID, AI2's MolmoAct2-DROID) needs three things DROID's robot has and the
-one-arm puzzles do not. RoboARC provides them without changing a task:
+A policy trained on DROID (openpi's pi0.5-DROID, AI2's MolmoAct2-DROID, NVIDIA's GR00T-N1.7-DROID) needs three things
+DROID's robot has and the one-arm puzzles do not. RoboARC provides them without changing a task:
 
 - **Camera poses** (`--camera-poses droid`, `roboarc/vla/droid_cameras.py`): `front_oblique`, `agentview` and `wrist`
   move to the poses of DROID's simulated evaluation scene (sim-evals), relative to the robot: the exterior cameras at
@@ -145,6 +145,12 @@ Each is called as its own DROID client calls it:
   query, all 15 executed (the checkpoint's `n_action_steps` and AI2's clients); 10 flow steps, the gripper clipped to
   [0, 1] (AI2's DROID server); float32 as the model card's reported runs (about 24 GB),
   `molmoact2-bf16` its bfloat16 path for a smaller GPU (under 16 GB).
+- GR00T-N1.7-DROID (Hugging Face `nvidia/GR00T-N1.7-DROID` through NVIDIA's `Isaac-GR00T`): two images, `agentview`
+  and the wrist, each DROID's 16:9 frame at 320 x 180, one frame per query (the checkpoint's video delta indices); the
+  state is the joints, the gripper and the hand's pose (`eef_9d`: Franka's `panda_link8` from its kinematics, the
+  rotation stored as Isaac-GR00T's DROID data stores it; it equals that repository's `demo_data/droid_sample` to
+  3e-7); 40 actions per query, 15 executed (Isaac-GR00T's DROID client `examples/DROID/main_gr00t.py`), the gripper
+  binarised at 0.5; 4 flow steps, bfloat16 (6.4 GB).
 
 `scripts/vla_droid.sh` runs it all in one command: it starts the adapter around the model, runs the episodes in the
 puzzle image with each model's cameras (`agentview` as exterior 1 and the wrist; `--camera-poses droid`, MolmoAct2
@@ -159,6 +165,12 @@ git checkout 215abfb217dbac7d5f1273282331b9b1866c0479 && GIT_LFS_SKIP_SMUDGE=1 u
 # the weights download on first use (22 GB, into ~/.cache/huggingface or $HF_HOME); found in ~/molmoact2 or $MOLMOACT2
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/allenai/molmoact2.git ~/molmoact2 && cd ~/molmoact2
 git checkout 66b87e64efd99dfd103241418113955cf64dfa9c && uv sync && uv pip install msgpack==1.1.0
+# GR00T: NVIDIA's environment + the protocol's msgpack and websockets; the weights download on first use (6.5 GB +
+# 4.6 GB for the backbone nvidia/Cosmos-Reason2-2B, whose licence must be accepted on Hugging Face); found in
+# ~/Isaac-GR00T or $GROOT
+git clone https://github.com/NVIDIA/Isaac-GR00T.git ~/Isaac-GR00T && cd ~/Isaac-GR00T
+git checkout 1a1837f20538b7d7e21f977a11a5aee14f99803c && git lfs pull --include "scripts/deployment/dgpu/wheels/*"
+uv sync && uv pip install msgpack==1.1.0 websockets
 
 scripts/vla_droid.sh --task lock-picking-03 --model jointpos --seed all --jobs 3 --out $RESULTS
 scripts/vla_droid.sh --task lock-picking-03 --model molmoact2 --jobs 3 --out $RESULTS
@@ -172,6 +184,7 @@ scripts/vla_droid.sh --task hedgehog-in-cage-02 --model hold --out $RESULTS -- -
 | `polaris` | openpi `polaris/pi05_droid_jointpos_polaris` (jointpos with PolaRiS' simulated data) | `droid` | 8, 224 |
 | `molmoact2` | Hugging Face `allenai/MolmoAct2-DROID` at `d8c1abd`, float32 | `droid` | 15, 320 |
 | `molmoact2-bf16` | the same in bfloat16 | `droid` | 15, 320 |
+| `groot` | Hugging Face `nvidia/GR00T-N1.7-DROID` at `05e7cc9`, bfloat16 | `droid` | 15, 320 |
 | `hold` | none: holds the arm (numpy only) | `droid` | 8, 224 |
 
 ### Rates
