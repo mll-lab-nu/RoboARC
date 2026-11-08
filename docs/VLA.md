@@ -150,7 +150,8 @@ Each is called as its own DROID client calls it:
   and the wrist, each DROID's 16:9 frame at 320 x 180, one frame per query (the checkpoint's video delta indices); the
   state is the joints, the gripper and the hand's pose (`eef_9d`: Franka's `panda_link8` from its kinematics, the
   rotation stored as Isaac-GR00T's DROID data stores it; it equals that repository's `demo_data/droid_sample` to
-  3e-7); 40 actions per query, 15 executed (Isaac-GR00T's DROID client `examples/DROID/main_gr00t.py`), the gripper
+  3e-7); 40 actions per query, 8 executed (as NVIDIA runs it in simulation, Isaac-GR00T `examples/RoboLab`; its real-robot
+  client `examples/DROID/main_gr00t.py` executes 15), the gripper
   binarised at 0.5; 4 flow steps, bfloat16 (6.4 GB).
 - Cosmos3-Nano-Policy-DROID (Hugging Face `nvidia/Cosmos3-Nano-Policy-DROID` through NVIDIA's `cosmos-framework`, its
   RoboLab policy service): three images, the wrist and both exterior cameras (`agentview` on the robot's left,
@@ -198,7 +199,7 @@ scripts/vla_droid.sh --task hedgehog-in-cage-02 --model hold --out $RESULTS -- -
 | `polaris` | openpi `polaris/pi05_droid_jointpos_polaris` (jointpos with PolaRiS' simulated data) | `droid` | 8, 224 |
 | `molmoact2` | Hugging Face `allenai/MolmoAct2-DROID` at `d8c1abd`, float32 | `droid` | 15, 320 |
 | `molmoact2-bf16` | the same in bfloat16 | `droid` | 15, 320 |
-| `groot` | Hugging Face `nvidia/GR00T-N1.7-DROID` at `05e7cc9`, bfloat16 | `droid` | 15, 320 |
+| `groot` | Hugging Face `nvidia/GR00T-N1.7-DROID` at `05e7cc9`, bfloat16 | `droid` | 8, 320 |
 | `cosmos3` | Hugging Face `nvidia/Cosmos3-Nano-Policy-DROID` at `24aa5d1` | `droid` | 32, 640 |
 | `hold` | none: holds the arm (numpy only) | `droid` | 8, 224 |
 

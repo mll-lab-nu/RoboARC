@@ -135,7 +135,8 @@ class Gr00tModel(DroidModel):
     """nvidia/GR00T-N1.7-DROID (3B, its backbone nvidia/Cosmos-Reason2-2B) through NVIDIA/Isaac-GR00T's Gr00tPolicy in
     bfloat16, asked as that repository's DROID client (examples/DROID/main_gr00t.py) asks it (groot_request): its own
     4 flow steps; 40 actions back, absolute joint positions and the gripper position, binarised at 0.5 as that client
-    executes them (groot_actions); that client executes 15 per query (scripts/vla_droid.sh: --horizon 15)."""
+    executes them (groot_actions). 8 executed per query (scripts/vla_droid.sh: --horizon 8), as NVIDIA runs it in
+    simulation (examples/RoboLab: --open-loop-horizon 8, part of its result); the real-robot client executes 15."""
     repo, revision = "nvidia/GR00T-N1.7-DROID", "05e7cc97e40dbd33b0890c35cc0214fcb0547ab5"
     code = "1a1837f20538b7d7e21f977a11a5aee14f99803c"     # NVIDIA/Isaac-GR00T
     backbone = "nvidia/Cosmos-Reason2-2B"                   # loaded by the model from its Hugging Face main

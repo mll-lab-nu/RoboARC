@@ -50,7 +50,7 @@ ENV_DIR=$OPENPI CONV=droid HORIZON=8 SIZE=224 NAME=pi05-droid-$MODEL POSES=droid
 case $MODEL in
   velocity) CONV=droid-velocity;;
   molmoact2*) ENV_DIR=$MOLMOACT2 HORIZON=15 SIZE=320 NAME=$MODEL-droid POSES=molmoact2;;
-  groot) ENV_DIR=$GROOT HORIZON=15 SIZE=320 NAME=groot-n17-droid;;
+  groot) ENV_DIR=$GROOT HORIZON=8 SIZE=320 NAME=groot-n17-droid;;   # as in NVIDIA's RoboLab (simulation) runs
   cosmos3) ENV_DIR=$COSMOS3 HORIZON=32 SIZE=640 NAME=cosmos3-nano-droid
     CAMERAS=$CAMERAS,observation/exterior_image_2_left=front_oblique
     # its server fetches the checkpoint with `uv run ... hf download`
