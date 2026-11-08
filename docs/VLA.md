@@ -150,9 +150,9 @@ Each is called as its own DROID client calls it:
   and the wrist, each DROID's 16:9 frame at 320 x 180, one frame per query (the checkpoint's video delta indices); the
   state is the joints, the gripper and the hand's pose (`eef_9d`: Franka's `panda_link8` from its kinematics, the
   rotation stored as Isaac-GR00T's DROID data stores it; it equals that repository's `demo_data/droid_sample` to
-  3e-7); 40 actions per query, 8 executed (as NVIDIA runs it in simulation, Isaac-GR00T `examples/RoboLab`; its real-robot
-  client `examples/DROID/main_gr00t.py` executes 15), the gripper
-  binarised at 0.5; 4 flow steps, bfloat16 (6.4 GB).
+  3e-7); 40 actions per query, 8 executed (as NVIDIA runs it in simulation, Isaac-GR00T `examples/RoboLab`; its
+  real-robot client `examples/DROID/main_gr00t.py` executes 15), the gripper binarised at 0.5; 4 flow steps, bfloat16
+  (6.4 GB).
 - Cosmos3-Nano-Policy-DROID (Hugging Face `nvidia/Cosmos3-Nano-Policy-DROID` through NVIDIA's `cosmos-framework`, its
   RoboLab policy service): three images, the wrist and both exterior cameras (`agentview` on the robot's left,
   `front_oblique` on its right), each DROID's 16:9 frame at 640 x 360, as RoboLab's Cosmos3 client sends them (the

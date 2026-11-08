@@ -1,6 +1,6 @@
-"""A DROID-trained policy (pi0.5-DROID, MolmoAct2-DROID, GR00T-N1.7-DROID: droid_models.py) on RoboARC's one-arm
-puzzles (one Franka arm with a Robotiq 2F-85, the `droid` conventions), served like stub_server's policies: no change to
-the runner or the tasks. The adapter knows no task: from the observation's joints and control step only, it makes the
+"""A DROID-trained policy (pi0.5-DROID, MolmoAct2-DROID, GR00T-N1.7-DROID, Cosmos3-Nano-Policy-DROID:
+droid_models.py) on RoboARC's one-arm puzzles (one Franka arm with a Robotiq 2F-85, the `droid` conventions), served
+like stub_server's policies: no change to the runner or the tasks. The adapter knows no task: from the observation's joints and control step only, it makes the
 robot DROID's on the two points the convention passes through as they are:
 
     wrist   RoboARC mounts the Robotiq on the Franka hand frame, -45 deg about the flange axis (topogym's
@@ -16,7 +16,7 @@ The cameras are the runner's: `--camera-poses droid` (droid_cameras.py) puts the
     python -m roboarc.vla.run --task <task> --policy ws://HOST:8000 --convention droid --policy-hz 15 --horizon 8 \
         --camera-poses droid
 
-scripts/vla_droid.sh runs both in one command. --model: jointpos, velocity, polaris, molmoact2, groot, hold
+scripts/vla_droid.sh runs both in one command. --model: jointpos, velocity, polaris, molmoact2, groot, cosmos3, hold
 (droid_models.py). The wrist offset applies to joint positions only: DROID's joint velocities (velocity) go as they
 are."""
 from __future__ import annotations
