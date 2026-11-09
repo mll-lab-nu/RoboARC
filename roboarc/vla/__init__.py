@@ -6,7 +6,9 @@ protocol) drives graded RoboARC episodes, on the same physics and grader as the 
 - conventions.py: openpi's ALOHA and DROID observation / action conventions on RoboARC's robots;
 - wire.py: the websocket + msgpack-numpy protocol (no openpi_client import: it pins numpy < 2);
 - run.py: the episode runner (live episode, the grader's fresh-process replay, results);
-- stub_server.py: a stand-in policy server (hold, or a replayed action sequence) for checking a setup."""
+- stub_server.py: a stand-in policy server (hold, or a replayed action sequence) for checking a setup;
+- droid_adapter.py: a DROID-trained policy served with DROID's wrist convention and start pose (one-arm puzzles);
+- droid_cameras.py: DROID's camera poses on the one-arm puzzles (the runner's --camera-poses droid)."""
 from .conventions import (ALOHA_CAMERAS, CONVENTIONS, AlohaConvention, Convention, DroidConvention, make_convention,
                           resize_with_pad, task_prompt)
 

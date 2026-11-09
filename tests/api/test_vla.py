@@ -295,6 +295,17 @@ def test_verdict_is_the_standard_rule():
     assert verdict(live, None, "ikea")["success"] == 1
 
 
+def test_parallel_writers_of_one_json_file(tmp_path):
+    """Runners of one run id write config.json at once; in containers every runner's pid is the same (1), so the
+    temporary names must not depend on it. Threads of one process share a pid too."""
+    from concurrent.futures import ThreadPoolExecutor
+    from roboarc.vla.run import _write_json
+    path = tmp_path / "config.json"
+    with ThreadPoolExecutor(8) as pool:
+        list(pool.map(lambda i: [_write_json(path, {"writer": i, "n": n}) for n in range(50)], range(8)))
+    assert json.loads(path.read_text())["n"] == 49 and [p.name for p in tmp_path.iterdir()] == ["config.json"]
+
+
 def test_default_step_limit():
     from roboarc.vla.run import default_max_steps
     t = roboarc.task_info("interlocked-claws-08")
@@ -319,7 +330,7 @@ def test_episode_end_to_end(tmp_path):
         acts = z["actions"]
     seeds = "0,1" if 1 in task.seeds else "0"         # seed 1: the same rows succeed on the appearance seed
     for name, policy, steps in (("replay", ReplayPolicy(acts, horizon=30), None), ("hold", HoldPolicy(30), 200)):
-        port, stop = _serve(policy)
+        port, stop = _serve(policy, {"version": {"model": name}})
         try:
             argv = ["--task", task.id, "--policy", f"ws://127.0.0.1:{port}", "--out", str(tmp_path / "out"),
                     "--run-id", name, "--renderer", "none"] + (["--max-steps", str(steps)] if steps else [])
@@ -329,6 +340,7 @@ def test_episode_end_to_end(tmp_path):
         run = tmp_path / "out" / task.id / name
         res = json.loads((run / "s0" / "e1" / "result.json").read_text())
         assert json.loads((run / "config.json").read_text())["config_key"].startswith("vla:")
+        assert res["server_metadata"] == {"version": {"model": name}}, res      # the served model's pinned versions
         if name == "replay":
             assert res["success"] == 1 and res["replay_success"] == 1 and res["deterministic"] == 1, res
             if task.reference_end_hash:

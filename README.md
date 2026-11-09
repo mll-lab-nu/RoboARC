@@ -113,6 +113,15 @@ python -m roboarc.vla.run --task roboarc-interlocked-claws-08-i01 --policy ws://
 Setup, observation and action layouts per robot, prompts, episodes and grading, results and GPU needs:
 [docs/VLA.md](docs/VLA.md).
 
+### pi0.5-DROID on the one-arm puzzles
+
+openpi's DROID-trained pi0.5 on the 18 one-arm puzzles, in one command (setup, options, tasks, what is adapted:
+[roboarc/vla/README.md](roboarc/vla/README.md)):
+
+```bash
+scripts/vla_droid.sh --task lock-picking-03,buzz-wire-3d-06 --jobs 2 --out results
+```
+
 ## Python API
 
 The package `roboarc` exposes every task as a Gymnasium-compatible environment, without Harbor. It runs the graded

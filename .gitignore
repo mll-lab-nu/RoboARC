@@ -11,3 +11,4 @@ __pycache__/
 /tasks/dataset.toml
 ikea/images/ikea-mujoco/context/
 *.oci.tar
+/.vla-lib/
