@@ -6,6 +6,20 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### `AGENT=dsh`: Harbor's ACP runner gets agent-client-protocol 0.12.1 (agent fix; nothing changes for another agent)
+- **Why:** Harbor (0.23 to 0.25, and its 0.25.1 development builds up to 2026-11-10) installs the ACP SDK
+  `agent-client-protocol` in its runner's venv during agent setup without a version, so a trial gets the latest
+  release. 1.0.0, on PyPI since 2026-11-09 00:34 UTC, has no `text_block`, which Harbor's `acp_runner.py` imports: from
+  then on every DSH trial's runner stopped at `ImportError: cannot import name 'text_block' from 'acp'`, before dsh
+  started and before any model call. Until then the latest release was 0.12.1 (uv does not pick the 1.0.0 release
+  candidates).
+- **Fix:** `scripts/harbor/agents/dsh_acp.py` installs `agent-client-protocol==0.12.1` for the runner, the release
+  every DSH trial before 2026-11-09 ran with; dsh, its launcher and the agent's environment are unchanged. A Harbor
+  release whose setup command no longer has that install line stops the agent's setup with an error naming it,
+  instead of installing an unpinned SDK.
+- **Tests:** `test_dsh_acp.py` checks the runner's install line (Harbor 0.23, 0.24 and 0.25). By hand, 2026-11-10:
+  Harbor's `acp_runner.py` of 0.23.0, 0.24.0 and 0.25.0 starts with SDK 0.12.1 and stops at that import with 1.0.0.
+
 ### `AGENT=kimi-code`: Kimi Code CLI on Moonshot's API (runner, agent and gateway; nothing changes for another agent or provider)
 - **Why:** a collaborator runs the evaluation with Kimi Code CLI and Kimi K3.1 Pro on Moonshot's API. Harbor's own
   kimi-code agent (Harbor 0.23 to 0.25) installs whatever version is latest, leaves the CLI's web tools on (FetchURL

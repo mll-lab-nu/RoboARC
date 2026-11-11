@@ -10,7 +10,8 @@ docker, no model, no network.
   the session's reasoning_effort is set after session/new and after a model change (skipped, and recorded, when the
   session does not offer the value); the prompt goes out only when the session's model is the one requested;
 - with Harbor importable (HARBOR_PYTHON, or the interpreter of `harbor` on PATH): DshAcp's registry entry, pinned version,
-  model value (one Harbor's runner matches among dsh's own option values) and launcher; the trial's token counts from
+  model value (one Harbor's runner matches among dsh's own option values), launcher and the runner's ACP SDK at 0.12.1
+  (1.0.0 has no text_block, which Harbor's acp_runner.py imports); the trial's token counts from
   dsh's own session records (every session's, in Harbor's convention: input = uncached + cache read + cache write).
 """
 import json
@@ -230,6 +231,25 @@ class HarborClass(unittest.TestCase):
         self.assertIn("- id: tool-web", patch)
         self.assertIn("search: false", patch)
         self.assertIn("fetch: false", patch)
+
+    def test_acp_sdk_pinned(self):
+        py = harbor_python()
+        if not py or subprocess.run([py, "-c", "import harbor"], capture_output=True).returncode != 0:
+            self.skipTest("Harbor is not importable (set HARBOR_PYTHON to its interpreter)")
+        code = textwrap.dedent(f"""
+            import json, sys, tempfile, pathlib
+            sys.path.insert(0, {str(REPO / 'scripts' / 'harbor' / 'agents')!r})
+            from dsh_acp import DshAcp
+            a = DshAcp(logs_dir=pathlib.Path(tempfile.mkdtemp()), model_name="deepseek/deepseek-v4.1-flash")
+            print(json.dumps({{k: a._build_dependencies_command(k) for k in ("local", "uvx")}}))
+        """)
+        p = subprocess.run([py, "-c", code], capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        for kind, cmd in json.loads(p.stdout.strip().splitlines()[-1]).items():
+            installs = [ln.split() for ln in cmd.splitlines() if "pip install --python" in ln]
+            # the runner's SDK at 0.12.1: 1.0.0 (2026-11-09) has no text_block, which Harbor's acp_runner.py imports
+            self.assertIn("agent-client-protocol==0.12.1", [w[-1] for w in installs], kind)
+            self.assertNotIn("agent-client-protocol", [w[-1] for w in installs], kind)
 
     def test_tokens_from_dsh_sessions(self):
         py = harbor_python()

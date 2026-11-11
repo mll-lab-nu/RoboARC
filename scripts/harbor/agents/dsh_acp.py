@@ -10,6 +10,10 @@ and turns them into agent/trajectory.json; this class adds what DSH needs:
 - install: Node (Harbor's nvm snippet) and `npm install -g @deepseek-ai/dsh@<version>` during agent setup, which still has
   the environment's network (a task's egress allowlist applies to the agent's run only), and a launcher for
   `dsh --profile acp`, the harness's ACP stdio profile;
+- Harbor's runner gets the ACP SDK agent-client-protocol 0.12.1: Harbor (0.23 to 0.25) installs it unpinned in the
+  runner's venv, and 1.0.0 (PyPI, 2026-11-09 00:34 UTC) has no `text_block`, which Harbor's acp_runner.py imports, so
+  every trial's runner stopped at that import (ImportError) before dsh started. 0.12.1 is the release every DSH trial
+  before that ran with;
 - the version is pinned: 0.2.1-rc.2 (npm `latest`), the release line of the exam's DSH runs (2026-10-15 to 10-18). It
   picks models from its built-in catalog: its `deepseek-flash` is DeepSeek-V4.1-Flash, so the model deepseek-v4.1-flash is
   asked for as `deepseek-flash` (the trial's records keep the model as given). Releases from 0.2.1-rc.3 on also list
@@ -41,6 +45,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -62,6 +67,7 @@ LAUNCHER = "/installed-agent/dsh-acp.sh"
 PATCH = "/installed-agent/dsh-roboarc.patch.yml"
 SHIM = "/installed-agent/acp_prompt_file.py"
 PROMPT = "/tmp/acp-prompt/instruction.txt"
+ACP_SDK = "agent-client-protocol==0.12.1"     # Harbor's runner imports text_block, which 1.0.0 dropped
 # the model as RoboARC names it (the exam's run id) -> the id of dsh's built-in catalog entry (0.2.1-rc.2 models.ts:
 # id 'deepseek-flash', name 'DeepSeek-V4.1-Flash'); the provider -> dsh's provider id (dsh-llm-deepseek-api-key)
 MODEL_IDS = {"deepseek-v4.1-flash": "deepseek-flash"}
@@ -99,6 +105,14 @@ class DshAcp(AcpAgent):
                 'nvm_node_bin="$(ls -d "${NVM_DIR:-$HOME/.nvm}"/versions/node/*/bin 2>/dev/null | sort -V | tail -n 1)"\n'
                 'if [ -n "$nvm_node_bin" ]; then PATH="$nvm_node_bin:$PATH"; export PATH; fi\n'
                 f'exec dsh --profile acp{patch} "$@"\n')
+
+    def _build_dependencies_command(self, kind: Any) -> str:
+        # Harbor's command ends a line with `uv pip install --python <runner venv>/bin/python agent-client-protocol`
+        command, n = re.subn(r"(pip install --python \S+ )agent-client-protocol$", rf"\g<1>{ACP_SDK}",
+                             super()._build_dependencies_command(kind), flags=re.M)
+        if n != 1:
+            raise RuntimeError(f"Harbor's ACP setup command changed: found {n} installs of agent-client-protocol to pin")
+        return command
 
     async def install(self, environment: BaseEnvironment) -> None:
         await super().install(environment)       # python, uv, the runner's venv, Harbor's launcher (-> LAUNCHER), acp_runner.py
