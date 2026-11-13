@@ -57,11 +57,33 @@ def last_msgs(trial, k=3):
 
 
 NOT_A_RESULT = "**not a result** — infrastructure error ({}): run it again; it is not the agent's 0"
+# Harbor's exceptions that are the agent's own end (RUNNING.md "Infrastructure failures"), results like any other end:
+# the cutoff; a model response longer than the harness's output-token maximum (Claude Code's "response exceeded the N
+# output token maximum", after its own recovery turns) or a request longer than the model's context window. The latter
+# two come from what the agent itself wrote, under the run's fixed configuration; a rerun of the same configuration only
+# draws again (Harbor's hosted runs never retry them either).
+AGENT_ENDS = ("AgentTimeoutError", "OutputTokenExceededError", "ContextWindowExceededError")
+
+
+def own_memory_end(ex, rw):
+    """Whether the agent ended because the kernel killed it at its own container's memory cap, in the scope of the
+    task's limits (the verifier's resource_oom_kills; RUNNING.md "Resources"), and that stopped the agent (Harbor:
+    NonZeroAgentExitCodeError): the agent's own end, a result whether or not the limits are enforced (the task's
+    instruction gives the agent its memory limit). Never when the host's OOM killer or an enclosing cgroup's killed a
+    process in the scope (resource_host_oom_kills), or the monitor's host protection did (resource_emergency_kills)."""
+    def n(key):
+        try:
+            return float(rw.get(key) or 0)
+        except (TypeError, ValueError):
+            return 0.0
+    return (ex == "NonZeroAgentExitCodeError" and n("resource_oom_kills") > 0
+            and not n("resource_host_oom_kills") and not n("resource_emergency_kills"))
 
 
 def not_a_result(trial, r, rw):
     """Why a trial that is not a success is no result either (PROTOCOL §2.6, §2.12: an infrastructure failure is neither a
-    success nor the agent's 0; only the agent's own end, its deliverable or the cutoff, AgentTimeoutError, is a result),
+    success nor the agent's 0; only the agent's own end is a result: its deliverable, the cutoff, its output over the
+    harness's output-token maximum or the model's context window (AGENT_ENDS), its own memory cap (own_memory_end)),
     or None. A trial whose verifier never ran (no reward.json: `docker compose up` failed, e.g. a CPU
     cap above the host's; the verifier timed out) was published as the agent's 0."""
     if rw.get("infra_error") or rw.get("grader_error"):
@@ -69,7 +91,7 @@ def not_a_result(trial, r, rw):
     ex = (r.get("exception_info") or {}).get("exception_type") or ""
     if not rw:
         return "the verifier wrote no reward.json" + (f"; Harbor: `{ex}`" if ex else "")
-    if ex and ex != "AgentTimeoutError":
+    if ex and ex not in AGENT_ENDS and not own_memory_end(ex, rw):
         return f"Harbor ended the trial with `{ex}`"
     try:
         chk = account_failure_check.check(str(trial))

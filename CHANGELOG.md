@@ -6,6 +6,24 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### Results: the output-token maximum, the context window and the agent's own memory cap are the agent's end (results; nothing changes for a trial that ended otherwise)
+- **Why:** `write_task_results.py` voided every trial Harbor ended with an exception other than the cutoff. Two of
+  those ends are the agent's own, under the run's fixed configuration, and their reruns only drew again until the
+  agent happened not to reach them:
+  - `OutputTokenExceededError` (and `ContextWindowExceededError`): GLM 5.3 Flash under Claude Code wrote 32000 tokens
+    of thinking four times in a row, after Claude Code's own "Output token limit hit. Resume directly" turns, and
+    Claude Code stopped (7 attempts, every model call answered 200). Harbor's hosted runs never retry these either.
+  - `NonZeroAgentExitCodeError` after the kernel killed the agent at its own container's memory cap
+    (`resource_oom_kills`): the agent's own scripts (numpy over point clouds, seconds from 0.2 GB to the 16 GB cap)
+    took the harness process with them (13 attempts: Opus 5.5, GLM 5.3 Flash, DeepSeek V4.1 Flash). The instruction
+    gives the agent its 8 GiB limit, and 88 counted trials had the same kill at the cap of a process that was not the
+    harness: only which process the kernel picked decided whether the trial was voided.
+- **Fix:** both are results, as graded (`AGENT_ENDS`, `own_memory_end()`). A host OOM kill, the monitor's emergency
+  kill, no `reward.json`, the verifier's `infra_error`, and the gateway's failed last calls stay "not a result".
+- **Docs:** RUNNING.md "Infrastructure failures" and "Resources", COLLABORATOR_SETUP section 5.
+- **Tests:** `scripts/harbor/tests/test_result_verdict.py` (synthetic trials); by hand, the published trials of
+  2026-11-12: the four GLM and two Opus attempts checked are now `fail`, a 504 timeout stays "not a result".
+
 ### `AGENT=dsh`: Harbor's ACP runner gets agent-client-protocol 0.12.1 (agent fix; nothing changes for another agent)
 - **Why:** Harbor (0.23 to 0.25, and its 0.25.1 development builds up to 2026-11-10) installs the ACP SDK
   `agent-client-protocol` in its runner's venv during agent setup without a version, so a trial gets the latest

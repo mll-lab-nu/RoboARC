@@ -348,8 +348,15 @@ PROTOCOL Appendix H.5: infrastructure failures allow at most one full retry with
 configuration, clearing all agent and environment state. If that retry also fails, follow the default failure-handling
 behavior; no further retries. Normal task failures do not qualify.
 - An infrastructure failure is what `scripts/harbor/write_task_results.py` publishes as "not a result": the verifier's
-  `infra_error` / `grader_error`, no `reward.json`, a Harbor exception other than the agent's cutoff, a model-account
-  failure. The agent's own end, its cutoff and its token budget are results and are never retried.
+  `infra_error` / `grader_error`, no `reward.json`, a Harbor exception other than the agent's own end, a model-account
+  failure. The agent's own end is a result and is never retried: its deliverable, its cutoff (`AgentTimeoutError`), its
+  token budget, a model response over the harness's output-token maximum (`OutputTokenExceededError`, e.g. Claude Code's
+  "response exceeded the 32000 output token maximum" after its own recovery turns) or a request over the model's
+  context window (`ContextWindowExceededError`), and the kernel killing the agent at its own container's memory cap in
+  the limits' scope (`NonZeroAgentExitCodeError` with `resource_oom_kills` and no host OOM or emergency kill; the task's
+  instruction gives the agent its memory limit). The output-token maximum is the harness's, part of the run's
+  configuration (Claude Code: 32000 for a model it does not know, 128000 for Opus 5.5; `CLAUDE_CODE_MAX_OUTPUT_TOKENS`
+  changes it, and with it the configuration).
 - The voided attempt's directory is moved aside and never counted; the retry starts from a new environment with the
   first attempt's recorded configuration. With the batch runner: move the job's directory and its claim
   (`$JOBS/.claims/<job>`) aside and start the batch's command again; the job runs again from the trial's seed. A launch
@@ -428,7 +435,9 @@ values from `scripts/task_resources.toml`, checked by `ci_checks/check-resources
   trial (`resource_limit_exceeded = 1`), never retried; `0`: observe and record only (`limits_violation_observed`,
   `/logs/verifier/resource_limits.json`); any other value: `infra_error = 1`, `resource_switch_error = 1`.
 - **Out-of-memory kills**: a kill at a container's own cap in the scope is a violation; a host OOM kill never is
-  (enforcement on: `infra_error = 1`, `resource_host_oom`).
+  (enforcement on: `infra_error = 1`, `resource_host_oom`). With enforcement off, a kill at the own cap that stops the
+  agent (Harbor: `NonZeroAgentExitCodeError`) is the agent's own end, a result as graded, never retried ("Infrastructure
+  failures"); one that only stops a process the agent started changes nothing.
 
 ## Recordings
 

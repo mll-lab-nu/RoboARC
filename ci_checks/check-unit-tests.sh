@@ -38,7 +38,7 @@ run() {   # run <timeout s> <test path from the repository root> [arguments of t
   cmds+="$(lane "$2")bash $self --one $*"$'\n'
 }
 # the standard-library tests
-for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_retry_policy.py \
+for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_retry_policy.py scripts/harbor/tests/test_result_verdict.py \
          scripts/harbor/tests/test_usage_gateway_option.py scripts/harbor/tests/test_usage_gateway_shipped.py \
          scripts/usage_gateway/tests/test_rawlog.py scripts/usage_gateway/tests/test_paths.py \
          scripts/usage_gateway/tests/test_budget_stop.py scripts/usage_gateway/tests/test_image_cap.py \

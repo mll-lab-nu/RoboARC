@@ -7,7 +7,8 @@ every runner applies and the required CI job `invariants` tests (scripts/harbor/
     retries. Normal task failures do not qualify.
 
 An attempt is one run of one task under one run id. Its outcome is "success", "agent_failure" (a result: the agent's
-deliverable, its cutoff, its token budget) or "infra_failure" (not a result: scripts/harbor/write_task_results.py
+deliverable, its cutoff, its token budget, its output over the harness's output-token maximum or the model's context
+window, a kill at its own memory cap) or "infra_failure" (not a result: scripts/harbor/write_task_results.py
 not_a_result(), the verifier's `infra_error` / `grader_error`, a trial Harbor or the model account ended). A launch that
 never started a trial is no attempt. The runner (scripts/harbor/run_agent_batch.sh, or any other runner) asks
 decide() after every attempt; check_attempts() audits a recorded sequence (the results pipeline, CI fixtures).

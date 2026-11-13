@@ -290,11 +290,13 @@ done
   folder and `$JOBS/.claims/<job>` out of `$JOBS` first. A reboot can interrupt more than one trial per lane: the one
   whose agent was running and those still being graded. It gets the same seed, and this is its one rerun (next item).
 - **"not a result"** in `<batch>.summary.md` marks an infrastructure failure: the grader's `infra_error` or
-  `grader_error`, no `reward.json`, a Harbor exception other than the agent's time limit, or a model-account failure.
+  `grader_error`, no `reward.json`, a Harbor exception other than the agent's own end, or a model-account failure.
   Such a trial may run once more, the same way: move its job folder and its claim out of `$JOBS`, start the command
   again; it gets the same seed. Once only: a rerun that fails again stays as it is. Name every rerun in `NOTES`
-  (section 6). A trial the agent ended itself, or that reached its time limit, is a result (0 or 1): never run it
-  again.
+  (section 6). A trial the agent ended itself is a result (0 or 1): never run it again. That includes its time limit,
+  a model response over the harness's output-token maximum (`OutputTokenExceededError`) or over the model's context
+  window (`ContextWindowExceededError`), and the agent killed at its own container's memory cap
+  (`NonZeroAgentExitCodeError` after an OOM kill at the cap; RUNNING.md "Infrastructure failures").
 - **Budget:** each trial gives the agent up to 3 h 10 min; `roboarc-wire-splicing-01-i01` gives 6 h (an owner's exception;
   its results are ranked as a group of their own). Use one API key per batch, with a spending cap.
 - **Live view:** `python3 scripts/harbor/live_board.py --jobs <JOBS>` serves a page on 127.0.0.1. Keep it local: it shows unredacted output.
