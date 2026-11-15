@@ -230,7 +230,7 @@ a VLA prompt cannot carry them yet.
 - The policy is asked after every `--horizon` actions; the simulation waits for its reply (no wall clock).
 - The episode ends at the task's own end (success, held for the task's confirmation window; the task's failure
   predicate; a simulator breakdown) or at the step limit: by default twice the reference solution's length, rounded up
-  to 100 steps (12000 steps, 5 simulated minutes, for the two bases without a reference).
+  to 100 steps (12000 steps, 5 simulated minutes, for a task without a reference).
 - Grading follows the task's standard mode: the executed rows are replayed once more, in a new process, from the frozen
   instance (after a live success, the tolerant grading replay of the GPU families). **success = live success and replay
   success**, with no infrastructure error (a simulator breakdown, live or replayed, or a replay that produced nothing
@@ -292,7 +292,7 @@ time to the default step limit (image 2.1.0, DROID's camera poses, live episode 
 | hedgehog-in-cage-08 | 6000 | 4.8 min | 2.4 min | 48 ms |
 | hedgehog-in-cage-02 | 3800 | 2.5 min | 1.8 min | 39 ms |
 
-All five took 33 minutes, the model's start included. All 18 one-arm puzzles to their limits are 402600 control steps
+All five took 33 minutes, the model's start included. All 18 one-arm puzzles to their limits are 410500 control steps
 per seed.
 
 Images are rendered only when the policy is asked, so with a horizon of 25 rendering costs about 2 ms per control

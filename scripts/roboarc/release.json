@@ -2104,8 +2104,30 @@
   },
   "fiber-bundling-05-i01": {
    "creation_source": "f24ccdce",
-   "evidence": {},
-   "oracle": "none",
+   "evidence": {
+    "privileged": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 2.2.0 (ghcr.io/mll-lab-nu/roboarc:2.2.0, sha256:f8fdee211ec5), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "1552f29d",
+     "tooling": "f2320e4c",
+     "date": "2026-11-14",
+     "trajectory_sha256": "a17ffbaab69bceb2072aa96adfcb901b8b5b33374a3032f553c96819e327a54f",
+     "end_state": "17b6af0171a92459"
+    },
+    "standard": {
+     "status": "passed",
+     "success": 1,
+     "deterministic": 1,
+     "image": "the release image roboarc 2.2.0 (ghcr.io/mll-lab-nu/roboarc:2.2.0, sha256:f8fdee211ec5), seed 0; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py)",
+     "source": "1552f29d",
+     "tooling": "f2320e4c",
+     "date": "2026-11-14",
+     "trajectory_sha256": "a17ffbaab69bceb2072aa96adfcb901b8b5b33374a3032f553c96819e327a54f",
+     "end_state": "17b6af0171a92459"
+    }
+   },
    "family": "fiber_bundling",
    "instance_package": "MuJoCo instance made before this image was built (TopoGym source f24ccdce; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)",
    "tier": "hard",
@@ -2113,8 +2135,8 @@
    "release_commit": "e0a930a38230cc117ad783c05f3076747e381d52",
    "nop": {
     "status": "passed",
-    "run": "the release image eai-roboarc 0.1.0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
-    "date": "2026-10-14"
+    "run": "the release image roboarc 2.2.0 (f8fdee211ec5), seed 0; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py)",
+    "date": "2026-11-14"
    },
    "ported_from": "fiber-bundling-hard-i00",
    "grasp_rules": "assisted grasping (contact_weld_v1): a gripper whose command moves towards closed takes hold of a graspable part (fiber_bundle) once both fingers touch the same part inside its grasp region, the tool frame within 6 cm of it and the penetration at most 2 mm, for 0.02 s; the part then follows the gripper rigidly. Any command that opens the gripper (by more than 0.2 % of its travel) lets it go. A hold that breaks (the fingers open more than 15 %, the part drifts 1 cm / 0.15 rad from its held pose, the hold has to push or pull its part with more than 65 N averaged over 20 ms, or no finger has touched the part for 0.2 s) is lost, and the gripper must open before it can take hold again; that force is reached when, for example, two held parts that hook into each other are pulled apart, or a held part is pressed into another object. Two grippers never hold the same part; other objects are grasped physically (friction)",
@@ -2130,6 +2152,11 @@
      "date": "2026-10-28",
      "mode": "both",
      "text": "roboarc 2.2.0: the instruction names the parts whose colour now changes with the appearance seed by their shape or role, not by a colour; the rules, limits and numbers it states are unchanged."
+    },
+    {
+     "date": "2026-11-14",
+     "mode": "both",
+     "text": "a reference solution (`solution/`, release.json oracle `none` -> `full`), re-planned on MuJoCo from the frozen instance (docs/simulator/families/fiber_bundling.md, References); the frozen instance, physics, grader and instruction are unchanged."
     }
    ]
   },

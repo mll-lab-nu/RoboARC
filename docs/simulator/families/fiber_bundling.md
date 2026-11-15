@@ -15,7 +15,8 @@ Success (`terminal_v4_fiber_ring_plane`), held for 0.5 s:
 - every bend is at most 60 deg;
 - the gripper has never touched a strand (that fails the task at once).
 
-Tiers very_easy .. medium carry references. Hard is held to robust physics only (no reference, no speed target).
+Every tier carries a reference. Very_easy .. medium have had theirs since the port; hard's (fiber-bundling-05-i01) was
+re-planned on its frozen instance on 2026-11-14 (References, "Hard").
 
 ## Model
 
@@ -220,6 +221,39 @@ All four on that build:
 Before the exact diagonal (bbdbae3ad + fiber v4; bit-identical on a0b4dddef and 0f8654a49, the Robotiq's frictionless
 spring links and drivers): very_easy 3556 rows, 7af6d2d3fc24a031; easier 3459, 8b8a6e91fa1aa0cc; easy 5009,
 991b03208bfd3873; medium 8116, 75377edd4df10081; weld 20 ms means 19.9-27.0 N.
+
+### Hard (fiber-bundling-05-i01, 2026-11-14)
+
+Hard had no reference until 2026-11-14. Its reference is re-planned on its frozen instance (the release instance in
+`roboarc:2.2.0`, birth f308c4c1a19865c4; the checkout's simulator source equals the image's) with `replan.py`, run in
+that image:
+- the pickup: the released (Genesis) hard rows 0-556 (`oracles_genesis/fiber-bundling-hard-i00`, named by
+  `RCB_GENESIS_ORACLES`), the sheath held from row 547;
+- the comb loop: 9 combs for the 16 strands, presses .032-.020 m, each strand accepted 2 mm inside the 11.5 mm target
+  (`--margin .002`); two combs at a -70 deg roll;
+- the gated closed-loop feed of very_easy and easier. No gate held it back, and the weld held at most 1.5 N in the feed.
+
+```
+replan.py hard <dir> --instance <instance.json> --presses .032,.030,.028,.026,.024,.022,.020 --margin .002 \
+    --near-mm 15 --near-past-mm 10 --near-speed .004 --near-gate .0005 --lag-max .003 --force-hold 20 --force-back 26
+```
+
+Recorded with `rerecord.py <instance.json> <dir>/rows.npz privileged.npz --tail 40` (the route's own last row is the
+success, so no tail row is executed):
+
+| tier | rows | simulated | final state sha | strands at success (mm) | weld 20 ms mean / max |
+|---|---|---|---|---|---|
+| hard | 9915 | 247.9 s | 17b6af0171a92459 | 9.81, 9.11, 8.0, 8.0, 8.0, 8.0, 8.0, 8.95, 8.5, 8.0, 8.0, 8.0, 10.04, 9.94, 11.19, 10.09 | 20.2 / 20.2 N |
+
+- `weldforce.py` in a fresh process: the same final state; the largest 20 ms mean is in a comb press (row 1901), 0.056 s
+  above 20 N, never above 40 N (the slip rule: 65 N).
+- Every arm joint target moves at most 0.0093 rad per control step (the standard service's rule: 0.04 rad), and every
+  row is inside the joint limits (0.42 rad of margin at the closest): `standard.npz` is the same file.
+- Seeds 1 and 2: `tools/release/restamp.py` (births 899f4be7bdf7c572, 7694648609052b74).
+  One fresh replay each on its seed's frozen instance: success at row 9915 (ends eacb5c95ed3543f8, 8d5685a6762ea4a1).
+- Harbor (`scripts/roboarc/harbor_check.py`, the image `roboarc:2.2.0` = f8fdee211ec5, rendering off, seed 0): the
+  privileged oracle 1, deterministic, both grader replays at 17b6af0171a92459; the standard oracle 1, live 9915
+  control steps with no row slowed and its fresh replay both at 17b6af0171a92459; nop 0 in both modes.
 
 ## Stress
 

@@ -6,6 +6,33 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### fiber-bundling-05-i01 gets a reference solution (task change: its two task directories)
+- **Why:** hard fiber bundling was the one puzzle base without a reference (release.json `oracle: "none"`): nothing
+  was known to solve it, Harbor checked only the nop agent, and the VLA runner gave it the 12000-step fallback.
+- **The reference:** re-planned on the frozen instance in `roboarc:2.2.0` (birth f308c4c1a19865c4) with
+  `tools/references/fiber_bundling/replan.py hard` (the released Genesis pickup rows 0-556, the comb loop with 9 combs
+  for the 16 strands, the gated closed-loop feed of very_easy and easier), recorded with
+  `tools/references/interlocked_claws/rerecord.py --tail 40`: 9915 rows (247.9 s simulated), success at the last row,
+  end state 17b6af0171a92459. Every arm joint target moves at most 0.0093 rad per control step (the standard rule:
+  0.04 rad) and stays inside the joint limits, so `standard.npz` is the same file; `privileged.s1.npz` and
+  `privileged.s2.npz` are re-stamped with the seeds' births (`tools/release/restamp.py`). The recipe and the weld force
+  (20 ms mean at most 20.2 N; the slip rule: 65 N) are in docs/simulator/families/fiber_bundling.md, References, "Hard".
+- **Evidence** (2026-11-14, `scripts/roboarc/harbor_check.py --instances --references`, rendering off, seed 0; image
+  `roboarc:2.2.0` = f8fdee211ec5, simulator source 1552f29d, tooling f2320e4c): the privileged oracle 1, deterministic,
+  both grader replays at 17b6af0171a92459; the standard oracle 1, live (9915 control steps, no row slowed) and fresh
+  replay both at 17b6af0171a92459; nop 0 in both modes. The host had no ghcr login, so the trials ran the resource
+  monitor from a local registry by the same manifest digest (`roboarc-monitor@sha256:ea1b0d4b…`). Seeds 1 and 2: one
+  strict replay each of the re-stamped file succeeds (no Harbor seed run, so `[metadata.seeds] oracle` is `[0]`).
+- **Tasks:** `tasks/roboarc-fiber-bundling-05-i01-{privileged,standard}` rendered again: `oracle = "full"` and
+  `[metadata.seeds] oracle = [0]` in `task.toml`, `solution/`, the README's Oracle row, Reference solution, nop record
+  and Change Log, `DIGEST`. The instruction, frozen instance, physics and graders are unchanged: results graded before
+  stand.
+- **Records:** `scripts/roboarc/oracles/fiber-bundling-05-i01/` (privileged, standard, s1, s2), release.json (both
+  modes' evidence, the nop record), `records/freeze_manifests/freeze_manifest.v3.json` (reference, sha256, `expect`).
+- **Counts:** all 78 puzzle bases ship a reference (docs/API.md, `tests/api/test_catalogue.py`). The VLA runner's
+  default step limit for fiber-bundling-05 is now 19900 (2 x 9915 rows, rounded up; it was 12000), so the 18 one-arm
+  puzzles to their limits are 410500 control steps per seed (docs/VLA.md, `tests/api/test_vla.py`).
+
 ### Results: the output-token maximum, the context window and the agent's own memory cap are the agent's end (results; nothing changes for a trial that ended otherwise)
 - **Why:** `write_task_results.py` voided every trial Harbor ended with an exception other than the cutoff. Two of
   those ends are the agent's own, under the run's fixed configuration, and their reruns only drew again until the

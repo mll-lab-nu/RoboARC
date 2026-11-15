@@ -310,7 +310,7 @@ def test_default_step_limit():
     from roboarc.vla.run import default_max_steps
     t = roboarc.task_info("interlocked-claws-08")
     assert default_max_steps(t) == 8600                  # 2 x 4277 rows, rounded up to 100
-    assert default_max_steps(roboarc.task_info("fiber-bundling-05")) == 12000     # no reference
+    assert default_max_steps(roboarc.task_info("fiber-bundling-05")) == 19900    # 2 x 9915 rows, rounded up to 100
 
 
 # ------------------------------------------------------------------------------------------- end to end (simulator)
