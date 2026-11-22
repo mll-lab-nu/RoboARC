@@ -1,0 +1,13 @@
+# variant dir	DIGEST (scripts/ablations/make_variants.py build --record; condition clr4x)
+roboarc-bed-bolt-01-i01-clr4x-privileged	sha256:36ee5f9091a20153a011cfc33c24b37f1d18e1663ddacd50a2ffd96d67ac5cd9
+roboarc-bed-bolt-01-i01-clr4x-standard	sha256:2d394a94b19f425a6c329a8576ecf66a92d70cdddecedcc8f12efff4854d7dfd
+roboarc-bed-bolt-03-i01-clr4x-privileged	sha256:87c748c0da246fec79f3bac7556da7220d09f719b8610c052a8cf228121d43d7
+roboarc-bed-bolt-03-i01-clr4x-standard	sha256:b07efaccda60c0b6854507e4eca0fea38e4e1c9886d5fad2f9ebb021475fb950
+roboarc-cast-coil-06-i01-clr4x-privileged	sha256:35bfb378182be6fac4dbfc22903a2f5a48d0fa85b4b93d7433d9c6abffc24a06
+roboarc-cast-coil-06-i01-clr4x-standard	sha256:d0802499769bff6e1ccf292149089fa3e86285faa81b6147187af414350a3550
+roboarc-cast-coil-07-i01-clr4x-privileged	sha256:3c9258e34cffc210375e5b906fc7fd6e8548b270bb992578cfac96668aa98ad9
+roboarc-cast-coil-07-i01-clr4x-standard	sha256:00de57ca5fd4437d619b6cc703204f4a23319cbc26cfb25484054a2202c3d3b4
+roboarc-lock-picking-04-i01-clr4x-privileged	sha256:e6d31f2909c82e28d4f0e22e424bba784d333aeeb253e385be6d256cbbf16a4d
+roboarc-lock-picking-04-i01-clr4x-standard	sha256:b4689053a295e0469ab840750b5e7383d003ed30dc458e9ec7403c8e68af149f
+roboarc-lock-picking-05-i01-clr4x-privileged	sha256:a37b152a40bc3f10aed9bbc8a2d377018ac02f6fb118cb4f0507035ccdf151ce
+roboarc-lock-picking-05-i01-clr4x-standard	sha256:80fd121b921dad82707ccc2189f63fd493a34af023b3abbc0a3ffb8f9beda091

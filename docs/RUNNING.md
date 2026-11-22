@@ -6,6 +6,8 @@ standard-mode wire protocol is [STANDARD_MODE.md](STANDARD_MODE.md); the benchma
 [benchmarks/roboarc.md](benchmarks/roboarc.md). The sections from "Official runs" on are the runner's rules:
 `scripts/harbor/run_agent_batch.sh` applies them by default. A collaborator running an evaluation for the maintainers
 follows [COLLABORATOR_SETUP.md](COLLABORATOR_SETUP.md) alone: it has everything from setup to sending the results back.
+The ablation experiments (task variants for the information-access, clearance and observation ablations) have their own
+note, [ABLATIONS.md](ABLATIONS.md).
 
 ## Requirements
 

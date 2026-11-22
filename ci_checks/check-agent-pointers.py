@@ -41,7 +41,13 @@ IDS = re.compile(r"""["']((?:source_|reference_)?(?:demo|demo_id|demo_name|demon
                              episode_name|trajectory_id|recording|recording_id))["']\s*:\s*["']""", re.I | re.X)
 FILES = re.compile(r"""(?<![\w.-])(?:[\w.-]+\.(?:hdf5|h5|mcap|parquet|rlds|tfrecord)\b|datasets/[\w.-]+/[\w.-]+)""", re.I)
 # (task-name regex, path regex, matched-text regex, reason)
-ALLOW: list[tuple[str, str, str, str]] = []   # none today
+ALLOW: list[tuple[str, str, str, str]] = [
+    # ablation E4 (scripts/ablations/cond_clearance.py): a clearance-relaxed privileged variant ships its frozen instance in
+    # its build context, so the meshes every released task stages from the image into /app are scanned here: trimesh's
+    # OBJ exporter writes its project URL into each file's header comment (a library attribution, not upstream material)
+    (r"^roboarc-.+-clr[24]x-privileged$", r"^environment/ablation_e4/instance/instance_assets/mujoco/meshes/[^/]+\.obj$",
+     r"^https://github\.com/mikedh/trimesh$", "trimesh's OBJ export header in the frozen meshes, as in every image instance"),
+]
 
 
 def agent_files(task: pathlib.Path):

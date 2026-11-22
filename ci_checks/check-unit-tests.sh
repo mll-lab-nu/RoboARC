@@ -56,6 +56,8 @@ for t in scripts/harbor/tests/test_codex_tools_off.py scripts/harbor/tests/test_
   run 300 "$t"
 done
 run 600 scripts/harbor/tests/test_runner_seeds.py   # the runner with a fake harbor: its lanes wait 30 s when nothing fits
+# the ablation experiments' variant generators, checks and runners (docs/ABLATIONS.md); numpy parts skip without it
+for t in $(cd "$root" && ls scripts/ablations/tests/test_*.py 2>/dev/null); do run 300 "$t"; done
 run 120 scripts/harbor/account_failure_check.py --selftest   # the runner's lane stop and infra rules on synthetic trials
 run 300 tools/release/source_hash.py --check   # the simulator source hashes to release.json's runtime.source (SOURCE.json)
 

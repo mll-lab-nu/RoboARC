@@ -12,3 +12,13 @@ __pycache__/
 ikea/images/ikea-mujoco/context/
 *.oci.tar
 /.vla-lib/
+# the ablation experiments' task variants, built by scripts/ablations/make_variants.py (docs/ABLATIONS.md)
+/tasks/*-q1c00-standard/
+/tasks/*-q1c10-standard/
+/tasks/*-q1c0g-standard/
+/tasks/*-q1c1g-standard/
+/tasks/*-cstate-standard/
+/tasks/*-clr2x-*/
+/tasks/*-clr4x-*/
+/tasks/*-obsv1-standard/
+/tasks/*-obsv2-standard/

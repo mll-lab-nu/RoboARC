@@ -1,0 +1,16 @@
+# variant dir	DIGEST (scripts/ablations/make_variants.py build --record; condition obsv1)
+roboarc-battery-replacement-01-i01-obsv1-standard	sha256:7faf69c59e9ba052fcf4f8d6b1bfb84674b8a25c8dfeec6cd22d1d2eca12de0b
+roboarc-bed-bolt-01-i01-obsv1-standard	sha256:d5de02a3209d57e31b699cb7404903dbf04222679aaaea1e31908880dfeade94
+roboarc-bed-bolt-02-i01-obsv1-standard	sha256:17f4d2d1dcbf0d8bc491ce56d33b5ca8437b86328f23e29ca650dc22600bf15f
+roboarc-bed-bolt-04-i01-obsv1-standard	sha256:7ca214c1cf2ddced6840aef1075f9569cd6ed5e0ca506010851eca2431fdd475
+roboarc-bed-bolt-05-i01-obsv1-standard	sha256:0a53fbeec612764443488c35627a6855761e1c526038195f7873b2aa01e71175
+roboarc-buzz-wire-3d-02-i01-obsv1-standard	sha256:9f464b09ac44376676806ee00e35c1ccc48d62245bff4cd265eff029548fbb69
+roboarc-buzz-wire-3d-06-i01-obsv1-standard	sha256:2292d703a7ce39edb498d46f0cb73f9a879c414b34e0b5c931d673a98a43d325
+roboarc-buzz-wire-3d-10-i01-obsv1-standard	sha256:5c6b8cb12d7326a30975a9c7396924758b6a1e020ab1ac7faf53b4b38ed7c4c2
+roboarc-caliper-sorting-01-i01-obsv1-standard	sha256:f034a2b694fcae66c00b2f4ebb388cc5eece2d639358e2dbdff493eac2b6381f
+roboarc-cast-coil-04-i01-obsv1-standard	sha256:d782eca08b2117bddc7c405f00e26334ee7c058423c5b00b4dcc0460135e81d5
+roboarc-cast-coil-07-i01-obsv1-standard	sha256:86245074a16c5a3206b8484ca4596d96dfa904889f99f7c5c7d78c4e6d14df5e
+roboarc-cast-coil-08-i01-obsv1-standard	sha256:b15b0e5d853559a3788344a44be307b5441574f682a1010a1ae1bbae1e425526
+roboarc-cast-keyhole-05-i01-obsv1-standard	sha256:07c3356c65939041338d723668ff03e64db569cfea6e05aed60c4fbc55d5965c
+roboarc-cast-keyhole-06-i01-obsv1-standard	sha256:53fbeef8c76400cc2a63774fbfd5fdbc61c1480dfacdc61aad73eda27fd710d1
+roboarc-hedgehog-in-cage-07-i01-obsv1-standard	sha256:99593607c76a40e5032d2708ebb79ed12c9b05270ee1fc2788f6cac0d709b9d7
