@@ -1,0 +1,9 @@
+# A dsh per-launch patch for RoboARC runs (scripts/harbor/agents/dsh_acp.py passes it as `dsh --profile acp --patch`):
+# no web tools. PROTOCOL D11: an official run offers the model no web search, and DeepSeek would run the search on its
+# side, past the task's egress allowlist. Rows and keys as in dsh's own bundles (packages/bundle/base/cordis.patch.yml,
+# docs/config-catalog.md `@deepseek-ai/dsh-tool-web`: `search` and `fetch` register web_search and web_fetch).
+
+- id: tool-web
+  config:
+    search: false
+    fetch: false

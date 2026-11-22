@@ -1,0 +1,11 @@
+{
+ "K": 1,
+ "interpolate": "hold",
+ "dtype": "float64",
+ "rows": "the privileged twin's solution/trajectory.npz, time-dilated to the joint-speed rule by ikea/scripts/ikea_mujoco/standard/std_reference.py",
+ "method": "closed-loop",
+ "source": "ikea/scripts/ikea_mujoco/oracles/burvik/burvik.npz (build2.py, the Franka Hand slew)",
+ "rows_out": 162534,
+ "steps_over_limit": 0,
+ "speed": "robot"
+}

@@ -1,0 +1,96 @@
+# roboarc-bed-bolt-01-i01-standard
+
+| | |
+|---|---|
+| Benchmark | RoboARC |
+| Mode | standard (`eai-standard/2.4`) |
+| Twin | `roboarc-bed-bolt-01-i01-privileged` |
+| Simulator / robot | `roboarc` / `aloha-2` |
+| Family / instance | `bed_bolt` / seed 0 (allowed seeds: [0, 1, 2]; §2.13) |
+| Oracle | `full` |
+| Agent time budget | 11400 s; tokens: protocol default (PROTOCOL §5) |
+| Base image | `ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057` |
+
+## Task
+Standard-mode twin of `roboarc-bed-bolt-01-i01-privileged` (same frozen instance): the agent gets only the `eai-standard/2.4` client
+(docs/STANDARD_MODE.md); the simulator runs in the `sim` sidecar (`environment/docker-compose.yaml`, GPU on the
+sidecar), which owns the scene and records the episode as a (T, 14) trajectory; its collect hook
+(`environment/sim/finalize.sh`) replays the trajectory once in a fresh process for success, rendering the video during
+that replay. The verifier runs in a separate sandbox (`tests/Dockerfile`) over the sidecar's artifacts. Compare against
+the privileged task to measure the cost of losing resets, privileged state and the tooling's primitives.
+
+## Difficulty
+Same scene, instance and success rule as `roboarc-bed-bolt-01-i01-privileged` (see its Difficulty). In standard mode the agent loses resets, privileged state and planning primitives: it sees camera images and proprioception only, acts through the client, and gets one episode, so it has to estimate the scene from images and recover from its own mistakes without starting over.
+
+## Reference solution
+`solution/solve.sh` streams the recorded rows of the standard-mode oracle episode (`solution/oracle_qpos.npy`, one `joint_position` row per 25 ms control step, `hold`; the same rows as the privileged reference) through the client (`solution/oracle_replay.py`). That episode scored 1 (live and fresh replay) on the release image roboarc 2.1.0 (ghcr.io/mll-lab-nu/roboarc:2.1.0, sha256:c813b33cff3f), seeds 0, 1 and 2; harbor run -a oracle with rendering off (scripts/roboarc/harbor_check.py) (2026-10-26; simulator source cf508cee, tooling 412cbe02).
+
+## Verification
+See `tests/grade.py`.
+
+`nop` scored 0 on this base in both modes (the release image roboarc 2.1.0 (c813b33cff3f), seeds 0, 1 and 2; harbor run -a nop with rendering off (scripts/roboarc/harbor_check.py); 2026-10-26).
+
+## Compute resources
+Minimum allocation for one trial (docs/PROTOCOL.md §2.9; `[metadata.resources]` in `task.toml`). The agent phase counts every container of the trial at once (the agent's, and in standard modes the simulator sidecar); the verifier phase runs after it.
+
+| | Agent phase | Verifier |
+|---|---|---|
+| CPU cores | 4 | 2 |
+| Memory | 7 GB | 6 GB |
+| GPU memory | 2 GB | 2 GB |
+
+- GPU: required, any NVIDIA GPU; recommended: L40S 48GB / RTX 4090 24GB / L4 24GB (sm_86 or newer).
+- Measured: their class's values (partial MuJoCo measurements of 2026-10-13 on the class's other families, with the protocol's margin); this family's own peaks not measured yet; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards
+- Limits in the agent phase (docs/PROTOCOL.md §2.10; `[metadata.resources.limits]`, shown to the agent in `instruction.md`; always measured and reported, and exceeding one fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`), the agent's container: no GPU, 8 GiB memory, 512 processes, 20 GiB of new files under `/app`, `/tmp`, `/root`; 60 s within 120 s. Expected peak of the whole trial: 12 GiB GPU memory, 16 GiB memory. Limits measured: their class's limits (partial MuJoCo measurements of 2026-10-13 on the class's other families, with the protocol's margin); this family's own peaks not measured yet.
+
+## Details
+
+### Goal
+Drive the long bolt into the blind hole in the bed frame's corner block with the L-shaped hex key until its head is within 1.5 mm of the block face.
+
+### Success requirements
+- Drive the bolt in until its head is within 1.5 mm of the block face, its tip at least 83.5 mm deep in the hole, with the thread caught, and its axis within 2 degrees of the hole's axis.
+- The hole is threaded. The thread catches when the bolt's tip is 2.5 to 8.2 mm inside the hole, within 1 mm of the hole's axis and 2 degrees of its direction, with the bolt's thread lined up with the hole's (a straight push lines up somewhere in that range; turning the bolt about its axis moves where); each turn then drives the bolt 5.7 mm in. A bolt the thread does not hold cannot be pushed in past the thread: not past 8.2 mm before it has ever caught, and afterwards not deeper than it has already been turned in; it catches again only there, in the same thread. With fewer than 2 turns engaged the thread cannot carry the bolt: when no finger and no key end holds it, it droops, and past 3 degrees it lets go and falls out.
+- Once the thread has engaged, pushing or pulling the bolt along its axis does not advance it. Fingers cannot turn the bolt (they slip); use the key.
+- Keep the bolt's and the key's linear speed at most 1 mm/s and angular speed at most 0.02 rad/s. Holding is allowed; the key may stay in the socket or anywhere else.
+- Keep all final conditions satisfied together for at least 0.5 s of simulation time. If any final condition stops holding, the confirmation interval starts again. A brief qualifying pose is not enough; let the simulation advance through the full interval.
+
+### Task failure conditions
+- A task piece falling more than 100 mm below the tabletop ends the episode in failure. Finger contact with a held movable piece may penetrate at most 2 mm; holding requires both fingers of the same hand to contact the same piece, or an active assisted grasp by that hand. All other task contacts, including piece-piece, table, arm and gripper-housing contacts, may penetrate at most 1 mm. Exceeding either limit ends the episode in failure.
+
+### Grader details (in addition to the requirements above)
+- Contact penetration as this benchmark grades it (it replaces the "at most 1 mm / 2 mm" wording above): penetration is recorded, it never ends the episode by itself. A success with deep interpenetration (a task contact deeper than 3 mm, or deeper than 2 mm for at least 0.25 s: 100 consecutive physics ticks; for a finger contact with a held piece 4 mm, or 2 mm for 0.25 s) is not credited automatically but reviewed, with the recorded evidence and frames; a clean success is credited automatically. A task contact deeper than 10 mm is a simulator breakdown (below).
+- Contact penetration is read from the contacts at the end of every physics tick (2.5 ms; 10 ticks per control step). "Held" is decided anew at every tick: a zero-force touch counts, and if one finger loses contact (with no active assisted grasp), the other finger is back at the non-held limits in the same tick.
+- Robot safety (this benchmark's tooling): no gripper target goes lower than 15 mm below the tabletop; a commanded target that would bring any part of a gripper lower is stopped there, on the commanded path. The fingertips reach about 16 mm beyond the tool frame (TCP) along its approach axis, open or closed. Arm drive torques are capped (the effort limits in robot_spec), so an arm pushing against an obstacle stalls at that torque. An arm with any part more than 5 mm deep in a fixed object (a fixture, the table) is stopped where it is: its joint targets become its measured joints for that control step, so it stops pushing (the safety readings report these stops as static_guard).
+- Forcing is recorded, not judged: an arm drive (not a gripper drive) at 95% of its torque cap or more while that arm's gripper, or a part it holds, presses on anything else with 20 N or more in total is forcing; 0.5 s of it on every physics tick is a forcing event in the evidence (`meta["safety"]`), shown to the reviewer when a success is reviewed. Forcing does not end the episode and does not change the grade by itself.
+- Simulator breakdown (a non-finite state or a task contact deeper than 10 mm): the episode ends as an infrastructure error, not your failure, unless an arm was forcing (even for one tick) within the 0.25 s before it: then it is your failure (forced_breakdown: what broke and what forced it).
+- Grasp regions (assisted grasping, see Grippers above; one sphere per graspable part): bolt: radius 53.2 mm; key: radius 107.9 mm. Both finger contacts must lie inside the part's sphere; a part touched elsewhere is grasped physically.
+
+| | |
+|---|---|
+| mode | standard (RGB, optional depth, proprioception, calibrated cameras, no reset) |
+| action space | `eai-standard/2.4`: `submit` chunks of `joint_position` (14, streamed at the 40 Hz control rate with the agent's `dt`) or `ee_pose` (16, IK per row); `observe` frames or a watch window; binary RCB1 responses |
+| oracle | `full` (`solution/`) |
+| verification | `success` = live success ∧ replay success: the live episode, then one fresh-process replay in the sidecar's collect hook, after the live service has exited; the state hashes are reported, not required (MuJoCo on the CPU replays bit for bit on one host; the rule does not rely on it); `/logs/verifier/replay.mp4` is rendered during that replay |
+| crash recovery | `eai-standard/2.4` §13: journal + per-call checkpoints, `restart: on-failure:6`, resume class `approx` |
+
+### Provenance
+- Frozen instance: a MuJoCo instance (`simulator.physics_engine` "mujoco", its scene frozen under `instance_assets/mujoco/`), built by TopoGym source `cf508cee` (MuJoCo instance made before this image was built (TopoGym source cf508cee; its bytes are bound into the release image ghcr.io/mll-lab-nu/roboarc:2.2.0, tools/release/release_rebuild.py --instances)); bound to this release's runtime (source `1552f29d`, tooling `f2320e4c`).
+- Frozen instance files (`instance.json`, `instance_assets/`): not in this directory. They are in the private HF dataset `eai-v2-internal/robotangle-assets` at `b2cf9b552f31`, under `instances/bed-bolt-01-i01/` (scripts/roboarc/assets.json pins each file's sha256). The image carries them, and `/opt/robotangle/stage_instance.py` copies this task's instance next to its `runtime_binding.json`, which names the instance's canonical sha256 and every asset's sha256. The tooling checks them again at every session start.
+- Release: RoboARC 2.2.1, image `ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057` (images/roboarc/); simulator source `e0a930a38` (PROVENANCE.md).
+- Name: RoboARC is the published name of this benchmark (2026-10-13). Code identifiers keep the simulator's name: the simulator package `topogym`, the tooling `rcb_topogym.py`, `TOPOGYM_*` variables.
+
+### Change Log
+- 2026-10-24: new task of roboarc (RoboARC on MuJoCo 3.14.0, docs/benchmarks/roboarc.md): a new design of bed_bolt: a bed frame's corner bolt: the long bolt carried to the blind hole and pushed in until the thread catches, then driven home with an L-shaped hex key, its short arm in the head's socket and the long arm swung 60 degrees at a time. Its task files start from the Genesis 1.2.1 task `interlocked-claws-easy-i00` (standard mode), with this design's own task text, rules and goal, its own frozen instance and its own reference.
+- 2026-10-25: roboarc 2.1.0: a white card lying flat on the table between the key's stand and the bolt's cradle shows the bolt's head and its recess, drawn 4.5 times their size (visual only), and the instruction says so in one sentence; the frozen instance is re-made with it (the bed frame's drawn parts). Its physics, its birth and end states (seeds 0, 1 and 2) and the reference are unchanged.
+- 2026-10-19: RoboARC 1.0.1, texts and the monitor's image reference only: the texts, comments and docstrings of this task cite this repository's paths (docs/PROTOCOL.md, docs/STANDARD_MODE.md, docs/TAXONOMY.md, tools/release/release_rebuild.py, images/roboarc/) and carry no internal notes, `[task].name` is `roboarc/<dir>` (it was `robot-coding-bench/<dir>`), and the Release line names the task set's version (the image stays `ghcr.io/embodied-first-exam/roboarc:1.0.0`). The resource-monitor sidecar runs RoboARC's own build of its image, `ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0` (images/monitor/; the same files and command as the earlier `ghcr.io/mll-lab-nu/efe:monitor-0.1.0`). The instruction, the logic of the grader and of the sim service, the tooling, the runtime binding, the frozen instance and the reference are unchanged: results graded under 1.0.0 stand.
+- 2026-10-20: RoboARC 1.1.0, the image without Genesis: `ghcr.io/embodied-first-exam/roboarc:1.1.0` is built from the Python base image with the same operating system, the same Debian package versions and the same wheels (by sha256) as 1.0.0, without genesis-world, libuipc and the packages only they used (no task of 1.0.0 ran on them: every base is MuJoCo, every family renders with nyx_direct.py). The simulator source drops its Genesis-only modules, the tooling (v20) drops the libuipc build choice and Genesis' kernel replacements, so the runtime binding names the new simulator source, tooling and runtime. The instruction, the grader, the frozen instance and the reference are unchanged; every reference replays in the new image to the end state it reaches in 1.0.0: results graded under 1.0.x stand.
+- 2026-10-21: RoboARC 1.1.0, every image by digest: the Dockerfiles and compose files name the simulator image and the resource monitor's image by manifest digest, `ghcr.io/embodied-first-exam/roboarc:1.1.0@sha256:85ea9003…` (images/pins.json), so a pull gets exactly the image that was validated (until now the simulator image was named by its tag). The image, the instruction, the grader, the tooling, the frozen instance and the reference are unchanged: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.1.0, the agent container's client packages are installed from a hashed lock: `environment/client-requirements.txt` keeps the same versions and adds the sha256 of the file pip selects for the client base, and `environment/Dockerfile` installs it with `--no-deps --require-hashes`, so a build installs exactly those files or fails. The installed packages are the same files as before.
+- 2026-10-21: RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of 1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.2.0, three scenes per base (appearance seeds): seed 0 is the released scene, unchanged; seeds 1 and 2 are the same scene and physics in other colours, materials and textures. The task allows seeds 0, 1 and 2 (`[metadata.seeds]`); the runner picks the trial's seed and the image stages that seed's frozen instance against its own runtime binding (`runtime_binding.s<S>.json`, `stage_instance.py --seed-file`). `oracle` lists seed 0 and the seeds whose Harbor oracle run passed; the reference serves every seed (re-stamped with each seed's birth where it records one). Image `ghcr.io/mll-lab-nu/roboarc:1.2.0` (the seeds' simulator source and tooling); seed 0's birth, end state and render inputs are those of 1.1.x, so results graded under 1.1.x stand.
+- 2026-10-22: RoboARC 1.2.1, the renderer checks the GPU before it starts: `nyx_direct.py` reads the Vulkan extensions of the task's GPU and, where `VK_KHR_ray_query` is missing (GPUs without RT cores, such as V100, A100 and H100), raises `nyx_direct.UnsupportedDevice` naming what is missing, instead of letting the native renderer crash the process. There the privileged verifier grades without its replay video (`video_rendered` 0) and the agent's camera calls raise an error it can catch; standard mode needs a GPU with RT cores. On a GPU with RT cores nothing changes. The runtime binding names the new `nyx_direct.py`; the image, the instruction, the grader, the simulator tooling, the frozen instance and the reference are unchanged: results graded under 1.2.0 stand.
+- 2026-10-22: RoboARC 1.3.0, the simulator source and tooling of a new experimental family (wire_splicing, not in tasks/ until the owner has reviewed it): the family's code, its two opt-in grasp options (welding a wire's links between the pads, holding between the pads) and an opt-in weld work guard, which only that family's scene profile turns on. Image `ghcr.io/mll-lab-nu/roboarc:1.3.0` (simulator source and tooling v22). This task's instance, physics, instruction, grader and reference are unchanged, and so are its birth and end states (seeds 0, 1 and 2): results graded under 1.2.x stand.
+- 2026-10-25: RoboARC 2.1.0, image `ghcr.io/mll-lab-nu/roboarc:2.1.0`: the simulator source draws a card in the five bed-bolt scenes (visual only), fixes a crash in wire_splicing's coil count on a straight tail, and lets the blanket families' release check leave out the world-fixed arm bases (see those tasks' own entries); the buzz-wire 06, 07 and 10 texts state their own loop opening. Unless this task's own entry says otherwise, its instance, physics, instruction, grader and reference are unchanged, and so are its birth and end states (seeds 0, 1 and 2): results graded under 2.0.0 stand.
+- 2026-10-28: RoboARC 2.2.0, image `ghcr.io/mll-lab-nu/roboarc:2.2.0`: appearance seeds v2. Seeds 1 and 2 change the room's lighting, the table top's material, the table's frame and the floor, and the task's objects' colours and finishes; they are other scenes than the seeds 1 and 2 of 1.2.0-2.1.0, so results at those seeds (and aggregates over a task's seeds) are not comparable with earlier ones. Seed 0 looks and reads as in 2.1.0 unless this task's own entry says otherwise. The physics, the graders, the births and the reference rows are unchanged at every seed: results graded under 2.1.0 stand.
+- 2026-10-30: RoboARC 2.2.1, the same image `ghcr.io/mll-lab-nu/roboarc:2.2.0`: the standard service returns mp4 video again. Its `encode_mp4` imported imageio, which the image does not ship, so a `submit` or `get_obs` with `video="mp4"` or `"both"` (and `submit`'s default, `"mp4"`) ended the episode as an infrastructure error; it now encodes with the image's ffmpeg binary (H.264, yuv420p, faststart, as before). The time limit's text also says that the agent works alone: a reply that ends its turn or asks a question ends the session. The instance, physics, grader and reference are unchanged, and so are the birth and end states: privileged results graded under 2.2.0 stand, and so do standard ones that never asked for mp4.

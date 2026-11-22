@@ -1,0 +1,1 @@
+[[78600, 84300, "right", "bolt_1", "shelf", {"no_ramp": true}], [84300, 89500, "right", "bolt_1", "shelf", {"free_axis": [1, 0, 0], "pw": [0, 1, 1], "kp": 0.005, "kr": 0.005}], [100000, 120300, "right", "tcp", "fixed:bolt_1", {"r0": 100000}]]

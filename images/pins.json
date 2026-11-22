@@ -1,0 +1,33 @@
+{
+ "note": "RoboARC's images, each pinned by its manifest digest (images/README.md), in push order: a base before the image built FROM it. ref: what every task names (scripts/task_conventions.py pinned_image; the monitor's is scripts/rcb_monitor/inject.py IMAGE); id: the image id (config digest); archive: the OCI archive images/push_all.sh pushes byte for byte. ci_checks/check-image-pins.py checks the tasks against this file.",
+ "images": [
+  {
+   "name": "roboarc",
+   "ref": "ghcr.io/mll-lab-nu/roboarc:2.2.0@sha256:96a0a895c0e4934adca39f7a370e67bf82bfb4db7ef049131a3ac0dc9d0f9057",
+   "id": "sha256:f8fdee211ec5dbe0783e9959612e97554eefa493da8e169863c975c415db2eaf",
+   "archive": "roboarc-2.2.0.oci.tar",
+   "made_by": "images/roboarc/build.sh, then images/archive.sh"
+  },
+  {
+   "name": "roboarc-ikea",
+   "ref": "ghcr.io/mll-lab-nu/roboarc-ikea:1.1.0@sha256:2c56d9226aaf97a325b610d464a1cd81e87db1a6285e923539397f493e21136b",
+   "id": "sha256:9f9cbab8aa74f858b22ac1144162aad9f1b1e5b927f90f6f8251130f36d73868",
+   "archive": "roboarc-ikea-1.1.0.oci.tar",
+   "made_by": "ikea/images/ikea-mujoco/build.sh"
+  },
+  {
+   "name": "roboarc-ikea-sim",
+   "ref": "ghcr.io/mll-lab-nu/roboarc-ikea-sim:1.1.0@sha256:f22a1e9042c7877d33703960313cf548f2af7f15d6fcfa61db83315bfdacba1e",
+   "id": "sha256:cbd929360257e48e6a68a54f28737c2d86b24c76c0e1885156fb933cb82bc626",
+   "archive": "roboarc-ikea-sim-1.1.0.oci.tar",
+   "made_by": "ikea/images/ikea-mujoco/build.sh"
+  },
+  {
+   "name": "roboarc-monitor",
+   "ref": "ghcr.io/mll-lab-nu/roboarc-monitor:0.1.0@sha256:ea1b0d4b859998d6a47e2cb7a72c3a9ae85870b32c75de1bc1448e387da07093",
+   "id": "sha256:c87b21124aa3abcf93872ffe84a25dbd3cbe70595c61f142ada899adaa7b347b",
+   "archive": "roboarc-monitor-0.1.0.oci.tar",
+   "made_by": "images/monitor/build.sh"
+  }
+ ]
+}

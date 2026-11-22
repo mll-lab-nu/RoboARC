@@ -1,0 +1,133 @@
+"""Horseshoe assembly entities and a conservative free-ring goal."""
+from pathlib import Path
+from topogym.tasks.placement import PlacementGoalMixin
+from dataclasses import replace
+
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+from topogym.assets.geometry.horseshoe_ring import generate_assets
+from topogym.assets.scene_visuals import finish_generated_urdf
+from topogym.tasks.base import EntitySpec, RigidTaskDefinition, TaskSpec
+from ..scene_presets import defaults, record_preset
+
+
+def recommended_grasp_assist(variation_id, seed=0, *, task_parameters=None):
+    """Both shoes and the ring remain graspable throughout a trials episode."""
+    from topogym.assets.geometry.horseshoe_ring import HorseshoeAssembly
+    from topogym.config.registry import task_definition
+    from topogym.utils.grasp import GraspAssistConfig, rigid_grasp_region
+    task = task_definition("horseshoe_ring", variation_id, seed)(task_parameters, seed=seed)
+    assembly = HorseshoeAssembly(template=task.template(), scale=float(task.config["scale"]))
+    names = {"horseshoe_left", "horseshoe_right", "target_ring"}
+    targets = tuple(rigid_grasp_region(body.name, body.name,
+        body.visual.vertices-body.visual.center_mass) for body in assembly.bodies if body.name in names)
+    if {target.entity for target in targets} != names:
+        raise ValueError("Horseshoe grasp geometry is incomplete")
+    return GraspAssistConfig("contact_weld_v1", targets,
+                            max_tcp_distance_m=max(.09, max(t.radius_m for t in targets)+.03))
+
+
+class HorseshoeRingTask(PlacementGoalMixin, RigidTaskDefinition):
+    task_id = "horseshoe_ring"
+    terminal_revision = "placement_region_v3_grasp_contact_2mm"
+    placement_description = 'the entire removable ring'
+    goal_side = (1, -1)  # -y, the nominal scene's side; pose variation cannot flip it
+    defaults = defaults(task_id, scale=2., center_xy_m=[-.1356786, .05], yaw_deg=0.,
+                    initial_floor_clearance_m=.001, stable_duration_s=.5,
+                    minimum_separation_m=.02, shoe_finish="steel")
+    # Appearance only: the horseshoes' and chains' finish, "steel" (as generated) or a scene_visuals role for their URDF
+    # colours and GLBs; at the default it stays out of instance_id and the recorded preset.
+    hash_when_changed = ("shoe_finish",)
+
+    template_resource = None
+    layout_resource = None
+
+    def template(self):
+        """The assembly template; None selects the packaged default."""
+        from topogym.assets.variation_resources import read_json
+        return read_json(self.template_resource) if self.template_resource else None
+
+    def rest_poses(self):
+        """Settled body poses in the layout frame; None spawns the template assembly."""
+        from topogym.assets.variation_resources import read_json
+        return read_json(self.layout_resource)["poses"] if self.layout_resource else None
+
+    def declare(self, asset_dir, table_height_m):
+        self.table_height_m = float(table_height_m)
+        cfg, folder = self.config, Path(asset_dir)
+        preset = record_preset(self, folder)
+        assembly, report = generate_assets(folder, scale=float(cfg["scale"]), template=self.template())
+        ring_finish = finish_generated_urdf(
+            folder / "target_ring" / "target_ring.urdf", cfg["target_ring_finish"]
+        )
+        if cfg["shoe_finish"] != self.defaults["shoe_finish"]:
+            from topogym.assets.scene_visuals import scale_glb_color, scale_urdf_color, surface
+            shoe = surface(cfg["shoe_finish"])
+            for body in assembly.bodies:
+                if body.name != "target_ring":
+                    scale_glb_color(folder / body.name / f"{body.name}.glb", 1., color=shoe["color"],
+                                    roughness=shoe["roughness"], metallic=shoe["metallic"])
+                    scale_urdf_color(folder / body.name / f"{body.name}.urdf", 1., color=shoe["color"])
+        self.assembly = assembly
+        self.body_origins = {item["name"]: np.asarray(item["origin_m"]) for item in report["bodies"]}
+        rotation = Rotation.from_euler("z", float(cfg["yaw_deg"]), degrees=True)
+        xy = np.asarray(cfg["center_xy_m"], dtype=float)
+        clearance = float(cfg["initial_floor_clearance_m"])
+        if xy.shape != (2,) or not np.isfinite(xy).all() or not np.isfinite(clearance) or clearance < 0:
+            raise ValueError("Invalid Horseshoe initial layout")
+        bottom = min(rotation.apply(body.visual.vertices)[:, 2].min() for body in assembly.bodies)
+        origin = np.r_[xy, self.table_height_m-bottom+clearance]
+        entities, self.local_vertices = [], {}
+        for body, item in zip(assembly.bodies, report["bodies"]):
+            center = np.asarray(item["origin_m"])
+            self.local_vertices[body.name] = body.visual.vertices-center
+            entities.append(EntitySpec(body.name, "urdf", folder/body.name/f"{body.name}.urdf",
+                tuple(origin+rotation.apply(center)), tuple(rotation.as_quat()[[3, 0, 1, 2]]),
+                material={"friction": .3, "gravity_compensation": 0.},
+                morph_options={"align": False, "convexify": True, "decimate": False,
+                               "merge_fixed_links": False}))
+        rest = self.rest_poses()
+        if rest is not None:
+            # Physically settled rest poses: the template assembly spawned on the
+            # table is not at rest (it drops ~66 mm).
+            anchor = np.r_[xy, self.table_height_m]
+            entities = [replace(e, position_m=tuple(anchor+rotation.apply(rest[e.name]["position_m"])),
+                                quaternion_wxyz=tuple((rotation*Rotation.from_quat(np.roll(
+                                    rest[e.name]["quaternion_wxyz"], -1))).as_quat()[[3, 0, 1, 2]]))
+                        for e in entities]
+        # Placement rule caches the union of collision and visible geometry.
+        from topogym.evaluation.task_metrics import rigid_asset_vertices
+        self.placement_vertices = {e.name: rigid_asset_vertices(e) for e in entities}
+        self.placement_targets = ('target_ring',)
+        self.placement_remainder = tuple(e.name for e in entities if e.name not in self.placement_targets)
+        return TaskSpec(tuple(entities), {"rigid": {"enable_self_collision": True, "iterations": 100,
+            "max_collision_pairs": 4096, "constraint_timeconst": .001}},
+            dict(**preset, task_id=self.task_id, instance_id=self.instance_id, asset_report=report,
+                 target_ring_visual=ring_finish,
+                 target_ring_free=True, target_ring_gravity_compensation=0.,
+                 goal_measure="whole ring in fixed region; remainder behind separator; holding allowed"))
+
+    def evaluate_goal_region(self, state, region):
+        """Measure the fixed placement rule; physical qualification is separate."""
+        from topogym.evaluation.task_metrics import placement_candidate
+        result = placement_candidate(state, region, self.placement_vertices,
+            self.placement_targets, self.placement_remainder)
+        from topogym.evaluation.task_metrics import body_points
+        loops = {}
+        for name, loop in self.assembly.loops.items():
+            body = state["bodies"][loop.body]
+            q = np.asarray(body["quaternion_wxyz"])
+            rotation = Rotation.from_quat(q[[1,2,3,0]])
+            center = body_points(body, [loop.center-self.body_origins[loop.body]])[0]
+            loops[name] = replace(loop, center=center, rotation=rotation*loop.rotation)
+        intact = all(abs(loops[a].linking(loops[b])) == 1 for a, b in self.assembly.edges)
+        if not intact:
+            return False, "Physical chain/eye connection lost", dict(result[2], connections_intact=False)
+        return result
+
+    def goal_region_observation(self, region):
+        return region.observation(self.placement_targets, self.placement_remainder)
+
+    def evaluate_state(self, state):
+        return self.evaluate_placement(state)

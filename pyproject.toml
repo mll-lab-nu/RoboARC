@@ -1,0 +1,67 @@
+[build-system]
+# setuptools 77 is the first that reads `license` as an SPDX expression and `license-files` (PEP 639)
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roboarc"
+version = "2.2.1"
+description = "RoboARC, physical puzzles for robotic manipulation under spatial constraints: the roboarc command line and the benchmark's tasks as Gymnasium-compatible environments"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "LICENSES/*"]
+# the paper's authors, in its order (CITATION.cff)
+authors = [
+    {name = "Qineng Wang"}, {name = "Jianwen Lyu"}, {name = "Pingyue Zhang"}, {name = "Reuben Tan"},
+    {name = "Xiaoyu Huang"}, {name = "Tonghe Zhang"}, {name = "Kangrui Wang"}, {name = "Yelong Shen"},
+    {name = "Jianfeng Gao"}, {name = "Guanya Shi"}, {name = "Ruohan Zhang"}, {name = "Manling Li"},
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# numpy only: inside the published images everything else is installed (and pinned) already, so
+# `pip install --no-deps -e .` (or PYTHONPATH=<repo>) is enough there. The extras pin the images' own versions.
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+# the puzzle image ghcr.io/mll-lab-nu/roboarc:1.1.0 (Python 3.11); its runtime binding also needs the image's
+# simulator source and torch, and the EPA-patched libmujoco (`python -m roboarc patch-mujoco`), so the image is the
+# supported runtime
+puzzles = ["numpy==2.3.5", "scipy==1.17.1", "mujoco==3.14.0", "warp-lang==1.18.0", "newton==1.6.1", "pillow==11.3.0"]
+# the IKEA images ghcr.io/mll-lab-nu/roboarc-ikea(-sim):1.1.0 (Python 3.12), plus the EPA patch as above
+ikea = ["numpy==2.5.4", "mujoco==3.14.0"]
+# roboarc.vla (docs/VLA.md): openpi's websocket protocol, at the versions openpi's lock pins (openpi_client itself pins
+# numpy < 2, so it is not a dependency); Pillow is in the images already
+vla = ["msgpack==1.1.0", "websockets==15.0.1", "pillow"]
+gym = ["gymnasium>=1.0"]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://roboarc.embodied-first-exam.ai"
+Repository = "https://github.com/mll-lab-nu/RoboARC"
+Documentation = "https://github.com/mll-lab-nu/RoboARC/tree/main/docs"
+Changelog = "https://github.com/mll-lab-nu/RoboARC/blob/main/CHANGELOG.md"
+Issues = "https://github.com/mll-lab-nu/RoboARC/issues"
+"Agent runs" = "https://huggingface.co/datasets/RoboARC/RoboARC-outputs"
+
+[project.scripts]
+roboarc = "roboarc.cli:main"
+
+[tool.setuptools]
+packages = ["roboarc", "roboarc.cli", "roboarc.vla"]
+
+[tool.setuptools.package-data]
+roboarc = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/api"]
+markers = [
+    "sim: needs a published image (the simulator, the frozen instances); skipped elsewhere",
+    "heavy: long bit-identity replays of the reference trajectories (minutes to an hour each); run on a build host",
+]

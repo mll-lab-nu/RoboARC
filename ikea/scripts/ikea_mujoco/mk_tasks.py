@@ -1,0 +1,684 @@
+#!/usr/bin/env python3
+"""Render the IKEA MuJoCo tasks: tasks/roboarc-ikea-<task>-i00-privileged (images/ikea-mujoco/README.md).
+
+usage: python3 scripts/ikea_mujoco/mk_tasks.py [--check] [task ...]
+  no task   every task in bindings.json
+  --check   write nothing; exit 1 if a task directory would change
+
+solution/trajectory.npz is the task's one reference for both modes: oracles/<task>/<task>[_ref].npz where the task has a
+closed-loop reference (CLOSED_LOOP), else the standard twin's solution/oracle_actions.npz (standard/std_reference.py).
+
+Ends with scripts/task_conventions.normalize, like every generator. Inputs (all in scripts/ikea_mujoco/):
+  tasks.json     per task: title, goal, success requirements and mechanism in plain words, robot type
+  assets.json    sha256 of every scene file in the image (stage_context.py); each task's runtime_binding.json repeats
+                 its scene's files
+  bindings.json  per task, what the image's scene builds to (rcb_ikea.py info inside the image): initial-state hash,
+                 actuators, timestep; the image reference and id (a task's own "image" overrides the default one: a
+                 scene added in a later image version)
+  evidence.json  per task, the Harbor oracle / nop checks (scripts/robotangle/harbor_check.py style records) and the
+                 measured replay wall time, which sets the verifier's timeout
+  shared/        rcb_ikea.py (the agent's tooling and the replay), grade.py (the verifier), copied unchanged (PROTOCOL D9)
+"""
+from __future__ import annotations
+import argparse, filecmp, hashlib, json, pathlib, re, shutil, sys, tempfile
+
+HERE = pathlib.Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+TASKS = ROOT.parent / "tasks"                     # the repository's tasks/, next to the puzzles
+SHARED = HERE / "shared"
+VERSION = (ROOT / "images/ikea-mujoco/VERSION").read_text().strip()
+AGENT_S = 11400                 # 3 h 10 min wall clock, both modes, as RoboARC's puzzles (scripts/roboarc/mk_tasks.py CUTOFF_SEC)
+TEXTS = json.loads((HERE / "tasks.json").read_text())
+ASSETS = json.loads((HERE / "assets.json").read_text())
+BIND = json.loads((HERE / "bindings.json").read_text())
+IMAGE = BIND["image"]["reference"]          # the one image of every task (a task's own bindings "image" would override it)
+assert IMAGE == f"ghcr.io/embodied-first-exam/roboarc-ikea:{VERSION}", (IMAGE, VERSION)   # the name the image was bound under (its pin is in ghcr.io/mll-lab-nu, images/pins.json) and its version
+sys.path.insert(0, str(ROOT.parent / "scripts"))   # the repository's task layer (normalize)
+import task_conventions as TC  # noqa: E402  the protocol's conventions: every generator ends with normalize(task_dir)
+# The agent's egress (PROTOCOL §2.11, H.6): the two lines the repository's `scripts/set_agent_egress.py allowlist`
+# writes, with that script's HOSTS (read from its text: it acts on import; one list for every task), in both modes.
+_HOSTS = re.findall(r'"([^"]+)"', re.search(r"(?ms)^HOSTS = \[(.*?)\]", (ROOT.parent / "scripts/set_agent_egress.py").read_text()).group(1))
+EGRESS = ('network_mode = "allowlist"      # model APIs and package registries (scripts/set_agent_egress.py); PROTOCOL §2.11\n'
+          "allowed_hosts = [" + ", ".join(f'"{h}"' for h in _HOSTS) + "]\n")
+
+# The README's Change Log (PROTOCOL §1, H.8: a changed task gets a new DIGEST and an entry), both modes.
+CHANGE_LOG = """### Change Log
+- 2026-10-19: RoboARC 1.0.1: the task is on the repository's task layer and under `tasks/` (in 1.0.0 it was under `ikea/`),
+  and its `[task].name` is `roboarc/<dir>` (it was `robot-coding-bench/<dir>`). For the agent: the instruction's closing
+  sections are the shared ones (`## External material`, `## Resource limits`, `## Time limit`); the network allowlist
+  adds the package registries (PyPI, the Debian / Ubuntu archives) that `## External material` already named (the
+  repository's one list, `scripts/set_agent_egress.py` `HOSTS`); a resource-monitor sidecar (its image
+  `ghcr.io/embodied-first-exam/roboarc-monitor:0.1.0`, images/monitor/) records the trial's resources (a limit
+  fails the trial only when the run sets `RCB_LIMITS_ENFORCE=1`); the agent's container gets the
+  declared caps. The task declares its compute resources, limits and seeds, and has a `DIGEST`; its texts cite this
+  repository's paths. The scene, the logic of the graders and of the sim service, the tooling (`rcb_ikea.py`), the
+  runtime binding, the reference and the images (`:1.0.0`) are unchanged. Results before and after 1.0.1 are not
+  comparable: the instruction and the egress changed.
+- 2026-10-20: RoboARC 1.1.0, the images `ghcr.io/embodied-first-exam/roboarc-ikea:1.1.0` and `roboarc-ikea-sim:1.1.0`:
+  rebuilt from fully pinned inputs (the Python base image by digest, Debian packages by version from the Debian
+  snapshot archive, wheels by sha256) and with only what the tasks run. Every file the graded runtime loads (MuJoCo
+  with its EPA patch, numpy, the scenes, the replay video's libraries, Nyx, torch and its CUDA libraries) is
+  byte-identical to 1.0.0's; left out are unused packages (mujoco's viewer and test dependencies, the Nyx environment's
+  triton, sympy and pip, curl), bytecode caches and the duplicate scene layer. The verifier's replay video libraries
+  (OSMesa, imageio with ffmpeg, Pillow) are in the base image, so the verifier image no longer installs them when it
+  is built; the agent's container has them too. The runtime binding names the new image id. The instruction, the
+  scene, the logic of the graders and of the sim service, the tooling and the reference are unchanged; every
+  reference replays to the end and settled states it reaches in 1.0.0: results graded under 1.0.x stand.
+- 2026-10-21: RoboARC 1.1.0, every image by digest: the Dockerfiles and compose files name the IKEA images and the
+  resource monitor's image by manifest digest (images/pins.json), so a pull gets exactly the images that were
+  validated (until now the IKEA images were named by their tags). In standard mode the agent container's client
+  packages are installed from a hashed lock (`environment/client-requirements.txt`, the same versions with the sha256
+  of each file, installed with `--no-deps --require-hashes`): the same files as before. The images, the instruction,
+  the scene, the graders, the tooling and the reference are unchanged: results graded under 1.1.0 stand.
+- 2026-10-21: RoboARC 1.1.1, image references moved to ghcr.io/mll-lab-nu (same images, same digests): the
+  Dockerfiles, compose files and README name `ghcr.io/mll-lab-nu/<image>:<tag>@sha256:<digest>` with the digests of
+  1.1.0 (images/pins.json). The runtime binding is unchanged, and nothing else changed: results graded under 1.1.0
+  stand.
+"""
+
+# Appearance seeds (the user, 2026-10-27): both twins allow seeds 0, 1 and 2, built at run time from the one frozen scene:
+# the runner's copy carries the trial's seed in the files `seed` (scripts/task_seed.py materialize; 0 as committed).
+# A seed changes only the standard twin's lighting (mk_standard_tasks.py seed_look); the privileged mode shows the agent no
+# images, so there every seed is the same task. The reference was checked on seed 0 (oracle = [0]).
+SEEDS = (1, 2)
+SEEDS_TOML = f'''
+[metadata.seeds]
+default = 0
+allowed = [{", ".join(str(s) for s in (0,) + SEEDS)}]
+oracle = [0]
+build = "runtime"
+'''
+SEEDS_CHANGE = """- 2026-10-27: three appearance seeds: the task allows seeds 0, 1 and 2 (`[metadata.seeds]`, `build = "runtime"`: the
+  runner picks the trial's seed and writes it to the files `seed`), as its standard twin, whose camera images seeds 1
+  and 2 light differently. This mode shows the agent no images and its replay video keeps the scene's own lights, so
+  here every seed is the same task. The scene, the physics, the instruction, the grader, the tooling and the reference
+  are unchanged: results graded under 1.1.x stand.
+"""
+
+
+def default_tasks() -> list[str]:
+    """Every task in bindings.json."""
+    return sorted(BIND["tasks"])
+
+
+def task_dir(t: str, mode: str = "privileged") -> pathlib.Path:
+    return TASKS / name(t, mode)
+
+
+# Closed-loop references (built phase by phase on the final physics with true-state feedback, recorded as the executed
+# rows; scripts/ikea_mujoco/oracles/<task>/): the task's one reference for both modes. task -> words for the README.
+CLOSED_LOOP = {
+    "eket": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/eket/build_ref.py`: the "
+             "demo as the phase guide, each held panel servoed onto the unclamped demo's recorded relative-pose track "
+             "(damped-least-squares Jacobian IK on the TCP) and paused at each slide until its gate accepts; each demo row "
+             "held (the guide tracks still running) until the slewed Franka Hand reaches its command; the rows are the "
+             "targets executed after the joint-speed and hand-speed clamp"),
+    "ikea365": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/ikea365/build_ref.py`: "
+                "the demo through the clamp as the phase guide; the right hand threads the returned screw itself before "
+                "releasing it; the screwdriver is centred on the true screw axis, spins with a 5-15 N axial push and goes "
+                "torque-free at the seat so the welds engage on an unloaded screw; guide tracks (damped-least-squares IK) "
+                "steer the hands onto member B, the turned stand and the bowl; each demo row held (the guide tracks still "
+                "running) until the slewed Franka Hand reaches its command, and the returned screw servoed onto its return "
+                "gate's pose in member A (the slew shifts the screw in the grasp); the rows are the targets executed after "
+                "the joint-speed and hand-speed clamp"),
+    "vesken": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/vesken/vesken_oracle.py`: "
+               "the demo as the phase guide, one operation per snap; each grasp approach offset to where the part really is, "
+               "each carried part held on its reference pose (near the host: on its connector error) by an integral loop "
+               "through damped-least-squares IK, a gentle press until the weld engages, one arm move re-pathed in joint "
+               "space to avoid a self-contact, the right hand lifting the bottom tray clear of a passing left wrist, two "
+               "wrist rolls that keep caps from tipping or being hit; the rows are the targets executed within the "
+               "joint-speed and Franka Hand speed limits"),
+    "burvik": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/burvik/build2.py` and "
+               "`move_from_take.py`: the demo (time-dilated to the joint-speed limits) as the phase guide, each row held "
+               "while the slewed Franka Hand is more than two ticks from its command; the top seated in "
+               "the jig's slot by a two-hand servo (the demo perched it on the guards, leaning 6 degrees, so the hand threading "
+               "leg_3 met the handle rack); the handle and the two handle legs servoed onto their axes in the top's frame, each "
+               "leg spun by the wrist with a bounded axial press until its weld engages; for the upright turn the right hand "
+               "re-takes the handle in the demo's arm configuration and the left hand takes leg_2 on its centre, then the "
+               "demo's rigid two-hand motion is executed on these grasps through joint-limited IK; the table set down level "
+               "on its feet, clear of the stand, before the hands open; the rows are the targets executed within the "
+               "joint-speed and hand-speed limits"),
+    "stegesund": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/stegesund/build.py`: "
+                  "the author's speed-limited demo as the phase guide, each row held until the slewed hands reach it, each "
+                  "grasp approach steered onto the part where it really is, each carried bolt steered onto its hole and "
+                  "kept on its axis while it is screwed in by hand, each hex-key drive moved onto the true bolt axis, the "
+                  "frame turned on the guide's path and the top rod steered into the crotches; tiny target shifts searched "
+                  "where the demo itself is chaotic (the half-lap press); the rows are the targets executed after the "
+                  "joint-speed and hand-speed clamp"),
+    "stenerik": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/stenerik/build.py` and "
+                 "`pads.py`: the demo as the phase guide, executed within the joint-speed limits; each carried screw steered "
+                 "onto its insert axis, the screwdriver centred on the true screw axis (screws 5-6 driven closed loop: wings "
+                 "aligned to the slots, spin with a light axial push, torque-free at the seat until the weld engages), the "
+                 "wind-up released before each lift; each carried pad steered onto its site, and each press servoed on the "
+                 "true pad-support contact force (the demo row held) until the bond latches; the rows are the targets "
+                 "executed after the joint-speed clamp"),
+    "variera": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/variera/build.py`: "
+                "the time-dilated demo (with its release tail) as the phase guide, each row held until the slewed Franka "
+                "Hand reaches its command; each carried side frame held on the unslewed run's pose by damped-least-squares "
+                "IK and released in steps (eased off to a light touch, then a small gap, then open) so the standing frame "
+                "does not rock off its place; where the demo's screwdriver spin ends short of the seat, the spin goes on "
+                "with the tip on the true screw axis until the head seats, then torque-free before the lift; the rows are "
+                "the targets executed after the speed clamp"),
+    "uppsta": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/uppsta/search.py` "
+               "(`uppsta_oracle.py`): the guide is the author's demo (each 2.5 ms tick reached over its two rows) run in the "
+               "scene without the prism rule, where it assembles the block; segment by segment (the arms' releases), each "
+               "grasp approach offset to where the part really is, each carried part held on its guide pose (relative to "
+               "the board near it) by an integral loop through damped-least-squares IK, the hex key's tip servoed onto the "
+               "hole's axis, a screw's spin matched modulo 60 degrees, a part pressed a little deeper before its release "
+               "where it would tip over; away from every grasp and release the demo is followed at every 4th row where the "
+               "segment's gate allows (`ref/tempo.npz`); the rows are the targets executed within the joint-speed limits "
+               "and the Franka Hand's speed"),
+    "gladom": ("a closed-loop reference built on the final physics by `ikea/scripts/ikea_mujoco/oracles/gladom/build.py`: the "
+               "demo as the phase guide, each row held until the slewed Franka Hand reaches its command; each screw "
+               "steered upright onto the stand's slot and lowered onto it before the fingers open; the hex driver's tip "
+               "kept on the hand axis (its true offset in the fingers compensated by damped-least-squares IK, also while "
+               "the wrist spins) and each screw driven on until its weld latches; the rows are the targets executed within "
+               "the joint-speed and hand-speed limits"),
+    "kyrre": ("a reference built on the final physics, the scene with MuJoCo's native cylinders (kyrre is the one exception "
+              "to the prism rule, approved on 2026-10-19, see ikea/scripts/ikea_mujoco/REVIEW.md) by "
+              "`ikea/scripts/ikea_mujoco/oracles/kyrre/rebuild.sh`: the author's demo (every row within the arm limits), each row "
+              "held until the slewed Franka Hand reaches its command (`standard/std_reference.py --grip wait`); screw 3-1's "
+              "second grasp re-aimed at where the screw really lies (`patch_grasp.py`: damped-least-squares IK on the TCP, "
+              "the demo's grasp pose relative to the screw); the hex key set down 12 mm along its rest, off the rest's "
+              "knife-edge pose where it never comes to rest; the rows are the targets executed within the joint-speed and "
+              "hand-speed limits"),
+}
+
+
+# A task's one reference for both modes that is not a closed-loop build (e.g. the author's speed-limited demo, unchanged,
+# or a demo time-dilated to the joint-speed limits), kept at scripts/ikea_mujoco/oracles/<task>/<task>.npz. task -> words.
+OWN_REFS: dict = {
+}
+
+
+def ref_words(t: str):
+    return CLOSED_LOOP.get(t) or OWN_REFS.get(t)
+
+
+def closed_loop_ref(t: str):
+    """The task's own reference file (CLOSED_LOOP or OWN_REFS), None if it has none."""
+    d = HERE / "oracles" / t
+    for f in (d / f"{t}_ref.npz", d / f"{t}.npz"):
+        if ref_words(t) and f.is_file():
+            return f
+    return None
+
+
+EVID = json.loads((HERE / "evidence.json").read_text()) if (HERE / "evidence.json").is_file() else {}
+
+
+def image(t: str) -> dict:
+    return BIND["tasks"][t].get("image", BIND["image"])
+
+
+def pinned(t: str) -> str:
+    """The task's image as its files name it: `<repo>:<tag>@sha256:<manifest digest>` (images/pins.json; the pin's image
+    id must be the bound one)."""
+    return TC.pinned_image(image(t)["reference"], image(t)["id"])
+
+
+def robot_text(t: str) -> dict:
+    """the robot's texts (tasks.json robots), with the task's own "robot_text" entries (e.g. actuator names) on top"""
+    x = TEXTS["tasks"][t]
+    return {**TEXTS["robots"][x["robot"]], **x.get("robot_text", {})}
+
+
+def demo(t: str) -> str:
+    return TEXTS["tasks"][t].get("demo", t)
+
+
+def keyframe(t: str) -> str:
+    return TEXTS["tasks"][t].get("keyframe", "home")
+
+
+def name(t: str, mode: str = "privileged") -> str:
+    # RoboARC 1.0.0 (user, 2026-10-19): the IKEA tasks are in the RoboARC namespace, roboarc-ikea-<scene>-i00-<mode>
+    # (until then ikea-<scene>-i00-<mode>; the evidence records keep the names they ran under)
+    return f"roboarc-ikea-{t}-i00-{mode}"
+
+
+def _base_timeout(t: str) -> int:
+    wall = EVID.get(t, {}).get("replay_wall_s")
+    return int(max(3600, 3 * wall + 600)) if wall else 7200
+
+
+def verifier_timeout(t: str) -> int:
+    """The verifier's time limit: room for the reference's replays on the Harbor host (3 x its wall + 600 s, at least
+    3600 s) and for a trajectory of row_cap(t) rows on a slow trial-class CPU (evidence.json `slow_replay_wall_s`: one
+    unobserved reference replay on a dedicated Xeon Gold 6230R core, the CPU-only pool hosts' class) with a 1.5x margin and
+    600 s to spare. A verifier that times out writes no verdict (an infrastructure failure), so the limit must cover the
+    longest trajectory the grader accepts on every host it runs on."""
+    e = EVID.get(t, {})
+    base, cap = _base_timeout(t), row_cap(t)
+    if cap and e.get("slow_replay_wall_s"):
+        base = max(base, int(1.5 * cap * e["slow_replay_wall_s"] / e["rows"] + 600) // 60 * 60 + 60)
+    return base
+
+
+def row_cap(t: str) -> int | None:
+    """The most rows a trajectory may have: what the verifier's two replays (measured on the reference, at the same time,
+    plus the video replay) fit in the Harbor host's timeout with a 1.5x margin and 600 s to spare. None without a
+    measurement (WIP). verifier_timeout() then also covers this many rows on a slow host."""
+    e = EVID.get(t, {})
+    if not (e.get("replay_wall_s") and e.get("rows")):
+        return None
+    per_row = e["replay_wall_s"] / e["rows"]
+    return int((_base_timeout(t) - 600) / (1.5 * per_row)) // 1000 * 1000
+
+
+def cap_text(t: str) -> str:
+    n = row_cap(t)
+    if n is None:
+        return "There is no step budget."
+    b = BIND["tasks"][t]
+    return (f"At most {n} rows ({n * 4 * b['timestep']:g} s of simulated time): the grader refuses a longer trajectory "
+            "(`bad_trajectory`), because its replays must fit the verifier's time limit.")
+
+
+def gripper_speed(t: str) -> float | None:
+    """The scene's Franka Hand command limit (units/s; rcb_ikea.gripper_speed_limits(), recorded in bindings.json by
+    `rcb_ikea.py info`), or None where the gripper is not limited (the ViperX)."""
+    v = {n.split("_", 1)[1] if n.startswith("left_") else n.split("/", 1)[1]: x
+         for n, x in BIND["tasks"][t]["speed_limits_per_s"].items() if n.startswith(("left_", "left/"))}.get("actuator8")
+    assert (v is not None) == (TEXTS["tasks"][t]["robot"] == "panda"), (t, v)
+    return v
+
+
+def gripper_speed_text(t: str, dt: float, step: str = "control tick") -> str:
+    """The Franka Hand slew in words (both modes' texts)."""
+    v = gripper_speed(t)
+    if v is None:
+        return "The gripper command is not limited."
+    return (f"The gripper command (`actuator8`) moves at most {v * dt:.6g} units per {step} ({v:.6g} units/s), the same way: "
+            "the Franka Hand's finger speed (50 mm/s per finger, so 0.1 m/s of commanded finger width; "
+            f"`rcb_ikea.GRIPPER_WIDTH_SPEED_M_S`, converted with this scene's `actuator8` gain and stiffness), so a full "
+            f"open-to-closed command (255 to 0) takes {255 / v:.3g} s.")
+
+
+def speed_text(t: str, dt: float) -> str:
+    """The speed clamp of rcb_ikea.Session.applied(), in words (the standard twin's rule, the same table)."""
+    if TEXTS["tasks"][t]["robot"] == "panda":
+        lim = (f"at most {2.175 * dt:g} rad per control tick on joints 1-4 (`actuator1`..`actuator4`: 2.175 rad/s) and "
+               f"{2.61 * dt:g} rad on joints 5-7 (`actuator5`..`actuator7`: 2.61 rad/s), the Franka Panda's joint velocity limits,")
+    else:
+        lim = f"at most {3.14159 * dt:g} rad per control tick on every arm joint (3.14159 rad/s, the ViperX 300 s joint velocity limit),"
+    return ("Speed rule (the robot's real limits; clamp, not fail; `rcb_ikea.JOINT_SPEED_LIMITS_RAD_S`): each arm joint "
+            f"target moves {lim} from the target applied on the previous tick; a target that asks for more is moved by "
+            "the limit only (`Session.applied()`, in `s.step` and in the grader's replay alike), so a fast row is spread over "
+            f"the ticks after it. {gripper_speed_text(t, dt)} A row within the limits (+1e-9) is applied unchanged.")
+
+
+def tick_ms(t: str) -> str:
+    e = EVID.get(t, {})
+    if e.get("replay_wall_s") and e.get("rows"):
+        return f"{1e3 * e['replay_wall_s'] / e['rows']:.1f} ms"
+    return "a few ms"
+
+
+def task_toml(t: str) -> str:
+    x, r, b = TEXTS["tasks"][t], robot_text(t), BIND["tasks"][t]
+    return f'''schema_version = "1.3"
+artifacts = ["/app/output/"]
+
+[task]
+name = "roboarc/{name(t)}"
+description = "IKEA MuJoCo {x['title']} ({r['short']}, MuJoCo 3.14.0 CPU): produce one replayable trajectory. {x['goal']} Frozen scene (the scene's keyframe '{keyframe(t)}'); physical grasps, no assist."
+authors = [{{ name = "Xiaoyu" }}, {{ name = "Zhen Wu" }}]
+keywords = ["robotics", "ikea", "furniture-assembly", "mujoco", "{TEXTS['tasks'][t]['robot']}", "bimanual", "code-as-policy", "trajectory"]
+
+[metadata]
+author_name = "Xiaoyu"
+task_type = "trajectory"          # trajectory | policy   (see docs/PROTOCOL.md)
+simulator = "mujoco"              # plain MuJoCo 3.14.0, CPU float64, the scene's own runtime and mechanism
+robot = "{r['robot']}"            # both arms (docs/TAXONOMY.md)
+family = "ikea_{t}"
+mode = "privileged"               # privileged (state-based tooling, resets) | standard (robot as a service)
+dynamics = "static"               # scene dynamics (docs/PROTOCOL.md §2): only the robot and gravity do work; springs, latches and threads are passive
+oracle = "full"
+grasp = "physical (finger friction; no assisted grasp, no welds to a gripper)"
+success_rule = "the scene's success.py (port of the source assembly grader) + the terminal rules (released, at rest, no breakdown), after the last row and after a 1.0 s hold"
+instance_seed = 0                 # one frozen scene: ikea/images/ikea-mujoco scene {t}, digest {ASSETS['tasks'][t]['digest'][:12]}
+expert_time_estimate_hours = {x['hours']}
+{SEEDS_TOML}
+[verifier]
+timeout_sec = {verifier_timeout(t)}.0
+environment_mode = "separate"     # verifier runs in its own sandbox (tests/Dockerfile); the agent container is gone by then
+network_mode = "no-network"
+
+[agent]
+timeout_sec = {AGENT_S}.0             # Agent wall-clock budget; verifier has its own budget
+{EGRESS}
+[environment]
+build_timeout_sec = 1800.0
+cpus = 4
+memory_mb = 8192
+
+[verifier.environment]
+build_timeout_sec = 1800.0
+cpus = 4                          # two replays at once (+ the video replay, privileged): the timeouts assume a core each
+memory_mb = 8192
+'''
+
+
+def bullets(items) -> str:
+    return "\n".join(f"- {s}" for s in items)
+
+
+def instruction(t: str) -> str:
+    x, r, b = TEXTS["tasks"][t], robot_text(t), BIND["tasks"][t]
+    dt_ms = 1e3 * b["timestep"]
+    return f'''# IKEA MuJoCo · {x['title']} — frozen scene
+
+You control a simulated robot (**{r['words']}**; plain MuJoCo 3.14.0 on the CPU, float64) via Python.
+**Task:** {x['goal']}
+
+## Success requirements
+
+{bullets(x['requirements'])}
+
+{TEXTS['terminal']}
+
+The requirements are the scene's own `success.py` (`/opt/ikea/scenes/{t}/success.py`); the terminal rules are the
+tooling's (`rcb_ikea.py`, `Session.final_check()`). `s.status()` checks all of it on the current state
+(`"goal"` = success.py, `"released"`, `"at_rest"`, `"breakdown"`, `"report"` = success.py's details);
+`s.final_check()` is the grader's verdict on your rows (the current state, then the 1.0 s hold).
+
+## Physics and mechanism
+
+- Parts move only through contact with the robot, gravity and the scene's own mechanism. {x['mechanism']}
+- Grasps are physical: friction from the finger contacts. Nothing attaches a part to a gripper, and there is no assist.
+- The scene (model, solver settings, mechanism) is frozen. The grader builds its own copy; changing the model or the
+  scene files in your container has no effect on the grade.
+
+This is a *fixed scene*: the parts and the robot start in the same state at every reset (the scene's keyframe `{keyframe(t)}`).
+You may reset and retry as many times as you want, read any simulator state, and save and restore states. Your
+deliverable is **one replayable trajectory**, not a general policy.
+
+## Deliverable
+Write the final trajectory to `/app/output/trajectory.npz` with `Session.save_trajectory(...)` (below).
+It is replayed open-loop from the same initial state in a fresh process, twice, and scored 1 if both replays pass
+`final_check()` (the requirements and the terminal rules at the end of your rows and after the 1.0 s hold) and end in
+the same state, else 0. Also leave the script that
+produced it at `/app/output/gen.py`. Save a real trajectory as soon as practical and keep saving progress; do not stop
+early.
+
+## Tooling (already installed; run `python` from any directory)
+```python
+from rcb_ikea import Session
+s = Session("{t}")                   # builds the frozen scene /opt/ikea/scenes/{t} (scene.py load())
+s.model, s.data                       # the MuJoCo MjModel / MjData (privileged: read anything; mujoco is importable)
+s.S                                   # the scene object: s.S.mech (mechanism state), s.S.success(), s.S.task (task.json)
+s.actuators                           # the {b['nu']} actuator names, in action order
+s.step(row)                           # one control tick: data.ctrl[:] = s.applied(row) (ctrlrange + speed rule), 4 physics steps (+ the mechanism)
+s.run(rows)                           # several ticks
+s.hold_action()                       # the current ctrl row (repeating it holds the targets)
+s.status()                            # {{'success', 'goal', 'released', 'at_rest', 'breakdown', 'rows', 'state_sha', 'report', ...}}
+s.final_check()                       # the grader's verdict: status() now and after holding the last row 1.0 s (state restored)
+st = s.get_state(); s.set_state(st)   # save / restore: physics, mechanism and monitor state, and the rows recorded so far
+s.reset()                             # a fresh build of the scene: exactly the grader's initial state; clears the rows
+s.replay(rows)                        # reset, replay open-loop, return final_check()  -> use this to self-check
+s.save_trajectory(path="/app/output/trajectory.npz")   # the rows recorded since the last reset (or pass rows)
+```
+Scene details: `/opt/ikea/scenes/{t}/` (scene.py, task.json, layout.json, success.py, the mechanism modules, scene.xml).
+There is no planner or skill library: inverse kinematics, grasping, screwing and every other skill are yours to build
+(MuJoCo's Jacobians, `mujoco.mj_jacSite`, and saved states make that practical).
+
+CLI equivalent of the grader's replay (one replay):
+`python /opt/tools/rcb_ikea.py replay --task {t} --traj /app/output/trajectory.npz`
+
+## Conventions
+- Action: one row of {b['nu']} actuator controls per control tick, float64: {r['action']}. Out-of-range values are
+  clamped to each actuator's ctrlrange. {speed_text(t, 4 * b['timestep'])} The arms are position servos; the actuators'
+  gains and force limits are in the model.
+- Trajectory file: `ctrl` (N, {b['nu']}) float64, `substeps` = 4, `timestep` = {b['timestep']} (what `save_trajectory`
+  writes). Each row is applied for 4 physics steps of {dt_ms:g} ms: a {4 * dt_ms:g} ms control tick ({1e3 / (4 * dt_ms):.0f} Hz).
+  {cap_text(t)} One control tick takes about {tick_ms(t)} of wall clock here: budget your experiments against the
+  time limit (`## Time limit`).
+- World frame: MuJoCo's, +z up, metres; quaternions are MuJoCo's **WXYZ**. Tool frames (sites): {r['tcp']}.
+- The episode does not end on success: the grader checks once, after your last row and again after the 1.0 s hold.
+  End your rows with the parts released, the arms clear of them and everything at rest.
+- One `Session` per process (the scene's modules are imported once).
+
+## External material
+{EXTERNAL_TEXT}
+
+## Time limit
+You have {AGENT_S} seconds ({AGENT_S // 60} min) to complete this task. This is wall-clock time from the start of your
+session; the time a simulator takes to start counts. When it is up you are stopped without warning and only what is in
+`/app/output/` at that moment is graded, so save a deliverable as soon as you have one and overwrite it whenever you have
+a better one.
+'''
+
+
+def shared_ref(t: str):
+    """The standard twin's reference (solution/oracle_actions.npz, the demo time-dilated to the joint-speed limits by
+    scripts/ikea_mujoco/standard/std_reference.py), which is the privileged reference too: the original demos command
+    joint targets faster than the robots' real limits and fail under the joint-speed clamp. None if it is missing."""
+    f = TASKS / name(t, "standard") / "solution/oracle_actions.npz"
+    return f if f.is_file() else None
+
+
+def ref_text(t: str, sha: str) -> str:
+    head = f"`solution/solve.sh` copies `solution/trajectory.npz` (sha256 `{sha}…`) to `/app/output/`: "
+    if closed_loop_ref(t) is not None:
+        return (head + f"the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the "
+                f"same rows): {ref_words(t)}. It never trips the speed clamp (arm joints and Franka Hand).")
+    return (head + f"the task's one reference, shared with the standard twin (its `solution/oracle_actions.npz`, the "
+                f"same rows): the robot demo of the IKEA MuJoCo tree (`demos/{demo(t)}/actions.npz`), time-dilated "
+                "to the robots' real joint-speed limits by `ikea/scripts/ikea_mujoco/standard/std_reference.py`"
+                + (" (each row whose gripper command steps faster than the Franka Hand's speed held until the hand reaches "
+                   "it, `--grip wait`)" if gripper_speed(t) else "")
+                + ", so the speed clamp never changes a row. The demo itself commands faster than the limits and fails "
+                "under the clamp.")
+
+
+def readme(t: str, traj: pathlib.Path) -> str:
+    x, r, b = TEXTS["tasks"][t], robot_text(t), BIND["tasks"][t]
+    e = EVID.get(t, {})
+    sha = hashlib.sha256(traj.read_bytes()).hexdigest()[:16] if traj.is_file() else "?"
+    checks = e.get("checks")
+    img = e.get("image", image(t))            # the image the Harbor checks ran on (evidence.json), else the task's
+    ver = (f"Harbor checks ({e['date']}, {e['host']}, image `{img['reference']}` id `{img['id'][7:19]}`): "
+           + "; ".join(f"`{c['agent']}` scored {c['reward']}" + (f" (two replays, {c['replay_wall_s']} s wall)"
+                                                                if c.get("replay_wall_s") else "") for c in checks)
+           + ".") if checks else "Harbor oracle / nop checks: pending."
+    if e.get("image_note"):
+        ver += " " + e["image_note"]
+    tm = e.get("timing")
+    if tm and "text" in tm:
+        ver += f" Reference timing: {tm['text']}"          # the record names the budget it was measured against
+    elif tm:
+        ver += (f" Reference timing against the {AGENT_S} s budget, by host: one unobserved replay "
+                f"{tm['quiet_i9_14900HX_s']:.0f} s ({100 * tm['quiet_i9_14900HX_s'] / AGENT_S:.1f} %) on a quiet "
+                f"i9-14900HX host; the standard twin's live episode {tm['loaded_standard_live_s']:.0f} s "
+                f"({100 * tm['loaded_standard_live_s'] / AGENT_S:.1f} %) on host B, a shared and loaded Ryzen 9 7950X (load 25-85 over the day; an earlier run on the same host took 4567 s / 5689 s for gladom / variera).")
+    return f'''# {name(t)}
+
+| | |
+|---|---|
+| Benchmark | IKEA MuJoCo |
+| Mode | privileged |
+| Twin | `{name(t, 'standard')}` |
+| Simulator / robot | `mujoco` / `{r['robot']}` |
+| Family / instance | `ikea_{t}` / seed 0 |
+| Oracle | `full` |
+| Agent time budget | {AGENT_S} s; tokens: protocol default (PROTOCOL §5) |
+| Base image | `{pinned(t)}` |
+
+## Task
+{x['manual']} in plain MuJoCo 3.14.0 (CPU, float64) with {r['words']}: produce one replayable trajectory. {x['goal']}
+
+## Difficulty
+Bimanual furniture assembly with physical grasps (no assist), {b['nu']}-D actuator action at {1 / (4 * b['timestep']):.0f} Hz
+(4 physics steps of {1e3 * b['timestep']:g} ms per row); the reference needs {e.get('ref_rows', e.get('rows', '?'))} rows
+({e.get('ref_sim_time_s', e.get('sim_time_s', '?'))} s of simulated time).
+
+## Reference solution
+{ref_text(t, sha)}
+
+## Verification
+Open-loop replay of `/app/output/trajectory.npz` from the scene's initial state in two fresh processes at the same time
+(`tests/grade.py`, `tests/rcb_ikea.py replay`: per row `data.ctrl[:] = row; S.step(4)` with the scene's mechanism, then
+`final_check()`: `success.py`, released, at rest and no breakdown at the end of the rows and again after a 1.0 s hold of
+the last row). Pass iff both replays pass and end in the same state hashes (`deterministic`). The
+scene in the verifier image must match `tests/runtime_binding.json` file by file (`instance_exact`) and build to its
+initial-state hash (`instance_ok`). Replay video (evidence only, never the verdict): a third process replays the same rows and renders `/logs/verifier/replay.mp4` (CPU OSMesa, 512 x 288, at most 750 frames over the episode and the 1.0 s hold; `video_rendered`).
+
+{ver}
+
+## Details
+| | |
+|---|---|
+| Grasping | physical (finger friction), no assist |
+| Success rule | the scene's `success.py` + the terminal rules (released, at rest, no breakdown), at the end of the rows and after a 1.0 s hold |
+| Scene | `/opt/ikea/scenes/{t}/` in the image; digest `{ASSETS['tasks'][t]['digest'][:16]}…` (ikea/scripts/ikea_mujoco/assets.json) |
+| Initial state | sha256 `{b['initial_state_sha256'][:16]}…` of the mjSTATE_INTEGRATION vector |
+
+### Goal
+{x['goal']}
+
+### Success requirements
+{bullets(x['requirements'])}
+
+### Mechanism
+{x['mechanism']}
+
+### Provenance
+- Scene and demo: the IKEA MuJoCo tree (`scenes/{t}/`, `demos/{demo(t)}/actions.npz`), MuJoCo 3.14.0, RoboARC rigid settings
+  (timestep {1e3 * b['timestep']:g} ms, Newton, 100 iterations, elliptic cones).
+- The scene files are not in this repository: the image carries them (`ikea/images/ikea-mujoco/README.md`, build
+  context from `ikea/scripts/ikea_mujoco/stage_context.py`, pinned by `ikea/scripts/ikea_mujoco/assets.json`).
+
+{CHANGE_LOG}{SEEDS_CHANGE}'''
+
+
+SOLVE = '''#!/bin/bash
+# Reference solution (privileged): the IKEA MuJoCo robot demo's ctrl rows (README.md, Reference solution).
+set -euo pipefail
+mkdir -p /app/output
+cp /solution/trajectory.npz /app/output/trajectory.npz
+'''
+
+ENV_DOCKERFILE = '''# Base image = plain MuJoCo 3.14.0 and the IKEA scenes (ikea/images/ikea-mujoco/). Everything task-specific is copied here.
+FROM {image}
+COPY rcb_ikea.py /opt/tools/rcb_ikea.py
+ENV PYTHONPATH=/opt/tools
+RUN mkdir -p /app/output
+WORKDIR /app
+'''
+
+TESTS_DOCKERFILE = '''# Separate verifier sandbox (PROTOCOL §4): the same image with the verifier's own copies of the tooling and the scene's
+# binding. Harbor uploads only the declared artifacts (/app/output/), so nothing the agent changed in its container
+# reaches the verdict.
+FROM {image}
+# Replay video (PROTOCOL §4; evidence only): MuJoCo's renderer on CPU software OpenGL (OSMesa) and ffmpeg, both in the
+# base image (pinned there; ikea/images/ikea-mujoco/Dockerfile), so building this image installs nothing.
+ENV MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+COPY grade.py rcb_ikea.py render_video.py video_view.json test.sh runtime_binding.json /tests/
+RUN chmod +x /tests/test.sh && mkdir -p /app/output /logs/verifier
+ENV PYTHONPATH=/tests
+WORKDIR /tests
+'''
+
+
+# PROTOCOL §2.11's honour rule, word for word (main's task_conventions.EXTERNAL_TEXT).
+EXTERNAL_TEXT = (
+    "You may install packages you need (pip, apt), and you may read anything installed in your container, the "
+    "simulator's and this benchmark's own source code included. Please solve the task yourself: do not search the web "
+    "for, or download, a ready-made solution to it, such as published or reference solutions, recorded demonstrations, "
+    "or policies trained for it. This is an honour rule; trials are reviewed. The network reaches your model's API and "
+    "the package registries (PyPI, Debian / Ubuntu archives) only.")
+
+
+def max_rows_arg(t: str) -> str:
+    n = row_cap(t)
+    return f" --max-rows {n}" if n else ""
+
+
+def test_sh(t: str) -> str:
+    return f'''#!/bin/bash
+# Verifier: replay /app/output/trajectory.npz from the scene's initial state in two fresh processes.
+# Writes /logs/verifier/reward.txt (1/0) and reward.json (numeric fields, see docs/PROTOCOL.md).
+# Harbor also mounts /logs/verifier into the agent's container: start from an empty directory, so nothing the agent
+# left there (a planted reward, a symlink) can count. rm never follows symlinks.
+rm -rf /logs/verifier/*   # verdicts from an earlier run never survive (docs/PROTOCOL.md §2.6)
+# The agent's files are untrusted input (PROTOCOL v2.0 H.1): no link out of /app/output, no FIFO, socket or device.
+find /app/output -mindepth 1 \\( -type l -o -type p -o -type s -o -type b -o -type c \\) -delete 2>/dev/null || true
+mkdir -p /logs/verifier
+python /tests/grade.py --task {t} --binding /tests/runtime_binding.json --traj /app/output/trajectory.npz --repeat 2{max_rows_arg(t)} --budget-s {verifier_timeout(t)} \\
+  2> /logs/verifier/grade.log
+chmod 0644 /logs/verifier/reward.txt /logs/verifier/reward.json
+'''
+
+
+def binding(t: str) -> str:
+    b = BIND["tasks"][t]
+    return json.dumps({"schema_version": 1, "task": t, "image": image(t), "runtime": BIND["runtime"],
+                       "scene_digest": ASSETS["tasks"][t]["digest"], "scene_files": ASSETS["tasks"][t]["files"],
+                       "initial_state_sha256": b["initial_state_sha256"], "nu": b["nu"], "timestep": b["timestep"],
+                       "substeps": 4, "actuators": b["actuators"]}, indent=1, sort_keys=True) + "\n"
+
+
+def video_view(t: str) -> str:
+    """The replay video's view (verifier only): the standard twin's camera-rig centre, front and scale."""
+    v = json.loads((HERE / "standard/rigs.json").read_text())["tasks"][t]
+    return json.dumps({k: v[k] for k in ("center", "front", "scale")}, indent=1) + "\n"
+
+
+def render(t: str, out: pathlib.Path) -> None:
+    files = {"task.toml": task_toml(t), "instruction.md": instruction(t),
+             "environment/Dockerfile": ENV_DOCKERFILE.format(image=pinned(t)),
+             "tests/Dockerfile": TESTS_DOCKERFILE.format(image=pinned(t)), "tests/test.sh": test_sh(t),
+             "tests/runtime_binding.json": binding(t), "tests/video_view.json": video_view(t), "solution/solve.sh": SOLVE,
+             "environment/seed": "0\n", "tests/seed": "0\n"}
+    for rel, s in files.items():
+        p = out / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(s)
+        if rel.endswith(".sh"):
+            p.chmod(0o755)
+    for rel, src in {"environment/rcb_ikea.py": "rcb_ikea.py", "tests/rcb_ikea.py": "rcb_ikea.py",
+                     "tests/grade.py": "grade.py", "tests/render_video.py": "render_video.py"}.items():
+        shutil.copyfile(SHARED / src, out / rel)
+    traj = out / "solution/trajectory.npz"
+    ref = closed_loop_ref(t) or shared_ref(t)   # one reference for both modes, within the joint-speed limits
+    if ref is None:
+        raise SystemExit(f"{t}: no reference: oracles/{t}/ (CLOSED_LOOP) or {name(t, 'standard')}/solution/oracle_actions.npz")
+    shutil.copyfile(ref, traj)
+    (out / "README.md").write_text(readme(t, traj))
+    TC.normalize(out)
+
+
+def same(a: pathlib.Path, b: pathlib.Path) -> bool:
+    fa = sorted(p.relative_to(a) for p in a.rglob("*") if p.is_file())
+    fb = sorted(p.relative_to(b) for p in b.rglob("*") if p.is_file())
+    return fa == fb and all(filecmp.cmp(a / f, b / f, shallow=False) for f in fa)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("tasks", nargs="*")
+    ap.add_argument("--check", action="store_true")
+    a = ap.parse_args()
+    tasks = a.tasks or default_tasks()
+    changed = []
+    for t in tasks:
+        dst = task_dir(t)
+        with tempfile.TemporaryDirectory() as tmp:
+            out = pathlib.Path(tmp) / name(t)
+            twin = task_dir(t, "standard")
+            if twin.is_dir():           # normalize reads the twin for the README's key table
+                (pathlib.Path(tmp) / twin.name).symlink_to(twin)
+            render(t, out)
+            if dst.is_dir() and same(out, dst):
+                continue
+            changed.append(name(t))
+            if not a.check:
+                shutil.rmtree(dst, ignore_errors=True)
+                shutil.copytree(out, dst)
+    print(("would change: " if a.check else "wrote: ") + (", ".join(changed) or "nothing"))
+    return 1 if a.check and changed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

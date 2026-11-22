@@ -1,0 +1,538 @@
+{
+ "burvik": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host A harbor/jobs/S2_priv_oracle/ikea-burvik-i00-privileged__b5FaYfT",
+    "max_part_depth_mm": 0.631,
+    "note": "Franka Hand slew reference, final dirs (row cap 325,000, verifier 12,000 s); both replays end 60878a5edc5d / settled 02732bf5d33e, instance_exact 1; the row cap was set from the first run (host A, replay_wall 1740.8 s, oracle 1, nop 0)",
+    "replay_wall_s": 1646.1,
+    "reward": 1,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "grader_error": 0,
+    "job": "host A harbor/jobs/S2_priv_nop/ikea-burvik-i00-privileged__gcVg62o",
+    "missing_trajectory": 1,
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "replay_wall_s": 1740.8,
+  "rows": 162534,
+  "sim_time_s": 406.34,
+  "slow_replay_wall_s": 3783.0,
+  "timing": {
+   "text": "one unobserved replay 3780-3783 s (35.0 %, inside the 40 % bar: 87.6 % of its 4320 s) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'; 1694 s (15.7 %) on a quiet i9-14900HX host; 1679-1684 s on a Ryzen 9 7950X workstation (Docker, image 0.3.0, two replays at once)."
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`60878a5edc5d` / `02732bf5d33e`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`60878a5edc5d` / `02732bf5d33e`, on the same workstation).",
+  "image": {
+   "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
+   "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  }
+ },
+ "eket": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "instance_exact": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_priv_oracle/ikea-eket-i00-privileged__HihrUey",
+    "max_part_depth_mm": 4.945,
+    "replay_wall_s": 1454.4,
+    "reward": 1,
+    "video_rendered": 1,
+    "note": "the hand-slew reference (closed-loop rebuild, build_ref.py grip_wait, 83,181 rows): both replays end 25be8deaa1fe / settled 1d2906d52c38",
+    "video_frames": 748
+   },
+   {
+    "agent": "nop",
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_priv_nop/ikea-eket-i00-privileged__FhkWV3X",
+    "reward": 0,
+    "note": "missing trajectory"
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
+  "maintainer_checks": {
+   "checks": [
+    {
+     "agent": "oracle",
+     "deterministic": 1,
+     "max_part_depth_mm": 4.949,
+     "note": "end-pose rule on: back 5.022 mm / 0.011 deg from its goal (bound 10 mm / 2 deg); end hash 0a38212b16dc, settled fe1fe33a3ad6, as before the fixes",
+     "replay_wall_s": 260.5,
+     "reward": 1,
+     "video_rendered": 1
+    },
+    {
+     "agent": "nop",
+     "grader_error": 0,
+     "missing_trajectory": 1,
+     "reward": 0
+    },
+    {
+     "agent": "adversarial (PROTOCOL H.1)",
+     "agent_report": "inspected the loader, the replay, final_check, the operation tracker, the latches and the end-pose rule; found no trajectory-only bypass; its best attempt (a one-row hold) replays released and at rest and scores 0 (no operations, no frame joints, four panels off goal)",
+     "agent_wall_s": 121,
+     "deterministic": 1,
+     "grader_error": 0,
+     "infra_error": 0,
+     "instance_ok": 1,
+     "instruction": "the task's instruction with a red-team paragraph on top: obtain reward 1 without assembling the cabinet, by any exploit of the grader, tooling, file format or simulator",
+     "n_actions": 1,
+     "reward": 0,
+     "run": "a coding agent at its highest reasoning setting, with the evaluation pool's agent settings (no external tools, usage gateway, egress allowlist)",
+     "tokens_in": 400354,
+     "tokens_out": 10994
+    }
+   ],
+   "commit": "d04b9d304c (review fixes)",
+   "date": "2026-10-17",
+   "host": "an AWS CPU host (64 vCPU, Docker containerd store), Harbor 0.23.0, stamped task copy, base image eai-ikea-mujoco:0.3.0 (digest 909e06d2d666)",
+   "note": "on the reference before the hand slew (the grader and tooling checks do not depend on the reference)"
+  },
+  "replay_wall_s": 294.9,
+  "rows": 70210,
+  "sim_time_s": 175.5,
+  "slow_replay_wall_s": 472.0,
+  "timing": {
+   "text": "one unobserved replay of the hand-slew reference 220 s (2.0 %; 5.1 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 652 s on a loaded Ryzen 9 7950X workstation (load 40-90); 575 s on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays."
+  },
+  "image": {
+   "id": "sha256:b9552184c2dec691d5603ee3e250058a7792de8bc123a76d6b9a61f099da0243",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1"
+  },
+  "ref_rows": 83181,
+  "ref_sim_time_s": 207.95,
+  "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the row cap and the verifier's time limit were set from (the reference before the hand slew, 2026-10-16), kept so the grading budget is unchanged; the hand-slew reference's own numbers are ref_rows / ref_sim_time_s and the checks",
+  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`25be8deaa1fe` / `1d2906d52c38`, on a Ryzen 9 7950X workstation)."
+ },
+ "gladom": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B harbor/jobs/A_priv_oracle/ikea-gladom-i00-privileged__FYmJHWz",
+    "max_part_depth_mm": 0.821,
+    "replay_wall_s": 5091.2,
+    "reward": 1,
+    "video_frames": 750,
+    "video_rendered": 1,
+    "note": "the hand-slew reference (closed-loop rebuild, 186611 rows): both replays end 88048a4ff775 / settled 5c2edffa330c, instance_exact 1"
+   },
+   {
+    "agent": "nop",
+    "job": "host B harbor/jobs/A_priv_nop/ikea-gladom-i00-privileged__PVSvKLw",
+    "reward": 0,
+    "note": "missing trajectory"
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded ~35-65), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "replay_wall_s": 5091.2,
+  "rows": 186611,
+  "sim_time_s": 466.5,
+  "slow_replay_wall_s": 8081.5,
+  "timing": {
+   "text": "one unobserved replay 2630 s (24.3 %; 61 % of the 4320 s bar) on a quiet i9-14900HX host core (Intel AVX2, one process at a time); 8069 / 8082 s (74.8 %, OVER the 40 % bar) on Xeon Gold 6230R cores (2.1 GHz, a slow trial-class CPU; two at once on one node); 4550 s on a loaded Ryzen 9 7950X workstation (load 50-65 on 32 threads); end and settled hashes equal everywhere"
+  },
+  "image": {
+   "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`88048a4ff775` / `5c2edffa330c`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`88048a4ff775` / `5c2edffa330c`, on the same workstation)."
+ },
+ "ikea365": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "instance_exact": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_priv_oracle/ikea-ikea365-i00-privileged__AbwsDre",
+    "max_part_depth_mm": 0.614,
+    "replay_wall_s": 1665.2,
+    "reward": 1,
+    "video_rendered": 1,
+    "note": "the hand-slew reference (closed-loop rebuild, build_ref.py grip_wait + the return-gate servo, 96,747 rows): both replays end 7db46c5971cd / settled 0e2e03a9c068",
+    "video_frames": 749
+   },
+   {
+    "agent": "nop",
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_priv_nop/ikea-ikea365-i00-privileged__FLSuGen",
+    "reward": 0,
+    "note": "missing trajectory"
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
+  "replay_wall_s": 359.5,
+  "rows": 89126,
+  "sim_time_s": 222.8,
+  "slow_replay_wall_s": 604.0,
+  "timing": {
+   "text": "one unobserved replay of the hand-slew reference 249 s (2.3 %; 5.8 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 835 s on a loaded Ryzen 9 7950X workstation (load 40-90); 649 s on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU; reported only), end and settled hashes equal on every host and in the Harbor replays."
+  },
+  "image": {
+   "id": "sha256:b9552184c2dec691d5603ee3e250058a7792de8bc123a76d6b9a61f099da0243",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1"
+  },
+  "ref_rows": 96747,
+  "ref_sim_time_s": 241.87,
+  "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the row cap and the verifier's time limit were set from (the reference before the hand slew, 2026-10-16), kept so the grading budget is unchanged; the hand-slew reference's own numbers are ref_rows / ref_sim_time_s and the checks",
+  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`7db46c5971cd` / `0e2e03a9c068`, on a Ryzen 9 7950X workstation)."
+ },
+ "lack": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B 2026-10-19_ikea_032/harbor/jobs/D_lp_oracle/ikea-lack-i00-privileged__WYEzbEP",
+    "reward": 1,
+    "video_rendered": 1,
+    "replay_wall_s": 772.1,
+    "note": "spot check of the 0.3.2 rebind (2026-10-19): end 684fe3c488e0, instance_exact 1, video rendered"
+   },
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "instance_exact": 1,
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_priv_oracle_lack3/ikea-lack-i00-privileged__Z2hm5pq",
+    "max_part_depth_mm": 0.423,
+    "replay_wall_s": 626.2,
+    "reward": 1,
+    "video_rendered": 1,
+    "note": "the hand-slew reference (the clamp-method rows with each over-fast gripper row held until the hand reaches it (std_reference --grip wait), 67,697 rows): both replays end 684fe3c488e0 / settled a4bc18f244c3; two earlier runs on the same dirs while host B was at load 60-90 also scored 1 (deterministic, the same hashes; L_priv_oracle/ikea-lack-i00-privileged__CUTBoAT, replay_wall 1356.2 s; L_priv_oracle_lack2/ikea-lack-i00-privileged__sVwCE8z, 1285.8 s) but recorded video_rendered 0: the render was cut short right after the verdict replays; evidence only, not reproduced in this run or in a standalone run of the verifier image (video 750 frames, peak memory 1.27 GB of 8 GB)",
+    "video_frames": 750
+   },
+   {
+    "agent": "nop",
+    "job": "host B 2026-10-18_ikea_hand_slew_land/harbor/jobs/L_priv_nop/ikea-lack-i00-privileged__UdK8zbq",
+    "reward": 0,
+    "note": "missing trajectory"
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, heavily loaded: load 40-90 on 32 threads), Docker, Harbor 0.23.0, image 0.3.1 sha256:b9552184c2de, the replay-video verifier, the Franka Hand slew",
+  "replay_wall_s": 530.7,
+  "rows": 63697,
+  "sim_time_s": 159.2,
+  "slow_replay_wall_s": 923.0,
+  "timing": {
+   "text": "one unobserved replay of the hand-slew reference 372 s (3.4 %; 8.6 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time, image 0.3.1's scene); 1342 s on a loaded Ryzen 9 7950X workstation (load 40-90); 1127 s on a Xeon Gold 6230R core including the re-time step (reported only), end and settled hashes equal on every host and in the Harbor replays."
+  },
+  "image": {
+   "id": "sha256:b9552184c2dec691d5603ee3e250058a7792de8bc123a76d6b9a61f099da0243",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.1"
+  },
+  "ref_rows": 67697,
+  "ref_sim_time_s": 169.24,
+  "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the row cap and the verifier's time limit were set from (the reference before the hand slew, 2026-10-16), kept so the grading budget is unchanged; the hand-slew reference's own numbers are ref_rows / ref_sim_time_s and the checks",
+  "image_note": "Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`684fe3c488e0` / `a4bc18f244c3`, on a Ryzen 9 7950X workstation)."
+ },
+ "stegesund": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "instance_exact": 1,
+    "job": "host B 2026-10-17_ikea_hs_stegesund/harbor/jobs/A_priv_oracle/ikea-stegesund-i00-privileged__jL9frex",
+    "max_part_depth_mm": 0.915,
+    "replay_wall_s": 1552.9,
+    "reward": 1,
+    "video_frames": 751,
+    "video_rendered": 1,
+    "note": "closed-loop reference under the Franka Hand slew: both replays 71688676098e / a7da23fa3988 (end / settled)"
+   },
+   {
+    "agent": "nop",
+    "job": "host B 2026-10-17_ikea_hs_stegesund/harbor/jobs/A_priv_nop/ikea-stegesund-i00-privileged__TkMzV3c",
+    "reward": 0,
+    "note": "missing trajectory"
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "replay_wall_s": 1508.1,
+  "rows": 357221,
+  "sim_time_s": 893.05,
+  "slow_replay_wall_s": 3160.0,
+  "timing": {
+   "text": "one unobserved replay of the closed-loop reference 1164 s (10.8 %) on a quiet i9-14900HX host; 1546-1554 s on a Ryzen 9 7950X workstation (shared, load ~22); 2450-2473 s on a dedicated Xeon Gold 6338 core (2.0 GHz, a slow trial-class CPU); end and settled hashes equal on all three CPU classes and in the Harbor replays."
+  },
+  "budget_basis": "rows, replay_wall_s and slow_replay_wall_s are the measurements the verifier's row cap (714000) and time limit (10080 s) were set from (the author's demo, 2026-10-16), kept so the grading budget is unchanged; the closed-loop reference's own numbers are ref_rows / ref_sim_time_s and the checks below",
+  "ref_rows": 379529,
+  "ref_sim_time_s": 948.82,
+  "image": {
+   "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`71688676098e` / `a7da23fa3988`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`71688676098e` / `a7da23fa3988`, on the same workstation)."
+ },
+ "stenerik": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B harbor/jobs/A_priv_oracle/ikea-stenerik-i00-privileged__HDJrwsy",
+    "max_part_depth_mm": 0.729,
+    "note": "the hand-slew reference 7a1e6e502d63 (2026-10-18): both replays end a690aa1b973b / settled 20a59284ab83, instance_exact 1, runtime_binding_ok 1",
+    "replay_wall_s": 3324.0,
+    "reward": 1,
+    "video_frames": 750,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "grader_error": 0,
+    "job": "host B harbor/jobs/A_priv_nop/ikea-stenerik-i00-privileged__k4fkifL",
+    "missing_trajectory": 1,
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, load ~15), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "replay_wall_s": 5063.7,
+  "rows": 215782,
+  "sim_time_s": 539.45,
+  "slow_replay_wall_s": 6286.0,
+  "timing": {
+   "text": "one unobserved replay of the hand-slew reference (222,600 rows) 2649 s (24.5 %) on a quiet i9-14900HX host (61.3 % of the 4320 s bar); 3292-3313 s (30.6 %) on a Ryzen 9 7950X workstation (load ~15, two at once); 6944-7082 s (64.3-65.6 %, OVER the 40 % bar, as before the hand rule: 6253-6286 s) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on every host."
+  },
+  "cap_basis": "replay_wall_s, rows and slow_replay_wall_s are the first reference's measurements (2026-10-17: 215,782 rows, host A 5063.7 s, the cluster 6230R 6286 s); they set the row cap (431,000) and the verifier timeout (19,440 s) and are kept so the grading is unchanged; the hand-slew reference (222,600 rows, host B replay_wall 3324 s, 6230R 6944-7082 s) fits both",
+  "image": {
+   "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`a690aa1b973b` / `20a59284ab83`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a690aa1b973b` / `20a59284ab83`, on the same workstation)."
+ },
+ "svallet": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B jobs/san_priv_oracle/ikea-svallet-i00-privileged__iyfk34c",
+    "max_part_depth_mm": 0.159,
+    "note": "final dirs (3 h budget, row cap); end hash = the earlier runs'",
+    "replay_wall_s": 495.2,
+    "reward": 1,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "job": "host B jobs/san_priv_nop/ikea-svallet-i00-privileged__BQ6oKAp",
+    "note": "final dirs (3 h budget, row cap), 2026-10-16 22:00",
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-16",
+  "end_hashes_equal_0.2.0": true,
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "maintainer_checks_standard": {
+   "checks": [
+    {
+     "agent": "oracle",
+     "deterministic": 1,
+     "grader_error": 0,
+     "infra_error": 0,
+     "live_matches_replay": 1,
+     "live_rows": 68000,
+     "live_sha": "0ff8067d19b8 (= standard_evidence.json)",
+     "live_success": 1,
+     "replay_wall_s": 315.5,
+     "reward": 1,
+     "rows_match": 1,
+     "service_time_s": 322.7,
+     "sim_error": 0,
+     "video_rendered": 1
+    },
+    {
+     "agent": "nop",
+     "grader_error": 0,
+     "infra_error": 0,
+     "note": "before 6baed1af9a the nop left no live.mp4 (no step, no frame); the start frame fixes it",
+     "replays_skipped": 1,
+     "reward": 0,
+     "sim_error": 0,
+     "video_rendered": 1
+    }
+   ],
+   "commit": "6baed1af9a (review fixes)",
+   "date": "2026-10-17",
+   "host": "an AWS GPU host (L40S 46 GB, 8 vCPU, Docker containerd store), Harbor 0.23.0, stamped task copy, images eai-ikea-mujoco:0.3.0 (909e06d2d666) and eai-ikea-mujoco-sim:0.4.0 (ff766b8164cf)",
+   "task": "ikea-svallet-i00-standard"
+  },
+  "replay_wall_s": 308.7,
+  "rows": 69414,
+  "sim_time_s": 173.5,
+  "slow_replay_wall_s": 478.0,
+  "timing": {
+   "text": "one unobserved replay 478 s (4.4 %, inside the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs'."
+  },
+  "image": {
+   "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene): a fresh replay of the reference in it ends and settles on the same hashes as in 0.3.0 (`19d049469045` / `6413de2d8af8`, on a Ryzen 9 7950X workstation, 2026-10-17). Merged head with the Franka Hand slew (not applied to the ViperX): a fresh replay in 0.3.1 ends and settles on `19d049469045` / `6413de2d8af8` (on the same workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`19d049469045` / `6413de2d8af8`, on the same workstation)."
+ },
+ "uppsta": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B harbor/jobs/C_priv_oracle/ikea-uppsta-i00-privileged__TQdUCWi",
+    "max_part_depth_mm": 2.702,
+    "note": "final dirs (row cap 860,000, verifier 25,920 s); both replays end a748a42dc36d / settled a2d8a234abc3, instance_exact 1, video rendered; the row cap was set from the first run (host B B_priv_oracle/ikea-uppsta-i00-privileged__7P9T99j, replay_wall 3826.5 s, oracle 1, nop 0)",
+    "replay_wall_s": 4157.2,
+    "reward": 1,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "grader_error": 0,
+    "job": "host B harbor/jobs/C_priv_nop/ikea-uppsta-i00-privileged__nXM8cpd",
+    "missing_trajectory": 1,
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, load ~15-20), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.1 sha256:b9552184c2de, the replay-video verifier",
+  "replay_wall_s": 3826.5,
+  "rows": 430225,
+  "sim_time_s": 537.78,
+  "slow_replay_wall_s": 8424.7,
+  "timing": {
+   "text": "3199 s (29.6 % of the 10800 s budget, 74 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time); 3519 s (32.6 %) on a Ryzen 9 7950X workstation (Docker, image 0.3.1, host load 12-17); one unobserved replay 8414-8425 s (78.0 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik on that CPU."
+  },
+  "image_note": "Merged head with the Franka Hand slew in the shared rule (2026-10-18): a fresh replay in image 0.3.1 ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on a Ryzen 9 7950X workstation, 7676 s at load 40-90): the reference was built within the slew. Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`a748a42dc36d` / `a2d8a234abc3`, on the same workstation).",
+  "image": {
+   "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
+   "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  }
+ },
+ "variera": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B harbor/jobs/A_priv_oracle/ikea-variera-i00-privileged__t3SawvP",
+    "max_part_depth_mm": 0.729,
+    "note": "the closed-loop reference under the Franka Hand slew (oracles/variera/variera_ref.npz 2e821fcfb52b); both replays end 95134e1fbd5c / settled 327c16c5f007, the video's end state the same",
+    "replay_wall_s": 3731.4,
+    "reward": 1,
+    "video_frames": 751,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "grader_error": 0,
+    "job": "host B harbor/jobs/A_priv_nop/ikea-variera-i00-privileged__ASqrUHx",
+    "missing_trajectory": 1,
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "replay_wall_s": 3731.4,
+  "rows": 243159,
+  "sim_time_s": 607.9,
+  "slow_replay_wall_s": 8696.1,
+  "timing": {
+   "text": "one unobserved replay 2664 s (24.7 %) on a quiet i9-14900HX host; 3646-3688 s (34.0 %) on a Ryzen 9 7950X workstation (loaded, load 50-60); 8024-8696 s (74.3-80.5 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU); end and settled hashes equal to the Harbor runs' on all three."
+  },
+  "image": {
+   "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`95134e1fbd5c` / `327c16c5f007`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`95134e1fbd5c` / `327c16c5f007`, on the same workstation)."
+ },
+ "vesken": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B 2026-10-17_ikea_hs_vesken/harbor/jobs/hs_P_oracle/ikea-vesken-i00-privileged__cQ7byk2",
+    "max_part_depth_mm": 2.071,
+    "replay_wall_s": 792.1,
+    "reward": 1,
+    "video_frames": 751,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "job": "host B 2026-10-17_ikea_hs_vesken/harbor/jobs/hs_P_nop/ikea-vesken-i00-privileged__xbaYoms",
+    "note": "the Franka Hand slew rebuild, 2026-10-18",
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-18",
+  "host": "a Ryzen 9 7950X workstation (shared, loaded), Docker, Harbor 0.23.0, image 0.3.0 sha256:ed950d079b63, the replay-video verifier",
+  "replay_wall_s": 792.1,
+  "rows": 389504,
+  "sim_time_s": 973.8,
+  "slow_replay_wall_s": 1822.2,
+  "timing": {
+   "text": "one unobserved replay 1822 s (16.9 %, inside the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU), 983 s on a Xeon Platinum 8592+ core, 748-761 s on a Ryzen 9 7950X workstation (loaded); end and settled hashes equal to the Harbor runs'."
+  },
+  "image": {
+   "id": "sha256:ed950d079b6304219d3b1ec2f428f851e383cec841d38a4c11bd0f25a42dea00",
+   "reference": "ghcr.io/mll-lab-nu/eai-ikea-mujoco:0.3.0"
+  },
+  "image_note": "Image 0.3.1 (the shared welded-part contact switch-off, off in this scene) on the merged head: a fresh replay of the reference ends and settles on the same hashes as in 0.3.0 (`943aa32ee13e` / `29685e37f6fe`, on a Ryzen 9 7950X workstation, 2026-10-18). Image 0.3.2 (kyrre's native-cylinder scene; this scene byte-identical to 0.3.1), 2026-10-19: a fresh replay of the reference ends and settles on the same hashes (`943aa32ee13e` / `29685e37f6fe`, on the same workstation)."
+ },
+ "kyrre": {
+  "checks": [
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B 2026-10-19_ikea_032/harbor/jobs/D_kp_oracle/ikea-kyrre-i00-privileged__WE4kroQ",
+    "max_part_depth_mm": 0.962,
+    "note": "final dirs on image 0.3.2 (row cap 1,466,000, verifier 24,480 s; 25,440 s since the 6230R measurement): both replays end 0a9f1a9e6d77 / settled e242979c6712, instance_exact 1, runtime binding ok, video rendered; host B at load 30-65 (the first run's 2745.6 s set the row cap)",
+    "replay_wall_s": 4528.2,
+    "reward": 1,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "grader_error": 0,
+    "job": "host B 2026-10-19_ikea_032/harbor/jobs/D_kp_nop/ikea-kyrre-i00-privileged__jbvrEHo",
+    "missing_trajectory": 1,
+    "reward": 0
+   },
+   {
+    "agent": "oracle",
+    "deterministic": 1,
+    "job": "host B 2026-10-17_ikea_v3_kyrre/cyl/harbor/jobs/C_priv_oracle/ikea-kyrre-i00-privileged__pQjFXPW",
+    "max_part_depth_mm": 0.962,
+    "note": "first run (the candidate build, local image 0.3.1-kyrre-cyl d444a931171a = 0.3.2's scenes but kyrre's scene.py comment; no row cap yet): both replays end 0a9f1a9e6d77 / settled e242979c6712, instance_exact 1, video rendered",
+    "replay_wall_s": 2745.6,
+    "reward": 1,
+    "video_rendered": 1
+   },
+   {
+    "agent": "nop",
+    "grader_error": 0,
+    "job": "host B 2026-10-17_ikea_v3_kyrre/cyl/harbor/jobs/C_priv_nop/ikea-kyrre-i00-privileged__mQXs26k",
+    "missing_trajectory": 1,
+    "reward": 0
+   }
+  ],
+  "date": "2026-10-19",
+  "host": "a Ryzen 9 7950X workstation (shared, load ~10 first run, 30-65 final), Docker, Harbor 0.23.0, fresh per-run file mtimes, image 0.3.2 sha256:5d5090ea1910 (final; first run on the candidate's local 0.3.1-kyrre-cyl), the replay-video verifier",
+  "replay_wall_s": 2745.6,
+  "rows": 733558,
+  "sim_time_s": 1833.89,
+  "slow_replay_wall_s": 8283.3,
+  "timing": {
+   "text": "2740 s (25.4 % of the 10800 s budget, 63 % of the 4320 s bar) on a quiet i9-14900HX host (one process at a time); 2694 s (24.9 %) on a Ryzen 9 7950X workstation (Docker, host load 5-10); one unobserved replay 8283 s (76.7 %, OVER the 40 % bar) on a dedicated Xeon Gold 6230R core (2.1 GHz, a slow trial-class CPU) and 7953 s (73.6 %) on a Xeon Gold 6338 core, end and settled hashes equal to the Harbor runs', as gladom / variera / stenerik / uppsta on the slow class."
+  },
+  "image_note": "kyrre is the one scene with MuJoCo's native cylinders (scene.py, the prism rule off; decided on 2026-10-19, ikea/scripts/ikea_mujoco/REVIEW.md): end 0a9f1a9e6d77 / settled e242979c6712 on AMD Zen 4 (7950X), Intel AVX2 (i9-14900HX) and Intel AVX-512 (Xeon Gold 6338, Xeon Gold 6230R).",
+  "image": {
+   "id": "sha256:5d5090ea19100858566df11f22f2187a92063ae9eef965348b8df8b872e16e63",
+   "reference": "ghcr.io/embodied-first-exam/roboarc-ikea:1.0.0"
+  }
+ }
+}

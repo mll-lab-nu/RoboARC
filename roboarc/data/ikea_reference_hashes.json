@@ -1,0 +1,14 @@
+{
+ "note": "The recorded end states of the IKEA references (tasks/roboarc-ikea-<name>-i00-privileged/solution/trajectory.npz): rcb_ikea.state_sha (sha256 of MuJoCo's integration state) after the last row ('end') and after the grader's 1.0 s hold of the last row ('settled'), as hex prefixes. Sources: the verifier's verdict.json of the Harbor oracle trials on the 1.0.0 images (16 hex digits), or ikea/scripts/ikea_mujoco/evidence.json (12 hex digits; only where its record names the shipped reference by its row count). Tasks without a record that matches the shipped reference are left out.",
+ "tasks": {
+  "lack": {"rows": 67697, "end": "684fe3c488e01d1a", "settled": "a4bc18f244c3687f", "source": "Harbor oracle, roboarc-ikea:1.0.0 (verdict.json)"},
+  "svallet": {"rows": 69414, "end": "19d049469045e1a2", "settled": "6413de2d8af8cc39", "source": "Harbor oracle, roboarc-ikea:1.0.0 (verdict.json)"},
+  "burvik": {"rows": 162534, "end": "60878a5edc5d", "settled": "02732bf5d33e", "source": "evidence.json"},
+  "eket": {"rows": 83181, "end": "25be8deaa1fe", "settled": "1d2906d52c38", "source": "evidence.json"},
+  "gladom": {"rows": 186611, "end": "88048a4ff775", "settled": "5c2edffa330c", "source": "evidence.json"},
+  "ikea365": {"rows": 96747, "end": "7db46c5971cd", "settled": "0e2e03a9c068", "source": "evidence.json"},
+  "kyrre": {"rows": 733558, "end": "0a9f1a9e6d77", "settled": "e242979c6712", "source": "evidence.json"},
+  "uppsta": {"rows": 430225, "end": "a748a42dc36d", "settled": "a2d8a234abc3", "source": "evidence.json"},
+  "variera": {"rows": 243159, "end": "95134e1fbd5c", "settled": "327c16c5f007", "source": "evidence.json"}
+ }
+}

@@ -1,0 +1,110 @@
+name: checks
+# The cheap checks (no GPU, no image, no dataset access): the generators' check modes, the frozen bytes, the protocol
+# invariants, the unit tests, the Python API's fast tests, and the advisory checks (warnings only). Strict replays and
+# Harbor trials need the image and a GPU (docs/DEVELOPING.md).
+# Pinned: the runner image (ubuntu-24.04), the actions by commit (the version in a comment), Python 3.12.15, and the
+# Python packages by version and sha256 (ci_checks/requirements-ci.lock, --require-hashes).
+on:
+  push:
+    branches: [main, "dev/**"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  generator:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: Task dirs equal a fresh render
+        run: umask 022 && python3 scripts/roboarc/mk_tasks.py --check
+  ikea:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: IKEA task dirs (tasks/roboarc-ikea-*) equal a fresh render (both generators)
+        run: bash ikea/ci/check.sh
+  image-pins:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: Every image a task names is pinned by digest (images/pins.json, the client base)
+        run: python3 ci_checks/check-image-pins.py
+  frozen-bytes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: No frozen path differs from its baseline (ci_checks/frozen-bytes.json), and the check's rules fire
+        run: |
+          set -e
+          python3 ci_checks/check-frozen-bytes.py --selftest
+          python3 ci_checks/check-frozen-bytes.py
+  invariants:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: Invariants (PROTOCOL Appendix H)
+        run: bash ci_checks/run_invariants.sh
+  unit-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: ffmpeg (the standard service's mp4 checks, scripts/roboarc/tests/test_server_requests.py 5)
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
+      - name: Test dependencies
+        run: python3 -m pip install --quiet --no-deps --require-hashes -r ci_checks/requirements-ci.lock
+      - name: Unit tests, check-video, resources, cutoffs, seed files
+        run: |
+          set -e
+          RCB_REQUIRE_FFMPEG=1 bash ci_checks/check-unit-tests.sh --all
+          python3 ci_checks/check-video.py tasks/roboarc-*
+          python3 ci_checks/check-resources.py tasks/roboarc-*
+          python3 ci_checks/check-cutoffs.py tasks/roboarc-*
+          python3 ci_checks/check-seed-files.py tasks/roboarc-*
+  api-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: Python API tests (no simulator)
+        if: hashFiles('tests/api/**') != ''
+        run: |
+          python3 -m pip install --quiet --no-deps --require-hashes -r ci_checks/requirements-ci.lock
+          python3 -m pytest tests/api -m "not sim and not heavy"
+      - name: No API tests yet
+        if: hashFiles('tests/api/**') == ''
+        run: echo "tests/api/ does not exist; nothing to run"
+  advisories:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065   # v5.6.0
+        with: { python-version: "3.12.15" }
+      - name: Advisory checks (warnings only)
+        env: { RCB_SKIP_UNIT_TESTS: "1" }
+        run: bash ci_checks/run_all.sh --tier advisory || [ $? -eq 3 ]

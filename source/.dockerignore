@@ -1,0 +1,28 @@
+# Build context of the RoboARC release image (images/roboarc/build.sh builds images/roboarc/Dockerfile from source/): only what the recipe COPYs.
+**
+!assets/
+!assets/robots/
+!assets/robots/**
+!assets/textures/
+!assets/textures/genesis/
+!assets/textures/genesis/**
+!images/topogym/prune.py
+!images/roboarc/
+!images/roboarc/**
+!topogym/
+!topogym/**
+# no solutions in any image (images/topogym/prune.py removes them again after COPY)
+topogym/agents
+topogym/planning
+topogym/data
+topogym/**/deferred
+topogym/**/legacy
+topogym/**/redundants
+topogym/**/rollout_simulation
+**/*.md
+# Relay robot identity includes the original robot documentation bytes.
+!assets/robots/**/*.md
+**/__pycache__/**
+**/*.pyc
+**/.env*
+**/.secrets/**

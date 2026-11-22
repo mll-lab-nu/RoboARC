@@ -1,0 +1,38 @@
+[
+ [
+  245952,
+  {
+   "time": 307.44000000526006,
+   "arm": "screw_b"
+  }
+ ],
+ [
+  253295,
+  {
+   "time": 316.6181250054604,
+   "fastener": "screw_b",
+   "host": "board",
+   "clamped": [
+    "end_block_b"
+   ]
+  }
+ ],
+ [
+  375706,
+  {
+   "time": 469.63187500880036,
+   "arm": "screw_a"
+  }
+ ],
+ [
+  380557,
+  {
+   "time": 475.69656250893274,
+   "fastener": "screw_a",
+   "host": "board",
+   "clamped": [
+    "end_block_a"
+   ]
+  }
+ ]
+]

@@ -1,0 +1,307 @@
+# Resource rules (PROTOCOL §2.9, §2.10), applied by scripts/task_conventions.py normalize: every rule whose `match`
+# finds the task name applies, in file order; a rule with a `class` only to the tasks whose family is in that class. The
+# values (and the `measured` strings) are rendered into every task.toml and README: changing one changes task bytes
+# (re-render, new DIGESTs).
+#
+# The family classes: the one list of which family is rigid, rope / chain or cloth (task.toml [metadata] family). A task
+# that `classes_required` finds must have its family in exactly one class: normalize refuses any other (a new family
+# without a class would otherwise get the generic rules' values unnoticed). The classes with `own_gpu` are the families
+# whose trials have a GPU of their own in the batch runner (scripts/harbor/gpu_slots.py reads them from this file).
+classes_required = "^roboarc-(?!ikea-)"
+
+[class.rigid]
+families = ["interlocked_claws", "buzz_wire_3d", "cast_keyhole", "cast_coil", "hedgehog_in_cage", "horseshoe_ring",
+            "lock_picking", "bed_bolt", "battery_replacement", "caliper_sorting", "clock_assembling"]
+
+[class.rope_chain]
+families = ["rope_threading", "knot_untying", "fiber_bundling", "slotted_post_ring", "orbits", "wire_splicing"]
+own_gpu = true
+
+[class.cloth]
+families = ["blanket_flatten", "blanket_fold"]
+own_gpu = true
+
+# roboarc: GPU memory 2 GB for every class (declared 7-8 GB before; a trial's measured peak is about 1.1 GB on 24 GB cards)
+[[rule]]
+match = "^roboarc-(?!ikea-).*-privileged$"
+min_cpus = 2.0
+min_memory_gb = 7.0
+min_gpu_memory_gb = 2.0
+gpu_required = true
+gpu_class = "any"
+recommended_gpu = "L40S 48GB / RTX 4090 24GB / L4 24GB (sm_86 or newer)"
+verifier_min_cpus = 2.0
+verifier_min_memory_gb = 5.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "the Genesis release's numbers, kept until the MuJoCo release's own peaks are measured (its Harbor runs; MuJoCo physics on the CPU, Nyx on the GPU); GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+[[rule]]
+match = "^roboarc-(?!ikea-).*-standard$"
+min_cpus = 2.0
+min_memory_gb = 7.0
+min_gpu_memory_gb = 2.0
+gpu_required = true
+gpu_class = "any"
+recommended_gpu = "L40S 48GB / RTX 4090 24GB / L4 24GB (sm_86 or newer)"
+verifier_min_cpus = 2.0
+verifier_min_memory_gb = 6.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "the Genesis release's numbers, kept until the MuJoCo release's own peaks are measured (its Harbor runs; MuJoCo physics on the CPU, Nyx on the GPU); GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# roboarc, rigid (privileged): per-class values
+[[rule]]
+match = "^roboarc-.*-privileged$"
+class = "rigid"
+min_cpus = 4.0
+min_memory_gb = 7.0
+min_gpu_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# roboarc, rigid (standard): per-class values
+[[rule]]
+match = "^roboarc-.*-standard$"
+class = "rigid"
+min_cpus = 4.0
+min_memory_gb = 7.0
+min_gpu_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# roboarc, rope / chain (privileged): per-class values
+[[rule]]
+match = "^roboarc-.*-privileged$"
+class = "rope_chain"
+min_cpus = 4.0
+min_memory_gb = 8.0
+min_gpu_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# roboarc, rope / chain (standard): per-class values
+[[rule]]
+match = "^roboarc-.*-standard$"
+class = "rope_chain"
+min_cpus = 4.0
+min_memory_gb = 7.0
+min_gpu_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# roboarc, cloth (privileged): per-class values
+[[rule]]
+match = "^roboarc-.*-privileged$"
+class = "cloth"
+min_cpus = 4.0
+min_memory_gb = 10.0
+min_gpu_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# roboarc, cloth (standard): per-class values
+[[rule]]
+match = "^roboarc-.*-standard$"
+class = "cloth"
+min_cpus = 6.0
+min_memory_gb = 8.0
+min_gpu_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 2.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+# The families released after those measurements (2026-10-23 / 24): their class's values, not their own peaks
+[[rule]]
+match = "^roboarc-(wire-splicing|bed-bolt|battery-replacement|caliper-sorting|clock-assembling)-"
+measured = "their class's values (partial MuJoCo measurements of 2026-10-13 on the class's other families, with the protocol's margin); this family's own peaks not measured yet; GPU 2 GB: a trial's peak was about 1.1 GB on 24 GB cards"
+
+[[limit]]
+match = "^roboarc-(?!ikea-).*-privileged$"
+scope = "trial"
+max_gpu_memory_gb = 16.0
+max_memory_gb = 16.0
+max_processes = 512
+max_disk_gb = 10.0
+disk_paths = ["/app", "/tmp", "/root"]
+disk_exclude = []
+sustain_sec = 60.0
+window_sec = 120.0
+trial_max_gpu_memory_gb = 16.0
+trial_max_memory_gb = 16.0
+measured = "the Genesis release's numbers, kept until the MuJoCo release's own peaks are measured (its Harbor runs; MuJoCo physics on the CPU, Nyx on the GPU)"
+
+[[limit]]
+match = "^roboarc-(?!ikea-).*-standard$"
+scope = "agent"
+max_gpu_memory_gb = 0.0
+max_memory_gb = 8.0
+max_processes = 512
+max_disk_gb = 20.0
+disk_paths = ["/app", "/tmp", "/root"]
+disk_exclude = []
+sustain_sec = 60.0
+window_sec = 120.0
+trial_max_gpu_memory_gb = 16.0
+trial_max_memory_gb = 21.0
+measured = "the Genesis release's numbers, kept until the MuJoCo release's own peaks are measured (its Harbor runs; MuJoCo physics on the CPU, Nyx on the GPU)"
+
+[[limit]]
+match = "^roboarc-.*-privileged$"
+class = "rigid"
+max_gpu_memory_gb = 12.0
+max_memory_gb = 24.0
+trial_max_gpu_memory_gb = 12.0
+trial_max_memory_gb = 24.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending"
+
+[[limit]]
+match = "^roboarc-.*-standard$"
+class = "rigid"
+trial_max_gpu_memory_gb = 12.0
+trial_max_memory_gb = 16.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending"
+
+[[limit]]
+match = "^roboarc-.*-privileged$"
+class = "rope_chain"
+max_gpu_memory_gb = 12.0
+max_memory_gb = 32.0
+trial_max_gpu_memory_gb = 12.0
+trial_max_memory_gb = 32.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending"
+
+[[limit]]
+match = "^roboarc-.*-standard$"
+class = "rope_chain"
+trial_max_gpu_memory_gb = 12.0
+trial_max_memory_gb = 16.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending"
+
+[[limit]]
+match = "^roboarc-.*-privileged$"
+class = "cloth"
+max_gpu_memory_gb = 20.0
+max_memory_gb = 24.0
+trial_max_gpu_memory_gb = 20.0
+trial_max_memory_gb = 24.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending"
+
+[[limit]]
+match = "^roboarc-.*-standard$"
+class = "cloth"
+trial_max_gpu_memory_gb = 20.0
+trial_max_memory_gb = 20.0
+measured = "partial MuJoCo measurements of 2026-10-13 (rendering off) with the protocol's margin; calibration pending"
+
+# The families released after those measurements (2026-10-23 / 24): their class's limits, not their own peaks
+[[limit]]
+match = "^roboarc-(wire-splicing|bed-bolt|battery-replacement|caliper-sorting|clock-assembling)-"
+measured = "their class's limits (partial MuJoCo measurements of 2026-10-13 on the class's other families, with the protocol's margin); this family's own peaks not measured yet"
+
+[[cap]]
+match = "^roboarc-(?!ikea-).*-privileged$"
+main = { cpus = 4.0, memory_gb = 20.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-(?!ikea-).*-standard$"
+main = { cpus = 4.0, memory_gb = 16.0, pids = 8192 }
+sim = { cpus = 4.0, memory_gb = 16.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-.*-privileged$"
+class = "rigid"
+main = { cpus = 16.0, memory_gb = 30.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-.*-standard$"
+class = "rigid"
+main = { cpus = 4.0, memory_gb = 16.0, pids = 8192 }
+sim = { cpus = 4.0, memory_gb = 8.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-.*-privileged$"
+class = "rope_chain"
+main = { cpus = 16.0, memory_gb = 40.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-.*-standard$"
+class = "rope_chain"
+main = { cpus = 4.0, memory_gb = 16.0, pids = 8192 }
+sim = { cpus = 4.0, memory_gb = 8.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-.*-privileged$"
+class = "cloth"
+main = { cpus = 8.0, memory_gb = 30.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-.*-standard$"
+class = "cloth"
+main = { cpus = 4.0, memory_gb = 16.0, pids = 8192 }
+sim = { cpus = 8.0, memory_gb = 12.0, pids = 8192 }
+
+# IKEA MuJoCo (the generic ^roboarc- rules above exclude ikea-)
+# IKEA MuJoCo, privileged: 12 task(s). MuJoCo on the CPU; the verifier also renders the replay video on the CPU (OSMesa) in a third process.
+[[rule]]
+match = "^roboarc-ikea-.*-privileged$"
+min_cpus = 2.0
+min_memory_gb = 2.0
+min_gpu_memory_gb = 0.0
+gpu_required = false
+gpu_class = "none"
+verifier_min_cpus = 3.0
+verifier_min_memory_gb = 3.0
+verifier_min_gpu_memory_gb = 0.0
+measured = "peak RSS of one Session 0.27-0.45 GB per scene (3000 reference rows + final_check, workstation, 2026-10-15); the verifier runs two replays and the video replay at once; x 1.2 and rounded up"
+
+# IKEA MuJoCo, standard: 12 task(s). Physics on the CPU; the sim sidecar renders RGB with Nyx (path tracer, Vulkan) and
+# depth with MuJoCo's EGL raster on one GPU.
+[[rule]]
+match = "^roboarc-ikea-.*-standard$"
+min_cpus = 2.0
+min_memory_gb = 3.0
+min_gpu_memory_gb = 1.0
+gpu_required = true
+gpu_class = "any"
+recommended_gpu = "RTX 4090 24GB / L4 24GB (an NVIDIA GPU with Vulkan and EGL)"
+verifier_min_cpus = 2.0
+verifier_min_memory_gb = 2.0
+verifier_min_gpu_memory_gb = 0.0
+measured = "Harbor standard oracle of svallet on an RTX 4090 host, 2026-10-17 (docker stats and nvidia-smi per process every 20 s): the sim sidecar peaked at 1.8 GiB of memory and 0.8 GiB of GPU memory (the Nyx render process), the agent's container (the client) below 0.1 GiB; the privileged verifier of the same task (two replays and the video replay) at 1.6 GiB; x 1.5 and rounded up"
+
+[[limit]]
+match = "^roboarc-ikea-.*-privileged$"
+scope = "trial"
+max_gpu_memory_gb = 0.0
+max_memory_gb = 8.0
+max_processes = 512
+max_disk_gb = 10.0
+disk_paths = ["/app", "/tmp", "/root"]
+disk_exclude = []
+sustain_sec = 60.0
+window_sec = 120.0
+trial_max_gpu_memory_gb = 0.0
+trial_max_memory_gb = 8.0
+measured = "the privileged peaks with room for an agent's own replays (four Sessions at once)"
+
+[[limit]]
+match = "^roboarc-ikea-.*-standard$"
+scope = "agent"
+max_gpu_memory_gb = 0.0
+max_memory_gb = 8.0
+max_processes = 512
+max_disk_gb = 20.0
+disk_paths = ["/app", "/tmp", "/root"]
+disk_exclude = []
+sustain_sec = 60.0
+window_sec = 120.0
+trial_max_gpu_memory_gb = 4.0
+trial_max_memory_gb = 16.0
+measured = "the sidecar's measured peaks (1.8 GiB, 0.8 GiB of GPU memory, svallet) with room for the longer scenes and an agent's own client processes; the agent's container runs the client only"
+
+[[cap]]
+match = "^roboarc-ikea-.*-privileged$"
+main = { cpus = 4.0, memory_gb = 10.0, pids = 8192 }
+
+[[cap]]
+match = "^roboarc-ikea-.*-standard$"
+main = { cpus = 4.0, memory_gb = 10.0, pids = 8192 }
+sim = { cpus = 4.0, memory_gb = 8.0, pids = 8192 }

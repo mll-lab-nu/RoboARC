@@ -1,0 +1,621 @@
+{
+  "resources": {
+    "blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/easy/seed_0/arrays.npz": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/easy/seed_0/arrays.npz",
+      "sha256": "468412eea6cfd25de4f9291fe35bf1a887de218fcf53fdeb26f2c60f5a8e510b",
+      "source": "prepared gathered_scene_v1 easy, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/easy/seed_0/manifest.json": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/easy/seed_0/manifest.json",
+      "sha256": "8e4066726df073c1ad15c03354792bce83965bae9d2076509ef3350cfc40df2f",
+      "source": "prepared gathered_scene_v1 easy, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/hard/seed_0/arrays.npz": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/hard/seed_0/arrays.npz",
+      "sha256": "e56be350823f4df0ebbe32e87b90550b61c5180d0f83928ffe1d0d55652f860c",
+      "source": "prepared gathered_scene_v1 hard, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/hard/seed_0/manifest.json": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/hard/seed_0/manifest.json",
+      "sha256": "a23cc42bb599622f9133818f9ccf8c906390c86c5f8cdfef29cbcf7f5b152d5f",
+      "source": "prepared gathered_scene_v1 hard, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/medium/seed_0/arrays.npz": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/medium/seed_0/arrays.npz",
+      "sha256": "b743fd0389abb1dcfb4c6a7395b8b9409a820e315f4793fd4affed920035082c",
+      "source": "prepared gathered_scene_v1 medium, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/medium/seed_0/manifest.json": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_archive_v2/cuda_sm89_mp128_87407517a32a/medium/seed_0/manifest.json",
+      "sha256": "c25349fd0c9b64867b1ec0f79fb38ecefab3124cc56ee04aeadb8c32b129eac6",
+      "source": "prepared gathered_scene_v1 medium, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_scene_v1/easy/seed_0/arrays.npz": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_scene_v1/easy/seed_0/arrays.npz",
+      "sha256": "d98bffe8a6598634baa65ba841909c431822713b58000b9bc8ab66b54ecee8e7",
+      "source": "prepared gathered_scene_v1 easy, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_scene_v1/easy/seed_0/manifest.json": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_scene_v1/easy/seed_0/manifest.json",
+      "sha256": "f4da678ab65346ea67bfe5f723514178de77e9120acb3a3029d2e7c8e5f7323b",
+      "source": "prepared gathered_scene_v1 easy, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_scene_v1/hard/seed_0/arrays.npz": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_scene_v1/hard/seed_0/arrays.npz",
+      "sha256": "7473914bf8b0a359528f99959c4f2820e29c5759f43104be6a236744701f9d2b",
+      "source": "prepared gathered_scene_v1 hard, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_scene_v1/hard/seed_0/manifest.json": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_scene_v1/hard/seed_0/manifest.json",
+      "sha256": "af6faf2ae89dff5902cb72a196a9e656f04d19d3e1c5c50247cff47460289d21",
+      "source": "prepared gathered_scene_v1 hard, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_scene_v1/medium/seed_0/arrays.npz": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_scene_v1/medium/seed_0/arrays.npz",
+      "sha256": "725e192e2fa04ce1daa5cb375f6e3205332ce047319085319c85372ce9dcb4cb",
+      "source": "prepared gathered_scene_v1 medium, seed 0; scope=scene_layout"
+    },
+    "blanket_flatten/gathered_scene_v1/medium/seed_0/manifest.json": {
+      "license": null,
+      "path": "variations/blanket_flatten/gathered_scene_v1/medium/seed_0/manifest.json",
+      "sha256": "5d3481c33d0ae0c4d587f8f80c5c24690cee18d9220df2c6c7cb92b843ad04ae",
+      "source": "prepared gathered_scene_v1 medium, seed 0; scope=scene_layout"
+    },
+    "cast_coil/template.json": {
+      "license": null,
+      "path": "templates/cast_coil_template.json",
+      "sha256": "d3f640cbe56eef616797e96d1128c183d518c727129198b74415fdf840d394ff",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "cast_keyhole/sources.json": {
+      "license": null,
+      "path": "templates/cast_keyhole_sources.json",
+      "sha256": "f4ed90f31bd49b2c8ecfff5365f7fd7822731068c95a55ec92fb59428b7a02f1",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "cast_keyhole/template.json": {
+      "license": null,
+      "path": "templates/cast_keyhole_template.json",
+      "sha256": "6e27811a0d0126e879649eafc4e89c5227a187b8d8e0839e803ca898bb6f1b44",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "hedgehog_in_cage/materials/dark_wood.png": {
+      "license": null,
+      "path": "textures/hedgehog_in_cage_materials_dark_wood.png",
+      "sha256": "aef45ab36d9f258b80edf278d417920b7326ad77c341d6618498d4598c59fd2c",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "hedgehog_in_cage/materials/light_wood.png": {
+      "license": null,
+      "path": "textures/hedgehog_in_cage_materials_light_wood.png",
+      "sha256": "c260c4543647d53da9379078a788d183a334734103739a42dce1a004a2eb0e33",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "hedgehog_in_cage/materials/sources.json": {
+      "license": null,
+      "path": "templates/hedgehog_in_cage_materials_sources.json",
+      "sha256": "1b5bce47b37c733620a31dfef4a328c7a361a247d05d221f072b4c9ecf1b7e66",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "hedgehog_in_cage/template.json": {
+      "license": null,
+      "path": "templates/hedgehog_in_cage_template.json",
+      "sha256": "9ba9a58c8541ccbcdf442a944cef26f1a58701c3fa5ed08fa9182bb22fd941a9",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "horseshoe_ring/template.json": {
+      "license": null,
+      "path": "templates/horseshoe_ring_template.json",
+      "sha256": "0926a070e7356aa2be1d8fe8dabe3c3321c57c419c9bda2480e57f89febab3d1",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "interlocked_claws/piece-0.obj": {
+      "license": null,
+      "path": "meshes/interlocked_claws_piece-0.obj",
+      "sha256": "35e40f140642310e64f587c528213fe60c64202bdababd654013f205b1602ed5",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "interlocked_claws/piece-1.obj": {
+      "license": null,
+      "path": "meshes/interlocked_claws_piece-1.obj",
+      "sha256": "15305d656b31248c13fad76089683a94f2720ce45ee22d3f4eacb7313eb6658b",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "interlocked_claws/reference_scene.json": {
+      "license": null,
+      "path": "templates/interlocked_claws_reference_scene.json",
+      "sha256": "6112b8ce71f80633f9810990fd24ef7c0e2dd916ee23754add0bdc42a51b36e6",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "rope_threading/reference.json": {
+      "license": null,
+      "path": "templates/rope_threading_reference.json",
+      "sha256": "bef5a13d9fc5b4bf783c233f7894f71cd37d9146192abb63001bd74af28f62a1",
+      "source": "retained packaged resource; see associated source metadata"
+    },
+    "variations/buzz_wire_3d/F1_compact_toy_s70_home_lab_v4/layout.json": {
+      "license": null,
+      "path": "variations/buzz_wire_3d/F1_compact_toy_s70_home_lab_v4/layout.json",
+      "sha256": "89b58f54bc8b1bae7b64840d84a00ed52c9e6ff77c9dba22368489db4882d4ff",
+      "source": "assets/tasks/buzz_wire_3d/F1_compact_toy_s70_home_lab_v4/planning/assets/geometry_report.json"
+    },
+    "variations/buzz_wire_3d/F1_triple_compact_toy_s70_home_lab_v1/layout.json": {
+      "license": null,
+      "path": "variations/buzz_wire_3d/F1_triple_compact_toy_s70_home_lab_v1/layout.json",
+      "sha256": "89857b6085a18c5aac80d3fd430d8c764bf39e264558ab7bd25165894f275a3f",
+      "source": "assets/tasks/buzz_wire_3d/F1_triple_compact_toy_s70_home_lab_v1/planning/assets/geometry_report.json"
+    },
+    "variations/buzz_wire_3d/F2_compact_toy_s70_home_lab_v4/layout.json": {
+      "license": null,
+      "path": "variations/buzz_wire_3d/F2_compact_toy_s70_home_lab_v4/layout.json",
+      "sha256": "8927e3d593e7fddfc6eaa3b8f6f9352f3d33e350b027e839662edc35eee5b328",
+      "source": "assets/tasks/buzz_wire_3d/F2_compact_toy_s70_home_lab_v4/planning/assets/geometry_report.json"
+    },
+    "variations/buzz_wire_3d/F2_terminal_xy40_20_v1/layout.json": {
+      "path": "variations/buzz_wire_3d/F2_terminal_xy40_20_v1/layout.json",
+      "sha256": "2fc4c6085ff65b1a05b75b9b019c32cd6bcb55cc06ed54e1cf9df425957bc762"
+    },
+    "variations/buzz_wire_3d/F3_compact_toy_s70_home_lab_v4/layout.json": {
+      "license": null,
+      "path": "variations/buzz_wire_3d/F3_compact_toy_s70_home_lab_v4/layout.json",
+      "sha256": "7af76f3bd6cdfa3f2667eb67cfed6d39f0c423ffb9ab2b94b93d79137217c037",
+      "source": "assets/tasks/buzz_wire_3d/F3_compact_toy_s70_home_lab_v4/planning/assets/geometry_report.json"
+    },
+    "variations/buzz_wire_3d/design_2_deck_rest_v2/layout.json": {
+      "license": null,
+      "path": "variations/buzz_wire_3d/design_2_deck_rest_v2/layout.json",
+      "sha256": "eb23ad6e5d9fe9b4d6e828fbb491e5bc51ddf3a4d7c6d80bbc64525724017eeb",
+      "source": "topogym/assets/geometry/buzz_wire_3d_simplified.py"
+    },
+    "variations/buzz_wire_3d/straight_span_deck_rest_v1/layout.json": {
+      "license": null,
+      "path": "variations/buzz_wire_3d/straight_span_deck_rest_v1/layout.json",
+      "sha256": "083fca92cf9f7ba1def1f9695eb7e1f7aa33ec73b863ba472c35991d9181f794",
+      "source": "topogym/assets/geometry/buzz_wire_3d_simplified.py"
+    },
+    "variations/cast_coil/design_4.json": {
+      "license": null,
+      "path": "variations/cast_coil/design_4.json",
+      "sha256": "84cb021eda26a407507ad46a4609578a1e174f9fc2f963a8fa158976ebaa6e71",
+      "source": "cast_coil seed family (design_4)"
+    },
+    "variations/cast_coil/corner_cut.json": {
+      "license": null,
+      "path": "variations/cast_coil/corner_cut.json",
+      "sha256": "382dcb4c2f98e0ca2f1a60850a28c5419139f08575d1694e70d480fb0602b639",
+      "source": "assets/tasks/cast_coil/appearance_single_v1/corner_cut/template.json"
+    },
+    "variations/cast_coil/depth_thick.json": {
+      "license": null,
+      "path": "variations/cast_coil/depth_thick.json",
+      "sha256": "d51463df863ed52659cb4c4b21175109525c62e1e2fb12097f47e50e930ccd45",
+      "source": "assets/tasks/cast_coil/appearance_single_v1/depth_thick/template.json"
+    },
+    "variations/cast_coil/easier/geometry.json": {
+      "license": null,
+      "path": "variations/cast_coil/easier/geometry.json",
+      "sha256": "7a46c4e61f46aa25ee8ecad95c2428e91db4663a0730911dd40e71e6a922e19e",
+      "source": "topogym.assets.geometry.cast_coil_simplified.geometry_record"
+    },
+    "variations/cast_coil/design_3.json": {
+      "license": null,
+      "path": "variations/cast_coil/design_3.json",
+      "sha256": "caaede1e754d5c130647352b7b339afbaff7457e90a3266cff5d4e5116150b71",
+      "source": "cast_coil seed family (design_3)"
+    },
+    "variations/cast_coil/face_small.json": {
+      "license": null,
+      "path": "variations/cast_coil/face_small.json",
+      "sha256": "5170d4d36cb1c5a68c87a9e88026d8959f1da4689d12bc976186da2e2f57eef4",
+      "source": "assets/tasks/cast_coil/appearance_single_v1/face_small/template.json"
+    },
+    "variations/cast_coil/design_5.json": {
+      "license": null,
+      "path": "variations/cast_coil/design_5.json",
+      "sha256": "c840c59135d90ea91257b599fd2c209888b0e01767cb135a8d0faa751986a199",
+      "source": "cast_coil seed family (design_5)"
+    },
+    "variations/cast_coil/very_easy/geometry.json": {
+      "license": null,
+      "path": "variations/cast_coil/very_easy/geometry.json",
+      "sha256": "29cb3137f12162867565a3c46c4b37d4da0e48481a1b231bd811a0a8cb5bc6c6",
+      "source": "topogym.assets.geometry.cast_coil_simplified.geometry_record"
+    },
+    "variations/cast_coil/design_6.json": {
+      "license": null,
+      "path": "variations/cast_coil/design_6.json",
+      "sha256": "fe7e0791c493635c8e59224baed359cf3941a58ed59e7e68776e01727cd3281b",
+      "source": "official Cast Coil pieces: the v2 very_easy tier on MuJoCo, 2026-10-09"
+    },
+    "variations/cast_coil/lattice_s43.json": {
+      "license": null,
+      "path": "variations/cast_coil/lattice_s43.json",
+      "sha256": "16a77e9a728698d20488574df5b8ffca1dee03d48d75843e67200a551e4f9032",
+      "source": "lattice design s43 of the v2 design search: the v2 easier tier on MuJoCo, 2026-10-10"
+    },
+    "variations/cast_coil/lattice_s121.json": {
+      "license": null,
+      "path": "variations/cast_coil/lattice_s121.json",
+      "sha256": "f0a9f3a33ed3d9d51ee580b823a0986ac1ce9a922dac7734ab43eac60f61e341",
+      "source": "lattice design s121 of the v2 design search: the v2 easy tier on MuJoCo, 2026-10-12"
+    },
+    "variations/cast_keyhole/F1/geometry.json": {
+      "license": null,
+      "path": "variations/cast_keyhole/F1/geometry.json",
+      "sha256": "f24d85badccd384fd2072a47d63ee6705297f7cbb2734001888fe36a65b552b8",
+      "source": "assets/tasks/cast_keyhole/seed_families_v2/F1/geometry.json"
+    },
+    "variations/cast_keyhole/F2/geometry.json": {
+      "license": null,
+      "path": "variations/cast_keyhole/F2/geometry.json",
+      "sha256": "5075fbe790593d2554465ec8c849a998c2e6690b12e3acc91e7217c940167234",
+      "source": "assets/tasks/cast_keyhole/seed_families_v2/F2/geometry.json"
+    },
+    "variations/cast_keyhole/F3/geometry.json": {
+      "license": null,
+      "path": "variations/cast_keyhole/F3/geometry.json",
+      "sha256": "a86340055eb09cab84816316c90e0905ff2bf7d3e166a210acbbdda7581bd755",
+      "source": "assets/tasks/cast_keyhole/seed_families_v2/F3/geometry.json"
+    },
+    "variations/cast_keyhole/double_maze/geometry.json": {
+      "license": null,
+      "path": "variations/cast_keyhole/double_maze/geometry.json",
+      "sha256": "78e14364ee5d96c84a42e7f017cc5871cb96743ba1facc3efebe1eef5647c934",
+      "source": "double-maze design dm4b: plate outlines and the in-hand opening, 2026-10-12"
+    },
+    "variations/cast_keyhole/easier/geometry.json": {
+      "license": null,
+      "path": "variations/cast_keyhole/easier/geometry.json",
+      "sha256": "dd0475c1c04711767979a99f2f92ed3b00fd6cad638fdd2cfac8f58adec121b0",
+      "source": "topogym/assets/geometry/cast_keyhole_simplified.py"
+    },
+    "variations/cast_keyhole/very_easy/geometry.json": {
+      "license": null,
+      "path": "variations/cast_keyhole/very_easy/geometry.json",
+      "sha256": "c263a93a38ac8dbabb09b5a56f1808549683e1bd2838370a37c586ca74b57885",
+      "source": "topogym/assets/geometry/cast_keyhole_simplified.py"
+    },
+    "variations/hedgehog_in_cage/cast_cage_v1/pieces.npz": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/cast_cage_v1/pieces.npz",
+      "sha256": "a4b154ee3df8250c8e79240419e56179b3d8b1d8c32a2d9c7143eb105226ceda",
+      "source": "Hanayama Cast Cage, faithful model at scale 4 (window set v2, design star): runs/hedgehog_cast_cage_20261010/faithful/scripts/export_topogym.py, 2026-10-11"
+    },
+    "variations/hedgehog_in_cage/fixed_side_window/assets.zip": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/fixed_side_window/assets.zip",
+      "sha256": "2890587be5135a32158694e9770e9d0a61b17f98c78b587f328d23fbd453ff96",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v2/fixed_side_window/assets"
+    },
+    "variations/hedgehog_in_cage/fixed_side_window/prototype.json": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/fixed_side_window/prototype.json",
+      "sha256": "03ae80eaa647f3729f929250c201d88202ad65428ae3d61697a6a2de4a0c2f8c",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v2/fixed_side_window/prototype.json"
+    },
+    "variations/hedgehog_in_cage/gen_keyhole/assets.zip": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/gen_keyhole/assets.zip",
+      "sha256": "8c9af53b47eb5f69e1c0b03357d0b373ce1c276573115160728521dc98dbfe6a",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v2/gen_keyhole/assets"
+    },
+    "variations/hedgehog_in_cage/gen_keyhole/prototype.json": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/gen_keyhole/prototype.json",
+      "sha256": "04dfc00ade3927f8faab84a2770604f39a006a2597c5ce937da7c1206525b590",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v2/gen_keyhole/prototype.json"
+    },
+    "variations/hedgehog_in_cage/gen_keyhole_s5_post/assets.zip": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/gen_keyhole_s5_post/assets.zip",
+      "sha256": "7ede97eb45b2b871feac2ffd5d55d0287e3c3d7e340ede39e15f3980f214a470",
+      "source": "gen_keyhole/assets.zip plus approved model_change.json in this bundle"
+    },
+    "variations/hedgehog_in_cage/gen_keyhole_s5_post/prototype.json": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/gen_keyhole_s5_post/prototype.json",
+      "sha256": "f8ef1e492e1364dd8929f4478b01ce66b814c78aaa5080327bc616b8ef2db7b3",
+      "source": "User-approved S5 support and high initial pose, 2026-10-03"
+    },
+    "variations/hedgehog_in_cage/helical_guide/assets.zip": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/helical_guide/assets.zip",
+      "sha256": "d2af341540e00bf9a3f24d5f72e0e23ef8ec7f208a4ecd626a1f022d9f6a3d63",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v1/helical_guide/assets"
+    },
+    "variations/hedgehog_in_cage/helical_guide/prototype.json": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/helical_guide/prototype.json",
+      "sha256": "6147d68468238f57a3ab7cdefd486402e7a3df0608b8c33c17c9a2ab89843a6a",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v1/helical_guide/prototype.json"
+    },
+    "variations/hedgehog_in_cage/oblique_gate/assets.zip": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/oblique_gate/assets.zip",
+      "sha256": "04ec99cd496aa997a866f1bd34456f8fc3cefc1d33456a281b2ae77117b43286",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v1/oblique_gate/assets"
+    },
+    "variations/hedgehog_in_cage/oblique_gate/prototype.json": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/oblique_gate/prototype.json",
+      "sha256": "b8852116c458432cc9bc15f0630f293c5c58c9ff31db5ab76723e68e9559e6e0",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v1/oblique_gate/prototype.json"
+    },
+    "variations/hedgehog_in_cage/staggered_gates/assets.zip": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/staggered_gates/assets.zip",
+      "sha256": "a2875cc9a519b65fb5b337928b45c8353f936d0fb0a2ab74d7f6bb5ff4239dcb",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v1/staggered_gates/assets"
+    },
+    "variations/hedgehog_in_cage/staggered_gates/prototype.json": {
+      "license": null,
+      "path": "variations/hedgehog_in_cage/staggered_gates/prototype.json",
+      "sha256": "716b3b9d96cc9e598f95d269e60bcfdb42696584acb090b423dc78615a0ccada",
+      "source": "assets/tasks/hedgehog_in_cage/seed_families_v1/staggered_gates/prototype.json"
+    },
+    "variations/horseshoe_ring/below_easy_easier_settled_poses.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/below_easy_easier_settled_poses.json",
+      "sha256": "280e991696a16ce2a481db7c48bd74bd5e0b0d11fa72655f403a6183a44e8360",
+      "source": "2026-10-06: 146 x 136 mm ring, template assembly settled 8 s on CPU (2.5 ms x 4) in the v18 image"
+    },
+    "variations/horseshoe_ring/below_easy_very_easy_settled_poses.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/below_easy_very_easy_settled_poses.json",
+      "sha256": "002c156d3f9a0c6a909926bbbcd1022725bc25061f189cc107d712bf55c41e5e",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/chain_compact.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_compact.json",
+      "sha256": "f640e8fe46013772b696aeb3a48b588b58fe228b0e54433e822caaa87ae9a2d5",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_elongated_wide.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_elongated_wide.json",
+      "sha256": "60abaa99f100c6aee0a15b3b39af393e80376722f7f16a18d0c7b1fdc836779f",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_long_control.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_long_control.json",
+      "sha256": "7cb6893b146237705af743c1b51de8531197eac4fa2f01069f45eaf471a2496d",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_longer.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_longer.json",
+      "sha256": "59c3dd5a8e8f0d9b86a45e06e618a3ac102013bb3bde76d31b47319c10eefc06",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_narrower.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_narrower.json",
+      "sha256": "53105a3fc960e503e8cde326a6b664a1fd8d6daa115f4d33de00d87bc282ff69",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_shorter.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_shorter.json",
+      "sha256": "731d49d71f52a1118877976e302c643cd260891c9e0c2a5fc24993ef5476b4b9",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_slender.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_slender.json",
+      "sha256": "01f3c5da24aeacd95c346aed2b31e40873ea7e4a052e8e816ab5a4c5823192fc",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_thick_control.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_thick_control.json",
+      "sha256": "09a5dfd928ae6485e4b2995f0a6dcc18498c36fd6e70d294746f34cbbc2fd5b4",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_thicker.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_thicker.json",
+      "sha256": "e3206bcffcc7245d5197deaf264653af6b86be5635169b18edb888a578dafe3d",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_wide_control.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_wide_control.json",
+      "sha256": "9c723df22df66ba70b54f3295681e9cd737f70611385cb48ba1f522b647e3575",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/chain_wider.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/chain_wider.json",
+      "sha256": "102cdf149222e818c94e3dea6b188d7a42ac270d14deffa2edb817bf82de7379",
+      "source": "assets/tasks/horseshoe_ring/fixed_trace_v1/variants.json"
+    },
+    "variations/horseshoe_ring/deep_waist.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/deep_waist.json",
+      "sha256": "83c3a1d4a4e2641187b199614a0932a3c41700680f2f7e0ee3b6b3f67e9a28c3",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/deep_waist_chain17p0.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/deep_waist_chain17p0.json",
+      "sha256": "a53d5f09d8043f267d51e01a3a9b92199740065ada64be4fc0d43cb683c90a14",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/deep_waist_chain17p5.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/deep_waist_chain17p5.json",
+      "sha256": "9664b0381d59bc4c75a4346ebfa52d3c70bbdd15386da7c4558b08975e56481f",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/u_mild.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/u_mild.json",
+      "sha256": "41b5bb61f9d4ac99dcf38680e0956eb91c69cd391eb96f49b2023a2189873e7d",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/u_mild_chain17p0.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/u_mild_chain17p0.json",
+      "sha256": "6b363d351ec83a49191e5fc3198d00dd1907037bf59552cd037650581da47245",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/u_mild_chain17p5.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/u_mild_chain17p5.json",
+      "sha256": "94cc64d9071351f2bce4b406396e59733abab3a229145542c4b2efc4aac01710",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/u_mild_settled_poses.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/u_mild_settled_poses.json",
+      "sha256": "a1401789d5d618a1812936329258051574127909b069a217cca2c919e0bb7a05",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/waist_ellipse.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/waist_ellipse.json",
+      "sha256": "39617fd8c0780890d1d1d8445cb2c64c84c621f662081dd383c71b917e5701d5",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/waist_ellipse_chain17p0.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/waist_ellipse_chain17p0.json",
+      "sha256": "ea8038440768aa20d8f5a191a49c23cb163cfa7468f00993670fe1a98e4c4573",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/waist_ellipse_chain17p5.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/waist_ellipse_chain17p5.json",
+      "sha256": "e31d6c6a1074327feb054c6585dca002c5bf45bff15c446fb690e823724d12cd",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/waist_ellipse_settled_poses.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/waist_ellipse_settled_poses.json",
+      "sha256": "b86841a325ebeff2d0cad1d85298b6e4ab322ba1d4b1091e481ffb7210550597",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/waist_mild.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/waist_mild.json",
+      "sha256": "8ccc6bb745e13d666e9127392748e7539352e569c4804bcd1349f9d5ce7ea1db",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "variations/horseshoe_ring/waist_mild_settled_poses.json": {
+      "license": null,
+      "path": "variations/horseshoe_ring/waist_mild_settled_poses.json",
+      "sha256": "958ab7676b8e2f122e782982688fec4f1a3a1930e3277eca8b4fea34e9779b72",
+      "source": "authored horseshoe_ring resource (internal authoring run)"
+    },
+    "blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_9c8a7a85bfba/very_easy/seed_0/manifest.json": {
+      "path": "variations/blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_9c8a7a85bfba/very_easy/seed_0/manifest.json",
+      "sha256": "1e18d3fbc1e6213a3815d95c68e4b5548b7b4eab3da62bed566cb2e0ed061050",
+      "source": "prepared corner_folds_v1 very_easy, seed 0; scope=scene_layout",
+      "license": null
+    },
+    "blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_9c8a7a85bfba/very_easy/seed_0/arrays.npz": {
+      "path": "variations/blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_9c8a7a85bfba/very_easy/seed_0/arrays.npz",
+      "sha256": "a3bdc38e79e847e9016ab13105b44e9905cd55acfde4b3880049c49ebc5a3237",
+      "source": "prepared corner_folds_v1 very_easy, seed 0; scope=scene_layout",
+      "license": null
+    },
+    "blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/very_easy/seed_0/manifest.json": {
+      "path": "variations/blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/very_easy/seed_0/manifest.json",
+      "sha256": "8e530ac51ce6934923c4c520e5793b21f3b01393f25e4c6989b3fa9763119456",
+      "source": "prepared corner_folds_v1 very_easy, seed 0; scope=scene_layout",
+      "license": null
+    },
+    "blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/very_easy/seed_0/arrays.npz": {
+      "path": "variations/blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/very_easy/seed_0/arrays.npz",
+      "sha256": "790060078862958e64e5f1a8478acdcf04714e37e6109f4741f532bd2c520eba",
+      "source": "prepared corner_folds_v1 very_easy, seed 0; scope=scene_layout",
+      "license": null
+    },
+    "blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/easier/seed_0/manifest.json": {
+      "path": "variations/blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/easier/seed_0/manifest.json",
+      "sha256": "f9fe95fc2d5f928cf1f35d5ec2c4beeaa228b9c7bb468b16bcdeb80c9937f570",
+      "source": "prepared corner_folds_v1 easier, seed 0; scope=scene_layout",
+      "license": null
+    },
+    "blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/easier/seed_0/arrays.npz": {
+      "path": "variations/blanket_flatten/corner_folds_archive_v1/cuda_sm89_mp128_87407517a32a/easier/seed_0/arrays.npz",
+      "sha256": "0391e0a149c1c83a1e7aff1c60e64b207c80af951ef0ecdd9a593429973890c1",
+      "source": "prepared corner_folds_v1 easier, seed 0; scope=scene_layout",
+      "license": null
+    },
+    "variations/interlocked_claws/rd_very_easy.json": {
+      "license": null,
+      "path": "variations/interlocked_claws/rd_very_easy.json",
+      "sha256": "348722e56d23807aae7df41fba6372bec14e8aa2d5dc0b9bfb7c028decda3360",
+      "source": "scripts/robotangle/redesign/interlocked_claws/export_runtime.py"
+    },
+    "variations/interlocked_claws/rd_easier.json": {
+      "license": null,
+      "path": "variations/interlocked_claws/rd_easier.json",
+      "sha256": "be59520d674678bc31ab8134429aef92bd24691eed2816abb06a8c6175f2fa32",
+      "source": "scripts/robotangle/redesign/interlocked_claws/export_runtime.py"
+    },
+    "variations/interlocked_claws/rd_easy.json": {
+      "license": null,
+      "path": "variations/interlocked_claws/rd_easy.json",
+      "sha256": "05beead7008f4df381cdc4082061e349cbf20f0be76f390d4394e8fb8355101c",
+      "source": "scripts/robotangle/redesign/interlocked_claws/export_runtime.py"
+    },
+    "variations/interlocked_claws/rd_medium.json": {
+      "license": null,
+      "path": "variations/interlocked_claws/rd_medium.json",
+      "sha256": "4ea92c9c0f7244adc9d1ed50d308e8700a63985b610a08b8c5eda8fcf0474ccb",
+      "source": "scripts/robotangle/redesign/interlocked_claws/export_runtime.py"
+    },
+    "variations/interlocked_claws/rd_hard.json": {
+      "license": null,
+      "path": "variations/interlocked_claws/rd_hard.json",
+      "sha256": "24f4312fcc89699869edcd065c08aea337e5d677946f70940f996f0fb1df4508",
+      "source": "scripts/robotangle/redesign/interlocked_claws/export_runtime.py"
+    },
+    "variations/rope_threading/rd_very_easy.json": {
+      "license": null,
+      "path": "variations/rope_threading/rd_very_easy.json",
+      "sha256": "7f15d41420c4500a73cb67ad5c04906037c2f380edc3ccc165f86c28e5fcac48",
+      "source": "scripts/robotangle/redesign/rope_threading/export_runtime.py"
+    },
+    "variations/rope_threading/rd_easier.json": {
+      "license": null,
+      "path": "variations/rope_threading/rd_easier.json",
+      "sha256": "c0a9375ff8a2cca18cfc8cc793739bd999c97bd19eef0a0ca38cd0756dbcdf91",
+      "source": "scripts/robotangle/redesign/rope_threading/export_runtime.py"
+    },
+    "variations/rope_threading/rd_easy.json": {
+      "license": null,
+      "path": "variations/rope_threading/rd_easy.json",
+      "sha256": "1203060abca57fed25e2fa16404097e93d4000d53f20df68884484cfb9cb6443",
+      "source": "scripts/robotangle/redesign/rope_threading/export_runtime.py"
+    },
+    "variations/rope_threading/rd_medium.json": {
+      "license": null,
+      "path": "variations/rope_threading/rd_medium.json",
+      "sha256": "74a8469ca8392c5a8f9e93d5e07548f93e1a16e09e2a242c56bf6c42cddf9317",
+      "source": "scripts/robotangle/redesign/rope_threading/export_runtime.py"
+    },
+    "variations/rope_threading/rd_hard.json": {
+      "license": null,
+      "path": "variations/rope_threading/rd_hard.json",
+      "sha256": "41cd1061aa62006cf603aa418a08382203a8a2821116a8dc6d35c7e044582dd4",
+      "source": "scripts/robotangle/redesign/rope_threading/export_runtime.py"
+    }
+  },
+  "schema_version": 1
+}

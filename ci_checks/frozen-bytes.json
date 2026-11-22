@@ -1,0 +1,192 @@
+{
+  "baseline": {
+    "commit": "0b95b338b5c08c08084370451590e1cf152d5a9b",
+    "what": "main on 2026-11-21: task set 2.2.1 with the fiber-bundling-05 reference"
+  },
+  "frozen": [
+    {
+      "path": "tasks/",
+      "reason": "the released task directories, generated and never edited by hand: the bytes every reported result was graded on, each directory with its DIGEST",
+      "files": 6489,
+      "sha256": "741f92e4d898ae3ec950e2c25812e899506ab40abea4c2a427c35b8538af58ca"
+    },
+    {
+      "path": "scripts/roboarc/packages/",
+      "reason": "each puzzle task's texts as they ship, its goal pictures and its instance lock: mk_tasks.py renders the task directories from them",
+      "files": 1488,
+      "sha256": "55d24d7cde1834906b8480cb7f067c1031a7f101a4649dd72bc3aae4d524adec"
+    },
+    {
+      "path": "scripts/roboarc/oracles/",
+      "reason": "the puzzle reference trajectories: copied into each task's solution/ and read by roboarc.load_reference()",
+      "files": 302,
+      "sha256": "10a9946e62909e65f16a7d747aaba3739a805145b04e5f7346e21ec3ab4819db"
+    },
+    {
+      "path": "scripts/roboarc/shared/",
+      "reason": "the pinned tooling, the graders and the standard service: copied unchanged into every puzzle task, docstrings and comments included",
+      "files": 10,
+      "sha256": "4e4b79fd701e4f7209190caa8293ef9a72d418054ec8b2ce8989954eb4c4b573"
+    },
+    {
+      "path": "scripts/roboarc/release.json",
+      "reason": "the release record (version, runtime, tooling hashes, each base's evidence): rendered into every puzzle task, and a new `version` re-renders every README and DIGEST",
+      "files": 1,
+      "sha256": "f97e1045c1ce401890ad7d53406f608d7aff439356eeb75133b406eba3f27737"
+    },
+    {
+      "path": "scripts/roboarc/assets.json",
+      "reason": "the pins of the frozen instances: each runtime binding is written from them and checked against them, and the release image is built from them",
+      "files": 1,
+      "sha256": "ed386ff80c217a0800c4f163937d45d593b6b07e12a2db053d3a73ff103640ab"
+    },
+    {
+      "path": "scripts/eai_standard/",
+      "reason": "the eai-standard/2.4 client and service layer, and the client base image (client.env): copied unchanged into every standard task",
+      "files": 9,
+      "sha256": "009fd26fb8654e438969b976544ff41515a832306959e7836cf10fc0a1b02d5b"
+    },
+    {
+      "path": "scripts/rcb_monitor/",
+      "only": [
+        "monitor.py",
+        "rcb_limits.py",
+        "selftest.py"
+      ],
+      "reason": "the resource monitor's code: inject.py copies these three files unchanged into every task",
+      "files": 3,
+      "sha256": "fc960e093daa03cc772bacddb9274cf2ce8cfd55e037cc414fa0d1c87687a912"
+    },
+    {
+      "path": "scripts/task_resources.toml",
+      "reason": "each task's minimum compute, limits and caps: rendered into task.toml, the README and the monitor's limits",
+      "files": 1,
+      "sha256": "d3ca66a99044e66067bd35a708a93b3d838a752e9231bd777958f63d2cbe09a5"
+    },
+    {
+      "path": "scripts/set_agent_egress.py",
+      "value": "HOSTS",
+      "reason": "the agent's egress allowlist: the generators write this list into every task.toml (the script around it may change)",
+      "sha256": "f96c1fdbb6d2194cae754143ae4bc9c7879171864337b369b5c96efe0d175898"
+    },
+    {
+      "path": "images/pins.json",
+      "reason": "the released images by manifest digest: every Dockerfile and compose file of a task names its images by these digests",
+      "files": 1,
+      "sha256": "e81652c34353fba4fe0e5f5facfaa0e10ce2e2c6df07c6520f1c7a957409b556"
+    },
+    {
+      "path": "images/roboarc/VERSION",
+      "reason": "the release image's version: rendered into every puzzle task's image reference",
+      "files": 1,
+      "sha256": "6aa9bc8c83a9a9b8e21ce9fdc1f5074511cebd40af4b136a615975faeda1cf22"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/shared/",
+      "reason": "the IKEA tooling, grader and video renderer: copied unchanged into every IKEA task",
+      "files": 3,
+      "sha256": "9b186be0bfc5cfe42d0c0dd9587e6460ff5305ad37bacbe9b212d0e798ddf108"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/standard/",
+      "reason": "the IKEA standard service, its grader, rigs and reference maker: its files are copied unchanged into every IKEA standard task",
+      "files": 9,
+      "sha256": "7865239a8dda3323a6501da874823fcdb390b7daaada3217086bbb657a356b67"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/oracles/",
+      "only": [
+        "*.npz"
+      ],
+      "reason": "the IKEA reference trajectories: copied into each task's solution/ (the build scripts next to them are not shipped)",
+      "files": 12,
+      "sha256": "54502e0863e1e771d7a43841a951b3314a328a328a1df0289a80787410480d2c"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/tasks.json",
+      "reason": "each IKEA task's title, goal and success requirements in words: rendered into its instruction and README",
+      "files": 1,
+      "sha256": "73d5647ab1c4c28289e03d551b813a172cedf191d44c7bf58080e132ddd49e8e"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/bindings.json",
+      "reason": "what the IKEA image's scenes build to (image id, initial-state hashes): rendered into each task's runtime binding",
+      "files": 1,
+      "sha256": "2ca78185301872744a9fdf6f4d85f4c7dfdc0addc46066bb6c212cbaf3eebf95"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/evidence.json",
+      "reason": "the IKEA privileged tasks' oracle and nop records: rendered into each README",
+      "files": 1,
+      "sha256": "308c4b1ab558b320d4f0774b72a3ca4b745d0f7dabacdb7e6b36805d06ceaa39"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/standard_evidence.json",
+      "reason": "the IKEA standard tasks' oracle and nop records: rendered into each README",
+      "files": 1,
+      "sha256": "6fb950a3ae30bbd7a0990f74991059700e942d768a22e4eb3e7321a219a2c64b"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/assets.json",
+      "reason": "the sha256 of every scene file in the IKEA image: rendered into each task's runtime binding and README, and checked when the image is built",
+      "files": 1,
+      "sha256": "65e8c91a0c995bc641c43aed5bedee618d5a818a46e464db0bcf2bd33571f253"
+    },
+    {
+      "path": "ikea/images/ikea-mujoco/",
+      "except": [
+        "README.md"
+      ],
+      "reason": "the IKEA images' recipe, versions and scene code: the scene files are in the released image under the hashes of assets.json, the versions are in every IKEA task",
+      "files": 92,
+      "sha256": "8adaa469403b8c76109839df6e60291d7f967c83a6fb2faf1c1774bf0dad562f"
+    },
+    {
+      "path": "source/topogym/",
+      "how": "tools/release/source_hash.py --check",
+      "reason": "the simulator source the release image installs: its hash (SOURCE.json) is in every puzzle task's runtime binding and a Session refuses another",
+      "files": 455,
+      "sha256": "1552f29dcec4b4102a93d1d8bb033e336ddea757443c6b08b127a877a0fba580"
+    },
+    {
+      "path": "source/assets/",
+      "reason": "the robot models and textures in the release image: a change is a new image version",
+      "files": 108,
+      "sha256": "3476bcc535c586dae37b9fc45fc0e3e82c6d48fe4367e9d0ac83234078e05d6c"
+    },
+    {
+      "path": "source/images/",
+      "reason": "the release image's recipe and the scripts it installs (stage_instance.py, the MuJoCo patch, prune.py): a change is a new image version",
+      "files": 8,
+      "sha256": "ade1b9c5719aa7f6d070268f5a26cb55e967f2aaa921a87e1e9a014cf06d7a72"
+    },
+    {
+      "path": "source/.dockerignore",
+      "reason": "which files of source/ the release image takes: a change is a new image version",
+      "files": 1,
+      "sha256": "f17b3fae9143f3601114753f8a331aae7d54973580022b6b69e68c7cb70c5ed9"
+    }
+  ],
+  "generators": [
+    {
+      "path": "scripts/roboarc/mk_tasks.py",
+      "reason": "renders the puzzle tasks: its constants (the time cutoff, the texts' facts) are in every one"
+    },
+    {
+      "path": "scripts/task_conventions.py",
+      "reason": "writes the sections every task shares (limits, time limit, external material) and the DIGEST"
+    },
+    {
+      "path": "scripts/rcb_monitor/inject.py",
+      "reason": "wires the resource monitor into every task and holds its image pin"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/mk_tasks.py",
+      "reason": "renders the IKEA privileged tasks"
+    },
+    {
+      "path": "ikea/scripts/ikea_mujoco/mk_standard_tasks.py",
+      "reason": "renders the IKEA standard tasks"
+    }
+  ]
+}

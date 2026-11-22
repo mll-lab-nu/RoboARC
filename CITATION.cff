@@ -1,0 +1,62 @@
+# How to cite RoboARC. Title, authors and their order are the paper's. `version` and `date-released` are those of the
+# task set (CHANGELOG.md). At release: add the paper's arXiv identifier (`identifiers`, or a `preferred-citation` of
+# type article), and keep README.md's BibTeX entry the same.
+cff-version: 1.2.0
+message: "If you use RoboARC in your research, please cite it as below."
+type: software
+title: "RoboARC: Physical Puzzles for Robotic Manipulation under Spatial Constraints"
+abstract: >-
+  RoboARC is a benchmark of physical puzzles for robotic manipulation under spatial constraints: 90 tasks in six
+  constraint types over rigid and soft materials, on three robots in MuJoCo. Every task is a frozen scene with a
+  physics-based grader and a verified reference solution, in a Privileged mode with the full simulator state and
+  resets and a Standard mode with camera images, proprioception and a single attempt.
+authors:
+  - family-names: Wang
+    given-names: Qineng
+    affiliation: Northwestern University
+  - family-names: Lyu
+    given-names: Jianwen
+    affiliation: Northwestern University
+  - family-names: Zhang
+    given-names: Pingyue
+    affiliation: Northwestern University
+  - family-names: Tan
+    given-names: Reuben
+    affiliation: Microsoft
+  - family-names: Huang
+    given-names: Xiaoyu
+    affiliation: UC Berkeley
+  - family-names: Zhang
+    given-names: Tonghe
+    affiliation: Carnegie Mellon University
+  - family-names: Wang
+    given-names: Kangrui
+    affiliation: Northwestern University
+  - family-names: Shen
+    given-names: Yelong
+    affiliation: Microsoft
+  - family-names: Gao
+    given-names: Jianfeng
+    affiliation: Microsoft
+  - family-names: Shi
+    given-names: Guanya
+    affiliation: Carnegie Mellon University
+  - family-names: Zhang
+    given-names: Ruohan
+    affiliation: Northwestern University
+  - family-names: Li
+    given-names: Manling
+    affiliation: Northwestern University
+version: 2.2.1
+date-released: 2026-10-30
+license: MIT
+url: "https://roboarc.embodied-first-exam.ai"
+repository-code: "https://github.com/mll-lab-nu/RoboARC"
+keywords:
+  - robotics
+  - manipulation
+  - benchmark
+  - spatial constraints
+  - coding agents
+  - vision-language-action policies
+  - MuJoCo

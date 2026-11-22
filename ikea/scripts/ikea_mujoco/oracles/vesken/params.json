@@ -1,0 +1,158 @@
+{
+ "comment": "per-operation parameters kept by search.py (2026-10-18, the Franka Hand slew; 16 candidates per op)",
+ "ops": [
+  {},
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "approach": 800,
+   "tweaks": [
+    [
+     "left",
+     20500,
+     21900,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.35,
+      0.17,
+      0
+     ],
+     300
+    ]
+   ]
+  },
+  {},
+  {},
+  {},
+  {
+   "rot": false,
+   "ff_rot": false
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "g": 0.005,
+   "gr": 0.0025
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "g": 0.005,
+   "gr": 0.0025
+  },
+  {
+   "lat0": true
+  },
+  {},
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "lat0": true
+  },
+  {
+   "g": 0.02,
+   "gr": 0.01
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300
+  },
+  {
+   "lat0": true
+  },
+  {
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015
+  },
+  {
+   "g": 0.02,
+   "gr": 0.01,
+   "lat0": true
+  },
+  {
+   "g": 0.005,
+   "gr": 0.0025,
+   "lat0": true
+  },
+  {
+   "ff": false,
+   "g": 0.03,
+   "gr": 0.015,
+   "rel_zone": 0.1
+  },
+  {
+   "rot_stage": false,
+   "stage_decay": true,
+   "tweaks": [
+    [
+     "left",
+     279800,
+     282200,
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      -0.17,
+      0,
+      0
+     ],
+     400
+    ]
+   ]
+  },
+  {
+   "ff_rot_max": 0.8,
+   "ff_rot_rows": 300
+  },
+  {
+   "rot": false,
+   "ff_rot": false,
+   "lat0": true
+  },
+  {
+   "g": 0.02,
+   "gr": 0.01
+  }
+ ],
+ "cand": [
+  0,
+  6,
+  0,
+  0,
+  0,
+  8,
+  4,
+  4,
+  1,
+  0,
+  12,
+  15,
+  13,
+  1,
+  1,
+  11,
+  4,
+  5,
+  7,
+  10,
+  13,
+  7,
+  15
+ ],
+ "tail": {
+  "g": 0.02,
+  "gr": 0.01,
+  "rest_s": 0.5
+ }
+}

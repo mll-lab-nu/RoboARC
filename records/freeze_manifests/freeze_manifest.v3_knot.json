@@ -1,0 +1,16 @@
+{
+ "note": "V3 knot_untying rd easier (knot-untying-07-i01; the rd hard tier is not shippable, see the V3 notes): release_rebuild.py --manifest inputs of the new base only (docs/rcb/roboarc_next_wave.md, V3 knot rd). It ships a premade frozen instance made in eai-roboarc:0.2.0-noinst with redesign/knot_untying/premade/make_premade.py (07 from inst10/easier_v8_r2 with the 2026-10-13 _r3 back strip, premade/region_source.py); pass --instances <dir> with <dir>/knot-untying-07-i01/. Reference: a re-timed route (redesign/knot_untying/robot/retime_search.py) of the 2026-10-14 route et1, every arm joint step within the standard service's joint-speed rule. step_s: the measured wall time per control step the texts state. Paths are relative to this file. Pass the head and --version on the command line.",
+ "bench": "roboarc",
+ "onto": "origin/dev/robotangle",
+ "only": [
+  "knot-untying-07-i01"
+ ],
+ "bases": {
+  "knot-untying-07-i01": {
+   "reference": "../../scripts/roboarc/oracles/knot-untying-07-i01/privileged.npz",
+   "sha256": "82c65a96cbaca655473d10a00be618a5c30871277db1574175fc63c1cf8041ac",
+   "expect": "8ae062ea4c733dbc",
+   "step_s": 0.41
+  }
+ }
+}
