@@ -44,7 +44,9 @@ while read -r ref id; do
     echo "FAIL $ref: docker pull failed (logged in to the registry? \`docker login ghcr.io\`)" >&2; bad=1; continue
   fi
   got="$(docker image inspect --format '{{.Id}}' "$ref" 2>/dev/null)"
-  if [ "$got" != "$id" ]; then
+  # Docker's classic image store reports the config digest (the pinned id); the containerd image store (the default of
+  # new Docker Engine installs) reports the manifest digest the reference was pulled by.
+  if [ "$got" != "$id" ] && [ "$got" != "${ref##*@}" ]; then
     echo "FAIL $ref: image id ${got:-none}, pinned $id" >&2; bad=1
   else
     echo "ok   $ref = ${id:7:12}"
