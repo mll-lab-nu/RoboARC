@@ -9,8 +9,8 @@ modes and paths to today's.
 
 ## 1. Machine
 
-- Linux x86_64 (not WSL, not arm64), Docker with the NVIDIA Container Toolkit, Harbor 0.23 or newer, Python 3.11 or
-  newer as `python3` (section 2 installs both).
+- Linux x86_64 (not WSL, not arm64), Docker with the NVIDIA Container Toolkit, Harbor 0.23 or newer (tested with
+  0.23.0 and 0.27.0), Python 3.11 or newer as `python3` (section 2 installs both).
 - **NVIDIA driver 580 or newer** (RoboARC's stated requirement). The renderer (Nyx) runs from about driver 570; the
   blanket families' cloth physics is built for CUDA 13 and needs 580 or newer, or 570 with NVIDIA's `cuda-compat`
   libraries (docs/API.md).
@@ -38,11 +38,11 @@ modes and paths to today's.
    git clone -b main https://github.com/mll-lab-nu/RoboARC.git && cd RoboARC
    uv venv --python 3.12 && source .venv/bin/activate     # Python 3.12 as `python3`, in .venv/ (git ignores it)
    uv pip install -e .                                    # the command `roboarc`
-   uv tool install harbor                                 # Harbor; `harbor --version` prints 0.23.0 or newer
+   uv tool install harbor                                 # Harbor 0.23 or newer (tested: 0.23.0 and 0.27.0)
    ```
    The repository's scripts call `python3` and need Python 3.11 or newer (Ubuntu 22.04 ships 3.10): activate the
-   environment (`source .venv/bin/activate`) in every shell that runs a command of this guide. With Kimi Code, use
-   Harbor 0.25 or newer.
+   environment (`source .venv/bin/activate`) in every shell that runs a command of this guide. `uv tool install
+   harbor==0.27.0` installs exactly one of the two tested Harbor versions. With Kimi Code, use Harbor 0.25 or newer.
 2. Pull the four images and check the machine:
    ```bash
    roboarc images pull --accept-licences      # about 19 GB on disk; each image is checked against its pinned digest
@@ -66,7 +66,6 @@ modes and paths to today's.
 
 Start with `interlocked-claws-08`. In each mode the reference solution must score 1, and doing nothing must score 0:
 
-<!-- unverified: the trial lists of this section were read with --print; the trials were not run in this lane -->
 ```bash
 roboarc selftest interlocked-claws-08
 ```

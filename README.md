@@ -11,14 +11,14 @@
 <p align="center">
   <a href="https://qinengwang-aiden.github.io/">Qineng Wang</a><sup>1*</sup>,
   <a href="https://www.linkedin.com/in/jianwen-lyu-ba9a11329/">Jianwen Lyu</a><sup>1*</sup>,
-  Pingyue Zhang<sup>1*</sup>,
-  Reuben Tan<sup>2†</sup>,
-  Xiaoyu Huang<sup>3†</sup>,
-  Tonghe Zhang<sup>4†</sup>,<br>
-  Kangrui Wang<sup>1</sup>,
-  Yelong Shen<sup>2</sup>,
-  Jianfeng Gao<sup>2</sup>,
-  Guanya Shi<sup>4</sup>,
+  <a href="https://williamzhangsjtu.github.io/">Pingyue Zhang</a><sup>1*</sup>,
+  <a href="https://www.microsoft.com/en-us/research/people/tanreuben/">Reuben Tan</a><sup>2†</sup>,
+  <a href="https://whoknowsssss.github.io/al-folio/">Xiaoyu Huang</a><sup>3†</sup>,
+  <a href="https://tonghezhang.com/">Tonghe Zhang</a><sup>4†</sup>,<br>
+  <a href="https://jameskrw.github.io/">Kangrui Wang</a><sup>1</sup>,
+  <a href="https://scholar.google.com/citations?user=S6OFEFEAAAAJ">Yelong Shen</a><sup>2</sup>,
+  <a href="https://www.microsoft.com/en-us/research/people/jfgao/">Jianfeng Gao</a><sup>2</sup>,
+  <a href="https://www.gshi.me/">Guanya Shi</a><sup>4</sup>,
   <a href="https://ruohanzhang.com/">Ruohan Zhang</a><sup>1</sup>,
   <a href="https://limanling.github.io/">Manling Li</a><sup>1</sup>
 </p>
@@ -107,21 +107,23 @@ In the Standard mode the strongest coding agent solves 43 % of the tasks (middle
 
 ### 1. Clone and install
 
-<!-- unverified: the anonymous clone works once the repository is public. `pip install -e .` was run in a new
-     virtual environment from a local checkout -->
+<!-- unverified: the anonymous clone works once the repository is public -->
 ```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh      # uv (https://docs.astral.sh/uv/); then open a new shell
 git clone https://github.com/mll-lab-nu/RoboARC.git
 cd RoboARC
-uv venv --python 3.12 && source .venv/bin/activate   # or any environment with Python 3.11 or newer
-pip install -e .                                     # the roboarc command and the Python package
+uv venv --python 3.12 && source .venv/bin/activate   # Python 3.12 as python3, in .venv/
+uv pip install -e .                                  # the roboarc command and the Python package
 roboarc --version                                    # roboarc 2.2.1
 ```
 
+In a Python 3.11 or newer environment of your own, `pip install -e .` installs the same command.
+
 [Harbor](https://github.com/laude-institute/harbor) runs the tasks for coding agents. Install version 0.23 or newer with
-[uv](https://docs.astral.sh/uv/), which also fetches the Python that Harbor needs (3.12 or newer):
+uv, which also fetches the Python that Harbor needs (3.12 or newer). RoboARC is tested with Harbor 0.23.0 and 0.27.0:
 
 ```bash
-uv tool install harbor
+uv tool install harbor               # the newest release; one tested version: uv tool install harbor==0.27.0
 harbor --version
 ```
 
@@ -136,7 +138,7 @@ One line per check, and for each check that fails, the fix. The values are your 
 ```text
 RoboARC 2.2.1, this host
   ok    python3                   3.12.9
-  ok    repository                /home/you/RoboARC: RoboARC 2.2.1, 90 tasks
+  ok    repository                /work/RoboARC: RoboARC 2.2.1, 90 tasks
   ok    GPU                       0: NVIDIA L4, 23034 MiB
   ok    NVIDIA driver             580.95.05
   ok    Vulkan ray query          vulkaninfo names VK_KHR_ray_query, VK_EXT_extended_dynamic_state3, VK_KHR_compute_shader_derivatives
@@ -157,8 +159,7 @@ The simulator, the renderer and every task's frozen scene are in four container 
 [`images/pins.json`](images/pins.json). Pulling or building the images accepts the third-party licences listed in
 [LICENSES/THIRD_PARTY.md](LICENSES/THIRD_PARTY.md), and `--accept-licences` records that acceptance once per user.
 
-<!-- unverified: syntax checked with --help and the consent step run without the option. No pull was made: the
-     packages are private until the release -->
+<!-- unverified: the anonymous pull from ghcr.io works once the packages are public -->
 ```bash
 roboarc images pull --accept-licences
 ```
@@ -189,26 +190,24 @@ the check and the archives for a host away from the registry.
 One task with the two built-in Harbor agents, which need no model: the reference solution (`oracle`) scores 1, and
 doing nothing (`nop`) scores 0.
 
-<!-- unverified: flags checked against `harbor run --help` of Harbor 0.23.0. Not run in this lane: the trials need
-     Docker, a GPU and the images -->
 ```bash
 # once per checkout and after every git pull: every file gets a time derived from its content,
 # which Docker's build cache keys on
 python3 scripts/stamp_mtimes.py tasks
 
-harbor run -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-08
-harbor run -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a nop    -o "$PWD/jobs" --job-name nop-claws-08
+harbor run -y -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-08
+harbor run -y -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a nop    -o "$PWD/jobs" --job-name nop-claws-08
 
 cat jobs/oracle-claws-08/*/verifier/reward.txt   # 1
 cat jobs/nop-claws-08/*/verifier/reward.txt      # 0
 ```
 
 The reference trial takes about 6 minutes on an RTX 4090. The verifier replays the trajectory twice and writes a video
-of it to `verifier/replay.mp4`, next to the score.
+of it to `verifier/replay.mp4`, next to the score. `-y` answers yes to Harbor's question whether the task may read
+`RCB_LIMITS_ENFORCE` from your environment: without it Harbor asks on a terminal and aborts where there is none.
 
 `roboarc selftest` runs the same check through Harbor for whole tasks and reports every score against the expected one:
 
-<!-- unverified: the trial list was checked with --print. The trials themselves were not run in this lane -->
 ```bash
 roboarc selftest interlocked-claws-08     # both modes, oracle and nop: 4 trials
 roboarc selftest --print                  # the default set, one task per family: 20 tasks, 80 trials
@@ -220,7 +219,7 @@ Then a coding agent on one task, here Codex in the Standard mode:
      model API key -->
 ```bash
 cp .env.example .env        # put your model API key in it
-harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model> \
+harbor run -y -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model> \
     --ak reasoning_effort=high --ak web_search=disabled --env-file .env -o "$PWD/jobs" --job-name codex-orbits-02
 ```
 
@@ -348,7 +347,6 @@ obs, reward, terminated, truncated, info = env.step(action)   # absolute joint t
 
 The simulator is in the images, so run it there with the repository mounted:
 
-<!-- unverified: not run in this lane (Docker, a GPU and the images). The two commands are those of docs/API.md -->
 ```bash
 IMAGE=$(bash images/pull_all.sh --list | awk '$1 ~ "/roboarc:" {print $1}')   # the pinned puzzle image
 
@@ -383,8 +381,7 @@ gets the task's camera images, the robot's state and a one-sentence instruction,
 episode is graded by the task's own grader. The two-arm tasks use openpi's ALOHA layout, the one-arm tasks its DROID
 layout.
 
-<!-- unverified: options checked with `roboarc vla run --help`. Not run in this lane (Docker, a GPU, the images and
-     a policy server). The docker line is the one of docs/VLA.md -->
+<!-- unverified: a real policy server. The docker line was run against the stand-in server `roboarc vla stub` -->
 ```bash
 # graded episodes of one task against a running policy server: inside the image, with one GPU
 IMAGE=$(bash images/pull_all.sh --list | awk '$1 ~ "/roboarc:" {print $1}')
@@ -399,8 +396,7 @@ docker run --rm --gpus 1 --network host -e NVIDIA_DRIVER_CAPABILITIES=all -u $(i
 Four DROID-trained policies run on the 18 one-arm puzzles in one command, which starts the model server and one
 container per episode:
 
-<!-- unverified: options checked with `roboarc vla droid --help`. Not run in this lane (Docker, a GPU, the images
-     and the models' environments) -->
+<!-- unverified: the pi0.5-DROID line, which needs the model's environment. The `--model hold` line was run -->
 ```bash
 # check the setup with the stand-in model `hold`
 roboarc vla droid --task hedgehog-in-cage-02 --model hold --out results -- --max-steps 400
@@ -494,7 +490,7 @@ python3 ci_checks/check-frozen-bytes.py         # the released task bytes and im
 bash ci_checks/run_invariants.sh                # the protocol's invariants
 
 # the tests' packages, then the unit tests and the Python package's fast tests
-python3 -m pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock
+uv pip install --no-deps --require-hashes -r ci_checks/requirements-ci.lock
 bash ci_checks/check-unit-tests.sh --all
 python3 -m pytest tests/api -m "not sim and not heavy"
 ```

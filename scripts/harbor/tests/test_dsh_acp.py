@@ -10,7 +10,9 @@ docker, no model, no network.
   the session's reasoning_effort is set after session/new and after a model change (skipped, and recorded, when the
   session does not offer the value); the prompt goes out only when the session's model is the one requested;
 - with Harbor importable (HARBOR_PYTHON, or the interpreter of `harbor` on PATH): DshAcp's registry entry, pinned version,
-  model value (one Harbor's runner matches among dsh's own option values), launcher and the runner's ACP SDK at 0.12.1
+  reasoning effort (Harbor 0.25 and newer refuse the option from an agent that does not declare the capability; checked
+  with Harbor 0.23.0 and 0.27.0), model value (one Harbor's runner matches among dsh's own option values), launcher and
+  the runner's ACP SDK at 0.12.1
   (1.0.0 has no text_block, which Harbor's acp_runner.py imports); the trial's token counts from
   dsh's own session records (every session's, in Harbor's convention: input = uncached + cache read + cache write).
 """
@@ -192,6 +194,8 @@ class HarborClass(unittest.TestCase):
             import json, sys, tempfile, pathlib, types
             sys.path.insert(0, {str(REPO / 'scripts' / 'harbor' / 'agents')!r})
             from dsh_acp import DshAcp
+            from harbor.agents.capabilities import AgentCapabilities
+            from harbor.agents.installed.acp import AcpAgent
             class Stub(types.ModuleType):          # the ACP SDK lives in the trial's runner venv: stand-ins for the import
                 def __getattr__(self, name):
                     if name.startswith("__"):
@@ -211,7 +215,13 @@ class HarborClass(unittest.TestCase):
             # dsh's model option as session/new returns it: one group per provider, values JSON [provider, model]
             option = types.SimpleNamespace(id="model", options=[types.SimpleNamespace(group="deepseek-official", options=[
                 types.SimpleNamespace(value=v) for v in ({FLASH!r}, '["deepseek-official","deepseek-v4-pro"]', {V4!r})])])
+            # what Harbor's ACP agent declares, and reasoning_effort where this Harbor has the field (0.25 and newer)
+            caps, acp_caps = DshAcp.capabilities.model_dump(mode="json"), AcpAgent.capabilities.model_dump(mode="json")
+            declared = caps.pop("reasoning_effort", None); acp_caps.pop("reasoning_effort", None)
             print(json.dumps({{"name": a.name(), "version": a._version, "cmd": a._registry_entry.distribution.local.cmd,
+                               "effort": a.options.reasoning_effort, "w_effort": w.options.reasoning_effort,
+                               "declared": declared, "field": "reasoning_effort" in AgentCapabilities.model_fields,
+                               "caps": caps, "acp_caps": acp_caps,
                                "model": a._requested_model(), "matched": _resolve_config_model_candidates(a._requested_model(), option),
                                "w_model": w._requested_model(), "launcher": a._launcher(), "web": w.options.web,
                                "w_version": w._version, "w_launcher": w._launcher(), "refused": refused}}))
@@ -220,6 +230,9 @@ class HarborClass(unittest.TestCase):
         self.assertEqual(p.returncode, 0, p.stderr)
         out = json.loads(p.stdout.strip().splitlines()[-1])
         self.assertEqual((out["name"], out["version"], out["cmd"]), ("dsh", "0.2.1-rc.2", "/installed-agent/dsh-acp.sh"))
+        self.assertEqual((out["effort"], out["w_effort"]), ("high", None))   # Harbor took the option (0.25+: it is declared)
+        self.assertEqual(out["declared"], True if out["field"] else None)
+        self.assertEqual(out["caps"], out["acp_caps"])          # nothing else differs from Harbor's ACP agent
         self.assertEqual(out["model"], FLASH)                   # dsh's catalog id for DeepSeek-V4.1-Flash, as dsh's own value
         self.assertEqual(out["matched"], [FLASH])               # Harbor's runner sets exactly that option value
         self.assertEqual(out["w_model"], '["deepseek-official","deepseek-v4-pro"]')

@@ -6,6 +6,36 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 
 ## Unreleased
 
+### The README's and the guides' commands as a new machine runs them (docs and tests; no task, image or result change)
+- **Why:** the release was installed and run on a new machine from the README and the guides alone (2026-11-22,
+  Ubuntu 22.04, Harbor 0.27.0), and some commands failed as written.
+- **Install:** the README installs uv before it uses it and installs the package with `uv pip install -e .` (a
+  `uv venv` holds no pip, so `pip` was the system's), and the tests' packages with `uv pip install`. Harbor: 0.23 or
+  newer, tested with 0.23.0 and 0.27.0.
+- **A single trial:** the `harbor run` lines pass `-y`. Harbor asks whether the task may read `RCB_LIMITS_ENFORCE`
+  from the environment, and without a terminal it aborts and runs nothing.
+- **In an image:** docs/API.md installs pytest into a mounted directory for the tests (the images ship without it)
+  and selects `-m "sim and not heavy"`, and installs imageio the same way for `examples/replay_reference.py --video`.
+  docs/VLA.md exports the reference into the mounted results directory (the repository is mounted read-only).
+- **Smaller:** the sample `roboarc doctor` output names `/work/RoboARC` (`check-protocol.py` flagged the earlier
+  sample path), RUNNING.md names the task's README for "Compute resources", and `.gitignore` lists the directories
+  these commands write (`results/`, `vla_results/`, `.pytest-lib/`, `.video-lib/`).
+- **Tests:** `tests/api` passes inside both images: the doctor's host tests answer as a host there too, the DROID
+  tests, which make a one-arm puzzle, run in the puzzle image only, and GR00T's `eef_9d` tests are skipped in an image
+  without scipy. On a host nothing changes: a missing scipy still fails them.
+
+### `AGENT=dsh` starts with Harbor 0.25 and newer (agent fix; nothing changes for another agent or with Harbor 0.23)
+- **Why:** from 0.25 on, Harbor takes the option `reasoning_effort` only from an agent whose class declares that
+  capability. `DshAcp` took the option without declaring it, so Harbor refused to make the agent (`ValueError: Agent
+  'dsh' does not support reasoning_effort.`) and `roboarc eval --agent dsh --effort high` started no trial. Found on
+  2026-11-22 with Harbor 0.27.0, which `uv tool install harbor` installed on a new machine. Harbor 0.23 and 0.24 have
+  no such field and were not affected.
+- **Fix:** `scripts/harbor/agents/dsh_acp.py` declares `reasoning_effort` where Harbor has the field, as
+  `antigravity_sdk.py` and `kimi_code_cli.py` do, and keeps every other capability of Harbor's ACP agent. What the
+  agent does with the effort is unchanged.
+- **Tests:** `test_dsh_acp.py` checks that Harbor takes the option and that the capability is declared: Harbor 0.23.0,
+  0.25.0 and 0.27.0. No DSH trial was run with Harbor 0.25 or newer.
+
 ### The easy set is retired (results; no task change)
 - **Why:** the benchmark reports all 90 task bases, so no number leaves a task out.
 - **What:** `docs/easy_set.toml` is removed. The batch summary (`$JOBS/<batch>.summary.md`) counts every task's results

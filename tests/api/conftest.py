@@ -26,6 +26,12 @@ def sim_task() -> str | None:
     return None
 
 
+# For a sim test that makes a puzzle task whatever the image is (the DROID tests' one-arm puzzle): an IKEA image has
+# neither the puzzles' simulator nor their frozen instances. On a host the hook below skips it with every sim test.
+puzzle_image_only = pytest.mark.skipif(
+    not _runtime.in_puzzle_image(), reason="makes a puzzle task, which only the puzzle image can build (this is not it)")
+
+
 def pytest_collection_modifyitems(config, items):
     if sim_task() is None:
         skip = pytest.mark.skip(reason="needs a published RoboARC image (the simulator and the frozen instances)")

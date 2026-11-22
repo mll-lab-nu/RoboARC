@@ -1,6 +1,7 @@
 """roboarc.vla.droid_adapter: DROID's wrist convention and start pose around a DROID-trained policy, and the models'
 own inputs and outputs (droid_models.py, without their libraries). Without a simulator unless marked `sim` (the runner
 against the adapter, rendering off)."""
+import importlib.util
 import json
 import os
 from types import SimpleNamespace
@@ -9,12 +10,14 @@ import numpy as np
 import pytest
 
 import roboarc
+from roboarc import _runtime
 from roboarc.vla import conventions as C
 from roboarc.vla.droid_adapter import DROID_RESET, JOINTS, WRIST_OFFSET, DroidAdapter
 from roboarc.vla.droid_models import (IMAGES, OpenpiModel, cosmos3_actions, cosmos3_request, droid_eef_9d,
                                       groot_actions, groot_request, molmoact2_actions, molmoact2_inputs)
 from roboarc.vla.stub_server import HoldPolicy
 
+from conftest import puzzle_image_only
 from test_vla import _serve, droid_env
 
 HOME = np.array([0, np.pi / 8, 0, -5 * np.pi / 8, 0, 3 * np.pi / 4, -np.pi / 4])   # Franka puzzles' start, RoboARC's q7
@@ -153,11 +156,20 @@ DROID_SAMPLE = [([-0.22476, -0.4210602, -0.1281129, -2.3547568, -0.1962341, 2.21
                  [0.5729071, -0.0376473, 0.2453221, 0.0839255, -0.042899, -0.9955482, 0.9920771, 0.0973273, 0.079439])]
 
 
+# GR00T's eef_9d reads Euler angles with scipy, which the IKEA images ship without (the puzzle image and the CI lock
+# have it). Skipped in such an image only: on a host a missing scipy still fails these tests
+skip_in_an_image_without_scipy = pytest.mark.skipif(
+    (_runtime.in_puzzle_image() or _runtime.in_ikea_image()) and importlib.util.find_spec("scipy") is None,
+    reason="this image ships without scipy, which GR00T's eef_9d needs")
+
+
+@skip_in_an_image_without_scipy
 @pytest.mark.parametrize("q, eef", DROID_SAMPLE)
 def test_groot_eef_9d_matches_droid_data(q, eef):
     assert np.allclose(droid_eef_9d(q), eef, atol=1e-6)
 
 
+@skip_in_an_image_without_scipy
 def test_groot_request_has_droid_frames_and_state():
     """Exterior 1 and the wrist as DROID's 320 x 180 frames (batch 1, one time step), DROID's eef_9d, gripper and
     joints as float32, and the prompt."""
@@ -205,6 +217,7 @@ def test_cosmos3_actions_binarise_the_gripper():
 
 
 @pytest.mark.sim
+@puzzle_image_only
 def test_episode_reaches_droid_reset(tmp_path):
     """The runner against the adapter around HoldPolicy on a one-arm puzzle (rendering off): the arm reaches DROID's
     reset in the first 2.5 s, then holds there; no infrastructure error."""

@@ -15,13 +15,14 @@ the results. Earlier names of commands, modes and paths are listed in [Names, ol
 - Linux x86_64 with an NVIDIA GPU that has RT cores (Nyx renders through Vulkan; driver >= 580; see "GPUs without RT
   cores" below) and Docker with the NVIDIA Container Toolkit. arm64 hosts are not supported (the
   images are linux/amd64, Nyx needs NVIDIA on x86_64, the standard client's lock lists x86_64 wheels).
-- Python 3.11 or newer as `python3`, uv, the command `roboarc` and Harbor 0.23 or newer: "Install" below.
+- Python 3.11 or newer as `python3`, uv, the command `roboarc` and Harbor 0.23 or newer (tested with 0.23.0 and
+  0.27.0): "Install" below.
 - The four images the tasks name, each by its digest ([images/pins.json](../images/pins.json)). `roboarc images pull
   --accept-licences` pulls them (about 19 GB) and checks each against its pin; `roboarc images check` checks the local
   ones, and `roboarc images build` builds one from the checkout ([images/README.md](../images/README.md)).
 - Every trial needs one GPU (IKEA privileged trials none). A task's minimum allocation is its `[metadata.resources]`
-  (README "Compute resources"; 2 GB of GPU memory, measured peak about 1.1 GB). The batch runner places each trial on
-  one GPU of the host ("GPUs and lanes" below).
+  (the task's README, "Compute resources"; 2 GB of GPU memory, measured peak about 1.1 GB). The batch runner places
+  each trial on one GPU of the host ("GPUs and lanes" below).
 
 ### Install
 
@@ -31,7 +32,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh        # uv (https://docs.astral
 git clone https://github.com/mll-lab-nu/RoboARC.git && cd RoboARC
 uv venv --python 3.12 && source .venv/bin/activate     # Python 3.12 as `python3`, in .venv/ (git ignores it)
 uv pip install -e .                                    # the command `roboarc`
-uv tool install harbor                                 # Harbor; `harbor --version` prints 0.23.0 or newer
+uv tool install harbor                                 # Harbor 0.23 or newer (tested: 0.23.0 and 0.27.0)
 roboarc doctor                                         # one line per requirement
 roboarc images pull --accept-licences                  # the four images; the licences: LICENSES/THIRD_PARTY.md
 ```
@@ -39,14 +40,15 @@ roboarc images pull --accept-licences                  # the four images; the li
 The repository's scripts call `python3` and need Python 3.11 or newer. Ubuntu 22.04 ships Python 3.10, so run them in
 the environment above: activate it (`source .venv/bin/activate`) in every shell that runs `roboarc`, the batch runner
 or a script of the repository. In a Python 3.11 or newer environment of your own, `pip install -e .` installs the same
-command. Kimi Code's trajectory files need Harbor 0.25.
+command. `uv tool install harbor==0.27.0` installs exactly one of the two tested Harbor versions. Kimi Code's
+trajectory files need Harbor 0.25.
 
 `roboarc doctor` prints one line per check and, under a check that failed, what to do. On a machine that is ready:
 
 ```
 RoboARC 2.2.1, this host
   ok    python3                   3.12.9
-  ok    repository                /home/you/RoboARC: RoboARC 2.2.1, 90 tasks
+  ok    repository                /work/RoboARC: RoboARC 2.2.1, 90 tasks
   ok    GPU                       0: NVIDIA GeForce RTX 4090, 24564 MiB
   ok    NVIDIA driver             580.95.05
   ok    Vulkan ray query          vulkaninfo names VK_KHR_ray_query, VK_EXT_extended_dynamic_state3, VK_KHR_compute_shader_derivatives
@@ -101,8 +103,6 @@ The first line ends with `stamp_mtimes: <n> files, <n> hashed, <n> restamped, 0 
 
 ## Checking a set-up: `roboarc selftest`
 
-<!-- unverified: the trial list was read with --print and the output lines from roboarc/cli/selftest.py; the trials
-     were not run in this lane (Docker, a GPU and the images) -->
 ```bash
 roboarc selftest interlocked-claws-08
 ```
@@ -137,13 +137,15 @@ One trial is a plain Harbor command, from a stamped checkout (above):
 
 ```bash
 python3 scripts/stamp_mtimes.py tasks
-harbor run -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-08   # reward 1
-harbor run -p tasks -i roboarc-interlocked-claws-08-i01-standard -a nop -o "$PWD/jobs" --job-name nop-claws-08          # reward 0
-harbor run -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model> \
+harbor run -y -p tasks -i roboarc-interlocked-claws-08-i01-privileged -a oracle -o "$PWD/jobs" --job-name oracle-claws-08   # reward 1
+harbor run -y -p tasks -i roboarc-interlocked-claws-08-i01-standard -a nop -o "$PWD/jobs" --job-name nop-claws-08          # reward 0
+harbor run -y -p tasks -i roboarc-orbits-02-i01-standard -a codex -m openai/<model> \
     --ak reasoning_effort=high --ak web_search=disabled -o "$PWD/jobs" --job-name codex-orbits-02
 ```
 
 `-i` takes the task directory's name with its mode. The score is in `jobs/<job>/<trial>/verifier/reward.txt`: 1 or 0.
+`-y` answers yes to Harbor's question whether the task may read `RCB_LIMITS_ENFORCE` from your environment ("Resources:
+limits and their enforcement" below): without it Harbor asks on a terminal and aborts where there is none.
 
 - Use Harbor's native agents (`-a codex`, `-a claude-code`) with their credentials in the environment or an
   `--env-file`: Codex `OPENAI_API_KEY` (OpenRouter: also `OPENAI_BASE_URL=https://openrouter.ai/api/v1`), a ChatGPT
@@ -413,7 +415,7 @@ To run one seed by hand:
 ```bash
 python3 scripts/task_seed.py list tasks/<task>                                   # default, allowed, oracle, build
 python3 scripts/task_seed.py materialize tasks/<task> --seed 1 --out /tmp/run1   # prints the copy and the seed
-harbor run -p /tmp/run1 -i <task> -a <agent> ...
+harbor run -y -p /tmp/run1 -i <task> -a <agent> ...
 ```
 
 Every RoboARC task allows seeds 0, 1 and 2: the puzzles since 1.2.0, the IKEA tasks since the appearance seeds v2

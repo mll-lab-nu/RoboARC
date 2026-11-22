@@ -58,7 +58,7 @@ python3 -m pytest tests/api -m "not sim and not heavy"   # the Python package an
 ```
 
 The first two lines are the generators' checks, which `run_all.sh` leaves to their own CI jobs. The checks need
-Python >= 3.11 (with numpy, requests and scipy for the second tier of unit tests: `python3 -m pip install
+Python >= 3.11 (with numpy, requests and scipy for the second tier of unit tests: `uv pip install
 --no-deps --require-hashes -r ci_checks/requirements-ci.lock`, the CI jobs' hashed lock for Python 3.12), no GPU and no image.
 `.github/workflows/checks.yml` runs them on pushes to `main` and `dev/**` and on pull requests, in the jobs `generator`,
 `ikea`, `image-pins` (`check-image-pins.py`: every image a task names is pinned by digest, images/pins.json),

@@ -61,8 +61,6 @@ Mount the repository (read-only is fine) and put it on `PYTHONPATH` (or `pip ins
 image). Inside an image the command is `python -m roboarc`, which is the command `roboarc` of a host install. Run from
 the repository root of the checkout:
 
-<!-- unverified: the two image lookups were run; the docker lines were not run in this lane (Docker, a GPU and the
-     images). scripts/vla_droid.sh runs the same pinned reference with `docker run` -->
 ```bash
 IMAGE=$(bash images/pull_all.sh --list | awk '$1 ~ "/roboarc:" {print $1}')                # the puzzle image
 IKEA_SIM=$(bash images/pull_all.sh --list | awk '$1 ~ "/roboarc-ikea-sim:" {print $1}')    # the IKEA image with Nyx
@@ -344,10 +342,24 @@ Each worker holds a whole simulator (and, with `nyx`, its own renderer), so memo
 
 - `examples/random_policy.py <task>`: a random walk around the current targets (the cheapest smoke test).
 - `examples/replay_reference.py <task> [--video out.mp4]`: the reference through the API, checked against its recorded
-  end hash.
+  end hash. `--video` needs imageio and imageio-ffmpeg, which the puzzle image ships without (below).
 - `examples/vla_loop.py <task>`: where a VLA plugs in: images + proprioception + instruction in, a chunk of joint
   targets out. For policies served the openpi way, `roboarc vla run` runs graded episodes
   ([docs/VLA.md](VLA.md)).
+
+A video of a reference from the puzzle image (`IMAGE` as under [Running](#running)): install the two packages into a
+directory and put it on `PYTHONPATH`. `--no-deps` keeps the image's own numpy and Pillow the ones in use:
+
+```bash
+mkdir -p .video-lib results && docker run --rm -u $(id -u):$(id -g) -e HOME=/tmp -v $PWD/.video-lib:/video-lib \
+  "$IMAGE" python -m pip install --target /video-lib --no-deps imageio imageio-ffmpeg
+docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) -e HOME=/tmp -v $PWD:/repo:ro \
+  -v $PWD/.video-lib:/video-lib:ro -v $PWD/results:/results -w /repo -e PYTHONPATH=/repo:/opt/topogym:/video-lib \
+  "$IMAGE" python examples/replay_reference.py roboarc-hedgehog-in-cage-02-i01 --renderer nyx \
+    --video /results/hedgehog.mp4 --every 4
+```
+
+It ends with `MATCH` and writes an H.264 file, one frame per four control steps.
 
 ## Command line
 
@@ -367,11 +379,25 @@ other subcommands (`images`, `selftest`, `eval`, `results`, `vla`) are in [RUNNI
 
 ## Tests
 
+<!-- unverified: the `-m heavy` selection (the bit-identity replays) was not run with this docker line -->
 ```bash
 python -m pytest tests/api -m "not sim and not heavy"         # anywhere (numpy, pytest): catalogue, references, spaces
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/api -m "not heavy"   # in an image: + one environment end to end
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/api -m heavy         # in an image: the bit-identity replays
+
+# in an image, which ships without pytest: install it into a directory once (IMAGE as under "Running")
+mkdir -p .pytest-lib && docker run --rm -u $(id -u):$(id -g) -e HOME=/tmp -v $PWD/.pytest-lib:/pytest-lib \
+  "$IMAGE" python -m pip install --target /pytest-lib pytest
+# one environment end to end (minutes, one GPU); with -m heavy: the bit-identity replays
+docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -e PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+  -u $(id -u):$(id -g) -e HOME=/tmp -v $PWD:/repo:ro -v $PWD/.pytest-lib:/pytest-lib:ro -w /repo \
+  -e PYTHONPATH=/repo:/opt/topogym:/pytest-lib "$IMAGE" \
+  python -m pytest tests/api -m "sim and not heavy" -p no:cacheprovider
 ```
+
+`-p no:cacheprovider` because the repository is mounted read-only. For the IKEA image with Nyx the last line runs
+`"$IKEA_SIM"` with `PYTHONPATH=/repo:/pytest-lib`. The first selection (`-m "not sim and not heavy"`) passes inside
+both images too. A test that needs what an image does not have is skipped there with its reason: the DROID tests make
+a one-arm puzzle and run in the puzzle image only, and GR00T's `eef_9d` needs scipy, which the IKEA images ship
+without.
 
 - `test_catalogue.py`, `test_spaces.py`: the 90 tasks and their metadata, the aliases, every puzzle reference against
   its pin (the freeze manifest's, or the release record's for a base released later), the space stand-ins. They run in CI.

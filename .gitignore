@@ -12,3 +12,7 @@ __pycache__/
 ikea/images/ikea-mujoco/context/
 *.oci.tar
 /.vla-lib/
+/.pytest-lib/
+/.video-lib/
+/vla_results/
+/results/

@@ -30,7 +30,8 @@ and turns them into agent/trajectory.json; this class adds what DSH needs:
   reads the file and starts Harbor's runner in its own process;
 - reasoning_effort: Harbor's runner sets only the model; acp_prompt_file.py sets the session's `reasoning_effort` option
   (dsh advertises it per model) after the session is created and after each model change, recorded with the model
-  check in agent/dsh-session.json.
+  check in agent/dsh-session.json. The class declares the capability, without which Harbor 0.25 and newer refuse the
+  option when the agent is made (checked with Harbor 0.23.0, 0.25.0 and 0.27.0).
 - token counts: dsh 0.2.1-rc.2 reports none over ACP (its prompt response carries the stop reason only; usage_update is
   the context's occupancy), so Harbor's ACP agent leaves them empty. dsh's own data (DSH_HOME: its session log, with the
   provider-reported usage of every request) lives in agent/dsh-home/, which Harbor keeps, and the trial's counts are
@@ -53,6 +54,7 @@ from typing import Any
 
 from pydantic import Field
 
+from harbor.agents.capabilities import AgentCapabilities
 from harbor.agents.installed.acp import AcpAgent, AcpOptions
 from harbor.agents.installed.base import with_prompt_template
 from harbor.agents.installed.node_install import nvm_node_install_snippet
@@ -84,6 +86,10 @@ class DshAcpOptions(AcpOptions):
 class DshAcp(AcpAgent):
     """DSH over ACP: Harbor's ACP agent with dsh installed, its instruction in a file and its reasoning effort set."""
 
+    # Harbor 0.25 takes a reasoning_effort option only from an agent that declares it; 0.23 and 0.24 have no such field.
+    # Every other capability stays the one of Harbor's ACP agent
+    capabilities = AcpAgent.capabilities.model_copy(
+        update={k: True for k in ("reasoning_effort",) if k in AgentCapabilities.model_fields})
     options_model = DshAcpOptions
     options: DshAcpOptions
 

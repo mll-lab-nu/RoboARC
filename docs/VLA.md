@@ -41,9 +41,10 @@ shared by every family in [docs/benchmarks/roboarc.md](benchmarks/roboarc.md); h
 
 ## Running
 
-<!-- unverified: the options were checked against `roboarc vla run --help`; the docker lines of this page were not run
-     in this lane (Docker, a GPU, the images and a policy server) -->
+<!-- unverified: a real policy server, and the IKEA line (the `roboarc-ikea-sim` image). The puzzle line was run
+     against the stand-in server `roboarc vla stub` -->
 ```bash
+RESULTS=$PWD/vla_results && mkdir -p "$RESULTS"      # where the results go: any directory, made before the run
 docker run --rm --gpus 1 -e NVIDIA_DRIVER_CAPABILITIES=all -u $(id -u):$(id -g) -e HOME=/tmp \
   -v $PWD:/repo:ro -v $PWD/.vla-lib:/vla-lib:ro -v $RESULTS:/results -w /repo \
   -e PYTHONPATH=/repo:/opt/topogym:/vla-lib "$IMAGE" \
@@ -171,8 +172,8 @@ Each is called as its own DROID client calls it:
   actions per query, all 32 executed (that client), the gripper binarised at 0.5; the service's defaults: 4 steps,
   guidance 3, a seed per query drawn from seed 0.
 
-<!-- unverified: the `roboarc vla droid` options were checked against its --help and the script; the models' set-up
-     lines are the earlier ones, with the git lfs pattern rooted (the same files, read with git-lfs 3.0.2) -->
+<!-- unverified: the four models' set-up lines (the earlier ones, with the git lfs pattern rooted: the same files,
+     read with git-lfs 3.0.2) and their runs. The `--model hold` line was run -->
 `roboarc vla droid` runs it all in one command (it is the script `scripts/vla_droid.sh`, with the same arguments): it
 starts the adapter around the model, runs the episodes in the
 puzzle image with each model's cameras (`agentview` as exterior 1 and the wrist, Cosmos3 also `front_oblique` as
@@ -333,9 +334,10 @@ noise) differ from episode to episode unless their server fixes the seed.
 `roboarc vla stub` (the module `roboarc.vla.stub_server`) is a stand-in policy server with openpi's protocol:
 
 ```bash
-python -m roboarc vla run --task interlocked-claws-08 --export-reference ref.npz    # in the image
-roboarc vla stub --policy replay --actions ref.npz --horizon 50 --port 8000         # anywhere: pip install -e '.[vla]'
-roboarc vla stub --policy hold --port 8000                                          # never succeeds
+# in the image, with the docker line of "Running": /results is the mounted $RESULTS (the repository is read-only)
+python -m roboarc vla run --task interlocked-claws-08 --export-reference /results/ref.npz
+roboarc vla stub --policy replay --actions $RESULTS/ref.npz --horizon 50 --port 8000   # anywhere: uv pip install -e '.[vla]'
+roboarc vla stub --policy hold --port 8000                                             # never succeeds
 ```
 
 Served through the policy loop, the reference succeeds and ends on its recorded state hash; `hold` repeats the

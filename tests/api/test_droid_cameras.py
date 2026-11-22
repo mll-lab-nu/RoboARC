@@ -13,6 +13,7 @@ from roboarc.vla import droid_cameras as D
 from roboarc.vla.droid_adapter import DroidAdapter
 from roboarc.vla.stub_server import HoldPolicy
 
+from conftest import puzzle_image_only
 from test_vla import _serve
 
 PROFILE = (Path(__file__).resolve().parents[2] / "source/topogym/config/profiles/camera_configs"
@@ -81,6 +82,7 @@ def _camera_info(task: str, droid: bool) -> dict:
 
 
 @pytest.mark.sim
+@puzzle_image_only
 def test_installed_poses_reach_the_calibration_strictly():
     """In the graded runtime (strict): the calibration that RoboARC reports holds DROID's poses in the robot frame."""
     task = roboarc.task_info(os.environ.get("ROBOARC_TEST_DROID", "lock-picking-03")).id
@@ -94,6 +96,7 @@ def test_installed_poses_reach_the_calibration_strictly():
 
 
 @pytest.mark.sim
+@puzzle_image_only
 def test_physics_is_unchanged(tmp_path):
     """The runner with and without --camera-poses droid (rendering off, the adapter around HoldPolicy): the same birth
     and the same end state."""

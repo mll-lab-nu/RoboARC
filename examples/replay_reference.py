@@ -3,6 +3,9 @@ state hash the release recorded for it; optionally write a video of the cameras.
 
     python examples/replay_reference.py roboarc-orbits-02-i01 --renderer none
     python examples/replay_reference.py roboarc-cast-coil-06-i01 --renderer nyx --video /tmp/cast_coil.mp4 --every 4
+
+--video needs imageio and imageio-ffmpeg. The puzzle image ships without them: docs/API.md, "Examples", installs them
+into a directory for it.
 """
 import argparse
 import time
@@ -15,7 +18,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("task")
     ap.add_argument("--renderer", default="none", choices=("nyx", "mujoco", "none"))
-    ap.add_argument("--video", help="write an mp4 of env.render() (needs a renderer and imageio)")
+    ap.add_argument("--video", help="write an mp4 of env.render() (needs a renderer, imageio and imageio-ffmpeg)")
     ap.add_argument("--every", type=int, default=4, help="video: one frame per this many control steps")
     a = ap.parse_args()
     actions = roboarc.load_reference(a.task)

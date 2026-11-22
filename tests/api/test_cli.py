@@ -689,7 +689,9 @@ HOST = {"cpu_model": "x", "cpus": 8, "memory_gb": 64, "docker": "Docker version 
 
 @pytest.fixture
 def machine(monkeypatch):
-    """A host that passes every check; a test changes `answers` (keyed by the tool asked) to break one."""
+    """A host that passes every check; a test changes `answers` (keyed by the tool asked) to break one. It is a host
+    wherever the tests run: inside a RoboARC image `roboarc doctor` would report the graded runtime instead (the last
+    test of this section), so the two questions that tell an image are answered too."""
     answers = {"python3": (0, "3.12.9"), "host_info.py": (0, json.dumps(HOST)), "vulkaninfo": (0, " ".join(doctor.VULKAN)),
                "docker info --format {{.ServerVersion}}": (0, "27.3.1"), "docker compose": (0, "2.29.7"),
                "docker info --format {{json .Runtimes}}": (0, '{"nvidia":{"path":"nvidia-container-runtime"},"runc":{}}'),
@@ -707,6 +709,8 @@ def machine(monkeypatch):
 
     monkeypatch.setattr(C, "capture", capture)
     monkeypatch.setattr(doctor.shutil, "which", lambda name: f"/usr/bin/{name}")
+    monkeypatch.setattr(_runtime, "in_puzzle_image", lambda: False)
+    monkeypatch.setattr(_runtime, "in_ikea_image", lambda: False)
     return answers
 
 
