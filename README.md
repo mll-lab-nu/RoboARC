@@ -119,11 +119,11 @@ roboarc --version                                    # roboarc 2.2.1
 
 In a Python 3.11 or newer environment of your own, `pip install -e .` installs the same command.
 
-[Harbor](https://github.com/laude-institute/harbor) runs the tasks for coding agents. Install version 0.23 or newer with
-uv, which also fetches the Python that Harbor needs (3.12 or newer). RoboARC is tested with Harbor 0.23.0 and 0.27.0:
+[Harbor](https://github.com/laude-institute/harbor) runs the tasks for coding agents. Install the pinned version 0.27.0 with
+uv, which also fetches the Python that Harbor needs (3.12 or newer):
 
 ```bash
-uv tool install harbor               # the newest release; one tested version: uv tool install harbor==0.27.0
+uv tool install harbor==0.27.0       # the pinned Harbor version
 harbor --version
 ```
 
@@ -145,7 +145,7 @@ RoboARC 2.2.1, this host
   ok    Docker                    server 27.3.1
   ok    Docker Compose            2.29.7
   ok    NVIDIA Container Toolkit  NVIDIA Container Toolkit CLI version 1.20.1
-  ok    Harbor                    0.23.0
+  ok    Harbor                    0.27.0
   FAIL  pinned images             0 of 4 are local; missing: ghcr.io/mll-lab-nu/roboarc:2.2.0, ...
                                   -> roboarc images pull
 doctor: 1 failed

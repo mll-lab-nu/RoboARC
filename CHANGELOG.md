@@ -9,6 +9,8 @@ RoboARC's releases. Versions before 1.0.0 were released inside the shared benchm
 ### The README's and the guides' commands as a new machine runs them (docs and tests; no task, image or result change)
 - **Why:** the release was installed and run on a new machine from the README and the guides alone (2026-11-22,
   Ubuntu 22.04, Harbor 0.27.0), and some commands failed as written.
+- **Harbor:** the install commands pin Harbor 0.27.0 (`uv tool install harbor==0.27.0`), the version the new
+  machine ran; `roboarc doctor` still accepts 0.23 or newer.
 - **Install:** the README installs uv before it uses it and installs the package with `uv pip install -e .` (a
   `uv venv` holds no pip, so `pip` was the system's), and the tests' packages with `uv pip install`. Harbor: 0.23 or
   newer, tested with 0.23.0 and 0.27.0.

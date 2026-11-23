@@ -15,8 +15,8 @@ the results. Earlier names of commands, modes and paths are listed in [Names, ol
 - Linux x86_64 with an NVIDIA GPU that has RT cores (Nyx renders through Vulkan; driver >= 580; see "GPUs without RT
   cores" below) and Docker with the NVIDIA Container Toolkit. arm64 hosts are not supported (the
   images are linux/amd64, Nyx needs NVIDIA on x86_64, the standard client's lock lists x86_64 wheels).
-- Python 3.11 or newer as `python3`, uv, the command `roboarc` and Harbor 0.23 or newer (tested with 0.23.0 and
-  0.27.0): "Install" below.
+- Python 3.11 or newer as `python3`, uv, the command `roboarc` and Harbor 0.27.0 (the pinned
+  version): "Install" below.
 - The four images the tasks name, each by its digest ([images/pins.json](../images/pins.json)). `roboarc images pull
   --accept-licences` pulls them (about 19 GB) and checks each against its pin; `roboarc images check` checks the local
   ones, and `roboarc images build` builds one from the checkout ([images/README.md](../images/README.md)).
@@ -32,7 +32,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh        # uv (https://docs.astral
 git clone https://github.com/mll-lab-nu/RoboARC.git && cd RoboARC
 uv venv --python 3.12 && source .venv/bin/activate     # Python 3.12 as `python3`, in .venv/ (git ignores it)
 uv pip install -e .                                    # the command `roboarc`
-uv tool install harbor                                 # Harbor 0.23 or newer (tested: 0.23.0 and 0.27.0)
+uv tool install harbor==0.27.0                         # the pinned Harbor version
 roboarc doctor                                         # one line per requirement
 roboarc images pull --accept-licences                  # the four images; the licences: LICENSES/THIRD_PARTY.md
 ```
@@ -40,8 +40,7 @@ roboarc images pull --accept-licences                  # the four images; the li
 The repository's scripts call `python3` and need Python 3.11 or newer. Ubuntu 22.04 ships Python 3.10, so run them in
 the environment above: activate it (`source .venv/bin/activate`) in every shell that runs `roboarc`, the batch runner
 or a script of the repository. In a Python 3.11 or newer environment of your own, `pip install -e .` installs the same
-command. `uv tool install harbor==0.27.0` installs exactly one of the two tested Harbor versions. Kimi Code's
-trajectory files need Harbor 0.25.
+command.
 
 `roboarc doctor` prints one line per check and, under a check that failed, what to do. On a machine that is ready:
 
@@ -55,7 +54,7 @@ RoboARC 2.2.1, this host
   ok    Docker                    server 29.1.3
   ok    Docker Compose            2.40.3
   ok    NVIDIA Container Toolkit  NVIDIA Container Toolkit CLI version 1.20.1
-  ok    Harbor                    0.23.0
+  ok    Harbor                    0.27.0
   ok    pinned images             4 of 4 are local, by their pinned digests
 doctor: every check passed
 ```
