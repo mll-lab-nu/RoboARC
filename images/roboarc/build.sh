@@ -7,9 +7,10 @@
 # the recipe copies), with the frozen instances as the named build context `instances`. This is the build step of
 # tools/release/release_rebuild.py:
 #   1. the frozen instances: --instances <dir> (one directory per base, instance.json + instance_assets/), or, by default,
-#      the Hugging Face dataset pinned in scripts/roboarc/assets.json, downloaded into --download <dir> (default
-#      $RCB_ROBOTANGLE_ASSETS or ~/.cache/robotangle-assets; ROBOARC_ASSETS_SOURCE=<repo>@<revision> names another copy
-#      of the dataset). Either way the context must hold exactly the pinned bases and files, each with its sha256
+#      the Hugging Face dataset RoboARC/RoboARC-assets, every file pinned in scripts/roboarc/assets.json, downloaded by
+#      scripts/roboarc/assets.py fetch into --download <dir> (default $RCB_ROBOTANGLE_ASSETS or
+#      ~/.cache/robotangle-assets; ROBOARC_ASSETS_SOURCE=<repo>@<revision> names another copy of the dataset). Either
+#      way the context must hold exactly the pinned bases and files, each with its sha256
 #      (scripts/roboarc/assets.py check-instances);
 #   2. `docker buildx build` of the recipe: the Python base image pinned by digest, Debian packages at exact versions from
 #      the Debian snapshot archive, wheels by sha256 (source/images/roboarc/runtime.lock, vbd-requirements.txt);
@@ -19,9 +20,8 @@
 # Needs Docker with BuildKit (the default `docker` driver), ~25 GB of free disk, network access to Docker Hub (the
 # Python base image), snapshot.debian.org, pypi.org / download.pytorch.org (the wheels) and dl.polyhaven.org (the Nyx
 # studio HDRI, wood maps and the appearance seeds' texture maps, sha256-checked), and (for the default instance source)
-# huggingface.co: a public dataset is read without a token, a private one with `hf auth login` or HF_TOKEN (never
-# printed). The build installs third-party software: it needs your acceptance of the licences in
-# LICENSES/THIRD_PARTY.md, --accept-licences or ROBOARC_ACCEPT_LICENCES=1 (exit 3 without it).
+# huggingface.co, read without a token. The build installs third-party software: it needs your acceptance of the
+# licences in LICENSES/THIRD_PARTY.md, --accept-licences or ROBOARC_ACCEPT_LICENCES=1 (exit 3 without it).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 VERSION="$(cat "$ROOT/images/roboarc/VERSION")"

@@ -43,8 +43,8 @@ Inputs (Python standard library only, plus scripts/task_conventions.normalize):
   scripts/eai_standard/v2_4/ + scripts/eai_standard/   the eai-standard/2.4 layer, copied unchanged
   oracles/       the references (privileged.npz; standard.npz is the same file, or, where release.json's standard evidence
                  has "speed_rule", the reference re-timed to the standard service's joint-speed rule)
-  assets.json    the frozen instances, not in git: the private HF dataset eai-v2-internal/robotangle-assets
-                 (instances/<base>/), pinned by commit and sha256. The image carries them; a task keeps its
+  assets.json    the frozen instances, not in git: the HF dataset RoboARC/RoboARC-assets (instances/<base>/), every
+                 file pinned by sha256 (scripts/roboarc/assets.py). The image carries them; a task keeps its
                  runtime_binding.json and stages its instance from the image (/opt/robotangle/stage_instance.py).
   roboarc_names.json   the Genesis-era base names -> RoboARC base, family, number, difficulty (a cross-check of the
                  packages' `difficulty`)

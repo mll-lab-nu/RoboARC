@@ -72,12 +72,12 @@ orbits-02) get their seeds the same way.
    frames but where the release changes seed 0's look on purpose (the appearance seeds v2: the goal marker of the 30
    bases that draw it); the blanket families' identity rule is checked on every blanket base. A seed enters `oracle`
    only with a passing Harbor oracle run.
-5. The Hugging Face dataset: one new revision of the asset dataset (`scripts/roboarc/assets.json` `repo`) for the
-   release, uploaded only after step 4 passes and with the maintainers' approval (`instances/<base>/seeds/<S>/` and
-   the new bases' instances), then
-   `scripts/roboarc/assets.py pin <copy> <revision>` and a rebuild that fetches from it. Until that upload the seed
-   instances ship in the image only (1.2.0: the release's instance tree, pinned file by file in `assets.json`), and
-   `images/roboarc/build.sh --instances <tree>` builds from such a tree.
+5. The Hugging Face dataset: one new revision of the asset dataset
+   [RoboARC/RoboARC-assets](https://huggingface.co/datasets/RoboARC/RoboARC-assets) for the release, uploaded only
+   after step 4 passes and with the maintainers' approval (`instances/<base>/seeds/<S>/` and the new bases'
+   instances), then `scripts/roboarc/assets.py pin <copy> <revision>` and a rebuild that fetches from it. Until that
+   upload the seed instances ship in the image only (1.2.0: the release's instance tree, pinned file by file in
+   `assets.json`), and `images/roboarc/build.sh --instances <tree>` builds from such a tree.
 6. A maintainer pushes the image (`images/push_all.sh`); the tasks name it by the digest in `images/pins.json`.
 
 The nine bases added with 1.2.0 (bed-bolt-01..05, caliper-sorting-01, clock-assembling-01, battery-replacement-01,

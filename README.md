@@ -442,13 +442,14 @@ The agent runs are in the Hugging Face dataset
 ## Optional: build the images yourself
 
 Pulling the prebuilt images is the normal path. Build them to change the simulator. Every input of the recipes is
-pinned, and the frozen scene instances and the IKEA meshes come from the public asset datasets on Hugging Face, each
-pinned by revision and by the sha256 of every file (`scripts/roboarc/assets.json`,
-`ikea/scripts/ikea_mujoco/assets.json`). The acceptance of
+pinned, and the frozen scene instances and the IKEA meshes come from the public asset datasets
+[RoboARC/RoboARC-assets](https://huggingface.co/datasets/RoboARC/RoboARC-assets) and
+[RoboARC/RoboARC-ikea-assets](https://huggingface.co/datasets/RoboARC/RoboARC-ikea-assets), with the sha256 of every
+file pinned (`scripts/roboarc/assets.json`, `ikea/scripts/ikea_mujoco/assets.json`). The acceptance of
 [LICENSES/THIRD_PARTY.md](LICENSES/THIRD_PARTY.md) applies to a build as to a pull.
 
-<!-- unverified: syntax checked with `roboarc images build --help`. No build was made, and the two asset datasets
-     are private until the release -->
+<!-- unverified: syntax checked with `roboarc images build --help`. No build was made. The download of both asset
+     datasets without a token, every file checked against its pin, was run on 2026-11-22 -->
 ```bash
 roboarc images build roboarc --accept-licences    # the puzzle image, about 25 GB of free disk
 roboarc images build ikea --accept-licences       # the two IKEA images, about 40 GB of free disk

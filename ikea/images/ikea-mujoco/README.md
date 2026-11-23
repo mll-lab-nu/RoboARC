@@ -47,10 +47,12 @@ lists and logs. The base image keeps pip and apt for the privileged agent (its i
 ## Build source
 
 The scene code is in git, `scenes/<scene>/` here. The meshes (`scenes/<scene>/assets/`, 2,078 files, about 40 MB per
-scene) are not: they are on a private Hugging Face dataset (layout `<scene>/assets/<file>`), pinned by its revision and
-by the sha256 of every file in `scripts/ikea_mujoco/assets.json` (`repo`, `revision`, and per scene `files`). Every
-task's `tests/runtime_binding.json` repeats its scene's pins, which the grader checks in the verifier image
-(`instance_exact`) together with the initial-state hash (`instance_ok`).
+scene) are not: they are in the public Hugging Face dataset
+[`RoboARC/RoboARC-ikea-assets`](https://huggingface.co/datasets/RoboARC/RoboARC-ikea-assets) (layout
+`<scene>/assets/<file>`), every file pinned by its sha256 in `scripts/ikea_mujoco/assets.json` (per scene `files`; its
+`repo` and `revision` name the dataset revision the pins were written from, which `fetch_image_context.sh` maps to the
+public dataset's commit). Every task's `tests/runtime_binding.json` repeats its scene's pins, which the grader checks
+in the verifier image (`instance_exact`) together with the initial-state hash (`instance_ok`).
 
 What is staged per scene: `scene.py`, `scene.xml`, `task.json`, `layout.json`, `sw_cutover.json` (where present), the
 scene's own Python modules (not `_*.py` scripts) and `assets/`; then `assets.json` (its `note` and `tasks`, the pins the
@@ -63,10 +65,14 @@ upstream material (PROTOCOL Appendix H.2); the scenes' upstream provenance is ke
 ## Build (paths from `ikea/`)
 
 ```bash
-images/ikea-mujoco/build.sh                    # meshes at the pinned revision (needs read access: `hf auth login` or HF_TOKEN)
+images/ikea-mujoco/build.sh                    # meshes from the HF dataset RoboARC/RoboARC-ikea-assets (no token needed)
 images/ikea-mujoco/build.sh --assets <dir>     # or a local copy of the meshes, <dir>/<scene>/assets/
 images/ikea-mujoco/build.sh --out <dir>        # where the OCI archives go (default: the current directory)
+scripts/ikea_mujoco/fetch_image_context.sh     # the download, check and staging step alone (needs huggingface_hub)
 ```
+
+`ROBOARC_IKEA_ASSETS_SOURCE=<repo>@<revision>` downloads the meshes from another copy of the dataset. Whatever the
+source, every file must have its pinned sha256.
 
 `build.sh` stages the scene code with the meshes into `images/ikea-mujoco/context/` (`stage_context.py`, every file
 checked against `scripts/ikea_mujoco/assets.json`), then builds with a throwaway BuildKit builder of a pinned version,

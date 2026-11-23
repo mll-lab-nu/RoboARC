@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""RoboARC's frozen MuJoCo instances: the Hugging Face dataset eai-v2-internal/robotangle-assets, pinned by commit and
-by the sha256 of every file in scripts/roboarc/assets.json. They are kept out of git (21 477 files); the release image
-carries them (images/roboarc/build.sh).
+"""RoboARC's frozen MuJoCo instances: the Hugging Face dataset RoboARC/RoboARC-assets
+(https://huggingface.co/datasets/RoboARC/RoboARC-assets), every file pinned by its sha256 in
+scripts/roboarc/assets.json. They are kept out of git (65 208 files); the release image carries them
+(images/roboarc/build.sh).
 
 usage:
   python3 scripts/roboarc/assets.py fetch <dir>            download the pinned instances into <dir> and check them
@@ -21,14 +22,15 @@ pins them; `pin` keeps a seed's `goal` while the seed's instance is the same. Ta
 directories keep only runtime_binding.json, which pins the same hashes (scripts/roboarc/mk_tasks.py checks that they
 agree); the image stages a task's instance with /opt/robotangle/stage_instance.py.
 
-The dataset at that revision also holds the Genesis base image's build inputs (image/); they are not pinned here and
-never fetched (the release image builds FROM the published base image, images/roboarc/README.md).
+Source: assets.json's "repo" and "revision" name the dataset revision the pins were written from. PUBLISHED maps that
+revision to the public dataset commit that holds exactly the pinned files, and fetch downloads from it;
+ROBOARC_ASSETS_SOURCE=<repo>@<revision> names another copy instead (another name, or a later revision that holds every
+pinned file). Whatever the source, each file must have its pinned sha256. The dataset is public: fetch needs no token,
+and the token is never printed.
 
-Access: a public dataset is read without a token. While it is private, fetch needs a member of eai-v2-internal,
-logged in with `hf auth login` or with HF_TOKEN in the environment; the token is never printed. fetch downloads from the
-pinned repo and revision, or from ROBOARC_ASSETS_SOURCE=<repo>@<revision>, a copy of the dataset published elsewhere
-(another name, or a later revision that holds every pinned file): whatever the source, each file must have its pinned
-sha256. fetch needs huggingface_hub (pip install huggingface_hub); everything else uses the standard library.
+fetch: with git and git-lfs installed, one shallow git fetch of the revision (its text files in one pack) and
+`git lfs pull` for the rest, in <dir> as a git work tree; otherwise, or when that fails, huggingface_hub's
+snapshot_download, one request per file (pip install huggingface_hub). Everything else uses the standard library.
 """
 from __future__ import annotations
 
@@ -36,12 +38,18 @@ import hashlib
 import json
 import os
 import pathlib
+import shutil
+import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 PIN = HERE / "assets.json"
 PREFIX = "instances/"
 SOURCE = "ROBOARC_ASSETS_SOURCE"
+PUBLIC_REPO = "RoboARC/RoboARC-assets"
+# assets.json "revision" -> (repo, revision) of the public dataset commit with exactly the files that pin lists
+PUBLISHED = {"b2cf9b552f310ef4cfbd91df62ccfa837757c93a": (PUBLIC_REPO, "e65dcbf87eb4164cae2ea92becca0ed477f4c35c")}
+HUB = "https://huggingface.co/datasets/"
 
 
 def file_sha(p: pathlib.Path) -> str:
@@ -121,34 +129,58 @@ def check_instances(d: pathlib.Path, pin: dict) -> list[str]:
 
 
 def source(pin: dict) -> tuple[str, str]:
-    """(repo, revision) fetch downloads from: the pinned ones, or those of ROBOARC_ASSETS_SOURCE=<repo>@<revision>."""
+    """(repo, revision) fetch downloads from: those of ROBOARC_ASSETS_SOURCE=<repo>@<revision>, else the public copy of
+    the pinned revision (PUBLISHED), else the pinned repo and revision."""
     s = os.environ.get(SOURCE, "")
     repo, at, rev = s.partition("@")
     if s and not (repo and at and rev):
         sys.exit(f"{SOURCE} must be <repo>@<revision>, not {s!r}")
-    return (repo, rev) if s else (pin["repo"], pin["revision"])
+    return (repo, rev) if s else PUBLISHED.get(pin["revision"], (pin["repo"], pin["revision"]))
+
+
+def fetch_git(d: pathlib.Path, repo: str, rev: str) -> bool:
+    """The revision's files with git and git-lfs: a shallow fetch of the commit, a forced checkout of it in d, then the
+    LFS files under instances/. False when git or git-lfs is missing or a step fails (fetch then uses huggingface_hub);
+    git never prompts for a password."""
+    if not shutil.which("git") or subprocess.run(["git", "lfs", "version"], capture_output=True).returncode != 0:
+        return False
+    env = dict(os.environ, GIT_LFS_SKIP_SMUDGE="1", GIT_TERMINAL_PROMPT="0")
+    g = ["git", "-C", str(d)]
+    remote = ["remote", "set-url" if (d / ".git").is_dir() else "add", "origin", HUB + repo]
+    steps = ([] if (d / ".git").is_dir() else [["git", "init", "-q", str(d)]]) + [
+        g + remote, g + ["fetch", "-q", "--depth", "1", "origin", rev],
+        g + ["checkout", "-q", "-f", "--detach", "FETCH_HEAD"], g + ["lfs", "pull", f"--include={PREFIX}**"]]
+    for step in steps:
+        if subprocess.run(step, env=env).returncode != 0:
+            print(f"git could not fetch {repo}@{rev[:12]}: using huggingface_hub", file=sys.stderr)
+            return False
+    return True
 
 
 def fetch(d: pathlib.Path, pin: dict) -> None:
-    """The pinned bases' directories only (instances/<base>/**), at the pinned revision (or from ROBOARC_ASSETS_SOURCE).
-    huggingface_hub sends a token when it has one (`hf auth login`, HF_TOKEN) and reads a public dataset without."""
+    """The revision of source() into d: with git (fetch_git) when it can, else the pinned bases' directories
+    (instances/<base>/**) with huggingface_hub, which reads a public dataset without a token (and sends one when it has
+    one: `hf auth login`, HF_TOKEN)."""
+    repo, rev = source(pin)
+    d.mkdir(parents=True, exist_ok=True)
+    if fetch_git(d, repo, rev):
+        return
     try:
         from huggingface_hub import snapshot_download
     except ImportError:
-        sys.exit("fetch needs huggingface_hub: pip install huggingface_hub")
-    repo, rev = source(pin)
-    d.mkdir(parents=True, exist_ok=True)
+        sys.exit("fetch needs huggingface_hub (pip install huggingface_hub), or git with git-lfs")
     try:
         snapshot_download(repo_id=repo, repo_type="dataset", revision=rev, local_dir=str(d),
                           allow_patterns=[f"{PREFIX}{b}/**" for b in sorted(pin["instances"])])
     except Exception as e:  # noqa: BLE001  the message names the repository, never the token
-        sys.exit(f"download of {repo}@{rev[:12]} failed ({type(e).__name__}). A public dataset needs no token, and a "
-                 "token the Hub rejects stops the download: unset HF_TOKEN or `hf auth logout`. A private dataset needs "
-                 "read access: `hf auth login` or HF_TOKEN")
+        sys.exit(f"download of {repo}@{rev[:12]} failed ({type(e).__name__}). The dataset is read without a token, and "
+                 "a token the Hub rejects stops the download: unset HF_TOKEN or run `hf auth logout`. "
+                 f"{SOURCE}=<repo>@<revision> downloads from another copy")
 
 
 def pin_from(d: pathlib.Path, rev: str, old: dict | None = None) -> dict:
-    """assets.json for the instances of a local copy of revision rev (d/instances/<base>/), in the committed layout."""
+    """assets.json for the instances of a local copy of revision rev of the public dataset (d/instances/<base>/), in the
+    committed layout."""
     files = {p.relative_to(d).as_posix(): file_sha(p) for p in sorted((d / "instances").rglob("*"))
              if p.is_file() and ".cache" not in p.parts}
     inst = {p.parent.name: {"instance_sha256": canonical_sha(p)} for p in sorted((d / "instances").glob("*/instance.json"))}
@@ -164,8 +196,8 @@ def pin_from(d: pathlib.Path, rev: str, old: dict | None = None) -> dict:
         if was.get("goal") and was.get("instance_sha256") == rec["instance_sha256"]:   # its goal pictures, rendered from it
             rec["goal"] = was["goal"]
         inst[base].setdefault("seeds", {})[s] = rec
-    return {"repo": old.get("repo", "eai-v2-internal/robotangle-assets"), "repo_type": "dataset", "private": True,
-            "revision": rev, "files": files, "instances": inst}
+    return {"repo": PUBLIC_REPO, "repo_type": "dataset", "private": False, "revision": rev, "files": files,
+            "instances": inst}
 
 
 def dumps(pin: dict) -> str:
@@ -193,7 +225,8 @@ def main(argv: list[str]) -> int:
         print(f"{missing} of the {len(pin['files'])} pinned files are not in {d}: {repo}@{rev[:12]} does not hold them, "
               f"or could not be read. images/roboarc/README.md (Build) says where every pinned file is ({SOURCE}, --instances)")
     if not bad:
-        print(f"ok {repo}@{rev[:12]}: {len(pin['files'])} files match scripts/roboarc/assets.json ({d})")
+        where = f" {repo}@{rev[:12]}" if argv[0] == "fetch" else ""
+        print(f"ok{where}: {len(pin['files'])} files match scripts/roboarc/assets.json ({d})")
     return 1 if bad else 0
 
 

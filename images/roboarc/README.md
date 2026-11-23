@@ -72,7 +72,7 @@ state it reaches in 1.0.0 (`docs/history/GENESIS_REMOVAL.md`).
 ## Build (from the repository root)
 
 ```bash
-images/roboarc/build.sh --accept-licences                       # instances from the HF dataset pinned in scripts/roboarc/assets.json (see below for 1.2.0)
+images/roboarc/build.sh --accept-licences                       # instances from the HF dataset RoboARC/RoboARC-assets
 images/roboarc/build.sh --accept-licences --instances <dir>     # or a local copy: <dir>/<base>/instance.json + instance_assets/
 images/roboarc/build.sh --accept-licences --noinst              # the image without instances (to make new instances in it)
 ```
@@ -81,9 +81,9 @@ The build installs third-party software: `--accept-licences` (or `ROBOARC_ACCEPT
 the licences `LICENSES/THIRD_PARTY.md` lists, and `build.sh` stops without it (exit 3). It is the build step of
 `tools/release/release_rebuild.py`:
 
-1. the frozen instances: by default the pinned revision of the Hugging Face dataset `eai-v2-internal/robotangle-assets`
-   (`instances/` only), downloaded by `scripts/roboarc/assets.py fetch`; or `--instances <dir>`. A public dataset is
-   read without a token, a private one with `hf auth login` or `HF_TOKEN` (never printed).
+1. the frozen instances: by default the Hugging Face dataset
+   [`RoboARC/RoboARC-assets`](https://huggingface.co/datasets/RoboARC/RoboARC-assets) (`instances/` only, read
+   without a token), downloaded by `scripts/roboarc/assets.py fetch`; or `--instances <dir>`.
    `ROBOARC_ASSETS_SOURCE=<repo>@<revision>` downloads from another copy of the dataset: another name, or a later
    revision. Either way `assets.py check-instances` requires exactly the pinned bases and files, each with its sha256,
    before anything is built;
@@ -92,11 +92,17 @@ the licences `LICENSES/THIRD_PARTY.md` lists, and `build.sh` stops without it (e
    `instances`;
 3. the runtime check below; the tag is removed when the installed runtime differs from `scripts/roboarc/release.json`.
 
-The appearance seeds (`instances/<base>/seeds/<S>/`, from 1.2.0) and the instances of the bases added since 1.2.0 (the
-nine released in 1.4.0, from 1.2.0; wire-splicing-01 from 1.3.0; bed-bolt 01-05 re-made and the ten blanket bases refreshed in 2.1.0) are pinned in `assets.json` but not yet in the HF dataset (one revision, uploaded with
-the owner's approval): until then build with `--instances <dir>` from the release's instance tree, or, once a
-revision holds every pinned file, with `ROBOARC_ASSETS_SOURCE=<repo>@<that revision>`. The pinned revision itself
-stays as it is: every puzzle task's README names it. `assets.py check-instances` verifies every pinned file.
+`scripts/roboarc/assets.json` pins 65,208 files: the instances of 111 bases, with the appearance seeds
+(`instances/<base>/seeds/<S>/`). Its `repo` and `revision` name the dataset revision the pins were written from, which
+every puzzle task's README repeats. The public dataset holds exactly these files in one commit, and `assets.py fetch`
+maps the pinned revision to it (`PUBLISHED` in `assets.py`). `assets.py fetch` downloads with git and git-lfs when
+both are installed (a shallow fetch of the commit, then `git lfs pull`), otherwise with `huggingface_hub`
+(`pip install huggingface_hub`). Download and check them on their own:
+
+```bash
+python3 scripts/roboarc/assets.py fetch ~/.cache/robotangle-assets
+# ok RoboARC/RoboARC-assets@e65dcbf87eb4: 65208 files match scripts/roboarc/assets.json (...)
+```
 
 It needs Docker with BuildKit (the default `docker` driver), about 25 GB of free disk and network access to Docker Hub
 (the base image), snapshot.debian.org, pypi.org and download.pytorch.org (the wheels) and dl.polyhaven.org (the studio

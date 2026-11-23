@@ -1,6 +1,8 @@
 # Third-party material in RoboARC: the images and the repository
 
-RoboARC's own code and documents are under the MIT licence in [`../LICENSE`](../LICENSE). Everything on this page comes
+RoboARC's own code and documents are under the MIT licence in [`../LICENSE`](../LICENSE). RoboARC's task instances
+(the dataset [RoboARC/RoboARC-assets](https://huggingface.co/datasets/RoboARC/RoboARC-assets), also inside the `roboarc`
+image) are under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Everything on this page comes
 from others and keeps its own licence. The page names every third-party component, where it is, its licence, and the
 file or link that holds the licence text: first what the images contain, then what is in the repository's own files.
 An item that is used by permission and not under a licence says so. The MIT licence does not extend to such items.
@@ -49,8 +51,8 @@ environment of `roboarc-ikea-sim`. Every image also has the texts of the GPL, th
 | GCC's runtime libraries inside the `numpy`, `scipy` and `torch` wheels (libgfortran, libquadmath, libgomp), with OpenBLAS | `roboarc`, `roboarc-ikea`, `roboarc-ikea-sim` | libgfortran and libgomp: GPL-3.0-or-later with the GCC Runtime Library Exception; libquadmath: LGPL-2.1-or-later; OpenBLAS: BSD-3-Clause | in the image: the `LICENSE.txt` of each wheel's `.dist-info` |
 | MuJoCo 3.14.0, with RoboARC's EPA fix patched into `libmujoco.so.3.14.0` ([Code](#code)) | `roboarc`, `roboarc-ikea`, `roboarc-ikea-sim` | Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt) |
 | PyTorch 2.11.0 (`torch`, the cu128 build) | `roboarc`, `roboarc-ikea-sim` | BSD-3-Clause | in the image: `<sp>/torch-2.11.0+cu128.dist-info/licenses/` (`LICENSE`, `NOTICE`) |
-| Newton 1.6.1, NVIDIA Warp 1.18.0 (`warp-lang`), `cuda-bindings`, Cython, `manifold3d` | `roboarc` (`cuda-bindings` also `roboarc-ikea-sim`) | Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt), and each package's `.dist-info` |
-| `numpy`, `scipy`, `networkx`, `dill`, `pycparser`, `omegaconf`, `PyOpenGL`, `python-fcl`, `antlr4-python3-runtime`, `shapely`, `imageio`, `imageio-ffmpeg` | as the lock files say | BSD, 2- or 3-clause | each package's `.dist-info` in the image, and its page https://pypi.org/project/<name>/ |
+| Newton 1.6.1, NVIDIA Warp 1.18.0 (`warp-lang`), `cuda-bindings`, Cython, `manifold3d` | `roboarc` (`cuda-bindings` also `roboarc-ikea-sim`) | Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt), and each package's `.dist-info` (Cython: https://pypi.org/project/Cython/) |
+| `numpy`, `scipy`, `networkx`, `dill`, `pycparser`, `omegaconf`, `PyOpenGL`, `python-fcl`, `antlr4-python3-runtime`, `shapely`, `imageio`, `imageio-ffmpeg` | as the lock files say | BSD, 2- or 3-clause | each package's `.dist-info` in the image (`PyOpenGL` and `antlr4-python3-runtime`: their PyPI page), and its page https://pypi.org/project/<name>/ |
 | `coacd`, `glfw`, `hydra-core`, `PyYAML`, `rtree`, `setuptools`, `trimesh`, `cffi` (MIT-0) | as the lock files say | MIT | as above |
 | `pillow` (MIT-CMU), `packaging` (Apache-2.0 or BSD-2-Clause), `mapbox-earcut` (ISC), `tqdm` (MPL-2.0 and MIT), `typing-extensions` (PSF-2.0) | as the lock files say | as named | as above |
 | The Python base images (Python 3.11 on Debian 12 in `roboarc`, Python 3.12 on Debian 13 in the IKEA images, Python 3.12 on Debian 12 in `roboarc-monitor`) and the Debian packages the recipes add: ffmpeg (above), the GL, EGL, OpenGL and Vulkan loaders, glib, X11 client libraries, libgomp, liblzma, curl, ca-certificates and ripgrep in `roboarc`; OSMesa and the same loaders in the IKEA images | all four | Python: PSF-2.0. Each Debian package has its own licence, the GPL and the LGPL among them | in the image: `/usr/share/doc/<package>/copyright` (the recipes keep these files) and `/usr/share/common-licenses/` |

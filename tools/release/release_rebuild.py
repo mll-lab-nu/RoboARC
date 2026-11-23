@@ -1278,7 +1278,7 @@ def report_md(r: dict, a, bases: list[dict]) -> str:
     else:
         out += ["- HF upload of the instances (the owner's OK first; upload only, nothing deleted). NOT UPLOADED: "
                 "assets.json's new pins name files that are not in the dataset at its revision.",
-                f"  `hf upload eai-v2-internal/robotangle-assets {a.work}/instances instances --repo-type dataset "
+                f"  `hf upload RoboARC/RoboARC-assets {a.work}/instances instances --repo-type dataset "
                 f"--commit-message \"RoboARC MuJoCo instances made in ghcr.io/mll-lab-nu/{a.bench}:{a.version} ({r['head'][:9]})\"`",
                 f"  then run this again with `--work {a.work} --hf-revision <the new dataset commit>`, which uses these "
                 "instances again (and runs Harbor again on the final bytes)."]

@@ -25,14 +25,14 @@ several of the paths they name: see [After 1.0.0](#after-100-the-clean-up).
 
 | input | pin |
 |---|---|
-| frozen instances: Hugging Face dataset `eai-v2-internal/robotangle-assets` | revision `b2cf9b552f310ef4cfbd91df62ccfa837757c93a`; 21477 files by sha256 in `scripts/roboarc/assets.json` |
+| frozen instances: Hugging Face dataset [`RoboARC/RoboARC-assets`](https://huggingface.co/datasets/RoboARC/RoboARC-assets), CC BY 4.0 | commit `e65dcbf87eb4164cae2ea92becca0ed477f4c35c`, exactly the 65208 files pinned by sha256 in `scripts/roboarc/assets.json` (whose `revision` `b2cf9b552f310ef4cfbd91df62ccfa837757c93a` names the dataset revision the pins were written from) |
 | puzzle image base (1.1.0) | `python:3.11.15-slim-bookworm@sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3` (the 0.2.22 image's own base); Debian packages from `snapshot.debian.org` 20260930T230000Z at the versions in `source/images/roboarc/Dockerfile`; wheels by sha256 in `source/images/roboarc/runtime.lock` and `vbd-requirements.txt` |
 | Genesis base image (`eai-robotangle` 0.2.22; 1.0.x only) | `ghcr.io/mll-lab-nu/efe:robotangle-0.2.22@sha256:eb1a75177bf3d11f60540ef5a285c5a47d8cf35e2e99630759bb108b9f05dfad`, the same digest as the published `eai-robotangle:0.2.22` |
 | monitor sidecar (`eai-monitor` 0.1.0) | `ghcr.io/mll-lab-nu/efe:monitor-0.1.0@sha256:f2c910f53f79c2bfa4a71298b10c78383cae3afc40720ca562cc845b8d20fb0c`, the same digest as the published `eai-monitor:0.1.0` |
 | standard agent base | `docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f`; its packages by version and wheel sha256 in `scripts/eai_standard/client-requirements.txt` (from 1.1.0) |
 | MuJoCo EPA fix | upstream google-deepmind/mujoco `6d662aedda693a1225a03a26c6b3ddd5e3cc4fbe`, backported as a byte patch |
 
-| IKEA scene meshes: Hugging Face dataset `eai-v2-internal/ikea-mujoco-assets` | revision `610b424b3d4152d8990e226eae60b9170ac7dbdf`; every file by sha256 in `ikea/scripts/ikea_mujoco/assets.json` |
+| IKEA scene meshes: Hugging Face dataset [`RoboARC/RoboARC-ikea-assets`](https://huggingface.co/datasets/RoboARC/RoboARC-ikea-assets) (scene meshes MIT, the Panda and ALOHA 2 models under their own licences, as in its card) | commit `471bcc0753985d1778fb7ba938156f3448204e4f`, exactly the 2078 asset files pinned by sha256 in `ikea/scripts/ikea_mujoco/assets.json` (whose `revision` `610b424b3d4152d8990e226eae60b9170ac7dbdf` names the dataset revision the pins were written from) |
 | IKEA base | `docker.io/library/python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1` |
 
 ## What changed against the sources

@@ -1,14 +1,19 @@
 """Unit test of scripts/roboarc/assets.py on a small fake dataset (standard library only, no network, about 1 s):
-  1. pin_from writes the committed assets.json layout (keys, order, formatting; instances/ only);
+  1. pin_from writes the committed assets.json layout (keys, order, formatting; instances/ only), naming the public
+     dataset;
   2. check passes on the pinned copy and names a changed, a missing file and a changed instance.json;
   3. check-instances (an image build context, one directory per base) passes on exactly the pinned files and names an
      extra file, an extra base and a changed file;
   4. the committed assets.json has that layout, and its instances agree with its files;
   5. appearance seeds (instances/<base>/seeds/<S>/): pinned with their own canonical sha256, checked by check and
      check-instances; a seed's files without its pin, or a pinned seed without its files, are named;
-  6. fetch (a stand-in huggingface_hub) downloads the pinned repo and revision, or those of ROBOARC_ASSETS_SOURCE, and
-     passes no token of its own: the library then reads a public dataset without one and sends a stored one if it
-     has it. A failed download names the repository and both remedies.
+  6. fetch (a stand-in huggingface_hub) downloads the public copy of the pinned revision (PUBLISHED), else the pinned
+     repo and revision, or those of ROBOARC_ASSETS_SOURCE, and passes no token of its own: the library then reads the
+     public dataset without one and sends a stored one if it has it. A failed download names the repository and the
+     remedies;
+  7. fetch with git (a stand-in subprocess.run): init, the public dataset as origin, a shallow fetch of the revision,
+     a forced checkout, `git lfs pull` of instances/, never prompting; huggingface_hub when a git step fails or git is
+     missing.
 usage: python3 scripts/roboarc/tests/test_assets.py"""
 import json, os, pathlib, shutil, sys, tempfile, types
 
@@ -41,7 +46,8 @@ def main() -> int:
         d = pathlib.Path(tmp) / "ds"
         fake(d)
         pin = A.pin_from(d, "f" * 40, old=committed)
-        assert list(pin) == list(committed) and pin["repo"] == committed["repo"] and pin["revision"] == "f" * 40
+        assert list(pin) == list(committed) and pin["revision"] == "f" * 40
+        assert (pin["repo"], pin["private"]) == (A.PUBLIC_REPO, False), (pin["repo"], pin["private"])
         assert sorted(pin["files"]) == [
             "instances/alpha-01-i01/instance.json", "instances/alpha-01-i01/instance_assets/mujoco/part0.xml",
             "instances/alpha-01-i01/instance_assets/mujoco/part1.xml", "instances/beta-02-i01/instance.json",
@@ -90,7 +96,8 @@ def main() -> int:
         nofiles = json.loads(json.dumps(pin))
         nofiles["instances"]["beta-02-i01"]["seeds"] = {"1": {"instance_sha256": "0" * 64}}
         assert any("pinned instance without its file" in b for b in A.schema(nofiles)), A.schema(nofiles)
-        # fetch: where it downloads from, and with what
+        # fetch: where it downloads from, and with what (git stubbed out: the huggingface_hub path)
+        real_fetch_git, A.fetch_git = A.fetch_git, lambda d, repo, rev: False
         calls, hub = [], types.ModuleType("huggingface_hub")
         hub.snapshot_download = lambda **kw: calls.append(kw)
         sys.modules["huggingface_hub"] = hub
@@ -101,6 +108,12 @@ def main() -> int:
         assert [(c["repo_id"], c["revision"]) for c in calls] == [(pin["repo"], "d" * 40), ("some-org/public-copy", "a" * 40)], calls
         assert all("token" not in c and c["repo_type"] == "dataset" for c in calls), calls
         assert calls[0]["allow_patterns"] == ["instances/alpha-01-i01/**", "instances/beta-02-i01/**"], calls[0]
+        os.environ.pop(A.SOURCE)
+        assert A.source(committed) == A.PUBLISHED[committed["revision"]], "the committed pin has no public copy"
+        repo, rev = A.PUBLISHED[committed["revision"]]
+        assert repo == A.PUBLIC_REPO and len(rev) == 40 and all(c in "0123456789abcdef" for c in rev), (repo, rev)
+        A.fetch(pathlib.Path(tmp) / "dl", dict(pin, revision=committed["revision"]))
+        assert (calls[-1]["repo_id"], calls[-1]["revision"]) == (repo, rev), calls[-1]
         for bad in ("no-revision", "@" + "a" * 40, "repo@"):
             os.environ[A.SOURCE] = bad
             try:
@@ -109,6 +122,31 @@ def main() -> int:
             except SystemExit as e:
                 assert "must be <repo>@<revision>" in str(e), e
         os.environ.pop(A.SOURCE)
+        # fetch with git: the steps, and huggingface_hub when a step fails or git is missing
+        A.fetch_git, runs = real_fetch_git, []
+        real_run, real_which = A.subprocess.run, A.shutil.which
+
+        def fake_run(cmd, **kw):
+            runs.append((cmd, kw.get("env") or {}))
+            return types.SimpleNamespace(returncode=0)
+        A.subprocess.run, A.shutil.which = fake_run, lambda name: "/usr/bin/" + name
+        try:
+            n, g = len(calls), pathlib.Path(tmp) / "dlgit"
+            A.fetch(g, dict(pin, revision=committed["revision"]))
+            assert len(calls) == n, "fetch used huggingface_hub although git succeeded"
+            cmds = [" ".join(c[3:]) if c[:2] == ["git", "-C"] else " ".join(c[1:]) for c, _ in runs]
+            assert cmds == ["lfs version", f"init -q {g}", f"remote add origin https://huggingface.co/datasets/{repo}",
+                            f"fetch -q --depth 1 origin {rev}", "checkout -q -f --detach FETCH_HEAD",
+                            "lfs pull --include=instances/**"], cmds
+            assert all(e.get("GIT_TERMINAL_PROMPT") == "0" and e.get("GIT_LFS_SKIP_SMUDGE") == "1" for _, e in runs[1:])
+            A.subprocess.run = lambda cmd, **kw: types.SimpleNamespace(returncode=1 if "fetch" in cmd else 0)
+            A.fetch(pathlib.Path(tmp) / "dlgit2", pin)
+            assert len(calls) == n + 1 and calls[-1]["revision"] == "d" * 40, "a failed git fetch did not fall back"
+            A.shutil.which = lambda name: None
+            A.fetch(pathlib.Path(tmp) / "dlgit3", pin)
+            assert len(calls) == n + 2, "fetch without git did not use huggingface_hub"
+        finally:
+            A.subprocess.run, A.shutil.which, A.fetch_git = real_run, real_which, lambda d, repo, rev: False
 
         def refused(**kw):
             raise PermissionError("401 with a secret in it")
@@ -119,9 +157,10 @@ def main() -> int:
         except SystemExit as e:
             msg = str(e)
             assert msg.startswith(f"download of {pin['repo']}@dddddddddddd failed (PermissionError)"), msg
-            assert "A public dataset needs no token" in msg and "`hf auth login` or HF_TOKEN" in msg and "secret" not in msg, msg
+            assert "read without a token" in msg and "unset HF_TOKEN" in msg and A.SOURCE in msg and "secret" not in msg, msg
         del sys.modules["huggingface_hub"]
-    print("ok assets.py: pin layout, check and check-instances, appearance seeds, fetch")
+        A.fetch_git = real_fetch_git
+    print("ok assets.py: pin layout, check and check-instances, appearance seeds, fetch (huggingface_hub and git)")
     return 0
 
 

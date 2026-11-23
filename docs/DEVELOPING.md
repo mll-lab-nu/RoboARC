@@ -116,10 +116,12 @@ ikea/images/ikea-mujoco/build.sh                               # the two IKEA im
 
 A build installs third-party software: `--accept-licences` (or `ROBOARC_ACCEPT_LICENCES=1`) states that you accept the
 licences [LICENSES/THIRD_PARTY.md](../LICENSES/THIRD_PARTY.md) lists, and a build script that takes the option stops
-without it. The frozen instances and the IKEA meshes are not in git. They come from two Hugging Face datasets, each
-pinned by revision and by the sha256 of every file (`scripts/roboarc/assets.json`,
-`ikea/scripts/ikea_mujoco/assets.json`). A public dataset is read without a token, a private one with `hf auth login`
-or `HF_TOKEN`. `ROBOARC_ASSETS_SOURCE=<repo>@<revision>` (the instances) and
+without it. The frozen instances and the IKEA meshes are not in git. They come from two public Hugging Face datasets,
+[RoboARC/RoboARC-assets](https://huggingface.co/datasets/RoboARC/RoboARC-assets) and
+[RoboARC/RoboARC-ikea-assets](https://huggingface.co/datasets/RoboARC/RoboARC-ikea-assets), read without a token, with
+the sha256 of every file pinned (`scripts/roboarc/assets.json`, `ikea/scripts/ikea_mujoco/assets.json`; `PUBLISHED`
+in `scripts/roboarc/assets.py` and `ikea/scripts/ikea_mujoco/fetch_image_context.sh` maps each pinned revision to the
+dataset commit that holds exactly the pinned files). `ROBOARC_ASSETS_SOURCE=<repo>@<revision>` (the instances) and
 `ROBOARC_IKEA_ASSETS_SOURCE=<repo>@<revision>` (the meshes) download from another published copy of a dataset; every
 file is checked against its pinned sha256 whatever the source.
 
