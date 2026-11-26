@@ -2,8 +2,7 @@
 
 <p align="center">
   <a href="https://roboarc.embodied-first-exam.ai"><img src="https://img.shields.io/badge/Website-roboarc.embodied--first--exam.ai-2f4f4f" alt="Website"></a>
-  <!-- arXiv link at release -->
-  <img src="https://img.shields.io/badge/arXiv-paper-b31b1b?logo=arxiv&logoColor=white" alt="arXiv">
+  <a href="https://arxiv.org/abs/2611.33390"><img src="https://img.shields.io/badge/arXiv-2611.33390-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>
   <a href="https://huggingface.co/datasets/RoboARC/RoboARC-outputs"><img src="https://img.shields.io/badge/Agent%20runs-Hugging%20Face-d9a400?logo=huggingface&logoColor=white" alt="Agent runs"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/Licence-MIT-b8a133" alt="Licence: MIT"></a>
 </p>
@@ -504,7 +503,7 @@ images and a GPU.
 
 If you use RoboARC in your research, please cite:
 
-<!-- arXiv id at release: add eprint, archivePrefix and the arXiv url. CITATION.cff has the same entry -->
+<!-- CITATION.cff has the same entry -->
 ```bibtex
 @misc{wang2026roboarc,
   title  = {RoboARC: Physical Puzzles for Robotic Manipulation under Spatial Constraints},
@@ -512,7 +511,10 @@ If you use RoboARC in your research, please cite:
             and Zhang, Tonghe and Wang, Kangrui and Shen, Yelong and Gao, Jianfeng
             and Shi, Guanya and Zhang, Ruohan and Li, Manling},
   year   = {2026},
-  url    = {https://roboarc.embodied-first-exam.ai}
+  eprint = {2611.33390},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  url    = {https://arxiv.org/abs/2611.33390}
 }
 ```
 

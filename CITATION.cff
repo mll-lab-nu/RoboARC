@@ -1,6 +1,5 @@
 # How to cite RoboARC. Title, authors and their order are the paper's. `version` and `date-released` are those of the
-# task set (CHANGELOG.md). At release: add the paper's arXiv identifier (`identifiers`, or a `preferred-citation` of
-# type article), and keep README.md's BibTeX entry the same.
+# task set (CHANGELOG.md). The paper is arXiv 2611.33390; keep README.md's BibTeX entry the same.
 cff-version: 1.2.0
 message: "If you use RoboARC in your research, please cite it as below."
 type: software
@@ -51,6 +50,13 @@ version: 2.2.1
 date-released: 2026-10-30
 license: MIT
 url: "https://roboarc.embodied-first-exam.ai"
+identifiers:
+  - type: doi
+    value: 10.48550/arXiv.2611.33390
+    description: "The paper on arXiv"
+  - type: url
+    value: "https://arxiv.org/abs/2611.33390"
+    description: "The paper on arXiv"
 repository-code: "https://github.com/mll-lab-nu/RoboARC"
 keywords:
   - robotics
